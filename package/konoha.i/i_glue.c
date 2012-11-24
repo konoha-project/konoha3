@@ -55,10 +55,10 @@ static void kMethod_WriteToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuf
 			if(i > 0) {
 				KLIB Kwb_Write(kctx, wb, ", ", 2);
 			}
-			if(FN_isCOERCION(pa->paramtypeItems[i].fn)) {
+			if(FN_isCOERCION(pa->paramtypeItems[i].name)) {
 				KLIB Kwb_printf(kctx, wb, "@Coercion ");
 			}
-			KLIB Kwb_printf(kctx, wb, "%s %s", TY_t(pa->paramtypeItems[i].ty), SYM_t(pa->paramtypeItems[i].fn));
+			KLIB Kwb_printf(kctx, wb, "%s %s", TY_t(pa->paramtypeItems[i].attrTypeId), SYM_t(pa->paramtypeItems[i].name));
 		}
 		KLIB Kwb_Write(kctx, wb, ")", 1);
 	}

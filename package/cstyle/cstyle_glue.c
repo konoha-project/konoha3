@@ -44,7 +44,7 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Statement(stmt, gma);
 	DBG_P("while statement .. ");
 	int ret = false;
-	if(SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
+	if(SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, CT_Boolean, 0)) {
 		kBlock *bk = SUGAR kStmt_GetBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
 		kStmt_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 		kStmt_Set(CatchBreak, stmt, true);
@@ -61,7 +61,7 @@ static KMETHOD Statement_do(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Statement(stmt, gma);
 	DBG_P("do statement .. ");
 	int ret = false;
-	if(SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
+	if(SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, CT_Boolean, 0)) {
 		kBlock *bk = SUGAR kStmt_GetBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
 		kStmt_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 		kStmt_Set(CatchBreak, stmt, true);
@@ -109,7 +109,7 @@ static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 	kBlock *initBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL/*defaultNS*/, KW_InitBlock, NULL);
 	if(initBlock == NULL) {  // with out init
 		DBG_P(">>>>>>>>> Without init block");
-		if(SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
+		if(SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, CT_Boolean, 0)) {
 			kBlock *bk = SUGAR kStmt_GetBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
 			kStmt_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 			kStmt_Set(CatchBreak, stmt, true);
@@ -270,18 +270,17 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *termToken = expr->termToken;
 	DBG_ASSERT(Expr_isTerm(expr) && IS_Token(termToken));
-	//DBG_P("termToken='%s'", S_text(termToken->text));
 	if(termToken->unresolvedTokenType == TokenType_CODE) {
 		SUGAR kToken_ToBraceGroup(kctx, (kTokenVar*)termToken, Stmt_ns(stmt), NULL);
 	}
 	if(termToken->resolvedSyntaxInfo->keyword == KW_BraceGroup) {
-		kExpr *arrayExpr = SUGAR new_UntypedCallStyleExpr(kctx, stmt->syn/*DUMMY*/, 2, K_NULL, K_NULL);
+		kExprVar *arrayExpr = SUGAR new_UntypedCallStyleExpr(kctx, stmt->syn/*DUMMY*/, 2, K_NULL, K_NULL);
 		SUGAR kStmt_AddExprParam(kctx, stmt, arrayExpr, termToken->subTokenList, 0, kArray_size(termToken->subTokenList), NULL);
 		size_t i;
 		KonohaClass *requestClass = CT_(reqty);
-		ktype_t paramType = TY_var; // default
+		KonohaClass *paramType = CT_INFER;
 		if(requestClass->baseTypeId == TY_Array) {
-			paramType = requestClass->p0;
+			paramType = CT_(requestClass->p0);
 		}
 		else {
 			requestClass = NULL; // undefined
@@ -291,15 +290,15 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 			if(typedExpr == K_NULLEXPR) {
 				KReturn(typedExpr);
 			}
-			DBG_P("i=%d, paramType=%s, typedExpr->ty=%s", i, TY_t(paramType), TY_t(typedExpr->ty));
-			if(paramType == TY_var) {
-				paramType = typedExpr->ty;
+//			DBG_P("i=%d, paramType=%s, typedExpr->ty=%s", i, TY_t(paramType), TY_t(typedExpr->ty));
+			if(paramType->typeId == TY_var) {
+				paramType = CT_(typedExpr->attrTypeId);
 			}
 		}
 		if(requestClass == NULL) {
-			requestClass = (paramType == TY_var) ? CT_Array : CT_p0(kctx, CT_Array, paramType);
+			requestClass = (paramType->typeId == TY_var) ? CT_Array : CT_p0(kctx, CT_Array, paramType->typeId);
 		}
-		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), TY_Array, MN_("{}"), -1, MethodMatch_NoOption);
+		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), CT_Array, MN_("{}"), -1, MethodMatch_NoOption);
 		DBG_ASSERT(mtd != NULL);
 		KFieldSet(arrayExpr, arrayExpr->cons->MethodItems[0], mtd);
 		KFieldSet(arrayExpr, arrayExpr->cons->ExprItems[1], SUGAR kExpr_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, kArray_size(arrayExpr->cons) - 2));

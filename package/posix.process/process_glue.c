@@ -301,10 +301,9 @@ static KMETHOD System_system(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t process_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	kparamtype_t p = { .ty = TY_int,  };
+	kparamtype_t p = {TY_int};
 	KonohaClass *cintArray = KLIB KonohaClass_Generics(kctx, CT_(TY_Array), TY_void, 1, &p);
 #define TY_intArray (cintArray->typeId)
-
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static, _F(System_getpid), TY_int, TY_System, MN_("getpid"), 0,

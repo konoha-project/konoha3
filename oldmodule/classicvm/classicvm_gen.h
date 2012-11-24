@@ -1384,7 +1384,7 @@ static size_t kopcode_size(kopcode_t opcode)
 
 static kbool_t kopcode_hasjump(kopcode_t opcode)
 {
-	return (OPDATA[opcode].types[0] == VMT_ADDR);
+	return (OPDATA[opcode].attrTypeIdpes[0] == VMT_ADDR);
 }
 #endif
 

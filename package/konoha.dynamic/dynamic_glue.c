@@ -52,11 +52,11 @@ static kbool_t kMethod_CheckMethodCallStack(KonohaContext *kctx, KonohaStack *sf
 	kParam *param = kMethod_GetParam(mtd);
 	for(i = 1; i <= argc; i++) {
 		KonohaClass *paramClass = O_ct(sfp[i].asObject);
-		ktype_t ptype = param->paramtypeItems[i-1].ty;
+		ktype_t ptype = param->paramtypeItems[i-1].attrTypeId;
 		if(ptype != paramClass->typeId) {
 			return false;
 		}
-		if(CT_isUnbox(paramClass)) {
+		if(CT_IsUnbox(paramClass)) {
 			sfp[i].unboxValue = O_unbox(sfp[i].asObject);
 		}
 	}
@@ -73,7 +73,7 @@ static KMETHOD Dynamic_(KonohaContext *kctx, KonohaStack *sfp)
 //	kString  *symbolString = kctx->esp[-1].asString;
 	kNameSpace *ns = sfp[K_NSIDX].asNameSpace;
 	DBG_ASSERT(IS_NameSpace(ns));
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, O_typeId(obj), symbol, argc, MethodMatch_CamelStyle);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, O_ct(obj), symbol, argc, MethodMatch_CamelStyle);
 	if(mtd != NULL) {
 		if(kMethod_CheckMethodCallStack(kctx, sfp, mtd, argc)) {
 			KonohaRuntime_setesp(kctx, kctx->esp - 1);

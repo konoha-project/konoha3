@@ -60,7 +60,7 @@ static kbool_t KonohaClass_setClassFieldObjectValue(KonohaContext *kctx, KonohaC
 {
 	int i;
 	for(i = definedClass->fieldsize - 1; i >= 0; i--) {
-		if(definedClass->fieldItems[i].fn == sym  && O_ct(definedClass->defaultNullValueVar_OnGlobalConstList->fieldObjectItems[i]) == O_ct(ObjectValue)) {
+		if(definedClass->fieldItems[i].name == sym  && O_ct(definedClass->defaultNullValueVar_OnGlobalConstList->fieldObjectItems[i]) == O_ct(ObjectValue)) {
 			kObjectVar *o = definedClass->defaultNullValueVar_OnGlobalConstList;
 			KFieldSet(o, o->fieldObjectItems[i], ObjectValue);
 			return true;
@@ -73,7 +73,7 @@ static kbool_t KonohaClass_setClassFieldUnboxValue(KonohaContext *kctx, KonohaCl
 {
 	int i;
 	for(i = definedClass->fieldsize - 1; i >= 0; i--) {
-		if(definedClass->fieldItems[i].fn == sym  && TY_isUnbox(definedClass->fieldItems[i].ty)) {
+		if(definedClass->fieldItems[i].name == sym  && TY_isUnbox(definedClass->fieldItems[i].attrTypeId)) {
 			definedClass->defaultNullValueVar_OnGlobalConstList->fieldUnboxItems[i] = unboxValue;
 			return true;
 		}
@@ -345,11 +345,11 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 		if(tokenSuperClass != NULL) {
 			DBG_ASSERT(Token_isVirtualTypeLiteral(tokenSuperClass));
 			superClass = CT_(Token_typeLiteral(tokenSuperClass));
-			if(CT_is(Final, superClass)) {
+			if(CT_Is(Final, superClass)) {
 				SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "%s is final", CT_t(superClass));
 				KReturnUnboxValue(false);
 			}
-			if(CT_is(Virtual, superClass)) {
+			if(CT_Is(Virtual, superClass)) {
 				SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "%s is still virtual", CT_t(superClass));
 				KReturnUnboxValue(false);
 			}
@@ -358,7 +358,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 		KonohaClass_InitField(kctx, definedClass, superClass, initsize);
 	}
 	else {
-		if(declsize > 0 && !CT_is(Virtual, definedClass)) {
+		if(declsize > 0 && !CT_Is(Virtual, definedClass)) {
 			SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "%s has already defined", CT_t(definedClass));
 			KReturnUnboxValue(false);
 		}
@@ -394,13 +394,13 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tkN = expr->cons->TokenItems[0];
 	ksymbol_t fn = tkN->resolvedSymbol;
-	kExpr *self = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, 0);
+	kExpr *self = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, CT_INFER, 0);
 	kNameSpace *ns = Stmt_ns(stmt);
 	if(self != K_NULLEXPR) {
-		kMethod *mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, self->ty, fn, TY_var);
+		kMethod *mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, CT_(self->attrTypeId), fn);
 		if(mtd != NULL) {
 			KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
-			KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, reqty));
+			KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, CT_(reqty)));
 		}
 		SUGAR kStmt_Message2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
 	}

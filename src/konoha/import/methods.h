@@ -39,7 +39,7 @@ static KMETHOD Object_to(KonohaContext *kctx, KonohaStack *sfp)
 	else {
 		kNameSpace *ns = KGetLexicalNameSpace(sfp);
 		DBG_ASSERT(IS_NameSpace(ns));
-		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, selfClass->typeId, targetClass->typeId);
+		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, selfClass, targetClass);
 //		DBG_P("BEFORE >>>>>>>>>>> %lld\n", sfp[0].unboxValue);
 		sfp[0].unboxValue = O_unbox(sfp[0].asObject);
 //		DBG_P("AFTER >>>>>>>>>>> %lld\n", sfp[0].unboxValue);
@@ -64,7 +64,7 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 	else {
 		kNameSpace *ns = KGetLexicalNameSpace(sfp);
 		DBG_ASSERT(IS_NameSpace(ns));
-		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, O_typeId(self), TY_String);
+		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, O_ct(self), CT_String);
 //		DBG_P("BEFORE >>>>>>>>>>> %s %lld\n", TY_t(O_typeId(self)), sfp[0].unboxValue);
 		sfp[0].unboxValue = O_unbox(self);
 //		DBG_P("AFTER >>>>>>>>>>> %lld\n", sfp[0].unboxValue);
@@ -94,7 +94,7 @@ static KMETHOD Boolean_box(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaClass *c = KGetReturnType(sfp);
-	DBG_ASSERT(CT_isUnbox(c));
+	DBG_ASSERT(CT_IsUnbox(c));
 	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
 //	DBG_P(">>>>>>>>>>> boxing %s %lld\n", TY_t(c->typeId), sfp[0].unboxValue);
 	KReturn(KLIB new_kObject(kctx, OnStack, c, sfp[0].unboxValue));

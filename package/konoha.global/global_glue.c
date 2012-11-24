@@ -58,15 +58,14 @@ static	kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObject *o, ktype_t ty, ksymbol_t symbol)
 {
-	ktype_t cid = O_typeId(o);
 	kNameSpace *ns = Stmt_ns(stmt);
-	kMethod *mtd = KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, cid, symbol, TY_var);
+	kMethod *mtd = KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, O_ct(o), symbol, TY_var);
 	if(mtd != NULL) {
 		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "already defined name: %s", SYM_t(symbol));
 		return NULL;
 	}
-	mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, cid, symbol, TY_var);
-	if(mtd != NULL && kMethod_GetReturnType(mtd) != ty) {
+	mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, O_ct(o), symbol);
+	if(mtd != NULL && kMethod_GetReturnType(mtd)->typeId != ty) {
 		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "differently defined name: %s", SYM_t(symbol));
 		return NULL;
 	}
@@ -75,7 +74,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 		flag |= kField_Getter;
 	}
 	KLIB KonohaClass_AddField(kctx, O_ct(o), flag, ty, symbol);
-	return KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, cid, symbol, ty);
+	return KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, O_ct(o), symbol, ty);
 }
 
 static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *valueExpr, kObject *scr)
@@ -83,7 +82,7 @@ static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gm
 	kNameSpace *ns = Stmt_ns(stmt);
 	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termExpr->termToken->resolvedSymbol);
 	if(mtd != NULL) {
-		kExpr *recvExpr =  new_ConstValueExpr(kctx, O_typeId(scr), scr);
+		kExpr *recvExpr =  new_ConstValueExpr(kctx, NULL, scr);
 		kExpr *setterExpr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_void, mtd,  2, recvExpr, valueExpr);
 		kStmt *newstmt = new_(Stmt, stmt->uline, OnGcStack);
 		kStmt_setsyn(newstmt, SYN_(ns, KW_ExprPattern));

@@ -945,7 +945,7 @@ static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, k
 
 static void Kwb_WriteValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass *c, KonohaStack *sfp)
 {
-	if(CT_isUnbox(c)) {
+	if(CT_IsUnbox(c)) {
 		c->p(kctx, sfp, 0, wb);
 	}
 	else {
@@ -986,7 +986,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 		const char *file = PLATAPI shortFilePath(FileId_t(uline));
 		PLATAPI printf_i(" [%ld] (%s:%d) %s.%s%s(", (sfp - kctx->stack->stack), file, (kushort_t)uline, Method_t(mtd));
 		KonohaClass *cThis = CT_(mtd->typeId);
-		if(!CT_isUnbox(cThis)) {
+		if(!CT_IsUnbox(cThis)) {
 			cThis = O_ct(sfp[0].asObject);
 		}
 		if(!kMethod_Is(Static, mtd)) {
@@ -1000,10 +1000,10 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 			if(i > 0) {
 				PLATAPI printf_i(", ");
 			}
-			KonohaClass *c = CT_(param->paramtypeItems[i].ty);
+			KonohaClass *c = CT_(param->paramtypeItems[i].attrTypeId);
 			c = c->realtype(kctx, c, cThis);
 			Kwb_WriteValue(kctx, &wb, c, sfp + i + 1);
-			PLATAPI printf_i("%s=(%s) %s", SYM_t(Symbol_Unmask(param->paramtypeItems[i].fn)), CT_t(c), KLIB Kwb_top(kctx, &wb, 1));
+			PLATAPI printf_i("%s=(%s) %s", SYM_t(Symbol_Unmask(param->paramtypeItems[i].name)), CT_t(c), KLIB Kwb_top(kctx, &wb, 1));
 			KLIB Kwb_Free(&wb);
 		}
 		PLATAPI printf_i(")\n");

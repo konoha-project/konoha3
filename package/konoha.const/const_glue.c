@@ -29,34 +29,31 @@
 extern "C"{
 #endif
 
-// --------------------------------------------------------------------------
-
-
-// --------------------------------------------------------------------------
 
 static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
 	kNameSpace *ns = Stmt_ns(stmt);
-	kToken *SymbolToken = SUGAR kStmt_GetToken(kctx, stmt, KW_SymbolPattern, NULL);
-	ksymbol_t unboxKey = SymbolToken->resolvedSymbol;
-	kbool_t result = SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, TypeCheckPolicy_CONST);
+	kToken *symbolToken = SUGAR kStmt_GetToken(kctx, stmt, KW_SymbolPattern, NULL);
+	ksymbol_t unboxKey = symbolToken->resolvedSymbol;
+	kbool_t result = SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, CT_INFER, TypeCheckPolicy_CONST);
 	if(result) {
-		kExpr *ConstExpr = SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL);
-		ktype_t type = ConstExpr->ty;
+		kExpr *constExpr = SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL);
+		KonohaClass *constClass = CT_(constExpr->attrTypeId);
+		ktype_t type = constClass->typeId;
 		uintptr_t unboxValue;
 		result = false;
-		if(ConstExpr->build == TEXPR_NULL) {   // const C = String
+		if(constExpr->build == TEXPR_NULL) {   // const C = String
 			type = VirtualType_KonohaClass;
-			unboxValue = (uintptr_t)(CT_(ConstExpr->ty));
+			unboxValue = (uintptr_t)constClass;
 			result = true;
 		}
-		else if(ConstExpr->build == TEXPR_CONST) {   // const C = "1"
-			unboxValue = (uintptr_t)ConstExpr->objectConstValue;
+		else if(constExpr->build == TEXPR_CONST) {   // const C = "1"
+			unboxValue = (uintptr_t)constExpr->objectConstValue;
 			result = true;
 		}
-		else if(ConstExpr->build == TEXPR_NCONST) {  // const c = 1
-			unboxValue = ConstExpr->unboxConstValue;
+		else if(constExpr->build == TEXPR_NCONST) {  // const c = 1
+			unboxValue = constExpr->unboxConstValue;
 			result = true;
 		}
 		if(result) {

@@ -98,7 +98,6 @@ static void kToken_ToError(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglev
 	}
 }
 
-#define Stmt_isERR(STMT)       ((STMT)->build == TSTMT_ERR)
 static SugarSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t kw, int isnew);
 
 static void kStmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
@@ -147,7 +146,7 @@ static kExpr* kStmt_Message2(KonohaContext *kctx, kStmt *stmt, kToken *tk, kinfo
 		}
 	}
 	kString *errmsg = SugarContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
-	if(taglevel <= ErrTag && !Stmt_isERR(stmt)) {
+	if(taglevel <= ErrTag && !kStmt_isERR(stmt)) {
 		kStmt_toERR(kctx, stmt, errmsg);
 	}
 	va_end(ap);
@@ -166,7 +165,7 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 		kfileline_t uline = stmt->uline;
 		kString *emsg = SugarContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
 		va_end(ap);
-		if(taglevel <= ErrTag && !Stmt_isERR(stmt)) {
+		if(taglevel <= ErrTag && !kStmt_isERR(stmt)) {
 			kStmt_toERR(kctx, stmt, emsg);
 		}
 	}

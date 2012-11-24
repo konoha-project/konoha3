@@ -230,7 +230,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->new_kBlock                 = new_kBlock;
 	mod->new_kStmt                  = new_kStmt;
 	mod->kBlock_InsertAfter         = kBlock_InsertAfter;
-	mod->new_UntypedTermExpr        = new_UntypedTermExpr;
+	mod->new_TermExpr        = new_TermExpr;
 	mod->new_UntypedCallStyleExpr   = new_UntypedCallStyleExpr;
 	mod->kStmt_ParseOperatorExpr    = kStmt_ParseOperatorExpr;
 	mod->kStmt_ParseExpr            = kStmt_ParseExpr;

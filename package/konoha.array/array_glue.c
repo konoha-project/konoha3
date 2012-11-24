@@ -238,98 +238,98 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(a);
 }
 
-/* Array[T] Array[T].map(Func[T,T] func) */
-static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
-{
-	INIT_GCSTACK();
-	kArray *a = sfp[0].asArray;
-	kFunc  *f = sfp[1].asFunc;
-	size_t asize = kArray_size(a);
-	ktype_t resolve_type = kMethod_GetReturnType(f->mtd);  // FIXME
-	KonohaClass *CT_ArrayT0 = CT_p0(kctx, CT_Array, resolve_type);
-	kArrayVar *returnValue = (kArrayVar *)KLIB new_kObject(kctx, _GcStack, CT_ArrayT0, asize);
-
-	size_t i;
-	if(kArray_isUnboxData(a)) {
-		for(i=0; i != asize; ++i) {
-			uintptr_t tmp = a->unboxItems[i];
-			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
-			lsfp[K_CALLDELTA+1].unboxValue = tmp;
-			{
-				KonohaStack *sfp = lsfp + K_CALLDELTA;
-				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
-				KonohaRuntime_callMethod(kctx, sfp);
-			}
-			END_LOCAL();
-			returnValue->unboxItems[i] = lsfp[0].unboxValue;
-		}
-	}
-	else {
-		for(i=0; i != asize; ++i) {
-			kObject *tmp  = a->ObjectItems[i];
-			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
-			{
-				KonohaStack *sfp = lsfp + K_CALLDELTA;
-				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
-				KonohaRuntime_callMethod(kctx, sfp);
-			}
-			END_LOCAL();
-			KFieldSet(returnValue, returnValue->ObjectItems[i], lsfp[0].asObject);
-		}
-	}
-	kArray_SetSize(returnValue, asize);
-	KReturnWith(returnValue, RESET_GCSTACK());
-}
-
-/* T Array[T].inject(Func[T,T,T] func) */
-static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kArray *a = sfp[0].asArray;
-	kFunc  *f = sfp[1].asFunc;
-	size_t asize = kArray_size(a);
-	ktype_t resolve_type = kMethod_GetReturnType(f->mtd);
-
-	size_t i;
-	if(kArray_isUnboxData(a)) {
-		uintptr_t tmp = 0;
-		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
-		for(i=0; i != asize; ++i) {
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
-			lsfp[K_CALLDELTA+1].unboxValue = tmp;
-			lsfp[K_CALLDELTA+2].unboxValue = a->unboxItems[i];
-			{
-				KonohaStack *sfp = lsfp + K_CALLDELTA;
-				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 2, KLIB Knull(kctx, CT_(resolve_type)));
-				KonohaRuntime_callMethod(kctx, sfp);
-			}
-			tmp = lsfp[0].unboxValue;
-		}
-		END_LOCAL();
-		KReturnUnboxValue(tmp);
-	}
-	else {
-		INIT_GCSTACK();
-		kObject *tmp = (kObject *) KLIB new_kObject(kctx, _GcStack, CT_(resolve_type), 0);
-		kObject *nulobj = KLIB Knull(kctx, CT_(resolve_type));
-		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
-		for(i=0; i != asize; ++i) {
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, nulobj);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, a->ObjectItems[i]);
-			{
-				KonohaStack *sfp = lsfp + K_CALLDELTA;
-				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 2, nulobj);
-				KonohaRuntime_callMethod(kctx, sfp);
-			}
-			KUnsafeFieldSet(tmp, lsfp[0].asObject);
-		}
-		END_LOCAL();
-		KReturnWith(tmp, RESET_GCSTACK());
-	}
-}
+///* Array[T] Array[T].map(Func[T,T] func) */
+//static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	INIT_GCSTACK();
+//	kArray *a = sfp[0].asArray;
+//	kFunc  *f = sfp[1].asFunc;
+//	size_t asize = kArray_size(a);
+//	ktype_t resolve_type = kMethod_GetReturnType(f->mtd);  // FIXME
+//	KonohaClass *CT_ArrayT0 = CT_p0(kctx, CT_Array, resolve_type);
+//	kArrayVar *returnValue = (kArrayVar *)KLIB new_kObject(kctx, _GcStack, CT_ArrayT0, asize);
+//
+//	size_t i;
+//	if(kArray_isUnboxData(a)) {
+//		for(i=0; i != asize; ++i) {
+//			uintptr_t tmp = a->unboxItems[i];
+//			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
+//			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
+//			lsfp[K_CALLDELTA+1].unboxValue = tmp;
+//			{
+//				KonohaStack *sfp = lsfp + K_CALLDELTA;
+//				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
+//				KonohaRuntime_callMethod(kctx, sfp);
+//			}
+//			END_LOCAL();
+//			returnValue->unboxItems[i] = lsfp[0].unboxValue;
+//		}
+//	}
+//	else {
+//		for(i=0; i != asize; ++i) {
+//			kObject *tmp  = a->ObjectItems[i];
+//			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
+//			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
+//			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
+//			{
+//				KonohaStack *sfp = lsfp + K_CALLDELTA;
+//				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
+//				KonohaRuntime_callMethod(kctx, sfp);
+//			}
+//			END_LOCAL();
+//			KFieldSet(returnValue, returnValue->ObjectItems[i], lsfp[0].asObject);
+//		}
+//	}
+//	kArray_SetSize(returnValue, asize);
+//	KReturnWith(returnValue, RESET_GCSTACK());
+//}
+//
+///* T Array[T].inject(Func[T,T,T] func) */
+//static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	kArray *a = sfp[0].asArray;
+//	kFunc  *f = sfp[1].asFunc;
+//	size_t asize = kArray_size(a);
+//	ktype_t resolve_type = kMethod_GetReturnType(f->mtd);
+//
+//	size_t i;
+//	if(kArray_isUnboxData(a)) {
+//		uintptr_t tmp = 0;
+//		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
+//		for(i=0; i != asize; ++i) {
+//			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
+//			lsfp[K_CALLDELTA+1].unboxValue = tmp;
+//			lsfp[K_CALLDELTA+2].unboxValue = a->unboxItems[i];
+//			{
+//				KonohaStack *sfp = lsfp + K_CALLDELTA;
+//				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 2, KLIB Knull(kctx, CT_(resolve_type)));
+//				KonohaRuntime_callMethod(kctx, sfp);
+//			}
+//			tmp = lsfp[0].unboxValue;
+//		}
+//		END_LOCAL();
+//		KReturnUnboxValue(tmp);
+//	}
+//	else {
+//		INIT_GCSTACK();
+//		kObject *tmp = (kObject *) KLIB new_kObject(kctx, _GcStack, CT_(resolve_type), 0);
+//		kObject *nulobj = KLIB Knull(kctx, CT_(resolve_type));
+//		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
+//		for(i=0; i != asize; ++i) {
+//			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, nulobj);
+//			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
+//			KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, a->ObjectItems[i]);
+//			{
+//				KonohaStack *sfp = lsfp + K_CALLDELTA;
+//				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 2, nulobj);
+//				KonohaRuntime_callMethod(kctx, sfp);
+//			}
+//			KUnsafeFieldSet(tmp, lsfp[0].asObject);
+//		}
+//		END_LOCAL();
+//		KReturnWith(tmp, RESET_GCSTACK());
+//	}
+//}
 
 static KMETHOD Array_shift(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -538,8 +538,8 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		_Public,        _F(Array_shift), TY_0, TY_Array, MN_("shift"), 0,
 		_Public,        _F(Array_unshift), TY_int, TY_Array, MN_("unshift"), 1, TY_0, FN_("value"),
 		_Public,        _F(Array_reverse), TY_Array, TY_Array, MN_("reverse"), 0,
-		_Public|_Im,    _F(Array_map), TY_ArrayT0, TY_Array, MN_("map"), 1, TY_FuncMap, FN_("func"),
-		_Public|_Im,    _F(Array_inject), TY_0, TY_Array, MN_("inject"), 1, TY_FuncInject, FN_("func"),
+//		_Public|_Im,    _F(Array_map), TY_ArrayT0, TY_Array, MN_("map"), 1, TY_FuncMap, FN_("func"),
+//		_Public|_Im,    _F(Array_inject), TY_0, TY_Array, MN_("inject"), 1, TY_FuncInject, FN_("func"),
 
 		_Public,        _F(Array_concat), TY_ArrayT0, TY_Array, MN_("concat"), 1, TY_ArrayT0, FN_("a1"),
 		_Public,        _F(Array_indexOf), TY_int, TY_Array, MN_("indexOf"), 1, TY_0, FN_("value"),
@@ -563,27 +563,20 @@ static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	// [0] currentToken, [1] NULL, [2] ....
 	size_t i;
 	KonohaClass *requestClass = CT_(reqty);
-	ktype_t paramType = TY_var; // default
-	if(requestClass->baseTypeId == TY_Array) {
-		paramType = requestClass->p0;
-	}
-	else {
-		requestClass = NULL; // undefined
-	}
+	KonohaClass *paramType = (requestClass->baseTypeId == TY_Array) ? CT_(requestClass->p0) : CT_INFER;
 	for(i = 2; i < kArray_size(expr->cons); i++) {
 		kExpr *typedExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, i, gma, paramType, 0);
 		if(typedExpr == K_NULLEXPR) {
 			KReturn(typedExpr);
 		}
-		//DBG_P("i=%d, paramType=%s, typedExpr->ty=%s", i, TY_t(paramType), TY_t(typedExpr->ty));
-		if(paramType == TY_var) {
-			paramType = typedExpr->ty;
+		if(paramType->typeId == TY_var) {
+			paramType = CT_(typedExpr->attrTypeId);
 		}
 	}
-	if(requestClass == NULL) {
-		requestClass = (paramType == TY_var) ? CT_Array : CT_p0(kctx, CT_Array, paramType);
+	if(requestClass->baseTypeId != TY_Array) {
+		requestClass = (paramType->typeId == TY_var) ? CT_Array : CT_p0(kctx, CT_Array, paramType->typeId);
 	}
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), TY_Array, MN_("[]"), -1, MethodMatch_NoOption);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), CT_Array, MN_("[]"), -1, MethodMatch_NoOption);
 	DBG_ASSERT(mtd != NULL);
 	KFieldSet(expr, expr->cons->MethodItems[0], mtd);
 	KFieldSet(expr, expr->cons->ExprItems[1], SUGAR kExpr_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, kArray_size(expr->cons) - 2));

@@ -414,13 +414,13 @@ add_clib_test(test_string  ./test/Clib/test_string.c)
 add_clib_test(test_cpp     ./test/Clib/test_cpp.cpp)
 add_clib_test(test_proto   ./test/Clib/test_proto.c)
 
-macro(add_builtin_test test_name)
-	add_test_with_property(Builtin/${test_name} ${ARGN})
-endmacro(add_builtin_test test_name)
+#macro(add_builtin_test test_name)
+#	add_test_with_property(Builtin/${test_name} ${ARGN})
+#endmacro(add_builtin_test test_name)
 
-add_builtin_test(Release/Logger  --builtin-test=test_logger)
-add_builtin_test(Release/Kwb     --builtin-test=test_kwb)
-add_builtin_test(Release/Kvproto --builtin-test=test_kvproto)
+#add_builtin_test(Release/Logger  --builtin-test=test_logger)
+#add_builtin_test(Release/Kwb     --builtin-test=test_kwb)
+#add_builtin_test(Release/Kvproto --builtin-test=test_kvproto)
 
 macro(set_package_path test_name)
 set_tests_properties(${test_name} PROPERTIES ENVIRONMENT

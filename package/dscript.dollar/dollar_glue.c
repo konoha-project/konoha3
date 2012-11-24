@@ -50,7 +50,7 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 //		kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
 ////		if(ct->typeId == TY_void) {
 ////			KReturn(SUGAR kStmt_Message2(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));
-////		} else if(CT_is(Virtual, ct)) {
+////		} else if(CT_Is(Virtual, ct)) {
 ////			SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "invalid application of 'dollar' to incomplete class %s", CT_t(ct));
 ////		}
 //		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {  // dollar C (...)

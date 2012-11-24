@@ -197,11 +197,11 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 	if(start == NULL) {
 		KReturnWith(K_NULLEXPR, RESET_GCSTACK());
 	}
-	expr = SUGAR kExpr_SetConstValue(kctx, expr, TY_String, UPCAST(text));
+	expr = SUGAR kExpr_SetConstValue(kctx, expr, NULL, UPCAST(text));
 	kNameSpace *ns = Stmt_ns(stmt);
-	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_String, MN_("+"), 1, MethodMatch_NoOption);
+	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, CT_String, MN_("+"), 1, MethodMatch_NoOption);
 
-	expr = new_ConstValueExpr(kctx, TY_String, UPCAST(TS_EMPTY));
+	expr = new_ConstValueExpr(kctx, NULL, UPCAST(TS_EMPTY));
 	while(true) {
 		start = strstr(str, "${");
 		if(start == NULL) {
@@ -235,11 +235,11 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 			TokenSeq_Pop(kctx, tokens);
 
 			if(start - str > 0) {
-				kExpr *first = new_ConstValueExpr(kctx, TY_String,
+				kExpr *first = new_ConstValueExpr(kctx, NULL,
 						UPCAST(KLIB new_kString(kctx, OnGcStack, str, (start - str), 0)));
 				expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_String, concat, 2, expr, first);
 			}
-			expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_String, concat, 2, expr, newexpr);
+			expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, CT_String, concat, 2, expr, newexpr);
 		}
 		TokenSeq_Pop(kctx, range);
 		KLIB Kwb_Free(&wb);
@@ -247,9 +247,9 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 	}
 
 	if((start == NULL) || (start != NULL && end == NULL)) {
-		kExpr *rest = new_ConstValueExpr(kctx, TY_String,
+		kExpr *rest = new_ConstValueExpr(kctx, CT_String,
 				UPCAST(KLIB new_kString(kctx, OnGcStack, str, strlen(str), 0)));
-		expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_String, concat, 2, expr, rest);
+		expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, CT_String, concat, 2, expr, rest);
 	}
 	KReturnWith(expr, RESET_GCSTACK());
 }

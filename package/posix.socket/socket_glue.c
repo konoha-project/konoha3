@@ -368,22 +368,22 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 //	KReturn(ret_s );
 //}
 
-//## int System.recv(int socket, byte[] buffer, int flags);
-static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp)
-{
-	kBytes *ba  = sfp[2].asBytes;
-	int ret = recv(WORD2INT(sfp[1].intValue),
-					  ba->buf,
-					  ba->bytesize,
-					  (int)sfp[3].intValue );
-	if(ret < 0 ) {
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-				LogText("@", "recv"),
-				LogText("perror", strerror(errno))
-		);
-	}
-	KReturnUnboxValue(ret);
-}
+////## int System.recv(int socket, byte[] buffer, int flags);
+//static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp)
+//{
+//	kBytes *ba  = sfp[2].asBytes;
+//	int ret = recv(WORD2INT(sfp[1].intValue),
+//					  ba->buf,
+//					  ba->bytesize,
+//					  (int)sfp[3].intValue );
+//	if(ret < 0 ) {
+//		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+//				LogText("@", "recv"),
+//				LogText("perror", strerror(errno))
+//		);
+//	}
+//	KReturnUnboxValue(ret);
+//}
 
 //## int System.recvfrom(int socket, byte[] buffer, int flags, Map remoteInfo);
 //static KMETHOD System_recvfrom(KonohaContext *kctx, KonohaStack* sfp)
@@ -407,126 +407,126 @@ static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp)
 //	KReturnUnboxValue(ret);
 //}
 
-//## int System.select(int[] readsock, int[] writesock, int[] exceptsock, long timeoutSec, long timeoutUSec);
-static KMETHOD System_Select(KonohaContext *kctx, KonohaStack* sfp)
-{
-	kArray *a1 = sfp[1].asArray;
-	kArray *a2 = sfp[2].asArray;
-	kArray *a3 = sfp[3].asArray;
-	int nfd = getNfd(a1, a2, a3 );
-
-	fd_set rfds, wfds, efds;
-	fd_set *rfd = toFd(&rfds, a1 );
-	fd_set *wfd = toFd(&wfds, a2 );
-	fd_set *efd = toFd(&efds, a3 );
-
-	struct timeval tv;
-	tv.tv_sec  = (long)sfp[4].intValue;
-	tv.tv_usec = (long)sfp[5].intValue;
-
-	int ret = select(nfd+1, rfd, wfd, efd, &tv );
-	if(ret > 0) {
-		fromFd(kctx, rfd, a1 );
-		fromFd(kctx, wfd, a2 );
-		fromFd(kctx, efd, a3 );
-	}
-	else {
-		if(ret < 0 ) {
-			OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-					LogText("@", "select"),
-					LogText("perror", strerror(errno))
-			);
-		}
-		// TODO::error or timeout is socket list all clear [pending]
-		KLIB kArray_Clear(kctx, a1, 0);
-		KLIB kArray_Clear(kctx, a2, 0);
-		KLIB kArray_Clear(kctx, a3, 0);
-	}
-	KReturnUnboxValue(ret);
-}
-
-//## int System.send(int socket, byte[] message, int flags);
-static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
-{
-	kBytes *ba = sfp[2].asBytes;
-	// Broken Pipe Signal Mask
-#if defined(__linux__)
-	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
-	__sighandler_t ret_signal = SIG_ERR;
-#elif defined(__APPLE__) || defined(__NetBSD__)
-	sig_t oldset = signal(SIGPIPE, SIG_IGN);
-	sig_t ret_signal = SIG_ERR;
-#endif
-	if(oldset == SIG_ERR) {
-		OLDTRACE_SWITCH_TO_KTrace(_UserFault,
-				LogText("@", "signal"),
-				LogText("perror", strerror(errno))
-		);
-	}
-	int ret = send(WORD2INT(sfp[1].intValue),
-					  ba->buf,
-					  ba->bytesize,
-					  (int)sfp[3].intValue );
-	if(ret < 0) {
-		OLDTRACE_SWITCH_TO_KTrace(_UserFault,
-				LogText("@", "send"),
-				LogText("perror", strerror(errno))
-		);
-	}
-	if(oldset != SIG_ERR) {
-		ret_signal = signal(SIGPIPE, oldset);
-		if(ret_signal == SIG_ERR) {
-			OLDTRACE_SWITCH_TO_KTrace(_UserFault,
-					LogText("@", "signal"),
-					LogText("perror", strerror(errno))
-			);
-		}
-	}
-	KReturnUnboxValue(ret);
-}
-
-//## int System.sendto(int socket, Bytes message, int flags, String dstIP, int dstPort, int family);
-static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack* sfp)
-{
-	kBytes *ba = sfp[2].asBytes;
-	struct sockaddr_in addr;
-	kString* s = sfp[4].asString;
-	toSockaddr(&addr, (char *)S_text(s), WORD2INT(sfp[5].intValue), WORD2INT(sfp[6].intValue));
-	// Broken Pipe Signal Mask
-#if defined(__linux__)
-	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
-	__sighandler_t ret_signal = SIG_ERR;
-#elif defined(__APPLE__) || defined(__NetBSD__)
-	sig_t oldset = signal(SIGPIPE, SIG_IGN);
-	sig_t ret_signal = SIG_ERR;
-#endif
-	int ret = sendto(
-			WORD2INT(sfp[1].intValue),
-			ba->buf,
-			ba->bytesize,
-			(int)sfp[3].intValue,
-			(struct sockaddr *)&addr,
-			sizeof(struct sockaddr)
-	);
-	if(ret < 0) {
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-				LogText("@", "sendto"),
-				LogUint("errno", errno),
-				LogText("errstr", strerror(errno))
-		);
-	}
-	if(oldset != SIG_ERR) {
-		ret_signal = signal(SIGPIPE, oldset);
-		if(ret_signal == SIG_ERR) {
-			OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-				LogText("@", "signal"),
-				LogUint("errno", errno),
-				LogText("errstr", strerror(errno))
-			);
-		}
-	}
-	KReturnUnboxValue(ret);
-}
+////## int System.select(int[] readsock, int[] writesock, int[] exceptsock, long timeoutSec, long timeoutUSec);
+//static KMETHOD System_Select(KonohaContext *kctx, KonohaStack* sfp)
+//{
+//	kArray *a1 = sfp[1].asArray;
+//	kArray *a2 = sfp[2].asArray;
+//	kArray *a3 = sfp[3].asArray;
+//	int nfd = getNfd(a1, a2, a3 );
+//
+//	fd_set rfds, wfds, efds;
+//	fd_set *rfd = toFd(&rfds, a1 );
+//	fd_set *wfd = toFd(&wfds, a2 );
+//	fd_set *efd = toFd(&efds, a3 );
+//
+//	struct timeval tv;
+//	tv.tv_sec  = (long)sfp[4].intValue;
+//	tv.tv_usec = (long)sfp[5].intValue;
+//
+//	int ret = select(nfd+1, rfd, wfd, efd, &tv );
+//	if(ret > 0) {
+//		fromFd(kctx, rfd, a1 );
+//		fromFd(kctx, wfd, a2 );
+//		fromFd(kctx, efd, a3 );
+//	}
+//	else {
+//		if(ret < 0 ) {
+//			OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+//					LogText("@", "select"),
+//					LogText("perror", strerror(errno))
+//			);
+//		}
+//		// TODO::error or timeout is socket list all clear [pending]
+//		KLIB kArray_Clear(kctx, a1, 0);
+//		KLIB kArray_Clear(kctx, a2, 0);
+//		KLIB kArray_Clear(kctx, a3, 0);
+//	}
+//	KReturnUnboxValue(ret);
+//}
+//
+////## int System.send(int socket, byte[] message, int flags);
+//static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
+//{
+//	kBytes *ba = sfp[2].asBytes;
+//	// Broken Pipe Signal Mask
+//#if defined(__linux__)
+//	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
+//	__sighandler_t ret_signal = SIG_ERR;
+//#elif defined(__APPLE__) || defined(__NetBSD__)
+//	sig_t oldset = signal(SIGPIPE, SIG_IGN);
+//	sig_t ret_signal = SIG_ERR;
+//#endif
+//	if(oldset == SIG_ERR) {
+//		OLDTRACE_SWITCH_TO_KTrace(_UserFault,
+//				LogText("@", "signal"),
+//				LogText("perror", strerror(errno))
+//		);
+//	}
+//	int ret = send(WORD2INT(sfp[1].intValue),
+//					  ba->buf,
+//					  ba->bytesize,
+//					  (int)sfp[3].intValue );
+//	if(ret < 0) {
+//		OLDTRACE_SWITCH_TO_KTrace(_UserFault,
+//				LogText("@", "send"),
+//				LogText("perror", strerror(errno))
+//		);
+//	}
+//	if(oldset != SIG_ERR) {
+//		ret_signal = signal(SIGPIPE, oldset);
+//		if(ret_signal == SIG_ERR) {
+//			OLDTRACE_SWITCH_TO_KTrace(_UserFault,
+//					LogText("@", "signal"),
+//					LogText("perror", strerror(errno))
+//			);
+//		}
+//	}
+//	KReturnUnboxValue(ret);
+//}
+//
+////## int System.sendto(int socket, Bytes message, int flags, String dstIP, int dstPort, int family);
+//static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack* sfp)
+//{
+//	kBytes *ba = sfp[2].asBytes;
+//	struct sockaddr_in addr;
+//	kString* s = sfp[4].asString;
+//	toSockaddr(&addr, (char *)S_text(s), WORD2INT(sfp[5].intValue), WORD2INT(sfp[6].intValue));
+//	// Broken Pipe Signal Mask
+//#if defined(__linux__)
+//	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
+//	__sighandler_t ret_signal = SIG_ERR;
+//#elif defined(__APPLE__) || defined(__NetBSD__)
+//	sig_t oldset = signal(SIGPIPE, SIG_IGN);
+//	sig_t ret_signal = SIG_ERR;
+//#endif
+//	int ret = sendto(
+//			WORD2INT(sfp[1].intValue),
+//			ba->buf,
+//			ba->bytesize,
+//			(int)sfp[3].intValue,
+//			(struct sockaddr *)&addr,
+//			sizeof(struct sockaddr)
+//	);
+//	if(ret < 0) {
+//		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+//				LogText("@", "sendto"),
+//				LogUint("errno", errno),
+//				LogText("errstr", strerror(errno))
+//		);
+//	}
+//	if(oldset != SIG_ERR) {
+//		ret_signal = signal(SIGPIPE, oldset);
+//		if(ret_signal == SIG_ERR) {
+//			OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+//				LogText("@", "signal"),
+//				LogUint("errno", errno),
+//				LogText("errstr", strerror(errno))
+//			);
+//		}
+//	}
+//	KReturnUnboxValue(ret);
+//}
 
 //## int System.shutdown(int socket, int how);
 KMETHOD System_shutdown(KonohaContext *kctx, KonohaStack* sfp)
@@ -640,7 +640,7 @@ static kbool_t socket_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		_Public|_Static|_Const|_Im, _F(System_getsockopt), TY_int, TY_System, MN_("getsockopt"), 2, TY_int, FN_("fd"), TY_int, FN_("opt"),
 		_Public|_Static|_Const|_Im, _F(System_setsockopt), TY_int, TY_System, MN_("setsockopt"), 3, TY_int, FN_("fd"), TY_int, FN_("opt"), TY_int, FN_("value"),
 //		_Public|_Static|_Const|_Im, _F(System_getpeername), TY_Map, TY_System, MN_("getpeername"), 1, TY_int, FN_("fd"),
-		_Public|_Static, _F(System_Select), TY_int, TY_System, MN_("select"), 5, TY_intArray, FN_("readsocks"), TY_intArray, FN_("writesocks"), TY_intArray, FN_("exceptsocks"), TY_int, FN_("timeoutSec"), TY_int, FN_("timeoutUSec"),
+//		_Public|_Static, _F(System_Select), TY_int, TY_System, MN_("select"), 5, TY_intArray, FN_("readsocks"), TY_intArray, FN_("writesocks"), TY_intArray, FN_("exceptsocks"), TY_int, FN_("timeoutSec"), TY_int, FN_("timeoutUSec"),
 		_Public|_Static|_Const|_Im, _F(System_shutdown), TY_int, TY_System, MN_("shutdown"), 2, TY_int, FN_("fd"), TY_int, FN_("how"),
 		_Public|_Static|_Const|_Im, _F(System_sockatmark), TY_int, TY_System, MN_("sockatmark"), 1, TY_int, FN_("fd"),
 		_Public|_Static|_Const|_Im, _F(System_socket), TY_int, TY_System, MN_("socket"), 3, TY_int, FN_("family"), TY_int, FN_("type"), TY_int, FN_("protocol"),

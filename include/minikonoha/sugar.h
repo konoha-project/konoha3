@@ -208,7 +208,7 @@ struct Tokenizer {
 // Expr TypeCheck(Stmt stmt, Expr expr, Gamma gma, int typeid)
 #define VAR_TypeCheck(STMT, EXPR, GMA, TY) \
 		kStmt *STMT = (kStmt *)sfp[1].asObject;\
-		kExpr *EXPR = (kExpr *)sfp[2].asObject;\
+		kExprVar *EXPR = (kExprVar *)sfp[2].asObject;\
 		kGamma *GMA = (kGamma *)sfp[3].asObject;\
 		ktype_t TY = (ktype_t)sfp[4].intValue;\
 		VAR_TRACE; (void)STMT; (void)EXPR; (void)GMA; (void)TY
@@ -402,7 +402,6 @@ typedef enum {
 	TSTMT_LOOP,
 	TSTMT_JUMP,
 	TSTMT_TRY,
-
 	TSTMT_ERR   // this must be last
 } kvisit_t;
 
@@ -428,7 +427,7 @@ struct kExprVar {
 		kArray*  cons;          // Cons
 		kBlock*  block;
 	};
-	ktype_t ty;    kexpr_t build;
+	ktype_t attrTypeId;    kexpr_t build;
 	union {
 		kObject*   objectConstValue;
 		uintptr_t  unboxConstValue;
@@ -437,6 +436,7 @@ struct kExprVar {
 };
 
 #define TSTMT_UNDEFINED      0
+#define kStmt_isERR(STMT)       ((STMT)->build == TSTMT_ERR)
 
 struct kStmtVar {
 	KonohaObjectHeader h;
@@ -472,10 +472,8 @@ struct kBlockVar {
 	kExpr               *esp;
 };
 
-typedef kbool_t (*CheckEndOfStmtFunc)(KonohaContext *, kArray *, int *currentIdxRef, int endIdx, int *indentRef, kArray *tokenList, int beginIdx);
-
 typedef struct {
-	ktype_t    ty;    ksymbol_t  fn;
+	ktype_t    attrTypeId;    ksymbol_t  name;
 } GammaStackDecl;
 
 #define kGamma_TopLevel        (kshortflag_t)(1)
@@ -493,7 +491,8 @@ typedef struct {
 
 typedef struct  {
 	kshortflag_t  flag;      kshortflag_t  cflag;
-	ktype_t       this_cid;  ktype_t       static_cid;
+	KonohaClass   *thisClass;
+	//ktype_t      static_cid;
 	kMethod      *currentWorkingMethod;
 	GammaStack    localScope;
 	int           blockScopeShiftSize;
@@ -580,25 +579,25 @@ typedef struct {
 	kStmtVar*    (*new_kStmt)(KonohaContext *kctx, kArray *gcstack, SugarSyntax *syn, ...);
 	void         (*kBlock_InsertAfter)(KonohaContext *, kBlock *, kStmtNULL *target, kStmt *);
 
-	kExpr*       (*new_UntypedTermExpr)(KonohaContext *, kToken *tk);
-	kExpr*       (*new_UntypedCallStyleExpr)(KonohaContext *, SugarSyntax *syn, int n, ...);
+	kExpr*       (*new_TermExpr)(KonohaContext *, kToken *tk);
+	kExprVar*       (*new_UntypedCallStyleExpr)(KonohaContext *, SugarSyntax *syn, int n, ...);
 	kExpr*       (*kStmt_ParseOperatorExpr)(KonohaContext *, kStmt *, SugarSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
 	kExpr*       (*kStmt_ParseExpr)(KonohaContext *, kStmt *, kArray *tokenList, int s, int e, const char *hintBeforeText);
 	kExpr*       (*kStmt_AddExprParam)(KonohaContext *, kStmt *, kExpr *, kArray *tokenList, int, int, const char *hintBeforeText);
 	kExpr*       (*kStmt_RightJoinExpr)(KonohaContext *, kStmt *, kExpr *, kArray *, int, int);
 
-	kExpr*       (*kExpr_SetConstValue)(KonohaContext *, kExpr *, ktype_t ty, kObject *o);
-	kExpr*       (*kExpr_SetUnboxConstValue)(KonohaContext *, kExpr *, ktype_t ty, uintptr_t unboxValue);
-	kExpr*       (*kExpr_SetVariable)(KonohaContext *, kExpr *, kGamma *, kexpr_t build, ktype_t ty, intptr_t index);
+	kExpr*       (*kExpr_SetConstValue)(KonohaContext *, kExprVar *, KonohaClass *, kObject *o);
+	kExpr*       (*kExpr_SetUnboxConstValue)(KonohaContext *, kExprVar *, ktype_t, uintptr_t unboxValue);
+	kExpr*       (*kExpr_SetVariable)(KonohaContext *, kExprVar *, kGamma *, kexpr_t build, ktype_t, intptr_t index);
+	kExpr *      (*new_TypedCallExpr)(KonohaContext *, kStmt *, kGamma *, KonohaClass *, kMethod *mtd, int n, ...);
 
-	kExpr *     (*new_TypedCallExpr)(KonohaContext *, kStmt *, kGamma *, ktype_t ty, kMethod *mtd, int n, ...);
 	kbool_t     (*kBlock_TypeCheckAll)(KonohaContext *, kBlock *, kGamma *);
-	kbool_t     (*kStmt_TypeCheckByName)(KonohaContext *, kStmt*, ksymbol_t, kGamma *, ktype_t, int);
-	kExpr*      (*kStmt_TypeCheckExprAt)(KonohaContext *, kStmt *, kExpr *, size_t, kGamma *, ktype_t, int);
-	kExpr *     (*kStmtkExpr_TypeCheckCallParam)(KonohaContext *, kStmt *, kExpr *, kMethod *, kGamma *, ktype_t);
+	kbool_t     (*kStmt_TypeCheckByName)(KonohaContext *, kStmt*, ksymbol_t, kGamma *, KonohaClass *, int);
+	kExpr*      (*kStmt_TypeCheckExprAt)(KonohaContext *, kStmt *, kExpr *, size_t, kGamma *, KonohaClass *, int);
+	kExpr *     (*kStmtkExpr_TypeCheckCallParam)(KonohaContext *, kStmt *, kExprVar *, kMethod *, kGamma *, KonohaClass *);
 	int         (*kGamma_AddLocalVariable)(KonohaContext *, kGamma *, ktype_t, ksymbol_t);
 	kbool_t     (*kStmt_DeclType)(KonohaContext *, kStmt *, kGamma *, ktype_t, kExpr *, kObject *, TypeDeclFunc, kStmt **);
-	kExpr*      (*kStmt_TypeCheckVariableNULL)(KonohaContext *, kStmt *, kExpr *, kGamma *, ktype_t);
+	kExpr*      (*kStmt_TypeCheckVariableNULL)(KonohaContext *, kStmt *, kExprVar *, kGamma *, KonohaClass *);
 
 	void       (*kToken_ToError)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
 	kExpr *    (*kStmt_Message2)(KonohaContext *, kStmt *, kToken *, kinfotag_t, const char *fmt, ...);
@@ -625,6 +624,8 @@ typedef struct {
 	kArray            *definedMethodList;
 } SugarContext;
 
+#define CT_INFER    CT_(TY_var)
+
 typedef enum {
 	TypeCheckPolicy_NOPOLICY              = 0,
 	TypeCheckPolicy_NOCHECK               = 1,
@@ -641,9 +642,9 @@ typedef enum {
 
 #define SUGAR
 
-static kExpr* kExpr_SetConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, kObject *o);
-static kExpr* kExpr_SetUnboxConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t unboxValue);
-static kExpr* kExpr_SetVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, kexpr_t build, ktype_t ty, intptr_t index);
+//static kExpr* kExpr_SetConstValue(KonohaContext *kctx, kExprVar *expr, ktype_t ty, kObject *o);
+//static kExpr* kExpr_SetUnboxConstValue(KonohaContext *kctx, kExprVar *expr, ktype_t ty, uintptr_t unboxValue);
+//static kExpr* kExpr_SetVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, kexpr_t build, ktype_t ty, intptr_t index);
 
 #define TY_Symbol                          kmodsugar->cSymbol->typeId
 #define TY_Token                           kmodsugar->cToken->typeId
@@ -795,7 +796,7 @@ static inline void Stmt_typed(kStmt *stmt, int build)
 	}
 }
 
-static inline kbool_t Expr_isSymbolTerm(kExpr *expr)
+static inline kbool_t kExpr_isSymbolTerm(kExpr *expr)
 {
 	return (Expr_isTerm(expr) && (expr->termToken->resolvedSyntaxInfo->keyword == KW_SymbolPattern));
 }
@@ -806,10 +807,10 @@ static inline void kExpr_Setsyn(kExpr *expr, SugarSyntax *syn)
 }
 
 #define kExpr_typed(E, B, TY)   Expr_typed(E, TEXPR_##B, TY)
-static inline kExpr *Expr_typed(kExpr *expr, int build, ktype_t ty)
+static inline kExpr *Expr_typed(kExprVar *expr, int build, ktype_t ty)
 {
-	((kExprVar *)expr)->build = build;
-	((kExprVar *)expr)->ty = ty;
+	expr->build = build;
+	expr->attrTypeId = ty;
 	return expr;
 }
 

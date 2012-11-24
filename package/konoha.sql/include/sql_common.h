@@ -279,7 +279,7 @@ void _ResultSet_InitColumn(KonohaContext *kctx, kResultSet *o, size_t column_siz
 	if(column_size > 0) {
 		rs->column = (struct DBschema *)KMalloc_UNTRACE(sizeof(DBschema) * column_size);
 		for(i = 0; i < column_size; i++) {
-			rs->column[i].type = TY_String;
+			rs->column[i].attrTypeIdpe = TY_String;
 			/* TS_EMPTY would be tenure, so ignore WriteBarrier. */
 			// [TODO] ask ide.
 			DBG_ASSERT(true);

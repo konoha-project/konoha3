@@ -165,9 +165,7 @@ static kbool_t iterator_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 {
 	KRequireKonohaCommonModule(trace);
 	if(CT_Iterator == NULL) {
-		kparamtype_t IteratorParam = {0};
-		IteratorParam.ty = TY_Object;
-
+		kparamtype_t IteratorParam = {TY_Object};
 		KDEFINE_CLASS defIterator = {0};
 		SETSTRUCTNAME(defIterator, Iterator);
 		defIterator.cflag  = CFLAG_Iterator;

@@ -60,7 +60,7 @@ static kExpr *kStmt_ParseOperatorExpr(KonohaContext *kctx, kStmt *stmt, SugarSyn
 		for(index = size - 1; index >= 0; index--) {
 			DBG_ASSERT(IS_Func(funcItems[index]));
 			kExpr *texpr = CallExpressionFunc(kctx, exprSyntax, funcItems[index], &callCount, stmt, tokenList, beginIdx, operatorIdx, endIdx);
-			if(Stmt_isERR(stmt)) return K_NULLEXPR;
+			if(kStmt_isERR(stmt)) return K_NULLEXPR;
 			if(texpr != K_NULLEXPR) return texpr;
 		}
 		if(currentSyntax->parentSyntaxNULL == NULL) break;
@@ -103,7 +103,7 @@ static int kStmt_FindOperator(KonohaContext *kctx, kStmt *stmt, kArray *tokenLis
 
 static kExpr* kStmt_ParseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx, const char *hintBeforeText)
 {
-	if(!Stmt_isERR(stmt)) {
+	if(!kStmt_isERR(stmt)) {
 		if(beginIdx < endIdx) {
 			int idx = kStmt_FindOperator(kctx, stmt, tokenList, beginIdx, endIdx);
 			SugarSyntax *syn = tokenList->TokenItems[idx]->resolvedSyntaxInfo;
@@ -153,7 +153,7 @@ static kExpr *kStmt_AddExprParam(KonohaContext *kctx, kStmt *stmt, kExpr *expr, 
 
 static kExpr *kStmt_RightJoinExpr(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kArray *tokenList, int c, int e)
 {
-	if(c < e && expr != K_NULLEXPR && !Stmt_isERR(stmt)) {
+	if(c < e && expr != K_NULLEXPR && !kStmt_isERR(stmt)) {
 		kToken *tk = tokenList->TokenItems[c];
 		if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern || tk->resolvedSyntaxInfo->sugarFuncTable[SugarFunc_Expression] == NULL) {
 			DBG_ASSERT(c >= 1);
@@ -192,14 +192,14 @@ static KonohaClass* TokenUtils_ParseGenericsType(KonohaContext *kctx, kNameSpace
 		if(paramClass == NULL) {
 			return NULL;
 		}
-		p[psize].ty = paramClass->typeId;
+		p[psize].attrTypeId = paramClass->typeId;
 		psize++;
 		if(currentIdx < endIdx && tokenList->TokenItems[currentIdx]->resolvedSyntaxInfo->keyword == KW_COMMA) {
 			currentIdx++;
 		}
 	}
 	if(baseClass->baseTypeId == TY_Func) {
-		return KLIB KonohaClass_Generics(kctx, baseClass, p[0].ty, psize-1, p+1);
+		return KLIB KonohaClass_Generics(kctx, baseClass, p[0].attrTypeId, psize-1, p+1);
 	}
 	else {
 		return KLIB KonohaClass_Generics(kctx, baseClass, TY_void, psize, p);
@@ -565,7 +565,7 @@ static int SugarSyntax_MatchPattern(KonohaContext *kctx, SugarSyntax *syn, kToke
 			kFunc **funcItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_PatternMatch, &size);
 			for(index = size - 1; index >= 0; index--) {
 				int next = CallPatternMatchFunc(kctx, funcItems[index], &callCount, stmt, name, tokenList, beginIdx, endIdx);
-				if(Stmt_isERR(stmt)) return -1;
+				if(kStmt_isERR(stmt)) return -1;
 				if(next >= beginIdx) return next;
 			}
 			if(syn->parentSyntaxNULL == NULL) break;
@@ -623,7 +623,7 @@ static int kStmt_MatchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeq *
 				tokens->beginIdx = tokenIdx;
 				int next = kStmt_MatchSyntaxPattern(kctx, stmt, tokens, &nrule, errRuleRef);
 				errRuleRef[0] = NULL;
-				if(Stmt_isERR(stmt)) return -1;
+				if(kStmt_isERR(stmt)) return -1;
 				if(next != -1) {
 					tokenIdx = next;
 				}
@@ -746,13 +746,13 @@ static int kStmt_ParseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int inde
 				patternEndIdx = TokenSeq_SelectSyntaxPattern(kctx, &nrule, currentSyntax->syntaxPatternListNULL_OnList, patternEndIdx);
 				errRule[0] = NULL; errRule[1] = NULL;
 				int nextIdx = kStmt_MatchSyntaxPattern(kctx, stmt, &tokens, &nrule, errRule);
-				if(Stmt_isERR(stmt)) return -1;
+				if(kStmt_isERR(stmt)) return -1;
 				if(beginIdx < nextIdx) return nextIdx;
 			} while(patternEndIdx > 0);
 		}
 		currentSyntax = currentSyntax->parentSyntaxNULL;
 	}
-	if(!Stmt_isERR(stmt)) {
+	if(!kStmt_isERR(stmt)) {
 		DBG_ASSERT(errRule[0] != NULL);
 //		KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
 //		KdumpTokenArray(kctx, stmtSyntax->syntaxPatternListNULL_OnList, 0, kArray_size(stmtSyntax->syntaxPatternListNULL_OnList));
@@ -846,7 +846,7 @@ static kbool_t kBlock_AddNewStmt(KonohaContext *kctx, kBlock *bk, TokenSeq *toke
 		}
 		currentIdx = kStmt_ParseBySyntaxPattern(kctx, stmt, indent, tokens->tokenList, currentIdx, tokens->endIdx);
 		if(currentIdx == -1) {
-			DBG_ASSERT(Stmt_isERR(stmt));
+			DBG_ASSERT(kStmt_isERR(stmt));
 			tokens->beginIdx = tokens->endIdx;
 			return false;
 		}

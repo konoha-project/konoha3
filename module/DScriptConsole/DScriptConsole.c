@@ -81,7 +81,7 @@ static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, k
 
 static void Kwb_WriteValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass *c, KonohaStack *sfp)
 {
-	if(CT_isUnbox(c)) {
+	if(CT_IsUnbox(c)) {
 		c->p(kctx, sfp, 0, wb);
 	}
 	else {

@@ -37,7 +37,7 @@ static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t
 	KFieldSet(expr, expr->termToken, tk);
 	Expr_setTerm(expr, 1);
 	expr->build = TEXPR_NEW;
-	expr->ty = ty;
+	expr->attrTypeId = ty;
 	return (kExpr *)expr;
 }
 

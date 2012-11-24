@@ -580,7 +580,7 @@ static KMETHOD Param_getType(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kParam *pa = (kParam *) sfp[0].asObject;
 	int n = sfp[1].intValue;
-	KReturnUnboxValue(pa->paramtypeItems[n].ty);
+	KReturnUnboxValue(pa->paramtypeItems[n].attrTypeId);
 }
 
 //## Int Method.getReturnType();

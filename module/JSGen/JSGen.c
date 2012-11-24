@@ -295,7 +295,7 @@ static void JSBuilder_VisitConstExpr(KonohaContext *kctx, KBuilder *builder, kSt
 
 static void JSBuilder_VisitNConstExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
-	JSBuilder_EmitNConstValue(kctx, builder, CT_(expr->ty), expr->unboxConstValue);
+	JSBuilder_EmitNConstValue(kctx, builder, CT_(expr->attrTypeId), expr->unboxConstValue);
 }
 
 static void JSBuilder_VisitNewExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
@@ -353,9 +353,9 @@ static void JSBuilder_VisitExprParams(KonohaContext *kctx, KBuilder *builder, kS
 static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr, kExpr *receiver, kMethod *mtd)
 {
 	KonohaClass *globalObjectClass = KLIB kNameSpace_GetClassByFullName(kctx, Stmt_ns(stmt), "GlobalObject", 12, NULL);
-	kbool_t isGlobal = (CT_(receiver->ty) == globalObjectClass || receiver->ty == TY_NameSpace);
+	kbool_t isGlobal = (CT_(receiver->attrTypeId) == globalObjectClass || receiver->attrTypeId == TY_NameSpace);
 	const char *methodName = SYM_t(mtd->mn);
-	if(receiver->ty == TY_NameSpace) {
+	if(receiver->attrTypeId == TY_NameSpace) {
 		if(mtd->mn == MN_("import")) {
 			kString *packageNameString = (kString*)kExpr_at(expr, 2)->objectConstValue;
 			kNameSpace *ns = (kNameSpace*)receiver->objectConstValue;
@@ -364,17 +364,17 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 			return;
 		}
 	}
-	if(receiver->ty == TY_System && methodName[0] == 'p') {
+	if(receiver->attrTypeId == TY_System && methodName[0] == 'p') {
 		JSBuilder_EmitString(kctx, builder, "console.log", "", "");
 	}else if(strcmp(SYM_t(mtd->mn), "new") == 0) {
-		JSBuilder_EmitString(kctx, builder, "new ", CT_t(CT_(receiver->ty)), "");
+		JSBuilder_EmitString(kctx, builder, "new ", CT_t(CT_(receiver->attrTypeId)), "");
 	}else if(strcmp(SYM_t(mtd->mn), "newList") == 0) {
 	}else if(strcmp(SYM_t(mtd->mn), "newArray") == 0) {
 		JSBuilder_EmitString(kctx, builder, "new Array", "", "");
 	}else{
 		if(!isGlobal) {
 			if(receiver->build == TEXPR_NULL) {
-				JSBuilder_EmitString(kctx, builder, CT_t(CT_(receiver->ty)), "", "");
+				JSBuilder_EmitString(kctx, builder, CT_t(CT_(receiver->attrTypeId)), "", "");
 			}
 			else{
 				SUGAR VisitExpr(kctx, builder, stmt, receiver);
@@ -517,9 +517,9 @@ static void JSBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder, K
 	KonohaClassField *field = class->fieldItems;
 	kObject *constList = class->defaultNullValue_OnGlobalConstList;
 	for(i = 0; i < class->fieldsize; ++i) {
-		JSBuilder_EmitString(kctx, builder, "this.", SYM_t(field[i].fn), " = ");
-		if(TY_isUnbox(field[i].ty)) {
-			JSBuilder_EmitNConstValue(kctx, builder, CT_(field[i].ty), constList->fieldUnboxItems[i]);
+		JSBuilder_EmitString(kctx, builder, "this.", SYM_t(field[i].name), " = ");
+		if(TY_isUnbox(field[i].attrTypeId)) {
+			JSBuilder_EmitNConstValue(kctx, builder, CT_(field[i].attrTypeId), constList->fieldUnboxItems[i]);
 		}else{
 			JSBuilder_EmitConstValue(kctx, builder, constList->fieldObjectItems[i]);
 		}
@@ -550,7 +550,7 @@ static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, k
 		if(i != 0) {
 			KLIB Kwb_printf(kctx, &wb, ", ");
 		}
-		KLIB Kwb_printf(kctx, &wb, "%s", SYM_t(params->paramtypeItems[i].fn));
+		KLIB Kwb_printf(kctx, &wb, "%s", SYM_t(params->paramtypeItems[i].name));
 	}
 	KLIB Kwb_printf(kctx, &wb, ")");
 	JSBuilder_EmitString(kctx, builder, KLIB Kwb_top(kctx, &wb, 1), "", "");

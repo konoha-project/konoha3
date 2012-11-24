@@ -541,7 +541,7 @@ static KMETHOD Token_isSymbol(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Token_newUntypedExpr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kToken *token = sfp[0].asToken;
-	KReturn(SUGAR new_UntypedTermExpr(kctx, token));
+	KReturn(SUGAR new_TermExpr(kctx, token));
 }
 
 //## boolean Token.isBeforeWhiteSpace();
@@ -808,7 +808,7 @@ static KMETHOD Expr_setConstValue(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kExpr *expr = sfp[0].asExpr;
 	KonohaClass *ct = O_ct(sfp[1].asObject);
-	if(CT_isUnbox(ct)) {
+	if(CT_IsUnbox(ct)) {
 		KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, ct->typeId, sfp[1].unboxValue));
 	}
 	KReturn(SUGAR kExpr_SetConstValue(kctx, expr, ct->typeId, sfp[1].asObject));
@@ -839,7 +839,7 @@ static KMETHOD Expr_newVariableExpr(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Expr_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaClass *ct = O_ct(sfp[1].asObject);
-	if(CT_isUnbox(ct)) {
+	if(CT_IsUnbox(ct)) {
 		KReturn(new_UnboxConstValueExpr(kctx, ct->typeId, sfp[1].unboxValue));
 	}
 	KReturn(new_ConstValueExpr(kctx, ct->typeId, sfp[1].asObject));
@@ -852,7 +852,7 @@ static KMETHOD Expr_setType(KonohaContext *kctx, KonohaStack *sfp)
 	kexpr_t build  = (kexpr_t)sfp[1].intValue;
 	ktype_t cid    = (ktype_t)sfp[2].intValue;
 	expr->build = build;
-	expr->ty = cid;
+	expr->attrTypeId = cid;
 	KReturnVoid();
 }
 

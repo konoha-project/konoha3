@@ -80,7 +80,7 @@
 ////	kParam *pa = kMethod_GetParam(mtd);
 ////	KonohaClass *thisClass = O_cid(sfp[0]);
 ////	for(i = 0; i < psize; i++) {
-////		pa->paramtypeItems[0].ty;
+////		pa->paramtypeItems[0].attrTypeId;
 ////		if(i > 0) {
 ////			knh_putc(ctx, cwb->w, ',');
 ////		}

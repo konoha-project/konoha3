@@ -227,17 +227,20 @@ typedef struct {
 #define TypeAttr_Attr(t)        (t  & (KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
 #define TypeAttr_Unmask(t)      (t  & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3)))
 
-#define TypeAttr_Boxed      KFLAG_H0
+#define TypeAttr_Boxed      KFLAG_H0    /* KeyValueStore, Field */
+#define TypeAttr_ReadOnly   KFLAG_H1    /* Variable, Field */
+#define TypeAttr_Coercion   KFLAG_H2    /* Variable, Field */
+
 #define TypeAttr_Is(P, t)   ((t & TypeAttr_##P) == TypeAttr_##P)
 
 #define SymbolKey_BOXED            NONE
 #define SymbolKey_unbox(sym)       NONE
 
 
-#define CT_(t)              (kctx->share->classTable.classItems[t])
+#define CT_(t)              (kctx->share->classTable.classItems[TypeAttr_Unmask(t)])
 #define CT_cparam(CT)       (kctx->share->paramdomList_OnGlobalConstList->ParamItems[(CT)->cparamdom])
 #define TY_isUnbox(t)       FLAG_is(CT_(t)->cflag, kClass_UnboxType)
-#define CT_isUnbox(C)       FLAG_is(C->cflag, kClass_UnboxType)
+#define CT_IsUnbox(C)       FLAG_is(C->cflag, kClass_UnboxType)
 
 #define SYM_MAX            KFLAG_H3
 #define Symbol_Attr(sym)      (sym  & (KFLAG_H0|KFLAG_H1|KFLAG_H2))
@@ -1059,8 +1062,8 @@ struct KonohaClassVar {
 struct KonohaClassField {
 	kshortflag_t    flag;
 	kshort_t        isobj;
-	ktype_t         ty;
-	ksymbol_t       fn;
+	ktype_t         attrTypeId;
+	ksymbol_t       name;
 };
 
 /* ----------------------------------------------------------------------- */
@@ -1124,7 +1127,7 @@ struct KonohaClassField {
 #define CFLAG_System            kClass_Nullable|kClass_Singleton|kClass_Final
 #define CFLAG_0                 kClass_TypeVar|kClass_UnboxType|kClass_Singleton|kClass_Final
 
-#define CT_is(P, C)           (TFLAG_is(kshortflag_t, (C)->cflag, kClass_##P))
+#define CT_Is(P, C)           (TFLAG_is(kshortflag_t, (C)->cflag, kClass_##P))
 #define TY_is(P, T)           (TFLAG_is(kshortflag_t, (CT_(T))->cflag, kClass_##P))
 #define CT_set(P, C, B)       TFLAG_set(kshortflag_t, (C)->cflag, kClass_##P, B)
 
@@ -1162,7 +1165,6 @@ struct KonohaClassField {
 #define kObject_hashCode(O)          (uintptr_t)((O)->h.magicflag >> (sizeof(kushort_t)*8))
 #define kObject_flags(O)             ((kushort_t)((O)->h.magicflag))
 #define kObject_setHashCode(O, HASH) ((kObjectVar *)O)->h.magicflag = (((uintptr_t)HASH) << (sizeof(kushort_t)*8) | kObject_flags(O))
-//#define kObject_setMagic(O, MAGIC)   ((kObjectVar *)O)->h.magicflag = ((((uintptr_t)M) << 10) & ((O)->.magicflag & kObject_MagicFlag))
 
 #define IS_NULL(o)                 ((((o)->h.magicflag) & kObject_NullObject) == kObject_NullObject)
 #define IS_NOTNULL(o)              ((((o)->h.magicflag) & kObject_NullObject) != kObject_NullObject)
@@ -1317,7 +1319,8 @@ struct kArrayVar {
 #define IS_Param(o)              (O_baseTypeId(o) == TY_Param)
 
 typedef struct kparamtype_t {
-	ktype_t    ty;  ksymbol_t  fn;
+	ktype_t    attrTypeId;
+	ksymbol_t  name;
 } kparamtype_t;
 
 struct kParamVar {
@@ -1376,7 +1379,8 @@ static const char* MethodFlagData[] = {
 #define kMethod_Set(P, MTD, B)        TFLAG_set(uintptr_t, (MTD)->flag, kMethod_##P, B)
 
 #define kMethod_GetParam(mtd)        kctx->share->paramList_OnGlobalConstList->ParamItems[mtd->paramid]
-#define kMethod_GetReturnType(mtd)   ((kMethod_GetParam(mtd))->rtype)
+#define kMethod_GetReturnType(mtd)   CT_((kMethod_GetParam(mtd))->rtype)
+#define kMethod_IsReturnFunc(mtd)    (CT_((kMethod_GetParam(mtd))->rtype)->baseTypeId == TY_Func)
 #define kMethod_ParamSize(mtd)       ((kMethod_GetParam(mtd))->psize)
 #define Method_t(mtd)                TY_t((mtd)->typeId),  MethodName_t((mtd)->mn)
 
@@ -1702,11 +1706,11 @@ struct KonohaLibVar {
 	KKeyValue*       (*kNameSpace_GetConstNULL)(KonohaContext *, kNameSpace *, ksymbol_t);
 	void             (*kNameSpace_LoadMethodData)(KonohaContext*, kNameSpace *, intptr_t *, KTraceInfo *);
 
-	kMethod*         (*kNameSpace_GetGetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
-	kMethod*         (*kNameSpace_GetSetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
-	kMethod*         (*kNameSpace_GetCoercionMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ktype_t tcid);
-	kMethod*         (*kNameSpace_GetMethodByParamSizeNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramsize, MethodMatchOption option);
-	kMethod*         (*kNameSpace_GetMethodBySignatureNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramdom, int paramsize, kparamtype_t *);
+	kMethod*         (*kNameSpace_GetGetterMethodNULL)(KonohaContext*, kNameSpace *, KonohaClass*, ksymbol_t mn);
+	kMethod*         (*kNameSpace_GetSetterMethodNULL)(KonohaContext*, kNameSpace *, KonohaClass*, ksymbol_t mn, ktype_t);
+	kMethod*         (*kNameSpace_GetCoercionMethodNULL)(KonohaContext*, kNameSpace *, KonohaClass *, KonohaClass *);
+	kMethod*         (*kNameSpace_GetMethodByParamSizeNULL)(KonohaContext*, kNameSpace *, KonohaClass *, kmethodn_t mn, int paramsize, MethodMatchOption option);
+	kMethod*         (*kNameSpace_GetMethodBySignatureNULL)(KonohaContext*, kNameSpace *, KonohaClass *, kmethodn_t mn, int paramdom, int paramsize, kparamtype_t *);
 	kMethod*         (*kMethod_DoLazyCompilation)(KonohaContext *kctx, kMethod *mtd, kparamtype_t *, int options);
 //	void             (*kNameSpace_compileAllDefinedMethods)(KonohaContext *kctx);
 

@@ -34,7 +34,7 @@ extern "C"{
 
 static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr)
 {
-	DBG_ASSERT(Expr_isSymbolTerm(termExpr));
+	DBG_ASSERT(kExpr_isSymbolTerm(termExpr));
 	kToken *termToken = termExpr->termToken;
 	if(Gamma_isTopLevel(gma)) {
 		kNameSpace *ns = Stmt_ns(stmt);
@@ -54,13 +54,13 @@ static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t 
 static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
-	kExpr *leftHandExpr = kExpr_at(expr, 1);
-	if(Expr_isSymbolTerm(leftHandExpr)) {
-		kExpr *texpr = SUGAR kStmt_TypeCheckVariableNULL(kctx, stmt, leftHandExpr, gma, TY_var);
+	kExprVar *leftHandExpr = (kExprVar *)kExpr_at(expr, 1);
+	if(kExpr_isSymbolTerm(leftHandExpr)) {
+		kExpr *texpr = SUGAR kStmt_TypeCheckVariableNULL(kctx, stmt, leftHandExpr, gma, CT_INFER);
 		if(texpr == NULL) {
-			kExpr *rightHandExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, TY_var, 0);
+			kExpr *rightHandExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, CT_INFER, 0);
 			if(rightHandExpr != K_NULLEXPR) {
-				DeclVariable(kctx, stmt, gma, rightHandExpr->ty, leftHandExpr);
+				DeclVariable(kctx, stmt, gma, rightHandExpr->attrTypeId, leftHandExpr);
 			}
 		}
 		else {

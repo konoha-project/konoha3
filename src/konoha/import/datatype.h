@@ -377,7 +377,7 @@ static uintptr_t hashparamdom(kushort_t psize, const kparamtype_t *p)
 	kushort_t i;
 	uintptr_t hcode = 0;
 	for(i = 0; i < psize; i++) {
-		hcode = p[i].ty + (31 * hcode);
+		hcode = p[i].attrTypeId + (31 * hcode);
 	}
 	return hcode;
 }
@@ -387,7 +387,7 @@ static uintptr_t hashparam(ktype_t rtype, kushort_t psize, const kparamtype_t *p
 	kushort_t i;
 	uintptr_t hcode = rtype;
 	for(i = 0; i < psize; i++) {
-		hcode = (p[i].ty + p[i].fn) + (31 * hcode);
+		hcode = (p[i].attrTypeId + p[i].name) + (31 * hcode);
 	}
 	return hcode;
 }
@@ -397,7 +397,7 @@ static kbool_t equalsParamDom(ktype_t rtype, kushort_t psize, const kparamtype_t
 	if(psize == pa->psize) {
 		kushort_t i;
 		for(i = 0; i < psize; i++) {
-			if(p[i].ty != pa->paramtypeItems[i].ty) return false;
+			if(p[i].attrTypeId != pa->paramtypeItems[i].attrTypeId) return false;
 		}
 		return true;
 	}
@@ -409,7 +409,7 @@ static kbool_t equalsParam(ktype_t rtype, kushort_t psize, const kparamtype_t *p
 	if(rtype == pa->rtype && psize == pa->psize) {
 		kushort_t i;
 		for(i = 0; i < psize; i++) {
-			if(p[i].ty != pa->paramtypeItems[i].ty || p[i].fn != pa->paramtypeItems[i].fn) return false;
+			if(p[i].attrTypeId != pa->paramtypeItems[i].attrTypeId || p[i].name != pa->paramtypeItems[i].name) return false;
 		}
 		return true;
 	}
@@ -478,7 +478,6 @@ static void kMethod_Free(KonohaContext *kctx, kObject *o)
 {
 	kMethodVar *mtd = (kMethodVar *)o;
 	if(mtd->virtualCodeApi_plus1 != NULL && mtd->virtualCodeApi_plus1[-1] != NULL) {
-		DBG_P("p=%p", mtd->virtualCodeApi_plus1[-1]);
 		mtd->virtualCodeApi_plus1[-1]->FreeVirtualCode(kctx, mtd->vcode_start);
 		mtd->vcode_start = NULL;
 	}
@@ -576,7 +575,7 @@ static KonohaClass *T_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass
 	kParam *cparam = CT_cparam(self);
 	//DBG_P("ct=%s, self=%s", CT_t(ct), CT_t(self));
 	DBG_ASSERT(ct->optvalue < cparam->psize);
-	KonohaClass *pct = CT_(cparam->paramtypeItems[ct->optvalue].ty);
+	KonohaClass *pct = CT_(cparam->paramtypeItems[ct->optvalue].attrTypeId);
 	return pct->realtype(kctx, pct, self);
 }
 
@@ -685,7 +684,7 @@ static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KD
 		DBG_ASSERT(ct->cstruct_size <= 256);
 		ct->DBG_NAME = (s->structname != NULL) ? s->structname : "N/A";
 		if(s->cparamsize > 0 && s->cParamItems != NULL) {
-			ct->p0 = s->cParamItems[0].ty;
+			ct->p0 = s->cParamItems[0].attrTypeId;
 			ct->cparamdom = Kparamdom(kctx, s->cparamsize, s->cParamItems);
 		}
 		// function
@@ -728,8 +727,8 @@ static KonohaClass *Generics_realtype(KonohaContext *kctx, KonohaClass *ct, Kono
 	kushort_t i;
 	kparamtype_t *p = ALLOCA(kparamtype_t, param->psize);
 	for(i = 0; i < param->psize; i++) {
-		KonohaClass *cParam = CT_(param->paramtypeItems[i].ty);
-		p[i].ty = cParam->realtype(kctx, cParam, self)->typeId;
+		KonohaClass *cParam = CT_(param->paramtypeItems[i].attrTypeId);
+		p[i].attrTypeId = cParam->realtype(kctx, cParam, self)->typeId;
 	}
 	return KLIB KonohaClass_Generics(kctx, ct, TY_void, param->psize, p);
 }
@@ -743,8 +742,8 @@ static KonohaClass *Func_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaCl
 	kushort_t i;
 	kparamtype_t *p = ALLOCA(kparamtype_t, param->psize);
 	for(i = 0; i < param->psize; i++) {
-		KonohaClass *cParam = CT_(param->paramtypeItems[i].ty);
-		p[i].ty = cParam->realtype(kctx, cParam, self)->typeId;
+		KonohaClass *cParam = CT_(param->paramtypeItems[i].attrTypeId);
+		p[i].attrTypeId = cParam->realtype(kctx, cParam, self)->typeId;
 	}
 	return KLIB KonohaClass_Generics(kctx, CT_(ct->baseTypeId), rtype, param->psize, p);
 }
@@ -756,7 +755,7 @@ static void checkTypeVar(KonohaContext *kctx, KonohaClassVar *newct, ktype_t rty
 	int i, isTypeVar = TY_isTypeVar2(rtype);
 	if(!isTypeVar) {
 		for(i = 0; i < psize; i++) {
-			if(TY_is(TypeVar, p[i].ty)) {
+			if(TY_is(TypeVar, p[i].attrTypeId)) {
 				isTypeVar = true;
 			}
 		}
@@ -784,7 +783,7 @@ static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, k
 
 	KonohaClassVar *newct = new_KonohaClass(kctx, ct0, NULL, NOPLINE);
 	newct->cparamdom = paramdom;
-	newct->p0 = isNotFuncClass ? p[0].ty : rtype;
+	newct->p0 = isNotFuncClass ? p[0].attrTypeId : rtype;
 	newct->methodList_OnGlobalConstList = K_EMPTYARRAY;
 	if(newct->searchSuperMethodClassNULL == NULL) {
 		newct->searchSuperMethodClassNULL = ct0;
@@ -806,7 +805,7 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 			KGrowingBuffer wb;
 			KonohaClass_shortName(kctx, CT_(ct->p0));
 			for(i = 0; i < cparam->psize; i++) {
-				KonohaClass_shortName(kctx, CT_(cparam->paramtypeItems[i].ty));
+				KonohaClass_shortName(kctx, CT_(cparam->paramtypeItems[i].attrTypeId));
 			}
 			Kwb_Init(&(kctx->stack->cwb), &wb);
 			kString *s = SYM_s(ct->classNameSymbol);
@@ -818,7 +817,7 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 			}
 			for(i = 0; i < cparam->psize; i++) {
 				if(c > 0) KLIB Kwb_Write(kctx, &wb, ",", 1);
-				s = KonohaClass_shortName(kctx, CT_(cparam->paramtypeItems[i].ty));
+				s = KonohaClass_shortName(kctx, CT_(cparam->paramtypeItems[i].attrTypeId));
 				KLIB Kwb_Write(kctx, &wb, S_text(s), S_size(s));
 			}
 			KLIB Kwb_Write(kctx, &wb, "]", 1);

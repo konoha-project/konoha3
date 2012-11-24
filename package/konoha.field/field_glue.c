@@ -114,7 +114,7 @@ static KMETHOD MethodFunc_UnboxPrototypeSetter(KonohaContext *kctx, KonohaStack 
 	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
 	kParam *pa = kMethod_GetParam(mtd);
-	KLIB kObjectProto_SetUnboxValue(kctx, sfp[0].asObject, key, pa->paramtypeItems[0].ty, sfp[1].unboxValue);
+	KLIB kObjectProto_SetUnboxValue(kctx, sfp[0].asObject, key, pa->paramtypeItems[0].attrTypeId, sfp[1].unboxValue);
 	KReturnUnboxValue(sfp[1].unboxValue);
 }
 
@@ -150,8 +150,8 @@ static kbool_t KonohaClass_AddField(KonohaContext *kctx, KonohaClass *ct, int fl
 		KonohaClassVar *definedClass = (KonohaClassVar *)ct;
 		definedClass->fieldsize += 1;
 		definedClass->fieldItems[pos].flag = flag;
-		definedClass->fieldItems[pos].ty = ty;
-		definedClass->fieldItems[pos].fn = sym;
+		definedClass->fieldItems[pos].attrTypeId = ty;
+		definedClass->fieldItems[pos].name = sym;
 		if(TY_isUnbox(ty)) {
 			definedClass->defaultNullValueVar_OnGlobalConstList->fieldUnboxItems[pos] = 0;
 		}
@@ -192,13 +192,13 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tkN = expr->cons->TokenItems[0];
 	ksymbol_t fn = tkN->resolvedSymbol;
-	kExpr *self = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, 0);
+	kExpr *self = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, CT_INFER, 0);
 	kNameSpace *ns = Stmt_ns(stmt);
 	if(self != K_NULLEXPR) {
-		kMethod *mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, self->ty, fn, TY_var);
+		kMethod *mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, CT_(self->attrTypeId), fn);
 		if(mtd != NULL) {
 			KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
-			KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, reqty));
+			KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, CT_(reqty)));
 		}
 		SUGAR kStmt_Message2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
 	}

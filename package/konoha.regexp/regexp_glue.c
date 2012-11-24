@@ -703,7 +703,7 @@ static KMETHOD TypeCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 	kRegExp *r = new_(RegExp, NULL, OnGcStack);
 	DBG_ASSERT(kArray_size(tk->subTokenList) == 2);
 	RegExp_set(kctx, r, tk->subTokenList->stringItems[0], tk->subTokenList->stringItems[1]);
-	KReturn(SUGAR kExpr_SetConstValue(kctx, expr, TY_RegExp, UPCAST(r)));
+	KReturn(SUGAR kExpr_SetConstValue(kctx, expr, NULL, UPCAST(r)));
 }
 
 static kbool_t regexp_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
