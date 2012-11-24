@@ -50,7 +50,7 @@ static void knh_sqlite3_perror(KonohaContext* kctx, sqlite3 *db, int r)
 	//KNH_SYSLOG(ctx, LOG_WARNING, msg, "sqlite3_error='%s'", sqlite3_errmsg(db));
 }
 
-void *SQLITE3_qopen(KonohaContext* kctx,  const char* db)
+void *SQLITE3_qopen(KonohaContext* kctx,  const char* db, KTraceInfo *trace)
 {
 	sqlite3 *db_sqlite3 = NULL;
 	db += 9;
@@ -61,7 +61,7 @@ void *SQLITE3_qopen(KonohaContext* kctx,  const char* db)
 	return (void *)db_sqlite3;
 }
 
-int SQLITE3_qnext(KonohaContext* kctx, kqcur_t *qcur, kResultSet *rs)
+int SQLITE3_qnext(KonohaContext* kctx, kqcur_t *qcur, kResultSet *rs, KTraceInfo *trace)
 {
 	sqlite3_stmt *stmt = (sqlite3_stmt *)qcur;
 	int r = sqlite3_step(stmt);
@@ -100,7 +100,7 @@ int SQLITE3_qnext(KonohaContext* kctx, kqcur_t *qcur, kResultSet *rs)
 	return 0;  /* NOMORE */
 }
 
-kqcur_t *SQLITE3_query(KonohaContext* kctx, void *db, const char* query, kResultSet *rs)
+kqcur_t *SQLITE3_query(KonohaContext* kctx, void *db, const char* query, kResultSet *rs, KTraceInfo *trace)
 {
 	if(rs == NULL) {
 		int r = sqlite3_exec((sqlite3*)db, query, NULL, NULL, NULL);
