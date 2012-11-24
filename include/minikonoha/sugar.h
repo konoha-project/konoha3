@@ -819,6 +819,4 @@ static inline kExpr *Expr_typed(kExprVar *expr, int build, kattrtype_t ty)
 #endif
 
 /* ------------------------------------------------------------------------ */
-
-
 #endif /* SUGAR_H_ */

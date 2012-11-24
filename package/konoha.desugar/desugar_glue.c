@@ -74,7 +74,7 @@ static KMETHOD String_AsciiAt(KonohaContext *kctx, KonohaStack *sfp)
 	int ch = 0;
 	size_t n = (size_t)sfp[1].intValue, len = S_size(sfp[0].asString);
 	if(n < len) {
-		ch = ((unsigned char*)S_text(sfp[0].asString))[n];
+		ch = ((unsigned char *)S_text(sfp[0].asString))[n];
 	}
 	KReturnUnboxValue(ch);
 }
@@ -111,7 +111,7 @@ static void Kwb_WriteToken(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
 {
 	char c = kToken_GetOpenHintChar(tk);
 	if(IS_String(tk)) {
-		if (c != 0) {
+		if(c != 0) {
 			KLIB Kwb_Write(kctx, wb, &c, 1);
 			KLIB Kwb_Write(kctx, wb, S_text(tk->text), S_size(tk->text));
 			KLIB Kwb_Write(kctx, wb, &c, 1);

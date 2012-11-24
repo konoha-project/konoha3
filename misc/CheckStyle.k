@@ -54,6 +54,10 @@ void main() {
         data = replace(args[i], data, "[a-zA-Z]+\\*\\)", "*)", " *)");
         data = replace(args[i], data, "if \\(", "if (", "if(");
         data = replace(args[i], data, "while \\(", "while (", "while(");
+        data = replace(args[i], data, "\n\t\n", "\n\t\n", "\n\n");
+        data = replace(args[i], data, ";\t\n", ";\t\n", ";\n");
+        data = replace(args[i], data, "; \n", "; \n", ";\n");
+        //data = replace(args[i], data, "#ifdef __cplusplus\n}\n#endif\n", "#ifdef __cplusplus\n}\n#endif\n", "#ifdef __cplusplus\n}\n#endif");
         emit(args[i], data);
         i = i + 1;
     }

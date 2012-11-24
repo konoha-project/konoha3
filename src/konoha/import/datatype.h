@@ -888,15 +888,15 @@ static void loadInitStructData(KonohaContext *kctx)
 {
 	KDEFINE_CLASS defTvoid = {0};
 	SetUnboxTypeName(defTvoid, void);
-	
+
 	KDEFINE_CLASS defTvar = {0};
 	SetUnboxTypeName(defTvar, var);
-	
+
 	KDEFINE_CLASS defObject = {0};
 	SETTYNAME(defObject, Object);
 	defObject.init = kObject_Init;
 	defObject.reftrace = kObject_Reftrace;
-	
+
 	KDEFINE_CLASS defBoolean = {0};
 	SetUnboxTypeName(defBoolean, boolean);
 	defBoolean.cstruct_size = sizeof(kBoolean);
@@ -904,54 +904,54 @@ static void loadInitStructData(KonohaContext *kctx)
 	defBoolean.unbox = kNumber_unbox;
 	defBoolean.p     = kBoolean_p;
 	defBoolean.fnull = kBoolean_fnull;
-	
+
 	KDEFINE_CLASS defInt = {0};
 	SetUnboxTypeName(defInt, int);
 	defInt.cstruct_size = sizeof(kInt);
 	defInt.init  = kNumber_Init;
 	defInt.unbox = kNumber_unbox;
 	defInt.p     = kInt_p;
-	
+
 	KDEFINE_CLASS defString = {0};
 	SETTYNAME(defString, String);
 	defString.init = kString_Init;
 	defString.free = kString_Free;
 	defString.p    = kString_p;
 	defString.unbox = kString_unbox;
-	
+
 	KDEFINE_CLASS defArray = {0};
 	SETTYNAME(defArray, Array);
 	defArray.init = kArray_Init;
 	defArray.reftrace = kArray_Reftrace;
 	defArray.free = kArray_Free;
 	defArray.p    = kArray_p;
-	
+
 	KDEFINE_CLASS defParam = {0};
 	SETTYNAME(defParam, Param);
 	defParam.init = kParam_Init;
-	
+
 	KDEFINE_CLASS defMethod = {0};
 	SETTYNAME(defMethod, Method);
 	defMethod.init = kMethod_Init;
 	defMethod.reftrace = kMethod_Reftrace;
 	defMethod.free     = kMethod_Free;
-	
+
 	KDEFINE_CLASS defFunc = {0};
 	SETTYNAME(defFunc, Func);
 	defFunc.init = Func_Init;
 	defFunc.reftrace = Func_Reftrace;
-	
+
 	KDEFINE_CLASS defNameSpace = {0};
 	SETTYNAME(defNameSpace, NameSpace);
 	defNameSpace.init = kNameSpace_Init;
 	defNameSpace.reftrace = kNameSpace_Reftrace;
 	defNameSpace.free = kNameSpace_Free;
 	defNameSpace.p    = kNameSpace_p;
-	
+
 	KDEFINE_CLASS defSystem = {0};
 	SETTYNAME(defSystem, System);
 	defSystem.init = DEFAULT_Init;
-	
+
 	KDEFINE_CLASS defT0 = {0};
 	SetUnboxTypeName(defT0, 0);
 	defT0.init = DEFAULT_Init;

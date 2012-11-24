@@ -154,7 +154,7 @@ static KMETHOD Thread_exit(KonohaContext *kctx, KonohaStack *sfp)
 	pthread_exit(NULL/*FIXME*/);
 	KReturnVoid();
 }
-	
+
 //## @Native void Thread.cancel();
 static KMETHOD Thread_cancel(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -290,7 +290,7 @@ static kbool_t thread_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	KonohaClass *cThread = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defThread, trace);
 	KonohaClass *cMutex  = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defMutex, trace);
 	KonohaClass *cCond   = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCond, trace);
-	
+
 	kparamtype_t P_Func[] = {{}};
 	int TY_FUNC = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_void, 0, P_Func))->typeId;
 
