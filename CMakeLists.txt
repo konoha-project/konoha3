@@ -255,8 +255,9 @@ macro(add_konoha_package _PKGNAME)
 		file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/*.k)
 		foreach(f ${test_files})
 			string(REPLACE // / f ${f})
-			string(REPLACE ${PARENT_SOURCE_DIR}/package/ "" test_name ${f})
-			string(REPLACE /test "" test_name ${test_name})
+			string(REPLACE ${PARENT_SOURCE_DIR}/src/package/ "" f ${f})
+			string(REPLACE ${PARENT_SOURCE_DIR}/src/package-devel/ "" f ${f})
+			string(REPLACE /test "" test_name ${f})
 			add_konoha_test(${test_name} ${f})
 			if(PACKAGE_ENV)
 				set_tests_properties(${test_name} PROPERTIES ENVIRONMENT ${PACKAGE_ENV})
@@ -309,6 +310,12 @@ macro(add_konoha_package _PKGNAME)
 			add_custom_target(copy_${_PKGNAME}_testfile ALL DEPENDS
 				${PACKAGE_TEST_FILE})
 		endif(PACKAGE_TEST_FILE)
+		add_custom_command(OUTPUT ${PARENT_BINARY_DIR}/package/${_PKGNAME}
+			COMMAND ${CMAKE_COMMAND} -E create_symlink
+			${CMAKE_CURRENT_BINARY_DIR}
+			${PARENT_BINARY_DIR}/package/${_PKGNAME})
+		add_custom_target(create_symlink_${_PKGNAME} ALL DEPENDS
+			${PARENT_BINARY_DIR}/package/${_PKGNAME})
 	else(NOT __NOT_BUILD)
 		foreach(_PKGLIB ${__NOT_FOUND})
 			show_package_warning(${_PKGNAME} ${_PKGLIB})
@@ -317,6 +324,12 @@ macro(add_konoha_package _PKGNAME)
 endmacro(add_konoha_package)
 
 add_subdirectory(src/module)
+
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/package
+	COMMAND ${CMAKE_COMMAND} -E make_directory
+	${CMAKE_CURRENT_BINARY_DIR}/package)
+add_custom_target(make_package_dir ALL DEPENDS
+	${CMAKE_CURRENT_BINARY_DIR}/package)
 
 file(GLOB PACKAGES ${CMAKE_CURRENT_SOURCE_DIR}/src/package/*)
 foreach(dir ${PACKAGES})
