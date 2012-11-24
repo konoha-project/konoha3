@@ -679,10 +679,10 @@ static KonohaClass* ResolveTypeVariable(KonohaContext *kctx, KonohaClass *varTyp
 	return varType->realtype(kctx, varType, thisClass);
 }
 
-static int param_policy(ksymbol_t fn)
+static int TypeCheckPolicy_(kattrtype_t attrtype)
 {
 	int pol = 0;
-	if(FN_isCOERCION(fn)) {
+	if(TypeAttr_Is(Coercion, attrtype)) {
 		pol = pol | TypeCheckPolicy_COERCION;
 	}
 	return pol;
@@ -748,7 +748,7 @@ static kExpr *kStmtkExpr_TypeCheckCallParam(KonohaContext *kctx, kStmt *stmt, kE
 	for(i = 0; i < pa->psize; i++) {
 		size_t n = i + 2;
 		KonohaClass* paramType = ResolveTypeVariable(kctx, CT_(pa->paramtypeItems[i].attrTypeId), thisClass);
-		int tycheckPolicy = param_policy(pa->paramtypeItems[i].name);
+		int tycheckPolicy = TypeCheckPolicy_(pa->paramtypeItems[i].attrTypeId);
 		kExpr *texpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, n, gma, paramType, tycheckPolicy);
 		if(texpr == K_NULLEXPR) {
 			return kStmtExpr_Message(kctx, stmt, expr, InfoTag, "%s.%s%s accepts %s at the parameter %d", Method_t(mtd), CT_t(paramType), (int)i+1);

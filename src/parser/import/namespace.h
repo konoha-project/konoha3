@@ -664,7 +664,7 @@ static kbool_t MethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, MethodMa
 						continue;
 					}
 					kMethod *castMethod = kNameSpace_GetCoercionMethodNULL(kctx, m->ns, mtype, ptype);
-					if(castMethod != NULL && (kMethod_Is(Coercion, castMethod) || FN_isCOERCION(param->paramtypeItems[i].name))) {
+					if(castMethod != NULL && (kMethod_Is(Coercion, castMethod) || TypeAttr_Is(Coercion, param->paramtypeItems[i].attrTypeId))) {
 						continue;
 					}
 					return false;

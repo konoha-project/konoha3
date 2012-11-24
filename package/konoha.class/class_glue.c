@@ -156,7 +156,7 @@ static KonohaClassVar* kNameSpace_DefineClassName(KonohaContext *kctx, kNameSpac
 		{S_text(name), VirtualType_KonohaClass, definedClass},
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), false/*isOverride*/, true);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), false/*isOverride*/, trace);
 	return definedClass;
 }
 
@@ -251,7 +251,7 @@ static kbool_t kStmt_AddClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma
 		if(Expr_isTerm(lexpr)) {
 			kString *name = lexpr->termToken->text;
 			ksymbol_t symbol = ksymbolA(S_text(name), S_size(name), SYM_NEWID);
-			kExpr *vexpr =  SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, ty, 0);
+			kExpr *vexpr =  SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, CT_(ty), 0);
 			if(vexpr == K_NULLEXPR) return false;
 			if(vexpr->build == TEXPR_CONST) {
 				KLIB KonohaClass_AddField(kctx, definedClass, flag, ty, symbol);

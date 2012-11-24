@@ -460,8 +460,8 @@ static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *t
 		_Public, _F(File_getc), TY_int, TY_File, MN_("getc"), 0,
 		_Public, _F(File_putc), TY_void, TY_File, MN_("putc"), 1, TY_int, FN_("char"),
 		_Public, _F(File_readLine), TY_String, TY_File, MN_("readLine"), 0,
-		_Public, _F(File_print), TY_String, TY_File, MN_("print"), 1, TY_String, FN_("str")|FN_COERCION,
-		_Public, _F(File_println), TY_void, TY_File, MN_("println"), 1, TY_String, FN_("str")|FN_COERCION,
+		_Public, _F(File_print), TY_String, TY_File, MN_("print"), 1, TY_String | TypeAttr_Coercion, FN_("str"),
+		_Public, _F(File_println), TY_void, TY_File, MN_("println"), 1, TY_String | TypeAttr_Coercion, FN_("str"),
 		_Public, _F(File_println0), TY_void, TY_File, MN_("println"), 0,
 		_Public, _F(File_flush), TY_void, TY_File, MN_("flush"), 0,
 

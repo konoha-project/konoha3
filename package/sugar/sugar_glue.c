@@ -1038,10 +1038,10 @@ static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 
 		/* Expr */
 		_Public, _F(Expr_getTermToken), TY_Token, TY_Expr, MN_("getTermToken"), 0,
-		_Public, _F(Expr_setConstValue), TY_Expr, TY_Expr, MN_("setConstValue"), 1, TY_Object, FN_("value") | FN_COERCION,
+		_Public, _F(Expr_setConstValue), TY_Expr, TY_Expr, MN_("setConstValue"), 1, TY_Object, FN_("value"),
 		_Public, _F(Expr_setVariable), TY_Expr, TY_Expr, MN_("setVariable"), 4, TY_Gamma, FN_gma, TY_int, FN_buildid, TY_cid, FN_typeid, TY_int, FN_("index"),
 		_Public, _F(Expr_newVariableExpr), TY_Expr, TY_Expr, MN_("new"), 4, TY_Gamma, FN_gma, TY_int, FN_buildid, TY_cid, FN_typeid, TY_int, FN_("index"),
-		_Public, _F(Expr_new), TY_Expr, TY_Expr, MN_("new"), 1, TY_Object, FN_("value") | FN_COERCION,
+		_Public, _F(Expr_new), TY_Expr, TY_Expr, MN_("new"), 1, TY_Object, FN_("value"),
 		_Public, _F(Expr_setType), TY_void, TY_Expr, MN_("setType"), 2, TY_int, FN_buildid, TY_cid, FN_typeid,
 		_Public, _F(kExpr_AddExpr), TY_Expr, TY_Expr, MN_("addExpr"), 1, TY_Expr, FN_expr,
 

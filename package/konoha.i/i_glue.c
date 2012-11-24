@@ -47,7 +47,7 @@ static void kMethod_WriteToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuf
 {
 	kParam *pa = kMethod_GetParam(mtd);
 	Method_WriteAttributeToBuffer(kctx, mtd, wb);
-	KLIB Kwb_printf(kctx, wb, "%s %s.%s%s", TY_t(pa->rtype), TY_t(mtd->typeId), MethodName_t(mtd->mn));
+	KLIB Kwb_printf(kctx, wb, "%s %s.%s%s", ATY_t(pa->rtype), TY_t(mtd->typeId), MethodName_t(mtd->mn));
 	{
 		size_t i;
 		KLIB Kwb_Write(kctx, wb, "(", 1);
@@ -55,10 +55,13 @@ static void kMethod_WriteToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuf
 			if(i > 0) {
 				KLIB Kwb_Write(kctx, wb, ", ", 2);
 			}
-			if(FN_isCOERCION(pa->paramtypeItems[i].name)) {
+			if(TypeAttr_Is(ReadOnly, pa->paramtypeItems[i].attrTypeId)) {
+				KLIB Kwb_printf(kctx, wb, "@ReadOnly ");
+			}
+			if(TypeAttr_Is(Coercion, pa->paramtypeItems[i].attrTypeId)) {
 				KLIB Kwb_printf(kctx, wb, "@Coercion ");
 			}
-			KLIB Kwb_printf(kctx, wb, "%s %s", TY_t(pa->paramtypeItems[i].attrTypeId), SYM_t(pa->paramtypeItems[i].name));
+			KLIB Kwb_printf(kctx, wb, "%s %s", ATY_t(pa->paramtypeItems[i].attrTypeId), SYM_t(pa->paramtypeItems[i].name));
 		}
 		KLIB Kwb_Write(kctx, wb, ")", 1);
 	}
@@ -119,7 +122,7 @@ static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t i_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_man), TY_void, TY_NameSpace, MN_("man"), 1, TY_Object, FN_("x") | FN_COERCION,
+		_Public, _F(NameSpace_man), TY_void, TY_NameSpace, MN_("man"), 1, TY_Object, FN_("x"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
