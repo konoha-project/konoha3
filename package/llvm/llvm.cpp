@@ -2149,7 +2149,7 @@ static int BasicBlock_compareTo(kObject *p1, kObject *p2)
 	return (bb1 != bb2);
 }
 
-//void defBasicBlock(KonohaContext *kctx _UNUSED_, ktype_t cid _UNUSED_, kclassdef_t *cdef)
+//void defBasicBlock(KonohaContext *kctx _UNUSED_, kattrtype_t cid _UNUSED_, kclassdef_t *cdef)
 //{
 //	cdef->name = "llvm::BasicBlock";
 //	cdef->compareTo = BasicBlock_compareTo;
@@ -2506,7 +2506,7 @@ static KMETHOD kMethod_setFunction(KonohaContext *kctx, KonohaStack *sfp)
 	kObject *po = sfp[1].asObject;
 	union anyptr { void *p; MethodFunc f;} ptr;
 	ptr.p = konoha::object_cast<void*>(po);
-	KLIB kMethod_setFunc(kctx, mtd, ptr.f);
+	KLIB kMethod_SetFunc(kctx, mtd, ptr.f);
 	KReturnVoid();
 }
 
@@ -2514,10 +2514,10 @@ static KMETHOD kMethod_setFunction(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Function_getArguments(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Function *func = konoha::object_cast<Function *>(sfp[0].asObject);
-	ktype_t cid = TY_Value;
+	kattrtype_t cid = TY_Value;
 	/*FIXME Generics Array */
-	//ktype_t rtype = sfp[K_MTDIDX].mtdNC->pa->rtype;
-	//ktype_t cid = CT_(rtype)->p1;
+	//kattrtype_t rtype = sfp[K_MTDIDX].mtdNC->pa->rtype;
+	//kattrtype_t cid = CT_(rtype)->p1;
 	kArray *a = new_(Array, 0, OnStack);
 	for (Function::arg_iterator I = func->arg_begin(), E = func->arg_end();
 			I != E; ++I) {
@@ -4575,33 +4575,33 @@ static KDEFINE_INT_CONST IntAttributes[] = {
 #undef C_
 
 //
-//void defGlobalValue(KonohaContext *kctx _UNUSED_, ktype_t cid _UNUSED_, kclassdef_t *cdef)
+//void defGlobalValue(KonohaContext *kctx _UNUSED_, kattrtype_t cid _UNUSED_, kclassdef_t *cdef)
 //{
 //	cdef->name = "GlobalValue";
 //}
 //
-//void constGlobalValue(KonohaContext *kctx, ktype_t cid, const knh_LoaderAPI_t *kapi)
+//void constGlobalValue(KonohaContext *kctx, kattrtype_t cid, const knh_LoaderAPI_t *kapi)
 //{
 //	kapi->loadClassIntConst(kctx, cid, IntGlobalVariable);
 //}
 //
-//void defIntrinsic(KonohaContext *kctx _UNUSED_, ktype_t cid _UNUSED_, kclassdef_t *cdef)
+//void defIntrinsic(KonohaContext *kctx _UNUSED_, kattrtype_t cid _UNUSED_, kclassdef_t *cdef)
 //{
 //	cdef->name = "Intrinsic";
 //}
 //
-//void constIntrinsic(KonohaContext *kctx, ktype_t cid, const knh_LoaderAPI_t *kapi)
+//void constIntrinsic(KonohaContext *kctx, kattrtype_t cid, const knh_LoaderAPI_t *kapi)
 //{
 //	kapi->loadClassIntConst(kctx, cid, IntIntrinsic);
 //}
 //
 //
-//void defAttributes(KonohaContext *kctx _UNUSED_, ktype_t cid _UNUSED_, kclassdef_t *cdef)
+//void defAttributes(KonohaContext *kctx _UNUSED_, kattrtype_t cid _UNUSED_, kclassdef_t *cdef)
 //{
 //	cdef->name = "Attributes";
 //}
 //
-//void constAttributes(KonohaContext *kctx _UNUSED_, ktype_t cid _UNUSED_, const knh_LoaderAPI_t *kapi)
+//void constAttributes(KonohaContext *kctx _UNUSED_, kattrtype_t cid _UNUSED_, const knh_LoaderAPI_t *kapi)
 //{
 //	kapi->loadClassIntConst(kctx, cid, IntAttributes);
 //}
@@ -4635,9 +4635,9 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 
 #define DEFINE_CLASS_CPP(\
 	/*const char * */structname,\
-	/*ktype_t      */typeId,         /*kshortflag_t    */cflag,\
-	/*ktype_t      */baseTypeId,     /*ktype_t         */superTypeId,\
-	/*ktype_t      */rtype,          /*kushort_t       */cparamsize,\
+	/*kattrtype_t      */typeId,         /*kshortflag_t    */cflag,\
+	/*kattrtype_t      */baseTypeId,     /*kattrtype_t         */superTypeId,\
+	/*kattrtype_t      */rtype,          /*kushort_t       */cparamsize,\
 	/*struct kparamtype_t   **/cparamItems,\
 	/*size_t     */cstruct_size,\
 	/*KonohaClassField   **/fieldItems,\
@@ -4659,9 +4659,9 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		isSubType,\
 		realtype) {\
 	/*const char * */structname,\
-	/*ktype_t      */typeId,         /*kshortflag_t    */cflag,\
-	/*ktype_t      */baseTypeId,     /*ktype_t         */superTypeId,\
-	/*ktype_t      */rtype,          /*kushort_t       */cparamsize,\
+	/*kattrtype_t      */typeId,         /*kshortflag_t    */cflag,\
+	/*kattrtype_t      */baseTypeId,     /*kattrtype_t         */superTypeId,\
+	/*kattrtype_t      */rtype,          /*kushort_t       */cparamsize,\
 	/*struct kparamtype_t   * */cparamItems,\
 	/*size_t     */cstruct_size,\
 	/*KonohaClassField   * */fieldItems,\
@@ -5256,9 +5256,9 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, methoddata, trace);
-	KLIB kNameSpace_LoadConstData(kctx, ns, (const char **)IntAttributes, 0, trace);
-	KLIB kNameSpace_LoadConstData(kctx, ns, (const char **)IntIntrinsic, 0, trace);
-	KLIB kNameSpace_LoadConstData(kctx, ns, (const char **)IntGlobalVariable, 0, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, (const char **)IntAttributes, false, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, (const char **)IntIntrinsic, false, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, (const char **)IntGlobalVariable, false, trace);
 
 	return true;
 }

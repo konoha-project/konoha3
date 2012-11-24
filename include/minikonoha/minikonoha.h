@@ -1401,7 +1401,7 @@ typedef struct MethodMatch {
 
 typedef enum {
 	MethodMatch_NoOption   = 1,
-	MethodMatch_CamelStyle      = 1 << 1,
+	MethodMatch_CamelStyle = 1 << 1
 } MethodMatchOption;
 
 
