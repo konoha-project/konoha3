@@ -53,7 +53,7 @@ static kObject *new_kObject(KonohaContext *kctx, kArray *gcstackNULL, KonohaClas
 	kObjectVar *o = PLATAPI AllocObject(kctx, ct->cstruct_size, NULL/*FIXME*/);
 	o->h.magicflag = ct->magicflag;
 	o->h.ct = ct;
-	o->h.kvproto = (KGrowingArray *) Kprotomap_new(0);
+	o->h.kvproto = (KProtoMap *) Kprotomap_new(0);
 	if(gcstackNULL != NULL) {
 		kArray_Add(kctx, gcstackNULL, o);
 	}
@@ -538,7 +538,7 @@ static void kNameSpace_Free(KonohaContext *kctx, kObject *o)
 {
 	kNameSpaceVar *ns = (kNameSpaceVar *)o;
 	KLIB kNameSpace_FreeSugarExtension(kctx, ns);
-	KLIB KArray_Free(kctx, &ns->constTable);
+	KLIB KDict_Free(kctx, &(ns->constTable));
 }
 
 static void kNameSpace_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)

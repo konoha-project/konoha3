@@ -235,20 +235,9 @@ KLIBDECL void KDict_Add(KonohaContext *kctx, KDict *dict, KKeyValue *kvs)
 	size_t size = KDict_size(dict);
 	KDict_Ensure(kctx, dict, 1);
 	memcpy(dict->data.keyValueItems + size, kvs, sizeof(KKeyValue));
-	size_t nitems = size + 1;
-	dict->data.bytesize = nitems * sizeof(KKeyValue);
+	dict->data.bytesize += sizeof(KKeyValue);
 	if(size - dict->sortedData > 8) {
 		KDict_Sort(kctx, dict);
-	}
-}
-
-KLIBDECL void KDict_Remove(KonohaContext *kctx, KDict *dict, ksymbol_t queryKey)
-{
-	KKeyValue *kvs = KDict_GetNULL(kctx, dict, queryKey);
-	if(kvs != NULL) {
-		//KObjectRefDec(TY_is(Boxed, kvs->attrTypeId), kvs->ObjectValue);
-		kvs->unboxValue = 0;
-		kvs->attrTypeId = 0;
 	}
 }
 
@@ -264,41 +253,74 @@ KLIBDECL void KDict_Set(KonohaContext *kctx, KDict *dict, KKeyValue *kvs0)
 	KDict_Add(kctx, dict, kvs0);
 }
 
-KLIBDECL void KDict_MergeData(KonohaContext *kctx, KDict *dict, KKeyValue *kvs, size_t nitems, int isOverride)
+KLIBDECL void KDict_Remove(KonohaContext *kctx, KDict *dict, ksymbol_t queryKey)
 {
-	size_t size = KDict_size(dict);
-	if(size == 0) {
+	KKeyValue *kvs = KDict_GetNULL(kctx, dict, queryKey);
+	if(kvs != NULL) {
+		//KObjectRefDec(TY_is(Boxed, kvs->attrTypeId), kvs->ObjectValue);
+		kvs->unboxValue = 0;
+		kvs->attrTypeId = 0;
+	}
+}
+
+KLIBDECL void KDict_MergeData(KonohaContext *kctx, KDict *dict, kObject *parent, KKeyValue *kvs, size_t nitems, int isOverride)
+{
+	size_t i;
+	for(i = 0; i < nitems; i++) {
+		if(TypeAttr_Is(Boxed, kvs[i].attrTypeId)) {
+			PLATAPI WriteBarrier(kctx, parent);
+			break;
+		}
+	}
+	if(KDict_size(dict) == 0) {
 		KDict_Ensure(kctx, dict, nitems);
 		memcpy(dict->data.keyValueItems, kvs, nitems * sizeof(KKeyValue));
 		dict->data.bytesize = nitems * sizeof(KKeyValue);
 		KDict_Sort(kctx, dict);
 	}
-	else {
-		size_t i;
-		for(i = 0; i < nitems; i++) {
-			ksymbol_t key = kvs[i].key;
-			KKeyValue* stored = KDict_GetNULL(kctx, dict, key);
-			if(stored != NULL) {
-//				if(TypeAttr_Unmask(kvs[i].attrTypeId) == TypeAttr_Unmask(stored->attrTypeId) && kvs[i].unboxValue == stored->unboxValue) {
-//					// same value
-//				}
-//				else if(isOverride) {
-//					stored->attrTypeId = kvs[i].attrTypeId;
-//					stored->unboxValue = kvs[i].unboxValue;
-//					if(TypeAttr_Is(Boxed, stored->attrTypeId)) {
-//						KLIB kArray_Add(kctx, ns->NameSpaceConstList, stored->ObjectValue);
-//					}
-//				}
-//				else {
-//					SugarContext_Message(kctx, ErrTag, Trace_pline(trace), "already defined symbol: %s%s", PSYM_t(key));
-//					ret = false;
-//				}
-			continue;
+	kbool_t foundItems[nitems];
+	bzero(foundItems, sizeof(int) * nitems);
+	for(i = 0; i < nitems; i++) {
+		KKeyValue *stored = KLIB KDict_GetNULL(kctx, dict, kvs[i].key);
+		if(stored != NULL) {
+			foundItems[i] = true;
+			if(isOverride) {
+				stored[0] = kvs[i];
 			}
-			KDict_Add(kctx, dict, kvs+i);
+		}
+	}
+	for(i = 0; i < nitems; i++) {
+		if(!foundItems[i]) {
+			KLIB KDict_Add(kctx, dict, kvs + i);
 		}
 	}
 }
+
+KLIBDECL void KDict_LoadData(KonohaContext *kctx, KDict *dict, kObject *parent, const char **d, int isOverride)
+{
+	KGrowingBuffer wb;
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+	while(d[0] != NULL) {
+		KKeyValue kv;
+		kv.key = ksymbolSPOL(d[0], strlen(d[0]), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID);
+		kv.unboxValue = (uintptr_t)d[2];
+		kattrtype_t ty = (kattrtype_t)(uintptr_t)d[1];
+		if(TY_isUnbox(ty) || ty == VirtualType_Text || ty == VirtualType_KonohaClass || ty == VirtualType_StaticMethod) {
+			kv.attrTypeId = ty;
+		}
+		else {
+			kv.attrTypeId = ty | TypeAttr_Boxed;
+		}
+		KLIB KBuffer_Write(kctx, &wb, (const char *)(&kv), sizeof(KKeyValue));
+		d += 3;
+	}
+	size_t nitems = KBuffer_bytesize(&wb) / sizeof(KKeyValue);
+	if(nitems > 0) {
+		KDict_MergeData(kctx, dict, parent, (KKeyValue *)KLIB KBuffer_Stringfy(kctx, &wb, 0), nitems, isOverride);
+	}
+	KLIB KBuffer_Free(&wb);
+}
+
 
 KLIBDECL void KDict_DoEach(KonohaContext *kctx, KDict *dict, void *thunk, void (*f)(KonohaContext*, void *, KKeyValue *))
 {
@@ -307,6 +329,16 @@ KLIBDECL void KDict_DoEach(KonohaContext *kctx, KDict *dict, void *thunk, void (
 		KKeyValue *kvs = dict->data.keyValueItems + i;
 		if(kvs->attrTypeId == 0 && kvs->unboxValue == 0) continue;
 		f(kctx, thunk, kvs);
+	}
+}
+
+KLIBDECL void KDict_Reftrace(KonohaContext *kctx, KDict *dict, KObjectVisitor *visitor)
+{
+	size_t i, size = KDict_size(dict);
+	for(i = 0; i < size; i++) {
+		if(TypeAttr_Is(Boxed, dict->data.keyValueItems[i].attrTypeId)) {
+			KRefTrace(dict->data.keyValueItems[i].ObjectValue);
+		}
 	}
 }
 
@@ -590,13 +622,7 @@ static void kObjectProto_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisito
 	O_ct(o)->reftrace(kctx, o, visitor);
 	KProtoMap *pm = KGetProtoMap(o);
 	if(pm != NULL) {
-		KDict *dict = &(pm->dict);
-		size_t i, size = KDict_size(dict);
-		for(i = 0; i < size; i++) {
-			if(TypeAttr_Is(Boxed, dict->data.keyValueItems[i].attrTypeId)) {
-				KRefTrace(dict->data.keyValueItems[i].ObjectValue);
-			}
-		}
+		KDict_Reftrace(kctx, &(pm->dict), visitor);
 	}
 }
 
@@ -894,7 +920,9 @@ static void klib_Init(KonohaLibVar *l)
 	l->KDict_Remove      = KDict_Remove;
 	l->KDict_Set         = KDict_Set;
 	l->KDict_MergeData   = KDict_MergeData;
+	l->KDict_LoadData    = KDict_LoadData;
 	l->KDict_DoEach      = KDict_DoEach;
+	l->KDict_Reftrace    = KDict_Reftrace;
 	l->KDict_Free        = KDict_Free;
 
 	l->KHashMap_Init     = KHashMap_Init;

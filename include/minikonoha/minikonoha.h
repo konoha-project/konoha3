@@ -472,7 +472,7 @@ typedef const struct kMethodVar         kMethod;
 typedef struct kMethodVar               kMethodVar;
 typedef const struct kFuncVar           kFunc;
 typedef struct kFuncVar                 kFuncVar;
-typedef const struct kNameSpaceVar      kNameSpace;
+typedef struct kNameSpaceVar            kNameSpace;
 typedef struct kNameSpaceVar            kNameSpaceVar;
 
 /* sugar.h */
@@ -1448,15 +1448,14 @@ struct kFuncVar {
 /* NameSpace */
 
 #define IS_NameSpace(O)  (O_ct(O) == CT_NameSpace)
-#define kNameSpace_sizeConstTable(ns)    (ns->constTable.bytesize / sizeof(KKeyValue))
+#define kNameSpace_sizeConstTable(ns)    (ns->constTable.data.bytesize / sizeof(KKeyValue))
 
 struct kNameSpaceVar {
 	KonohaObjectHeader h;
 	kpackageId_t packageId;  	       kshortflag_t syntaxOption;
 	kArray                            *NameSpaceConstList;
 	kNameSpace                        *parentNULL;
-	KGrowingArray                      constTable;        // const variable
-	size_t                             sortedConstTable;
+	KDict                              constTable;
 	kObject                           *globalObjectNULL_OnList;
 	kArray                            *methodList_OnList;   // default K_EMPTYARRAY
 	size_t                             sortedMethodList;
@@ -1622,8 +1621,10 @@ struct KonohaLibVar {
 	void                (*KDict_Add)(KonohaContext *, KDict *, KKeyValue *);
 	void                (*KDict_Remove)(KonohaContext *, KDict *, ksymbol_t);
 	void                (*KDict_Set)(KonohaContext *, KDict *, KKeyValue *);
-	kbool_t             (*KDict_MergeData)(KonohaContext *, KDict *, KKeyValue *, size_t, int, KTraceInfo *);
+	void                (*KDict_MergeData)(KonohaContext *, KDict *, kObject *parent, KKeyValue *, size_t, int isOverride);
+	void                (*KDict_LoadData)(KonohaContext *, KDict *, kObject *parent, const char **, int isOverride);
 	void                (*KDict_DoEach)(KonohaContext *, KDict *, void *, void (*)(KonohaContext*, void *, KKeyValue *));
+	void                (*KDict_Reftrace)(KonohaContext *, KDict *, KObjectVisitor *);
 	void                (*KDict_Free)(KonohaContext *, KDict *);
 
 	KHashMap*           (*KHashMap_Init)(KonohaContext*, size_t);
