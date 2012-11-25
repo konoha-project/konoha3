@@ -41,40 +41,40 @@ static void reftrace2(KonohaContext *kctx, void *e)
 void test_Kmap(KonohaContext *kctx)
 {
     uintptr_t i;
-    KHashMap* map = KLIB Kmap_Init(kctx, 4);
+    KHashMap* map = KLIB KHashMap_Init(kctx, 4);
     for (i = 0; i < 10; ++i) {
-        KHashMapEntry *entry = KLIB Kmap_newEntry(kctx, map, i);
+        KHashMapEntry *entry = KLIB KHashMap_newEntry(kctx, map, i);
         assert(entry->hcode == i);
         entry->unboxKey = i*2;
         entry->unboxValue = i;
     }
     for (i = 0; i < 10; ++i) {
-        KHashMapEntry *entry = KLIB Kmap_get(kctx, map, i);
+        KHashMapEntry *entry = KLIB KHashMap_get(kctx, map, i);
         assert(entry != NULL);
         assert(entry->unboxValue == i);
     }
-    KLIB Kmap_each(kctx, map, NULL, reftrace);
+    KLIB KHashMap_each(kctx, map, NULL, reftrace);
     fprintf(stderr, "%d\n", _sum_);
     assert(_sum_ == 45);
 
     for (i = 0; i < 10; i+=2) {
-        KHashMapEntry *entry = KLIB Kmap_get(kctx, map, i);
+        KHashMapEntry *entry = KLIB KHashMap_get(kctx, map, i);
         assert(entry != NULL);
-        KLIB Kmap_remove(map, entry);
+        KLIB KHashMap_remove(map, entry);
     }
     for (i = 0; i < 10; i+=2) {
-        KHashMapEntry *entry = KLIB Kmap_get(kctx, map, i);
+        KHashMapEntry *entry = KLIB KHashMap_get(kctx, map, i);
         assert(entry == NULL);
     }
     for (i = 0; i < 10; ++i) {
-        KHashMapEntry *entry = KLIB Kmap_get(kctx, map, i);
+        KHashMapEntry *entry = KLIB KHashMap_get(kctx, map, i);
         if(i % 2 == 0) {
             assert(entry == NULL);
         } else {
             assert(entry->unboxValue == i);
         }
     }
-    KLIB Kmap_Free(kctx, map, reftrace2);
+    KLIB KHashMap_Free(kctx, map, reftrace2);
     assert(_sum2_ == 25);
     fprintf(stderr, "%d\n", _sum2_);
     _sum_ = _sum2_ = 0;

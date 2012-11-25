@@ -70,11 +70,11 @@
 //{
 //	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 //	KGrowingBuffer wb;
-//	KLIB Kwb_Init(&kctx->stack->cwb, &wb);
+//	KLIB KBuffer_Init(&kctx->stack->cwb, &wb);
 //	kfileline_t uline = sfp[K_RTNIDX].calledFileLine;
 //	if(uline > 0) {
 //		const char *file = FileId_t(uline);
-//		KLIB Kwb_printf(kctx, &wb, "(%s:%d) %s.%s%s" , PLATAPI shortFilePath(file), (kushort_t)uline, Method_t(mtd));
+//		KLIB KBuffer_printf(kctx, &wb, "(%s:%d) %s.%s%s" , PLATAPI shortFilePath(file), (kushort_t)uline, Method_t(mtd));
 //	}
 ////	int i = 0, psize = kMethod_ParamSize(mtd);
 ////	kParam *pa = kMethod_GetParam(mtd);
@@ -88,7 +88,7 @@
 ////		knh_putc(ctx, cwb->w, '=');
 ////		knh_Write_sfp(ctx, cwb->w, type, &sfp[i+1], FMT_line);
 ////	}
-//	const char *msg = KLIB Kwb_top(kctx, &wb, 1);
+//	const char *msg = KLIB KBuffer_Stringfy(kctx, &wb, 1);
 //	KLIB new_kString(kctx, e->StackTraceList, msg, strlen(msg), 0);
 ////	if((mtd)->mn != MN_LAMBDA) {
 ////		knh_uline_t uline = knh_stack_uline(ctx, sfp);
@@ -188,7 +188,7 @@
 //
 //static void Exception_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 //{
-//	KLIB Kwb_printf(kctx, wb, "%s", S_text(v[pos].asException->message));
+//	KLIB KBuffer_printf(kctx, wb, "%s", S_text(v[pos].asException->message));
 //}
 //
 //static void kModuleException_Setup(KonohaContext *kctx, KonohaModule *def, int newctx)

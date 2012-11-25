@@ -380,12 +380,12 @@ static kString *kFILE_readAll(KonohaContext *kctx, kArray *gcstack, kFile *file,
 {
 	char buf[K_PAGESIZE];
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kString *ret = KNULL(String);
 	while(1) {
 		size_t size = fread(buf, 1, sizeof(buf), file->fp);
 		if(size > 0) {
-			KLIB Kwb_Write(kctx, &wb, buf, size);
+			KLIB KBuffer_Write(kctx, &wb, buf, size);
 		}
 		else {
 			break;
@@ -397,10 +397,10 @@ static kString *kFILE_readAll(KonohaContext *kctx, kArray *gcstack, kFile *file,
 		clearerr(file->fp);
 		return ret;
 	}
-	if(Kwb_bytesize(&wb) > 0) {
-		ret = KLIB new_kString(kctx, gcstack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
+	if(KBuffer_bytesize(&wb) > 0) {
+		ret = KLIB new_kString(kctx, gcstack, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
 	}
-	KLIB Kwb_Free(&wb);
+	KLIB KBuffer_Free(&wb);
 	return ret;
 }
 
@@ -1276,11 +1276,11 @@ static kString *kPipeReadStringNULL(KonohaContext *kctx, FILE *fp)
 {
 	char buf[K_PAGESIZE];
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	while(1) {
 		size_t size = fread(buf, 1, sizeof(buf), fp);
 		if(size > 0) {
-			KLIB Kwb_Write(kctx, &wb, buf, size);
+			KLIB KBuffer_Write(kctx, &wb, buf, size);
 		}
 		else {
 			break;
@@ -1289,8 +1289,8 @@ static kString *kPipeReadStringNULL(KonohaContext *kctx, FILE *fp)
 	if(ferror(fp)) {
 		return NULL;
 	}
-	kString *ret = KLIB new_kString(kctx, GcUnsafe, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
-	KLIB Kwb_Free(&wb);
+	kString *ret = KLIB new_kString(kctx, GcUnsafe, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
+	KLIB KBuffer_Free(&wb);
 	return ret;
 }
 

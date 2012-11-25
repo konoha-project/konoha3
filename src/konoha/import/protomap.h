@@ -22,6 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+
 #define DICTMAP_THRESHOLD 4
 #ifndef CLZ
 #define CLZ(n) __builtin_clzl(n)

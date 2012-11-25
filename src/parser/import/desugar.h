@@ -368,10 +368,10 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, size_t start)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	const char *text = S_text(tk->text) + start;
 	const char *end  = S_text(tk->text) + S_size(tk->text);
-	KLIB Kwb_Write(kctx, &wb, S_text(tk->text), start);
+	KLIB KBuffer_Write(kctx, &wb, S_text(tk->text), start);
 	while(text < end) {
 		int ch = *text;
 		if(ch == '\\' && *(text+1) != '\0') {
@@ -394,12 +394,12 @@ static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, si
 		}
 		{
 			char buf[1] = {ch};
-			KLIB Kwb_Write(kctx, &wb, (const char *)buf, 1);
+			KLIB KBuffer_Write(kctx, &wb, (const char *)buf, 1);
 		}
 		text++;
 	}
-	kString *s = KLIB new_kString(kctx, OnGcStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
-	KLIB Kwb_Free(&wb);
+	kString *s = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_Stringfy(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
+	KLIB KBuffer_Free(&wb);
 	return s;
 }
 

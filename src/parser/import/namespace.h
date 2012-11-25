@@ -87,9 +87,9 @@ static void kNameSpace_ParseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, c
 static SugarSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, SugarSyntax *parentSyntax, ksymbol_t keyword)
 {
 	if(ns->syntaxMapNN == NULL) {
-		((kNameSpaceVar *)ns)->syntaxMapNN = KLIB Kmap_Init(kctx, 0);
+		((kNameSpaceVar *)ns)->syntaxMapNN = KLIB KHashMap_Init(kctx, 0);
 	}
-	KHashMapEntry *e = KLIB Kmap_newEntry(kctx, ns->syntaxMapNN, (uintptr_t)keyword);
+	KHashMapEntry *e = KLIB KHashMap_newEntry(kctx, ns->syntaxMapNN, (uintptr_t)keyword);
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)KCalloc_UNTRACE(sizeof(SugarSyntax), 1);
 	e->unboxValue = (uintptr_t)syn;
 	syn->parentSyntaxNULL = parentSyntax;
@@ -174,7 +174,7 @@ static kbool_t kNameSpace_ImportSyntaxAll(KonohaContext *kctx, kNameSpace *ns, k
 {
 	if(targetNS->syntaxMapNN != NULL) {
 		struct ImportSyntaxArgument argumentData = { ns, trace };
-		KLIB Kmap_each(kctx, targetNS->syntaxMapNN, &argumentData, ImportEachSyntax);
+		KLIB KHashMap_each(kctx, targetNS->syntaxMapNN, &argumentData, ImportEachSyntax);
 	}
 	return true;
 }
@@ -185,7 +185,7 @@ static SugarSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns, ks
 	uintptr_t hcode = keyword;
 	while(currentNameSpace != NULL) {
 		if(currentNameSpace->syntaxMapNN != NULL) {
-			KHashMapEntry *e = KLIB Kmap_get(kctx, currentNameSpace->syntaxMapNN, hcode);
+			KHashMapEntry *e = KLIB KHashMap_get(kctx, currentNameSpace->syntaxMapNN, hcode);
 			while(e != NULL) {
 				if(e->hcode == hcode) {
 					if(isNew && ns != currentNameSpace) {
@@ -205,12 +205,12 @@ static kbool_t kNameSpace_RemoveSyntax(KonohaContext *kctx, kNameSpace *ns, ksym
 {
 	uintptr_t hcode = keyword;
 	if(ns->syntaxMapNN != NULL) {
-		KHashMapEntry *e = KLIB Kmap_get(kctx, ns->syntaxMapNN, hcode);
+		KHashMapEntry *e = KLIB KHashMap_get(kctx, ns->syntaxMapNN, hcode);
 		while(e != NULL) {
 			if(e->hcode == hcode) {
 				SugarSyntaxVar *syn = (SugarSyntaxVar *)e->unboxValue;
 				KLIB ReportScriptMessage(kctx, trace, InfoTag, "@%s removing syntax %s%s", PackageId_t(syn->lastLoadedPackageId), PSYM_t(syn->keyword));
-				KLIB Kmap_remove(ns->syntaxMapNN, e);
+				KLIB KHashMap_remove(ns->syntaxMapNN, e);
 				bzero(syn, sizeof(SugarSyntax));
 				KFree(syn, sizeof(SugarSyntax));
 				return true;
@@ -343,12 +343,12 @@ static kbool_t kNameSpace_MergeConstData(KonohaContext *kctx, kNameSpaceVar *ns,
 	kbool_t ret = true;
 	size_t i, size = kNameSpace_sizeConstTable(ns);
 	if(size == 0) {
-		KLIB Karray_Init(kctx, &ns->constTable, (nitems + 8) * sizeof(KKeyValue));
+		KLIB KArray_Init(kctx, &ns->constTable, (nitems + 8) * sizeof(KKeyValue));
 		memcpy(ns->constTable.keyValueItems, kvs, nitems * sizeof(KKeyValue));
 	}
 	else {
 		KGrowingBuffer wb;
-		KLIB Kwb_Init(&(GetSugarContext(kctx)->errorMessageBuffer), &wb);
+		KLIB KBuffer_Init(&(GetSugarContext(kctx)->errorMessageBuffer), &wb);
 		for(i = 0; i < nitems; i++) {
 			ksymbol_t key = kvs[i].key;
 			KKeyValue* stored = kNameSpace_GetLocalConstNULL(kctx, ns, key);
@@ -369,17 +369,17 @@ static kbool_t kNameSpace_MergeConstData(KonohaContext *kctx, kNameSpaceVar *ns,
 				}
 				continue;
 			}
-			KLIB Kwb_Write(kctx, &wb, (const char *)(kvs+i), sizeof(KKeyValue));
+			KLIB KBuffer_Write(kctx, &wb, (const char *)(kvs+i), sizeof(KKeyValue));
 		}
-		kvs = (KKeyValue *)KLIB Kwb_top(kctx, &wb, 0);
-		nitems = Kwb_bytesize(&wb)/sizeof(KKeyValue);
+		kvs = (KKeyValue *)KLIB KBuffer_Stringfy(kctx, &wb, 0);
+		nitems = KBuffer_bytesize(&wb)/sizeof(KKeyValue);
 		if(nitems > 0) {
 			if(!((size + nitems) * sizeof(KKeyValue) < ns->constTable.bytemax)) {
-				KLIB Karray_resize(kctx, &ns->constTable, (size + nitems + 8) * sizeof(KKeyValue));
+				KLIB KArray_Resize(kctx, &ns->constTable, (size + nitems + 8) * sizeof(KKeyValue));
 			}
 			memcpy(ns->constTable.keyValueItems + size, kvs, nitems * sizeof(KKeyValue));
 		}
-		KLIB Kwb_Free(&wb);
+		KLIB KBuffer_Free(&wb);
 	}
 	for(i = size; i < size + nitems; i++) {
 		KKeyValue *nskvs = ns->constTable.keyValueItems + i;
@@ -433,19 +433,19 @@ static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, con
 	KKeyValue kv;
 	KGrowingBuffer wb;
 	kbool_t result = true;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	while(d[0] != NULL) {
 		SetKeyValue(kctx, &kv,
 			ksymbolSPOL(d[0], strlen(d[0]), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID),
 			(kattrtype_t)(uintptr_t)d[1], (uintptr_t)d[2], _GcStack);
-		KLIB Kwb_Write(kctx, &wb, (const char *)(&kv), sizeof(KKeyValue));
+		KLIB KBuffer_Write(kctx, &wb, (const char *)(&kv), sizeof(KKeyValue));
 		d += 3;
 	}
-	size_t nitems = Kwb_bytesize(&wb) / sizeof(KKeyValue);
+	size_t nitems = KBuffer_bytesize(&wb) / sizeof(KKeyValue);
 	if(nitems > 0) {
-		result = kNameSpace_MergeConstData(kctx, (kNameSpaceVar *)ns, (KKeyValue *)KLIB Kwb_top(kctx, &wb, 0), nitems, isOverride, trace);
+		result = kNameSpace_MergeConstData(kctx, (kNameSpaceVar *)ns, (KKeyValue *)KLIB KBuffer_Stringfy(kctx, &wb, 0), nitems, isOverride, trace);
 	}
-	KLIB Kwb_Free(&wb);
+	KLIB KBuffer_Free(&wb);
 	RESET_GCSTACK();
 	return result;
 }

@@ -89,7 +89,7 @@ static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, k
 	PLATAPI printf_i("%s - %s%s\n", beginTag, msg, endTag);
 }
 
-static void Kwb_WriteValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass *c, KonohaStack *sfp)
+static void KBuffer_WriteValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass *c, KonohaStack *sfp)
 {
 	if(CT_IsUnbox(c)) {
 		c->p(kctx, sfp, 0, wb);
@@ -125,7 +125,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 
 	KonohaStack *sfp = topStack;
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	while(bottomStack < sfp) {
 		kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 		kfileline_t uline = sfp[K_RTNIDX].calledFileLine;
@@ -136,9 +136,9 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 			cThis = O_ct(sfp[0].asObject);
 		}
 		if(!kMethod_Is(Static, mtd)) {
-			Kwb_WriteValue(kctx, &wb, cThis, sfp);
-			PLATAPI printf_i("this=(%s) %s, ", CT_t(cThis), KLIB Kwb_top(kctx, &wb, 1));
-			KLIB Kwb_Free(&wb);
+			KBuffer_WriteValue(kctx, &wb, cThis, sfp);
+			PLATAPI printf_i("this=(%s) %s, ", CT_t(cThis), KLIB KBuffer_Stringfy(kctx, &wb, 1));
+			KLIB KBuffer_Free(&wb);
 		}
 		unsigned i;
 		kParam *param = kMethod_GetParam(mtd);
@@ -148,14 +148,14 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 			}
 			KonohaClass *c = CT_(param->paramtypeItems[i].attrTypeId);
 			c = c->realtype(kctx, c, cThis);
-			Kwb_WriteValue(kctx, &wb, c, sfp + i + 1);
-			PLATAPI printf_i("%s=(%s) %s", SYM_t(Symbol_Unmask(param->paramtypeItems[i].name)), CT_t(c), KLIB Kwb_top(kctx, &wb, 1));
-			KLIB Kwb_Free(&wb);
+			KBuffer_WriteValue(kctx, &wb, c, sfp + i + 1);
+			PLATAPI printf_i("%s=(%s) %s", SYM_t(Symbol_Unmask(param->paramtypeItems[i].name)), CT_t(c), KLIB KBuffer_Stringfy(kctx, &wb, 1));
+			KLIB KBuffer_Free(&wb);
 		}
 		PLATAPI printf_i(")\n");
 		sfp = sfp[K_SHIFTIDX].previousStack;
 	}
-	KLIB Kwb_Free(&wb);
+	KLIB KBuffer_Free(&wb);
 	PLATAPI printf_i("%s\n", EndTag(kctx, InfoTag));
 }
 

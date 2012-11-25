@@ -107,33 +107,33 @@ static KMETHOD Token_setError(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(sfp[4].intValue);
 }
 
-static void Kwb_WriteToken(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
+static void KBuffer_WriteToken(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
 {
 	char c = kToken_GetOpenHintChar(tk);
 	if(IS_String(tk)) {
 		if (c != 0) {
-			KLIB Kwb_Write(kctx, wb, &c, 1);
-			KLIB Kwb_Write(kctx, wb, S_text(tk->text), S_size(tk->text));
-			KLIB Kwb_Write(kctx, wb, &c, 1);
+			KLIB KBuffer_Write(kctx, wb, &c, 1);
+			KLIB KBuffer_Write(kctx, wb, S_text(tk->text), S_size(tk->text));
+			KLIB KBuffer_Write(kctx, wb, &c, 1);
 		}
 		else {
-			KLIB Kwb_Write(kctx, wb, S_text(tk->text), S_size(tk->text));
+			KLIB KBuffer_Write(kctx, wb, S_text(tk->text), S_size(tk->text));
 		}
 	}
 	else if(IS_Array(tk)) {
 		size_t i;
 		kArray *a = tk->subTokenList;
-		KLIB Kwb_Write(kctx, wb, &c, 1);
+		KLIB KBuffer_Write(kctx, wb, &c, 1);
 		for(i = 0; i < kArray_size(a); i++) {
-			KLIB Kwb_Write(kctx, wb, " ", 1);
-			Kwb_WriteToken(kctx, wb, a->TokenItems[i]);
+			KLIB KBuffer_Write(kctx, wb, " ", 1);
+			KBuffer_WriteToken(kctx, wb, a->TokenItems[i]);
 		}
-		KLIB Kwb_Write(kctx, wb, " ", 1);
+		KLIB KBuffer_Write(kctx, wb, " ", 1);
 		c = kToken_GetCloseHintChar(tk);
-		KLIB Kwb_Write(kctx, wb, &c, 1);
+		KLIB KBuffer_Write(kctx, wb, &c, 1);
 	}
 	else {
-		KLIB Kwb_printf(kctx, wb, "%s%s", PSYM_t(tk->resolvedSymbol));
+		KLIB KBuffer_printf(kctx, wb, "%s%s", PSYM_t(tk->resolvedSymbol));
 	}
 }
 
@@ -146,9 +146,9 @@ static KMETHOD Token_toString(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else {
 		KGrowingBuffer wb;
-		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-		Kwb_WriteToken(kctx, &wb, tk);
-		KReturnWith(KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0), KLIB Kwb_Free(&wb));
+		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+		KBuffer_WriteToken(kctx, &wb, tk);
+		KReturnWith(KLIB new_kString(kctx, OnStack, KLIB KBuffer_Stringfy(kctx, &wb, 1), KBuffer_bytesize(&wb), 0), KLIB KBuffer_Free(&wb));
 	}
 }
 

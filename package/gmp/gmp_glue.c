@@ -67,7 +67,7 @@ static void Mpz_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *
 	/* This function is called when serializing the object. */
 	kMpz *p = (kMpz *)v[pos].asObject;
 	char *buf = mpz_get_str(NULL, 10, p->mpz);
-	KLIB Kwb_printf(kctx, wb, "%s", buf);
+	KLIB KBuffer_printf(kctx, wb, "%s", buf);
 	free(buf);
 }
 
@@ -474,7 +474,7 @@ static void Mpf_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *
 	kMpf *p = (kMpf *)v[pos].asObject;
 	char buf[1024];
 	gmp_snprintf(buf, 1024, "%.Fg", p->mpf);
-	KLIB Kwb_printf(kctx, wb, "%s", buf);
+	KLIB KBuffer_printf(kctx, wb, "%s", buf);
 }
 
 static KMETHOD Mpf_new(KonohaContext *kctx, KonohaStack *sfp)

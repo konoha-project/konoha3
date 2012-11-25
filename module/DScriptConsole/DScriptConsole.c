@@ -79,7 +79,7 @@ static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, k
 	PLATAPI syslog_i( 5/*LOG_NOTICE*/, "{\"Method\": \"DScriptCompilerMessage\", \"CId\": \"%s\", \"Body\": \"%s\"}", cid, msg);
 }
 
-static void Kwb_WriteValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass *c, KonohaStack *sfp)
+static void KBuffer_WriteValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass *c, KonohaStack *sfp)
 {
 	if(CT_IsUnbox(c)) {
 		c->p(kctx, sfp, 0, wb);

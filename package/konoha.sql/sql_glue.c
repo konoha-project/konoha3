@@ -213,7 +213,7 @@ static void kResultSet_Init(KonohaContext *kctx, kObject *o, void *conf)
 	rs->qcur = NULL;
 	rs->column_size = 0;
 	rs->column = NULL;
-	KLIB Karray_Init(kctx, &rs->databuf, RESULTSET_BUFSIZE);
+	KLIB KArray_Init(kctx, &rs->databuf, RESULTSET_BUFSIZE);
 	KFieldInit(rs, rs->connection, (kConnection *)conf);
 	KFieldInit(rs, rs->tableName, KNULL(String));
 	rs->qcurfree = NULL;
@@ -244,13 +244,13 @@ static void kResultSet_Free(KonohaContext *kctx, kObject *o)
 
 static void kResultSet_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
-	//KLIB Kwb_printf(kctx, wb, "%s", "{");
+	//KLIB KBuffer_printf(kctx, wb, "%s", "{");
 	//size_t n;
 	//for(n = 0; n < (o)->column_size; n++) {
 	//	if(n > 0) {
 	//		kwrite_delim(ctx,w);
 	//	}
-	//	KLIB Kwb_printf(kctx, w, "(%d): ", n);
+	//	KLIB KBuffer_printf(kctx, w, "(%d): ", n);
 	//	char *p = BA_totext((o)->databuf) + (o)->column[n].start;
 	//	switch((o)->column[n].ctype) {
 	//		case kResultSet_CTYPE__null :

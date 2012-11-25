@@ -80,17 +80,17 @@
 ////	switch(type) {
 ////	case VMT_VOID: break;
 ////	case VMT_ADDR:
-////		KLIB Kwb_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - vcode_start));
+////		KLIB KBuffer_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - vcode_start));
 ////		break;
 ////	case VMT_R:
-////		KLIB Kwb_printf(kctx, wb, " sfp[%d,r=%d]", (int)c->data[i]/2, (int)c->data[i]);
+////		KLIB KBuffer_printf(kctx, wb, " sfp[%d,r=%d]", (int)c->data[i]/2, (int)c->data[i]);
 ////		break;
 ////	case VMT_U:
-////		KLIB Kwb_printf(kctx, wb, " u(%lu, ", c->data[i]); break;
+////		KLIB KBuffer_printf(kctx, wb, " u(%lu, ", c->data[i]); break;
 ////	case VMT_F:
-////		KLIB Kwb_printf(kctx, wb, " function(%p)", c->p[i]); break;
+////		KLIB KBuffer_printf(kctx, wb, " function(%p)", c->p[i]); break;
 ////	case VMT_TY:
-////		KLIB Kwb_printf(kctx, wb, "(%s)", CT_t(c->ct[i])); break;
+////		KLIB KBuffer_printf(kctx, wb, "(%s)", CT_t(c->ct[i])); break;
 ////	}/*switch*/
 ////}
 //

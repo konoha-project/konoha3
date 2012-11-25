@@ -82,7 +82,7 @@ static void SugarContext_Reftrace(KonohaContext *kctx, struct KonohaModuleContex
 static void SugarContext_Free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	SugarContext *base = (SugarContext *)baseh;
-	KLIB Karray_Free(kctx, &base->errorMessageBuffer);
+	KLIB KArray_Free(kctx, &base->errorMessageBuffer);
 	KFree(base, sizeof(SugarContext));
 }
 
@@ -99,7 +99,7 @@ static void SugarModule_Setup(KonohaContext *kctx, struct KonohaModule *def, int
 		base->definedMethodList = new_(MethodArray, 8, OnContextConstList);
 		base->preparedGamma     = new_(Gamma, NULL, OnContextConstList);
 
-		KLIB Karray_Init(kctx, &base->errorMessageBuffer, K_PAGESIZE);
+		KLIB KArray_Init(kctx, &base->errorMessageBuffer, K_PAGESIZE);
 		kctx->modlocal[MOD_sugar] = (KonohaModuleContext *)base;
 	}
 }

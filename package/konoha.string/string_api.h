@@ -259,13 +259,13 @@ static kString* String_replaceFirst(KonohaContext *kctx, kString *self, kString 
 	if(pos == NULL)
 		return self;
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-	KLIB Kwb_Write(kctx, &wb, text, pos - text);
-	KLIB Kwb_Write(kctx, &wb, S_text(newText), S_size(newText));
-	KLIB Kwb_Write(kctx, &wb, pos + oldLen, end - pos - oldLen);
-	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB Kwb_top(kctx, &wb, 0),
-			Kwb_bytesize(&wb), StringPolicy_maskASCII(self));
-	KLIB Kwb_Free(&wb);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Write(kctx, &wb, text, pos - text);
+	KLIB KBuffer_Write(kctx, &wb, S_text(newText), S_size(newText));
+	KLIB KBuffer_Write(kctx, &wb, pos + oldLen, end - pos - oldLen);
+	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_Stringfy(kctx, &wb, 0),
+			KBuffer_bytesize(&wb), StringPolicy_maskASCII(self));
+	KLIB KBuffer_Free(&wb);
 	return ret;
 }
 
@@ -277,19 +277,19 @@ static kString* String_replace(KonohaContext *kctx, kString *self, const char *o
 	if(pos == NULL)
 		return self;
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-	KLIB Kwb_Write(kctx, &wb, text, pos - text);
-	KLIB Kwb_Write(kctx, &wb, newText, newLen);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Write(kctx, &wb, text, pos - text);
+	KLIB KBuffer_Write(kctx, &wb, newText, newLen);
 	text = pos + oldLen;
 	while((pos = strstr(text, oldText)) != NULL) {
-		KLIB Kwb_Write(kctx, &wb, text, pos - text);
-		KLIB Kwb_Write(kctx, &wb, newText, newLen);
+		KLIB KBuffer_Write(kctx, &wb, text, pos - text);
+		KLIB KBuffer_Write(kctx, &wb, newText, newLen);
 		text = pos + oldLen;
 	}
-	KLIB Kwb_Write(kctx, &wb, text, end - text);
-	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB Kwb_top(kctx, &wb, 0),
-			Kwb_bytesize(&wb), StringPolicy_maskASCII(self));
-	KLIB Kwb_Free(&wb);
+	KLIB KBuffer_Write(kctx, &wb, text, end - text);
+	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_Stringfy(kctx, &wb, 0),
+			KBuffer_bytesize(&wb), StringPolicy_maskASCII(self));
+	KLIB KBuffer_Free(&wb);
 	return ret;
 }
 
@@ -330,18 +330,18 @@ static kString *String_trim(KonohaContext *kctx, kString *self)
 static kString* String_toupper(KonohaContext *kctx, kString *self, const char *text, const char *pos, const char *end)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-	KLIB Kwb_Write(kctx, &wb, text, pos - text);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Write(kctx, &wb, text, pos - text);
 	size_t len = end - pos;
 	char *buf = ALLOCA(char, end - pos), *base = buf;
 	while(pos < end) {
 		int ch = *pos++;
 		*buf++ = ('a' <= ch && ch <= 'z') ? toupper(ch) : ch;
 	}
-	KLIB Kwb_Write(kctx, &wb, base, len);
-	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB Kwb_top(kctx, &wb, 0),
-			Kwb_bytesize(&wb), StringPolicy_maskASCII(self));
-	KLIB Kwb_Free(&wb);
+	KLIB KBuffer_Write(kctx, &wb, base, len);
+	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_Stringfy(kctx, &wb, 0),
+			KBuffer_bytesize(&wb), StringPolicy_maskASCII(self));
+	KLIB KBuffer_Free(&wb);
 	return ret;
 }
 
@@ -349,18 +349,18 @@ static kString* String_toupper(KonohaContext *kctx, kString *self, const char *t
 static kString* String_tolower(KonohaContext *kctx, kString *self, const char *text, const char *pos, const char *end)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-	KLIB Kwb_Write(kctx, &wb, text, pos - text);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Write(kctx, &wb, text, pos - text);
 	size_t len = end - pos;
 	char *buf = ALLOCA(char, end - pos), *base = buf;
 	while(pos < end) {
 		int ch = *pos++;
 		*buf++ = ('A' <= ch && ch <= 'Z') ? tolower(ch) : ch;
 	}
-	KLIB Kwb_Write(kctx, &wb, base, len);
-	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB Kwb_top(kctx, &wb, 0),
-			Kwb_bytesize(&wb), StringPolicy_maskASCII(self));
-	KLIB Kwb_Free(&wb);
+	KLIB KBuffer_Write(kctx, &wb, base, len);
+	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_Stringfy(kctx, &wb, 0),
+			KBuffer_bytesize(&wb), StringPolicy_maskASCII(self));
+	KLIB KBuffer_Free(&wb);
 	return ret;
 }
 

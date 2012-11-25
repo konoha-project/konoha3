@@ -48,7 +48,7 @@ static ksymbol_t StringToKsymbol(KonohaContext *kctx, kString *key)
 static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	ksymbol_t symbol = (ksymbol_t)v[pos].unboxValue;
-	KLIB Kwb_printf(kctx, wb, "%s%s", PSYM_t(symbol));
+	KLIB KBuffer_printf(kctx, wb, "%s%s", PSYM_t(symbol));
 }
 
 //## symbol String.toSymbol();
@@ -288,7 +288,7 @@ static void kcid_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer 
 {
 	kattrtype_t cid = (kattrtype_t)v[pos].intValue;
 	DBG_P(">>> Class=%s, cid=%d", SYM_t(CT_(cid)->classNameSymbol), cid);
-	KLIB Kwb_printf(kctx, wb, "%s%s", PSYM_t(CT_(cid)->classNameSymbol));
+	KLIB KBuffer_printf(kctx, wb, "%s%s", PSYM_t(CT_(cid)->classNameSymbol));
 }
 
 //## cid Object.tocid();

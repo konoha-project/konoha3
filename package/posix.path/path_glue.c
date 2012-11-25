@@ -407,7 +407,7 @@ static void kDir_Free(KonohaContext *kctx, kObject *o)
 static void kDir_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	kDir *dir = (kDir *)v[pos].asObject;
-	KLIB Kwb_printf(kctx, wb, "DIR: %s", S_text(dir->PathInfoNULL));
+	KLIB KBuffer_printf(kctx, wb, "DIR: %s", S_text(dir->PathInfoNULL));
 }
 
 //## DIR System.opendir(String path)
@@ -453,11 +453,11 @@ static KMETHOD DIR_readFileName(KonohaContext *kctx, KonohaStack *sfp)
 			}
 			else {
 				KGrowingBuffer wb;
-				KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-				KLIB Kwb_iconv(kctx, &wb, dir->readerIconv, d_name, strlen(d_name), trace);
+				KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+				KLIB KBuffer_iconv(kctx, &wb, dir->readerIconv, d_name, strlen(d_name), trace);
 				KReturnWith(
-					KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), StringPolicy_SystemInfo),
-					KLIB Kwb_Free(&wb)
+					KLIB new_kString(kctx, OnStack, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), StringPolicy_SystemInfo),
+					KLIB KBuffer_Free(&wb)
 				);
 			}
 		}
@@ -480,18 +480,18 @@ static KMETHOD DIR_readPath(KonohaContext *kctx, KonohaStack *sfp)
 		if(result != NULL) {
 			char *d_name = result->d_name, delim[2] = {'/', 0};
 			KGrowingBuffer wb;
-			KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-			KLIB Kwb_Write(kctx, &wb, S_text(dir->PathInfoNULL), S_size(dir->PathInfoNULL));
-			KLIB Kwb_Write(kctx, &wb, delim, 1);
+			KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+			KLIB KBuffer_Write(kctx, &wb, S_text(dir->PathInfoNULL), S_size(dir->PathInfoNULL));
+			KLIB KBuffer_Write(kctx, &wb, delim, 1);
 			if(dir->readerIconv != ICONV_NULL) {
-				KLIB Kwb_Write(kctx, &wb, d_name, strlen(d_name));
+				KLIB KBuffer_Write(kctx, &wb, d_name, strlen(d_name));
 			}
 			else {
-				KLIB Kwb_iconv(kctx, &wb, dir->readerIconv, d_name, strlen(d_name), trace);
+				KLIB KBuffer_iconv(kctx, &wb, dir->readerIconv, d_name, strlen(d_name), trace);
 			}
 			KReturnWith(
-				KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), StringPolicy_SystemInfo),
-				KLIB Kwb_Free(&wb)
+				KLIB new_kString(kctx, OnStack, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), StringPolicy_SystemInfo),
+				KLIB KBuffer_Free(&wb)
 			);
 		}
 		if(ret == -1) {

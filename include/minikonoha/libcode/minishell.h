@@ -65,28 +65,28 @@ static kstatus_t readstmt(KonohaContext *kctx, KGrowingBuffer *wb, kfileline_t *
 		int check;
 		char *ln = PLATAPI readline_i(line == 1 ? ">>> " : "    ");
 		if(ln == NULL) {
-			KLIB Kwb_Free(wb);
+			KLIB KBuffer_Free(wb);
 			status = K_BREAK;
 			break;
 		}
 		if(line > 1) {
-			KLIB Kwb_Write(kctx, wb, "\n", 1);
+			KLIB KBuffer_Write(kctx, wb, "\n", 1);
 		}
-		KLIB Kwb_Write(kctx, wb, ln, strlen(ln));
+		KLIB KBuffer_Write(kctx, wb, ln, strlen(ln));
 		free(ln);
-		if((check = checkstmt(KLIB Kwb_top(kctx, wb, 0), Kwb_bytesize(wb))) > 0) {
+		if((check = checkstmt(KLIB KBuffer_Stringfy(kctx, wb, 0), KBuffer_bytesize(wb))) > 0) {
 			uline[0]++;
 			line++;
 			continue;
 		}
 		if(check < 0) {
 			PLATAPI printf_i("(Cancelled)...\n");
-			KLIB Kwb_Free(wb);
+			KLIB KBuffer_Free(wb);
 		}
 		break;
 	}
-	if(Kwb_bytesize(wb) > 0) {
-		PLATAPI add_history_i(KLIB Kwb_top(kctx, wb, 1));
+	if(KBuffer_bytesize(wb) > 0) {
+		PLATAPI add_history_i(KLIB KBuffer_Stringfy(kctx, wb, 1));
 	}
 //	fputs(TERM_EBOLD(kctx), stdout);
 	fflush(stdout);
@@ -102,7 +102,7 @@ static void dumpEval(KonohaContext *kctx, KGrowingBuffer *wb)
 		KonohaStack *lsfp = base->stack + base->evalidx;
 		CT_(ty)->p(kctx, lsfp, 0, wb);
 		fflush(stdout);
-		PLATAPI printf_i(" (%s) %s\n", TY_t(ty), KLIB Kwb_top(kctx, wb,1));
+		PLATAPI printf_i(" (%s) %s\n", TY_t(ty), KLIB KBuffer_Stringfy(kctx, wb,1));
 		base->evalty = TY_void;
 	}
 }
@@ -110,23 +110,23 @@ static void dumpEval(KonohaContext *kctx, KGrowingBuffer *wb)
 static void shell(KonohaContext *kctx)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kfileline_t uline = FILEID_("(shell)") | 1;
 	while(1) {
 		kfileline_t inc = 0;
 		kstatus_t status = readstmt(kctx, &wb, &inc);
 		if(status == K_BREAK) break;
-		if(status == K_CONTINUE && Kwb_bytesize(&wb) > 0) {
-			status = (kstatus_t)Konoha_Eval((KonohaContext *)kctx, KLIB Kwb_top(kctx, &wb, 1), uline);
+		if(status == K_CONTINUE && KBuffer_bytesize(&wb) > 0) {
+			status = (kstatus_t)Konoha_Eval((KonohaContext *)kctx, KLIB KBuffer_Stringfy(kctx, &wb, 1), uline);
 			uline += inc;
-			KLIB Kwb_Free(&wb);
+			KLIB KBuffer_Free(&wb);
 			if(status != K_FAILED) {
 				dumpEval(kctx, &wb);
-				KLIB Kwb_Free(&wb);
+				KLIB KBuffer_Free(&wb);
 			}
 		}
 	}
-	KLIB Kwb_Free(&wb);
+	KLIB KBuffer_Free(&wb);
 	PLATAPI printf_i("\n");
 	return;
 }

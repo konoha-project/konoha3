@@ -161,10 +161,10 @@ static void kFile_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer
 {
 	kFile *file = (kFile *)v[pos].asObject;
 	if(file->PathInfoNULL != NULL) {
-		KLIB Kwb_Write(kctx, wb, S_text(file->PathInfoNULL), S_size(file->PathInfoNULL));
+		KLIB KBuffer_Write(kctx, wb, S_text(file->PathInfoNULL), S_size(file->PathInfoNULL));
 	}
 	else {
-		KLIB Kwb_printf(kctx, wb, "FILE:%p", file->fp);
+		KLIB KBuffer_printf(kctx, wb, "FILE:%p", file->fp);
 	}
 }
 
@@ -239,7 +239,7 @@ static KMETHOD File_readLine(KonohaContext *kctx, KonohaStack *sfp)
 	kFile *file = (kFile *)sfp[0].asObject;
 	if(file->fp != NULL) {
 		KGrowingBuffer wb;
-		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		int ch, pos = 0, hasUTF8 = false, bufferCount = 0, policy = StringPolicy_ASCII;
 		char buffer[K_PAGESIZE];
 		KMakeTrace(trace, sfp);
@@ -259,10 +259,10 @@ static KMETHOD File_readLine(KonohaContext *kctx, KonohaStack *sfp)
 			buffer[pos] = ch; pos++;
 			if(!(pos < K_PAGESIZE)) {
 				if(hasUTF8 && file->readerIconv != ICONV_NULL) {
-					KLIB Kwb_iconv(kctx, &wb, file->readerIconv, buffer, pos, trace);
+					KLIB KBuffer_iconv(kctx, &wb, file->readerIconv, buffer, pos, trace);
 				}
 				else {
-					KLIB Kwb_Write(kctx, &wb, buffer, pos);
+					KLIB KBuffer_Write(kctx, &wb, buffer, pos);
 				}
 				bufferCount++;
 				hasUTF8 = false;
@@ -271,16 +271,16 @@ static KMETHOD File_readLine(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		if(pos > 0) {
 			if(hasUTF8 && file->readerIconv != ICONV_NULL) {
-				KLIB Kwb_iconv(kctx, &wb, file->readerIconv, buffer, pos, trace);
+				KLIB KBuffer_iconv(kctx, &wb, file->readerIconv, buffer, pos, trace);
 			}
 			else {
-				KLIB Kwb_Write(kctx, &wb, buffer, pos);
+				KLIB KBuffer_Write(kctx, &wb, buffer, pos);
 			}
 		}
 		kFile_CheckEOF(kctx, file, trace);
 		KReturnWith(
-			KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), policy),
-			KLIB Kwb_Free(&wb)
+			KLIB new_kString(kctx, OnStack, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), policy),
+			KLIB KBuffer_Free(&wb)
 		);
 	}
 	else {
@@ -307,10 +307,10 @@ static KMETHOD File_print(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else {
 		KGrowingBuffer wb;
-		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-		KLIB Kwb_iconv(kctx, &wb, file->writerIconv, S_text(line), S_size(line), trace);
-		TRACE_fwrite(kctx, file, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), trace);
-		KLIB Kwb_Free(&wb);
+		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+		KLIB KBuffer_iconv(kctx, &wb, file->writerIconv, S_text(line), S_size(line), trace);
+		TRACE_fwrite(kctx, file, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), trace);
+		KLIB KBuffer_Free(&wb);
 	}
 }
 

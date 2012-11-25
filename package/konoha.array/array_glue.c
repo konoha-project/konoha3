@@ -95,7 +95,7 @@ static void UnboxArray_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractA
 	size_t minbyte = min * sizeof(uintptr_t);
 	if(!(minbyte < a->a.bytemax)) {
 		if(minbyte < sizeof(kObject)) minbyte = sizeof(kObject);
-		KLIB Karray_Expand(kctx, &a->a, minbyte);
+		KLIB KArray_Expand(kctx, &a->a, minbyte);
 	}
 }
 
@@ -426,7 +426,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //	kArray *a = sfp[0].asArray;
 //	size_t i = 0;
 //	KGrowingBuffer wb;
-//	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+//	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 //	if(kArray_size(a) < 1) {
 //		KReturn(KNULL(String));
 //	}
@@ -434,10 +434,10 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //		uintptr_t uv = a->unboxItems[i];
 //		for (i = 0; i < kArray_size(a) - 1; i++) {
 //			uv = a->unboxItems[i];
-//			KLIB Kwb_printf(kctx, &wb, "%ld,", uv);
+//			KLIB KBuffer_printf(kctx, &wb, "%ld,", uv);
 //		}
 //		uv = a->unboxItems[i];
-//		KLIB Kwb_printf(kctx, &wb, "%ld", uv);
+//		KLIB KBuffer_printf(kctx, &wb, "%ld", uv);
 //	} else {
 //		kObject *obj;
 //		BEGIN_LOCAL(lsfp, 1);
@@ -447,7 +447,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //			// before call system.p, push variables
 //			KUnsafeFieldSet(lsfp[0].asObject, obj);
 //			O_ct(obj)->p(kctx, lsfp, 0, &wb, 0);
-//			KLIB Kwb_printf(kctx, &wb, ",");
+//			KLIB KBuffer_printf(kctx, &wb, ",");
 //		}
 //		obj = a->ObjectItems[i];
 //		KUnsafeFieldSet(lsfp[0].asObject, obj);
@@ -455,10 +455,10 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //		END_LOCAL();
 //
 //	}
-//	const char *KGrowingBufferTopChar = KLIB Kwb_top(kctx, &wb, 0);
+//	const char *KGrowingBufferTopChar = KLIB KBuffer_Stringfy(kctx, &wb, 0);
 //	size_t strsize = strlen(KGrowingBufferTopChar);
 //	kString *ret = KLIB new_kString(kctx, KGrowingBufferTopChar, strsize, 0);
-//	KLIB Kwb_Free(&wb);
+//	KLIB KBuffer_Free(&wb);
 //	KReturn(ret);
 //}
 

@@ -64,10 +64,10 @@ static void kKonohaFactory_Free(KonohaContext *kctx, kObject *o)
 //{
 //	kKonohaFactory *file = (kKonohaFactory *)v[pos].asObject;
 //	if(file->PathInfoNULL != NULL) {
-//		KLIB Kwb_Write(kctx, wb, S_text(file->PathInfoNULL), S_size(file->PathInfoNULL));
+//		KLIB KBuffer_Write(kctx, wb, S_text(file->PathInfoNULL), S_size(file->PathInfoNULL));
 //	}
 //	else {
-//		KLIB Kwb_printf(kctx, wb, "FILE:%p", file->fp);
+//		KLIB KBuffer_printf(kctx, wb, "FILE:%p", file->fp);
 //	}
 //}
 
@@ -90,10 +90,10 @@ static void kKonoha_Free(KonohaContext *kctx, kObject *o)
 //{
 //	kKonoha *file = (kKonoha *)v[pos].asObject;
 //	if(file->PathInfoNULL != NULL) {
-//		KLIB Kwb_Write(kctx, wb, S_text(file->PathInfoNULL), S_size(file->PathInfoNULL));
+//		KLIB KBuffer_Write(kctx, wb, S_text(file->PathInfoNULL), S_size(file->PathInfoNULL));
 //	}
 //	else {
-//		KLIB Kwb_printf(kctx, wb, "FILE:%p", file->fp);
+//		KLIB KBuffer_printf(kctx, wb, "FILE:%p", file->fp);
 //	}
 //}
 

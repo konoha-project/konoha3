@@ -86,38 +86,38 @@ static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeT
 	switch(type) {
 	case VMT_VOID: break;
 	case VMT_ADDR:
-		KLIB Kwb_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - vcode_start));
+		KLIB KBuffer_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - vcode_start));
 		break;
 	case VMT_UL: {
 		kfileline_t uline = (kfileline_t)c->data[i];
-		KLIB Kwb_printf(kctx, wb, " (%s:%d)", PLATAPI shortFilePath(FileId_t(uline)), (kshort_t)uline);
+		KLIB KBuffer_printf(kctx, wb, " (%s:%d)", PLATAPI shortFilePath(FileId_t(uline)), (kshort_t)uline);
 		break;
 	}
 	case VMT_R: {
-		KLIB Kwb_printf(kctx, wb, " sfp[%d,r=%d]", (int)c->data[i]/2, (int)c->data[i]);
+		KLIB KBuffer_printf(kctx, wb, " sfp[%d,r=%d]", (int)c->data[i]/2, (int)c->data[i]);
 		break;
 	}
 	case VMT_FX: {
 		kshort_t index  = (kshort_t)c->data[i];
 		kshort_t xindex = (kshort_t)(c->data[i] >> (sizeof(kshort_t)*8));
-		KLIB Kwb_printf(kctx, wb, " sfp[%d,r=%d][%d]", (int)index/2, (int)index, (int)xindex);
+		KLIB KBuffer_printf(kctx, wb, " sfp[%d,r=%d][%d]", (int)index/2, (int)index, (int)xindex);
 		break;
 	}
 	case VMT_U:
-		KLIB Kwb_printf(kctx, wb, " i%ld", (long)c->data[i]); break;
+		KLIB KBuffer_printf(kctx, wb, " i%ld", (long)c->data[i]); break;
 	case VMT_C:
 	case VMT_TY:
-		KLIB Kwb_printf(kctx, wb, "(%s)", CT_t(c->ct[i])); break;
+		KLIB KBuffer_printf(kctx, wb, "(%s)", CT_t(c->ct[i])); break;
 	case VMT_F:
-		KLIB Kwb_printf(kctx, wb, " function(%p)", c->p[i]); break;
+		KLIB KBuffer_printf(kctx, wb, " function(%p)", c->p[i]); break;
 	case VMT_Object: {
 		kObject *o = c->o[i];
 		if(IS_Method(o)) {
 			kMethod *mtd = (kMethod*)o;
-			KLIB Kwb_printf(kctx, wb, " %s.%s%s", TY_t(mtd->typeId), MethodName_t(mtd->mn));
+			KLIB KBuffer_printf(kctx, wb, " %s.%s%s", TY_t(mtd->typeId), MethodName_t(mtd->mn));
 		}
 		else {
-			KLIB Kwb_printf(kctx, wb, " (%s)", CT_t(O_ct(o)));
+			KLIB KBuffer_printf(kctx, wb, " (%s)", CT_t(O_ct(o)));
 			KLIB kObject_WriteToBuffer(kctx, o, 0, wb, NULL, 0);
 		}
 		break;
@@ -129,12 +129,12 @@ static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeT
 
 static void WriteVirtualCode1(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, VirtualCode *vcode_start)
 {
-	KLIB Kwb_printf(kctx, wb, "[L%d:%d] %s(%d)", (int)(c - vcode_start), c->line, OPDATA[c->opcode].name, (int)c->opcode);
+	KLIB KBuffer_printf(kctx, wb, "[L%d:%d] %s(%d)", (int)(c - vcode_start), c->line, OPDATA[c->opcode].name, (int)c->opcode);
 	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg1, c, 0, vcode_start);
 	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg2, c, 1, vcode_start);
 	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg3, c, 2, vcode_start);
 	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg4, c, 3, vcode_start);
-	KLIB Kwb_printf(kctx, wb, "\n");
+	KLIB KBuffer_printf(kctx, wb, "\n");
 }
 
 static void WriteVirtualCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c)
@@ -149,10 +149,10 @@ static void WriteVirtualCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCod
 static void DumpVirtualCode(KonohaContext *kctx, VirtualCode *c)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	WriteVirtualCode(kctx, &wb, c);
-	DBG_P(">>>\n%s", KLIB Kwb_top(kctx, &wb, true));
-	KLIB Kwb_Free(&wb);
+	DBG_P(">>>\n%s", KLIB KBuffer_Stringfy(kctx, &wb, true));
+	KLIB KBuffer_Free(&wb);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -290,8 +290,8 @@ static bblock_t BasicBlock_id(KonohaContext *kctx, BasicBlock *bb)
 static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, bblock_t oldId)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-	BasicBlock *bb = (BasicBlock*)KLIB Kwb_Alloca(kctx, &wb, max);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+	BasicBlock *bb = (BasicBlock*)KLIB KBuffer_Alloca(kctx, &wb, max);
 	if(oldId != -1) {
 		BasicBlock *oldbb = BasicBlock_FindById(kctx, oldId);
 		if(((char*)oldbb) + oldbb->max == (char*)bb) {
@@ -337,7 +337,7 @@ static bblock_t BasicBlock_Add(KonohaContext *kctx, bblock_t blockId, kfileline_
 
 static int CodeOffset(KGrowingBuffer *wb)
 {
-	return Kwb_bytesize(wb);
+	return KBuffer_bytesize(wb);
 }
 
 static void BasicBlock_WriteBuffer(KonohaContext *kctx, bblock_t blockId, KGrowingBuffer *wb)
@@ -354,7 +354,7 @@ static void BasicBlock_WriteBuffer(KonohaContext *kctx, bblock_t blockId, KGrowi
 			bblock_t id = BasicBlock_id(kctx, bb);
 			char buf[len];  // bb is growing together with wb.
 			memcpy(buf, ((char*)bb) + sizeof(BasicBlock), len);
-			KLIB Kwb_Write(kctx, wb, buf, len);
+			KLIB KBuffer_Write(kctx, wb, buf, len);
 			bb = BasicBlock_FindById(kctx, id);  // recheck
 			bb->lastoffset = CodeOffset(wb) - sizeof(VirtualCode);
 			DBG_ASSERT(bb->codeoffset + ((len / sizeof(VirtualCode)) - 1) * sizeof(VirtualCode) == bb->lastoffset);
@@ -900,17 +900,17 @@ static struct VirtualCode *MakeThreadedCode(KonohaContext *kctx, KBuilder *build
 static struct VirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *builder, bblock_t beginId, bblock_t returnId)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	BasicBlock_WriteBuffer(kctx, beginId, &wb);
 	BasicBlock_WriteBuffer(kctx, returnId, &wb);
 
-	size_t codesize = Kwb_bytesize(&wb);
+	size_t codesize = KBuffer_bytesize(&wb);
 	DBG_P(">>>>>> codesize=%d", codesize);
 	DBG_ASSERT(codesize != 0);
 	VirtualCode *vcode = (VirtualCode *)KCalloc_UNTRACE(codesize, 1);
-	memcpy((void*)vcode, KLIB Kwb_top(kctx, &wb, 0), codesize);
+	memcpy((void*)vcode, KLIB KBuffer_Stringfy(kctx, &wb, 0), codesize);
 	BasicBlock_setJumpAddr(kctx, BasicBlock_FindById(kctx, beginId), (char*)vcode);
-	KLIB Kwb_Free(&wb);
+	KLIB KBuffer_Free(&wb);
 	vcode = MakeThreadedCode(kctx, builder, vcode, codesize);
 	DumpVirtualCode(kctx, vcode);
 	return vcode;
@@ -930,7 +930,7 @@ static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr, size_
 static struct VirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 
 	INIT_GCSTACK();
 	KBuilder builderbuf = {}, *builder = &builderbuf;
@@ -958,7 +958,7 @@ static struct VirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMeth
 	ASM(RET);
 	VirtualCode *vcode = CompileVirtualCode(kctx, builder, builder->bbBeginId, builder->bbReturnId);
 	RESET_GCSTACK();
-	KLIB Kwb_Free(&wb);
+	KLIB KBuffer_Free(&wb);
 	return vcode;
 }
 

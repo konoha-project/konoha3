@@ -159,11 +159,11 @@ PlatformApi* platform_kernel(void)
 static void KonohaContext_EvalScript(KonohaContext *kctx, char *data, size_t len)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-	KLIB Kwb_Write(kctx, &wb,data,len);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Write(kctx, &wb,data,len);
 	kfileline_t uline = FILEID_("(kernel)") | 1;
-	Konoha_Eval((KonohaContext*)kctx, KLIB Kwb_top(kctx, &wb,1),uline);
-	KLIB Kwb_Free(&wb);
+	Konoha_Eval((KonohaContext*)kctx, KLIB KBuffer_Stringfy(kctx, &wb,1),uline);
+	KLIB KBuffer_Free(&wb);
 }
 //EXPORT_SYMBOL(KonohaContext_EvalScript);
 

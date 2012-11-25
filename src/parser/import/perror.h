@@ -49,14 +49,14 @@ static kString* new_StringMessage(KonohaContext *kctx, kArray *gcstack, KGrowing
 	const char *msg = TAG_t(taglevel);
 	if(uline > 0) {
 		const char *file = FileId_t(uline);
-		KLIB Kwb_printf(kctx, wb, "%s(%s:%d) " , msg, PLATAPI shortFilePath(file), (kushort_t)uline);
+		KLIB KBuffer_printf(kctx, wb, "%s(%s:%d) " , msg, PLATAPI shortFilePath(file), (kushort_t)uline);
 	}
 	else {
-		KLIB Kwb_printf(kctx, wb, "%s" , msg);
+		KLIB KBuffer_printf(kctx, wb, "%s" , msg);
 	}
-	KLIB Kwb_vprintf(kctx, wb, fmt, ap);
-	msg = KLIB Kwb_top(kctx, wb, 0);
-	return KLIB new_kString(kctx, gcstack, msg, Kwb_bytesize(wb), 0);
+	KLIB KBuffer_vprintf(kctx, wb, fmt, ap);
+	msg = KLIB KBuffer_Stringfy(kctx, wb, 0);
+	return KLIB new_kString(kctx, gcstack, msg, KBuffer_bytesize(wb), 0);
 }
 
 static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
@@ -64,13 +64,13 @@ static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t tagle
 	SugarContext *sugarContext = GetSugarContext(kctx);
 	if(isPrintMessage(kctx, sugarContext, taglevel)) {
 		KGrowingBuffer wb;
-		KLIB Kwb_Init(&sugarContext->errorMessageBuffer, &wb);
+		KLIB KBuffer_Init(&sugarContext->errorMessageBuffer, &wb);
 		kString *emsg = new_StringMessage(kctx, sugarContext->errorMessageList, &wb, taglevel, uline, fmt, ap);
 		PLATAPI ReportCompilerMessage(kctx, taglevel, uline, S_text(emsg));
 		if(taglevel <= ErrTag) {
 			sugarContext->errorMessageCount++;
 		}
-		KLIB Kwb_Free(&wb);
+		KLIB KBuffer_Free(&wb);
 		return emsg;
 	}
 	return NULL;
@@ -172,7 +172,7 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 	else {
 		INIT_GCSTACK();
 		KGrowingBuffer wb;
-		KLIB Kwb_Init(&kctx->stack->cwb, &wb);
+		KLIB KBuffer_Init(&kctx->stack->cwb, &wb);
 		kString *emsg = new_StringMessage(kctx, _GcStack, &wb, taglevel, Trace_pline(trace), fmt, ap);
 		va_end(ap);
 		PLATAPI ReportCompilerMessage(kctx, taglevel, Trace_pline(trace), S_text(emsg));
@@ -185,7 +185,7 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 				return; /* in case of that KonohaRuntime_raise cannot jump; */
 			}
 		}
-		KLIB Kwb_Free(&wb);
+		KLIB KBuffer_Free(&wb);
 		RESET_GCSTACK();
 	}
 }

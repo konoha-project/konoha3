@@ -88,11 +88,11 @@ static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 {
 	size_t i;
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	if(O_typeId(tokenList) == TY_Token) {
 		/* Single token was passed (e.g. "dsh ls;"). */
 		kToken *token = (kToken *)tokenList;
-		KLIB Kwb_Write(kctx, &wb, S_text(token->text), S_size(token->text));
+		KLIB KBuffer_Write(kctx, &wb, S_text(token->text), S_size(token->text));
 	}
 	else {
 		/* Multiple tokens was passed (e.g. "dsh ls -la;"). */
@@ -109,23 +109,23 @@ static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 				}
 				const char *dollarstr = expandDollarToken(kctx, tokenList, start, i-1);
 				if(dollarstr == NULL) {
-					KLIB Kwb_Free(&wb);
+					KLIB KBuffer_Free(&wb);
 					return NULL;
 				}
 				else {
-					KLIB Kwb_Write(kctx, &wb, dollarstr, strlen(dollarstr));
+					KLIB KBuffer_Write(kctx, &wb, dollarstr, strlen(dollarstr));
 				}
 			}
 			else {
-				KLIB Kwb_Write(kctx, &wb, S_text(token->text), S_size(token->text));
+				KLIB KBuffer_Write(kctx, &wb, S_text(token->text), S_size(token->text));
 			}
 			if(kToken_is(BeforeWhiteSpace, token)) {
-				KLIB Kwb_Write(kctx, &wb, " ", 1);
+				KLIB KBuffer_Write(kctx, &wb, " ", 1);
 			}
 		}
 	}
-	kString *cmd = KLIB new_kString(kctx, GcUnsafe, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
-	KLIB Kwb_Free(&wb);
+	kString *cmd = KLIB new_kString(kctx, GcUnsafe, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
+	KLIB KBuffer_Free(&wb);
 	return cmd;
 }
 

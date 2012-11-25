@@ -56,7 +56,7 @@ static void kPyObject_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBu
 	PyObject *pyo =  ((kPyObject *)v[pos].asObject)->self;
 	PyObject *str = pyo->ob_type->tp_str(pyo);
 	Py_INCREF(str);
-	KLIB Kwb_printf(kctx, wb, "%s", PyString_AsString(str));
+	KLIB KBuffer_printf(kctx, wb, "%s", PyString_AsString(str));
 	Py_DECREF(str);
 }
 
@@ -149,11 +149,11 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 //	if(po->self == NULL) {
 //		// [TODO] throw Exception
 //	}
-//	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+//	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 //	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
-//	struct kBytesVar *ba = (struct kBytesVar *)new_Bytes(kctx, Kwb_bytesize(&wb));
-//	ba->buf = KLIB Kwb_top(kctx, &wb, 1);
-//	KLIB Kwb_Free(&wb);
+//	struct kBytesVar *ba = (struct kBytesVar *)new_Bytes(kctx, KBuffer_bytesize(&wb));
+//	ba->buf = KLIB KBuffer_Stringfy(kctx, &wb, 1);
+//	KLIB KBuffer_Free(&wb);
 //	KReturn(ba);
 //}
 
@@ -179,10 +179,10 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 	KGrowingBuffer wb;
 	// assert
 	DBG_ASSERT(po->self != NULL);
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
-	kString *s = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
-	KLIB Kwb_Free(&wb);
+	kString *s = KLIB new_kString(kctx, OnStack, KLIB KBuffer_Stringfy(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
+	KLIB KBuffer_Free(&wb);
 	KReturn(s);
 	//if(PyString_Check(po->self)) {
 	//	//dec
@@ -203,10 +203,10 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 	//}
 	//else {
 	//	KGrowingBuffer wb;
-	//	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	//	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	//	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
-	//	kString *s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
-	//	KLIB Kwb_Free(&wb);
+	//	kString *s = KLIB new_kString(kctx, KLIB KBuffer_Stringfy(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
+	//	KLIB KBuffer_Free(&wb);
 	//	KReturn(s);
 	//}
 }

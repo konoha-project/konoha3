@@ -72,13 +72,13 @@ static void kmodjit_Reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KO
 	KRefTrace(mod->global_value);
 	KRefTrace(mod->constPool);
 	END_REFTRACE();
-	KLIB Kmap_each(kctx, mod->jitcache, (void *) visitor, val_Reftrace);
+	KLIB KHashMap_each(kctx, mod->jitcache, (void *) visitor, val_Reftrace);
 }
 
 static void kmodjit_Free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	kmodjit_t *modshare = (kmodjit_t *) baseh;
-	KLIB Kmap_Free(kctx, modshare->jitcache, NULL);
+	KLIB KHashMap_Free(kctx, modshare->jitcache, NULL);
 	KFree(baseh, sizeof(kmodjit_t));
 }
 
@@ -279,7 +279,7 @@ static kObject *jitcache_get(KonohaContext *kctx, kMethod *mtd)
 {
 	uintptr_t hcode = jitcache_hash(mtd);
 	KHashMap *map = kmodjit->jitcache;
-	KHashMapEntry *e = KLIB Kmap_get(kctx, map, hcode);
+	KHashMapEntry *e = KLIB KHashMap_get(kctx, map, hcode);
 	if(e) {
 		return (kObject *) e->unboxValue;
 	} else {
@@ -291,7 +291,7 @@ static void jitcache_set(KonohaContext *kctx, kMethod *mtd, kObject *f)
 {
 	uintptr_t hcode = jitcache_hash(mtd);
 	KHashMap *map = kmodjit->jitcache;
-	KHashMapEntry *newe = KLIB Kmap_newEntry(kctx, map, hcode);
+	KHashMapEntry *newe = KLIB KHashMap_newEntry(kctx, map, hcode);
 	newe->unboxValue = (uintptr_t) f;
 }
 
@@ -596,9 +596,9 @@ static KMETHOD Method_getFname(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-	KLIB Kwb_printf(kctx, &wb, "%s%s", MethodName_t(mtd->mn));
-	kString *fname = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), StringPolicy_POOL);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_printf(kctx, &wb, "%s%s", MethodName_t(mtd->mn));
+	kString *fname = KLIB new_kString(kctx, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), StringPolicy_POOL);
 	KReturn(fname);
 }
 
@@ -716,7 +716,7 @@ static kbool_t ijit_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	base->h.reftrace = kmodjit_Reftrace;
 	base->h.free     = kmodjit_Free;
 	base->defaultCodeGen = kctx->klib->kMethod_GenCode;
-	base->jitcache = KLIB Kmap_Init(kctx, 0);
+	base->jitcache = KLIB KHashMap_Init(kctx, 0);
 	KUnsafeFieldInit(base->global_value, new_(Array, 18));
 	KUnsafeFieldInit(base->constPool, new_(Array, 0));
 

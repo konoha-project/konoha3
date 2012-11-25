@@ -142,7 +142,7 @@ static size_t DoJsonEach(KonohaContext *kctx, struct JsonBuf *jsonbuf, void *thu
 //static void WriteJsonToBuffer(KonohaContext *kctx, KGrowingBuffer *wb, struct JsonBuf *jsonbuf)
 //{
 //	char* data = json_dumps(jsonbuf->jsonobj, JSON_ENSURE_ASCII);  // FIXME: if UTF-8 is supported
-//	KLIB Kwb_Write(kctx, wb, data, strlen(data));
+//	KLIB KBuffer_Write(kctx, wb, data, strlen(data));
 //	free(data);
 //}
 

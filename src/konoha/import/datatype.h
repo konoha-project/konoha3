@@ -64,7 +64,7 @@ static kObject *new_kObject(KonohaContext *kctx, kArray *gcstackNULL, KonohaClas
 static void KonohaClass_WriteUnboxValueToBuffer(KonohaContext *kctx, KonohaClass *c, uintptr_t unboxValue, int isDelim, KGrowingBuffer *wb)
 {
 	if(isDelim > 0) {
-		KLIB Kwb_Write(kctx, wb, ", ", 2);
+		KLIB KBuffer_Write(kctx, wb, ", ", 2);
 	}
 	KonohaValue v = {};
 	v.unboxValue = unboxValue;
@@ -74,10 +74,10 @@ static void KonohaClass_WriteUnboxValueToBuffer(KonohaContext *kctx, KonohaClass
 static void kObject_WriteToBuffer(KonohaContext *kctx, kObject *o, int isDelim, KGrowingBuffer *wb, KonohaValue *sfp, int pos)
 {
 	if(isDelim > 0) {
-		KLIB Kwb_Write(kctx, wb, ", ", 2);
+		KLIB KBuffer_Write(kctx, wb, ", ", 2);
 	}
 	if(IS_NULL(o)) {
-		KLIB Kwb_Write(kctx, wb, TEXTSIZE("null"));
+		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("null"));
 	}
 	else {
 		if(sfp == NULL) {
@@ -116,10 +116,10 @@ static void kNumber_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void kBoolean_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	if(v[pos].boolValue) {
-		KLIB Kwb_Write(kctx, wb, TEXTSIZE("true"));
+		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("true"));
 	}
 	else {
-		KLIB Kwb_Write(kctx, wb, TEXTSIZE("false"));
+		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("false"));
 	}
 }
 
@@ -130,7 +130,7 @@ static kObject* kBoolean_fnull(KonohaContext *kctx, KonohaClass *ct)
 
 static void kInt_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
-	KLIB Kwb_printf(kctx, wb, KINT_FMT, v[pos].intValue);
+	KLIB KBuffer_printf(kctx, wb, KINT_FMT, v[pos].intValue);
 }
 
 // String
@@ -154,26 +154,26 @@ static void kString_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuff
 {
 	const char *t = S_text(v[pos].asString);
 	size_t i, len = S_size(v[pos].asString);
-	Kwb_Write(kctx, wb, "\"", 1);
+	KBuffer_Write(kctx, wb, "\"", 1);
 	for(i = 0; i < len; i++) {
 		int ch = t[i];
 		char buf[2] = {'\\', ch};
 		if(ch == '\\' || ch == '"') {
-			KLIB Kwb_Write(kctx, wb, buf, 2);
+			KLIB KBuffer_Write(kctx, wb, buf, 2);
 		}
 		else if(t[i] == '\n'){
 			buf[1] = 'n';
-			KLIB Kwb_Write(kctx, wb, buf, 2);
+			KLIB KBuffer_Write(kctx, wb, buf, 2);
 		}
 		else if(t[i] == '\t'){
 			buf[1] = 't';
-			KLIB Kwb_Write(kctx, wb, buf, 2);
+			KLIB KBuffer_Write(kctx, wb, buf, 2);
 		}
 		else {
-			KLIB Kwb_Write(kctx, wb, buf+1, 1);
+			KLIB KBuffer_Write(kctx, wb, buf+1, 1);
 		}
 	}
-	Kwb_Write(kctx, wb, "\"", 1);
+	KBuffer_Write(kctx, wb, "\"", 1);
 }
 
 static uintptr_t kString_unbox(KonohaContext *kctx, kObject *o)
@@ -257,7 +257,7 @@ static void kArray_Init(KonohaContext *kctx, kObject *o, void *conf)
 	a->a.bytesize    = 0;
 	a->a.bytemax = ((size_t)conf * sizeof(void *));
 	if(a->a.bytemax > 0) {
-		KLIB Karray_Init(kctx, &a->a, a->a.bytemax);
+		KLIB KArray_Init(kctx, &a->a, a->a.bytemax);
 	}
 	if(TY_isUnbox(O_p0(a))) {
 		kArray_setUnboxData(a, 1);
@@ -278,14 +278,14 @@ static void kArray_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 static void kArray_Free(KonohaContext *kctx, kObject *o)
 {
 	struct _kAbstractArray *a = (struct _kAbstractArray *)o;
-	KLIB Karray_Free(kctx, &a->a);
+	KLIB KArray_Free(kctx, &a->a);
 }
 
 static void kArray_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb)
 {
 	size_t i;
 	kArray *a = values[pos].asArray;
-	KLIB Kwb_Write(kctx, wb, "[", 1);
+	KLIB KBuffer_Write(kctx, wb, "[", 1);
 	if(kArray_isUnboxData(a)) {
 		KonohaClass *c = CT_(O_p0(a));
 		for(i = 0; i < kArray_size(a); i++) {
@@ -298,7 +298,7 @@ static void kArray_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowing
 			kObject_WriteToBuffer(kctx, o, (i>0)/*delim*/, wb, values, pos+1);
 		}
 	}
-	KLIB Kwb_Write(kctx, wb, "]", 1);
+	KLIB KBuffer_Write(kctx, wb, "]", 1);
 }
 
 static void kArray_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray *a, size_t min)
@@ -306,7 +306,7 @@ static void kArray_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray
 	size_t minbyte = min * sizeof(void *);
 	if(!(minbyte < a->a.bytemax)) {
 		if(minbyte < sizeof(kObject)) minbyte = sizeof(kObject);
-		KLIB Karray_Expand(kctx, &a->a, minbyte);
+		KLIB KArray_Expand(kctx, &a->a, minbyte);
 	}
 }
 
@@ -418,9 +418,9 @@ static kbool_t equalsParam(kattrtype_t rtype, kushort_t psize, const kparamtype_
 
 typedef kbool_t (*equalsP)(kattrtype_t rtype, kushort_t psize, const kparamtype_t *p, kParam *pa);
 
-static kparamId_t Kmap_getparamid(KonohaContext *kctx, KHashMap *kmp, kArray *list, uintptr_t hcode, equalsP f, kattrtype_t rtype, kushort_t psize, const kparamtype_t *p)
+static kparamId_t KHashMap_getparamid(KonohaContext *kctx, KHashMap *kmp, kArray *list, uintptr_t hcode, equalsP f, kattrtype_t rtype, kushort_t psize, const kparamtype_t *p)
 {
-	KHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
+	KHashMapEntry *e = KLIB KHashMap_get(kctx, kmp, hcode);
 	while(e != NULL) {
 		if(e->hcode == hcode && f(rtype, psize, p, e->paramKey_OnList)) {
 			return (kparamId_t)e->unboxValue;
@@ -429,7 +429,7 @@ static kparamId_t Kmap_getparamid(KonohaContext *kctx, KHashMap *kmp, kArray *li
 	}
 	uintptr_t paramid = kArray_size(list);
 	kParam *paramkey = new_Param(kctx, list, rtype, psize, p);
-	e = KLIB Kmap_newEntry(kctx, kmp, hcode);
+	e = KLIB KHashMap_newEntry(kctx, kmp, hcode);
 	e->paramKey_OnList   = paramkey;
 	e->unboxValue = paramid;
 	return (kparamId_t)paramid;
@@ -439,7 +439,7 @@ static kparamId_t Kparam(KonohaContext *kctx, kattrtype_t rtype, kushort_t psize
 {
 	uintptr_t hcode = hashparam(rtype, psize, p);
 	KLock(kctx->share->paramMutex);
-	kparamId_t param = Kmap_getparamid(kctx, kctx->share->paramMap_KeyOnList, kctx->share->paramList_OnGlobalConstList, hcode, equalsParam, rtype, psize, p);
+	kparamId_t param = KHashMap_getparamid(kctx, kctx->share->paramMap_KeyOnList, kctx->share->paramList_OnGlobalConstList, hcode, equalsParam, rtype, psize, p);
 	KUnlock(kctx->share->paramMutex);
 	return param;
 }
@@ -448,7 +448,7 @@ static kparamId_t Kparamdom(KonohaContext *kctx, kushort_t psize, const kparamty
 {
 	uintptr_t hcode = hashparamdom(psize, p);
 	KLock(kctx->share->paramMutex);
-	kparamId_t param = Kmap_getparamid(kctx, kctx->share->paramdomMap_KeyOnList, kctx->share->paramdomList_OnGlobalConstList, hcode, equalsParamDom, TY_void, psize, p);
+	kparamId_t param = KHashMap_getparamid(kctx, kctx->share->paramdomMap_KeyOnList, kctx->share->paramdomList_OnGlobalConstList, hcode, equalsParamDom, TY_void, psize, p);
 	KUnlock(kctx->share->paramMutex);
 	return param;
 }
@@ -538,13 +538,13 @@ static void kNameSpace_Free(KonohaContext *kctx, kObject *o)
 {
 	kNameSpaceVar *ns = (kNameSpaceVar *)o;
 	KLIB kNameSpace_FreeSugarExtension(kctx, ns);
-	KLIB Karray_Free(kctx, &ns->constTable);
+	KLIB KArray_Free(kctx, &ns->constTable);
 }
 
 static void kNameSpace_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	kNameSpace *ns = v[pos].asNameSpace;
-	KLIB Kwb_printf(kctx, wb, "%s", PackageId_t(ns->packageId));
+	KLIB KBuffer_printf(kctx, wb, "%s", PackageId_t(ns->packageId));
 }
 
 // ---------------
@@ -607,7 +607,7 @@ static void DEFAULT_Free(KonohaContext *kctx, kObject *o)
 
 static void DEFAULT_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
-	KLIB Kwb_printf(kctx, wb, "&%p(:%s)", v[pos].asObject, TY_t(O_typeId(v[pos].asObject)));
+	KLIB KBuffer_printf(kctx, wb, "&%p(:%s)", v[pos].asObject, TY_t(O_typeId(v[pos].asObject)));
 }
 
 static uintptr_t DEFAULT_unbox(KonohaContext *kctx, kObject *o)
@@ -658,7 +658,7 @@ static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KD
 	KLock(share->classTableMutex); {
 		newid = share->classTable.bytesize / sizeof(KonohaClassVar *);
 		if(share->classTable.bytesize == share->classTable.bytemax) {
-			KLIB Karray_Expand(kctx, &share->classTable, share->classTable.bytemax * 2);
+			KLIB KArray_Expand(kctx, &share->classTable, share->classTable.bytemax * 2);
 		}
 		share->classTable.bytesize += sizeof(KonohaClassVar *);
 		ct = (KonohaClassVar *)KCalloc_UNTRACE(sizeof(KonohaClass), 1);
@@ -807,23 +807,23 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 			for(i = 0; i < cparam->psize; i++) {
 				KonohaClass_shortName(kctx, CT_(cparam->paramtypeItems[i].attrTypeId));
 			}
-			Kwb_Init(&(kctx->stack->cwb), &wb);
+			KBuffer_Init(&(kctx->stack->cwb), &wb);
 			kString *s = SYM_s(ct->classNameSymbol);
-			KLIB Kwb_Write(kctx, &wb, S_text(s), S_size(s));
-			KLIB Kwb_Write(kctx, &wb, "[", 1);
+			KLIB KBuffer_Write(kctx, &wb, S_text(s), S_size(s));
+			KLIB KBuffer_Write(kctx, &wb, "[", 1);
 			if(ct->baseTypeId == TY_Func) {
 				s = KonohaClass_shortName(kctx, CT_(ct->p0));
-				KLIB Kwb_Write(kctx, &wb, S_text(s), S_size(s)); c++;
+				KLIB KBuffer_Write(kctx, &wb, S_text(s), S_size(s)); c++;
 			}
 			for(i = 0; i < cparam->psize; i++) {
-				if(c > 0) KLIB Kwb_Write(kctx, &wb, ",", 1);
+				if(c > 0) KLIB KBuffer_Write(kctx, &wb, ",", 1);
 				s = KonohaClass_shortName(kctx, CT_(cparam->paramtypeItems[i].attrTypeId));
-				KLIB Kwb_Write(kctx, &wb, S_text(s), S_size(s));
+				KLIB KBuffer_Write(kctx, &wb, S_text(s), S_size(s));
 			}
-			KLIB Kwb_Write(kctx, &wb, "]", 1);
-			const char *text = Kwb_top(kctx, &wb, 1);
-			((KonohaClassVar *)ct)->shortClassNameNULL_OnGlobalConstList = new_kString(kctx, OnGlobalConstList, text, Kwb_bytesize(&wb), StringPolicy_ASCII);
-			KLIB Kwb_Free(&wb);
+			KLIB KBuffer_Write(kctx, &wb, "]", 1);
+			const char *text = KBuffer_Stringfy(kctx, &wb, 1);
+			((KonohaClassVar *)ct)->shortClassNameNULL_OnGlobalConstList = new_kString(kctx, OnGlobalConstList, text, KBuffer_bytesize(&wb), StringPolicy_ASCII);
+			KLIB KBuffer_Free(&wb);
 		}
 	}
 	return ct->shortClassNameNULL_OnGlobalConstList;
@@ -1047,23 +1047,23 @@ static void KonohaRuntime_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KInitLock(share->paramMutex);
 
 	initKonohaLib((KonohaLibVar *)kctx->klib);
-	KLIB Karray_Init(kctx, &share->classTable, K_CLASSTABLE_INITSIZE * sizeof(KonohaClass));
+	KLIB KArray_Init(kctx, &share->classTable, K_CLASSTABLE_INITSIZE * sizeof(KonohaClass));
 	loadInitStructData(kctx);
 
 	KUnsafeFieldInit(share->GlobalConstList, new_(Array, 8, OnField));
 
-	share->longClassNameMapNN = KLIB Kmap_Init(kctx, 0);
+	share->longClassNameMapNN = KLIB KHashMap_Init(kctx, 0);
 	share->fileIdList_OnGlobalConstList         = new_(StringArray, 8, OnGlobalConstList);
-	share->fileIdMap_KeyOnList        = KLIB Kmap_Init(kctx, 0);
+	share->fileIdMap_KeyOnList        = KLIB KHashMap_Init(kctx, 0);
 	share->packageIdList_OnGlobalConstList      = new_(StringArray, 8, OnGlobalConstList);
-	share->packageIdMap_KeyOnList     = KLIB Kmap_Init(kctx, 0);
-	share->packageMapNO       = KLIB Kmap_Init(kctx, 0);
+	share->packageIdMap_KeyOnList     = KLIB KHashMap_Init(kctx, 0);
+	share->packageMapNO       = KLIB KHashMap_Init(kctx, 0);
 
 	share->symbolList_OnGlobalConstList         = new_(StringArray, 32, OnGlobalConstList);
-	share->symbolMap_KeyOnList        = KLIB Kmap_Init(kctx, 0);
-	share->paramMap_KeyOnList         = KLIB Kmap_Init(kctx, 0);
+	share->symbolMap_KeyOnList        = KLIB KHashMap_Init(kctx, 0);
+	share->paramMap_KeyOnList         = KLIB KHashMap_Init(kctx, 0);
 	share->paramList_OnGlobalConstList          = new_(Array, 32, OnGlobalConstList);
-	share->paramdomMap_KeyOnList      = KLIB Kmap_Init(kctx, 0);
+	share->paramdomMap_KeyOnList      = KLIB KHashMap_Init(kctx, 0);
 	share->paramdomList_OnGlobalConstList       = new_(Array, 32, OnGlobalConstList);
 	//
 	share->constNull_OnGlobalConstList =  new_(Object, NULL, OnGlobalConstList);
@@ -1110,16 +1110,16 @@ static void packageMap_Free(KonohaContext *kctx, void *p)
 static void KonohaRuntime_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KonohaRuntimeVar *share = (KonohaRuntimeVar *)ctx->share;
-	KLIB Kmap_Free(kctx, share->longClassNameMapNN, NULL);
-	KLIB Kmap_Free(kctx, share->fileIdMap_KeyOnList, NULL);
-	KLIB Kmap_Free(kctx, share->packageIdMap_KeyOnList, NULL);
-	KLIB Kmap_Free(kctx, share->packageMapNO, packageMap_Free);
-	KLIB Kmap_Free(kctx, share->symbolMap_KeyOnList, NULL);
-	KLIB Kmap_Free(kctx, share->paramMap_KeyOnList, NULL);
-	KLIB Kmap_Free(kctx, share->paramdomMap_KeyOnList, NULL);
+	KLIB KHashMap_Free(kctx, share->longClassNameMapNN, NULL);
+	KLIB KHashMap_Free(kctx, share->fileIdMap_KeyOnList, NULL);
+	KLIB KHashMap_Free(kctx, share->packageIdMap_KeyOnList, NULL);
+	KLIB KHashMap_Free(kctx, share->packageMapNO, packageMap_Free);
+	KLIB KHashMap_Free(kctx, share->symbolMap_KeyOnList, NULL);
+	KLIB KHashMap_Free(kctx, share->paramMap_KeyOnList, NULL);
+	KLIB KHashMap_Free(kctx, share->paramdomMap_KeyOnList, NULL);
 
 	KonohaRuntime_FreeClassTable(kctx);
-	KLIB Karray_Free(kctx, &share->classTable);
+	KLIB KArray_Free(kctx, &share->classTable);
 
 	KFreeLock(share->classTableMutex);
 	KFreeLock(share->filepackMutex);

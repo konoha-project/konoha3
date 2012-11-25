@@ -247,7 +247,7 @@ static size_t knh_regexp_Matched(kregmatch_t* r, size_t maxmatch)
 	return n;
 }
 
-static void Kwb_WriteRegexFormat(KonohaContext *kctx, KGrowingBuffer *wb, const char *fmttext, size_t fmtlen, const char *base, kregmatch_t *r, size_t matched)
+static void KBuffer_WriteRegexFormat(KonohaContext *kctx, KGrowingBuffer *wb, const char *fmttext, size_t fmtlen, const char *base, kregmatch_t *r, size_t matched)
 {
 	const char *ch = fmttext;
 	const char *eof = ch + fmtlen; // end of fmt
@@ -255,7 +255,7 @@ static void Kwb_WriteRegexFormat(KonohaContext *kctx, KGrowingBuffer *wb, const 
 	for (; ch < eof; ch++) {
 		if(*ch == '\\') {
 			buf[0] = *ch;
-			KLIB Kwb_Write(kctx, wb, buf, 1);
+			KLIB KBuffer_Write(kctx, wb, buf, 1);
 			ch++;
 		} else if(*ch == '$' && isdigit(ch[1])) {
 			size_t grpidx = (size_t)ch[1] - '0'; // get head of grourp_index
@@ -272,12 +272,12 @@ static void Kwb_WriteRegexFormat(KonohaContext *kctx, KGrowingBuffer *wb, const 
 					}
 				}
 				kregmatch_t *rp = &r[grpidx];
-				KLIB Kwb_Write(kctx, wb, base + rp->rm_so, rp->rm_eo - rp->rm_so);
+				KLIB KBuffer_Write(kctx, wb, base + rp->rm_so, rp->rm_eo - rp->rm_so);
 				continue; // skip putc
 			}
 		}
 		buf[0] = *ch;
-		KLIB Kwb_Write(kctx, wb, buf, 1);
+		KLIB KBuffer_Write(kctx, wb, buf, 1);
 	}
 }
 
@@ -301,7 +301,7 @@ static void RegExp_Free(KonohaContext *kctx, kObject *o)
 static void RegExp_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	kRegExp *re = v[pos].asRegExp;
-	KLIB Kwb_printf(kctx, wb, "/%s/%s%s%s", S_text(re->pattern),
+	KLIB KBuffer_printf(kctx, wb, "/%s/%s%s%s", S_text(re->pattern),
 			RegExp_isGlobal(re) ? "g" : "",
 			RegExp_isIgnoreCase(re) ? "i" : "",
 			RegExp_isMultiline(re) ? "m" : "");
@@ -458,9 +458,9 @@ static KMETHOD RegExp_exec(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-static kString *Kwb_newString(KonohaContext *kctx, kArray *gcstack, KGrowingBuffer *wb)
+static kString *KBuffer_newString(KonohaContext *kctx, kArray *gcstack, KGrowingBuffer *wb)
 {
-	return KLIB new_kString(kctx, gcstack, KLIB Kwb_top(kctx, wb, false), Kwb_bytesize(wb), 0);
+	return KLIB new_kString(kctx, gcstack, KLIB KBuffer_Stringfy(kctx, wb, false), KBuffer_bytesize(wb), 0);
 }
 
 //## @Const method String String.replace(RegExp searchvalue, String newvalue);
@@ -473,7 +473,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 	kString *s = s0;
 	if(IS_NOTNULL(re) && S_size(re->pattern) > 0) {
 		KGrowingBuffer wb;
-		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		const char *str = S_text(s0);  // necessary
 		const char *base = str;
 		const char *eos = str + S_size(s0); // end of str
@@ -489,22 +489,22 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 			}
 			size_t len = pmatch[0].rm_eo;
 			if(pmatch[0].rm_so > 0) {
-				KLIB Kwb_Write(kctx, &wb, str, pmatch[0].rm_so);
+				KLIB KBuffer_Write(kctx, &wb, str, pmatch[0].rm_so);
 			}
 			size_t matched = knh_regexp_Matched(pmatch, KREGEXP_MATCHSIZE);
 			if(len > 0) {
-				Kwb_WriteRegexFormat(kctx, &wb, fmttext, fmtlen, base, pmatch, matched);
+				KBuffer_WriteRegexFormat(kctx, &wb, fmttext, fmtlen, base, pmatch, matched);
 				str += len;
 			} else {
 				if(str == base) { // 0-length match at head of string
-					Kwb_WriteRegexFormat(kctx, &wb, fmttext, fmtlen, base, pmatch, matched);
+					KBuffer_WriteRegexFormat(kctx, &wb, fmttext, fmtlen, base, pmatch, matched);
 				}
 				break;
 			}
 		} while(isGlobalOption);
-		KLIB Kwb_Write(kctx, &wb, str, strlen(str)); // write out remaining string
-		s = Kwb_newString(kctx, OnStack, &wb); // close cwb
-		KLIB Kwb_Free(&wb);
+		KLIB KBuffer_Write(kctx, &wb, str, strlen(str)); // write out remaining string
+		s = KBuffer_newString(kctx, OnStack, &wb); // close cwb
+		KLIB KBuffer_Free(&wb);
 	}
 	KReturn(s);
 }

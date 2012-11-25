@@ -36,7 +36,7 @@ static void syntaxMap_Free(KonohaContext *kctx, void *p)
 static void kNameSpace_FreeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns)
 {
 	if(ns->syntaxMapNN != NULL) {
-		KLIB Kmap_Free(kctx, ns->syntaxMapNN, syntaxMap_Free);
+		KLIB KHashMap_Free(kctx, ns->syntaxMapNN, syntaxMap_Free);
 	}
 	if(ns->tokenMatrix != NULL) {
 		KFree((void *)ns->tokenMatrix, SIZEOF_TOKENMATRIX);
@@ -50,7 +50,7 @@ static void kNameSpace_FreeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns
 static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	ksymbol_t symbol = (ksymbol_t)v[pos].unboxValue;
-	KLIB Kwb_printf(kctx, wb, "%s%s", PSYM_t(symbol));
+	KLIB KBuffer_printf(kctx, wb, "%s%s", PSYM_t(symbol));
 }
 
 /* --------------- */
@@ -98,26 +98,26 @@ static const char *kToken_t(KonohaContext *kctx, kToken *tk)
 }
 
 #ifndef USE_SMALLBUILD
-static void Kwb_WriteTokenSymbol(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
+static void KBuffer_WriteTokenSymbol(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
 {
 	if(tk->resolvedSymbol == TokenType_INDENT) {
-		KLIB Kwb_printf(kctx, wb, "$Indent ");
+		KLIB KBuffer_printf(kctx, wb, "$Indent ");
 	}
 	else {
 		ksymbol_t symbolType = tk->resolvedSyntaxInfo == NULL ? tk->resolvedSymbol : tk->resolvedSyntaxInfo->keyword;
-		KLIB Kwb_printf(kctx, wb, "%s%s ", PSYM_t(symbolType));
+		KLIB KBuffer_printf(kctx, wb, "%s%s ", PSYM_t(symbolType));
 	}
 }
 
-static void Kwb_WriteTokenText(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
+static void KBuffer_WriteTokenText(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
 {
 	const char *text = IS_String(tk->text) ? S_text(tk->text) : "...";
 	char c = kToken_GetOpenHintChar(tk);
 	if(c != 0) {
-		KLIB Kwb_printf(kctx, wb, "%c%s%c", c, text, kToken_GetCloseHintChar(tk));
+		KLIB KBuffer_printf(kctx, wb, "%c%s%c", c, text, kToken_GetCloseHintChar(tk));
 	}
 	else {
-		KLIB Kwb_printf(kctx, wb, "%s", text);
+		KLIB KBuffer_printf(kctx, wb, "%s", text);
 	}
 }
 #endif/*USE_SMALLBUILD*/
@@ -126,24 +126,24 @@ static void kToken_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowing
 {
 #ifndef USE_SMALLBUILD
 	kToken *tk = values[pos].asToken;
-	Kwb_WriteTokenSymbol(kctx, wb, tk);
+	KBuffer_WriteTokenSymbol(kctx, wb, tk);
 	if(IS_String(tk->text)) {
-		KLIB Kwb_printf(kctx, wb, "'%s'", S_text(tk->text));
+		KLIB KBuffer_printf(kctx, wb, "'%s'", S_text(tk->text));
 	}
 	else if(IS_Array(tk->subTokenList)) {
 		size_t i;
 		kArray *a = tk->subTokenList;
-		KLIB Kwb_Write(kctx, wb, "[", 1);
+		KLIB KBuffer_Write(kctx, wb, "[", 1);
 		if(kArray_size(a) > 0) {
 			KUnsafeFieldSet(values[pos+1].asToken, a->TokenItems[0]);
 			kToken_p(kctx, values, pos+1, wb);
 		}
 		for(i = 1; i < kArray_size(a); i++) {
-			KLIB Kwb_Write(kctx, wb, " ", 1);
+			KLIB KBuffer_Write(kctx, wb, " ", 1);
 			KUnsafeFieldSet(values[pos+1].asToken, a->TokenItems[i]);
 			kToken_p(kctx, values, pos+1, wb);
 		}
-		KLIB Kwb_Write(kctx, wb, "]", 1);
+		KLIB KBuffer_Write(kctx, wb, "]", 1);
 	}
 #endif
 }
@@ -174,7 +174,7 @@ static void kExpr_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visi
 static void kExprTerm_p(KonohaContext *kctx, kObject *o, KonohaValue *values, int pos, KGrowingBuffer *wb)
 {
 	if(IS_Token(o)) {
-		Kwb_WriteTokenText(kctx, wb, (kToken *)o);
+		KBuffer_WriteTokenText(kctx, wb, (kToken *)o);
 	}
 	else {
 		KUnsafeFieldSet(values[pos].asObject, o);
@@ -187,52 +187,52 @@ static void kExpr_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingB
 {
 #ifndef USE_SMALLBUILD
 	kExpr *expr = values[pos].asExpr;
-	KLIB Kwb_Write(kctx, wb, "(", 1);
+	KLIB KBuffer_Write(kctx, wb, "(", 1);
 	if(expr->build == TEXPR_CONST) {
-		KLIB Kwb_Write(kctx, wb, TEXTSIZE("const "));
+		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("const "));
 		kExprTerm_p(kctx, (kObject *)expr->objectConstValue, values, pos+1, wb);
 	}
 	else if(expr->build == TEXPR_NEW) {
-		KLIB Kwb_printf(kctx, wb, "new %s", TY_t(expr->attrTypeId));
+		KLIB KBuffer_printf(kctx, wb, "new %s", TY_t(expr->attrTypeId));
 	}
 	else if(expr->build == TEXPR_NULL) {
-		KLIB Kwb_Write(kctx, wb, TEXTSIZE("null"));
+		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("null"));
 	}
 	else if(expr->build == TEXPR_NCONST) {
-		KLIB Kwb_Write(kctx, wb, TEXTSIZE("const "));
+		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("const "));
 		values[pos+1].unboxValue = expr->unboxConstValue;
 		CT_(expr->attrTypeId)->p(kctx, values, pos+1, wb);
 	}
 	else if(expr->build == TEXPR_LOCAL) {
-		KLIB Kwb_printf(kctx, wb, "local sfp[%d]", (int)expr->index);
+		KLIB KBuffer_printf(kctx, wb, "local sfp[%d]", (int)expr->index);
 	}
 	else if(expr->build == TEXPR_BLOCK) {
-		KLIB Kwb_printf(kctx, wb, "block %d", expr->index);
+		KLIB KBuffer_printf(kctx, wb, "block %d", expr->index);
 	}
 	else if(expr->build == TEXPR_FIELD) {
 		kshort_t index  = (kshort_t)expr->index;
 		kshort_t xindex = (kshort_t)(expr->index >> (sizeof(kshort_t)*8));
-		KLIB Kwb_printf(kctx, wb, "field sfp[%d][%d]", (int)index, (int)xindex);
+		KLIB KBuffer_printf(kctx, wb, "field sfp[%d][%d]", (int)index, (int)xindex);
 	}
 	else if(expr->build == TEXPR_STACKTOP) {
-		KLIB Kwb_printf(kctx, wb, "stack %d", expr->index);
+		KLIB KBuffer_printf(kctx, wb, "stack %d", expr->index);
 	}
 	else if(Expr_isTerm(expr)) {
-		KLIB Kwb_Write(kctx, wb, TEXTSIZE("term "));
+		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("term "));
 		kExprTerm_p(kctx, (kObject *)expr->termToken, values, pos+1, wb);
 	}
 	else if(IS_Array(expr->cons)) {
 		size_t i;
 		for(i = 0; i < kArray_size(expr->cons); i++) {
 			if(i > 0) {
-				KLIB Kwb_Write(kctx, wb, " ", 1);
+				KLIB KBuffer_Write(kctx, wb, " ", 1);
 			}
 			kExprTerm_p(kctx, expr->cons->ObjectItems[i], values, pos+1, wb);
 		}
 	}
-	KLIB Kwb_Write(kctx, wb, ")", 1);
+	KLIB KBuffer_Write(kctx, wb, ")", 1);
 	if(expr->attrTypeId != TY_var) {
-		KLIB Kwb_printf(kctx, wb, ":%s", TY_t(expr->attrTypeId));
+		KLIB KBuffer_printf(kctx, wb, ":%s", TY_t(expr->attrTypeId));
 	}
 #endif
 }
@@ -373,13 +373,13 @@ static void kStmt_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingB
 {
 	kStmt *stmt = values[pos].asStmt;
 	if(stmt->syn == NULL) {
-		KLIB Kwb_printf(kctx, wb, "DONE {uline: %d, ", (kshort_t)stmt->uline);
+		KLIB KBuffer_printf(kctx, wb, "DONE {uline: %d, ", (kshort_t)stmt->uline);
 	}
 	else {
-		KLIB Kwb_printf(kctx, wb, "%s%s {uline: %d, ", PSYM_t(stmt->syn->keyword), (kshort_t)stmt->uline);
+		KLIB KBuffer_printf(kctx, wb, "%s%s {uline: %d, ", PSYM_t(stmt->syn->keyword), (kshort_t)stmt->uline);
 	}
 	KLIB kObjectProto_p(kctx, values, pos, wb, 0);
-	KLIB Kwb_Write(kctx, wb, "}", 1);
+	KLIB KBuffer_Write(kctx, wb, "}", 1);
 }
 
 static kStmtVar* new_kStmt(KonohaContext *kctx, kArray *gcstack, SugarSyntax *syn, ...)

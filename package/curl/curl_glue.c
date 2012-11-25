@@ -664,7 +664,7 @@ static size_t writeToBuffer(void *buffer, size_t size, size_t nmemb, void *obj)
 	struct ReceiveBuffer *rbuf = (struct ReceiveBuffer *)obj;
 	KonohaContext *kctx = rbuf->kctx;
 	size_t writeSize = size * nmemb;
-	KLIB Kwb_Write(kctx, &rbuf->wb, (char *)buffer, writeSize);
+	KLIB KBuffer_Write(kctx, &rbuf->wb, (char *)buffer, writeSize);
 	return writeSize;
 }
 
@@ -676,7 +676,7 @@ static KMETHOD Curl_receiveString(KonohaContext *kctx, KonohaStack *sfp)
 	/* presets */
 	struct ReceiveBuffer rbuf = {0};
 	rbuf.kctx = kctx;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &rbuf.wb);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &rbuf.wb);
 	curl_easy_setopt(kcurl->curl, CURLOPT_WRITEFUNCTION, writeToBuffer);
 	curl_easy_setopt(kcurl->curl, CURLOPT_WRITEDATA, &rbuf);
 
@@ -695,8 +695,8 @@ static KMETHOD Curl_receiveString(KonohaContext *kctx, KonohaStack *sfp)
 	}
 
 	KReturnWith(
-		KLIB new_kString(rbuf.kctx, OnStack, KLIB Kwb_top(rbuf.kctx, &rbuf.wb, 0), Kwb_bytesize(&rbuf.wb), 0),
-		KLIB Kwb_Free(&rbuf.wb)
+		KLIB new_kString(rbuf.kctx, OnStack, KLIB KBuffer_Stringfy(rbuf.kctx, &rbuf.wb, 0), KBuffer_bytesize(&rbuf.wb), 0),
+		KLIB KBuffer_Free(&rbuf.wb)
 	);
 }
 

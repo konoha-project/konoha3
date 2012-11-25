@@ -26,14 +26,14 @@
 #include "minikonoha/platform.h"
 #include "test_konoha.h"
 
-void test_Karray(KonohaContext *kctx)
+void test_KArray(KonohaContext *kctx)
 {
     intptr_t i;
     KGrowingArray a;
-    kctx->klib->Karray_Init(kctx, &a, 4 * sizeof(intptr_t));
+    kctx->klib->KArray_Init(kctx, &a, 4 * sizeof(intptr_t));
     for (i = 0; i < 10; ++i) {
         if(a.bytesize == a.bytemax) {
-            kctx->klib->Karray_Expand(kctx, &a, a.bytesize+1 * sizeof(intptr_t));
+            kctx->klib->KArray_Expand(kctx, &a, a.bytesize+1 * sizeof(intptr_t));
         }
         ((int*)a.bytebuf)[i] = i;
         a.bytesize += 1*sizeof(intptr_t);
@@ -42,7 +42,7 @@ void test_Karray(KonohaContext *kctx)
         assert (i*sizeof(intptr_t) < a.bytesize);
         assert(((int*)a.bytebuf)[i] == i);
     }
-    kctx->klib->Karray_Free(kctx, &a);
+    kctx->klib->KArray_Free(kctx, &a);
 }
 
 int main(int argc, const char *argv[])
@@ -50,7 +50,7 @@ int main(int argc, const char *argv[])
     KonohaContext* konoha = CreateContext();
     int i;
     for (i = 0; i < 100; ++i) {
-        test_Karray(konoha);
+        test_KArray(konoha);
     }
     DeleteContext(konoha);
     return 0;

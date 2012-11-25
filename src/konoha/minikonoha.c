@@ -31,7 +31,6 @@
 extern "C" {
 #endif
 
-#include "import/protomap.h"
 #include "import/klibexec.h"
 #include "import/datatype.h"
 #include "import/methods.h"
@@ -63,7 +62,7 @@ static void KonohaStackRuntime_Init(KonohaContext *kctx, KonohaContextVar *ctx, 
 	KUnsafeFieldInit(base->ContextConstList, new_(Array, 8, OnField));
 	KUnsafeFieldInit(base->OptionalErrorInfo, TS_EMPTY);
 	base->gcstack_OnContextConstList = new_(Array, K_PAGESIZE/sizeof(void *), base->ContextConstList);
-	KLIB Karray_Init(kctx, &base->cwb, K_PAGESIZE * 4);
+	KLIB KArray_Init(kctx, &base->cwb, K_PAGESIZE * 4);
 	ctx->esp = base->stack;
 	ctx->stack = base;
 }
@@ -84,7 +83,7 @@ static void KonohaStackRuntime_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 	if(ctx->stack->evaljmpbuf != NULL) {
 		KFree(ctx->stack->evaljmpbuf, sizeof(jmpbuf_i));
 	}
-	KLIB Karray_Free(kctx, &ctx->stack->cwb);
+	KLIB KArray_Free(kctx, &ctx->stack->cwb);
 	KFree(ctx->stack->stack, sizeof(KonohaStack) * ctx->stack->stacksize);
 	KFree(ctx->stack, sizeof(KonohaStackRuntimeVar));
 }

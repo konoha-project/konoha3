@@ -59,9 +59,9 @@ static void Person_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 {
 	/* This function is called when serializing the object. */
 	struct Person *p = (struct Person *) v[pos].asObject;
-	KLIB Kwb_Write(kctx, wb, S_text(p->name), S_size(p->name));
-	KLIB Kwb_Write(kctx, wb, ",", 1);
-	KLIB Kwb_printf(kctx, wb, KINT_FMT, p->age);
+	KLIB KBuffer_Write(kctx, wb, S_text(p->name), S_size(p->name));
+	KLIB KBuffer_Write(kctx, wb, ",", 1);
+	KLIB KBuffer_printf(kctx, wb, KINT_FMT, p->age);
 }
 
 static void Person_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)

@@ -38,7 +38,7 @@ static void Method_WriteAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KGr
 	for(i = 0; i < sizeof(MethodFlagData)/sizeof(const char *); i++) {
 		uintptr_t flagmask = 1 << i;
 		if((mtd->flag & flagmask) == flagmask) {
-			KLIB Kwb_printf(kctx, wb, "@%s ", MethodFlagData[i]);
+			KLIB KBuffer_printf(kctx, wb, "@%s ", MethodFlagData[i]);
 		}
 	}
 }
@@ -47,23 +47,23 @@ static void kMethod_WriteToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuf
 {
 	kParam *pa = kMethod_GetParam(mtd);
 	Method_WriteAttributeToBuffer(kctx, mtd, wb);
-	KLIB Kwb_printf(kctx, wb, "%s %s.%s%s", ATY_t(pa->rtype), TY_t(mtd->typeId), MethodName_t(mtd->mn));
+	KLIB KBuffer_printf(kctx, wb, "%s %s.%s%s", ATY_t(pa->rtype), TY_t(mtd->typeId), MethodName_t(mtd->mn));
 	{
 		size_t i;
-		KLIB Kwb_Write(kctx, wb, "(", 1);
+		KLIB KBuffer_Write(kctx, wb, "(", 1);
 		for(i = 0; i < pa->psize; i++) {
 			if(i > 0) {
-				KLIB Kwb_Write(kctx, wb, ", ", 2);
+				KLIB KBuffer_Write(kctx, wb, ", ", 2);
 			}
 			if(TypeAttr_Is(ReadOnly, pa->paramtypeItems[i].attrTypeId)) {
-				KLIB Kwb_printf(kctx, wb, "@ReadOnly ");
+				KLIB KBuffer_printf(kctx, wb, "@ReadOnly ");
 			}
 			if(TypeAttr_Is(Coercion, pa->paramtypeItems[i].attrTypeId)) {
-				KLIB Kwb_printf(kctx, wb, "@Coercion ");
+				KLIB KBuffer_printf(kctx, wb, "@Coercion ");
 			}
-			KLIB Kwb_printf(kctx, wb, "%s %s", ATY_t(pa->paramtypeItems[i].attrTypeId), SYM_t(pa->paramtypeItems[i].name));
+			KLIB KBuffer_printf(kctx, wb, "%s %s", ATY_t(pa->paramtypeItems[i].attrTypeId), SYM_t(pa->paramtypeItems[i].name));
 		}
-		KLIB Kwb_Write(kctx, wb, ")", 1);
+		KLIB KBuffer_Write(kctx, wb, ")", 1);
 	}
 }
 
@@ -82,10 +82,10 @@ static void copyMethodList(KonohaContext *kctx, kattrtype_t cid, kArray *s, kArr
 static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kMethod_WriteToBuffer(kctx, mtd, &wb);
-	PLATAPI printf_i("%s\n", KLIB Kwb_top(kctx, &wb, 1));
-	KLIB Kwb_Free(&wb);
+	PLATAPI printf_i("%s\n", KLIB KBuffer_Stringfy(kctx, &wb, 1));
+	KLIB KBuffer_Free(&wb);
 	return;
 }
 

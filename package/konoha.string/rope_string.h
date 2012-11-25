@@ -219,14 +219,14 @@ static void String2_Free(KonohaContext *kctx, kObject *o)
 
 static void Stack_Init(KonohaContext *kctx, KGrowingArray *stack)
 {
-	KLIB Karray_Init(kctx, stack, 4 * sizeof(kStringBase**));
+	KLIB KArray_Init(kctx, stack, 4 * sizeof(kStringBase**));
 }
 
 static void Stack_Push(KonohaContext *kctx, KGrowingArray *stack, kStringBase *str)
 {
 	size_t index = stack->bytesize / sizeof(kStringBase *);
 	if(stack->bytesize == stack->bytemax) {
-		KLIB Karray_Expand(kctx, stack, stack->bytemax * 2);
+		KLIB KArray_Expand(kctx, stack, stack->bytemax * 2);
 	}
 	stack->ObjectItems[index] = (kObject *) str;
 	stack->bytesize += sizeof(kStringBase *);
@@ -245,7 +245,7 @@ static kStringBase *Stack_Pop(KonohaContext *kctx, KGrowingArray *stack)
 
 static void Stack_dispose(KonohaContext *kctx, KGrowingArray *stack)
 {
-	KLIB Karray_Free(kctx, stack);
+	KLIB KArray_Free(kctx, stack);
 }
 
 static void copyText(KonohaContext *kctx, KGrowingArray *stack, char *dest, size_t size)

@@ -70,7 +70,7 @@ static void kJson_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer
 //		KReturn(KNULL(String));
 //	}
 //	char* data = json_dumps(json->obj, JSON_ENSURE_ASCII);
-//	KLIB Kwb_printf(kctx, wb, "%s", data);
+//	KLIB KBuffer_printf(kctx, wb, "%s", data);
 //	free(data);
 }
 

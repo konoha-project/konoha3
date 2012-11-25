@@ -77,7 +77,7 @@
 //		}
 //	} else {
 //		KGrowingBuffer wb;
-//		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+//		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 //		/* case : import konoha.import */
 //		ksymbol_t star = SYM_("*");
 //		size_t i = 0;
@@ -91,14 +91,14 @@
 //						break;
 //					}
 //				}
-//				KLIB Kwb_Write(kctx, &wb, S_text(tk->text), S_size(tk->text));
-//				KLIB Kwb_Write(kctx, &wb, ".", 1);
+//				KLIB KBuffer_Write(kctx, &wb, S_text(tk->text), S_size(tk->text));
+//				KLIB KBuffer_Write(kctx, &wb, ".", 1);
 //			}
 //		}
 //		kString *name = tokenList->TokenItems[i]->text;
-//		KLIB Kwb_Write(kctx, &wb, S_text(name), S_size(name));
+//		KLIB KBuffer_Write(kctx, &wb, S_text(name), S_size(name));
 //
-//		kString *pkgname = KLIB new_kString(kctx, OnGcStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+//		kString *pkgname = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_Stringfy(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
 //		expr = CreateImportCall(kctx, syn, tkImport, ns, pkgname);
 //	}
 //	KLIB kObjectProto_SetObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);

@@ -451,7 +451,7 @@ struct kStmtVar {
 #define kStmt_setObject(CTX, O, K, V)             KLIB kObjectProto_SetObject(CTX, UPCAST(O), K, O_typeId(V), UPCAST(V))
 #define kStmt_setUnboxValue(CTX, O, K, T, V)      KLIB kObjectProto_SetUnboxValue(CTX, UPCAST(O), K, T, V)
 #define kStmt_removeKey(CTX, O, K)                KLIB kObjectProto_RemoveKey(CTX, UPCAST(O), K)
-#define kStmt_protoEach(CTX, O, THUNK, F)         KLIB kObjectProto_Each(CTX, UPCAST(O), THUNK, F)
+#define kStmt_protoEach(CTX, O, THUNK, F)         KLIB kObjectProto_DoEach(CTX, UPCAST(O), THUNK, F)
 
 #define kStmt_Message(kctx, STMT, PE, FMT, ...)            SUGAR kStmt_Message2(kctx, STMT, NULL, PE, FMT, ## __VA_ARGS__)
 #define kStmtToken_Message(kctx, STMT, TK, PE, FMT, ...)   SUGAR kStmt_Message2(kctx, STMT, TK, PE, FMT, ## __VA_ARGS__)

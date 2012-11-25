@@ -98,13 +98,13 @@ static void kFileStatus_Free(KonohaContext *kctx, kObject *o)
 static void kFileStatus_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	kFileStatus *stat = (kFileStatus *)v[pos].asObject;
-	KLIB Kwb_printf(kctx, wb, "{dev: %d, ", stat->stat->st_dev);
-	KLIB Kwb_printf(kctx, wb, "ino: %d, ",  stat->stat->st_ino);
-	KLIB Kwb_printf(kctx, wb, "mode: %d, ", stat->stat->st_mode);
-	KLIB Kwb_printf(kctx, wb, "nlink: %d, ", stat->stat->st_nlink);
-	KLIB Kwb_printf(kctx, wb, "uid: %d, ", stat->stat->st_uid);
-	KLIB Kwb_printf(kctx, wb, "uid: %d, ", stat->stat->st_gid);
-	KLIB Kwb_printf(kctx, wb, "size: %d}", stat->stat->st_size);
+	KLIB KBuffer_printf(kctx, wb, "{dev: %d, ", stat->stat->st_dev);
+	KLIB KBuffer_printf(kctx, wb, "ino: %d, ",  stat->stat->st_ino);
+	KLIB KBuffer_printf(kctx, wb, "mode: %d, ", stat->stat->st_mode);
+	KLIB KBuffer_printf(kctx, wb, "nlink: %d, ", stat->stat->st_nlink);
+	KLIB KBuffer_printf(kctx, wb, "uid: %d, ", stat->stat->st_uid);
+	KLIB KBuffer_printf(kctx, wb, "uid: %d, ", stat->stat->st_gid);
+	KLIB KBuffer_printf(kctx, wb, "size: %d}", stat->stat->st_size);
 }
 
 // --------------------------------------------------------------------------

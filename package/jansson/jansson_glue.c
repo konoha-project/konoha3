@@ -65,7 +65,7 @@ static void Jansson_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuff
 {
 	struct kJanssonVar *json = (struct kJanssonVar *)v[pos].asObject;
 	char* data = json_dumps(json->obj, JSON_ENSURE_ASCII);
-	KLIB Kwb_printf(kctx, wb, "%s", data);
+	KLIB KBuffer_printf(kctx, wb, "%s", data);
 	free(data);
 }
 

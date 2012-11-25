@@ -69,7 +69,7 @@ static void Float_Init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void Float_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
-	KLIB Kwb_printf(kctx, wb, KFLOAT_FMT, v[pos].floatValue);
+	KLIB KBuffer_printf(kctx, wb, KFLOAT_FMT, v[pos].floatValue);
 }
 
 
