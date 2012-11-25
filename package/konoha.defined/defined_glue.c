@@ -40,7 +40,7 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	int popIsBlockingErrorMessage = sugarContext->isBlockedErrorMessage;
 	sugarContext->isBlockedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->cons); i++) {
-		kExpr *typedExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, i, gma, TY_var, TypeCheckPolicy_ALLOWVOID);
+		kExpr *typedExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, i, gma, CT_INFER, TypeCheckPolicy_ALLOWVOID);
 		if(typedExpr == K_NULLEXPR) {
 			isDefined = false;
 			break;
