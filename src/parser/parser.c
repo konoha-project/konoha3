@@ -147,24 +147,24 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	defToken.init = kToken_Init;
 	defToken.reftrace = kToken_Reftrace;
 	defToken.p = kToken_p;
-	
+
 	KDEFINE_CLASS defExpr = {0};
 	SETSTRUCTNAME(defExpr, Expr);
 	defExpr.init = kExpr_Init;
 	defExpr.reftrace = kExpr_Reftrace;
 	defExpr.p        = kExpr_p;
-	
+
 	KDEFINE_CLASS defStmt = {0};
 	SETSTRUCTNAME(defStmt, Stmt);
 	defStmt.init = kStmt_Init;
 	defStmt.reftrace = kStmt_Reftrace;
 	defStmt.p        = kStmt_p;
-	
+
 	KDEFINE_CLASS defBlock = {0};
 	SETSTRUCTNAME(defBlock, Block);
 	defBlock.init = kBlock_Init;
 	defBlock.reftrace = kBlock_Reftrace;
-	
+
 	KDEFINE_CLASS defGamma = {0};
 	SETSTRUCTNAME(defGamma, Gamma);
 	defGamma.init = Gamma_Init;

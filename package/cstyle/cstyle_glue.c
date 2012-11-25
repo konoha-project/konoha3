@@ -218,7 +218,7 @@ static KMETHOD PatternMatch_IncExpr(KonohaContext *kctx, KonohaStack *sfp)
 		kExpr *expr = SUGAR kStmt_ParseExpr(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, NULL);
 		if(expr != K_NULLEXPR) {
 			SUGAR kStmt_AddParsedObject(kctx, stmt, KW_ExprPattern, UPCAST(expr));
-			((kStmtVar*)stmt)->syn = SYN_(Stmt_ns(stmt), KW_ExprPattern);
+			((kStmtVar *)stmt)->syn = SYN_(Stmt_ns(stmt), KW_ExprPattern);
 		}
 		TokenSeq_Pop(kctx, macro);
 		end = SUGAR kNameSpace_FindEndOfStatement(kctx, kStmt_ns(stmt), tokenList, end+1, endIdx);
@@ -271,7 +271,7 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *termToken = expr->termToken;
 	DBG_ASSERT(Expr_isTerm(expr) && IS_Token(termToken));
 	if(termToken->unresolvedTokenType == TokenType_CODE) {
-		SUGAR kToken_ToBraceGroup(kctx, (kTokenVar*)termToken, Stmt_ns(stmt), NULL);
+		SUGAR kToken_ToBraceGroup(kctx, (kTokenVar *)termToken, Stmt_ns(stmt), NULL);
 	}
 	if(termToken->resolvedSyntaxInfo->keyword == KW_BraceGroup) {
 		kExprVar *arrayExpr = SUGAR new_UntypedCallStyleExpr(kctx, stmt->syn/*DUMMY*/, 2, K_NULL, K_NULL);

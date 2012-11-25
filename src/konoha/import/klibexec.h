@@ -78,11 +78,11 @@ KLIBDECL void KBuffer_Init(KGrowingArray *m, KGrowingBuffer *wb)
 KLIBDECL void* KBuffer_Alloca(KonohaContext *kctx, KGrowingBuffer *wb, size_t bytelen)
 {
 	KGrowingArray *m = wb->m;
-	if(m->bytesize % sizeof(void*) != 0) {
-		m->bytesize = ((m->bytesize / sizeof(void*))+1) * sizeof(void*);
+	if(m->bytesize % sizeof(void *) != 0) {
+		m->bytesize = ((m->bytesize / sizeof(void *))+1) * sizeof(void *);
 	}
-	if(bytelen % sizeof(void*) != 0) {
-		bytelen = ((bytelen / sizeof(void*))+1) * sizeof(void*);
+	if(bytelen % sizeof(void *) != 0) {
+		bytelen = ((bytelen / sizeof(void *))+1) * sizeof(void *);
 	}
 	if(!(m->bytesize + bytelen < m->bytemax)) {
 		KArray_Expand(kctx, m, m->bytesize + bytelen);
@@ -772,7 +772,7 @@ struct wbenv {
 
 static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 {
-	struct wbenv *w = (struct wbenv*)arg;
+	struct wbenv *w = (struct wbenv *)arg;
 	ksymbol_t key = d->key;
 	if(w->count > 0) {
 		KLIB KBuffer_Write(kctx, w->wb, ", ", 2);

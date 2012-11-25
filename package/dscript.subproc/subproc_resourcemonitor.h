@@ -53,13 +53,13 @@ enum e_resource{
 
 #define FETCH_MEM_FROM_RESOURCE_MONITOR(spd) fetch_resourcemonitor_about(kctx, &(spd->rmon), R_MEMORY)
 
- #if defined(__APPLE__)
- #include "subproc_resourcemonitor_mac.h"
- #elif defined(__linux__) || defined(__NetBSD__)
- #include "subproc_resourcemonitor_linux.h"
- #else
-	// TODO: for example, BSD
- #endif
+#if defined(__APPLE__)
+#include "subproc_resourcemonitor_mac.h"
+#elif defined(__linux__) || defined(__NetBSD__)
+#include "subproc_resourcemonitor_linux.h"
+#else
+#warning TODO: for example, BSD
+#endif
 
 #else
 #define SUBPROC_RESOURCEMON_INSTANCE
@@ -78,6 +78,4 @@ enum e_resource{
 #ifdef __cplusplus
 }
 #endif
-
-
 #endif /* SUBPROC_RESOURCEMONITOR_H_ */

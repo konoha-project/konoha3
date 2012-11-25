@@ -25,7 +25,7 @@
 static kbool_t VisitStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
 	kbool_t ret = false;
-	struct KBuilderCommon *cbuilder = (struct KBuilderCommon*)builder;
+	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
 	switch(stmt->build) {
 		case TSTMT_ERR:   ret = cbuilder->api->visitErrStmt(kctx, builder, stmt); break;
 		case TSTMT_EXPR:  ret = cbuilder->api->visitExprStmt(kctx, builder, stmt);   break;
@@ -42,7 +42,7 @@ static kbool_t VisitStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 
 static void VisitExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
-	struct KBuilderCommon *cbuilder = (struct KBuilderCommon*)builder;
+	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
 	int a = cbuilder->a;
 	int espidx = cbuilder->espidx;
 	int shift = cbuilder->shift;
@@ -68,7 +68,7 @@ static void VisitExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr
 
 static kbool_t VisitBlock(KonohaContext *kctx, KBuilder *builder, kBlock *block)
 {
-	struct KBuilderCommon *cbuilder = (struct KBuilderCommon*)builder;
+	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
 	int a = cbuilder->a;
 	int espidx = cbuilder->espidx;
 	int shift = cbuilder->shift;

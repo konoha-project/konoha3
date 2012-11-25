@@ -99,7 +99,7 @@ static KMETHOD String_AsciiAt(KonohaContext *kctx, KonohaStack *sfp)
 	int ch = 0;
 	size_t n = (size_t)sfp[1].intValue, len = S_size(sfp[0].asString);
 	if(n < len) {
-		ch = ((unsigned char*)S_text(sfp[0].asString))[n];
+		ch = ((unsigned char *)S_text(sfp[0].asString))[n];
 	}
 	KReturnUnboxValue(ch);
 }
