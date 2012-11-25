@@ -263,15 +263,9 @@ KLIBDECL void KDict_Remove(KonohaContext *kctx, KDict *dict, ksymbol_t queryKey)
 	}
 }
 
-KLIBDECL void KDict_MergeData(KonohaContext *kctx, KDict *dict, kObject *parent, KKeyValue *kvs, size_t nitems, int isOverride)
+KLIBDECL void KDict_MergeData(KonohaContext *kctx, KDict *dict, KKeyValue *kvs, size_t nitems, int isOverride)
 {
 	size_t i;
-	for(i = 0; i < nitems; i++) {
-		if(TypeAttr_Is(Boxed, kvs[i].attrTypeId)) {
-			PLATAPI WriteBarrier(kctx, parent);
-			break;
-		}
-	}
 	if(KDict_size(dict) == 0) {
 		KDict_Ensure(kctx, dict, nitems);
 		memcpy(dict->data.keyValueItems, kvs, nitems * sizeof(KKeyValue));
@@ -296,32 +290,6 @@ KLIBDECL void KDict_MergeData(KonohaContext *kctx, KDict *dict, kObject *parent,
 		}
 	}
 }
-
-KLIBDECL void KDict_LoadData(KonohaContext *kctx, KDict *dict, kObject *parent, const char **d, int isOverride)
-{
-	KGrowingBuffer wb;
-	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	while(d[0] != NULL) {
-		KKeyValue kv;
-		kv.key = ksymbolSPOL(d[0], strlen(d[0]), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID);
-		kv.unboxValue = (uintptr_t)d[2];
-		kattrtype_t ty = (kattrtype_t)(uintptr_t)d[1];
-		if(TY_isUnbox(ty) || ty == VirtualType_Text || ty == VirtualType_KonohaClass || ty == VirtualType_StaticMethod) {
-			kv.attrTypeId = ty;
-		}
-		else {
-			kv.attrTypeId = ty | TypeAttr_Boxed;
-		}
-		KLIB KBuffer_Write(kctx, &wb, (const char *)(&kv), sizeof(KKeyValue));
-		d += 3;
-	}
-	size_t nitems = KBuffer_bytesize(&wb) / sizeof(KKeyValue);
-	if(nitems > 0) {
-		KDict_MergeData(kctx, dict, parent, (KKeyValue *)KLIB KBuffer_Stringfy(kctx, &wb, 0), nitems, isOverride);
-	}
-	KLIB KBuffer_Free(&wb);
-}
-
 
 KLIBDECL void KDict_DoEach(KonohaContext *kctx, KDict *dict, void *thunk, void (*f)(KonohaContext*, void *, KKeyValue *))
 {
@@ -921,7 +889,6 @@ static void klib_Init(KonohaLibVar *l)
 	l->KDict_Remove      = KDict_Remove;
 	l->KDict_Set         = KDict_Set;
 	l->KDict_MergeData   = KDict_MergeData;
-	l->KDict_LoadData    = KDict_LoadData;
 	l->KDict_DoEach      = KDict_DoEach;
 	l->KDict_Reftrace    = KDict_Reftrace;
 	l->KDict_Free        = KDict_Free;

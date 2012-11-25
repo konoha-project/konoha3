@@ -311,7 +311,7 @@ static KKeyValue* kNameSpace_GetLocalConstNULL(KonohaContext *kctx, kNameSpace *
 		const char *textData = (const char *)kvs->unboxValue;
 		kvs->attrTypeId = TY_String | TypeAttr_Boxed;
 		kvs->StringValue = KLIB new_kString(kctx, ns->NameSpaceConstList, textData, strlen(textData), StringPolicy_TEXT);
-		PLATAPI WriteBarrier(kctx, (kObject*)ns);
+		KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs->StringValue);
 	}
 	return kvs;
 }
@@ -328,7 +328,13 @@ static KKeyValue* kNameSpace_GetConstNULL(KonohaContext *kctx, kNameSpace *ns, k
 
 static kbool_t kNameSpace_MergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KKeyValue *kvs, size_t nitems, int isOverride, KTraceInfo *trace)
 {
-	KLIB KDict_MergeData(kctx, &(ns->constTable), (kObject*)ns, kvs, nitems, isOverride);
+	size_t i;
+	for(i = 0; i < nitems; i++) {
+		if(TypeAttr_Is(Boxed, kvs[i].attrTypeId)) {
+			KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs[i].ObjectValue);
+		}
+	}
+	KLIB KDict_MergeData(kctx, &(ns->constTable), kvs, nitems, isOverride);
 	return true;
 }
 
@@ -350,14 +356,29 @@ static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksym
 	SetKeyValue(kctx, &kvs, key, ty, unboxValue);
 	KLIB KDict_Set(kctx, &(ns->constTable), &kvs);
 	if(TypeAttr_Is(Boxed, kvs.attrTypeId)) {
-		PLATAPI WriteBarrier(kctx, (kObject*)ns);
+		KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs.ObjectValue);
 	}
 	return true;
 }
 
 static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, const char **d, int isOverride, KTraceInfo *trace)
 {
-	KLIB KDict_LoadData(kctx, &(ns->constTable), (kObject*)ns, d, isOverride);
+	KGrowingBuffer wb;
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+	while(d[0] != NULL) {
+		KKeyValue kvs;
+		SetKeyValue(kctx, &kvs, ksymbolSPOL(d[0], strlen(d[0]), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID), (kattrtype_t)(uintptr_t)d[1], (uintptr_t)d[2]);
+		KLIB KBuffer_Write(kctx, &wb, (const char *)(&kvs), sizeof(KKeyValue));
+		d += 3;
+		if(TypeAttr_Is(Boxed, kvs.attrTypeId)) {
+			KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs.ObjectValue);
+		}
+	}
+	size_t nitems = KBuffer_bytesize(&wb) / sizeof(KKeyValue);
+	if(nitems > 0) {
+		KLIB KDict_MergeData(kctx, &(ns->constTable), (KKeyValue *)KLIB KBuffer_Stringfy(kctx, &wb, 0), nitems, isOverride);
+	}
+	KLIB KBuffer_Free(&wb);
 	return true;
 }
 

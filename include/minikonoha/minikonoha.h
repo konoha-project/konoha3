@@ -1621,8 +1621,7 @@ struct KonohaLibVar {
 	void                (*KDict_Add)(KonohaContext *, KDict *, KKeyValue *);
 	void                (*KDict_Remove)(KonohaContext *, KDict *, ksymbol_t);
 	void                (*KDict_Set)(KonohaContext *, KDict *, KKeyValue *);
-	void                (*KDict_MergeData)(KonohaContext *, KDict *, kObject *parent, KKeyValue *, size_t, int isOverride);
-	void                (*KDict_LoadData)(KonohaContext *, KDict *, kObject *parent, const char **, int isOverride);
+	void                (*KDict_MergeData)(KonohaContext *, KDict *, KKeyValue *, size_t, int isOverride);
 	void                (*KDict_DoEach)(KonohaContext *, KDict *, void *, void (*)(KonohaContext*, void *, KKeyValue *));
 	void                (*KDict_Reftrace)(KonohaContext *, KDict *, KObjectVisitor *);
 	void                (*KDict_Free)(KonohaContext *, KDict *);
