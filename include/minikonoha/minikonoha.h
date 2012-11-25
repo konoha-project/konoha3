@@ -1158,7 +1158,7 @@ struct KonohaClassField {
 typedef struct KonohaObjectHeader {
 	kmagicflag_t magicflag;
 	KonohaClass *ct;
-	KProtoMap *kvproto;
+	KProtoMap *prototypePtr;
 } KonohaObjectHeader;
 
 struct kObjectVar {
