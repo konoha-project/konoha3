@@ -300,7 +300,7 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 // --------------------------------------------------------------------------
 /* ConstTable */
 
-#define OLD
+//#define OLD
 
 #ifndef OLD
 

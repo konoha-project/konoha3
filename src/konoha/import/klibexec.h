@@ -277,6 +277,7 @@ KLIBDECL void KDict_MergeData(KonohaContext *kctx, KDict *dict, kObject *parent,
 		memcpy(dict->data.keyValueItems, kvs, nitems * sizeof(KKeyValue));
 		dict->data.bytesize = nitems * sizeof(KKeyValue);
 		KDict_Sort(kctx, dict);
+		return;
 	}
 	kbool_t foundItems[nitems];
 	bzero(foundItems, sizeof(int) * nitems);
