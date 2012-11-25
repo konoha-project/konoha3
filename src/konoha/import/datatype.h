@@ -53,7 +53,7 @@ static kObject *new_kObject(KonohaContext *kctx, kArray *gcstackNULL, KonohaClas
 	kObjectVar *o = PLATAPI AllocObject(kctx, ct->cstruct_size, NULL/*FIXME*/);
 	o->h.magicflag = ct->magicflag;
 	o->h.ct = ct;
-	o->h.kvproto = (KProtoMap *) Kprotomap_new(0);
+	o->h.kvproto = NULL; /* (KProtoMap *) Kprotomap_new(0); */
 	if(gcstackNULL != NULL) {
 		kArray_Add(kctx, gcstackNULL, o);
 	}

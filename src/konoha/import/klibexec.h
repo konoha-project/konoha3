@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#define USE_IDE_PROTOMAP 1
+//#define USE_IDE_PROTOMAP 1
 
 KLIBDECL void KArray_Init(KonohaContext *kctx, KGrowingArray *m, size_t bytemax)
 {
@@ -280,7 +280,7 @@ KLIBDECL void KDict_MergeData(KonohaContext *kctx, KDict *dict, kObject *parent,
 		return;
 	}
 	kbool_t foundItems[nitems];
-	bzero(foundItems, sizeof(int) * nitems);
+	bzero(foundItems, sizeof(kbool_t) * nitems);
 	for(i = 0; i < nitems; i++) {
 		KKeyValue *stored = KLIB KDict_GetNULL(kctx, dict, kvs[i].key);
 		if(stored != NULL) {
