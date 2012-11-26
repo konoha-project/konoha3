@@ -109,10 +109,10 @@ static RawEvent* dequeueRawEventFromLocalQueue(LocalQueue *queue)
 //		invoke_gc(ctx);
 //	}
 //	if(TFLAG_is(int, safepoint, SAFEPOINT_SIGNAL)) {
-//		if (ctx->sighandlers != NULL) {
+//		if(ctx->sighandlers != NULL) {
 //			KNH_ASSERT(ctx->signal < K_SIGNAL_MAX);
 //			kFunc *handler_func = (kFunc *)ctx->sighandlers[ctx->signal];
-//			if (handler_func != NULL) {
+//			if(handler_func != NULL) {
 //				ksfp_t *lsfp = ctx->esp + 1; // for safety
 //				lsfp[K_CALLDELTA + 1].ivalue = ctx->signal;
 //				knh_Func_invoke(ctx, handler_func, lsfp, 1/* argc */);
@@ -279,10 +279,10 @@ static void AddSignalEvent(KonohaContext *kctx, struct EventContext *eventContex
 static void StartEventHandler(KonohaContext *kctx)
 {
 	KNH_ASSERT(PLATAPI eventContext == NULL);
-	struct EventContext *eventContext = (struct EventContext*)PLATAPI malloc_i(sizeof(struct EventContext));
-	((KonohaFactory*)kctx->platApi)->eventContext = eventContext;
-	bzero(((KonohaFactory*)kctx->platApi)->eventContext, sizeof(struct EventContext));
-	eventContext->queue = (LocalQueue*)PLATAPI malloc_i(sizeof(LocalQueue));
+	struct EventContext *eventContext = (struct EventContext *)PLATAPI malloc_i(sizeof(struct EventContext));
+	((KonohaFactory *)kctx->platApi)->eventContext = eventContext;
+	bzero(((KonohaFactory *)kctx->platApi)->eventContext, sizeof(struct EventContext));
+	eventContext->queue = (LocalQueue *)PLATAPI malloc_i(sizeof(LocalQueue));
 	LocalQueue_Init(kctx, eventContext->queue);
 	SetSignal(kctx);
 }
@@ -290,7 +290,7 @@ static void StartEventHandler(KonohaContext *kctx)
 static void StopEventHandler(KonohaContext *kctx)
 {
 	ResetSignal(kctx);
-	struct EventContext *eventContext = ((KonohaFactory*)kctx->platApi)->eventContext;
+	struct EventContext *eventContext = ((KonohaFactory *)kctx->platApi)->eventContext;
 	LocalQueue_Free(kctx, eventContext->queue);
 	PLATAPI free_i(eventContext);
 }
@@ -327,7 +327,7 @@ static void DispatchEvent(KonohaContext *kctx, kbool_t (*consume)(KonohaContext 
 	}
 	RawEvent *rawEvent = dequeueRawEventFromLocalQueue(eventContext->queue);
 	while(rawEvent != NULL) {
-		consume(kctx, (struct JsonBuf*)rawEvent, trace);
+		consume(kctx, (struct JsonBuf *)rawEvent, trace);
 		rawEvent = dequeueRawEventFromLocalQueue(eventContext->queue);
 	}
 }
@@ -447,8 +447,8 @@ kbool_t LoadSignalModule(KonohaFactory *factory, ModuleType type)
 //	CTX ctx = knh_getCurrentContext();
 //	record_signal(ctx, sig RECDATA);
 //#if !defined(K_USING_MINGW_)
-//	if (si->si_code == SEGV_ACCERR) {
-//		void* address = (void*)si->si_Addr;
+//	if(si->si_code == SEGV_ACCERR) {
+//		void* address = (void *)si->si_Addr;
 //		fprintf(stderr, "address=%p\n", address);
 //	}
 //#endif /* defined(K_USING_MINGW_) */
@@ -513,7 +513,7 @@ kbool_t LoadSignalModule(KonohaFactory *factory, ModuleType type)
 				KNH_LDATA(LOG_i("signal", T)));        \
 	}                                                          \
 	knh_bzero(sa, sizeof(struct sigaction));                   \
-} while (0)
+} while(0)
 #endif
 
 //#endif /* defined(K_USING_MINGW_) */

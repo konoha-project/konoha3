@@ -113,7 +113,7 @@ static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeT
 	case VMT_Object: {
 		kObject *o = c->o[i];
 		if(IS_Method(o)) {
-			kMethod *mtd = (kMethod*)o;
+			kMethod *mtd = (kMethod *)o;
 			KLIB KBuffer_printf(kctx, wb, " %s.%s%s", TY_t(mtd->typeId), MethodName_t(mtd->mn));
 		}
 		else {
@@ -273,7 +273,7 @@ static BasicBlock *BasicBlock_FindById(KonohaContext *kctx, bblock_t id)
 {
 	BasicBlock *bb = NULL;
 	while(id != -1) {
-		bb = (BasicBlock*)(kctx->stack->cwb.bytebuf + id);
+		bb = (BasicBlock *)(kctx->stack->cwb.bytebuf + id);
 		id = bb->newid;
 	}
 	return bb;
@@ -284,17 +284,17 @@ static bblock_t BasicBlock_id(KonohaContext *kctx, BasicBlock *bb)
 	while(bb->newid != -1) {
 		bb = BasicBlock_FindById(kctx, bb->newid);
 	}
-	return ((char*)bb) - kctx->stack->cwb.bytebuf;
+	return ((char *)bb) - kctx->stack->cwb.bytebuf;
 }
 
 static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, bblock_t oldId)
 {
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	BasicBlock *bb = (BasicBlock*)KLIB KBuffer_Alloca(kctx, &wb, max);
+	BasicBlock *bb = (BasicBlock *)KLIB KBuffer_Alloca(kctx, &wb, max);
 	if(oldId != -1) {
 		BasicBlock *oldbb = BasicBlock_FindById(kctx, oldId);
-		if(((char*)oldbb) + oldbb->max == (char*)bb) {
+		if(((char *)oldbb) + oldbb->max == (char *)bb) {
 			oldbb->max += (max - sizeof(BasicBlock));
 			wb.m->bytesize -= sizeof(BasicBlock);
 			return oldbb;
@@ -330,7 +330,7 @@ static bblock_t BasicBlock_Add(KonohaContext *kctx, bblock_t blockId, kfileline_
 		size_t newsize = newsize2(bb->max);
 		bb = new_BasicBlock(kctx, newsize, blockId);
 	}
-	memcpy(((char*)bb) + bb->size, op, size);
+	memcpy(((char *)bb) + bb->size, op, size);
 	bb->size += padding_size;
 	return BasicBlock_id(kctx, bb);
 }
@@ -353,7 +353,7 @@ static void BasicBlock_WriteBuffer(KonohaContext *kctx, bblock_t blockId, KGrowi
 		if(len > 0) {
 			bblock_t id = BasicBlock_id(kctx, bb);
 			char buf[len];  // bb is growing together with wb.
-			memcpy(buf, ((char*)bb) + sizeof(BasicBlock), len);
+			memcpy(buf, ((char *)bb) + sizeof(BasicBlock), len);
 			KLIB KBuffer_Write(kctx, wb, buf, len);
 			bb = BasicBlock_FindById(kctx, id);  // recheck
 			bb->lastoffset = CodeOffset(wb) - sizeof(VirtualCode);
@@ -404,7 +404,7 @@ static void BasicBlock_setJumpAddr(KonohaContext *kctx, BasicBlock *bb, char *vc
 			BasicBlock *bbJ = BasicBlock_leapJump(kctx, BasicBlock_FindById(kctx, bb->branchid));
 			OPJMP *j = (OPJMP *)(vcode + bb->lastoffset);
 			DBG_ASSERT(j->opcode == OPCODE_JMP || j->opcode == OPCODE_JMPF);
-			j->jumppc = (VirtualCode*)(vcode + bbJ->codeoffset);
+			j->jumppc = (VirtualCode *)(vcode + bbJ->codeoffset);
 			bbJ = BasicBlock_FindById(kctx, bb->branchid);
 			if(!BasicBlock_isVisited(bbJ)) {
 				BasicBlock_setVisited(bbJ);
@@ -908,8 +908,8 @@ static struct VirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *bui
 	DBG_P(">>>>>> codesize=%d", codesize);
 	DBG_ASSERT(codesize != 0);
 	VirtualCode *vcode = (VirtualCode *)KCalloc_UNTRACE(codesize, 1);
-	memcpy((void*)vcode, KLIB KBuffer_Stringfy(kctx, &wb, 0), codesize);
-	BasicBlock_setJumpAddr(kctx, BasicBlock_FindById(kctx, beginId), (char*)vcode);
+	memcpy((void *)vcode, KLIB KBuffer_Stringfy(kctx, &wb, 0), codesize);
+	BasicBlock_setJumpAddr(kctx, BasicBlock_FindById(kctx, beginId), (char *)vcode);
 	KLIB KBuffer_Free(&wb);
 	vcode = MakeThreadedCode(kctx, builder, vcode, codesize);
 	DumpVirtualCode(kctx, vcode);

@@ -403,7 +403,7 @@
 //{
 //	kfileline_t uline = 0;
 //	while(true) {
-//		if (pc->opcode == OPCODE_RET) {
+//		if(pc->opcode == OPCODE_RET) {
 //			break;
 //		}
 //		if(pc->count > 0) {

@@ -829,7 +829,7 @@ static void KnewGcContext(KonohaContext *kctx)
 			default_size = (size_t) tmp;
 	}
 #endif
-	((KonohaContextVar*)kctx)->gcContext = HeapManager_Init(kctx, default_size);
+	((KonohaContextVar *)kctx)->gcContext = HeapManager_Init(kctx, default_size);
 }
 
 static void KdeleteGcContext(KonohaContext *kctx)
@@ -2002,7 +2002,7 @@ static void concgc_mark(HeapManager *mng, MarkStack *mstack, KObjectVisitor *vis
 {
 	KonohaContext *kctx = mng->kctx;
 	kObject *ref;
-	while ((ref = mstack_next(mstack)) != NULL) {
+	while((ref = mstack_next(mstack)) != NULL) {
 		KLIB kObjectProto_Reftrace(kctx, ref, visitor);
 	}
 }
@@ -2042,8 +2042,8 @@ static void *concgc_thread_entry(void *o)
 		// init and firstmark phase
 		concgc_stop_the_world(mng, GCPHASE_INIT);
 		if(mng->phase == GCPHASE_EXIT) break;
-		((KonohaFactory*)kctx->platApi)->WriteBarrier = Kwrite_barrier_concmark_phase;
-		((KonohaFactory*)kctx->platApi)->UpdateObjectField = KupdateObjectField_concmark_phase;
+		((KonohaFactory *)kctx->platApi)->WriteBarrier = Kwrite_barrier_concmark_phase;
+		((KonohaFactory *)kctx->platApi)->UpdateObjectField = KupdateObjectField_concmark_phase;
 		KLIB ReftraceAll(kctx, &tracer.base);
 		if(count++ > 8) {
 			// concurrent mark phase
@@ -2060,8 +2060,8 @@ static void *concgc_thread_entry(void *o)
 		}
 		// sweep phase
 		bmgc_gc_sweep(mng);
-		((KonohaFactory*)kctx->platApi)->WriteBarrier = Kwrite_barrier;
-		((KonohaFactory*)kctx->platApi)->UpdateObjectField = KupdateObjectField;
+		((KonohaFactory *)kctx->platApi)->WriteBarrier = Kwrite_barrier;
+		((KonohaFactory *)kctx->platApi)->UpdateObjectField = KupdateObjectField;
 		concgc_start_the_world(mng, GCPHASE_NONE);
 	}
 	return NULL;

@@ -34,7 +34,7 @@ extern "C" {
 #endif
 
 #ifndef LOG2
-#define LOG2(N) ((unsigned)((sizeof(void*) * 8) - __builtin_clzl(N - 1)))
+#define LOG2(N) ((unsigned)((sizeof(void *) * 8) - __builtin_clzl(N - 1)))
 #endif
 
 /* ARRAY */
@@ -53,7 +53,7 @@ typedef struct ARRAY(T) ARRAY(T)
 
 #define DEF_ARRAY_OP__(T, ValueType)\
 static inline ARRAY(T) *ARRAY_Init_##T (ARRAY(T) *a, size_t initsize) {\
-    a->list = (T*) KJSON_MALLOC(sizeof(T)*initsize);\
+    a->list = (T *) KJSON_MALLOC(sizeof(T)*initsize);\
     a->capacity  = initsize;\
     a->size  = 0;\
     return a;\
@@ -65,7 +65,7 @@ static inline void ARRAY_##T##_ensureSize(ARRAY(T) *a, size_t size) {\
     while(a->size + size > a->capacity) {\
         a->capacity *= 2;\
     }\
-    a->list = (T*)realloc(a->list, sizeof(T) * a->capacity);\
+    a->list = (T *)realloc(a->list, sizeof(T) * a->capacity);\
 }\
 static inline void ARRAY_##T##_dispose(ARRAY(T) *a) {\
     KJSON_FREE(a->list);\
@@ -76,7 +76,7 @@ static inline void ARRAY_##T##_dispose(ARRAY(T) *a) {\
 static inline void ARRAY_##T##_Add(ARRAY(T) *a, ValueType v) {\
     if(a->size + 1 >= a->capacity) {\
         a->capacity = 1 << LOG2(a->capacity * 2 + 1);\
-        a->list = (T*)realloc(a->list, sizeof(T) * a->capacity);\
+        a->list = (T *)realloc(a->list, sizeof(T) * a->capacity);\
     }\
     ARRAY_##T##_set(a, a->size++, v);\
 }

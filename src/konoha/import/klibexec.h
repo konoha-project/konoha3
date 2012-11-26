@@ -562,7 +562,7 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 
 static KProtoMap* new_KProtoMap(KonohaContext *kctx)
 {
-	KProtoMap* p = (KProtoMap*)KCalloc_UNTRACE(1, sizeof(KProtoMap));
+	KProtoMap* p = (KProtoMap *)KCalloc_UNTRACE(1, sizeof(KProtoMap));
 	p->refc = 1;
 	KLIB KArray_Init(kctx, &(p->dict.data), sizeof(KKeyValue) * 4);
 	return p;

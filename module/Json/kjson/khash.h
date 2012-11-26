@@ -68,7 +68,7 @@ static uint32_t fnv1a(const char *p, uint32_t len)
 
 #define HASH(STR, LEN) SuperFastHash(STR, LEN)
 #undef get16bits
-#if (defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \
+#if(defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \
   || defined(_MSC_VER) || defined (__BORLANDC__) || defined (__TURBOC__)
 #define get16bits(d) (*((const uint16_t *) (d)))
 #endif
@@ -132,7 +132,7 @@ static uint32_t djbhash(const char *p, uint32_t len)
     uint32_t hash = 5381;
     const uint8_t *s = (const uint8_t *) p;
     const uint8_t *e = (const uint8_t *) p + len;
-    while (s < e) {
+    while(s < e) {
         hash = ((hash << 5) + hash) + *s++;
     }
     return hash;

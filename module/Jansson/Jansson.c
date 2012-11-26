@@ -119,7 +119,7 @@ static void FreeJson(KonohaContext *kctx, struct JsonBuf *jsonbuf)
 
 static const char* JsonToNewText(KonohaContext *kctx, struct JsonBuf *jsonbuf)
 {
-	return (const char*) json_dumps(jsonbuf->jsonobj, 0);  // FIXME: if UTF-8 is supported
+	return (const char *) json_dumps(jsonbuf->jsonobj, 0);  // FIXME: if UTF-8 is supported
 }
 
 static size_t DoJsonEach(KonohaContext *kctx, struct JsonBuf *jsonbuf, void *thunk, void (*doEach)(KonohaContext *, const char *, struct JsonBuf *, void *))

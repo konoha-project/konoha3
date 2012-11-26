@@ -56,8 +56,8 @@ extern "C" {
 #endif
 
 /* ------------------------------------------------------------------------ */
-#define ShiftPointer(p, size)   ((char*)p + (size))
-#define MemorySize(p, p2)      (((char*)p) - ((char*)p2))
+#define ShiftPointer(p, size)   ((char *)p + (size))
+#define MemorySize(p, p2)      (((char *)p) - ((char *)p2))
 
 #define PageObjectSize(i) (K_PAGESIZE / sizeof(kGCObject##i))
 
@@ -218,7 +218,7 @@ static GcManager *Arena_Init(KonohaContext *kctx)
 	}\
 	do_Free(MSGC(j).arena_table.table, MSGC(j).arena_table.capacity * sizeof(ObjectPageTable_t));\
 	/*memlocal->ObjectArenaTBL[j] = NULL;*/\
-} while (0)
+} while(0)
 
 static void Arena_Free(GcManager *mng)
 {
@@ -355,19 +355,19 @@ static void Kfree(KonohaContext *kctx, void *p, size_t s)
 	o = MSGC(i).freelist.list;\
 	MSGC(i).freelist.list = (kGCObject *)((kGCObject0 *)o)->ref;\
 	((kGCObject0 *)o)->ref = NULL;\
-} while (0)
+} while(0)
 
 #define FREELIST_PUSH(o,i) do {\
 	kGCObject0 *tmp0 = (kGCObject0 *) o;\
 	tmp0->ref = (kGCObject0 *) MSGC(i).freelist.list;\
 	MSGC(i).freelist.list = (kGCObject *)o;\
-} while (0)
+} while(0)
 
 #define OBJECT_REUSE(used,i) do {\
 	(used)->h.ct = NULL;\
 	(used)->h.magicflag = 0;\
 	FREELIST_PUSH(used,i);\
-} while (0)
+} while(0)
 
 #define ObjectPage_Init(j) do {\
 	size_t i = 0;\
@@ -436,7 +436,7 @@ static kGCObject0 *new_ObjectArena0(GcManager *mng, size_t arenasize)
 	if(unlikely(!(pageindex < MSGC(0).arena_table.capacity))) {
 		size_t oldsize = MSGC(0).arena_table.capacity;
 		size_t newsize = oldsize * 2;
-		MSGC(0).arena_table.table = (ObjectPageTable_t*)do_realloc(MSGC(0).arena_table.table, oldsize * sizeof(ObjectPageTable_t), newsize * sizeof(ObjectPageTable_t));
+		MSGC(0).arena_table.table = (ObjectPageTable_t *)do_realloc(MSGC(0).arena_table.table, oldsize * sizeof(ObjectPageTable_t), newsize * sizeof(ObjectPageTable_t));
 		MSGC(0).arena_table.capacity = newsize;
 	}
 	MSGC(0).arena_table.size += 1;
@@ -448,7 +448,7 @@ static kGCObject0 *new_ObjectArena0(GcManager *mng, size_t arenasize)
 
 	int i = 0;
 	kGCObject0 *tmp = p;
-	while (tmp != &oat->head0->slots[PageObjectSize(0)]) {
+	while(tmp != &oat->head0->slots[PageObjectSize(0)]) {
 		tmp = tmp->ref;
 		i++;
 	}
@@ -464,7 +464,7 @@ static kGCObject1 *new_ObjectArena1(GcManager *mng, size_t arenasize)
 	if(unlikely(!(pageindex < MSGC(1).arena_table.capacity))) {
 		size_t oldsize = MSGC(1).arena_table.capacity;
 		size_t newsize = oldsize * 2;
-		MSGC(1).arena_table.table = (ObjectPageTable_t*)do_realloc(MSGC(1).arena_table.table, oldsize * sizeof(ObjectPageTable_t), newsize * sizeof(ObjectPageTable_t));
+		MSGC(1).arena_table.table = (ObjectPageTable_t *)do_realloc(MSGC(1).arena_table.table, oldsize * sizeof(ObjectPageTable_t), newsize * sizeof(ObjectPageTable_t));
 		MSGC(1).arena_table.capacity = newsize;
 	}
 	MSGC(1).arena_table.size += 1;
@@ -476,7 +476,7 @@ static kGCObject1 *new_ObjectArena1(GcManager *mng, size_t arenasize)
 
 	int i = 0;
 	kGCObject1 *tmp = p;
-	while (tmp != &oat->head1->slots[PageObjectSize(1)]) {
+	while(tmp != &oat->head1->slots[PageObjectSize(1)]) {
 		tmp = tmp->ref;
 		i++;
 	}
@@ -492,7 +492,7 @@ static kGCObject2 *new_ObjectArena2(GcManager *mng, size_t arenasize)
 	if(unlikely(!(pageindex < MSGC(2).arena_table.capacity))) {
 		size_t oldsize = MSGC(2).arena_table.capacity;
 		size_t newsize = oldsize * 2;
-		MSGC(2).arena_table.table = (ObjectPageTable_t*)do_realloc(MSGC(2).arena_table.table, oldsize * sizeof(ObjectPageTable_t), newsize * sizeof(ObjectPageTable_t));
+		MSGC(2).arena_table.table = (ObjectPageTable_t *)do_realloc(MSGC(2).arena_table.table, oldsize * sizeof(ObjectPageTable_t), newsize * sizeof(ObjectPageTable_t));
 		MSGC(2).arena_table.capacity = newsize;
 	}
 	MSGC(2).arena_table.size += 1;
@@ -504,7 +504,7 @@ static kGCObject2 *new_ObjectArena2(GcManager *mng, size_t arenasize)
 
 	int i = 0;
 	kGCObject2 *tmp = p;
-	while (tmp != &oat->head2->slots[PageObjectSize(2)]) {
+	while(tmp != &oat->head2->slots[PageObjectSize(2)]) {
 		tmp = tmp->ref;
 		i++;
 	}
@@ -519,11 +519,11 @@ static kGCObject2 *new_ObjectArena2(GcManager *mng, size_t arenasize)
 		for(i = 0; i < PageObjectSize(j); ++i) {\
 			kGCObject##j *o = &opage->slots[i];\
 			if(o->h.ct == NULL) continue;\
-			KLIB kObjectProto_Free(kctx, (kObjectVar*)o);\
+			KLIB kObjectProto_Free(kctx, (kObjectVar *)o);\
 		}\
 		opage++;\
 	}\
-} while (0)
+} while(0)
 
 static void ObjectArenaTable_Free0(KonohaContext *kctx, const ObjectPageTable_t *oat)
 {
@@ -547,7 +547,7 @@ static void ObjectArenaTable_Free2(KonohaContext *kctx, const ObjectPageTable_t 
 		ObjectPageTable_t *t = oat + i;\
 		ObjectArenaTable_Free##j(kctx, t);\
 	}\
-} while (0)
+} while(0)
 
 static void ObjectArena_FinalFree0(KonohaContext *kctx, ObjectPageTable_t *oat, size_t oatSize)
 {
@@ -575,7 +575,7 @@ static void ObjectArena_FinalFree2(KonohaContext *kctx, ObjectPageTable_t *oat, 
 		tail->ref = (kGCObject##N *)MSGC(N).freelist.list;\
 		MSGC(N).freelist.list = (kGCObject *)block;\
 	}\
-} while (0)
+} while(0)
 
 static void gc_extendObjectArena0(GcManager *mng)
 {
@@ -638,11 +638,11 @@ static kObject *mstack_next(MarkStack *mstack)
 #define MSGC_SETUP(i) do {\
 	kGCObject##i *p = new_ObjectArena##i(mng, K_ARENASIZE);\
 	MSGC(i).freelist.list = (kGCObject *)p;\
-} while (0)
+} while(0)
 
 static void KnewGcContext(KonohaContext *kctx)
 {
-	((KonohaContextVar*)kctx)->gcContext = Arena_Init(kctx);
+	((KonohaContextVar *)kctx)->gcContext = Arena_Init(kctx);
 	GcManager *mng = (GcManager *)kctx->gcContext;
 	mng->kctx = kctx;
 	MSGC_SETUP(0);
@@ -652,7 +652,7 @@ static void KnewGcContext(KonohaContext *kctx)
 #ifdef GCSTAT
 	global_gc_stat.fp = fopen("KONOHA_BMGC_INFO", "a");
 #endif
-	((KonohaContextVar*)kctx)->gcContext = mng;
+	((KonohaContextVar *)kctx)->gcContext = mng;
 }
 
 #define  FinalFree(n) ObjectArena_FinalFree##n(mng->kctx, MSGC(n).arena_table.table, MSGC(n).arena_table.size);
@@ -664,7 +664,7 @@ static void KdeleteGcContext(KonohaContext *kctx)
 	FinalFree(2);
 	Arena_Free(mng);
 	if(mng->mstack.capacity > 0) {
-		do_Free(mng->mstack.stack,  (mng->mstack.capacity + 1) * sizeof(kObject*));
+		do_Free(mng->mstack.stack,  (mng->mstack.capacity + 1) * sizeof(kObject *));
 		mng->mstack.capacity = 0;
 	}
 #ifdef GCSTAT
@@ -748,7 +748,7 @@ static void msgc_gc_mark(GcManager *mng)
 	if(MSGC(n).freelist.size <= MSGC(n).gc_threshold) {\
 		gc_extendObjectArena##n(mng);\
 	}\
-} while (0)
+} while(0)
 
 static size_t sweep0(GcContext *mng, void *p, int n, size_t sizeOfObject)
 {
@@ -758,17 +758,17 @@ static size_t sweep0(GcContext *mng, void *p, int n, size_t sizeOfObject)
 	size_t pageSize = K_PAGESIZE/sizeOfObject;
 	for(i = 0; i < pageSize; ++i) {
 		kGCObject0 *o = (kGCObject0 *)ShiftPointer(p,sizeOfObject*i);
-		if(!Object_isMark((kObject*)o)) {
+		if(!Object_isMark((kObject *)o)) {
 			if( O_ct(o)) {
 				DBG_P("~Object%d %s", n, O_ct(o)->DBG_NAME);
-				KLIB kObjectProto_Free(kctx, (kObjectVar*)o);
+				KLIB kObjectProto_Free(kctx, (kObjectVar *)o);
 				assert(O_ct(o)->cstruct_size == sizeOfObject);
 				++collected;
 				OBJECT_REUSE(o, n);
 				MSGC(n).freelist.size += 1;
 			}
 		}
-		Object_unsetMark(((kObjectVar*)o));
+		Object_unsetMark(((kObjectVar *)o));
 	}
 	return collected;
 }
@@ -787,7 +787,7 @@ static size_t sweep0(GcContext *mng, void *p, int n, size_t sizeOfObject)
 	}\
 	CHECK_EXPAND(listSize,n);\
 	return collected;\
-} while (0)
+} while(0)
 
 static size_t gc_sweep0(GcManager *mng)
 {
@@ -837,7 +837,7 @@ static kObjectVar *KallocObject(KonohaContext *kctx, size_t size, KTraceInfo *tr
 	kGCObject *o = NULL;
 	FREELIST_POP(o,page_size);
 	MSGC(page_size).freelist.size -= 1;
-	do_bzero((void*)o, size);
+	do_bzero((void *)o, size);
 #if GCDEBUG
 	OLDTRACE_SWITCH_TO_KTrace(LOGPOL_DEBUG,
 			LogText("@", "new"),
@@ -857,7 +857,7 @@ static kObjectVar *KallocObject(KonohaContext *kctx, size_t size, KTraceInfo *tr
 			return true;\
 		}\
 	}\
-} while (0)
+} while(0)
 
 static kbool_t KisObject(KonohaContext *kctx, void *ptr)
 {

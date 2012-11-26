@@ -40,7 +40,7 @@ static FILE *stdlog2 = NULL;
 static const char *GetProfile()
 {
 	char *p = getenv("KONOHA_TESTPROFILE");
-	return (p == NULL)? "minimum" /* for compatibility */: (const char*)p;
+	return (p == NULL)? "minimum" /* for compatibility */: (const char *)p;
 }
 
 static FILE *GetLogFile(void)
@@ -68,7 +68,7 @@ static int check_result2(FILE *fp0, FILE *fp1)
 {
 	char buf0[4096];
 	char buf1[4096];
-	while (fgets(buf0, sizeof(buf0), fp0) != NULL) {
+	while(fgets(buf0, sizeof(buf0), fp0) != NULL) {
 		char *p = fgets(buf1, sizeof(buf1), fp1);
 		if(p == NULL) return 1;//FAILED
 		if(strcmp(buf0, buf1) != 0) {
@@ -96,7 +96,7 @@ static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)
 		FILE *fp = fopen(proof_file, "r");
 		if(fp == NULL) {
 			fprintf(stdout, "no proof file: %s\n", proof_file);
-			((KonohaFactory*)kctx->platApi)->exitStatus = 1;
+			((KonohaFactory *)kctx->platApi)->exitStatus = 1;
 			return;
 		}
 		FILE *fp2 = fopen(result_file, "r");
@@ -104,10 +104,10 @@ static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)
 		int ret = check_result2(fp, fp2);
 		if(ret != 0) {
 			fprintf(stdout, "proof file mismatched: %s\n", proof_file);
-			((KonohaFactory*)kctx->platApi)->exitStatus = 78;
+			((KonohaFactory *)kctx->platApi)->exitStatus = 78;
 		}
 		else {
-			((KonohaFactory*)kctx->platApi)->exitStatus = 0;
+			((KonohaFactory *)kctx->platApi)->exitStatus = 0;
 		}
 		fclose(fp);
 		fclose(fp2);

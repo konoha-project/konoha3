@@ -65,7 +65,7 @@ typedef enum kjson_type {
 union JSONValue;
 typedef union JSONValue JSON;
 
-#define JSONSTRING_INLINE_SIZE (sizeof(void*)*2)
+#define JSONSTRING_INLINE_SIZE (sizeof(void *)*2)
 typedef struct JSONString {
     const char *str;
     unsigned length;
@@ -211,7 +211,7 @@ typedef struct JSONObject_iterator {
 #endif
 
 #ifndef LOG2
-#define LOG2(N) ((uint32_t)((sizeof(void*) * 8) - __builtin_clzl(N - 1)))
+#define LOG2(N) ((uint32_t)((sizeof(void *) * 8) - __builtin_clzl(N - 1)))
 #endif
 
 #ifdef __cplusplus
@@ -378,7 +378,7 @@ static inline JSON JSONObject_iterator_next(JSONObject_iterator *itr, JSON *val)
 {
     JSONObject *o = itr->obj;
     map_record_t *r;
-    while((r = kmap_next(&o->child, (kmap_iterator*) itr)) != NULL) {
+    while((r = kmap_next(&o->child, (kmap_iterator *) itr)) != NULL) {
         JSONString *key = r->k;
         *val = toJSON(ValueP(r->v));
         return toJSON(ValueS(key));

@@ -244,7 +244,7 @@ static uint8_t skip_space(input_stream *ins, uint8_t c)
     assert(c != 0 && c == *str);
     if(n > 0) {
         ip &= ~15;
-        __m128i x = _mm_loadu_si128((const __m128i*)ip);
+        __m128i x = _mm_loadu_si128((const __m128i *)ip);
         __m128i mask1 = _mm_or_si128(_mm_cmpeq_epi8(x, k0x09), _mm_cmpeq_epi8(x, k0x0a));
         __m128i mask2 = _mm_or_si128(_mm_cmpeq_epi8(x, k0x0d), _mm_cmpeq_epi8(x, k0x20));
         __m128i mask  = _mm_or_si128(_mm_cmpeq_epi8(x, k0x00), _mm_or_si128(mask1, mask2));
@@ -258,7 +258,7 @@ static uint8_t skip_space(input_stream *ins, uint8_t c)
         str += 16 - n;
     }
     while(1) {
-        __m128i x = _mm_loadu_si128((const __m128i*)(str));
+        __m128i x = _mm_loadu_si128((const __m128i *)(str));
         __m128i mask1 = _mm_or_si128(_mm_cmpeq_epi8(x, k0x09), _mm_cmpeq_epi8(x, k0x0a));
         __m128i mask2 = _mm_or_si128(_mm_cmpeq_epi8(x, k0x0d), _mm_cmpeq_epi8(x, k0x20));
         __m128i mask  = _mm_or_si128(_mm_cmpeq_epi8(x, k0x00), _mm_or_si128(mask1, mask2));
@@ -295,7 +295,7 @@ static uint8_t skipBSorDoubleQuote(input_stream *ins)
     size_t n = ip & 15;
     if(n > 0) {
         __m128i mask;
-        __m128i x = _mm_loadu_si128((const __m128i*)(ip & ~15));
+        __m128i x = _mm_loadu_si128((const __m128i *)(ip & ~15));
         __m128i result1 = _mm_cmpeq_epi8(x, k0x5c);
         __m128i result2 = _mm_cmpeq_epi8(x, k0x22);
         __m128i result3 = _mm_cmpeq_epi8(x, k0x00);
@@ -311,7 +311,7 @@ static uint8_t skipBSorDoubleQuote(input_stream *ins)
         str += 16 - n;
     }
     while(1) {
-        __m128i x = _mm_loadu_si128((const __m128i*)str);
+        __m128i x = _mm_loadu_si128((const __m128i *)str);
         __m128i result1 = _mm_cmpeq_epi8(x, k0x5c);
         __m128i result2 = _mm_cmpeq_epi8(x, k0x22);
         __m128i result3 = _mm_cmpeq_epi8(x, k0x00);

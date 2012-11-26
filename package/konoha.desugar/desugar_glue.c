@@ -111,7 +111,7 @@ static void KBuffer_WriteToken(KonohaContext *kctx, KGrowingBuffer *wb, kToken *
 {
 	char c = kToken_GetOpenHintChar(tk);
 	if(IS_String(tk)) {
-		if (c != 0) {
+		if(c != 0) {
 			KLIB KBuffer_Write(kctx, wb, &c, 1);
 			KLIB KBuffer_Write(kctx, wb, S_text(tk->text), S_size(tk->text));
 			KLIB KBuffer_Write(kctx, wb, &c, 1);
