@@ -492,7 +492,7 @@ static kExpr* kStmtExpr_ToSetter(KonohaContext *kctx, kStmt *stmt, kExprVar *exp
 	p[pa->psize].attrTypeId = expr->attrTypeId;
 	kparamId_t paramdom = KLIB Kparamdom(kctx, psize, p);
 	kMethod *foundMethod = kNameSpace_GetMethodBySignatureNULL(kctx, ns, c, MN_toSETTER(mtd->mn), paramdom, psize, p);
-	if(foundMethod != NULL) {
+	if(foundMethod == NULL) {
 		p[pa->psize].attrTypeId = pa->rtype;   /* transform "T1 A.get(T2)" to "void A.set(T2, T1)" */
 		paramdom = KLIB Kparamdom(kctx, psize, p);
 		foundMethod = kNameSpace_GetMethodBySignatureNULL(kctx, ns, c, MN_toSETTER(mtd->mn), paramdom, psize, p);
