@@ -762,7 +762,7 @@ static void KBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 	 **/
 	int i, a = builder->common.a;
 	int s = kMethod_Is(Static, mtd) ? 2 : 1;
-	int espidx  = builder->common.espidx;
+	int espidx  = builder->common.espidx + 1;
 	int thisidx = espidx + K_CALLDELTA;
 	int argc = CallExpr_getArgCount(expr);
 	for (i = s; i < argc + 2; i++) {
