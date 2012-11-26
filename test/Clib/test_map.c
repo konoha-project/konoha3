@@ -53,14 +53,14 @@ void test_Kmap(KonohaContext *kctx)
         assert(entry != NULL);
         assert(entry->unboxValue == i);
     }
-    KLIB KHashMap_each(kctx, map, NULL, reftrace);
+    KLIB KHashMap_DoEach(kctx, map, NULL, reftrace);
     fprintf(stderr, "%d\n", _sum_);
     assert(_sum_ == 45);
 
     for (i = 0; i < 10; i+=2) {
         KHashMapEntry *entry = KLIB KHashMap_get(kctx, map, i);
         assert(entry != NULL);
-        KLIB KHashMap_remove(map, entry);
+        KLIB KHashMap_Remove(map, entry);
     }
     for (i = 0; i < 10; i+=2) {
         KHashMapEntry *entry = KLIB KHashMap_get(kctx, map, i);

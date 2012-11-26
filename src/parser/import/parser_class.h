@@ -249,7 +249,7 @@ static kExprVar* kExpr_AddSeveral(KonohaContext *kctx, kExprVar *expr, int n, va
 {
 	int i;
 	if(!IS_Array(expr->cons)) {
-		KFieldSet(expr, expr->cons, new_(Array, 8, OnField));
+		KFieldSet(expr, expr->cons, new_(Array, 0, OnField));
 	}
 	for(i = 0; i < n; i++) {
 		kObject *v =  (kObject *)va_arg(ap, kObject *);

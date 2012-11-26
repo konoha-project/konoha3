@@ -324,7 +324,7 @@ KLIBDECL void KDict_Free(KonohaContext *kctx, KDict *dict)
 
 #define HMAP_INIT 83
 
-static void kmap_makeFreeList(KHashMap *kmap, size_t s, size_t e)
+static void KHashMap_MakeFreeList(KHashMap *kmap, size_t s, size_t e)
 {
 	bzero(kmap->arena + s, (e - s) * sizeof(KHashMapEntry));
 	kmap->unused = kmap->arena + s;
@@ -339,7 +339,7 @@ static void kmap_makeFreeList(KHashMap *kmap, size_t s, size_t e)
 	DBG_ASSERT(kmap->arena[e-1].next == NULL);
 }
 
-static void kmap_rehash(KonohaContext *kctx, KHashMap *kmap)
+static void KHashMap_Rehash(KonohaContext *kctx, KHashMap *kmap)
 {
 	size_t i, newhmax = kmap->hmax * 2 + 1;
 	KHashMapEntry **newhentry = (KHashMapEntry**)KCalloc_UNTRACE(newhmax, sizeof(KHashMapEntry *));
@@ -354,7 +354,7 @@ static void kmap_rehash(KonohaContext *kctx, KHashMap *kmap)
 	kmap->hmax = newhmax;
 }
 
-static void kmap_shiftptr(KHashMap *kmap, intptr_t shift)
+static void KHashMap_ShiftPointer(KHashMap *kmap, intptr_t shift)
 {
 	size_t i, size = kmap->arenasize / 2;
 	for(i = 0; i < size; i++) {
@@ -375,10 +375,10 @@ static KHashMapEntry *KHashMap_newEntry(KonohaContext *kctx, KHashMap *kmap, kui
 		kmap->arenasize *= 2;
 		kmap->arena = (KHashMapEntry *)KMalloc_UNTRACE(kmap->arenasize * sizeof(KHashMapEntry));
 		memcpy(kmap->arena, oarena, oarenasize * sizeof(KHashMapEntry));
-		kmap_shiftptr(kmap, (char *)kmap->arena - oarena);
-		kmap_makeFreeList(kmap, oarenasize, kmap->arenasize);
+		KHashMap_ShiftPointer(kmap, (char *)kmap->arena - oarena);
+		KHashMap_MakeFreeList(kmap, oarenasize, kmap->arenasize);
 		KFree(oarena, oarenasize * sizeof(KHashMapEntry));
-		kmap_rehash(kctx, kmap);
+		KHashMap_Rehash(kctx, kmap);
 	}
 	e = kmap->unused;
 	kmap->unused = e->next;
@@ -400,14 +400,14 @@ KLIBDECL KHashMap *KHashMap_Init(KonohaContext *kctx, size_t init)
 	if(init < HMAP_INIT) init = HMAP_INIT;
 	kmap->arenasize = (init * 3) / 4;
 	kmap->arena = (KHashMapEntry *)KMalloc_UNTRACE(kmap->arenasize * sizeof(KHashMapEntry));
-	kmap_makeFreeList(kmap, 0, kmap->arenasize);
+	KHashMap_MakeFreeList(kmap, 0, kmap->arenasize);
 	kmap->hentry = (KHashMapEntry**)KCalloc_UNTRACE(init, sizeof(KHashMapEntry *));
 	kmap->hmax = init;
 	kmap->size = 0;
 	return (KHashMap *)kmap;
 }
 
-KLIBDECL void KHashMap_each(KonohaContext *kctx, KHashMap *kmap, void *thunk, void (*f)(KonohaContext *kctx, KHashMapEntry *, void *thunk))
+KLIBDECL void KHashMap_DoEach(KonohaContext *kctx, KHashMap *kmap, void *thunk, void (*f)(KonohaContext *kctx, KHashMapEntry *, void *thunk))
 {
 	size_t i;
 	for(i = 0; i < kmap->hmax; i++) {
@@ -448,7 +448,7 @@ static KHashMapEntry *KHashMap_getentry(KonohaContext *kctx, KHashMap* kmap, kui
 	return NULL;
 }
 
-static void kmap_unuse(KHashMap *kmap, KHashMapEntry *e)
+static void KHashMap_Unuse(KHashMap *kmap, KHashMapEntry *e)
 {
 	e->next = kmap->unused;
 	kmap->unused = e;
@@ -457,7 +457,7 @@ static void kmap_unuse(KHashMap *kmap, KHashMapEntry *e)
 	kmap->size--;
 }
 
-static void KHashMap_remove(KHashMap* kmap, KHashMapEntry *oe)
+static void KHashMap_Remove(KHashMap* kmap, KHashMapEntry *oe)
 {
 	KHashMapEntry **hlist = kmap->hentry;
 	size_t idx = oe->hcode % kmap->hmax;
@@ -465,13 +465,13 @@ static void KHashMap_remove(KHashMap* kmap, KHashMapEntry *oe)
 	while(e != NULL) {
 		if(e->next == oe) {
 			e->next = oe->next;
-			kmap_unuse(kmap, oe);
+			KHashMap_Unuse(kmap, oe);
 			return;
 		}
 		e = e->next;
 	}
 	hlist[idx] = oe->next;
-	kmap_unuse(kmap, oe);
+	KHashMap_Unuse(kmap, oe);
 }
 
 // key management
@@ -895,10 +895,10 @@ static void klib_Init(KonohaLibVar *l)
 
 	l->KHashMap_Init     = KHashMap_Init;
 	l->KHashMap_Free     = KHashMap_Free;
-	l->KHashMap_each     = KHashMap_each;
+	l->KHashMap_DoEach     = KHashMap_DoEach;
 	l->KHashMap_newEntry = KHashMap_newEntry;
 	l->KHashMap_get      = KHashMap_getentry;
-	l->KHashMap_remove   = KHashMap_remove;
+	l->KHashMap_Remove   = KHashMap_Remove;
 	l->KHashMap_getcode  = KHashMap_getcode;
 	l->kObjectProto_Free     = kObjectProto_Free;
 	l->kObjectProto_Reftrace = kObjectProto_Reftrace;

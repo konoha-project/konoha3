@@ -114,8 +114,11 @@ static kExpr *kStmtExpr_ToBox(KonohaContext *kctx, kStmt *stmt, kExpr *texpr, kG
 {
 	KonohaClass *c = CT_(texpr->attrTypeId);
 	if(c->typeId != TY_boolean) c = CT_Int;
-	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, kStmt_ns(stmt), c, MN_box, 0, MethodMatch_NoOption);
-	return new_TypedCallExpr(kctx, stmt, gma, c, mtd, 1, texpr);
+	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, kStmt_ns(stmt), c, MN_box, 0, MethodMatch_CamelStyle);
+	DBG_ASSERT(mtd != NULL);
+	//return new_TypedCallExpr(kctx, stmt, gma, reqClass, mtd, 1, texpr);
+	kExprVar *expr = new_UntypedCallStyleExpr(kctx, SYN_(Stmt_ns(stmt), KW_ExprMethodCall), 2, mtd, texpr);
+	return kExpr_typed(expr, CALL, c->typeId/*reqClass->typeId*/);
 }
 
 static kExpr *kExpr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, KonohaClass* reqClass, int pol)

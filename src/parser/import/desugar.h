@@ -730,7 +730,8 @@ static kExpr* BoxThisExpr(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kExpr *
 	KonohaClass *thisClass = CT_(thisExpr->attrTypeId);
 	DBG_ASSERT(IS_Method(mtd));
 	DBG_ASSERT(thisClass->typeId != TY_var);
-	if(!TY_isUnbox(mtd->typeId) && CT_IsUnbox(thisClass)) {
+	DBG_P("mtd_cid=%s this=%s", ATY_t(mtd->typeId), CT_t(thisClass));
+	if(!TY_is(UnboxType, mtd->typeId) && CT_Is(UnboxType, thisClass)) {
 		KFieldSet(expr->cons, expr->cons->ExprItems[1], kStmtExpr_ToBox(kctx, stmt, thisExpr, gma, thisClass));
 	}
 	thisClassRef[0] = thisClass;

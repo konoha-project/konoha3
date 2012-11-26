@@ -1629,8 +1629,8 @@ struct KonohaLibVar {
 	KHashMap*           (*KHashMap_Init)(KonohaContext*, size_t);
 	KHashMapEntry*      (*KHashMap_newEntry)(KonohaContext*, KHashMap *, uintptr_t);
 	KHashMapEntry*      (*KHashMap_get)(KonohaContext*, KHashMap *, uintptr_t);
-	void                (*KHashMap_remove)(KHashMap *, KHashMapEntry *);
-	void                (*KHashMap_each)(KonohaContext*, KHashMap *, void *thunk, void (*)(KonohaContext*, KHashMapEntry*, void *));
+	void                (*KHashMap_Remove)(KHashMap *, KHashMapEntry *);
+	void                (*KHashMap_DoEach)(KonohaContext*, KHashMap *, void *thunk, void (*)(KonohaContext*, KHashMapEntry*, void *));
 	void                (*KHashMap_Free)(KonohaContext*, KHashMap *, void (*)(KonohaContext*, void *));
 	ksymbol_t           (*KHashMap_getcode)(KonohaContext*, KHashMap *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
 

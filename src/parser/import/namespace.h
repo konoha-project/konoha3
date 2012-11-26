@@ -174,7 +174,7 @@ static kbool_t kNameSpace_ImportSyntaxAll(KonohaContext *kctx, kNameSpace *ns, k
 {
 	if(targetNS->syntaxMapNN != NULL) {
 		struct ImportSyntaxArgument argumentData = { ns, trace };
-		KLIB KHashMap_each(kctx, targetNS->syntaxMapNN, &argumentData, ImportEachSyntax);
+		KLIB KHashMap_DoEach(kctx, targetNS->syntaxMapNN, &argumentData, ImportEachSyntax);
 	}
 	return true;
 }
@@ -210,7 +210,7 @@ static kbool_t kNameSpace_RemoveSyntax(KonohaContext *kctx, kNameSpace *ns, ksym
 			if(e->hcode == hcode) {
 				SugarSyntaxVar *syn = (SugarSyntaxVar *)e->unboxValue;
 				KLIB ReportScriptMessage(kctx, trace, InfoTag, "@%s removing syntax %s%s", PackageId_t(syn->lastLoadedPackageId), PSYM_t(syn->keyword));
-				KLIB KHashMap_remove(ns->syntaxMapNN, e);
+				KLIB KHashMap_Remove(ns->syntaxMapNN, e);
 				bzero(syn, sizeof(SugarSyntax));
 				KFree(syn, sizeof(SugarSyntax));
 				return true;
