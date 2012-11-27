@@ -29,10 +29,45 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
 #include <minikonoha/arch/minivm.h>
+#include <v8.h>
 
-#ifdef __cplusplus
+#define LOG_FUNCTION_NAME "p"
+
 extern "C" {
-#endif
+
+static v8::Handle<v8::Value> JSLog(const v8::Arguments& args)
+{
+	if(args.Length() < 1) {
+		return v8::Undefined();
+	}
+
+	v8::HandleScope scope;
+	v8::Handle<v8::Value> arg = args[0];
+	v8::String::Utf8Value value(arg);
+	printf("%s\n", *value);
+
+	return v8::Undefined();
+}
+
+v8::Persistent<v8::Context> createContext(){	
+	v8::Handle<v8::ObjectTemplate> global = v8::ObjectTemplate::New();
+	global->Set(v8::String::New("p"), v8::FunctionTemplate::New(JSLog));
+	return v8::Context::New(NULL, global);
+}
+
+class JSContext{
+public:
+	v8::HandleScope handleScope;
+	v8::Persistent<v8::Context> context;
+	v8::Context::Scope contextScope;
+	JSContext():context(createContext()),contextScope(v8::Context::Scope(context)){
+	}
+	~JSContext(){
+		context.Dispose();
+	}
+};
+
+static JSContext* globalJSContext = NULL;
 
 typedef struct JSBuilder {
 	struct KBuilderCommon common;
@@ -365,7 +400,7 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 		}
 	}
 	if(receiver->attrTypeId == TY_System && methodName[0] == 'p') {
-		JSBuilder_EmitString(kctx, builder, "console.log", "", "");
+		JSBuilder_EmitString(kctx, builder, LOG_FUNCTION_NAME, "", "");
 	}else if(strcmp(SYM_t(mtd->mn), "new") == 0) {
 		JSBuilder_EmitString(kctx, builder, "new ", CT_t(CT_(receiver->attrTypeId)), "");
 	}else if(strcmp(SYM_t(mtd->mn), "newList") == 0) {
@@ -433,10 +468,10 @@ static void JSBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStm
 	}
 	else{
 		kExpr *receiver = kExpr_at(expr, 1);
-		if(mtd == jsBuilder->visitingMethod) {
+		/*if(mtd == jsBuilder->visitingMethod) {
 			JSBuilder_EmitString(kctx, builder, "arguments.callee", "", "");
 		}
-		else if(strcmp(SYM_t(mtd->mn), "newList") == 0) {
+		else*/ if(strcmp(SYM_t(mtd->mn), "newList") == 0) {
 			isArray = true;
 		}
 		else {
@@ -487,7 +522,7 @@ static void compileAllDefinedMethods(KonohaContext *kctx)
 	for(i = 0; i < kArray_size(share->GlobalConstList); i++) {
 		kObject *o = share->GlobalConstList->ObjectItems[i];
 		if(O_ct(o) == CT_NameSpace) {
-			kNameSpace *ns = (kNameSpace *) o;
+			kNameSpace *ns = (kNameSpace  *) o;
 			size_t j;
 			for(j = 0; j < kArray_size(ns->methodList_OnList); j++) {
 				kMethod *mtd = ns->methodList_OnList->MethodItems[j];
@@ -511,12 +546,12 @@ static void JSBuilder_EmitExtendFunctionCode(KonohaContext *kctx, KBuilder *buil
 	JSBuilder_EmitNewLineWith(kctx, builder, "}");
 }
 
-static void JSBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder, KonohaClass *class)
+static void JSBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder, KonohaClass *kclass)
 {
 	kushort_t i;
-	KonohaClassField *field = class->fieldItems;
-	kObject *constList = class->defaultNullValue_OnGlobalConstList;
-	for(i = 0; i < class->fieldsize; ++i) {
+	KonohaClassField *field = kclass->fieldItems;
+	kObject *constList = kclass->defaultNullValue_OnGlobalConstList;
+	for(i = 0; i < kclass->fieldsize; ++i) {
 		JSBuilder_EmitString(kctx, builder, "this.", SYM_t(field[i].name), " = ");
 		if(TY_isUnbox(field[i].attrTypeId)) {
 			JSBuilder_EmitNConstValue(kctx, builder, CT_(field[i].attrTypeId), constList->fieldUnboxItems[i]);
@@ -529,15 +564,15 @@ static void JSBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder, K
 
 static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 {
-	KonohaClass *class = CT_(mtd->typeId);
+	KonohaClass *kclass = CT_(mtd->typeId);
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kParam *params = kMethod_GetParam(mtd);
 	unsigned i;
 	if(mtd->typeId == TY_NameSpace) {
-		KLIB KBuffer_printf(kctx, &wb, "%s%s = function(", MethodName_t(mtd->mn));
+		KLIB KBuffer_printf(kctx, &wb, "var %s%s = function(", MethodName_t(mtd->mn));
 	}else if(strcmp(SYM_t(mtd->mn), "new") == 0) {
-		KLIB KBuffer_printf(kctx, &wb, "function %s(", CT_t(class));
+		KLIB KBuffer_printf(kctx, &wb, "function %s(", CT_t(kclass));
 	}else{
 		compileAllDefinedMethods(kctx);
 		if(kMethod_Is(Static, mtd)) {
@@ -557,29 +592,29 @@ static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, k
 	KLIB KBuffer_Free(&wb);
 }
 
-static void JSBuilder_EmitClassHeader(KonohaContext *kctx, KBuilder *builder, KonohaClass *class)
+static void JSBuilder_EmitClassHeader(KonohaContext *kctx, KBuilder *builder, KonohaClass *kclass)
 {
 	JSBuilder *jsBuilder = (JSBuilder *)builder;
-	KonohaClass *base = CT_(class->superTypeId);
+	KonohaClass *base = CT_(kclass->superTypeId);
 	if(base->typeId != TY_Object) {
 		JSBuilder_EmitExtendFunctionCode(kctx, builder);
-		JSBuilder_EmitString(kctx, builder, "var ", CT_t(class), " = (function (_super) {");
+		JSBuilder_EmitString(kctx, builder, "var ", CT_t(kclass), " = (function (_super) {");
 	}else{
-		JSBuilder_EmitString(kctx, builder, "var ", CT_t(class), " = (function () {");
+		JSBuilder_EmitString(kctx, builder, "var ", CT_t(kclass), " = (function () {");
 	}
 	JSBuilder_EmitNewLineWith(kctx, builder, "");
 	jsBuilder->indent++;
 	if(base->typeId != TY_Object){
-		JSBuilder_EmitString(kctx, builder, "__extends(", CT_t(class), ", _super);");
+		JSBuilder_EmitString(kctx, builder, "__extends(", CT_t(kclass), ", _super);");
 		JSBuilder_EmitNewLineWith(kctx, builder, "");
 	}
 }
 
-static void JSBuilder_EmitClassFooter(KonohaContext *kctx, KBuilder *builder, KonohaClass *class)
+static void JSBuilder_EmitClassFooter(KonohaContext *kctx, KBuilder *builder, KonohaClass *kclass)
 {
 	JSBuilder *jsBuilder = (JSBuilder *)builder;
-	KonohaClass *base = CT_(class->superTypeId);
-	JSBuilder_EmitString(kctx, builder, "return ", CT_t(class), ";");
+	KonohaClass *base = CT_(kclass->superTypeId);
+	JSBuilder_EmitString(kctx, builder, "return ", CT_t(kclass), ";");
 	JSBuilder_EmitNewLineWith(kctx, builder, "");
 	jsBuilder->indent--;
 	if(base->typeId != TY_Object) {
@@ -600,17 +635,17 @@ static void JSBuilder_Init(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 	jsBuilder->isIndentEmitted = false;
 	jsBuilder->indent = 0;
 	KLIB KBuffer_Init(&jsBuilder->buffer, &jsBuilder->jsCodeBuffer);
-
-	KonohaClass *class = CT_(mtd->typeId);
-	KonohaClass *base  = CT_(class->superTypeId);
-
+	
+	KonohaClass *kclass = CT_(mtd->typeId);
+	KonohaClass *base  = CT_(kclass->superTypeId);
+	
 	if(mtd->mn != 0) {
 		KLIB kMethod_SetFunc(kctx, mtd, NULL);
 		if(strcmp(SYM_t(mtd->mn), "new") == 0) {
 			isConstractor = true;
 		}
 		if(isConstractor) {
-			JSBuilder_EmitClassHeader(kctx, builder, class);
+			JSBuilder_EmitClassHeader(kctx, builder, kclass);
 		}
 		JSBuilder_EmitMethodHeader(kctx, builder, mtd);
 		JSBuilder_EmitNewLineWith(kctx, builder, " {");
@@ -619,7 +654,7 @@ static void JSBuilder_Init(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 			if(base->typeId != TY_Object) {
 				JSBuilder_EmitNewLineWith(kctx, builder, "_super.call(this);");
 			}
-			JSBuilder_VisitClassFields(kctx, builder, class);
+			JSBuilder_VisitClassFields(kctx, builder, kclass);
 		}
 	}else{
 		compileAllDefinedMethods(kctx);
@@ -633,11 +668,19 @@ static void JSBuilder_Free(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 		jsBuilder->indent--;
 		JSBuilder_EmitNewLineWith(kctx, builder, "}");
 		if(strcmp(SYM_t(mtd->mn), "new") == 0) {
-			KonohaClass *class = CT_(mtd->typeId);
-			JSBuilder_EmitClassFooter(kctx, builder, class);
+			KonohaClass *kclass = CT_(mtd->typeId);
+			JSBuilder_EmitClassFooter(kctx, builder, kclass);
 		}
 	}
-	printf("%s\n", KLIB KBuffer_Stringfy(kctx, &jsBuilder->jsCodeBuffer, 1));
+	const char* jsSrc = KLIB KBuffer_Stringfy(kctx, &jsBuilder->jsCodeBuffer, 1);
+	//printf("%s\n", jsSrc);
+	v8::Handle<v8::String> v8Src = v8::String::New(jsSrc);
+	v8::Handle<v8::Script> v8Script = v8::Script::Compile(v8Src);
+	v8::Handle<v8::Value> result = v8Script->Run();
+	v8::String::AsciiValue resultStr(result);
+	if(*resultStr != NULL){
+		//printf("%s\n", *resultStr);
+	}
 	KLIB KBuffer_Free(&jsBuilder->jsCodeBuffer);
 }
 
@@ -696,19 +739,21 @@ static struct KBuilderAPI2* GetDefaultBuilderAPI(void)
 }
 // -------------------------------------------------------------------------
 
-kbool_t LoadJSGenModule(KonohaFactory *factory, ModuleType type)
+kbool_t LoadJavaScriptModule(KonohaFactory *factory, ModuleType type)
 {
 	static KModuleInfo ModuleInfo = {
-		"JSGen", K_VERSION, 0, "jsgen",
+		"JavaScript", K_VERSION, 0, "JavaScript",
 	};
 	factory->VirtualMachineInfo            = &ModuleInfo;
 	//factory->IsSupportedVirtualCode        = IsSupportedVirtualCode;
 	factory->GetDefaultBootCode            = GetDefaultBootCode;
 	factory->GetDefaultBuilderAPI          = GetDefaultBuilderAPI;
+
+	globalJSContext = new JSContext();
+
+
 	return true;
 }
 
-#ifdef __cplusplus
 } /* extern "C" */
-#endif
 
