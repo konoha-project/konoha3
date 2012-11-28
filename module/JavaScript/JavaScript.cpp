@@ -29,11 +29,15 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
 #include <minikonoha/arch/minivm.h>
-#include <v8.h>
+#ifdef HAVE_LIBV8
+	#include <v8.h>
+#endif
 
 #define LOG_FUNCTION_NAME "p"
 
 extern "C" {
+
+#ifdef HAVE_LIBV8
 
 static v8::Handle<v8::Value> JSLog(const v8::Arguments& args)
 {
@@ -68,6 +72,8 @@ public:
 };
 
 static JSContext* globalJSContext = NULL;
+
+#endif
 
 typedef struct JSBuilder {
 	struct KBuilderCommon common;
@@ -673,14 +679,22 @@ static void JSBuilder_Free(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 		}
 	}
 	const char* jsSrc = KLIB KBuffer_Stringfy(kctx, &jsBuilder->jsCodeBuffer, 1);
-	//printf("%s\n", jsSrc);
-	v8::Handle<v8::String> v8Src = v8::String::New(jsSrc);
-	v8::Handle<v8::Script> v8Script = v8::Script::Compile(v8Src);
-	v8::Handle<v8::Value> result = v8Script->Run();
-	v8::String::AsciiValue resultStr(result);
-	if(*resultStr != NULL){
-		//printf("%s\n", *resultStr);
+#ifdef HAVE_LIBV8
+	kbool_t isCompileOnly = KonohaContext_Is(CompileOnly, kctx);
+#else
+#define isCompileOnly (1)
+#endif
+	if(isCompileOnly) {
+		printf("%s\n", jsSrc);
 	}
+#ifdef HAVE_LIBV8
+	else {
+		v8::Handle<v8::String> v8Src = v8::String::New(jsSrc);
+		v8::Handle<v8::Script> v8Script = v8::Script::Compile(v8Src);
+		v8::Handle<v8::Value> result = v8Script->Run();
+		v8::String::AsciiValue resultStr(result);
+	}
+#endif
 	KLIB KBuffer_Free(&jsBuilder->jsCodeBuffer);
 }
 
@@ -748,9 +762,9 @@ kbool_t LoadJavaScriptModule(KonohaFactory *factory, ModuleType type)
 	//factory->IsSupportedVirtualCode        = IsSupportedVirtualCode;
 	factory->GetDefaultBootCode            = GetDefaultBootCode;
 	factory->GetDefaultBuilderAPI          = GetDefaultBuilderAPI;
-
+#ifdef HAVE_LIBV8
 	globalJSContext = new JSContext();
-
+#endif
 
 	return true;
 }
