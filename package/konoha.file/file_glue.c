@@ -80,7 +80,7 @@ static void kFile_close(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
 	if(ret != 0) {
 		KTraceErrorPoint(trace, SoftwareFault|SystemFault, "fclose", LogErrno);
 	}
-	//file->fp = NULL;
+	file->fp = NULL;
 	if(file->readerIconv != ICONV_NULL) {
 		PLATAPI iconv_close_i(kctx, file->readerIconv);
 		file->readerIconv = ICONV_NULL;
