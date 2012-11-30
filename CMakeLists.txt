@@ -36,77 +36,6 @@ set(PARSER
 	src/parser/parser.c
 )
 
-## Packages
-set(PACKAGES
-## YOU MUST add packages in an alphabetical order 
-	cstyle
-	cstyle.file
-	cstyle.float
-	cstyle.global
-	cstyle.libc
-	cstyle.math
-## YOU MUST add packages in an alphabetical order
-	java2.class
-	java2.object
-## YOU MUST add packages in an alphabetical order
-	konoha
-	konoha.array
-	konoha.bytes
-	konoha.class
-	konoha.complex
-	konoha.console
-	konoha.const
-	konoha.date
-	konoha.defined
-	konoha.desugar
-	konoha.dynamic
-	konoha.eval
-	konoha.eventlistener
-	konoha.field
-	konoha.file
-	konoha.float
-	konoha.foreach
-	konoha.global
-	konoha.i
-	konoha.import
-	konoha.iterator
-	konoha.json
-	konoha.math
-	konoha.map
-#	konoha.mpi
-	konoha.namespace
-	konoha.new
-	konoha.object
-	konoha.prototype
-	konoha.regexp
-	konoha.string
-##konoha.sql
-	konoha.untyped
-	konoha.var
-	minikonoha
-	sugar
-## YOU MUST ADD packages in an alphabetical order
-	posix.fd
-	posix.path
-	posix.process
-	posix.socket
-	posix.stat
-	posix.thread
-	dscript.dollar
-	dscript.subproc
-	dscript.shell
-	curl
-	llvm
-	libvirt
-##	ijit
-	jansson
-	mecab
-	python
-#	apache   ## removed Module bugs
-#	openssl
-	gmp
-)
-
 set(PACKAGE_NAME    ${PROJECT_NAME})
 set(PACKAGE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 set(PACKAGE_STRING  ${CMAKE_PROJECT_NAME}-${PACKAGE_VERSION})
@@ -326,8 +255,9 @@ macro(add_konoha_package _PKGNAME)
 		file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/*.k)
 		foreach(f ${test_files})
 			string(REPLACE // / f ${f})
-			string(REPLACE ${PARENT_SOURCE_DIR}/package/ "" test_name ${f})
-			string(REPLACE /test "" test_name ${test_name})
+			string(REPLACE ${PARENT_SOURCE_DIR}/src/package/ "" f ${f})
+			string(REPLACE ${PARENT_SOURCE_DIR}/src/package-devel/ "" f ${f})
+			string(REPLACE /test "" test_name ${f})
 			add_konoha_test(${test_name} ${f})
 			if(PACKAGE_ENV)
 				set_tests_properties(${test_name} PROPERTIES ENVIRONMENT ${PACKAGE_ENV})
@@ -380,6 +310,12 @@ macro(add_konoha_package _PKGNAME)
 			add_custom_target(copy_${_PKGNAME}_testfile ALL DEPENDS
 				${PACKAGE_TEST_FILE})
 		endif(PACKAGE_TEST_FILE)
+		add_custom_command(OUTPUT ${PARENT_BINARY_DIR}/package/${_PKGNAME}
+			COMMAND ${CMAKE_COMMAND} -E create_symlink
+			${CMAKE_CURRENT_BINARY_DIR}
+			${PARENT_BINARY_DIR}/package/${_PKGNAME})
+		add_custom_target(create_symlink_${_PKGNAME} ALL DEPENDS
+			${PARENT_BINARY_DIR}/package/${_PKGNAME})
 	else(NOT __NOT_BUILD)
 		foreach(_PKGLIB ${__NOT_FOUND})
 			show_package_warning(${_PKGNAME} ${_PKGLIB})
@@ -387,14 +323,27 @@ macro(add_konoha_package _PKGNAME)
 	endif(NOT __NOT_BUILD)
 endmacro(add_konoha_package)
 
-add_subdirectory(module)
+add_subdirectory(src/module)
 
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/package
+	COMMAND ${CMAKE_COMMAND} -E make_directory
+	${CMAKE_CURRENT_BINARY_DIR}/package)
+add_custom_target(make_package_dir ALL DEPENDS
+	${CMAKE_CURRENT_BINARY_DIR}/package)
+
+file(GLOB PACKAGES ${CMAKE_CURRENT_SOURCE_DIR}/src/package/*)
 foreach(dir ${PACKAGES})
-	set(dir "${CMAKE_CURRENT_SOURCE_DIR}/package/${dir}")
 	if(IS_DIRECTORY ${dir} AND EXISTS ${dir}/CMakeLists.txt)
 		add_subdirectory(${dir})
-	endif()
-endforeach()
+	endif(IS_DIRECTORY ${dir} AND EXISTS ${dir}/CMakeLists.txt)
+endforeach(dir ${PACKAGES})
+
+file(GLOB DEVEL_PACKAGES ${CMAKE_CURRENT_SOURCE_DIR}/src/package-devel/*)
+foreach(dir ${DEVEL_PACKAGES})
+	if(IS_DIRECTORY ${dir} AND EXISTS ${dir}/CMakeLists.txt)
+		add_subdirectory(${dir})
+	endif(IS_DIRECTORY ${dir} AND EXISTS ${dir}/CMakeLists.txt)
+endforeach(dir ${DEVE_PACKAGES})
 
 macro(add_clib_test test_name)
 	add_executable(${test_name} ${ARGN})
