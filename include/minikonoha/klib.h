@@ -83,7 +83,7 @@ static kinline kString* CT_s_(KonohaContext *kctx, KonohaClass *ct)
 }
 
 #define TY_s(X)   TY_s_(kctx, X)
-#define TY_t(X)   S_text(TY_s(X))
+#define TY_t(X)   S_text(TY_s(TypeAttr_Unmask(X)))
 #define ATY_t(X)  TY_t(TypeAttr_Unmask(X))
 static kinline kString* TY_s_(KonohaContext *kctx, kattrtype_t ty)
 {
