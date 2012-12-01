@@ -37,14 +37,14 @@ static kExpr *CallExpressionFunc(KonohaContext *kctx, SugarSyntax *syn, kFunc *f
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 6);
 	lsfp[K_CALLDELTA+0].unboxValue = (uintptr_t)syn;
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, fo->self);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject *)stmt);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asNameSpace, kStmt_ns(stmt));
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asStmt, stmt);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asArray, tokenList);
 	lsfp[K_CALLDELTA+3].intValue = beginIdx;
 	lsfp[K_CALLDELTA+4].intValue = operatorIdx;
 	lsfp[K_CALLDELTA+5].intValue = endIdx;
 	countRef[0] += 1;
-	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo->mtd, 5, UPCAST(K_NULLEXPR));
+	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo, 5, UPCAST(K_NULLEXPR));
 	END_LOCAL();
 	DBG_ASSERT(IS_Expr(lsfp[0].asObject));
 	return lsfp[0].asExpr;
@@ -543,14 +543,14 @@ static int CallPatternMatchFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 {
 	INIT_GCSTACK();
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, fo->self);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject *)stmt);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asNameSpace, kStmt_ns(stmt));
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asStmt, stmt);
 	lsfp[K_CALLDELTA+2].intValue = name;
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+3].asArray, tokenList);
 	lsfp[K_CALLDELTA+4].intValue = beginIdx;
 	lsfp[K_CALLDELTA+5].intValue = endIdx;
 	countRef[0] += 1;
-	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo->mtd, 5, KLIB Knull(kctx, CT_Int));
+	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo, 5, KLIB Knull(kctx, CT_Int));
 	END_LOCAL();
 	RESET_GCSTACK();
 	return (int)lsfp[0].intValue;

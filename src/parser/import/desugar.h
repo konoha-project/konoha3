@@ -645,7 +645,7 @@ static kExpr* kStmt_TypeCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExp
 		kParam *pa = kMethod_GetParam(mtd);
 		KonohaClass *ct = KLIB KonohaClass_Generics(kctx, CT_Func, pa->rtype, pa->psize, (kparamtype_t *)pa->paramtypeItems);
 		kFuncVar *fo = (kFuncVar *)KLIB new_kObject(kctx, OnGcStack, ct, (uintptr_t)mtd);
-		KFieldSet(fo, fo->self, UPCAST(ns));
+		//KFieldSet(fo, fo->self, UPCAST(ns));
 		return new_ConstValueExpr(kctx, ct, UPCAST(fo));
 	}
 	if(symbol != SYM_NONAME) {

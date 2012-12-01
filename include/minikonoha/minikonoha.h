@@ -1118,15 +1118,7 @@ struct KonohaClassField {
 #define CT_set(P, C, B)       TFLAG_set(kshortflag_t, (C)->cflag, kClass_##P, B)
 
 #define TY_isFunc(T)         (CT_(T)->baseTypeId == TY_Func)
-
-//#define kField_Hidden          ((kshortflag_t)(1<<0))
-//#define kField_Protected       ((kshortflag_t)(1<<1))
-//#define kField_Getter          ((kshortflag_t)(1<<2))
-//#define kField_Setter          ((kshortflag_t)(1<<3))
-//#define kField_Key             ((kshortflag_t)(1<<4))
-//#define kField_Volatile        ((kshortflag_t)(1<<5))
-//#define kField_ReadOnly        ((kshortflag_t)(1<<6))
-//#define kField_Property        ((kshortflag_t)(1<<7))
+#define CT_isFunc(C)         ((C)->baseTypeId == TY_Func)
 
 /* ------------------------------------------------------------------------ */
 /* Object */
@@ -1439,8 +1431,8 @@ typedef kbool_t (*MethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, MethodMatc
 
 struct kFuncVar {
 	KonohaObjectHeader h;
-	kObject *self;
-	kMethod *mtd;
+	kMethod *method;
+	kObject *env;
 };
 
 
@@ -1509,6 +1501,10 @@ struct _kSystem {
 
 #define END_LOCAL() ((KonohaContextVar *)kctx)->esp = esp_;
 
+#define KSetStackFuncCall(SFP, FO, ARGC)\
+	SFP[K_MTDIDX].calledMethod = (FO)->method;\
+	KonohaRuntime_setesp(kctx, SFP + ARGC + 1);\
+
 #define KSetMethodCallStack(tsfp, UL, MTD, ARGC, DEFVAL) { \
 		tsfp[K_MTDIDX].calledMethod = MTD; \
 		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
@@ -1523,6 +1519,7 @@ struct _kSystem {
 		(sfp[K_MTDIDX].calledMethod)->invokeMethodFunc(kctx, sfp);\
 		kctx->stack->topStack = sfp[K_SHIFTIDX].previousStack;\
 	} \
+
 
 #define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL)
 

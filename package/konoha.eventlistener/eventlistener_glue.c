@@ -432,13 +432,13 @@ static void enqueueEventToGlobalQueue(KonohaContext *kctx, RawEvent rawEvent)
 {
 	kEvent *ev = (kEvent *)KLIB new_kObject(kctx, OnStack, CT_Event, 0);
 	ev->j = (json_t *)rawEvent;
-	kattrtype_t resolve_type = kMethod_GetReturnType(KonohaContext_getEventContext(kctx)->enqFuncNULL->mtd);
+	kattrtype_t resolve_type = kMethod_GetReturnType(KonohaContext_getEventContext(kctx)->enqFuncNULL->method);
 	BEGIN_LOCAL(lsfp, K_CALLDELTA+1);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject *)ev);
 	{
 		KonohaStack *sfp = lsfp + K_CALLDELTA;
-		KSetMethodCallStack(sfp, 0/*UL*/, KonohaContext_getEventContext(kctx)->enqFuncNULL->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
+		KSetMethodCallStack(sfp, 0/*UL*/, KonohaContext_getEventContext(kctx)->enqFuncNULL->method, 1, KLIB Knull(kctx, CT_(resolve_type)));
 		KonohaRuntime_callMethod(kctx, sfp);
 	}
 	END_LOCAL();
@@ -472,7 +472,7 @@ static void KscheduleEvent(KonohaContext *kctx) {
 		BEGIN_LOCAL(lsfp, K_CALLDELTA);
 		{
 			KonohaStack *sfp = lsfp + K_CALLDELTA;
-			KSetMethodCallStack(sfp, 0/*UL*/, KonohaContext_getEventContext(kctx)->invokeFuncNULL->mtd, 0, K_NULL);
+			KSetMethodCallStack(sfp, 0/*UL*/, KonohaContext_getEventContext(kctx)->invokeFuncNULL->method, 0, K_NULL);
 			KonohaRuntime_callMethod(kctx, sfp);
 		}
 		END_LOCAL();

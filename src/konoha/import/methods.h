@@ -254,8 +254,8 @@ static KMETHOD String_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFuncVar *fo = (kFuncVar *)sfp[0].asFunc;
-	KFieldSet(fo, fo->self, sfp[1].asObject);
-	KFieldSet(fo, fo->mtd,  sfp[2].asMethod);
+//	KFieldSet(fo, fo->self, sfp[1].asObject);
+	KFieldSet(fo, fo->method,  sfp[2].asMethod);
 	KReturn(fo);
 }
 
@@ -264,9 +264,8 @@ static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFunc* fo = sfp[0].asFunc;
 	DBG_ASSERT(IS_Func(fo));
-	DBG_ASSERT(IS_Method(fo->mtd));
-	KUnsafeFieldSet(sfp[0].asObject, fo->self);
-	KSELFCALL(sfp, fo->mtd);
+//	KUnsafeFieldSet(sfp[0].asObject, fo->self);
+	KSELFCALL(sfp, fo->method);
 }
 
 //## @Const @Static void System.assert(boolean x)

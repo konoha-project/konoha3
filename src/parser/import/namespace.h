@@ -75,7 +75,7 @@ static void kNameSpace_SetTokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns, i
 {
 	kArray **list = (kArray**)kNameSpace_tokenFuncMatrix(kctx, ns);
 	kNameSpace_AddFuncList(kctx, ns, list, konohaChar, fo);
-	KLIB kMethod_DoLazyCompilation(kctx, (fo)->mtd, NULL, HatedLazyCompile);
+	KLIB kMethod_DoLazyCompilation(kctx, (fo)->method, NULL, HatedLazyCompile);
 }
 
 // ---------------------------------------------------------------------------
@@ -226,7 +226,7 @@ static SugarSyntaxVar *kNameSpace_AddSugarFunc(KonohaContext *kctx, kNameSpace *
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, keyword, 1/*new*/);
 	DBG_ASSERT(idx < SugarFunc_SIZE);
 	kNameSpace_AddFuncList(kctx, ns, syn->sugarFuncListTable, idx, funcObject);
-	KLIB kMethod_DoLazyCompilation(kctx, (funcObject)->mtd, NULL, HatedLazyCompile);
+	KLIB kMethod_DoLazyCompilation(kctx, (funcObject)->method, NULL, HatedLazyCompile);
 	syn->lastLoadedPackageId = ns->packageId;
 	return syn;
 }
@@ -236,7 +236,7 @@ static SugarSyntaxVar *kNameSpace_SetTokenFunc(KonohaContext *kctx, kNameSpace *
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, keyword, 1/*new*/);
 	kArray **list = (kArray**)kNameSpace_tokenFuncMatrix(kctx, ns);
 	kNameSpace_AddFuncList(kctx, ns, list, konohaChar, fo);
-	KLIB kMethod_DoLazyCompilation(kctx, (fo)->mtd, NULL, HatedLazyCompile);
+	KLIB kMethod_DoLazyCompilation(kctx, (fo)->method, NULL, HatedLazyCompile);
 	syn->tokenKonohaChar = konohaChar;
 	syn->sugarFuncTable[SugarFunc_TokenFunc] = fo;  // added in addFuncList
 	syn->lastLoadedPackageId = ns->packageId;

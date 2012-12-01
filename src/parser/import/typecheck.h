@@ -39,7 +39,7 @@ static kExpr *CallTypeCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+3].asObject, (kObject *)gma);
 	lsfp[K_CALLDELTA+4].intValue = reqty;
 	countRef[0] += 1;
-	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo->mtd, 5, UPCAST(K_NULLEXPR));
+	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo, 5, UPCAST(K_NULLEXPR));
 	END_LOCAL();
 	RESET_GCSTACK();
 	DBG_ASSERT(IS_Expr(lsfp[0].asObject));
@@ -198,11 +198,11 @@ static kbool_t kStmt_TypeCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t
 static kbool_t CallStatementFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, kGamma *gma)
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 3);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, (kObject *)fo->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, (kObject *)Stmt_ns(stmt));
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject *)stmt);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, (kObject *)gma);
 	countRef[0] += 1;
-	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo->mtd, 3, UPCAST(K_FALSE));
+	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo, 3, UPCAST(K_FALSE));
 	END_LOCAL();
 	return lsfp[0].boolValue;
 }

@@ -553,15 +553,15 @@ static void kNameSpace_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingB
 static void Func_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kFuncVar *fo = (kFuncVar *)o;
-	KFieldInit(fo, fo->self, K_NULL);
-	KFieldInit(fo, fo->mtd, conf == NULL ? KNULL(Method) : (kMethod *)conf);
+//	KFieldInit(fo, fo->self, K_NULL);
+	KFieldInit(fo, fo->method, conf == NULL ? KNULL(Method) : (kMethod *)conf);
 }
 
 static void Func_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kFunc *fo = (kFunc *)o;
-	KRefTrace(fo->self);
-	KRefTrace(fo->mtd);
+//	KRefTrace(fo->self);
+	KRefTrace(fo->method);
 }
 
 // ---------------

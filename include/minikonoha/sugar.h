@@ -768,7 +768,7 @@ static inline void kToken_setTypeId(KonohaContext *kctx, kToken *tk, kNameSpace 
 }
 
 #define Stmt_ns(STMT)   kStmt_ns(STMT)
-static inline kNameSpace *kStmt_ns(/*KonohaContext *kctx, */kStmt *stmt)
+static inline kNameSpace *kStmt_ns(kStmt *stmt)
 {
 	return stmt->parentBlockNULL->BlockNameSpace;
 }
