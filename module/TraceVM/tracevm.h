@@ -329,7 +329,7 @@ typedef struct OPCALL {
 	sfp_[K_SHIFTIDX].previousStack = (KonohaStack *)(rbp);\
 	sfp_[K_PCIDX].pc = PC_NEXT(pc);\
 	sfp_[K_MTDIDX].calledMethod = mtd_;\
-	KonohaRuntime_setesp(kctx, (KonohaStack *)(rbp + espshift));\
+	KStackSetArgc(kctx, (KonohaStack *)(rbp + espshift));\
 	(mtd_)->invokeMethodFunc(kctx, sfp_); \
 } while(0)
 
@@ -432,7 +432,7 @@ typedef struct OPSAFEPOINT {
 } OPSAFEPOINT;
 
 #define OPEXEC_SAFEPOINT(UL, espidx) do {\
-	KonohaRuntime_setesp(kctx, (KonohaStack *)(rbp+espidx));\
+	KStackSetArgc(kctx, (KonohaStack *)(rbp+espidx));\
 	KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack *)rbp, UL); \
 } while(0)
 

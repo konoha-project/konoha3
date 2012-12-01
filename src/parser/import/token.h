@@ -351,21 +351,21 @@ static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 
 static void CallSugarMethod(KonohaContext *kctx, KonohaStack *sfp, kFunc *fo, int argc, kObject *obj)
 {
-	KSetMethodCallStack(sfp, 0, fo->method, argc, obj);
+	KStackSetFuncAll(sfp, obj, 0, fo, argc);
 	KLIB KonohaRuntime_tryCallMethod(kctx, sfp);
 }
 
 static int CallTokenFunc(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Tokenizer *tokenizer, kStringVar *preparedString, int tok_start)
 {
 	DBG_ASSERT(IS_Func(fo));
-	BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, tokenizer->ns);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject *)tk);
-	lsfp[K_CALLDELTA+1].unboxValue = (uintptr_t)tokenizer;
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asString, preparedString);
-	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo, 2, KLIB Knull(kctx, CT_Int));
-	END_LOCAL();
-	int pos = lsfp[0].intValue + tok_start;
+	BEGIN_UnusedStack(lsfp);
+	KUnsafeFieldSet(lsfp[0].asNameSpace, tokenizer->ns);
+	KUnsafeFieldSet(lsfp[1].asToken, tk);
+	lsfp[1].unboxValue = (uintptr_t)tokenizer;
+	KUnsafeFieldSet(lsfp[2].asString, preparedString);
+	CallSugarMethod(kctx, lsfp, fo, 2, KLIB Knull(kctx, CT_Int));
+	END_UnusedStack();
+	int pos = lsfp[K_RTNIDX].intValue + tok_start;
 	if(pos > tok_start && tokenizer->currentLine > 0) { // check new lines
 		int i;
 		const char *t = tokenizer->source;

@@ -32,18 +32,18 @@ extern "C" {
 static kExpr *CallTypeCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, kExpr *expr, kGamma *gma, int reqty)
 {
 	INIT_GCSTACK();
-	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, (kObject *)Stmt_ns(stmt));
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject *)stmt);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, (kObject *)expr);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+3].asObject, (kObject *)gma);
-	lsfp[K_CALLDELTA+4].intValue = reqty;
+	BEGIN_UnusedStack(lsfp);
+	KUnsafeFieldSet(lsfp[0].asNameSpace, Stmt_ns(stmt));
+	KUnsafeFieldSet(lsfp[1].asStmt, stmt);
+	KUnsafeFieldSet(lsfp[2].asExpr, expr);
+	KUnsafeFieldSet(lsfp[3].asGamma, gma);
+	lsfp[4].intValue = reqty;
 	countRef[0] += 1;
-	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo, 5, UPCAST(K_NULLEXPR));
-	END_LOCAL();
+	CallSugarMethod(kctx, lsfp, fo, 5, UPCAST(K_NULLEXPR));
+	END_UnusedStack();
 	RESET_GCSTACK();
-	DBG_ASSERT(IS_Expr(lsfp[0].asObject));
-	return (kExpr *)lsfp[0].asObject;
+	DBG_ASSERT(IS_Expr(lsfp[K_RTNIDX].asObject));
+	return (kExpr *)lsfp[K_RTNIDX].asObject;
 }
 
 static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, KonohaClass* reqtc)
@@ -94,20 +94,17 @@ static kExpr* kStmtExpr_ToConstValue(KonohaContext *kctx, kStmt *stmt, kExprVar 
 {
 	size_t i, size = kArray_size(cons), psize = size - 2;
 	kMethod *mtd = cons->MethodItems[0];
-	BEGIN_LOCAL(lsfp, K_CALLDELTA + psize);
+	BEGIN_UnusedStack(lsfp);
 	for(i = 1; i < size; i++) {
-		kExpr_PutConstValue(kctx, cons->ExprItems[i], lsfp + K_CALLDELTA + i - 1);
+		kExpr_PutConstValue(kctx, cons->ExprItems[i], lsfp + i - 1);
 	}
-	{
-		KonohaStack *sfp = lsfp + K_CALLDELTA;
-		KSetMethodCallStack(sfp, stmt->uline, mtd, psize, KLIB Knull(kctx, CT_(expr->attrTypeId)));
-		KonohaRuntime_callMethod(kctx, sfp);
-	}
-	END_LOCAL();
+	KStackSetMethodAll(lsfp, KLIB Knull(kctx, CT_(expr->attrTypeId)), stmt->uline, mtd, psize);
+	KStackCall(lsfp);
+	END_UnusedStack();
 	if(CT_Is(UnboxType, rtype) /* || rtype->typeId == TY_void*/) {
-		return SUGAR kExpr_SetUnboxConstValue(kctx, expr, rtype->typeId, lsfp[0].unboxValue);
+		return SUGAR kExpr_SetUnboxConstValue(kctx, expr, rtype->typeId, lsfp[K_RTNIDX].unboxValue);
 	}
-	return SUGAR kExpr_SetConstValue(kctx, expr, NULL, lsfp[0].asObject);
+	return SUGAR kExpr_SetConstValue(kctx, expr, NULL, lsfp[K_RTNIDX].asObject);
 }
 
 static kExpr *kStmtExpr_ToBox(KonohaContext *kctx, kStmt *stmt, kExpr *texpr, kGamma *gma, KonohaClass* reqClass)
@@ -197,14 +194,14 @@ static kbool_t kStmt_TypeCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t
 
 static kbool_t CallStatementFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, kGamma *gma)
 {
-	BEGIN_LOCAL(lsfp, K_CALLDELTA + 3);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, (kObject *)Stmt_ns(stmt));
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject *)stmt);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, (kObject *)gma);
+	BEGIN_UnusedStack(lsfp);
+	KUnsafeFieldSet(lsfp[0].asNameSpace, Stmt_ns(stmt));
+	KUnsafeFieldSet(lsfp[1].asStmt,  stmt);
+	KUnsafeFieldSet(lsfp[2].asGamma, gma);
 	countRef[0] += 1;
-	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo, 3, UPCAST(K_FALSE));
-	END_LOCAL();
-	return lsfp[0].boolValue;
+	CallSugarMethod(kctx, lsfp, fo, 3, UPCAST(K_FALSE));
+	END_UnusedStack();
+	return lsfp[K_RTNIDX].boolValue;
 }
 
 static kbool_t SugarSyntax_TypeCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, kGamma *gma)
@@ -373,24 +370,23 @@ static kattrtype_t kStmt_CheckReturnType(KonohaContext *kctx, kStmt *stmt)
 
 static kstatus_t kMethod_RunEval(KonohaContext *kctx, kMethod *mtd, kattrtype_t rtype, kfileline_t uline, KTraceInfo *trace)
 {
-	BEGIN_LOCAL(lsfp, K_CALLDELTA);
+	BEGIN_UnusedStack(lsfp);
 	KonohaStackRuntimeVar *runtime = kctx->stack;
 	if(runtime->evalty != TY_void) {
-		KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, runtime->stack[runtime->evalidx].asObject);
-		lsfp[K_CALLDELTA+1].intValue = runtime->stack[runtime->evalidx].intValue;
+		KUnsafeFieldSet(lsfp[1].asObject, runtime->stack[runtime->evalidx].asObject);
+		lsfp[1].intValue = runtime->stack[runtime->evalidx].intValue;
 	}
-	KonohaStack *sfp = lsfp + K_CALLDELTA;
-	KSetMethodCallStack(sfp, uline, mtd, 1, KLIB Knull(kctx, CT_(rtype)));
+	KStackSetMethodAll(lsfp, KLIB Knull(kctx, CT_(rtype)), uline, mtd, 1);
 	kstatus_t result = K_CONTINUE;
-	if(KLIB KonohaRuntime_tryCallMethod(kctx, sfp)) {
+	if(KLIB KonohaRuntime_tryCallMethod(kctx, lsfp)) {
 		runtime->evalty = rtype;
-		runtime->evalidx = (lsfp - kctx->stack->stack);
+		runtime->evalidx = ((lsfp + K_RTNIDX)- kctx->stack->stack);
 	}
 	else {
 		runtime->evalty = TY_void;  // no value
 		result = K_BREAK;        // message must be reported;
 	}
-	END_LOCAL();
+	END_UnusedStack();
 	return result;
 }
 

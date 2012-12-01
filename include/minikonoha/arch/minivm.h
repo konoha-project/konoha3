@@ -283,7 +283,7 @@ typedef struct OPCALL {
 	sfp_[K_SHIFTIDX].previousStack = (KonohaStack *)(rbp);\
 	sfp_[K_PCIDX].pc = PC_NEXT(pc);\
 	sfp_[K_MTDIDX].calledMethod = mtd_;\
-	KonohaRuntime_setesp(kctx, (KonohaStack *)(rbp + op->espshift));\
+	((KonohaContextVar *)kctx)->esp = (KonohaStack *)(rbp + op->espshift);\
 	(mtd_)->invokeMethodFunc(kctx, sfp_); \
 } while(0)
 #endif
@@ -410,7 +410,7 @@ typedef struct OPSAFEPOINT {
 #ifndef OPEXEC_SAFEPOINT
 #define OPEXEC_SAFEPOINT() do {\
 	OPSAFEPOINT *op = (OPSAFEPOINT *)pc;\
-	KonohaRuntime_setesp(kctx, (KonohaStack *)(rbp + op->esp));\
+	KStackSetArgc((KonohaStack *)(rbp), op->esp);\
 	KLIB CheckSafePoint(kctx, (KonohaStack *)rbp, op->uline);\
 } while(0)
 #endif
@@ -423,11 +423,7 @@ typedef struct OPCHKSTACK {
 } OPCHKSTACK;
 
 #ifndef OPEXEC_CHKSTACK
-#define OPEXEC_CHKSTACK() do {\
-	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
-		KLIB KonohaRuntime_raise(kctx, EXPT_("StackOverflow"), SoftwareFault, NULL, (KonohaStack *)(rbp));\
-	}\
-} while(0)
+#define OPEXEC_CHKSTACK() KStackCheckOverflow((KonohaStack *)(rbp))
 #endif
 
 /* TRACE */

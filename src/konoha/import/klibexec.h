@@ -799,7 +799,7 @@ static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp
 	int jumpResult;
 	INIT_GCSTACK();
 	if((jumpResult = PLATAPI setjmp_i(*runtime->evaljmpbuf)) == 0) {
-		KonohaRuntime_callMethod(kctx, sfp);
+		KStackCall(sfp);
 	}
 	else {
 		PLATAPI ReportCaughtException(kctx, SYM_t(jumpResult), runtime->faultInfo, S_text(runtime->OptionalErrorInfo), runtime->bottomStack, runtime->topStack);

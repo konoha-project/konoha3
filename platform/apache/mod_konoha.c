@@ -293,15 +293,15 @@ static int konoha_handler(request_rec *r)
 
 	/* XXX: We assume Request Object may not be freed by GC */
 	kObject *req_obj = KLIB new_kObject(kctx, OnStack, cRequest, (uintptr_t)r);
-	BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
+	BEGIN_UnusedStack(lsfp, K_CALLDELTA + 1);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, req_obj);
 	{
 		KonohaStack *sfp = lsfp + K_CALLDELTA;
-		KSetMethodCallStack(sfp, 0/*UL*/, mtd, 1, KLIB Knull(kctx, CT_Int));
-		KonohaRuntime_callMethod(kctx, sfp);
+		KStackSetMethodAll(sfp, 0/*UL*/, mtd, 1, KLIB Knull(kctx, CT_Int));
+		KStackCall(sfp);
 	}
-	END_LOCAL();
+	END_UnusedStack();
 	int ret = lsfp[0].intValue;
 	Konoha_Destroy(konoha);
 	return ret;

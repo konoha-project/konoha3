@@ -35,19 +35,19 @@ extern "C" {
 
 static kExpr *CallExpressionFunc(KonohaContext *kctx, SugarSyntax *syn, kFunc *fo, int *countRef, kStmt *stmt, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx)
 {
-	BEGIN_LOCAL(lsfp, K_CALLDELTA + 6);
-	lsfp[K_CALLDELTA+0].unboxValue = (uintptr_t)syn;
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asNameSpace, kStmt_ns(stmt));
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asStmt, stmt);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asArray, tokenList);
-	lsfp[K_CALLDELTA+3].intValue = beginIdx;
-	lsfp[K_CALLDELTA+4].intValue = operatorIdx;
-	lsfp[K_CALLDELTA+5].intValue = endIdx;
+	BEGIN_UnusedStack(lsfp);
+	lsfp[0].unboxValue = (uintptr_t)syn;
+	KUnsafeFieldSet(lsfp[0].asNameSpace, kStmt_ns(stmt));
+	KUnsafeFieldSet(lsfp[1].asStmt, stmt);
+	KUnsafeFieldSet(lsfp[2].asArray, tokenList);
+	lsfp[3].intValue = beginIdx;
+	lsfp[4].intValue = operatorIdx;
+	lsfp[5].intValue = endIdx;
 	countRef[0] += 1;
-	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo, 5, UPCAST(K_NULLEXPR));
-	END_LOCAL();
-	DBG_ASSERT(IS_Expr(lsfp[0].asObject));
-	return lsfp[0].asExpr;
+	CallSugarMethod(kctx, lsfp, fo, 5, UPCAST(K_NULLEXPR));
+	END_UnusedStack();
+	DBG_ASSERT(IS_Expr(lsfp[K_RTNIDX].asObject));
+	return lsfp[K_RTNIDX].asExpr;
 }
 
 static kExpr *kStmt_ParseOperatorExpr(KonohaContext *kctx, kStmt *stmt, SugarSyntax *exprSyntax, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx)
@@ -542,18 +542,18 @@ static int TokenSeq_Resolve(KonohaContext *kctx, TokenSeq *tokens, MacroSet *mac
 static int CallPatternMatchFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, ksymbol_t name, kArray *tokenList, int beginIdx, int endIdx)
 {
 	INIT_GCSTACK();
-	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asNameSpace, kStmt_ns(stmt));
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asStmt, stmt);
-	lsfp[K_CALLDELTA+2].intValue = name;
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+3].asArray, tokenList);
-	lsfp[K_CALLDELTA+4].intValue = beginIdx;
-	lsfp[K_CALLDELTA+5].intValue = endIdx;
+	BEGIN_UnusedStack(lsfp);
+	KUnsafeFieldSet(lsfp[0].asNameSpace, kStmt_ns(stmt));
+	KUnsafeFieldSet(lsfp[1].asStmt, stmt);
+	lsfp[2].intValue = name;
+	KUnsafeFieldSet(lsfp[3].asArray, tokenList);
+	lsfp[4].intValue = beginIdx;
+	lsfp[5].intValue = endIdx;
 	countRef[0] += 1;
-	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo, 5, KLIB Knull(kctx, CT_Int));
-	END_LOCAL();
+	CallSugarMethod(kctx, lsfp, fo, 5, KLIB Knull(kctx, CT_Int));
+	END_UnusedStack();
 	RESET_GCSTACK();
-	return (int)lsfp[0].intValue;
+	return (int)lsfp[K_RTNIDX].intValue;
 }
 
 static int SugarSyntax_MatchPattern(KonohaContext *kctx, SugarSyntax *syn, kToken *patternToken, kStmt *stmt, int name, kArray *tokenList, int beginIdx, int endIdx)

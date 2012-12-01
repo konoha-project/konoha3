@@ -694,12 +694,12 @@ static KMETHOD Pointer_toObject(KonohaContext *kctx, KonohaStack *sfp)
 static void _kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 {
 	DBG_P("START CODE GENERATION..");
-	BEGIN_LOCAL(lsfp, 8);
+	BEGIN_UnusedStack(lsfp, 8);
 
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asMethod, mtd);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, (kObject *)bk);
 	KCALL(lsfp, 0, GenCodeMtd, 2, K_NULL);
-	END_LOCAL();
+	END_UnusedStack();
 }
 
 static kbool_t ijit_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)

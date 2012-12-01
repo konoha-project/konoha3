@@ -716,6 +716,7 @@ typedef struct {
 		uintptr_t                unboxValue;  //unboxValue
 		kObject                 *ObjectValue;  //ObjectValue
 		kString                 *StringValue;  //stringValue
+		kFunc                   *FuncValue;
 	};
 } KKeyValue;
 
@@ -1493,52 +1494,64 @@ struct _kSystem {
 /* ------------------------------------------------------------------------ */
 /* macros */
 
-#define KonohaRuntime_setesp(kctx, newesp)  ((KonohaContextVar *)kctx)->esp = (newesp)
-#define klr_setcalledMethod(sfpA, mtdO)   sfpA.calledMethod = mtdO
+#define KStackCheckOverflow(SFP) do {\
+		if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
+			KLIB KonohaRuntime_raise(kctx, EXPT_("StackOverflow"), SoftwareFault, NULL, SFP);\
+		}\
+}while(0)\
 
-#define BEGIN_LOCAL(V,N) \
-	KonohaStack *V = kctx->esp, *esp_ = kctx->esp; (void)V;((KonohaContextVar *)kctx)->esp = esp_+N;\
+#define BEGIN_UnusedStack(SFP) KonohaStack *SFP = kctx->esp + K_CALLDELTA, *esp_ = kctx->esp; KStackCheckOverflow(kctx->stack->topStack);
+#define END_UnusedStack()      ((KonohaContextVar *)kctx)->esp = esp_;
 
-#define END_LOCAL() ((KonohaContextVar *)kctx)->esp = esp_;
+#define KStackSetLine(SFP, UL)    SFP[K_RTNIDX].calledFileLine   = UL
+#define KStackSetArgc(SFP, ARGC)  ((KonohaContextVar *)kctx)->esp = (SFP + ARGC + 1)
 
-#define KSetStackFuncCall(SFP, FO, ARGC)\
+#define KStackSetMethodAll(SFP, DEFVAL, UL, MTD, ARGC) { \
+		KUnsafeFieldSet(SFP[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
+		KStackSetLine(SFP, UL);\
+		KStackSetArgc(SFP, ARGC);\
+		SFP[K_MTDIDX].calledMethod = MTD; \
+	} \
+
+
+#define KStackSetFunc(SFP, FO) do {\
 	SFP[K_MTDIDX].calledMethod = (FO)->method;\
-	KonohaRuntime_setesp(kctx, SFP + ARGC + 1);\
+}while(0);\
 
-#define KSetMethodCallStack(tsfp, UL, MTD, ARGC, DEFVAL) { \
-		tsfp[K_MTDIDX].calledMethod = MTD; \
-		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
-		tsfp[K_RTNIDX].calledFileLine   = UL;\
-		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
+#define KStackSetFuncAll(SFP, DEFVAL, UL, FO, ARGC) { \
+		KUnsafeFieldSet(SFP[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
+		KStackSetLine(SFP, UL);\
+		KStackSetArgc(SFP, ARGC);\
+		KStackSetFunc(SFP, FO);\
 	} \
 
 // if you want to ignore (exception), use KonohaRuntime_tryCallMethod
-#define KonohaRuntime_callMethod(kctx, sfp) { \
-		sfp[K_SHIFTIDX].previousStack = kctx->stack->topStack;\
-		kctx->stack->topStack = sfp;\
-		(sfp[K_MTDIDX].calledMethod)->invokeMethodFunc(kctx, sfp);\
-		kctx->stack->topStack = sfp[K_SHIFTIDX].previousStack;\
+#define KStackCall(SFP) { \
+		SFP[K_SHIFTIDX].previousStack = kctx->stack->topStack;\
+		kctx->stack->topStack = SFP;\
+		(SFP[K_MTDIDX].calledMethod)->invokeMethodFunc(kctx, SFP);\
+		kctx->stack->topStack = SFP[K_SHIFTIDX].previousStack;\
+	} \
+
+#define KStackCallAgain(SFP, MTD) { \
+		SFP[K_MTDIDX].calledMethod = MTD;\
+		(MTD)->invokeMethodFunc(kctx, SFP);\
 	} \
 
 
-#define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL)
-
-#define KCALL_DONT_USE_THIS(LSFP, RIX, MTD, ARGC, DEFVAL) { \
-		KonohaStack *tsfp = LSFP + RIX + K_CALLDELTA;\
-		tsfp[K_MTDIDX].calledMethod = MTD;\
-		tsfp[K_SHIFTIDX].shift = 0;\
-		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
-		tsfp[K_RTNIDX].calledFileLine = 0;\
-		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
-		(MTD)->invokeMethodFunc(kctx, tsfp);\
-		tsfp[K_MTDIDX].calledMethod = NULL;\
-	} \
-
-#define KSELFCALL(TSFP, MTD) { \
-		KonohaStack *tsfp = TSFP;\
-		tsfp[K_MTDIDX].calledMethod = MTD;\
-		(MTD)->invokeMethodFunc(kctx, tsfp);\
-	} \
+//#define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL)
+//
+//#define KCALL_DONT_USE_THIS(LSFP, RIX, MTD, ARGC, DEFVAL) { \
+//		KonohaStack *tsfp = LSFP + RIX + K_CALLDELTA;\
+//		tsfp[K_MTDIDX].calledMethod = MTD;\
+//		tsfp[K_SHIFTIDX].shift = 0;\
+//		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
+//		tsfp[K_RTNIDX].calledFileLine = 0;\
+//		KStackSetArgc(kctx, tsfp + ARGC + 1);\
+//		(MTD)->invokeMethodFunc(kctx, tsfp);\
+//		tsfp[K_MTDIDX].calledMethod = NULL;\
+//	} \
+//
 
 /* ----------------------------------------------------------------------- */
 /* Package */

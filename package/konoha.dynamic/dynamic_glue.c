@@ -46,7 +46,7 @@ struct _kDynamic {
 //{
 //}
 
-static kbool_t kMethod_CheckMethodCallStack(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd, int argc)
+static kbool_t kMethod_CheckMethodKStackCall(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd, int argc)
 {
 	int i;
 	kParam *param = kMethod_GetParam(mtd);
@@ -75,11 +75,11 @@ static KMETHOD Dynamic_(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_ASSERT(IS_NameSpace(ns));
 	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, O_ct(obj), symbol, argc, MethodMatch_CamelStyle);
 	if(mtd != NULL) {
-		if(kMethod_CheckMethodCallStack(kctx, sfp, mtd, argc)) {
-			KonohaRuntime_setesp(kctx, kctx->esp - 1);
+		if(kMethod_CheckMethodKStackCall(kctx, sfp, mtd, argc)) {
+			KStackSetArgc(sfp, argc);
 			sfp[K_MTDIDX].calledMethod = mtd;
 			//kObject *returnValue = sfp[K_RTNIDX].asObject;
-			KonohaRuntime_callMethod(kctx, sfp);
+			KStackCall(sfp);
 			return;
 		}
 	}

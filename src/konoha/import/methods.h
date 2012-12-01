@@ -265,7 +265,8 @@ static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 	kFunc* fo = sfp[0].asFunc;
 	DBG_ASSERT(IS_Func(fo));
 //	KUnsafeFieldSet(sfp[0].asObject, fo->self);
-	KSELFCALL(sfp, fo->method);
+
+	KStackCallAgain(sfp, fo->method);
 }
 
 //## @Const @Static void System.assert(boolean x)

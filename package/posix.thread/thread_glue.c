@@ -60,9 +60,9 @@ static void *spawn_start(void *v)
 	// TODO Exception handling
 	// TODO push func arguments
 
-//	BEGIN_LOCAL(lsfp, K_CALLDELTA+0);
+//	BEGIN_UnusedStack(lsfp, K_CALLDELTA+0);
 //	KCALL(lsfp, 0, t->func->mtd, 0, K_NULL);
-//	END_LOCAL();
+//	END_UnusedStack();
 
 	KLIB KonohaContext_Free(t->rootCtx, (KonohaContextVar *)kctx);
 	t->kctx = NULL;

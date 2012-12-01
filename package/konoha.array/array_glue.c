@@ -253,30 +253,30 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 //	if(kArray_isUnboxData(a)) {
 //		for(i=0; i != asize; ++i) {
 //			uintptr_t tmp = a->unboxItems[i];
-//			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
+//			BEGIN_UnusedStack(lsfp, K_CALLDELTA + 1);
 //			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 //			lsfp[K_CALLDELTA+1].unboxValue = tmp;
 //			{
 //				KonohaStack *sfp = lsfp + K_CALLDELTA;
-//				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
-//				KonohaRuntime_callMethod(kctx, sfp);
+//				KStackSetMethodAll(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
+//				KStackCall(sfp);
 //			}
-//			END_LOCAL();
+//			END_UnusedStack();
 //			returnValue->unboxItems[i] = lsfp[0].unboxValue;
 //		}
 //	}
 //	else {
 //		for(i=0; i != asize; ++i) {
 //			kObject *tmp  = a->ObjectItems[i];
-//			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
+//			BEGIN_UnusedStack(lsfp, K_CALLDELTA + 1);
 //			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 //			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
 //			{
 //				KonohaStack *sfp = lsfp + K_CALLDELTA;
-//				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
-//				KonohaRuntime_callMethod(kctx, sfp);
+//				KStackSetMethodAll(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
+//				KStackCall(sfp);
 //			}
-//			END_LOCAL();
+//			END_UnusedStack();
 //			KFieldSet(returnValue, returnValue->ObjectItems[i], lsfp[0].asObject);
 //		}
 //	}
@@ -295,38 +295,38 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 //	size_t i;
 //	if(kArray_isUnboxData(a)) {
 //		uintptr_t tmp = 0;
-//		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
+//		BEGIN_UnusedStack(lsfp, K_CALLDELTA + 2);
 //		for(i=0; i != asize; ++i) {
 //			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 //			lsfp[K_CALLDELTA+1].unboxValue = tmp;
 //			lsfp[K_CALLDELTA+2].unboxValue = a->unboxItems[i];
 //			{
 //				KonohaStack *sfp = lsfp + K_CALLDELTA;
-//				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 2, KLIB Knull(kctx, CT_(resolve_type)));
-//				KonohaRuntime_callMethod(kctx, sfp);
+//				KStackSetMethodAll(sfp, 0/*UL*/, f->mtd, 2, KLIB Knull(kctx, CT_(resolve_type)));
+//				KStackCall(sfp);
 //			}
 //			tmp = lsfp[0].unboxValue;
 //		}
-//		END_LOCAL();
+//		END_UnusedStack();
 //		KReturnUnboxValue(tmp);
 //	}
 //	else {
 //		INIT_GCSTACK();
 //		kObject *tmp = (kObject *) KLIB new_kObject(kctx, _GcStack, CT_(resolve_type), 0);
 //		kObject *nulobj = KLIB Knull(kctx, CT_(resolve_type));
-//		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
+//		BEGIN_UnusedStack(lsfp, K_CALLDELTA + 2);
 //		for(i=0; i != asize; ++i) {
 //			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, nulobj);
 //			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
 //			KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, a->ObjectItems[i]);
 //			{
 //				KonohaStack *sfp = lsfp + K_CALLDELTA;
-//				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 2, nulobj);
-//				KonohaRuntime_callMethod(kctx, sfp);
+//				KStackSetMethodAll(sfp, 0/*UL*/, f->mtd, 2, nulobj);
+//				KStackCall(sfp);
 //			}
 //			KUnsafeFieldSet(tmp, lsfp[0].asObject);
 //		}
-//		END_LOCAL();
+//		END_UnusedStack();
 //		KReturnWith(tmp, RESET_GCSTACK());
 //	}
 //}
@@ -440,7 +440,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //		KLIB KBuffer_printf(kctx, &wb, "%ld", uv);
 //	} else {
 //		kObject *obj;
-//		BEGIN_LOCAL(lsfp, 1);
+//		BEGIN_UnusedStack(lsfp, 1);
 //		for (i = 0; i < kArray_size(a) - 1; i++) {
 //			obj = a->ObjectItems[i];
 //			DBG_ASSERT(O_ct(obj)->p);
@@ -452,7 +452,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //		obj = a->ObjectItems[i];
 //		KUnsafeFieldSet(lsfp[0].asObject, obj);
 //		O_ct(obj)->p(kctx, lsfp, 0, &wb, 0);
-//		END_LOCAL();
+//		END_UnusedStack();
 //
 //	}
 //	const char *KGrowingBufferTopChar = KLIB KBuffer_Stringfy(kctx, &wb, 0);
