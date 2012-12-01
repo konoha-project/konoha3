@@ -25,7 +25,7 @@
 #ifndef MINISHELL_H_
 #define MINISHELL_H_
 
-static int checkstmt(const char *t, size_t len)
+static int CheckStmt(const char *t, size_t len)
 {
 	size_t i = 0;
 	int ch, quote = 0, nest = 0;
@@ -56,7 +56,7 @@ static int checkstmt(const char *t, size_t len)
 	return 1;
 }
 
-static kstatus_t readstmt(KonohaContext *kctx, KGrowingBuffer *wb, kfileline_t *uline)
+static kstatus_t ReadStmt(KonohaContext *kctx, KGrowingBuffer *wb, kfileline_t *uline)
 {
 	int line = 1;
 	kstatus_t status = K_CONTINUE;
@@ -74,7 +74,7 @@ static kstatus_t readstmt(KonohaContext *kctx, KGrowingBuffer *wb, kfileline_t *
 		}
 		KLIB KBuffer_Write(kctx, wb, ln, strlen(ln));
 		free(ln);
-		if((check = checkstmt(KLIB KBuffer_Stringfy(kctx, wb, 0), KBuffer_bytesize(wb))) > 0) {
+		if((check = CheckStmt(KLIB KBuffer_Stringfy(kctx, wb, 0), KBuffer_bytesize(wb))) > 0) {
 			uline[0]++;
 			line++;
 			continue;
@@ -94,7 +94,7 @@ static kstatus_t readstmt(KonohaContext *kctx, KGrowingBuffer *wb, kfileline_t *
 	return status;
 }
 
-static void dumpEval(KonohaContext *kctx, KGrowingBuffer *wb)
+static void DumpEval(KonohaContext *kctx, KGrowingBuffer *wb)
 {
 	KonohaStackRuntimeVar *base = kctx->stack;
 	kattrtype_t ty = base->evalty;
@@ -107,21 +107,21 @@ static void dumpEval(KonohaContext *kctx, KGrowingBuffer *wb)
 	}
 }
 
-static void shell(KonohaContext *kctx)
+static void RunShell(KonohaContext *kctx)
 {
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kfileline_t uline = FILEID_("(shell)") | 1;
 	while(1) {
 		kfileline_t inc = 0;
-		kstatus_t status = readstmt(kctx, &wb, &inc);
+		kstatus_t status = ReadStmt(kctx, &wb, &inc);
 		if(status == K_BREAK) break;
 		if(status == K_CONTINUE && KBuffer_bytesize(&wb) > 0) {
 			status = (kstatus_t)Konoha_Eval((KonohaContext *)kctx, KLIB KBuffer_Stringfy(kctx, &wb, 1), uline);
 			uline += inc;
 			KLIB KBuffer_Free(&wb);
 			if(status != K_FAILED) {
-				dumpEval(kctx, &wb);
+				DumpEval(kctx, &wb);
 				KLIB KBuffer_Free(&wb);
 			}
 		}
@@ -131,14 +131,14 @@ static void shell(KonohaContext *kctx)
 	return;
 }
 
-static void show_module(KonohaContext *kctx, KModuleInfo *info)
+static void ShowModule(KonohaContext *kctx, KModuleInfo *info)
 {
 	if(info != NULL && info->desc != NULL) {
 		PLATAPI printf_i(" %s", info->desc);
 	}
 }
 
-static void show_version(KonohaContext *kctx)
+static void ShowVersion(KonohaContext *kctx)
 {
 	PLATAPI printf_i(K_PROGNAME " " K_VERSION " (%s) (%s, %lu, %s)\n", K_CODENAME, K_REVISION, K_DATE, __DATE__);
 #if defined(__GNUC__)
@@ -149,18 +149,18 @@ static void show_version(KonohaContext *kctx)
 	PLATAPI printf_i("[clang %s]\n", __VERSION__);
 #endif
 	PLATAPI printf_i("modules:");
-	show_module(kctx, PLATAPI VirtualMachineInfo);
-	show_module(kctx, PLATAPI GCInfo);
-	show_module(kctx, PLATAPI ConsoleInfo);
-	show_module(kctx, PLATAPI EventInfo);
-	show_module(kctx, PLATAPI I18NInfo);
+	ShowModule(kctx, PLATAPI VirtualMachineInfo);
+	ShowModule(kctx, PLATAPI GCInfo);
+	ShowModule(kctx, PLATAPI ConsoleInfo);
+	ShowModule(kctx, PLATAPI EventInfo);
+	ShowModule(kctx, PLATAPI I18NInfo);
 	PLATAPI printf_i("\n");
 }
 
 static kbool_t konoha_shell(KonohaContext* konoha)
 {
-	show_version(konoha);
-	shell(konoha);
+	ShowVersion(konoha);
+	RunShell(konoha);
 	return true;
 }
 
