@@ -1539,20 +1539,6 @@ struct _kSystem {
 	} \
 
 
-//#define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL)
-//
-//#define KCALL_DONT_USE_THIS(LSFP, RIX, MTD, ARGC, DEFVAL) { \
-//		KonohaStack *tsfp = LSFP + RIX + K_CALLDELTA;\
-//		tsfp[K_MTDIDX].calledMethod = MTD;\
-//		tsfp[K_SHIFTIDX].shift = 0;\
-//		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
-//		tsfp[K_RTNIDX].calledFileLine = 0;\
-//		KStackSetArgc(kctx, tsfp + ARGC + 1);\
-//		(MTD)->invokeMethodFunc(kctx, tsfp);\
-//		tsfp[K_MTDIDX].calledMethod = NULL;\
-//	} \
-//
-
 /* ----------------------------------------------------------------------- */
 /* Package */
 
