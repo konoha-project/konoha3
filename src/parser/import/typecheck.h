@@ -57,18 +57,21 @@ static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *g
 		for(index = size - 1; index >= 0; index--) {
 			kExpr *texpr = CallTypeCheckFunc(kctx, FuncItems[index], &callCount, stmt, expr, gma, reqtc->typeId);
 			if(kStmt_isERR(stmt)) return K_NULLEXPR;
-			if(texpr->attrTypeId != TY_var) return texpr;
+			if(texpr->attrTypeId != TY_var) {
+				DBG_ASSERT(texpr->build != -1);
+				return texpr;
+			}
 		}
 		if(syn->parentSyntaxNULL == NULL) break;
 		syn = syn->parentSyntaxNULL;
 	}
-	if(callCount == 0) {
+	if(callCount == 0 || !kStmt_isERR(stmt)) {
 		if(Expr_isTerm(expr)) {
-			return kStmtToken_Message(kctx, stmt, expr->termToken, ErrTag, "undefined token type checker: '%s'", KToken_t(expr->termToken));
+			return kStmtToken_Message(kctx, stmt, expr->termToken, ErrTag, "undefined term: %s", KToken_t(expr->termToken));
 		}
 		else {
 			DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", expr->syn, expr->syn->parentSyntaxNULL, PSYM_t(syn->keyword));
-			return kStmt_Message(kctx, stmt, ErrTag, "undefined operator type checker: %s%s",  PSYM_t(expr->syn->keyword));
+			return kStmt_Message(kctx, stmt, ErrTag, "undefined operator: %s%s",  PSYM_t(expr->syn->keyword));
 		}
 	}
 	return K_NULLEXPR;

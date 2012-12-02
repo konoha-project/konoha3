@@ -47,19 +47,19 @@ static void VisitExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr
 	int espidx = cbuilder->espidx;
 	int shift = cbuilder->shift;
 	switch(expr->build) {
-	case TEXPR_CONST:    cbuilder->api->visitConstExpr(kctx, builder, stmt, expr);  break;
-	case TEXPR_NEW:      cbuilder->api->visitNewExpr(kctx, builder, stmt, expr);    break;
-	case TEXPR_NULL:     cbuilder->api->visitNullExpr(kctx, builder, stmt, expr);   break;
-	case TEXPR_NCONST:   cbuilder->api->visitNConstExpr(kctx, builder, stmt, expr); break;
-	case TEXPR_LOCAL:    cbuilder->api->visitLocalExpr(kctx, builder, stmt, expr);  break;
-	case TEXPR_BLOCK:    cbuilder->api->visitBlockExpr(kctx, builder, stmt, expr);  break;
-	case TEXPR_FIELD:    cbuilder->api->visitFieldExpr(kctx, builder, stmt, expr);  break;
-	case TEXPR_CALL:     cbuilder->api->visitCallExpr(kctx, builder, stmt, expr);   break;
-	case TEXPR_AND:      cbuilder->api->visitAndExpr(kctx, builder, stmt, expr);    break;
-	case TEXPR_OR:       cbuilder->api->visitOrExpr(kctx, builder, stmt, expr);     break;
-	case TEXPR_LET:      cbuilder->api->visitLetExpr(kctx, builder, stmt, expr);    break;
-	case TEXPR_STACKTOP: cbuilder->api->visitStackTopExpr(kctx, builder, stmt, expr);break;
-	default: DBG_ABORT("unknown expr=%d", expr->build);
+		case TEXPR_CONST:    cbuilder->api->visitConstExpr(kctx, builder, stmt, expr);  break;
+		case TEXPR_NEW:      cbuilder->api->visitNewExpr(kctx, builder, stmt, expr);    break;
+		case TEXPR_NULL:     cbuilder->api->visitNullExpr(kctx, builder, stmt, expr);   break;
+		case TEXPR_NCONST:   cbuilder->api->visitNConstExpr(kctx, builder, stmt, expr); break;
+		case TEXPR_LOCAL:    cbuilder->api->visitLocalExpr(kctx, builder, stmt, expr);  break;
+		case TEXPR_BLOCK:    cbuilder->api->visitBlockExpr(kctx, builder, stmt, expr);  break;
+		case TEXPR_FIELD:    cbuilder->api->visitFieldExpr(kctx, builder, stmt, expr);  break;
+		case TEXPR_CALL:     cbuilder->api->visitCallExpr(kctx, builder, stmt, expr);   break;
+		case TEXPR_AND:      cbuilder->api->visitAndExpr(kctx, builder, stmt, expr);    break;
+		case TEXPR_OR:       cbuilder->api->visitOrExpr(kctx, builder, stmt, expr);     break;
+		case TEXPR_LET:      cbuilder->api->visitLetExpr(kctx, builder, stmt, expr);    break;
+		case TEXPR_STACKTOP: cbuilder->api->visitStackTopExpr(kctx, builder, stmt, expr);break;
+		default: DBG_ABORT("unknown expr=%d", expr->build);
 	}
 	cbuilder->a = a;
 	cbuilder->espidx = espidx;
