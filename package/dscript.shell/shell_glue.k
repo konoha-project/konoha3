@@ -35,7 +35,7 @@ import("konoha.math");
 import("konoha.object");
 import("konoha.string");
 import("dscript.subproc");
-import("sugar");
+import("konoha.desugar");
 
 @Public String FILE.readAll() {
 	String ret = "";
@@ -266,7 +266,8 @@ boolean statementShell(Stmt stmt, Gamma gma) {
 		return false;
 	}
 	String[] args = concatTokenList(tokenList);
-	Block block = stmt.newBlock(generateSubProcSequence(args, true));
+	Token[] subprocTokens = tokenize(generateSubProcSequence(args, true));
+	Block block = stmt.newBlock(subprocTokens, 0, subprocTokens.getSize());
 	boolean ret = block.TypeCheckAll(gma);
 	if(!ret) {
 		return false;
@@ -280,10 +281,10 @@ boolean statementShell(Stmt stmt, Gamma gma) {
 
 int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, int endIdx) {
 	Token firstToken = tokenList[beginIdx];
-	if(firstToken.isSymbol() && SubProc.isCommand(firstToken.getText())) {
+	if(firstToken.Is("$Symbol") && SubProc.isCommand(firstToken.getText())) {
 		int i = beginIdx + 1;
 		while(i < endIdx) {
-			if(tokenList[i].isParenthesis()) {
+			if(tokenList[i].Is("()")) {
 				return -1;
 			}
 			i = i + 1;
@@ -320,8 +321,7 @@ int tokenFuncDollar(Token tk, String source) {
 		ch = source.charCodeAt(pos);
 		if(ch == closeParenthesis) {
 			if(tk.isNotNull() && pos > 2) {
-				tk.setText(source.substr(2, pos - 2));
-				tk.setUnresolvedTokenType("$CommandReplace");
+				tk.setText("$CommandReplace", source, 2, pos);
 			}
 			return pos + 1;
 		}
@@ -339,8 +339,8 @@ Expr expressionCommandReplace(Stmt stmt, Token[] tokenList, int beginIdx, int op
 		while(i < endIdx) {
 			System.p(tokenList[i].getText());
 			System.p(tokenList[i].getText().getSize());
-			System.p(tokenList[i].isSymbol());
-			System.p(tokenList[i].isParenthesis());
+			System.p(tokenList[i].is("$Symbol"));
+			System.p(tokenList[i].is("()"));
 			i = i + 1;
 		}
 	}
