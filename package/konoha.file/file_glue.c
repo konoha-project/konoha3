@@ -75,8 +75,11 @@ static int TRACE_fputc(KonohaContext *kctx, kFile *file, int ch, KTraceInfo *tra
 
 static void kFile_close(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
 {
+	int ret = 0;
 	DBG_ASSERT(file->fp != NULL);
-	int ret = fclose(file->fp);
+	if(!(file->fp == stdin || file->fp == stdout || file->fp == stderr)) {
+		ret = fclose(file->fp);
+	}
 	if(ret != 0) {
 		KTraceErrorPoint(trace, SoftwareFault|SystemFault, "fclose", LogErrno);
 	}
