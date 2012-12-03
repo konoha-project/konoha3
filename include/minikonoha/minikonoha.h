@@ -223,14 +223,14 @@ typedef struct {
 /* kattrtype_t */
 #define TY_newid           ((kattrtype_t)-1)
 
-#define TypeAttr_Attr(t)        (t  & (KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
-#define TypeAttr_Unmask(t)      (t  & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3)))
+#define TypeAttr_Attr(t)        ((t)  & (KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
+#define TypeAttr_Unmask(t)      ((t)  & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3)))
 
 #define TypeAttr_Boxed      KFLAG_H0    /* KeyValueStore, Field */
 #define TypeAttr_ReadOnly   KFLAG_H1    /* Variable, Field */
 #define TypeAttr_Coercion   KFLAG_H2    /* Variable, Field */
 
-#define TypeAttr_Is(P, t)   ((t & TypeAttr_##P) == TypeAttr_##P)
+#define TypeAttr_Is(P, t)   (((t) & TypeAttr_##P) == TypeAttr_##P)
 
 #define CT_(t)              (kctx->share->classTable.classItems[TypeAttr_Unmask(t)])
 #define CT_cparam(CT)       (kctx->share->paramdomList_OnGlobalConstList->ParamItems[(CT)->cparamdom])
