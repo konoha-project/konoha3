@@ -73,17 +73,21 @@ static kbool_t VisitBlock(KonohaContext *kctx, KBuilder *builder, kBlock *block)
 	int espidx = cbuilder->espidx;
 	int shift = cbuilder->shift;
 	cbuilder->espidx = (block->esp->build == TEXPR_STACKTOP) ? shift + block->esp->index : block->esp->index;
+	kbool_t ret = true;
 	size_t i;
 	for (i = 0; i < kArray_size(block->StmtList); i++) {
 		kStmt *stmt = block->StmtList->StmtItems[i];
 		if(stmt->syn == NULL) continue;
 		cbuilder->uline = stmt->uline;
-		if(!VisitStmt(kctx, builder, stmt)) return false;
+		if(!VisitStmt(kctx, builder, stmt)) {
+			ret = false;
+			break;
+		}
 	}
 	cbuilder->a = a;
 	cbuilder->espidx = espidx;
 	cbuilder->shift = shift;
-	return true;
+	return ret;
 }
 
 static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
