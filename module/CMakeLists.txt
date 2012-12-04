@@ -12,6 +12,8 @@ set(KONOHA_MODULE_DIR
 macro(add_konoha_module ModuleName)
 	MESSAGE(STATUS "Compiling ${ModuleName} Module")
 	ENABLE_COVERAGE_INFO_IF_ENABLE(MODULE_EXTRA_LIBRARY)
+	set(CMAKE_C_FLAGS_${uppercase_CMAKE_BUILD_TYPE}   "${CMAKE_C_FLAGS_${uppercase_CMAKE_BUILD_TYPE}}   ${MODULE_C_FLAGS}")
+	set(CMAKE_CXX_FLAGS_${uppercase_CMAKE_BUILD_TYPE} "${CMAKE_CXX_FLAGS_${uppercase_CMAKE_BUILD_TYPE}} ${MODULE_CXX_FLAGS}")
 	add_library(${ModuleName} SHARED ${MODULE_SOURCE_CODE})
 	target_link_libraries(${ModuleName} ${MODULE_EXTRA_LIBRARY})
 	set_target_properties(${ModuleName} PROPERTIES PREFIX "")

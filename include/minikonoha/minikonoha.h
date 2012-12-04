@@ -1388,6 +1388,7 @@ struct kMethodVar {
 	kToken           *SourceToken;
 	union {
 		kNameSpace   *LazyCompileNameSpace;       // lazy compilation
+		kBlock       *CompiledBlock;
 	};
 	uintptr_t         serialNumber;
 };
