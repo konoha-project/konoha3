@@ -207,16 +207,25 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 	String prevname = "";
 	int argsize = 0;
 	int redirectindex = -1;
+	String mode = "w";
 	while(true) {
 		/* pipe */
 		index = indexOf(args, "|", startindex);
 		if(index < 0) {
-			redirectindex = indexOf(args, ">", startindex);
+			redirectindex = indexOf(args, ">>", startindex);
 			if(redirectindex >= 0) {
+				mode = "a";
 				argsize = redirectindex - startindex - 1;
 			}
 			else {
-				argsize = args.getSize() - startindex - 1;
+				redirectindex = indexOf(args, ">", startindex);
+				if(redirectindex >= 0) {
+					mode = "w";
+					argsize = redirectindex - startindex - 1;
+				}
+				else {
+					argsize = args.getSize() - startindex - 1;
+				}
 			}
 		}
 		else {
@@ -237,7 +246,7 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 			if(redirectindex >= 0) {
 				/* redirect */
 				String filename = args[redirectindex + 1];
-				ret = ret + varname + ".setOutputStream(new FILE(\"" + filename + "\", \"w\"));\n";
+				ret = ret + varname + ".setOutputStream(new FILE(\"" + filename + "\", \"" + mode + "\"));\n";
 			}
 			else {
 				/* end of pipe */
