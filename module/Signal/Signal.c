@@ -276,7 +276,7 @@ static void AddSignalEvent(KonohaContext *kctx, struct EventContext *eventContex
 
 // ---------------------------------------------------------------------------
 
-static void StartEventHandler(KonohaContext *kctx)
+static void StartEventHandler(KonohaContext *kctx, void *args)
 {
 	KNH_ASSERT(PLATAPI eventContext == NULL);
 	struct EventContext *eventContext = (struct EventContext *)PLATAPI malloc_i(sizeof(struct EventContext));
