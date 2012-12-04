@@ -74,4 +74,8 @@
 #cmakedefine HAVE_BUILTIN_CTZL 1
 
 /* Define to 1 if you have the `bzero' function. */
-#cmakedefine HAVE_BZERO 1
+#cmakedefine HAVE_BZERO 1 
+
+/* Define to 1 if you have the `bzero' function. */
+#cmakedefine HAVE_LIBV8 1
+
