@@ -108,7 +108,7 @@ static KMETHOD Json_toInt(KonohaContext *kctx, KonohaStack *sfp)
 		KReturnUnboxValue((intptr_t)n);
 	}
 	else if(PLATAPI IsJsonType(&jo->jsonbuf, KJSON_STRING)) {
-		const char* text = PLATAPI GetJsonText(kctx, &jo->jsonbuf, NULL, 0, "0");
+		const char *text = PLATAPI GetJsonText(kctx, &jo->jsonbuf, NULL, 0, "0");
 		int64_t n = strtoll(text, NULL, 10);
 		KReturnUnboxValue((intptr_t)n);
 	}
@@ -131,15 +131,16 @@ static KMETHOD Int_toJson(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	if(PLATAPI IsJsonType(&jo->jsonbuf, KJSON_STRING)) {
-		const char *text = PLATAPI GetJsonText(kctx, &jo->jsonbuf, NULL, 0, NULL);
-		DBG_ASSERT(text != NULL);
-		KReturn(KLIB new_kString(kctx, OnStack, text, strlen(text), 0));
-	}
-	else if(PLATAPI IsJsonType(&jo->jsonbuf, KJSON_NULL)) {
+	if(PLATAPI IsJsonType(&jo->jsonbuf, KJSON_NULL)) {
 		KReturn(KNULL(String));
 	}
-	KReturn(KNULL(String));
+	else {
+		const char *text = PLATAPI JsonToNewText(kctx, &jo->jsonbuf);
+		DBG_ASSERT(text != NULL);
+		kString *ret = KLIB new_kString(kctx, OnStack, text, strlen(text), 0);
+		free(text);
+		KReturn(ret);
+	}
 }
 
 //## Json String.toJson();
