@@ -439,8 +439,8 @@ int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, in
 //static KMETHOD Stmt_TypeCheckExpr(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	ksymbol_t key = (ksymbol_t)sfp[1].intValue;
-//	kattrtype_t typeId = O_typeId(sfp[3].asObject);
-//	KReturnUnboxValue(SUGAR kStmt_TypeCheckByName(kctx, sfp[0].asStmt, key, sfp[2].asGamma, typeId, sfp[4].intValue));
+//	KonohaClass *kclass = O_ct(sfp[3].asObject);
+//	KReturnUnboxValue(SUGAR kStmt_TypeCheckByName(kctx, sfp[0].asStmt, key, sfp[2].asGamma, kclass, sfp[4].intValue));
 //}
 //
 ////## Expr Stmt.newExpr(Token[] tokenList, int s, int e);
