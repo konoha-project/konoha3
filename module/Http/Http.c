@@ -113,10 +113,10 @@ static RawEvent* dequeueRawEventFromLocalQueue(LocalQueue *queue)
 //		invoke_gc(ctx);
 //	}
 //	if(TFLAG_is(int, safepoint, SAFEPOINT_SIGNAL)) {
-//		if (ctx->sighandlers != NULL) {
+//		if(ctx->sighandlers != NULL) {
 //			KNH_ASSERT(ctx->signal < K_SIGNAL_MAX);
 //			kFunc *handler_func = (kFunc *)ctx->sighandlers[ctx->signal];
-//			if (handler_func != NULL) {
+//			if(handler_func != NULL) {
 //				ksfp_t *lsfp = ctx->esp + 1; // for safety
 //				lsfp[K_CALLDELTA + 1].ivalue = ctx->signal;
 //				knh_Func_invoke(ctx, handler_func, lsfp, 1/* argc */);
@@ -197,13 +197,13 @@ typedef struct {
 static void StartEventHandler(KonohaContext *kctx, void *args)
 {
 	KNH_ASSERT(PLATAPI eventContext == NULL);
-	struct EventContext *eventContext = (struct EventContext*)PLATAPI malloc_i(sizeof(struct EventContext));
-	((KonohaFactory*)kctx->platApi)->eventContext = eventContext;
-	bzero(((KonohaFactory*)kctx->platApi)->eventContext, sizeof(struct EventContext));
+	struct EventContext *eventContext = (struct EventContext *)PLATAPI malloc_i(sizeof(struct EventContext));
+	((KonohaFactory *)kctx->platApi)->eventContext = eventContext;
+	bzero(((KonohaFactory *)kctx->platApi)->eventContext, sizeof(struct EventContext));
 
 	eventContext->safePointRef = (int *)&kctx->safepoint;
 
-	eventContext->queue = (LocalQueue*)PLATAPI malloc_i(sizeof(LocalQueue));
+	eventContext->queue = (LocalQueue *)PLATAPI malloc_i(sizeof(LocalQueue));
 	LocalQueue_Init(kctx, eventContext->queue);
 
 	eventContext->httpContext = httpContext;
@@ -273,7 +273,7 @@ static void DispatchEvent(KonohaContext *kctx, kbool_t (*consume)(KonohaContext 
 	RawEvent *rawEvent = dequeueRawEventFromLocalQueue(eventContext->queue);
 	pthread_mutex_unlock(&eventContext->lock);
 	while(rawEvent != NULL) {
-		consume(kctx, (struct JsonBuf*)rawEvent, trace);
+		consume(kctx, (struct JsonBuf *)rawEvent, trace);
 		pthread_mutex_lock(&eventContext->lock);
 		rawEvent = dequeueRawEventFromLocalQueue(eventContext->queue);
 		pthread_mutex_unlock(&eventContext->lock);
