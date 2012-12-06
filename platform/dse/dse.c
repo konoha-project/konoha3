@@ -22,39 +22,131 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-/* ************************************************************************ */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <assert.h>
-#include <getopt.h>
-#include <event.h>
-#include <evhttp.h>
-#include <event2/buffer.h>
-#include <logpool/logpool.h>
-#ifndef K_USE_PTHREAD
-#define K_USE_PTHREAD 1
-#endif /* K_USE_PTHREAD */
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#include <minikonoha/platform_posix.h>
-#ifndef K_USE_PTHREAD
-#include <pthread.h>
-#endif /* K_USE_PTHREAD */
+#include <minikonoha/klib.h>
+
+#ifdef __GNUC__
+#include <getopt.h>
+#else
+
+char *optarg = 0;
+int optind   = 1;
+int optopt   = 0;
+int opterr   = 0;
+int optreset = 0;
+
+struct option {
+	char *name;
+	int has_arg;
+	int *flag;
+	int val;
+};
+
+/* The has_arg field should be one of: */
+enum {
+	no_argument,       /* no argument to the option is expect        */
+	required_argument, /* an argument to the option is required      */
+	optional_argument, /* an argument to the option may be presented */
+};
+
+static int getopt_long(int argc, char * const *argv, const char *optstring, const struct option *longopts, int *longindex);
+
+#include <string.h>
+#include <ctype.h>
+static int getopt_long(int argc, char * const *argv, const char *optstring, const struct option *longopts, int *longindex)
+{
+	if(optind < argc) {
+		char *arg = argv[optind];
+		if(arg == 0)
+			return -1;
+		if(arg[0] == '-' && arg[1] == '-') {
+			const struct option *opt = longopts;
+			arg += 2;
+			while (opt->name) {
+				char *end = strchr(arg, '=');
+				if(end == 0 && opt->has_arg == no_argument) {
+					if(strcmp(arg, opt->name) == 0)
+						*longindex = opt - longopts;
+					optind++;
+					return opt->val;
+				}
+				if(strncmp(arg, opt->name, end - arg) == 0) {
+					*longindex = opt - longopts;
+					optarg = end+1;
+					optind++;
+					return opt->val;
+				}
+				opt++;
+			}
+		}
+		else if(arg[0] == '-') {
+			arg += 1;
+			const char *c = optstring;
+			while (*c != 0) {
+				if(*c == arg[0]) {
+					if(*(c+1) == ':' && arg[1] == '=') {
+						optarg = arg+2;
+					}
+					optind++;
+					return arg[0];
+				}
+				c++;
+			}
+		}
+	}
+	return -1;
+}
+
+#endif /*__GNUC__ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // for debug
-#define DEBUG_PRINT(fmt, ...) do { \
-	if(verbose_debug) fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
+#include <stdio.h>
+
+extern int verbose_debug;
+
+#define DEBUG_P(fmt, ...) do { \
+	if(verbose_debug) fprintf(stdout, "DEBUG(%s:%d) " fmt "\n", __func__, __LINE__, ##__VA_ARGS__); \
+} while (0)
+#define DEBUG_ABORT() do { \
+	if(verbose_debug) fprintf(stderr, "ABORT(%s:%d) ", __func__, __LINE__); \
+	perror(NULL); \
+	exit(EXIT_FAILURE); \
 } while (0)
 #define DEBUG_ASSERT(stmt) do { \
-	if(verbose_debug) assert(stmt); \
+	assert(stmt); \
 } while (0)
 
 // for memory management
-static void *dse_malloc(size_t size);
-static void  dse_Free(void *ptr, size_t size);
+static size_t totalSizeOfAllocatedMemory = 0;
+
+static void *dse_malloc(size_t size)
+{
+	void *ptr = malloc(size);
+	if(ptr == NULL) {
+		fprintf(stderr, "malloc failed\n");
+		size = 0;
+	}
+	if(verbose_debug) {
+		totalSizeOfAllocatedMemory += size;
+		DEBUG_P("totalSizeOfAllocatedMemory:%ld\n", totalSizeOfAllocatedMemory);
+	}
+	return ptr;
+}
+
+static void dse_free(void *ptr, size_t size)
+{
+	free(ptr);
+	if(verbose_debug) {
+		totalSizeOfAllocatedMemory -= size;
+		DEBUG_P("totalSizeOfAllocatedMemory:%ld\n", totalSizeOfAllocatedMemory);
+		DEBUG_ASSERT(totalSizeOfAllocatedMemory >= 0);
+	}
+}
 
 /* Message */
 struct Message {
@@ -67,8 +159,9 @@ static Message *Message_new(unsigned char *requestLine, size_t length);
 static void     Message_delete(Message *msg);
 
 /* Scheduler */
+#include <pthread.h>
+
 #define MSG_QUEUE_SIZE 16
-#define POOL_SIZE      16
 #define next(index)    (((index) + 1) % MSG_QUEUE_SIZE)
 
 struct Scheduler {
@@ -81,75 +174,71 @@ struct Scheduler {
 typedef struct Scheduler Scheduler;
 
 static Scheduler *Scheduler_new(void);
-static void       Scheduler_delete(Scheduler *sched);
-static bool       dse_enqueue(Scheduler *sched, Message *msg);
-static Message   *dse_dequeue(Scheduler *sched);
+static void       Scheduler_delete(Scheduler *scheduler);
+static bool       Scheduler_enqueue(Scheduler *scheduler, Message *msg);
+static Message   *Scheduler_dequeue(Scheduler *scheduler);
 
 /* DSE */
+#include <event.h>
+#include <evhttp.h>
+
 struct DSE {
+	int                port;
+	int                threadsize;
+	char              *scriptdir;
 	struct event_base *base;
 	struct evhttp     *httpd;
-	Scheduler         *sched;
+	Scheduler         *scheduler;
+	struct KonohaFactory     *factory;
 };
 typedef struct DSE DSE;
 
 static DSE *DSE_new(void);
-static void DSE_start(DSE *dse, const char *addr, int ip);
+static void DSE_start(DSE *dse);
 static void DSE_delete(DSE *dse);
 
-#define PATH_SIZE   256
-#define THREAD_SIZE 16
-#define LOG_END     0
-#define LOG_s       1
-#define KEYVALUE_s(K,V) LOG_s, (K), (V)
+//kstatus_t MODSUGAR_Eval(KonohaContext *kctx, const char *script, size_t len, kfileline_t uline);
+//kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, KTraceInfo *trace);
 
-#define HTTPD_ADDR  "0.0.0.0"
-#define HTTPD_PORT  8080
+// -------------------------------------------------------------------------
+// getopt
 
-struct targs {
-	Scheduler   *sched;
-	PlatformApi *platform;
-};
+#include <minikonoha/platform.h>
+//#include <minikonoha/libcode/minishell.h>
 
+// -------------------------------------------------------------------------
+// KonohaContext
 
-
-#ifdef __cplusplus
-extern "C" {
+#ifdef _MSC_VER
+#define strcasecmp stricmp
 #endif
 
-/* global variables */
-static size_t totalMalloc = 0;
-static int    port = HTTPD_PORT;
-static int    threadsize = THREAD_SIZE;
-static char  *logpoolip = NULL;
-static char  *scriptdir = NULL;
-
-// ---------------------------------------------------------------------------
-// [utilities]
-
-static void *dse_malloc(size_t size)
-{
-	void *ptr = malloc(size);
-	if(ptr == NULL) {
-		DEBUG_PRINT("malloc failed");
-		size = 0;
-	}
-	if(verbose_debug) {
-		totalMalloc += size;
-		fprintf(stderr, "totalMalloc:%ld @dse_malloc()\n", totalMalloc);
-	}
-	return ptr;
-}
-
-static void dse_Free(void *ptr, size_t size)
-{
-	free(ptr);
-	if(verbose_debug) {
-		totalMalloc -= size;
-		fprintf(stderr, "totalMalloc:%ld @dse_Free()\n", totalMalloc);
-		assert(totalMalloc >= 0);
-	}
-}
+//static void CommandLine_Define(KonohaContext *kctx, char *keyvalue, KTraceInfo *trace)
+//{
+//	char *p = strchr(keyvalue, '=');
+//	if(p != NULL) {
+//		size_t len = p-keyvalue;
+//		char *namebuf = ALLOCA(char, len+1);
+//		memcpy(namebuf, keyvalue, len); namebuf[len] = 0;
+////		DBG_P("name='%s'", namebuf);
+//		ksymbol_t key = KLIB Ksymbol(kctx, namebuf, len, 0, SYM_NEWID);
+//		uintptr_t unboxValue;
+//		kattrtype_t ty;
+//		if(isdigit(p[1])) {
+//			ty = TY_int;
+//			unboxValue = (uintptr_t)strtol(p+1, NULL, 0);
+//		}
+//		else {
+//			ty = VirtualType_Text;
+//			unboxValue = (uintptr_t)(p+1);
+//		}
+//		KLIB kNameSpace_SetConstData(kctx, KNULL(NameSpace), key, ty, unboxValue, true/*isOverride*/, trace);
+//	}
+//	else {
+//		fprintf(stdout, "invalid define option: use -D<key>=<value>\n");
+//		KExit(EXIT_FAILURE);
+//	}
+//}
 
 // ---------------------------------------------------------------------------
 // [Message]
@@ -170,8 +259,8 @@ static Message *Message_new(unsigned char *requestLine, size_t length)
 static void Message_delete(Message *msg)
 {
 	if(msg == NULL) return;
-	dse_Free(msg->data, msg->len + 1);
-	dse_Free(msg, sizeof(Message));
+	dse_free(msg->data, msg->len + 1);
+	dse_free(msg, sizeof(Message));
 }
 
 // ---------------------------------------------------------------------------
@@ -179,281 +268,252 @@ static void Message_delete(Message *msg)
 
 static Scheduler *Scheduler_new(void)
 {
-	Scheduler *sched = dse_malloc(sizeof(Scheduler));
-	sched->front = 0;
-	sched->last = 0;
-	pthread_mutex_init(&sched->lock, NULL);
-	pthread_cond_init(&sched->cond, NULL);
-	return sched;
+	Scheduler *scheduler = dse_malloc(sizeof(Scheduler));
+	scheduler->front = 0;
+	scheduler->last = 0;
+	pthread_mutex_init(&scheduler->lock, NULL);
+	pthread_cond_init(&scheduler->cond, NULL);
+	return scheduler;
 }
 
-static void Scheduler_delete(Scheduler *sched)
+static void Scheduler_delete(Scheduler *scheduler)
 {
-	pthread_mutex_destroy(&sched->lock);
-	pthread_cond_destroy(&sched->cond),
-		dse_Free(sched, sizeof(Scheduler));
+	pthread_mutex_destroy(&scheduler->lock);
+	pthread_cond_destroy(&scheduler->cond),
+		dse_free(scheduler, sizeof(Scheduler));
 }
 
-static bool dse_enqueue(Scheduler *sched, Message *msg)
+static bool Scheduler_enqueue(Scheduler *scheduler, Message *msg)
 {
-	int front = sched->front;
-	int last = sched->last;
+	int front = scheduler->front;
+	int last = scheduler->last;
 	if(next(front) == last) return false;
-	sched->msgQueue[front] = msg;
-	sched->front = next(front);
+	scheduler->msgQueue[front] = msg;
+	scheduler->front = next(front);
 	return true;
 }
 
-static Message *dse_dequeue(Scheduler *sched)
+static Message *Scheduler_dequeue(Scheduler *scheduler)
 {
-	int front = sched->front;
-	int last = sched->last;
+	int front = scheduler->front;
+	int last = scheduler->last;
 	if(front == last) return NULL;
-	Message *msg = sched->msgQueue[last];
-	sched->last = next(last);
+	Message *msg = scheduler->msgQueue[last];
+	scheduler->last = next(last);
 	return msg;
 }
 
 // ---------------------------------------------------------------------------
 // [DSE]
 
-//static void vlplog(int priority, const char *message, va_list ap)
-//{
-// void *logpool_args;
-// logpool_t *lp;
-// char *val = va_arg(ap, char *);
-// if(logpoolip) {
-// lp = logpool_open_trace(NULL, logpoolip, 14801);
-// }
-// else {
-// lp = logpool_open_trace(NULL, "0.0.0.0", 14801);
-// }
-// logpool_record(lp, &logpool_args, LOG_NOTICE, "dse",
-// KEYVALUE_s("", ""),
-// LOG_END);
-// logpool_close(lp);
-// return;
-//}
-
-static void lplog(int priority, const char *message, ...)
+static DSE *DSE_new(void)
 {
-	// va_list ap;
-	// va_start(ap, trace_id);
-	// vlplog(priority, message, ap);
-	// va_end(ap);
+	static const char scriptdir[] = "./";
+	DSE *dse = (DSE *)dse_malloc(sizeof(DSE));
+	dse->port = 8080;
+	dse->threadsize = 16;
+	dse->scriptdir = (char *)scriptdir;
+	dse->base = event_base_new();
+	dse->httpd = evhttp_new(dse->base);
+	dse->scheduler = Scheduler_new();
+	return dse;
 }
 
-static const char *dse_formatScriptPath(char *buf, size_t bufsiz)
+int verbose_code;
+extern int verbose_sugar;
+
+static struct option long_options2[] = {
+	/* These options set a flag. */
+	{"verbose",         no_argument,       &verbose_debug, 1},   // for debug
+	{"verbose:sugar",   no_argument,       &verbose_sugar, 1},   // for debug
+	{"verbose:code",    no_argument,       &verbose_code,  1},   // for debug
+	{"port",            required_argument, 0,              'p'}, // port
+	{"threadsize",      required_argument, 0,              't'}, // thread size
+	{"scriptdir",       required_argument, 0,              'D'}, // directory of the acquired script
+	{NULL, 0, 0, 0},  /* sentinel */
+};
+
+static void DSE_ParseCommandOption(DSE* dse, int argc, char **argv)
 {
-	FILE *fp = NULL;
-	char *path = getenv("DSE_SCRIPTPATH");
-	const char *local = "";
-	if(path == NULL) {
-		path = getenv("KONOHA_HOME");
-		local = "/dse";
+	char *e;
+
+	while (1) {
+		int option_index = 0;
+		int c = getopt_long (argc, argv, "p:t:D:", long_options2, &option_index);
+		if(c == -1) break; /* Detect the end of the options. */
+		switch (c) {
+			case 'p':
+				dse->port = (int)strtol(optarg, &e, 10);
+				break;
+
+			case 't':
+				dse->threadsize = (int)strtol(optarg, &e, 10);
+				break;
+
+			case 'D':
+				dse->scriptdir = optarg;
+				break;
+
+			case '?':
+				/* getopt_long already printed an error message. */
+				fprintf(stderr, "Usage: COMMAND [ --verbose ] [ --verbose:sugar ] [ --verbose:code ] [ --port | -p ] port [ --threadsize | -t ] size [ --scriptdir | -D ] directory\n");
+				break;
+
+			default:
+				DEBUG_ABORT();
+				return;
+		}
 	}
+}
+
+static const char *DSE_formatScriptPath(char *buf, size_t bufsiz)
+{
+	const char *path = getenv("KONOHA_HOME");
+	const char *local = "/dse";
 	if(path == NULL) {
 		path = getenv("HOME");
 		local = "/.minikonoha/dse";
 	}
-	snprintf(buf, bufsiz, "%s%s/%s", path, local, "dse.k");
+	snprintf(buf, bufsiz, "%s%s/dse.k", path, local);
 #ifdef K_PREFIX
-	fp = fopen(buf, "r");
-	if(fp != NULL) {
-		fclose(fp);
-		return (const char*)buf;
+	if(!HasFile(buf)) {
+		snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/dse/dse.k");
 	}
-	snprintf(buf, bufsiz, "%s/%s", K_PREFIX, "/minikonoha/dse/dse.k");
 #endif
-	fp = fopen(buf, "r");
-	if(fp != NULL) {
-		fclose(fp);
-		return (const char*)buf;
-	}
-	return NULL;
+	return HasFile(buf) ? (const char *)buf : NULL;
 }
 
-static void dse_define(KonohaContext *kctx, Message *msg)
+static void DSE_defineConstData(DSE *dse, KonohaContext *kctx, Message *msg)
 {
 	if(msg != NULL) {
 		KDEFINE_TEXT_CONST TextData[] = {
 			{"DSE_MESSAGE", VirtualType_Text, (char *)msg->data},
-			{"DSE_SCRIPT_DIR", VirtualType_Text, scriptdir},
+			{"DSE_SCRIPT_DIR", VirtualType_Text, dse->scriptdir},
 			{}
 		};
-		KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);
+		KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), false/*isOverride*/, 0);
 	}
 	else {
 		KDEFINE_TEXT_CONST TextData[] = {
-			{"DSE_SCRIPT_DIR", VirtualType_Text, scriptdir},
+			{"DSE_SCRIPT_DIR", VirtualType_Text, dse->scriptdir},
 			{}
 		};
-		KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);
+		KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), false/*isOverride*/, 0);
 	}
 	KDEFINE_INT_CONST IntData[] = {
 		{"DSE_DEBUG", TY_int, verbose_debug}, {}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(IntData), 0);
+	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(IntData), false/*isOverride*/, 0);
 }
 
-static void *dse_dispatch(void *arg)
+KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);
+int Konoha_Destroy(KonohaContext *kctx);
+
+#define PATH_SIZE 256
+
+static void *DSE_dispatch(void *arg)
 {
-	struct targs *args = (struct targs *)arg;
-	Scheduler *sched = args->sched;
-	PlatformApi *dse_platform = args->platform;
+	DSE *dse = (DSE *)arg;
+	Scheduler *scheduler = dse->scheduler;
+	KonohaFactory *factory = dse->factory;
 	Message *msg;
 	kbool_t ret;
 	char script[PATH_SIZE];
-	dse_formatScriptPath(script, sizeof(script));
+	DSE_formatScriptPath(script, PATH_SIZE);
 
 	while(true) {
-		pthread_mutex_lock(&sched->lock);
-		if(!(msg = dse_dequeue(sched))) {
-			pthread_cond_wait(&sched->cond, &sched->lock);
-			msg = dse_dequeue(sched);
+		pthread_mutex_lock(&scheduler->lock);
+		if(!(msg = Scheduler_dequeue(scheduler))) {
+			pthread_cond_wait(&scheduler->cond, &scheduler->lock);
+			msg = Scheduler_dequeue(scheduler);
 		}
-		pthread_mutex_unlock(&sched->lock);
-		// DEBUG_PRINT("%s", msg);
-		KonohaContext* konoha = konoha_open(dse_platform);
-		dse_define(konoha, msg);
+		pthread_mutex_unlock(&scheduler->lock);
+		DEBUG_P("%s", msg->data);
+		KonohaContext* konoha = KonohaFactory_CreateKonoha(factory);
+		DSE_defineConstData(dse, konoha, msg);
 		ret = Konoha_LoadScript(konoha, script);
-		konoha_close(konoha);
+		Konoha_Destroy(konoha);
 		Message_delete(msg);
 	}
 	return NULL;
 }
 
-static void dse_req_handler(struct evhttp_request *req, void *arg)
+static void DSE_requestHandler(struct evhttp_request *request, void *arg)
 {
-	struct evbuffer *body = evhttp_request_get_input_buffer(req);
+	struct evbuffer *body = evhttp_request_get_input_buffer(request);
 	size_t len = evbuffer_get_length(body);
-	Scheduler *sched = (Scheduler *)arg;
+	DSE *dse = (DSE *)arg;
+	Scheduler *scheduler = dse->scheduler;
 	Message *msg = NULL;
 	unsigned char *requestLine;
 	struct evbuffer *buf;
 
-	switch(req->type) {
+	switch(request->type) {
 		case EVHTTP_REQ_POST :
 			// now, we fetch message
 			requestLine = evbuffer_pullup(body, -1);
 			msg = Message_new(requestLine, len);
-			pthread_mutex_lock(&sched->lock);
-			if(dse_enqueue(sched, msg)) {
-				pthread_mutex_unlock(&sched->lock);
-				pthread_cond_signal(&sched->cond);
+			pthread_mutex_lock(&scheduler->lock);
+			if(Scheduler_enqueue(scheduler, msg)) {
+				pthread_mutex_unlock(&scheduler->lock);
+				pthread_cond_signal(&scheduler->cond);
 				buf = evbuffer_new();
-				evhttp_send_reply(req, HTTP_OK, "OK", buf);
-				evbuffer_Free(buf);
+				evhttp_send_reply(request, HTTP_OK, "OK", buf);
+				evbuffer_free(buf);
 				break;
 			}
 			Message_delete(msg);
-			pthread_mutex_unlock(&sched->lock);
-			evhttp_send_error(req, HTTP_BADREQUEST, "DSE server's message queue is full");
+			pthread_mutex_unlock(&scheduler->lock);
+			evhttp_send_error(request, HTTP_BADREQUEST, "DSE's message queue is full");
 			break;
 		default :
-			evhttp_send_error(req, HTTP_BADREQUEST, "Available POST only");
+			evhttp_send_error(request, HTTP_BADREQUEST, "Available POST only");
 			break;
 	}
 }
 
-static DSE *DSE_new(void)
+static void DSE_start(DSE *dse)
 {
-	DSE *newdse = (DSE *)dse_malloc(sizeof(DSE));
-	newdse->base = event_base_new();
-	newdse->httpd = evhttp_new(newdse->base);
-	newdse->sched = Scheduler_new();
-	return newdse;
-}
-
-static void DSE_start(DSE *dse, const char *addr, int ip)
-{
-	if(evhttp_bind_socket(dse->httpd, addr, ip) < 0){
-		perror("evhttp_bind_socket");
-		exit(EXIT_FAILURE);
+	if(evhttp_bind_socket(dse->httpd, "127.0.0.1", dse->port) < 0){
+		DEBUG_ABORT();
 	}
 
 	int i;
-	pthread_t thread_pool[threadsize];
-	PlatformApi *dse_platform = KonohaUtils_getDefaultPlatformApi();
-	KonohaFactory *dse_platformVar = (KonohaFactory *)dse_platform;
-	dse_platformVar->name = "dse";
-	dse_platformVar->syslog_i = lplog;
-	struct targs args = {
-		dse->sched,
-		dse_platform
-	};
+	pthread_t threadPool[dse->threadsize];
+	struct KonohaFactory factory = {};
+	PosixFactory(&factory);
+	factory.name = "dse";
+	dse->factory = &factory;
 
-	for(i = 0; i < threadsize; i++) {
-		pthread_create(&thread_pool[i], NULL, dse_dispatch, (void *)&args);
+	for(i = 0; i < dse->threadsize; i++) {
+		pthread_create(&threadPool[i], NULL, DSE_dispatch, (void *)dse);
 	}
-	evhttp_set_gencb(dse->httpd, dse_req_handler, (void *)dse->sched);
+	evhttp_set_gencb(dse->httpd, DSE_requestHandler, (void *)dse);
 	event_base_dispatch(dse->base);
 }
 
 static void DSE_delete(DSE *dse)
 {
-	evhttp_Free(dse->httpd);
-	event_base_Free(dse->base);
-	Scheduler_delete(dse->sched);
-	dse_Free(dse, sizeof(DSE));
+	evhttp_free(dse->httpd);
+	event_base_free(dse->base);
+	Scheduler_delete(dse->scheduler);
+	dse_free(dse, sizeof(DSE));
 }
 
-static struct option long_option[] = {
-	/* These options set a flag. */
-	{"verbose", no_argument, &verbose_debug, 1},
-	{"logpool", required_argument, 0, 'l'},
-	{"port", required_argument, 0, 'p'},
-	{"threadsize", required_argument, 0, 't'},
-	{"scriptdir", required_argument, 0, 'D'},
-	{0, 0, 0, 0}
-};
-
-static void dse_Parseopt(int argc, char *argv[])
-{
-	char *e;
-	logpoolip = getenv("LOGPOOL_IP");
-	while(true) {
-		int option_index = 0;
-		int c = getopt_long(argc, argv, "l:p:t:D:", long_option, &option_index);
-		if(c == -1) break; /* Detect the end of the options. */
-		switch(c) {
-			case 'l':
-				logpoolip = optarg;
-				break;
-			case 'p':
-				port = (int)strtol(optarg, &e, 10);
-				break;
-			case 't':
-				threadsize = (int)strtol(optarg, &e, 10);
-				break;
-			case 'D':
-				scriptdir = optarg;
-				break;
-			case '?':
-				fprintf(stderr, "Unknown or required argument option -%c\n", optopt);
-				fprintf(stderr, "Usage: COMMAND [ --verbose ] [ --port | -p ] port [ --logpool | -l ] logpoolip\n");
-				exit(EXIT_FAILURE);
-			default:
-				break;
-		}
-	}
-	if(!logpoolip) logpoolip = "0.0.0.0";
-	if(!scriptdir) scriptdir = "./";
-	if(getenv("DSE_DEBUG") != NULL || getenv("KONOHA_DEBUG") != NULL) {
-		verbose_debug = 1;
-	}
-}
+// -------------------------------------------------------------------------
+// ** main **
 
 int main(int argc, char *argv[])
 {
-	dse_Parseopt(argc, argv);
-	DEBUG_PRINT("DSE starts on port %d", port);
-	DEBUG_PRINT("LogPool is running on %s", logpoolip);
-	logpool_global_Init(LOGPOOL_TRACE);
-	DSE *dse = DSE_new();
-	DSE_start(dse, HTTPD_ADDR, port);
+	if(getenv("DSE_DEBUG") != NULL) {
+		verbose_debug = 1;
+		verbose_sugar = 1;
+		verbose_code = 1;
+	}
+	DSE* dse = DSE_new();
+	DSE_ParseCommandOption(dse, argc, argv);
+	DSE_start(dse);
 	DSE_delete(dse);
-	logpool_global_exit();
 	return 0;
 }
 
