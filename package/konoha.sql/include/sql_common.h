@@ -27,10 +27,13 @@
 #ifndef SQL_COMMON_H_
 #define SQL_COMMON_H_
 
-#define MSC_VAR
-#include<stdio.h>
-#include<minikonoha/minikonoha.h>
-#include<minikonoha/sugar.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <stdio.h>
+
+#ifndef kunused
+#define kunused __attribute__((unused))
+#endif
 
 typedef const struct QueryDriver QueryDriver;
 typedef struct kConnectionVar kConnection;
@@ -98,7 +101,7 @@ typedef enum {
 /* ------------------------------------------------------------------------ */
 /* [bytes API] */
 
-kint_t parseInt(char* utext, size_t len)
+static kunused kint_t parseInt(char* utext, size_t len)
 {
 	kint_t n = 0, prev = 0, base = 10;
 	size_t i = 0;
@@ -151,7 +154,7 @@ kint_t parseInt(char* utext, size_t len)
 	return n;
 }
 
-kfloat_t parseFloat(char* utext, size_t len)
+static kunused kfloat_t parseFloat(char* utext, size_t len)
 {
 	kfloat_t ret;
 #if defined(K_USING_NOFLOAT)
@@ -199,7 +202,7 @@ static size_t _NumberOfDigit(kint_t value, int base)
 
 /* ------------------------------------------------------------------------ */
 
-void _ResultSet_setInt(KonohaContext *kctx, kResultSet *rs, size_t n, kint_t value)
+static void _ResultSet_setInt(KonohaContext *kctx, kResultSet *rs, size_t n, kint_t value)
 {
 	DBG_ASSERT(n < rs->column_size);
 	KGrowingBuffer wb;
@@ -214,7 +217,7 @@ void _ResultSet_setInt(KonohaContext *kctx, kResultSet *rs, size_t n, kint_t val
 	KLIB KBuffer_Write(kctx, &wb, buf, len);
 }
 
-void _ResultSet_setFloat(KonohaContext *kctx, kResultSet *rs, size_t n, kfloat_t value)
+static void _ResultSet_setFloat(KonohaContext *kctx, kResultSet *rs, size_t n, kfloat_t value)
 {
 	KNH_ASSERT(n < rs->column_size);
 	KGrowingBuffer wb;
@@ -229,7 +232,7 @@ void _ResultSet_setFloat(KonohaContext *kctx, kResultSet *rs, size_t n, kfloat_t
 	KLIB KBuffer_Write(kctx, &wb, buf, len);
 }
 
-void _ResultSet_setText(KonohaContext *kctx, kResultSet *rs, size_t n, char* text, size_t len)
+static void _ResultSet_setText(KonohaContext *kctx, kResultSet *rs, size_t n, char* text, size_t len)
 {
 	DBG_ASSERT(n < rs->column_size);
 	KGrowingBuffer wb;
@@ -240,7 +243,7 @@ void _ResultSet_setText(KonohaContext *kctx, kResultSet *rs, size_t n, char* tex
 	KLIB KBuffer_Write(kctx, &wb, (const char *)(text), len);
 }
 
-//void _ResultSet_setBlob(KonohaContext *kctx, kResultSet *o, size_t n, kbytes_t t)
+//static void _ResultSet_setBlob(KonohaContext *kctx, kResultSet *o, size_t n, kbytes_t t)
 //{
 //	KNH_ASSERT(n < o->column_size);
 //	KGrowingBuffer wb;
@@ -251,7 +254,7 @@ void _ResultSet_setText(KonohaContext *kctx, kResultSet *rs, size_t n, char* tex
 //	KLIB KBuffer_Write(kctx, &wb, (const char *)(t.text), t.len);
 //}
 
-void _ResultSet_setNULL(KonohaContext *kctx, kResultSet *o, size_t n)
+static void _ResultSet_setNULL(KonohaContext *kctx, kResultSet *o, size_t n)
 {
 	KNH_ASSERT(n < o->column_size);
 	o->column[n].ctype = kResultSet_CTYPE__null;
@@ -259,8 +262,7 @@ void _ResultSet_setNULL(KonohaContext *kctx, kResultSet *o, size_t n)
 	o->column[n].len = 0;
 }
 
-#if defined(_MSC_VER)
-void _ResultSet_InitColumn(KonohaContext *kctx, kResultSet *o, size_t column_size)
+static void _ResultSet_InitColumn(KonohaContext *kctx, kResultSet *o, size_t column_size)
 {
 	size_t i;
 	kResultSet* rs = (kResultSet *)o;
@@ -291,7 +293,5 @@ void _ResultSet_InitColumn(KonohaContext *kctx, kResultSet *o, size_t column_siz
 	}
 	rs->rowidx = 0;
 }
-
-#endif /* _MSC_VER */
 
 #endif /* SQL_COMMON_H_ */

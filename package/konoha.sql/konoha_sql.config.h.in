@@ -1,3 +1,0 @@
-#define MYSQL_INCLUDED_ @KonohaPkgUsing_MYSQL@
-#define SQLITE_INCLUDED_ @KonohaPkgUsing_SQLITE@
-#define PSQL_INCLUDED_ @KonohaPkgUsing_PSQL@

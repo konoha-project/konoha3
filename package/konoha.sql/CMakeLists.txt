@@ -18,10 +18,9 @@ if(MYSQL_CONFIG OR HAVE_LIBSQLITE OR PG_CONFIG)
 			set(PACKAGE_EXTRA_LIBRARY ${ExtraLibs})
 			set(PACKAGE_SCRIPT_CODE sql_glue.k)
 			set(PACKAGE_SOURCE_CODE ${PACKAGE_SOURCE_CODE}
-			  include/mysql.h
+			  include/kmysql.h
 			)
 			include_directories(${HAVE_MYSQL_H})
-		set(KonohaPkgUsing_MYSQL 1)
 		endif(HAVE_MYSQL_H)
 	endif(MYSQL_CONFIG)
 
@@ -29,9 +28,8 @@ if(MYSQL_CONFIG OR HAVE_LIBSQLITE OR PG_CONFIG)
 		set(ExtraLibs ${ExtraLibs} ${HAVE_LIBSQLITE})
 		set(PACKAGE_EXTRA_LIBRARY ${ExtraLibs})
 		set(PACKAGE_SOURCE_CODE ${PACKAGE_SOURCE_CODE}
-			include/sqlite.h
+			include/ksqlite.h
 		)
-		set(KonohaPkgUsing_SQLITE 1)
 	endif(HAVE_LIBSQLITE)
 
 	if(PG_CONFIG)
@@ -51,12 +49,13 @@ if(MYSQL_CONFIG OR HAVE_LIBSQLITE OR PG_CONFIG)
 			include/postgresql.h
 		)
 		set(PG_INCLUDE_DIR_ALL ${PG_INCLUDE_DIR} ${PG_INCLUDE_DIR_SERVER})
-		set(KonohaPkgUsing_PSQL 1)
+		set(HAVE_PSQL 1)
 		include_directories(${PG_INCLUDE_DIR_ALL})
 	endif(PG_CONFIG)
 
+	add_definitions(-DHAVE_KONOHA_SQL_CONFIG_H)
 	configure_file (
-		"${CMAKE_CURRENT_SOURCE_DIR}/konoha_sql.config.h.in"
+		"${CMAKE_CURRENT_SOURCE_DIR}/konoha_sql.config.h.cmake"
 		"${CMAKE_CURRENT_BINARY_DIR}/konoha_sql.config.h"
 	)
 

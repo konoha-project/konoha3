@@ -80,7 +80,7 @@ set(PACKAGES
 	konoha.prototype
 	konoha.regexp
 	konoha.string
-##konoha.sql
+	konoha.sql
 	konoha.untyped
 	konoha.var
 	minikonoha

@@ -24,11 +24,7 @@
 
 /* ************************************************************************ */
 
-#if defined (_MSC_VER)
-#undef _MSC_VER
 #include <sqlite3.h>
-#endif
-#define _MSC_VER
 #include "sql_common.h"
 
 //------------------------------------------------------------------------ */
@@ -50,7 +46,7 @@ static void knh_sqlite3_perror(KonohaContext* kctx, sqlite3 *db, int r)
 	//KNH_SYSLOG(ctx, LOG_WARNING, msg, "sqlite3_error='%s'", sqlite3_errmsg(db));
 }
 
-void *SQLITE3_qopen(KonohaContext* kctx,  const char* db)
+static void *SQLITE3_qopen(KonohaContext* kctx, const char* db, KTraceInfo *trace)
 {
 	sqlite3 *db_sqlite3 = NULL;
 	db += 9;
@@ -61,7 +57,7 @@ void *SQLITE3_qopen(KonohaContext* kctx,  const char* db)
 	return (void *)db_sqlite3;
 }
 
-int SQLITE3_qnext(KonohaContext* kctx, kqcur_t *qcur, kResultSet *rs)
+static int SQLITE3_qnext(KonohaContext* kctx, kqcur_t *qcur, kResultSet *rs, KTraceInfo *trace)
 {
 	sqlite3_stmt *stmt = (sqlite3_stmt *)qcur;
 	int r = sqlite3_step(stmt);
@@ -100,7 +96,7 @@ int SQLITE3_qnext(KonohaContext* kctx, kqcur_t *qcur, kResultSet *rs)
 	return 0;  /* NOMORE */
 }
 
-kqcur_t *SQLITE3_query(KonohaContext* kctx, void *db, const char* query, kResultSet *rs)
+static kqcur_t *SQLITE3_query(KonohaContext* kctx, void *db, const char* query, kResultSet *rs, KTraceInfo *trace)
 {
 	if(rs == NULL) {
 		int r = sqlite3_exec((sqlite3*)db, query, NULL, NULL, NULL);
@@ -143,12 +139,12 @@ kqcur_t *SQLITE3_query(KonohaContext* kctx, void *db, const char* query, kResult
 	}
 }
 
-void SQLITE3_qclose(void *hdr)
+static void SQLITE3_qclose(void *hdr)
 {
 	sqlite3_close((sqlite3*)hdr);
 }
 
-void SQLITE3_qfree(kqcur_t *qcur)
+static void SQLITE3_qfree(kqcur_t *qcur)
 {
 	sqlite3_stmt *stmt = (sqlite3_stmt *)qcur;
 	sqlite3_finalize(stmt);
@@ -156,7 +152,11 @@ void SQLITE3_qfree(kqcur_t *qcur)
 
 const QueryDriver SQLLite3Driver = {
 	K_DSPI_QUERY, "sqlite3",
-	SQLITE3_qopen, SQLITE3_query, SQLITE3_qclose, SQLITE3_qnext, SQLITE3_qfree
+	SQLITE3_qopen,
+	SQLITE3_query,
+	SQLITE3_qclose,
+	SQLITE3_qnext,
+	SQLITE3_qfree
 };
 
 //------------------------------------------------------------------------ */
