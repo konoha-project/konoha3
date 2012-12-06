@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include "../../include/minikonoha/minikonoha.h"
+#include "../../../include/minikonoha/minikonoha.h"
 
 #ifndef VMCOMMON_H
 #define VMCOMMON_H
