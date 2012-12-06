@@ -28,7 +28,6 @@
 #include <minikonoha/konoha_common.h>
 #include <minikonoha/klib.h>
 
-//#include <minikonoha/sugar.h>
 #include "konoha_sql.config.h"
 
 #ifdef __cplusplus
@@ -36,11 +35,11 @@ extern "C" {
 #endif
 
 #ifdef MYSQL_INCLUDED_
-#include "include/mysql.h"
+#include "include/kmysql.h"
 #endif
 
 #ifdef SQLITE_INCLUDED_
-#include "include/sqlite.h"
+#include "include/ksqlite.h"
 #endif
 
 #ifdef PSQL_INCLUDED_
