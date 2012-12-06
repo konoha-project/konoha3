@@ -79,15 +79,23 @@ static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *g
 
 static void kExpr_PutConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *sfp)
 {
-	if(expr->build == TEXPR_CONST) {
+	kvisit_t build = expr->build;
+	if((kvisit_t)expr->build == TEXPR_CONST) {
 		KUnsafeFieldSet(sfp[0].asObject, expr->objectConstValue);
 		sfp[0].unboxValue = O_unbox(expr->objectConstValue);
 	} else if(expr->build == TEXPR_NCONST) {
 		sfp[0].unboxValue = expr->unboxConstValue;
 	} else if(expr->build == TEXPR_NEW) {
 		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, OnField, CT_(expr->attrTypeId), 0));
+	} else if(expr->build == TEXPR_CALL) {
+		/* case Object Object.boxing(UnboxType Val) */
+		kMethod *mtd = expr->cons->MethodItems[0];
+		kExpr *texpr = expr->cons->ExprItems[1];
+		assert(mtd->mn == MN_box && kArray_size(expr->cons) == 2);
+		assert(TY_isUnbox(expr->attrTypeId) == true);
+		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, OnField, CT_(expr->attrTypeId), texpr->unboxConstValue));
 	} else {
-		assert(expr->build == TEXPR_NULL);
+		assert((kvisit_t)expr->build == TEXPR_NULL);
 		KUnsafeFieldSet(sfp[0].asObject, KLIB Knull(kctx, CT_(expr->attrTypeId)));
 		sfp[0].unboxValue = 0;
 	}

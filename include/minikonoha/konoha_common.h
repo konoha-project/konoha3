@@ -59,7 +59,7 @@ typedef struct {
 } KonohaCommonModule;
 
 
-static void KonohaCommonModule_Init(KonohaContext *kctx, KTraceInfo *trace)
+static inline void KonohaCommonModule_Init(KonohaContext *kctx, KTraceInfo *trace)
 {
 	KonohaCommonModule *base = (KonohaCommonModule *)KCalloc(sizeof(KonohaCommonModule), 1, trace);
 	base->h.name      = "KonohaCommon";

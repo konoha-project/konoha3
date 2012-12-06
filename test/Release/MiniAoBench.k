@@ -10,7 +10,7 @@ import("konoha.const");
 import("konoha.class");
 import("konoha.array");
 import("cstyle", "while");
-// //import("konoha.assign"); Don't use any more
+import("cstyle", "+=");
 import("konoha.new");
 AllowImplicitGlobalVariable(true);
 

@@ -194,7 +194,7 @@ static kbool_t RetrieveJsonArrayAt(KonohaContext *kctx, struct JsonBuf *jsonbuf,
 {
 	if(JSON_TYPE_CHECK(Array, toJSON(jsonbuf->json_i))) {
 		otherbuf->json_i = JSONArray_get(toJSON(jsonbuf->json_i), index).bits;
-		return otherbuf->json_i == 0;
+		return true;
 	}
 	return false;
 }

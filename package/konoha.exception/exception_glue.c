@@ -293,7 +293,7 @@
 //	int ret = false;
 //
 //	// check "catch(...)"
-//	//ret = SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Exception, 0);
+//	//ret = SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, CT_Exception, 0);
 //
 //	kBlock *catchBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
 //	kStmt *parentStmt = Stmt_LookupTryOrCatchStmtNULL(kctx, stmt);

@@ -611,14 +611,14 @@ static KMETHOD Stmt_setType(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Stmt_TypeCheckExpr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t key = (ksymbol_t)sfp[1].intValue;
-	KReturnUnboxValue(SUGAR kStmt_TypeCheckByName(kctx, sfp[0].asStmt, key, sfp[2].asGamma, (kattrtype_t)sfp[3].intValue, 0));
+	KReturnUnboxValue(SUGAR kStmt_TypeCheckByName(kctx, sfp[0].asStmt, key, sfp[2].asGamma, CT_(sfp[3].intValue), 0));
 }
 
 //## boolean Stmt.TypeCheckExpr(symbol key, Gamma gma, cid typeId, int pol);
 static KMETHOD Stmt_TypeCheckExprPol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t key = (ksymbol_t)sfp[1].intValue;
-	KReturnUnboxValue(SUGAR kStmt_TypeCheckByName(kctx, sfp[0].asStmt, key, sfp[2].asGamma, (kattrtype_t)sfp[3].intValue, (int)sfp[4].intValue));
+	KReturnUnboxValue(SUGAR kStmt_TypeCheckByName(kctx, sfp[0].asStmt, key, sfp[2].asGamma, CT_(sfp[3].intValue), (int)sfp[4].intValue));
 }
 
 //## Expr Stmt.newExpr(Token[] tokenList, int s, int e);
@@ -695,14 +695,14 @@ static KMETHOD Stmt_newTypedCallExpr1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStmt *stmt          = sfp[0].asStmt;
 	kGamma *gma          = sfp[1].asGamma;
-	kattrtype_t cid          = (kattrtype_t)sfp[2].intValue;
+	KonohaClass *ct      = CT_(sfp[2].intValue);/*FIXME typeId => KonohaClass */
 	ksymbol_t methodName = (ksymbol_t)sfp[3].intValue;
 	kExpr *firstExpr     = sfp[4].asExpr;
-	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), cid, methodName, 1, MethodMatch_CamelStyle);
+	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), ct, methodName, 1, MethodMatch_CamelStyle);
 	if(method == NULL) {
 		KReturn(KNULL(Expr));
 	}
-	KReturn(SUGAR new_TypedCallExpr(kctx, stmt, gma, cid, method, 1, firstExpr));
+	KReturn(SUGAR new_TypedCallExpr(kctx, stmt, gma, ct, method, 1, firstExpr));
 }
 
 //## Expr Stmt.newTypedCallExpr(Gamma gma, cid typeId, String methodName, Expr firstExpr, Expr secondExpr);
@@ -710,15 +710,15 @@ static KMETHOD Stmt_newTypedCallExpr2(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStmt *stmt          = sfp[0].asStmt;
 	kGamma *gma          = sfp[1].asGamma;
-	kattrtype_t cid          = (kattrtype_t)sfp[2].intValue;
+	KonohaClass *ct      = CT_(sfp[2].intValue);/*FIXME typeId => KonohaClass */
 	ksymbol_t methodName = (ksymbol_t)sfp[3].intValue;
 	kExpr *firstExpr     = sfp[4].asExpr;
 	kExpr *secondExpr    = sfp[5].asExpr;
-	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), cid, methodName, 2, MethodMatch_CamelStyle);
+	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), ct, methodName, 2, MethodMatch_CamelStyle);
 	if(method == NULL) {
 		KReturn(KNULL(Expr));
 	}
-	KReturn(SUGAR new_TypedCallExpr(kctx, stmt, gma, cid, method, 2, firstExpr, secondExpr));
+	KReturn(SUGAR new_TypedCallExpr(kctx, stmt, gma, ct, method, 2, firstExpr, secondExpr));
 }
 
 //## Expr Stmt.rightJoinExpr(Expr expr, Token[] tokenList, int currentIdx, int endIdx);
@@ -806,18 +806,18 @@ static KMETHOD Expr_getTermToken(KonohaContext *kctx, KonohaStack *sfp)
 //## Expr Expr.setConstValue(Object value);
 static KMETHOD Expr_setConstValue(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kExpr *expr = sfp[0].asExpr;
+	kExprVar *expr = (kExprVar *) sfp[0].asExpr;
 	KonohaClass *ct = O_ct(sfp[1].asObject);
 	if(CT_IsUnbox(ct)) {
 		KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, ct->typeId, sfp[1].unboxValue));
 	}
-	KReturn(SUGAR kExpr_SetConstValue(kctx, expr, ct->typeId, sfp[1].asObject));
+	KReturn(SUGAR kExpr_SetConstValue(kctx, expr, ct, sfp[1].asObject));
 }
 
 //## Expr Expr.setVariable(Gamma gma, int build, cid typeid, int index);
 static KMETHOD Expr_setVariable(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kExpr *expr    = sfp[0].asExpr;
+	kExprVar *expr = (kExprVar *) sfp[0].asExpr;
 	kGamma *gma    = sfp[1].asGamma;
 	kexpr_t build  = (kexpr_t)sfp[2].intValue;
 	kattrtype_t cid    = (kattrtype_t)sfp[3].intValue;
@@ -842,7 +842,7 @@ static KMETHOD Expr_new(KonohaContext *kctx, KonohaStack *sfp)
 	if(CT_IsUnbox(ct)) {
 		KReturn(new_UnboxConstValueExpr(kctx, ct->typeId, sfp[1].unboxValue));
 	}
-	KReturn(new_ConstValueExpr(kctx, ct->typeId, sfp[1].asObject));
+	KReturn(new_ConstValueExpr(kctx, ct, sfp[1].asObject));
 }
 
 //## void Expr.setType(int build, cid typeid);
