@@ -28,22 +28,23 @@
 #include <minikonoha/konoha_common.h>
 #include <minikonoha/klib.h>
 
-//#include <minikonoha/sugar.h>
+#ifdef HAVE_KONOHA_SQL_CONFIG_H
 #include "konoha_sql.config.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifdef MYSQL_INCLUDED_
-#include "include/mysql.h"
+#ifdef HAVE_MYSQL
+#include "include/kmysql.h"
 #endif
 
-#ifdef SQLITE_INCLUDED_
-#include "include/sqlite.h"
+#ifdef HAVE_LIBSQLITE
+#include "include/ksqlite.h"
 #endif
 
-#ifdef PSQL_INCLUDED_
+#ifdef PSQL_INCLUDED
 #include "include/postgresql.h"
 #endif
 
@@ -56,22 +57,26 @@ extern "C" {
 /* [NOP DB Driver] */
 
 
-void *NOP_qopen(KonohaContext *kctx, const char* url, KTraceInfo *trace)
+static void *NOP_qopen(KonohaContext *kctx, const char* url, KTraceInfo *trace)
 {
 	return NULL;
 }
-kqcur_t *NOP_query(KonohaContext *kctx, void *hdr, const char* sql, kResultSet *rs, KTraceInfo *trace)
+
+static kqcur_t *NOP_query(KonohaContext *kctx, void *hdr, const char* sql, kResultSet *rs, KTraceInfo *trace)
 {
 	return NULL;
 }
-void NOP_qclose(void *db)
+
+static void NOP_qclose(void *db)
 {
 }
-int NOP_qnext(KonohaContext *kctx, kqcur_t *qcur, kResultSet *rs, KTraceInfo *trace)
+
+static int NOP_qnext(KonohaContext *kctx, kqcur_t *qcur, kResultSet *rs, KTraceInfo *trace)
 {
 	return 0;  /* NOMORE */
 }
-void NOP_qfree(kqcur_t *qcur)
+
+static void NOP_qfree(kqcur_t *qcur)
 {
 }
 
@@ -96,17 +101,17 @@ static int HandlerNameLength(const char* p) {
 static QueryDriver* LoadQueryDriver(KonohaContext *kctx, const char *dburl)
 {
 	int len = HandlerNameLength(dburl);
-#ifdef MYSQL_INCLUDED_
+#ifdef HAVE_MYSQL
 	if(strncmp(dburl, "mysql", len) == 0) {
 		return &MySQLDriver;
 	}
 #endif
-#ifdef SQLITE_INCLUDED_
+#ifdef HAVE_LIBSQLITE
 	if(strncmp(dburl, "sqlite3", len) == 0) {
 		return &SQLLite3Driver;
 	}
 #endif
-#ifdef PSQL_INCLUDED_
+#ifdef PSQL_INCLUDED
 	if(strncmp(dburl, "postgresql", len) == 0) {
 		return &PostgreSQLDriver;
 	}
@@ -140,9 +145,6 @@ static void kConnection_Free(KonohaContext *kctx, kObject *o)
 
 /* ------------------------------------------------------------------------ */
 /* [Connection API] */
-
-
-#define DB_NAMESIZE 32
 
 //## Connection Connection.new(String dburl);
 static KMETHOD Connection_new(KonohaContext *kctx, KonohaStack *sfp)
@@ -186,7 +188,7 @@ static KMETHOD Connection_close(KonohaContext *kctx, KonohaStack *sfp)
 	conn->db = NULL;
 }
 
-#ifdef MYSQL_INCLUDED_
+#ifdef HAVE_MYSQL
 
 //## int Connection.getInsertId();
 KMETHOD Connection_getInsertId(KonohaContext *kctx, KonohaStack *sfp)
@@ -499,7 +501,7 @@ static kbool_t sql_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 		_Public, _F(Connection_new), TY_Connection, TY_Connection, MN_("new"), 1, TY_String, FN_("dbname"),
 		_Public, _F(Connection_close), TY_void, TY_Connection, MN_("close"), 0,
 		_Public, _F(Connection_query), TY_ResultSet, TY_Connection, MN_("query"), 1, TY_String, FN_("query"),
-#ifdef MYSQL_INCLUDED_
+#ifdef HAVE_MYSQL
 		_Public, _F(Connection_getInsertId), TY_int, TY_Connection, MN_("getInsertId"), 0,
 #endif
 

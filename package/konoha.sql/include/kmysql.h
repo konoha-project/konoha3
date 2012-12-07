@@ -26,7 +26,6 @@
 
 // [TODO] check if platform has not mysql.h
 #include <mysql.h>
-#define _MSC_VER
 #include "sql_common.h"
 
 #define MYSQL_USER_MAXLEN 16

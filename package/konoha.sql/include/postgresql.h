@@ -25,7 +25,6 @@
 /* ************************************************************************ */
 
 #include<libpq-fe.h>
-#define _MSC_VER
 #include"sql_common.h"
 //#include<postgresql/libpq-fe.h>
 

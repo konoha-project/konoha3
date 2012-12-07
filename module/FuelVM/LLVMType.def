@@ -1,0 +1,49 @@
+TYPE(KonohaContextVar,
+		PARAM9(KonohaContextVar,
+			OP(ulong, safepoint),
+			OP(PtrKonohaValueVar, esp),
+			OP(PtrKonohaFactory, platApi),
+			OP(PtrKonohaLibVar, klib),
+			OP(PtrKonohaRuntimeVar, share),
+			OP(PtrKonohaStackRuntimeVar, stack),
+			OP(PtrPtrKonohaModule, modshare),
+			OP(PtrPtrKonohaModuleContext, modlocal),
+			OP(Ptrvoid, gcContext)))
+
+TYPE(KonohaObjectHeader,
+		PARAM3(KonohaObjectHeader,
+			OP(ulong, magicflag),
+			OP(PtrKonohaClassVar, ct),
+			OP(PtrKProtoMap, prototypePtr)))
+
+TYPE(KonohaValueVar,
+		PARAM2(KonohaValueVar,
+			OP(PtrkObjectVar, asObject),
+			OP(ulong, unboxValue)))
+
+TYPE(kObjectVar,
+		PARAM2(kObjectVar,
+			OP(KonohaObjectHeader, h),
+			OP(PtrPtrkObjectVar, fieldObjectItems)))
+
+FUNCTION(MethodFunc,
+		void,
+		PARAM2(MethodFunc,
+			OP(PtrKonohaContextVar, kctx),
+			OP(PtrKonohaValueVar, stack)))
+
+TYPE(kMethodVar,
+		PARAM13(kMethodVar,
+			OP(KonohaObjectHeader, h),
+			OP(PtrMethodFunc, invokeMethodFunc),
+			OP(PtrVirtualCode, vcode_start),
+			OP(ulong, flag),
+			OP(uint, typeId),
+			OP(uint, mn),
+			OP(uint, paramid),
+			OP(uint, paramdom),
+			OP(int, delta),
+			OP(uint, packageId),
+			OP(PtrkTokenVar, SourceToken),
+			OP(PtrkNameSpaceVar, LazyCompileNameSpace),
+			OP(ulong, serialNumber)))

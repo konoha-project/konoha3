@@ -79,7 +79,6 @@ static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *g
 
 static void kExpr_PutConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *sfp)
 {
-	kvisit_t build = expr->build;
 	if((kvisit_t)expr->build == TEXPR_CONST) {
 		KUnsafeFieldSet(sfp[0].asObject, expr->objectConstValue);
 		sfp[0].unboxValue = O_unbox(expr->objectConstValue);

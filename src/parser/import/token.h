@@ -248,32 +248,54 @@ static int ParseSlash(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, 
 	return ParseOperator(kctx, tk, tokenizer, tok_start);
 }
 
+static int skipBackQuoteOrNewLineOrDoubleQuote(const char *source, int *posPtr, int *hasUTF8)
+{
+	char ch;
+	int pos = *posPtr;
+	for(ch = source[pos++]; ch != 0; ch = source[pos++]) {
+		if(ch < 0) {
+			*hasUTF8 = 1;
+		}
+		if(ch == '\\' || ch == '\n' || ch == '"') {
+			*posPtr = pos;
+			return ch;
+		}
+	}
+	*posPtr = pos;
+	return ch;
+}
+
 static int ParseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
-	int ch, prev = '"', prev2 = '\0', pos = tok_start + 1, hasUTF8 = false;
-	while((ch = tokenizer->source[pos++]) != 0) {
-		if(ch == '\n') {
+	int pos = tok_start + 1, hasUTF8 = false, hasBQ = false;
+	int ch = 0;
+	while(true) {
+		ch = skipBackQuoteOrNewLineOrDoubleQuote(tokenizer->source, &pos, &hasUTF8);
+		if(ch == 0 || ch == '"' || ch == '\n') {
 			break;
 		}
-		if(ch == '"' && (prev != '\\' || (prev == '\\' && prev2 == '\\'))) {
-			if(IS_NOTNULL(tk)) {
-				size_t length = pos - (tok_start + 1) - 1;
-				KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, tokenizer->source + tok_start + 1, length, hasUTF8 ? StringPolicy_UTF8 : StringPolicy_ASCII));
-				tk->unresolvedTokenType = TokenType_TEXT;
-			}
-			return pos;
+		else {
+			assert(ch == '\\');
+			hasBQ = 1;
+			pos++;
 		}
-		if(ch == '\\' && IS_NOTNULL(tk)) {
-			kToken_set(RequiredReformat, tk, true);
+	}
+	if(hasBQ && IS_NOTNULL(tk)) {
+		kToken_set(RequiredReformat, tk, true);
+	}
+	if(ch == '"') {
+		if(IS_NOTNULL(tk)) {
+			size_t length = pos - (tok_start + 1) - 1;
+			kString *text = KLIB new_kString(kctx, OnField,
+					tokenizer->source + tok_start + 1, length,
+					hasUTF8 ? StringPolicy_UTF8 : StringPolicy_ASCII);
+			KFieldSet(tk, tk->text, text);
+			tk->unresolvedTokenType = TokenType_TEXT;
 		}
-		if(ch < 0) {
-			hasUTF8 = true;
-		}
-		prev2 = prev;
-		prev = ch;
+		return pos;
 	}
 	ERROR_UnclosedToken(kctx, tk, "\"");
-	return pos-1;
+	return pos - 1;
 }
 
 static int ParseWhiteSpace(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
