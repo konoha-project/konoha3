@@ -1,8 +1,0 @@
-check_include_file(db.h HAVE_DB_H)
-find_library(HAVE_LIBDB NAMES db)
-set(ExtraLibs)
-if(HAVE_LIBDB)
-	set(MODULE_EXTRA_LIBRARY ${HAVE_LIBDB})
-endif(HAVE_LIBDB)
-set(MODULE_SOURCE_CODE Diagnosis.c)
-add_konoha_module(Diagnosis)

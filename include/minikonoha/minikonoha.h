@@ -894,6 +894,7 @@ struct KonohaStackRuntimeVar {
 #define MOD_REGEXP     16
 #define MOD_APACHE     17
 #define MOD_EVENT      18
+#define MOD_mpi        19
 
 struct KonohaModule {
 	const char *name;
