@@ -222,13 +222,16 @@ static void _ResultSet_setFloat(KonohaContext *kctx, kResultSet *rs, size_t n, k
 	KNH_ASSERT(n < rs->column_size);
 	KGrowingBuffer wb;
 	size_t len = 12; // sizeof KFLOAT_FMT
+	char buf[len];
+	memset(&buf, '\0', len);
+	sprintf(buf, KFLOAT_FMT, (value));
+
+	len = strlen(buf);
+
 	KLIB KBuffer_Init(&(((kResultSet *)rs)->databuf), &wb);
 	rs->column[n].ctype = kResultSet_CTYPE__float;
 	rs->column[n].start = strlen(rs->databuf.bytebuf);
 	rs->column[n].len = len;
-	char buf[len];
-	memset(&buf, '\0', len);
-	sprintf(buf, KFLOAT_FMT, (value));
 	KLIB KBuffer_Write(kctx, &wb, buf, len);
 }
 
