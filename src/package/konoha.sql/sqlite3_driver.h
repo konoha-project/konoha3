@@ -22,31 +22,25 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-/* ************************************************************************ */
-
 #include <sqlite3.h>
-#include "sql_common.h"
+
+#ifndef SQLITE3_DRIVER_H
+#define SQLITE3_DRIVER_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 //------------------------------------------------------------------------ */
-
-#define K_PATHHEAD_MAXSIZ    32
-
-/* ======================================================================== */
-
-extern QueryDriver MySQLDriver;
-
-/* ======================================================================== */
-
 static void knh_sqlite3_perror(KonohaContext* kctx, sqlite3 *db, int r)
 {
-//	const char *msg = "sqlite3";
 	if(r == SQLITE_PERM || r == SQLITE_AUTH) {
 		//msg = "Security";
 	}
 	//KNH_SYSLOG(ctx, LOG_WARNING, msg, "sqlite3_error='%s'", sqlite3_errmsg(db));
 }
 
-static void *SQLITE3_qopen(KonohaContext* kctx, const char* db, KTraceInfo *trace)
+static DBHandler *SQLITE3_qopen(KonohaContext* kctx, const char *db, KTraceInfo *trace)
 {
 	sqlite3 *db_sqlite3 = NULL;
 	db += 9;
@@ -54,10 +48,10 @@ static void *SQLITE3_qopen(KonohaContext* kctx, const char* db, KTraceInfo *trac
 	if(r != SQLITE_OK) {
 		return NULL;
 	}
-	return (void *)db_sqlite3;
+	return (DBHandler *)db_sqlite3;
 }
 
-static int SQLITE3_qnext(KonohaContext* kctx, kqcur_t *qcur, kResultSet *rs, KTraceInfo *trace)
+static int SQLITE3_qnext(KonohaContext* kctx, KCursor *qcur, kResultSet *rs, KTraceInfo *trace)
 {
 	sqlite3_stmt *stmt = (sqlite3_stmt *)qcur;
 	int r = sqlite3_step(stmt);
@@ -66,37 +60,32 @@ static int SQLITE3_qnext(KonohaContext* kctx, kqcur_t *qcur, kResultSet *rs, KTr
 		for(i = 0; i < rs->column_size; i++) {
 			int type = sqlite3_column_type(stmt, i);
 			switch(type) {
-				case SQLITE_INTEGER: {
-					_ResultSet_setInt(kctx, rs, i, (kint_t)sqlite3_column_int64(stmt, i));
-					break;
-				}
-				case SQLITE_FLOAT: {
-					_ResultSet_setFloat(kctx, rs, i, (kfloat_t)sqlite3_column_double(stmt, i));
-					break;
-				}
-				case SQLITE_TEXT: {
-					_ResultSet_setText(kctx, rs, i, (char *)sqlite3_column_text(stmt,i), (size_t)sqlite3_column_bytes(stmt, i));
-					break;
-				}
-				case SQLITE_BLOB: {
-					//_ResultSet_setBlob(kctx, rs, i, (const char *)sqlite3_column_blob(stmt, i), sqlite3_column_bytes(stmt, i));
-					break;
-				}
-				case SQLITE_NULL:
-				default: {
-					_ResultSet_setNULL(kctx, rs, i);
-				}
+			case SQLITE_INTEGER:
+				ResultSet_setInt(kctx, rs, i, (kint_t)sqlite3_column_int64(stmt, i));
+				break;
+			case SQLITE_FLOAT:
+				ResultSet_setFloat(kctx, rs, i, (kfloat_t)sqlite3_column_double(stmt, i));
+				break;
+			case SQLITE_TEXT:
+				ResultSet_setText(kctx, rs, i, (char *)sqlite3_column_text(stmt,i), (size_t)sqlite3_column_bytes(stmt, i));
+				break;
+			case SQLITE_BLOB:
+				//ResultSet_setBlob(kctx, rs, i, (const char *)sqlite3_column_blob(stmt, i), sqlite3_column_bytes(stmt, i));
+				break;
+			case SQLITE_NULL:
+			default:
+				ResultSet_setNull(kctx, rs, i);
 			}
 		}
 		return 1;
 	}
 	else if(r != SQLITE_DONE) {
-	   //
+		//
 	}
 	return 0;  /* NOMORE */
 }
 
-static kqcur_t *SQLITE3_query(KonohaContext* kctx, void *db, const char* query, kResultSet *rs, KTraceInfo *trace)
+static KCursor *SQLITE3_query(KonohaContext* kctx, DBHandler *db, const char *query, kResultSet *rs, KTraceInfo *trace)
 {
 	if(rs == NULL) {
 		int r = sqlite3_exec((sqlite3*)db, query, NULL, NULL, NULL);
@@ -108,21 +97,12 @@ static kqcur_t *SQLITE3_query(KonohaContext* kctx, void *db, const char* query, 
 	else {
 		sqlite3_stmt *stmt = NULL;
 		sqlite3_prepare((sqlite3*)db, query, strlen(query), &stmt, NULL);
-	/* if(r != SQLITE_OK) { */
-	/* 	sqlite3_finalize(stmt); */
-	/* 	DBG_P("msg='%s", sqlite3_errmsg((sqlite3)db)); */
-	/* 	return NULL; */
-	/* } */
-	/* 	r = sqlite3_reset(stmt); */
-	/* if(r != SQLITE_OK) { */
-	/* 	sqlite3_finalize(stmt); */
-	/* 	return NULL; */
-		size_t column_size = (size_t)sqlite3_column_count(stmt);
+		/*FIXME Error Check & Trace */
+		size_t column_size = (size_t) sqlite3_column_count(stmt);
 		DBG_P("column_size=%d", column_size);
-
-		_ResultSet_InitColumn(kctx, rs, column_size);
+		ResultSet_InitColumn(kctx, rs, column_size);
 		if(column_size == 0) {
-			sqlite3_exec((sqlite3*)db, query, NULL, NULL, NULL);
+			sqlite3_exec((sqlite3 *)db, query, NULL, NULL, NULL);
 		}else if(column_size > 0) {
 			size_t i;
 			for(i = 0; i < column_size; i++) {
@@ -135,23 +115,23 @@ static kqcur_t *SQLITE3_query(KonohaContext* kctx, void *db, const char* query, 
 				}
 			}
 		}
-		return (kqcur_t *)stmt;
+		return (KCursor *)stmt;
 	}
 }
 
-static void SQLITE3_qclose(void *hdr)
+static void SQLITE3_qclose(DBHandler *hdr)
 {
-	sqlite3_close((sqlite3*)hdr);
+	sqlite3_close((sqlite3 *)hdr);
 }
 
-static void SQLITE3_qfree(kqcur_t *qcur)
+static void SQLITE3_qfree(KCursor *qcur)
 {
 	sqlite3_stmt *stmt = (sqlite3_stmt *)qcur;
 	sqlite3_finalize(stmt);
 }
 
-const QueryDriver SQLLite3Driver = {
-	K_DSPI_QUERY, "sqlite3",
+static QueryDriver SQLLite3Driver = {
+	"sqlite3",
 	SQLITE3_qopen,
 	SQLITE3_query,
 	SQLITE3_qclose,
@@ -159,4 +139,9 @@ const QueryDriver SQLLite3Driver = {
 	SQLITE3_qfree
 };
 
-//------------------------------------------------------------------------ */
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif /* end of include guard */

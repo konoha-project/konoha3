@@ -27,97 +27,87 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/konoha_common.h>
 #include <minikonoha/klib.h>
+#include <stdio.h> /* for strtoll, strtod */
 
 #ifdef HAVE_KONOHA_SQL_CONFIG_H
 #include "konoha_sql.config.h"
 #endif
 
+typedef void KCursor;
+typedef void DBHandler;
+struct kResultSet;
+
+typedef const struct QueryDriverVar {
+	const char *name;
+	DBHandler *(*qopen)(KonohaContext* kctx, const char *url, KTraceInfo *trace);
+	KCursor   *(*qexec)(KonohaContext* kctx, DBHandler *hdr, const char *query, struct kResultSet *rs, KTraceInfo *trace);
+	void       (*qclose)(DBHandler *hdl);
+	int        (*qcurnext)(KonohaContext* kctx, KCursor *qcur, struct kResultSet *rs, KTraceInfo *trace);
+	void       (*qcurfree)(KCursor *);
+} QueryDriver;
+
+typedef struct kConnection {
+	KonohaObjectHeader  h;
+	DBHandler   *db;
+	QueryDriver *driver;
+} kConnection;
+
+#define TY_Connection     cConnection->typeId
+
+/* [ResultSet] */
+
+typedef struct KColumn {
+	kattrtype_t  type;
+	int          dbtype;
+	kString     *name;
+	krbp_t       val;
+} KColumn;
+
+typedef struct kResultSet {
+	KonohaObjectHeader  h;
+	kConnection  *connectionNULL;
+	KCursor      *qcur;
+	KColumn      *column;
+	size_t        column_size;
+	size_t        rowidx;
+	QueryDriver  *driver; /* necessary if connection is closed before */
+} kResultSet;
+
+#define TY_ResultSet     cResultSet->typeId
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifdef HAVE_MYSQL
-#include "include/kmysql.h"
-#endif
-
-#ifdef HAVE_LIBSQLITE
-#include "include/ksqlite.h"
-#endif
-
-#ifdef PSQL_INCLUDED
-#include "include/postgresql.h"
-#endif
-
-/* ======================================================================== */
-/* [Connection] */
-
-
-/* ======================================================================== */
 /* ------------------------------------------------------------------------ */
 /* [NOP DB Driver] */
 
-
-static void *NOP_qopen(KonohaContext *kctx, const char* url, KTraceInfo *trace)
+static DBHandler *NOP_qopen(KonohaContext *kctx, const char *url, KTraceInfo *trace)
 {
 	return NULL;
 }
 
-static kqcur_t *NOP_query(KonohaContext *kctx, void *hdr, const char* sql, kResultSet *rs, KTraceInfo *trace)
+static KCursor *NOP_query(KonohaContext *kctx, DBHandler *hdr, const char *query, kResultSet *rs, KTraceInfo *trace)
 {
 	return NULL;
 }
 
-static void NOP_qclose(void *db)
+static void NOP_qclose(DBHandler *db)
 {
 }
 
-static int NOP_qnext(KonohaContext *kctx, kqcur_t *qcur, kResultSet *rs, KTraceInfo *trace)
+static int NOP_qnext(KonohaContext *kctx, KCursor *qcur, kResultSet *rs, KTraceInfo *trace)
 {
-	return 0;  /* NOMORE */
+	return 0; /* NOMORE */
 }
 
-static void NOP_qfree(kqcur_t *qcur)
+static void NOP_qfree(KCursor *qcur)
 {
 }
 
 static QueryDriver NoQueryDriver = {
-	K_DSPI_QUERY, "NOP", NOP_qopen, NOP_query, NOP_qclose, NOP_qnext, NOP_qfree
+	"NOP", NOP_qopen, NOP_query, NOP_qclose, NOP_qnext, NOP_qfree
 };
-
-static int HandlerNameLength(const char* p) {
-	char ch;
-	ch = p[0];
-	int i = 0;
-	while(ch != '\0') {
-		if(ch == ':') {
-			return i;
-		}
-		i++;
-		ch = p[i];
-	}
-	return i;
-}
-
-static QueryDriver* LoadQueryDriver(KonohaContext *kctx, const char *dburl)
-{
-	int len = HandlerNameLength(dburl);
-#ifdef HAVE_MYSQL
-	if(strncmp(dburl, "mysql", len) == 0) {
-		return &MySQLDriver;
-	}
-#endif
-#ifdef HAVE_LIBSQLITE
-	if(strncmp(dburl, "sqlite3", len) == 0) {
-		return &SQLLite3Driver;
-	}
-#endif
-#ifdef PSQL_INCLUDED
-	if(strncmp(dburl, "postgresql", len) == 0) {
-		return &PostgreSQLDriver;
-	}
-#endif
-	return &NoQueryDriver;
-}
 
 /* ------------------------------------------------------------------------ */
 /* [Connection Class Define] */
@@ -129,10 +119,6 @@ static void kConnection_Init(KonohaContext *kctx, kObject *o, void *conf)
 	con->driver = &NoQueryDriver;
 }
 
-static void kConnection_Reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor *visitor)
-{
-}
-
 static void kConnection_Free(KonohaContext *kctx, kObject *o)
 {
 	kConnection *con = (kConnection *)o;
@@ -140,24 +126,191 @@ static void kConnection_Free(KonohaContext *kctx, kObject *o)
 		con->driver->qclose(con->db);
 		con->db = NULL;
 	}
-	con->driver = &NoQueryDriver;  // safety
+	con->driver = &NoQueryDriver; // safety
+}
+
+static void kResultSet_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kResultSet *rs = (kResultSet *)o;
+	if(conf != NULL) {
+		KFieldInit(rs, rs->connectionNULL, (kConnection *) conf);
+	} else {
+		rs->connectionNULL = NULL;
+	}
+	rs->qcur = NULL;
+	rs->column_size = 0;
+	rs->column = NULL;
+	rs->rowidx = 0;
+	rs->driver = NULL;
+}
+
+static void kResultSet_Reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor *visitor)
+{
+	kResultSet *rs = (kResultSet *)p;
+	KColumn *col = rs->column;
+	KColumn *end = col + rs->column_size;
+	while(col < end) {
+		KRefTrace(col->name);
+		if(TY_isUnbox(col->type)) {
+			KRefTrace(col->val.asObject);
+		}
+	}
+	KRefTraceNullable(rs->connectionNULL);
+}
+
+static void kResultSet_Free(KonohaContext *kctx, kObject *o)
+{
+	kResultSet *rs = (kResultSet *)o;
+	if(rs->column_size > 0) {
+		KFree(rs->column, sizeof(KColumn) * rs->column_size);
+	}
+	if(rs->qcur != NULL) {
+		rs->driver->qcurfree(rs->qcur);
+		rs->qcur = NULL;
+	}
+	rs->connectionNULL = NULL;
+}
+
+static void kResultSet_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+{
+	kResultSet *rs = (kResultSet *) v[0].asObject;
+	KLIB KBuffer_printf(kctx, wb, "{");
+	size_t i;
+	for(i = 0; i < (rs)->column_size; i++) {
+		if(i > 0) {
+			KLIB KBuffer_printf(kctx, wb, ",");
+		}
+		KLIB KBuffer_printf(kctx, wb, "(%d): ", i);
+		kattrtype_t type = rs->column[i].type;
+		krbp_t *val = &rs->column[i].val;
+		if(TY_isUnbox(type)) {
+			KonohaValue sp[1]; sp[0].unboxValue = val[0].unboxValue;
+			CT_(type)->p(kctx, sp, 0, wb);
+		} else {
+			KLIB kObject_WriteToBuffer(kctx, val[0].asObject, false/*delim*/, wb, NULL, 0);
+		}
+	}
+	KLIB KBuffer_printf(kctx, wb, "}");
+}
+
+static bool String_equal(KonohaContext *kctx, kString *str0, kString *str1)
+{
+	if(S_size(str0) == S_size(str1)) {
+		return strncmp(S_text(str0), S_text(str1), S_size(str0)) == 0;
+	}
+	return false;
+}
+
+static int ResultSet_FindColumn(KonohaContext *kctx, kResultSet *rs, kString *name)
+{
+	size_t i = 0;
+	for(i = 0; i < rs->column_size; i++) {
+		if(String_equal(kctx, name, rs->column[i].name)) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+static void ResultSet_InitColumn(KonohaContext *kctx, kResultSet *rs, unsigned column_size)
+{
+	rs->column_size = column_size;
+	if(rs->column_size > 0) {
+		rs->column = KMalloc_UNTRACE(sizeof(KColumn) * rs->column_size);
+	}
+}
+
+static void ResultSet_setNull(KonohaContext *kctx, kResultSet *rs, unsigned Idx)
+{
+	rs->column[Idx].type = TY_void;
+	rs->column[Idx].val.unboxValue = 0;
+}
+
+static void ResultSet_setText(KonohaContext *kctx, kResultSet *rs, unsigned Idx, const char *text, size_t len)
+{
+	rs->column[Idx].type = TY_String;
+	KFieldInit(rs, rs->column[Idx].val.asString, KLIB new_kString(kctx, GcUnsafe, text, len, 0));
+}
+
+static void ResultSet_setInt(KonohaContext *kctx, kResultSet *rs, unsigned Idx, kint_t val)
+{
+	rs->column[Idx].type = TY_int;
+	rs->column[Idx].val.intValue = val;
+}
+
+static void ResultSet_setFloat(KonohaContext *kctx, kResultSet *rs, unsigned Idx, kfloat_t val)
+{
+	rs->column[Idx].type = TY_float;
+	rs->column[Idx].val.floatValue = val;
+}
+
+static kint_t parseInt(char *ptr, size_t len)
+{
+	char *endptr = ptr + len;
+	return strtoll(ptr, &endptr, 10);
+}
+
+static kfloat_t parseFloat(char *ptr, size_t len)
+{
+	char *endptr = ptr + len;
+	return strtod(ptr, &endptr);
 }
 
 /* ------------------------------------------------------------------------ */
-/* [Connection API] */
+
+#ifdef HAVE_MYSQL
+#include "mysql_driver.h"
+#endif
+
+#ifdef HAVE_LIBSQLITE
+#include "sqlite3_driver.h"
+#endif
+
+#ifdef HAVE_PSQL
+#include "postgresql_driver.h"
+#endif
+
+static QueryDriver *FindQueryDriverByScheme(KonohaContext *kctx, const char *dburl)
+{
+	const char *res = strchr(dburl, ':');
+	if(res == NULL) {
+		return &NoQueryDriver;
+	}
+	int len = res - dburl;
+#ifdef HAVE_MYSQL
+	if(strncmp(dburl, "mysql", len) == 0) {
+		return &MySQLDriver;
+	}
+#endif
+#ifdef HAVE_LIBSQLITE
+	if(strncmp(dburl, "sqlite3", len) == 0) {
+		return &SQLLite3Driver;
+	}
+#endif
+#ifdef HAVE_PSQL
+	if(strncmp(dburl, "postgresql", len) == 0) {
+		return &PostgreSQLDriver;
+	}
+#endif
+	return &NoQueryDriver;
+}
+
+/* ------------------------------------------------------------------------ */
+/* [Methods] */
 
 //## Connection Connection.new(String dburl);
 static KMETHOD Connection_new(KonohaContext *kctx, KonohaStack *sfp)
 {
+	kConnection *con = (kConnection *) sfp[0].asObject;
 	KMakeTrace(trace, sfp);
-	const char *dburl = S_text(sfp[1].asString);
-	QueryDriver *driver = LoadQueryDriver(kctx, dburl);
-	void *db = driver->qopen(kctx, dburl, trace);
+	const char  *dburl  = S_text(sfp[1].asString);
+	QueryDriver *driver = FindQueryDriverByScheme(kctx, dburl);
+	DBHandler *db = driver->qopen(kctx, dburl, trace);
 	if(db != NULL) {
-		kConnection* con = (kConnection *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)db);
+		con->db     = db;
 		con->driver = driver;
-		KReturn(con);
 	}
+	KReturn(con);
 }
 
 //## ResultSet Connection.query(String query);
@@ -167,15 +320,11 @@ static KMETHOD Connection_query(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	kConnection *conn = (kConnection *)sfp[0].asObject;
 	const char *query = S_text(sfp[1].asString);
-	kResultSet* rs = (kResultSet *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), (uintptr_t)conn);
-	kqcur_t *qcur = conn->driver->qexec(kctx, conn->db, query, rs, trace);
+	kResultSet *rs = (kResultSet *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)conn);
+	KCursor *qcur = conn->driver->qexec(kctx, conn->db, query, rs, trace);
 	if(qcur != NULL) {
-		rs->qcur = qcur;
-		rs->qcurfree = conn->driver->qcurfree;
-	}
-	else {
-		rs->qcur = NULL;
-		rs->qcurfree = NULL;
+		rs->qcur   = qcur;
+		rs->driver = conn->driver;
 	}
 	KReturnWith(rs, RESET_GCSTACK());
 }
@@ -183,7 +332,7 @@ static KMETHOD Connection_query(KonohaContext *kctx, KonohaStack *sfp)
 //## void Connection.close();
 static KMETHOD Connection_close(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kConnection* conn = (kConnection *)sfp[0].asObject;
+	kConnection *conn = (kConnection *)sfp[0].asObject;
 	conn->driver->qclose(conn->db);
 	conn->db = NULL;
 }
@@ -193,10 +342,10 @@ static KMETHOD Connection_close(KonohaContext *kctx, KonohaStack *sfp)
 //## int Connection.getInsertId();
 KMETHOD Connection_getInsertId(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kConnection *c = (kConnection *)sfp[0].asObject;
+	kConnection *conn = (kConnection *)sfp[0].asObject;
 	kint_t ret = 0;
-	if(strncmp(c->driver->name, "mysql", sizeof("mysql")) == 0) {
-		ret = (kint_t)mysql_insert_id((MYSQL *)c->db);
+	if(conn->driver == &MySQLDriver) {
+		ret = (kint_t) mysql_insert_id((MYSQL *)conn->db);
 	}
 	else {
 		// [TODO] throw exeption when another dbms use this method.
@@ -206,268 +355,126 @@ KMETHOD Connection_getInsertId(KonohaContext *kctx, KonohaStack *sfp)
 
 #endif
 
-/* ------------------------------------------------------------------------ */
-/* [ResultSet Class Define] */
-
-static void kResultSet_Init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	kResultSet *rs = (kResultSet *)o;
-	rs->qcur = NULL;
-	rs->column_size = 0;
-	rs->column = NULL;
-	KLIB KArray_Init(kctx, &rs->databuf, RESULTSET_BUFSIZE);
-	KFieldInit(rs, rs->connection, (kConnection *)conf);
-	KFieldInit(rs, rs->tableName, KNULL(String));
-	rs->qcurfree = NULL;
-	rs->rowidx = 0;
-}
-
-static void kResultSet_Reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor *visitor)
-{
-	kResultSet *rs = (kResultSet *)p;
-	KRefTrace(rs->connection);
-	KRefTrace(rs->column->name);
-	KRefTrace(rs->tableName);
-}
-
-static void kResultSet_Free(KonohaContext *kctx, kObject *o)
-{
-	kResultSet *rs = (kResultSet *)o;
-	if(rs->column_size > 0) {
-		KFree((void *)rs->column, sizeof(DBschema) * rs->column_size);
-	}
-	if(rs->qcur != NULL) {
-		rs->qcurfree(rs->qcur);
-		rs->qcur = NULL;
-	}
-	rs->connection = NULL;
-}
-
-
-static void kResultSet_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
-{
-	//KLIB KBuffer_printf(kctx, wb, "%s", "{");
-	//size_t n;
-	//for(n = 0; n < (o)->column_size; n++) {
-	//	if(n > 0) {
-	//		kwrite_delim(ctx,w);
-	//	}
-	//	KLIB KBuffer_printf(kctx, w, "(%d): ", n);
-	//	char *p = BA_totext((o)->databuf) + (o)->column[n].start;
-	//	switch((o)->column[n].ctype) {
-	//		case kResultSet_CTYPE__null :
-	//			kwrite(ctx, w, STEXT("null"));
-	//			break;
-	//		case kResultSet_CTYPE__integer :
-	//			kwrite_ifmt(ctx, w, KINT_FMT, (*((kint_t *)p)));
-	//			break;
-	//		case kResultSet_CTYPE__float :
-	//			kwrite_ffmt(ctx, w, KFLOAT_FMT, (*((kfloat_t *)p)));
-	//			break;
-	//		case kResultSet_CTYPE__text :
-	//			kwrite(ctx, w, B2(p, (o)->column[n].len));
-	//			break;
-	//		case kResultSet_CTYPE__bytes :
-	//			kprintf(ctx, w, "BLOB(%dbytes)", (o)->column[n].len);
-	//			break;
-	//	}
-	//}
-	//kputc(ctx, w, '}');
-}
-
-/* ------------------------------------------------------------------------ */
-/* [ResultSet inner function] */
-
-static int _ResultSet_FindColumn(KonohaContext *kctx, kResultSet *o, const char* name)
-{
-	size_t i = 0;
-	for(i = 0; i < o->column_size; i++) {
-		if(strcasecmp(S_text(o->column[i].name), name) == 0) return i;
-	}
-	return -1;
-}
-
-static int _ResultSet_indexof_(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kResultSet *o = (kResultSet *)sfp[0].asObject;
-	if(IS_Int(sfp[1].asObject)) {
-		size_t n = (size_t)sfp[1].intValue;
-		if(!(n < o->column_size)) {
-			//THROW_OutOfRange(ctx, sfp, sfp[1].intValue, (o)->column_size);
-			return -1;
-		}
-		return n;
-	}
-	else if(IS_String(sfp[1].asObject)) {
-		int loc = _ResultSet_FindColumn(kctx, o, S_text(sfp[1].asString));
-		if(loc == -1) {
-			//THROW_OutOfRange(ctx, sfp, sfp[1].intValue, (o)->column_size);
-		}
-		return loc;
-	}
-	return -1;
-}
-
-/* ------------------------------------------------------------------------ */
-/* [ResultSet API] */
 
 //## Boolean ResultSet.next();
 
-KMETHOD ResultSet_next(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD ResultSet_next(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kResultSet* rs = (kResultSet *)sfp[0].asObject;
+	kResultSet *rs = (kResultSet *) sfp[0].asObject;
 	kbool_t ret = false;
 	DBG_ASSERT(rs->qcur != NULL);
 	KMakeTrace(trace, sfp);
-	if(rs->connection->driver->qcurnext(kctx, rs->qcur, rs, trace)) {
+	if(rs->driver->qcurnext(kctx, rs->qcur, rs, trace)) {
 		rs->rowidx++;
 		ret = true;
 	}
 	else {
-		rs->qcurfree(rs->qcur);
+		rs->driver->qcurfree(rs->qcur);
 		rs->qcur = NULL;
-		//o->qcurfree = kgetQueryDSPI(ctx, t)->qcurfree;
 	}
 	KReturnUnboxValue(ret);
 }
 
 //## int ResultSet.getSize();
-KMETHOD ResultSet_getSize(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD ResultSet_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kResultSet* rs = (kResultSet *)sfp[0].asObject;
+	kResultSet *rs = (kResultSet *) sfp[0].asObject;
 	KReturnUnboxValue(rs->column_size);
 }
 
 //## String ResultSet.getName(Int n);
-KMETHOD ResultSet_getName(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD ResultSet_getName(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kResultSet* rs = (kResultSet *)sfp[0].asObject;
+	kResultSet *rs = (kResultSet *)sfp[0].asObject;
 	size_t n = (size_t)sfp[1].intValue;
 	KCheckIndex(n, rs->column_size);
 	KReturn(rs->column[n].name);
 }
+
 /* ------------------------------------------------------------------------ */
 /* [getter/setter] */
 
-//## Int ResultSet.getInt(String n);
-KMETHOD ResultSet_getInt(KonohaContext *kctx, KonohaStack *sfp)
+//## int ResultSet.getInt(String n);
+static KMETHOD ResultSet_getInt(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int n = _ResultSet_indexof_(kctx, sfp);
+	kResultSet *rs = (kResultSet *)sfp[0].asObject;
+	int idx = ResultSet_FindColumn(kctx, rs, sfp[1].asString);
 	kint_t res = 0;
-	char data[16];
-	if(n >= 0) {
-		kResultSet *o = (kResultSet *)sfp[0].asObject;
-		const char *p = o->databuf.bytebuf + o->column[n].start;
-		switch((o)->column[n].ctype) {
-		case kResultSet_CTYPE__integer :
-			memset(data, '\0', 16);
-			memcpy(data, p, o->column[n].len);
-			res = strtoll(data, NULL, 10);
-			break;
-		case kResultSet_CTYPE__float :
-			res = (kint_t)(*((kfloat_t *)p)); break;
-		case kResultSet_CTYPE__null :
-		default:
-			//KSETv(NULL, sfp[_rix].o, KNH_NULVAL(CLASS_Int));
-			break;
+	if(idx >= 0) {
+		kattrtype_t type = rs->column[idx].type;
+		if(type == TY_int) {
+			res = rs->column[idx].val.intValue;
+		} else if(KDefinedKonohaCommonModule() && type == TY_float) {
+			res = (kint_t) rs->column[idx].val.floatValue;
 		}
 	}
 	KReturnUnboxValue(res);
 }
 
-#define RESULTSET_FLOATSIZE 16
-
-//## Float ResultSet.getFloat(String n);
-KMETHOD ResultSet_getFloat(KonohaContext *kctx, KonohaStack *sfp)
+//## float ResultSet.getFloat(String name);
+static KMETHOD ResultSet_getFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int n = _ResultSet_indexof_(kctx, sfp);
+	kResultSet *rs = (kResultSet *)sfp[0].asObject;
+	int idx = ResultSet_FindColumn(kctx, rs, sfp[1].asString);
 	kfloat_t res = 0.0;
-	char data[RESULTSET_FLOATSIZE];
-	if(n >= 0) {
-		kResultSet *o = (kResultSet *)sfp[0].asObject;
-		const char *p = o->databuf.bytebuf + o->column[n].start;
-		switch((o)->column[n].ctype) {
-		case kResultSet_CTYPE__integer :
-			res = (kfloat_t)(*((kint_t *)p)); break;
-		case kResultSet_CTYPE__float :
-			memset(data, '\0', RESULTSET_FLOATSIZE);
-			memcpy(data, p, o->column[n].len);
-			res = atof(data);
-			break;
-		case kResultSet_CTYPE__null :
-		default:
-			//KSETv(NULL, sfp[_rix].o, KNH_NULVAL(CLASS_Float));
-			break;
+	if(idx >= 0) {
+		kattrtype_t type = rs->column[idx].type;
+		if(type == TY_int) {
+			res = (kfloat_t) rs->column[idx].val.intValue;
+		} else if(KDefinedKonohaCommonModule() && type == TY_float) {
+			res = rs->column[idx].val.floatValue;
 		}
 	}
 	KReturnFloatValue(res);
 }
 
 //## String ResultSet.getString(String n);
-KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 {
-	size_t n = (size_t)_ResultSet_indexof_(kctx, sfp);
-	kResultSet* rs = (kResultSet *)sfp[0].asObject;
-	DBG_ASSERT(n < rs->column_size);
-	const char *p = rs->databuf.bytebuf + rs->column[n].start;
-	switch(rs->column[n].ctype) {
-	case kResultSet_CTYPE__integer :
-		KReturn(KLIB new_kString(kctx, GcUnsafe, p, rs->column[n].len, 0));
-		break;
-	case kResultSet_CTYPE__float :
-		break;
-		//return new_String__float(kctx, (kfloat_t)(*((kfloat_t *)p)));
-	case kResultSet_CTYPE__text : {
-		KReturn(KLIB new_kString(kctx, GcUnsafe, p, rs->column[n].len, 0));
+	kResultSet *rs = (kResultSet *)sfp[0].asObject;
+	kString *res = TS_EMPTY;
+	int idx = ResultSet_FindColumn(kctx, rs, sfp[1].asString);
+	if(idx >= 0) {
+		kattrtype_t type = rs->column[idx].type;
+		krbp_t *val = &rs->column[idx].val;
+		if(type == TY_String) {
+			res = val[0].asString;
+		} else if(type == TY_int) {
+			KGrowingBuffer wb;
+			KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+			KLIB KBuffer_printf(kctx, &wb, KFLOAT_FMT, val[0].floatValue);
+			const char *text = KLIB KBuffer_Stringfy(kctx, &wb, 0);
+			res = KLIB new_kString(kctx, OnStack, text, KBuffer_bytesize(&wb), 0);
+			KLIB KBuffer_Free(&wb);
+		} else if(KDefinedKonohaCommonModule() && type == TY_float) {
+			KGrowingBuffer wb;
+			KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+			KLIB KBuffer_printf(kctx, &wb, KFLOAT_FMT, val[0].floatValue);
+			KLIB KBuffer_Free(&wb);
+			const char *text = KLIB KBuffer_Stringfy(kctx, &wb, 0);
+			res = KLIB new_kString(kctx, OnStack, text, KBuffer_bytesize(&wb), 0);
+			KLIB KBuffer_Free(&wb);
 		}
-	case kResultSet_CTYPE__null :
-		break;
 	}
-	KReturn(TS_EMPTY);
+	KReturn(res);
 }
 
-//## method dynamic ResultSet.get(dynamic n);
-//KMETHOD ResultSet_get(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	
-//	int n = _ResultSet_indexof_(ctx, sfp);
-//	Object *v = KNH_NULL;
-//	if(n >= 0) {
-//		kResultSet *o = (kResultSet *)sfp[0].o;
-//		const char *p = BA_totext((o)->databuf) + (o)->column[n].start;
-//		switch((o)->column[n].ctype) {
-//		case kResultSet_CTYPE__integer : {
-//			kint_t val;
-//			memcpy(&val, p, sizeof(kint_t));
-//			KNH_SETv(ctx, sfp[_rix].o, new_Int_(ctx, CLASS_Int, val));
-//			KReturnUnboxValue((*((kint_t *)p)));
-//		}
-//		case kResultSet_CTYPE__float : {
-//			kfloat_t val;
-//			knh_memcpy(&val, p, sizeof(kfloat_t));
-//			KNH_SETv(ctx, sfp[_rix].o, new_Float_(ctx, CLASS_Float, val));
-//			KReturnFloatValue((*((kfloat_t *)p)));
-//		}
-//		case kResultSet_CTYPE__text : {
-//			kbytes_t t = {{BA_totext((o)->databuf) + (o)->column[n].start}, (o)->column[n].len};
-//			v = UPCAST(new_S(t.text, t.len));
-//			break;
-//		}
-//		case kResultSet_CTYPE__bytes :
-//			{
-//				kBytes *ba = new_Bytes(ctx, BA_totext((o)->databuf) + (o)->column[n].start, (o)->column[n].len);
-//				kbytes_t t = {{BA_totext((o)->databuf) + (o)->column[n].start}, (o)->column[n].len};
-//				kBytes_Write(ctx, ba, t);
-//				v = UPCAST(ba);
-//			}
-//			break;
-//		default:
-//			v = KNH_NULL;
-//		}
-//	}
-//	KReturn(v);
-//}
-//
+//## @SmartReturn Object ResultSet.get(String n);
+static KMETHOD ResultSet_get(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KonohaClass *retClass = KGetReturnType(sfp);
+	if(retClass->typeId == TY_int) {
+		ResultSet_getInt(kctx, sfp);
+	} else if(retClass->typeId == TY_String) {
+		ResultSet_getString(kctx, sfp);
+	} else if(KDefinedKonohaCommonModule() && retClass->typeId == TY_float) {
+		ResultSet_getFloat(kctx, sfp);
+	} else {
+		kObject *returnValue = KLIB Knull(kctx, retClass);
+		sfp[K_RTNIDX].unboxValue = O_unbox(returnValue);
+		KReturn(returnValue);
+	}
+}
 
 #define _Public   kMethod_Public
 #define _F(F)   (intptr_t)(F)
@@ -481,7 +488,6 @@ static kbool_t sql_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 		.cflag = kClass_Final,
 		.init = kConnection_Init,
 		.free = kConnection_Free,
-		.reftrace = kConnection_Reftrace,
 	};
 
 	static KDEFINE_CLASS ResultSetDef = {
@@ -509,6 +515,7 @@ static kbool_t sql_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 		_Public, _F(ResultSet_getInt), TY_int, TY_ResultSet, MN_("getInt"), 1, TY_String, FN_("query"),
 		_Public, _F(ResultSet_getFloat), TY_float, TY_ResultSet, MN_("getFloat"), 1, TY_String, FN_("query"),
 		_Public, _F(ResultSet_getString), TY_String, TY_ResultSet, MN_("getString"), 1, TY_String, FN_("query"),
+		_Public|kMethod_SmartReturn, _F(ResultSet_get), TY_Object, TY_ResultSet, MN_("get"), 1, TY_String, FN_("query"),
 		_Public, _F(ResultSet_next), TY_boolean, TY_ResultSet, MN_("next"), 0,
 		_Public, _F(ResultSet_getSize), TY_int, TY_ResultSet, MN_("getSize"), 0,
 		_Public, _F(ResultSet_getName), TY_String, TY_ResultSet, MN_("getName"), 1, TY_int, FN_("idx"),
