@@ -1,7 +1,0 @@
-find_library(HAVE_LIBEVENT NAMES event)
-if(HAVE_LIBEVENT)
-	set(ExtraLibs ${ExtraLibs} ${HAVE_LIBEVENT})
-	set(MODULE_EXTRA_LIBRARY ${ExtraLibs})
-	set(MODULE_SOURCE_CODE DScriptConsole.c)
-	add_konoha_module(DScriptConsole)
-endif(HAVE_LIBEVENT)
