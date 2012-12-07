@@ -36,18 +36,17 @@ extern "C"{
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-#define TP_kw           TY_Symbol, FN_("keyword")
-#define TP_source       TY_String, FN_("source")
-#define TP_pos          TY_int, FN_("pos")
+#define TP_kw           TY_Symbol,     FN_("keyword")
+#define TP_source       TY_String,     FN_("source")
+#define TP_pos          TY_int,        FN_("pos")
 #define TP_tokens       TY_TokenArray, FN_("tokens")
-#define TP_begin        TY_int, FN_("begin")
-#define TP_end          TY_int, FN_("end")
-#define TP_message      TY_String, FN_("message")
+#define TP_begin        TY_int,        FN_("begin")
+#define TP_end          TY_int,        FN_("end")
+#define TP_message      TY_String,     FN_("message")
 
-#define TP_level         TY_int, FN_("level")
-#define TP_token         TY_Token, FN_("token")
-#define TP_expr          TY_Expr,  FN_("expr")
-
+#define TP_level         TY_int,       FN_("level")
+#define TP_token         TY_Token,     FN_("token")
+#define TP_expr          TY_Expr,      FN_("expr")
 
 // --------------------------------------------------------------------------
 /* TokenFunc */
@@ -208,7 +207,7 @@ static KMETHOD Token_getText(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Token_getSubTokenList(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
-	if(IS_String(tk->subTokenList)) {
+	if(IS_Array(tk->subTokenList)) {
 		KReturnField(tk->subTokenList);
 	}
 }
