@@ -25,8 +25,8 @@
 /* ************************************************************************ */
 
 #define USING_SUGAR_AS_BUILTIN 1
+#define USE_AsciiToKonohaChar
 #include <minikonoha/sugar.h>
-#include <minikonoha/local.h>
 
 /* ************************************************************************ */
 
@@ -79,6 +79,7 @@ static void SugarContext_Reftrace(KonohaContext *kctx, struct KonohaModuleContex
 //	KRefTrace(base->definedMethodList);
 //	END_REFTRACE();
 }
+
 static void SugarContext_Free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	SugarContext *base = (SugarContext *)baseh;

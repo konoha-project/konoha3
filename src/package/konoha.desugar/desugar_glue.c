@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include <minikonoha/minikonoha.h>
+#define USE_AsciiToKonohaChar
 #include <minikonoha/sugar.h>
 #include <stdio.h>
 
@@ -50,21 +51,6 @@ extern "C"{
 
 // --------------------------------------------------------------------------
 /* TokenFunc */
-
-/** sample code
- * int SingleQuoteToken (Token tk, String source) {
-	int pos, ch, prev = '\'';
-	while((ch = source.AsciiAt(pos)) != 0) {
-		if(ch == '\'' && prev != '\\') {
-			tk.setText("$SingleQuotedChar", source, 1, pos - 1);
-			return pos + 1;
-		}
-		prev = ch;
-	}
-	return tk.setError("must closed with '", source, 0, end);
-}
- *
- ***/
 
 //## int String.asciiAt(int pos);
 static KMETHOD String_AsciiAt(KonohaContext *kctx, KonohaStack *sfp)
@@ -151,7 +137,17 @@ static KMETHOD Token_toString(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## Token[] NameSpace.tokenize(String s);
-static KMETHOD NameSpace_tokenize(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_Tokenize(KonohaContext *kctx, KonohaStack *sfp)
+{
+	INIT_GCSTACK();
+	kArray *a = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
+	TokenSeq source = {sfp[0].asNameSpace, a};
+	SUGAR TokenSeq_Tokenize(kctx, &source, S_text(sfp[1].asString), 0);
+	KReturnWith(a, RESET_GCSTACK());
+}
+
+//## Token[] NameSpace.Preprocess(String s);
+static KMETHOD NameSpace_Preprocess(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
 	kArray *a = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
@@ -166,7 +162,7 @@ static KMETHOD NameSpace_tokenize(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 ////## boolean NameSpace.DefineMacro(Symbol symbol, int param, String source);
-//static KMETHOD NameSpace_tokenize(KonohaContext *kctx, KonohaStack *sfp)
+//static KMETHOD NameSpace_Tokenize(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
 //	size_t beginIdx = (size_t)sfp[2].intValue;
@@ -230,7 +226,8 @@ static void desugar_defineTokenFunc(KonohaContext *kctx, kNameSpace *ns, KTraceI
 		_Public|_Const, _F(Token_getSubTokenList), TY_TokenArray, TY_Token, MN_("GetSubTokenList"), 0,
 		_Public, _F(Token_isBeforeWhiteSpace), TY_boolean, TY_Token, MN_("isBeforeWhiteSpace"), 0,
 		_Public, _F(Token_new), TY_Token, TY_Token, MN_("new"), 1, TP_kw,
-		_Public|_Im, _F(NameSpace_tokenize), TY_TokenArray, TY_NameSpace, MN_("Tokenize"), 1, TP_source,
+		_Public|_Im, _F(NameSpace_Tokenize), TY_TokenArray, TY_NameSpace, MN_("Tokenize"), 1, TP_source,
+		_Public|_Im, _F(NameSpace_Preprocess), TY_TokenArray, TY_NameSpace, MN_("Preprocess"), 1, TP_source,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -883,7 +880,6 @@ static void desugar_defineExprMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 //		_Public, _F(Expr_setType), TY_void, TY_Expr, MN_("setType"), 2, TY_int, FN_buildid, TY_cid, FN_typeid,
 //		_Public, _F(kExpr_AddExpr), TY_Expr, TY_Expr, MN_("addExpr"), 1, TY_Expr, FN_expr,
 //
-//
 //		/* Gamma */
 //		_Public, _F(Gamma_declareLocalVariable), TY_int, TY_Gamma, MN_("declareLocalVariable"), 2, TY_cid, FN_typeid, TY_Symbol, FN_key,
 //		DEND,
@@ -956,19 +952,13 @@ static KMETHOD NameSpace_DefinedBinaryOperator(KonohaContext *kctx, KonohaStack 
 	KReturnUnboxValue(syn != NULL && (syn->precedence_op2 > 0));
 }
 
-//## void NameSpace.setTokenFunc(symbol keyword, int konohaChar, Func f);
-static KMETHOD NameSpace_setTokenFunc(KonohaContext *kctx, KonohaStack *sfp)
+//## void NameSpace.AddTokenizer(symbol keyword, int konohaChar, Func f);
+static KMETHOD NameSpace_AddTokenizer(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
-	int konohaChar = (int)sfp[2].intValue;
+	int konohaChar = AsciiToKonohaChar((int)sfp[2].intValue);
 	SUGAR kNameSpace_SetTokenFunc(kctx, sfp[0].asNameSpace, keyword, konohaChar, sfp[3].asFunc);
 }
-
-////## void NameSpace.compileAllDefinedMethods();
-//static KMETHOD NameSpace_compileAllDefinedMethods(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	KLIB kNameSpace_compileAllDefinedMethods(kctx);
-//}
 
 //## void NameSpace.addPatternMatch(symbol keyword, Func f);
 static KMETHOD NameSpace_AddPatternMatch(KonohaContext *kctx, KonohaStack *sfp)
@@ -1007,7 +997,6 @@ static KMETHOD NameSpace_AddTypeCheck(KonohaContext *kctx, KonohaStack *sfp)
 
 static void desugar_defineNameSpaceMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	int FN_keyword = SYM_("keyword");
 	int FN_func = SYM_("func");
 	/* Func[Int, Token, String] */
 	kparamtype_t P_FuncTokenize[] = {{TY_Token}, {TY_String}};
@@ -1026,18 +1015,17 @@ static void desugar_defineNameSpaceMethod(KonohaContext *kctx, kNameSpace *ns, K
 	int TY_FuncTypeCheck = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_Expr, 4, P_FuncTypeCheck))->typeId;
 	//DBG_P("func=%s", TY_t(TY_FuncTypeCheck));
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im, _F(NameSpace_DefinedSyntax), TY_boolean, TY_NameSpace, MN_("DefinedSyntax"), 1, TY_Symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_DefinedLiteral), TY_boolean, TY_NameSpace, MN_("DefinedLiteral"), 1, TY_Symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_DefinedStatement), TY_boolean, TY_NameSpace, MN_("DefinedStatement"), 1, TY_Symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_DefinedExpression), TY_boolean, TY_NameSpace, MN_("DefinedExpression"), 1, TY_Symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_DefinedBinaryOperator), TY_boolean, TY_NameSpace, MN_("DefinedBinaryOperator"), 1, TY_Symbol, FN_keyword,
-//		_Public, _F(NameSpace_compileAllDefinedMethods), TY_void, TY_NameSpace, MN_("compileAllDefinedMethods"), 0,
-		_Public, _F(NameSpace_setTokenFunc), TY_void, TY_NameSpace, MN_("SetTokenFunc"), 3, TY_Symbol, FN_keyword, TY_int, FN_("kchar"), TY_FuncToken, FN_func,
-		_Public, _F(NameSpace_AddPatternMatch), TY_void, TY_NameSpace, MN_("AddPatternMatch"), 2, TY_Symbol, FN_keyword, TY_FuncPatternMatch, FN_func,
-		_Public, _F(NameSpace_AddExpression), TY_void, TY_NameSpace, MN_("AddExpression"), 2, TY_Symbol, FN_keyword, TY_FuncExpression, FN_func,
-		_Public, _F(NameSpace_AddTopLevelStatement), TY_void, TY_NameSpace, MN_("AddTopLevelStatement"), 2, TY_Symbol, FN_keyword, TY_FuncStatement, FN_func,
-		_Public, _F(NameSpace_AddStatement), TY_void, TY_NameSpace, MN_("AddStatement"), 2, TY_Symbol, FN_keyword, TY_FuncStatement, FN_func,
-		_Public, _F(NameSpace_AddTypeCheck), TY_void, TY_NameSpace, MN_("AddTypeCheck"), 2, TY_Symbol, FN_keyword, TY_FuncTypeCheck, FN_func,
+		_Public|_Im, _F(NameSpace_DefinedSyntax), TY_boolean, TY_NameSpace, MN_("DefinedSyntax"), 1, TP_kw,
+		_Public|_Im, _F(NameSpace_DefinedLiteral), TY_boolean, TY_NameSpace, MN_("DefinedLiteral"), 1, TP_kw,
+		_Public|_Im, _F(NameSpace_DefinedStatement), TY_boolean, TY_NameSpace, MN_("DefinedStatement"), 1, TP_kw,
+		_Public|_Im, _F(NameSpace_DefinedExpression), TY_boolean, TY_NameSpace, MN_("DefinedExpression"), 1, TP_kw,
+		_Public|_Im, _F(NameSpace_DefinedBinaryOperator), TY_boolean, TY_NameSpace, MN_("DefinedBinaryOperator"), 1, TP_kw,
+		_Public, _F(NameSpace_AddTokenizer),         TY_void, TY_NameSpace, MN_("AddTokenizer"), 3, TP_kw, TY_int, FN_("kchar"), TY_FuncToken, FN_func,
+		_Public, _F(NameSpace_AddPatternMatch),      TY_void, TY_NameSpace, MN_("AddPatternMatch"), 2, TP_kw, TY_FuncPatternMatch, FN_func,
+		_Public, _F(NameSpace_AddExpression),        TY_void, TY_NameSpace, MN_("AddExpression"), 2, TP_kw, TY_FuncExpression, FN_func,
+		_Public, _F(NameSpace_AddTopLevelStatement), TY_void, TY_NameSpace, MN_("AddTopLevelStatement"), 2, TP_kw, TY_FuncStatement, FN_func,
+		_Public, _F(NameSpace_AddStatement),         TY_void, TY_NameSpace, MN_("AddStatement"), 2, TP_kw, TY_FuncStatement, FN_func,
+		_Public, _F(NameSpace_AddTypeCheck),         TY_void, TY_NameSpace, MN_("AddTypeCheck"), 2, TP_kw, TY_FuncTypeCheck, FN_func,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -1052,7 +1040,6 @@ static void desugar_defineNameSpaceMethod(KonohaContext *kctx, kNameSpace *ns, K
 
 
 // ---------------------------------------------------------------------------
-
 /* syntax */
 
 static kbool_t isSubKeyword(KonohaContext *kctx, kArray *tokenList, int beginIdx, int endIdx)
@@ -1224,7 +1211,7 @@ static kbool_t desugar_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 KDEFINE_PACKAGE* desugar_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "konoha", "1.0");
+	KSetPackageName(d, "konoha", K_VERSION);
 	d.PackupNameSpace    = desugar_PackupNameSpace;
 	d.ExportNameSpace   = desugar_ExportNameSpace;
 	return &d;

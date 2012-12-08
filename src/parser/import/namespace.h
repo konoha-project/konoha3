@@ -531,7 +531,6 @@ static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, con
 
 #endif
 
-
 // ---------------------------------------------------------------------------
 /* ClassName in ConstTable */
 
