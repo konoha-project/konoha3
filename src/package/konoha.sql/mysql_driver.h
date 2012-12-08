@@ -22,33 +22,23 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-/* ************************************************************************ */
-
-// [TODO] check if platform has not mysql.h
 #include <mysql.h>
-#include "sql_common.h"
+#include <stdio.h> /* for sscanf */
+#ifndef MYSQL_DRIVER_H
+#define MYSQL_DRIVER_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define MYSQL_USER_MAXLEN 16
 #define MYSQL_PASS_MAXLEN 255
 #define MYSQL_HOST_MAXLEN 255
 #define MYSQL_DBNM_MAXLEN 64
 
-/* ======================================================================== */
-
-extern QueryDriver MySQLDriver;
-
-/* ======================================================================== */
-
-/*
-static void kmysql_perror(KonohaContext *kctx, MYSQL *db, int r)
-{
-//	KNH_SYSLOG(kctx, LOG_WARNING, "MysqlError", "'%s'", mysql_error(db));
-}
-*/
 /* ------------------------------------------------------------------------ */
 
-//static void *MYSQL_qopen(KonohaContext *kctx, const char* url)
-void *MYSQL_qopen(KonohaContext *kctx, const char* url)
+static DBHandler *MYSQL_qopen(KonohaContext *kctx, const char *url, KTraceInfo *trace)
 {
 	char *puser, user[MYSQL_USER_MAXLEN+1] = {0};
 	char *ppass, pass[MYSQL_PASS_MAXLEN+1] = {0}; // temporary defined
@@ -58,8 +48,9 @@ void *MYSQL_qopen(KonohaContext *kctx, const char* url)
 
 	url += 8; // skip: 'mysql://'
 	const char *btstr = url;
+	// FIXME: consider to buffer over run
 	sscanf(btstr, "%16[^ :\r\n\t]:%255[^ @\r\n\t]@%255[^ :\r\n\t]:%5d/%64[^ \r\n\t]",
-			(char *)&user, (char *)&pass, (char *)&host, &port, (char *)&dbnm); // consider to buffer over run
+			(char *)&user, (char *)&pass, (char *)&host, &port, (char *)&dbnm);
 
 	puser = (user[0]) ? user : NULL;
 	ppass = (pass[0]) ? pass : NULL;
@@ -77,37 +68,35 @@ void *MYSQL_qopen(KonohaContext *kctx, const char* url)
 			LogUint("port", port),
 			LogUint("errno", mysql_errno(db)),
 			LogText("error", mysql_error(db)));
-	return (void *)db;
+	return (DBHandler *) db;
 }
 /* ------------------------------------------------------------------------ */
 
-//static int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcur, kResultSet *rs)
-int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, kResultSet *rs)
+static int MYSQL_qnext(KonohaContext *kctx, KCursor *qcursor, kResultSet *rs, KTraceInfo *trace)
 {
+	//FIXME(ide) we do not use mysql_fetch_row() because row of a result set are stringified.
 	MYSQL_ROW row;
 	MYSQL_RES* res = (MYSQL_RES *)qcursor;
 	int i;
 	int num_fields = mysql_num_fields(res);
 	if((row = mysql_fetch_row(res)) != NULL) {
-		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault, LogText("@","mysql_fetch_row"));
-		kint_t ival;
-		kfloat_t fval;
 		for (i = 0; i < num_fields; i++) {
-		//for (i = 0; i < rs->column_size; i++) {
 			if(row[i] == NULL) {
-				_ResultSet_setNULL(kctx, rs, i);
+				ResultSet_setNull(kctx, rs, i);
 				continue;
 			}
+			kint_t ival;
+			kfloat_t fval;
 			switch (rs->column[i].dbtype) {
 			case MYSQL_TYPE_TINY:     case MYSQL_TYPE_SHORT:
 			case MYSQL_TYPE_INT24:    case MYSQL_TYPE_LONG:
 			case MYSQL_TYPE_LONGLONG: case MYSQL_TYPE_YEAR:
 				ival = parseInt((char *)row[i], strlen((char *)row[i]));
-				_ResultSet_setInt(kctx, rs, i, ival);
+				ResultSet_setInt(kctx, rs, i, ival);
 				break;
 			case MYSQL_TYPE_FLOAT: case MYSQL_TYPE_DOUBLE:
 				fval = parseFloat((char *)row[i], strlen((char *)row[i]));
-				_ResultSet_setFloat(kctx, rs, i, fval);
+				ResultSet_setFloat(kctx, rs, i, fval);
 				break;
 			case MYSQL_TYPE_NEWDECIMAL: case MYSQL_TYPE_STRING:
 			case MYSQL_TYPE_VAR_STRING: case MYSQL_TYPE_TINY_BLOB:
@@ -115,114 +104,73 @@ int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, kResultSet *rs)
 			case MYSQL_TYPE_LONG_BLOB:  case MYSQL_TYPE_BIT:
 			case MYSQL_TYPE_TIME:       case MYSQL_TYPE_DATE:
 			case MYSQL_TYPE_DATETIME:   case MYSQL_TYPE_TIMESTAMP:
-				_ResultSet_setText(kctx, rs, i, (char *)row[i], strlen((char *)row[i]));
+				ResultSet_setText(kctx, rs, i, (char *)row[i], strlen((char *)row[i]));
 				break;
 			case MYSQL_TYPE_NULL:
 			default:
-				//KNH_SYSLOG(kctx, LOG_WARNING, "mysql", "mysql_qnext(dbtype)='unknown datatype [%d]'", DP(rs)->column[i].dbtype);
-				_ResultSet_setNULL(kctx, rs, i);
+				ResultSet_setNull(kctx, rs, i);
 				break;
 			}
-		} /* for */
+		}
 		return 1; /* CONTINUE */
-	} else {
-		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault, LogText("@","mysql_fetch_row"));
 	}
 	return 0; /* NOMORE */
 }
 /* ------------------------------------------------------------------------ */
 
-//static kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, kbytes_t sql, kResultSet *rs)
-kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, kResultSet *rs)
+static KCursor *MYSQL_query(KonohaContext *kctx, void *hdr, const char *sql, kResultSet *rs, KTraceInfo *trace)
 {
 	MYSQL_RES *res = NULL;
 	MYSQL *db = (MYSQL *)hdr;
 	if(db == NULL) {
-		/* return NULL */
+		return NULL;
 	}
 	else if(rs == NULL) {
 		/* Connection.exec */
 		int r = mysql_query(db, sql);
-		if(r > 0) {
-			OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
-					LogText("@","mysql_query"),
-					LogText("query", sql),
-					LogUint("errno", mysql_errno(db)),
-					LogText("error",mysql_error(db))
-			);
+		if(r != 0) {
+			/*FIXME Trace */
+			//mysql_error(db)
 		}
+		return NULL;
+	}
+	/* Connection.query */
+	int r = mysql_query((MYSQL *)db, sql);
+	if(r != 0) { // error
+		/*FIXME Trace */
+		return NULL;
+	}
+	res = mysql_store_result((MYSQL *)db);
+	if(res == NULL) { // NULL RESULT
+		if(mysql_errno(db) != 0) {
+			/*FIXME Trace */
+			mysql_free_result(res);
+		}
+		return NULL;
 	}
 	else {
-		/* Connection.query */
-		int r = mysql_query((MYSQL *)db, sql);
-		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
-				LogText("@","mysql_query"),
-				LogText("query", sql),
-				LogUint("errno", mysql_errno(db)),
-				LogText("error", mysql_error(db))
-		);
-		if(r == 0) { // success
-			res = mysql_store_result((MYSQL *)db);
-			if(res == NULL) { // NULL RESULT
-				if(mysql_errno(db) != 0) {
-					mysql_free_result(res);
-					OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
-							LogText("@","mysql_sotre_result"),
-							LogUint("errno", mysql_errno(db)),
-							LogText("error", mysql_error(db))
-					);
-				} else {
-					OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
-							LogText("@","mysql_sotre_result"),
-							LogUint("errno", mysql_errno(db)),
-							LogText("error", mysql_error(db))
-					);
-				}
-			}
-			else {
-				_ResultSet_InitColumn(kctx, rs, (size_t)mysql_num_fields(res));
-				OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
-							LogText("@","mysql_sotre_result"),
-							LogUint("errno", mysql_errno(db)),
-							LogText("error", mysql_error(db))
-					);
-				size_t i = 0;
-				MYSQL_FIELD *field = NULL;
-				while((field = mysql_fetch_field(res))) {
-					rs->column[i].dbtype = field->type;
-					kString *s = KLIB new_kString(kctx, GcUnsafe, field->name, strlen(field->name), 0);
-					DBG_ASSERT(i < rs->column_size);
-					KFieldSet(rs, rs->column[i].name, s);
-					i++;
-				}
-				//int num_fields = mysql_num_fields(res), k, j = 0;
-				//MYSQL_ROW row;
-				//while((row = mysql_fetch_row(res))) {
-				//	for (k = 0; k < num_fields; k++) {
-				//		fprintf(stderr, "[%d] %s\n", j, row[k]);
-				//	}
-				//	j++;
-				//}
-				//mysql_free_result(res);
-				//mysql_close(db);
-				//exit(1);
-			}
+		size_t i = 0;
+		MYSQL_FIELD *field = NULL;
+		ResultSet_InitColumn(kctx, rs, (size_t)mysql_num_fields(res));
+		while((field = mysql_fetch_field(res))) {
+			kString *s = KLIB new_kString(kctx, GcUnsafe, field->name, strlen(field->name), 0);
+			KFieldSet(rs, rs->column[i].name, s);
+			rs->column[i].dbtype = field->type;
+			i++;
 		}
 	}
-	return (kqcur_t *) res;
+	return (KCursor *) res;
 }
 /* ------------------------------------------------------------------------ */
 
-//static void MYSQL_qclose(KonohaContext *kctx, void *hdr)
-void MYSQL_qclose(void *db)
+static void MYSQL_qclose(void *db)
 {
 	mysql_close((MYSQL *)db);
 }
 
 /* ------------------------------------------------------------------------ */
 
-//static void MYSQL_qfree(kqcur_t *qcur)
-void MYSQL_qfree(kqcur_t *qcur)
+static void MYSQL_qfree(KCursor *qcur)
 {
 	if(qcur != NULL) {
 		MYSQL_RES *res = (MYSQL_RES *)qcur;
@@ -233,8 +181,15 @@ void MYSQL_qfree(kqcur_t *qcur)
 /* ------------------------------------------------------------------------ */
 /* [prototype function] */
 
-const QueryDriver MySQLDriver = {
-	K_DSPI_QUERY, "mysql",
+static const QueryDriver MySQLDriver = {
+	"mysql",
 	MYSQL_qopen, MYSQL_query, MYSQL_qclose, MYSQL_qnext, MYSQL_qfree
 };
 /* ------------------------------------------------------------------------ */
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif /* end of include guard */
