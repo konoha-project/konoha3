@@ -31,11 +31,7 @@
 extern "C"{
 #endif
 
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Im       kMethod_Immutable
-#define _Coercion kMethod_Coercion
-#define _F(F)   (intptr_t)(F)
+#include <minikonoha/import/methoddecl.h>
 
 #define TP_kw           TY_Symbol,     FN_("keyword")
 #define TP_source       TY_String,     FN_("source")
@@ -60,6 +56,13 @@ static KMETHOD String_AsciiAt(KonohaContext *kctx, KonohaStack *sfp)
 	if(n < len) {
 		ch = ((unsigned char *)S_text(sfp[0].asString))[n];
 	}
+	KReturnUnboxValue(ch);
+}
+
+//## @Const @Static int NameSpace.Ascii(String source);
+static KMETHOD NameSpace_Ascii(KonohaContext *kctx, KonohaStack *sfp)
+{
+	int ch = ((unsigned char *)S_text(sfp[1].asString))[0];
 	KReturnUnboxValue(ch);
 }
 
@@ -217,6 +220,7 @@ static KMETHOD Token_isBeforeWhiteSpace(KonohaContext *kctx, KonohaStack *sfp)
 static void desugar_defineTokenFunc(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
+		_Public|_Im|_Const|_Static, _F(NameSpace_Ascii), TY_String, TY_NameSpace, MN_("Ascii"), 1, TP_source,
 		_Public, _F(String_AsciiAt), TY_int, TY_String, MN_("AsciiAt"), 1, TP_pos,
 		_Public, _F(Token_setText), TY_int, TY_Token, MN_("SetText"), 4, TP_kw, TP_source, TP_begin, TP_end,
 		_Public, _F(Token_setError), TY_int, TY_Token, MN_("SetError"), 4, TP_message, TP_source, TP_begin, TP_end,
