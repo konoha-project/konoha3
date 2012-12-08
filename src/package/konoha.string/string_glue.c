@@ -230,7 +230,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 		{
 			TokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
 			TokenSeq_Push(kctx, tokens);
-			SUGAR TokenSeq_Resolve(kctx, &tokens, NULL, &range, range.beginIdx);
+			SUGAR TokenSeq_Preprocess(kctx, &tokens, NULL, &range, range.beginIdx);
 			kExpr *newexpr = SUGAR kStmt_ParseExpr(kctx, stmt, tokens.tokenList, tokens.beginIdx, tokens.endIdx, NULL);
 			TokenSeq_Pop(kctx, tokens);
 

@@ -251,14 +251,14 @@ static int TokenUtils_ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArr
 // ---------------------------------------------------------------------------
 /* macro */
 
-static int TokenSeq_Resolve(KonohaContext *kctx, TokenSeq *tokens, MacroSet *, TokenSeq *source, int beginIdx);
+static int TokenSeq_Preprocess(KonohaContext *kctx, TokenSeq *tokens, MacroSet *, TokenSeq *source, int beginIdx);
 
 static kbool_t TokenSeq_ExpandMacro(KonohaContext *kctx, TokenSeq *tokens, ksymbol_t symbol, MacroSet *macroParam)
 {
 	while(macroParam->symbol != 0) {
 		if(macroParam->symbol == symbol) {
 			TokenSeq paramtokens = {tokens->ns, macroParam->tokenList, macroParam->beginIdx, macroParam->endIdx};
-			TokenSeq_Resolve(kctx, tokens, NULL, &paramtokens, macroParam->beginIdx);
+			TokenSeq_Preprocess(kctx, tokens, NULL, &paramtokens, macroParam->beginIdx);
 			return true;
 		}
 		macroParam++;
@@ -283,7 +283,7 @@ static kTokenVar* kToken_ExpandGroupMacro(KonohaContext *kctx, kTokenVar *tk, kN
 		int isChanged = true;
 		TokenSeq group = {ns, GetSugarContext(kctx)->preparedTokenList};
 		TokenSeq_Push(kctx, group);
-		TokenSeq_Resolve(kctx, &group, macroParam, &source, source.beginIdx);
+		TokenSeq_Preprocess(kctx, &group, macroParam, &source, source.beginIdx);
 		if(group.endIdx - group.beginIdx == source.endIdx) {
 			int i;
 			isChanged = false;
@@ -310,7 +310,7 @@ static kbool_t TokenSeq_ApplyMacro(KonohaContext *kctx, TokenSeq *tokens, kArray
 	TokenSeq macro = {tokens->ns, macroTokenList, beginIdx + paramsize, endIdx};
 	KdumpTokenArray(kctx, macro.tokenList, macro.beginIdx, macro.endIdx);
 	int dstart = kArray_size(tokens->tokenList);
-	TokenSeq_Resolve(kctx, tokens, macroParam, &macro, beginIdx + paramsize);
+	TokenSeq_Preprocess(kctx, tokens, macroParam, &macro, beginIdx + paramsize);
 	DBG_P("dstart=%d, tokens->begin,end=%d, %d", dstart, tokens->beginIdx, tokens->endIdx);
 	KdumpTokenArray(kctx, tokens->tokenList, dstart, tokens->endIdx);
 	return true;
@@ -351,7 +351,7 @@ static void kNameSpace_SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol
 	TokenSeq_Tokenize(kctx, &source, data, 0);
 	TokenSeq tokens = {source.ns, source.tokenList, source.endIdx};
 	tokens.TargetPolicy.ExpandingBraceGroup = true;
-	TokenSeq_Resolve(kctx, &tokens, NULL, &source, source.beginIdx);
+	TokenSeq_Preprocess(kctx, &tokens, NULL, &source, source.beginIdx);
 	syn->macroParamSize = paramsize;
 	syn->macroDataNULL_OnList =  new_kArraySubset(kctx, ns->NameSpaceConstList, tokens.tokenList, tokens.beginIdx, tokens.endIdx);
 	TokenSeq_Pop(kctx, source);
@@ -375,7 +375,7 @@ static int TokenSeq_AddGroup(KonohaContext *kctx, TokenSeq *tokens, MacroSet *ma
 		source->SourceConfig.openToken = openToken;
 		source->SourceConfig.stopChar = closech;
 		nested.TargetPolicy.RemovingIndent = true;
-		int returnIdx = TokenSeq_Resolve(kctx, &nested, macro, source, currentIdx);
+		int returnIdx = TokenSeq_Preprocess(kctx, &nested, macro, source, currentIdx);
 		source->SourceConfig.openToken = pushOpenToken;
 		source->SourceConfig.stopChar = pushStopChar;
 		return returnIdx;
@@ -391,7 +391,7 @@ static kTokenVar* kToken_ToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameS
 	KFieldSet(tk, tk->subTokenList, new_(TokenArray, 0, OnField));
 	tk->resolvedSyntaxInfo = SYN_(ns, KW_BraceGroup);
 	TokenSeq tokens = {ns, tk->subTokenList, 0};
-	TokenSeq_Resolve(kctx, &tokens, macroSet, &source, source.beginIdx);
+	TokenSeq_Preprocess(kctx, &tokens, macroSet, &source, source.beginIdx);
 	TokenSeq_Pop(kctx, source);
 	return tk;
 }
@@ -459,7 +459,7 @@ static int TokenSeq_ApplyMacroSyntax(KonohaContext *kctx, TokenSeq *tokens, Suga
 	return nextIdx;
 }
 
-static int TokenSeq_Resolve(KonohaContext *kctx, TokenSeq *tokens, MacroSet *macroParam, TokenSeq *source, int beginIdx)
+static int TokenSeq_Preprocess(KonohaContext *kctx, TokenSeq *tokens, MacroSet *macroParam, TokenSeq *source, int beginIdx)
 {
 	int currentIdx = beginIdx;
 	if(tokens->TargetPolicy.syntaxSymbolPattern == NULL) {
@@ -533,7 +533,7 @@ static int TokenSeq_Resolve(KonohaContext *kctx, TokenSeq *tokens, MacroSet *mac
 		source->SourceConfig.foundErrorToken = source->SourceConfig.openToken;
 	}
 	RETURN_ERROR:;
-	TokenSeq_end(kctx, tokens);
+	TokenSeq_End(kctx, tokens);
 	return source->endIdx;
 }
 
@@ -864,7 +864,7 @@ static kBlock *new_kBlock(KonohaContext *kctx, kStmt *parent, MacroSet *macro, T
 	TokenSeq tokens = {source->ns, source->tokenList, kArray_size(source->tokenList)};
 	source->SourceConfig.openToken = NULL;
 	source->SourceConfig.stopChar = 0;
-	TokenSeq_Resolve(kctx, &tokens, macro, source, source->beginIdx);
+	TokenSeq_Preprocess(kctx, &tokens, macro, source, source->beginIdx);
 	while(tokens.beginIdx < tokens.endIdx) {
 		kBlock_AddNewStmt(kctx, bk, &tokens);
 	}
@@ -986,7 +986,7 @@ static void kNameSpace_ParseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, c
 	TokenSeq_Tokenize(kctx, &source, ruleSource, uline);
 	TokenSeq patterns = {ns, source.tokenList, source.endIdx};
 	patterns.TargetPolicy.RemovingIndent = true;
-	TokenSeq_Resolve(kctx, &patterns, NULL, &source, source.beginIdx);
+	TokenSeq_Preprocess(kctx, &patterns, NULL, &source, source.beginIdx);
 	KLIB kArray_Add(kctx, patternList, K_NULLTOKEN);  // delim
 	size_t firstPatternIdx = kArray_size(patternList);
 	kArray_AddSyntaxPattern(kctx, patternList, &patterns);

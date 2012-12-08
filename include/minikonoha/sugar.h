@@ -237,7 +237,7 @@ typedef enum {
 #define SYNFLAG_StmtJumpAhead0      ((kshortflag_t)1 << 9)  /* continue */
 #define SYNFLAG_StmtJumpSkip0       ((kshortflag_t)1 << 10)  /* break */
 
-#define SYN_Is(P, o)      (TFLAG_is(uintptr_t,(o)->flag, SYNFLAG_##P))
+#define SYN_Is(P, o)       (TFLAG_is(uintptr_t,(o)->flag, SYNFLAG_##P))
 #define SYN_Set(P,o,B)     TFLAG_set(uintptr_t,(o)->flag, SYNFLAG_##P, B)
 
 struct SugarSyntaxVar {
@@ -255,11 +255,11 @@ struct SugarSyntaxVar {
 	kArray                           *macroDataNULL_OnList;
 };
 
-#define PatternMatch_(NAME)    .PatternMatch   = PatternMatch_##NAME
-#define Expression_(NAME)       .Expression      = Expression_##NAME
+#define PatternMatch_(NAME)       .PatternMatch   = PatternMatch_##NAME
+#define Expression_(NAME)         .Expression      = Expression_##NAME
 #define TopLevelStatement_(NAME)  .TopLevelStatement = Statement_##NAME
-#define Statement_(NAME)     .Statement    = Statement_##NAME
-#define TypeCheck_(NAME)     .TypeCheck    = TypeCheck_##NAME
+#define Statement_(NAME)          .Statement    = Statement_##NAME
+#define TypeCheck_(NAME)          .TypeCheck    = TypeCheck_##NAME
 
 #define _OPLeft   .flag = (SYNFLAG_ExprLeftJoinOp2)
 
@@ -315,7 +315,7 @@ struct kTokenVar {
 	union {
 		ksymbol_t   unresolvedTokenType; // (resolvedSyntaxInfo == NULL)
 		ksymbol_t   resolvedSymbol;      // symbol (resolvedSyntaxInfo != NULL)
-		kattrtype_t     resolvedTypeId;      // typeid if KW_TypePattern
+		kattrtype_t resolvedTypeId;      // typeid if KW_TypePattern
 	};
 	union {
 		kushort_t   indent;               // indent when kw == TokenType_INDENT
@@ -355,28 +355,27 @@ struct TokenSeqTarget {
 
 typedef struct TokenSeq {
 	kNameSpace *ns;
-	kArray *tokenList;
-	int beginIdx;
-	int endIdx;
+	kArray     *tokenList;
+	int         beginIdx;
+	int         endIdx;
 	union {
 		struct TokenSeqSource SourceConfig;
 		struct TokenSeqTarget TargetPolicy;
 	};
 } TokenSeq;
 
-#define TokenSeq_end(kctx, range)   range->endIdx = kArray_size(range->tokenList)
 
-#define TokenSeq_Push(kctx, range) \
-	size_t _PopCheckIdx = kArray_size(range.tokenList);\
-	range.beginIdx = kArray_size(range.tokenList);\
-	range.endIdx   = 0;\
+#define TokenSeq_Push(kctx, tokens) \
+	size_t _PopCheckIdx = kArray_size(tokens.tokenList);\
+	tokens.beginIdx      = kArray_size(tokens.tokenList);\
+	tokens.endIdx        = 0;\
 
-#define TokenSeq_Pop(kctx, range)   do {\
-	KLIB kArray_Clear(kctx, range.tokenList, _PopCheckIdx);\
-	DBG_ASSERT(_PopCheckIdx == kArray_size(range.tokenList));\
+#define TokenSeq_Pop(kctx, tokens)   do {\
+	KLIB kArray_Clear(kctx, tokens.tokenList, _PopCheckIdx);\
+	DBG_ASSERT(_PopCheckIdx == kArray_size(tokens.tokenList));\
 } while(0)
 
-typedef kbool_t (*CheckEndOfStmtFunc2)(KonohaContext *, TokenSeq *range, TokenSeq *sourceRange, int *currentIdxRef, int *indentRef);
+#define TokenSeq_End(kctx, tokens)   tokens->endIdx = kArray_size(tokens->tokenList)
 
 #define Token_isVirtualTypeLiteral(TK)     ((TK)->resolvedSyntaxInfo->keyword == KW_TypePattern)
 #define Token_typeLiteral(TK)              (TK)->resolvedTypeId
@@ -560,7 +559,7 @@ typedef struct {
 
 	void        (*TokenSeq_Tokenize)(KonohaContext *, TokenSeq *, const char *, kfileline_t);
 	kbool_t     (*TokenSeq_ApplyMacro)(KonohaContext *, TokenSeq *, kArray *, int, int, size_t, MacroSet *);
-	int         (*TokenSeq_Resolve)(KonohaContext *, TokenSeq *, MacroSet *, TokenSeq *, int);
+	int         (*TokenSeq_Preprocess)(KonohaContext *, TokenSeq *, MacroSet *, TokenSeq *, int);
 	kstatus_t   (*TokenSeq_Eval)(KonohaContext *, TokenSeq *, KTraceInfo *);
 
 	int         (*TokenUtils_ParseTypePattern)(KonohaContext *, kNameSpace *, kArray *, int , int , KonohaClass **classRef);

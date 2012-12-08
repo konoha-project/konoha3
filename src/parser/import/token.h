@@ -550,7 +550,7 @@ static void TokenSeq_Tokenize(KonohaContext *kctx, TokenSeq *tokens, const char 
 	tenv.FuncItems  = kNameSpace_tokenFuncMatrix(kctx, tokens->ns);
 	tenv.preparedString = KLIB new_kString(kctx, _GcStack, tenv.source, tenv.sourceLength, StringPolicy_ASCII|StringPolicy_TEXT|StringPolicy_NOPOOL);
 	Tokenizer_Tokenize(kctx, &tenv);
-	TokenSeq_end(kctx, tokens);
+	TokenSeq_End(kctx, tokens);
 	RESET_GCSTACK();
 }
 

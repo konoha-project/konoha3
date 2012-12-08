@@ -208,7 +208,7 @@ static kBlock* kStmt_ParseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 				KLIB kArray_Add(kctx, sourceRange.tokenList, tk);
 				prevToken = tk;
 			}
-			TokenSeq_end(kctx, (&sourceRange));
+			TokenSeq_End(kctx, (&sourceRange));
 			bk = SUGAR new_kBlock(kctx, stmt/*parent*/, NULL, &sourceRange);
 			KLIB kObjectProto_SetObject(kctx, stmt, KW_BlockPattern, TY_Block, bk);
 		}

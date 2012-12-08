@@ -471,7 +471,7 @@ static void TokenSeq_SelectStatement(KonohaContext *kctx, TokenSeq *tokens, Toke
 	}
 	KLIB kArray_Clear(kctx, tokens->tokenList, tokens->beginIdx);
 	tokens->endIdx = 0;
-	TokenSeq_Resolve(kctx, tokens, NULL, source, source->beginIdx);
+	TokenSeq_Preprocess(kctx, tokens, NULL, source, source->beginIdx);
 	//KdumpTokenArray(kctx, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
 	source->beginIdx = source->endIdx;
 	source->endIdx = sourceEndIdx;

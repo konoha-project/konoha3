@@ -160,7 +160,7 @@ static KMETHOD NameSpace_tokenize(KonohaContext *kctx, KonohaStack *sfp)
 	SUGAR TokenSeq_Tokenize(kctx, &source, S_text(sfp[1].asString), 0);
 	TokenSeq tokens = {source.ns, a, 0};
 	tokens.TargetPolicy.ExpandingBraceGroup = true;
-	SUGAR TokenSeq_Resolve(kctx, &tokens, NULL, &source, source.beginIdx);
+	SUGAR TokenSeq_Preprocess(kctx, &tokens, NULL, &source, source.beginIdx);
 	TokenSeq_Pop(kctx, source);
 	KReturnWith(a, RESET_GCSTACK());
 }
@@ -345,7 +345,7 @@ int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, in
 //	SUGAR TokenSeq_Tokenize(kctx, &source, S_text(sfp[2].asString), 0);
 //	TokenSeq tokens = {source.ns, source.tokenList, source.endIdx};
 //	//tokens.TargetPolicy.ExpandingBraceGroup = (flag == 1);
-//	SUGAR TokenSeq_Resolve(kctx, &tokens, NULL, &source, source.beginIdx);
+//	SUGAR TokenSeq_Preprocess(kctx, &tokens, NULL, &source, source.beginIdx);
 //	ksymbol_t kw   = (ksymbol_t)sfp[1].intValue;
 //	SugarSyntax *syn = SYN_(sfp[0].asNameSpace, kw);
 //	int ret = 0;
