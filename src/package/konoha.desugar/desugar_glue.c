@@ -1151,11 +1151,11 @@ static kbool_t desugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 {
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
 		{"Symbol", VirtualType_KonohaClass, (uintptr_t)CT_Symbol},
-		{"Token", VirtualType_KonohaClass, (uintptr_t)CT_Token},
-		{"Stmt", VirtualType_KonohaClass,  (uintptr_t)CT_Stmt},
-		{"Expr", VirtualType_KonohaClass,  (uintptr_t)CT_Expr},
-		{"Block", VirtualType_KonohaClass, (uintptr_t)CT_Block},
-		{"Gamma", VirtualType_KonohaClass, (uintptr_t)CT_Gamma},
+		{"Token",  VirtualType_KonohaClass, (uintptr_t)CT_Token},
+		{"Stmt",   VirtualType_KonohaClass,  (uintptr_t)CT_Stmt},
+		{"Expr",   VirtualType_KonohaClass,  (uintptr_t)CT_Expr},
+		{"Block",  VirtualType_KonohaClass, (uintptr_t)CT_Block},
+		{"Gamma",  VirtualType_KonohaClass, (uintptr_t)CT_Gamma},
 		{"NameSpace", VirtualType_KonohaClass, (uintptr_t)CT_NameSpace},
 		{NULL},
 	};
