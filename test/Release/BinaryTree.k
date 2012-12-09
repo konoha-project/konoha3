@@ -5,7 +5,7 @@ import("konoha.global");
 import("cstyle"); // konoha.null is obsolate; use cstyle
 import("cstyle"); // konoha.int was obsolete
 import("konoha.array");
-import("konoha.const");
+import("konoha.namespace");  // konoha.const is obsolete
 AllowImplicitGlobalVariable(true);
 
 /* The Great Computer Language Shootout

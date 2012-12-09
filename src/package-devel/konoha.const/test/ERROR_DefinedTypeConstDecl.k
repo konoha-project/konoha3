@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.const");
+import("konoha.namespace");  // konoha.const is obsolete
 
 const String = 10;
 System.p(String);

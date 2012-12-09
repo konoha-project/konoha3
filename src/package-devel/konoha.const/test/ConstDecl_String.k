@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.const");
+import("konoha.namespace");  // konoha.const is obsolete
 
 const NAME="konoha";
 assert(NAME == "konoha");

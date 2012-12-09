@@ -6,7 +6,7 @@ import("konoha.math");
 import("konoha.bytes");
 import("konoha.string");
 import("konoha.global");
-import("konoha.const");
+import("konoha.namespace");  // konoha.const is obsolete
 import("konoha.class");
 import("konoha.array");
 import("cstyle", "while");

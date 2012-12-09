@@ -1,7 +1,7 @@
 // written by Atsushi Uchida
 
 import("konoha.new");
-import("konoha.const");
+import("konoha.namespace");  // konoha.const is obsolete
 import("konoha.class");
 
 const A = 10;

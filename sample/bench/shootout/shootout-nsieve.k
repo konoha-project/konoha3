@@ -9,7 +9,7 @@ import("cstyle"); // konoha.int was obsolete
 import("konoha.new");
 import("konoha.array");
 import("konoha.class");
-import("konoha.const");
+import("konoha.namespace");  // konoha.const is obsolete
 import("konoha.string");
 
 const N=8;

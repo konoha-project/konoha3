@@ -5,7 +5,7 @@
  */
 
 import("cstyle");
-import("konoha.const");
+import("konoha.namespace");  // konoha.const is obsolete
 import("konoha.class");
 import("konoha.float");
 // //import("konoha.assign"); Don't use any more

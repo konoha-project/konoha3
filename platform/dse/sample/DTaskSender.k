@@ -3,7 +3,7 @@
 import("jansson");
 import("curl");
 import("konoha.class");
-import("konoha.const");
+import("konoha.namespace");  // konoha.const is obsolete
 import("konoha.string");
 import("konoha.bytes");
 import("konoha.file");
