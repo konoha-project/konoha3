@@ -31,7 +31,7 @@
 extern "C"{
 #endif
 
-#include <minikonoha/import/methoddecl.h>
+#include<minikonoha/import/methoddecl.h>
 
 #define TP_kw           TY_Symbol,     FN_("keyword")
 #define TP_source       TY_String,     FN_("source")
