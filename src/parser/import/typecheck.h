@@ -389,8 +389,8 @@ static kstatus_t kMethod_RunEval(KonohaContext *kctx, kMethod *mtd, kattrtype_t 
 	KStackSetMethodAll(lsfp, KLIB Knull(kctx, CT_(rtype)), uline, mtd, 1);
 	kstatus_t result = K_CONTINUE;
 	if(KLIB KonohaRuntime_tryCallMethod(kctx, lsfp)) {
+		runtime->evalidx = ((lsfp + K_RTNIDX) - kctx->stack->stack);
 		runtime->evalty = rtype;
-		runtime->evalidx = ((lsfp + K_RTNIDX)- kctx->stack->stack);
 	}
 	else {
 		runtime->evalty = TY_void;  // no value
