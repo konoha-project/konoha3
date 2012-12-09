@@ -595,7 +595,7 @@ typedef struct {
 	kbool_t         (*kArray_AddSyntaxRule)(KonohaContext *, kArray *ruleList, TokenSeq *sourceRange);
 	SugarSyntaxVar* (*kNameSpace_SetTokenFunc)(KonohaContext *, kNameSpace *, ksymbol_t, int ch, kFunc *);
 	SugarSyntaxVar* (*kNameSpace_AddSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
-	void            (*kNameSpace_SetMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *);
+	kbool_t         (*kNameSpace_SetMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *, int optionMacro);
 
 	void        (*TokenSeq_Tokenize)(KonohaContext *, TokenSeq *, const char *, kfileline_t);
 	kbool_t     (*TokenSeq_ApplyMacro)(KonohaContext *, TokenSeq *, kArray *, int, int, size_t, MacroSet *);

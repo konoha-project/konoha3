@@ -343,18 +343,23 @@ static void TokenSeq_ApplyMacroGroup(KonohaContext *kctx, TokenSeq *tokens, kArr
 	TokenSeq_ApplyMacro(kctx, tokens, macroTokenList, 0, kArray_size(macroTokenList), paramsize, mp);
 }
 
-static void kNameSpace_SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data)
+static kbool_t kNameSpace_SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data, int optionMacro)
 {
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, keyword, /*new*/true);
-	TokenSeq source = {ns, GetSugarContext(kctx)->preparedTokenList};
-	TokenSeq_Push(kctx, source);
-	TokenSeq_Tokenize(kctx, &source, data, 0);
-	TokenSeq tokens = {source.ns, source.tokenList, source.endIdx};
-	tokens.TargetPolicy.ExpandingBraceGroup = true;
-	TokenSeq_Preprocess(kctx, &tokens, NULL, &source, source.beginIdx);
-	syn->macroParamSize = paramsize;
-	syn->macroDataNULL_OnList =  new_kArraySubset(kctx, ns->NameSpaceConstList, tokens.tokenList, tokens.beginIdx, tokens.endIdx);
-	TokenSeq_Pop(kctx, source);
+	if(syn->macroDataNULL_OnList == NULL) {
+		TokenSeq source = {ns, GetSugarContext(kctx)->preparedTokenList};
+		TokenSeq_Push(kctx, source);
+		TokenSeq_Tokenize(kctx, &source, data, 0);
+		TokenSeq tokens = {source.ns, source.tokenList, source.endIdx};
+		tokens.TargetPolicy.ExpandingBraceGroup = true;
+		TokenSeq_Preprocess(kctx, &tokens, NULL, &source, source.beginIdx);
+		syn->macroParamSize = paramsize;
+		syn->macroDataNULL_OnList =  new_kArraySubset(kctx, ns->NameSpaceConstList, tokens.tokenList, tokens.beginIdx, tokens.endIdx);
+		if(optionMacro) syn->flag |= SYNFLAG_Macro;
+		TokenSeq_Pop(kctx, source);
+		return true;
+	}
+	return false;
 }
 
 /* ------------------------------------------------------------------------ */

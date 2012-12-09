@@ -164,18 +164,6 @@ static KMETHOD NameSpace_Preprocess(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnWith(a, RESET_GCSTACK());
 }
 
-////## boolean NameSpace.DefineMacro(Symbol symbol, int param, String source);
-//static KMETHOD NameSpace_Tokenize(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
-//	size_t beginIdx = (size_t)sfp[2].intValue;
-//	kString *source = sfp[3].asString;
-//	if(SUGAR kNameSpace_SetMacroData(kctx, sfp[0].asNameSpace, keyword, paramsize, S_text(source))) {
-//		;
-//	}
-//	KReturnWith(a, RESET_GCSTACK());
-//}
-
 //## Token Token.new(Symbol key);
 static KMETHOD Token_new(KonohaContext *kctx, KonohaStack *sfp)
 {
