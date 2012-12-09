@@ -28,7 +28,7 @@ import("konoha.object");
 import("konoha.class");
 import("konoha.var");
 import("konoha.global");
-import("konoha.namespace");
+import("konoha.ns");
 import("konoha.string");
 import("konoha.regexp");
 import("konoha.array");

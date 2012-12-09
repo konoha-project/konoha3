@@ -3,7 +3,7 @@ import("konoha.class");
 import("konoha.array");
 import("konoha.map");
 import("konoha.global");
-import("konoha.namespace");  // konoha.const is obsolete
+import("konoha.ns");  // konoha.const is obsolete
 import("konoha.object");
 import("posix.thread");
 

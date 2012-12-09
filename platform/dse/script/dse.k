@@ -4,7 +4,7 @@
 import("jansson"); // Replace to konoha.json
 import("konoha.class");
 import("konoha.array");
-import("konoha.namespace");  // konoha.const is obsolete
+import("konoha.ns");  // konoha.const is obsolete
 import("konoha.string");
 import("konoha.bytes");
 import("konoha.file");

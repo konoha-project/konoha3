@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.namespace");  // konoha.defined is obsolete
+import("konoha.ns");  // konoha.defined is obsolete
 
 void test() {
 	int a;

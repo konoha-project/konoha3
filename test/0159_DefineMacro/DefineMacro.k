@@ -1,6 +1,6 @@
 // written by kimio
 
-import("konoha.namespace");
+import("konoha.ns");
 DefineMacro("public", 0, "@Public");
 public
 

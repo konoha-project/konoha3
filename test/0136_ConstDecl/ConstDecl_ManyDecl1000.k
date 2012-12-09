@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.namespace");  // konoha.const is obsolete
+import("konoha.ns");  // konoha.const is obsolete
 
 const N0 = 0;
 const N1 = 1;

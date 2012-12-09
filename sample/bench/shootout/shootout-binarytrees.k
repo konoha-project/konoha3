@@ -9,7 +9,7 @@ import("konoha.new");
 import("konoha.class");
 import("cstyle"); // konoha.null is obsolate; use cstyle
 import("konoha.global");
-import("konoha.namespace");  // konoha.const is obsolete
+import("konoha.ns");  // konoha.const is obsolete
 import("cstyle"); // konoha.int was obsolete
 
 const MINDEPTH = 4;
