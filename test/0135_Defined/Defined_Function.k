@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.defined");
+import("konoha.namespace");  // konoha.defined is obsolete
 
 int succ(int n) {
 	return n+1;

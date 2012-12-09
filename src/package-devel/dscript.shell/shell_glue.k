@@ -28,7 +28,7 @@ import("cstyle", "null");
 import("cstyle", "float");
 import("konoha.array");
 import("konoha.console");
-import("konoha.defined");
+import("konoha.namespace");  // konoha.defined is obsolete
 import("konoha.eval");
 import("konoha.file");
 import("konoha.math");
