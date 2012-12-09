@@ -796,6 +796,16 @@ run_test 5 7 minimum "-MOutputTest" 0135_Defined/Defined_LocalVariable.k
 run_test 6 7 minimum "-MOutputTest" 0135_Defined/Defined_Method.k
 run_test 7 7 minimum "-MOutputTest" 0135_Defined/Defined_Operator.k
 record_result 0135_Defined $PASS 7
+## 0136_ConstDecl
+PASS=0
+run_test 1 7 minimum "-MOutputTest" 0136_ConstDecl/ConstDecl_DefinedTypeERROR.k
+run_test 2 7 minimum "-MOutputTest" 0136_ConstDecl/ConstDecl_DuplicatedERROR.k
+run_test 3 7 minimum "-MOutputTest" 0136_ConstDecl/ConstDecl_Int.k
+run_test 4 7 minimum "-MOutputTest" 0136_ConstDecl/ConstDecl_ManyDecl1000.k
+run_test 5 7 minimum "-MOutputTest" 0136_ConstDecl/ConstDecl_ManyDecl10000.k
+run_test 6 7 minimum "-MOutputTest" 0136_ConstDecl/ConstDecl_String.k
+run_test 7 7 minimum "-MOutputTest" 0136_ConstDecl/ConstDecl_Type.k
+record_result 0136_ConstDecl $PASS 7
 ## 0150_Sugar
 PASS=0
 run_test 1 8 minimum "-MOutputTest" 0150_Sugar/Sugar_BlockTypeCheck.k
@@ -1189,7 +1199,9 @@ run_test 10 10 minimum "-MOutputTest" 0231_IntArray/IntArraySet.k
 record_result 0231_IntArray $PASS 10
 ## 0240_Prototype
 PASS=0
-record_result 0240_Prototype $PASS 0
+run_test 1 2 minimum "-MOutputTest" 0240_Prototype/Prototype_IntProperty.k
+run_test 2 2 minimum "-MOutputTest" 0240_Prototype/Prototype_StringProperty.k
+record_result 0240_Prototype $PASS 2
 ## 0250_IShell
 PASS=0
 record_result 0250_IShell $PASS 0
@@ -1220,6 +1232,9 @@ record_result 0252_Console $PASS 4
 PASS=0
 run_test 1 1 minimum "-MOutputTest" 0253_Eval/Eval_DefineFunc.k
 record_result 0253_Eval $PASS 1
+## 0254_NameSpace
+PASS=0
+record_result 0254_NameSpace $PASS 0
 ## 0261_Var
 PASS=0
 run_test 1 7 minimum "-MOutputTest" 0261_Var/Var_GlobalFunc.k
@@ -1242,5 +1257,10 @@ record_result 0262_Untyped $PASS 5
 PASS=0
 run_test 1 1 minimum "-MOutputTest" 0263_Dynamic/Dynamic_Type.k
 record_result 0263_Dynamic $PASS 1
+## 0999_Bugs
+PASS=0
+run_test 1 2 minimum "-MOutputTest" 0999_Bugs/Bugs_ML592.k
+run_test 2 2 minimum "-MOutputTest" 0999_Bugs/Bugs_ML598.k
+record_result 0999_Bugs $PASS 2
 total
 
