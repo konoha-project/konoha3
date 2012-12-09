@@ -388,29 +388,11 @@ static KMETHOD PatternMatch_ClassName(KonohaContext *kctx, KonohaStack *sfp)
 
 // --------------------------------------------------------------------------
 
-static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_TypeCheck(stmt, expr, gma, reqty);
-	kToken *tkN = expr->cons->TokenItems[0];
-	ksymbol_t fn = tkN->resolvedSymbol;
-	kExpr *self = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, CT_INFER, 0);
-	kNameSpace *ns = Stmt_ns(stmt);
-	if(self != K_NULLEXPR) {
-		kMethod *mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, CT_(self->attrTypeId), fn);
-		if(mtd != NULL) {
-			KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
-			KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, CT_(reqty)));
-		}
-		SUGAR kStmt_Message2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
-	}
-}
-
 static kbool_t class_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("$ClassName"), 0, NULL, 0, 0, PatternMatch_ClassName, NULL, NULL, NULL, NULL, },
 		{ SYM_("class"), 0, "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", 0, 0, NULL, NULL, Statement_class, NULL, NULL, },
-		{ SYM_("."), 0, NULL, -1, 0, NULL, NULL, NULL, NULL, TypeCheck_Getter, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
