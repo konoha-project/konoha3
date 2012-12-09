@@ -105,7 +105,6 @@ static KMETHOD Prototype_setInt(KonohaContext *kctx, KonohaStack *sfp)
 	KLIB kObjectProto_SetUnboxValue(kctx, sfp[0].asObject, symbol, TY_int, sfp[2].unboxValue);
 }
 
-
 static void ThrowTypeError(KonohaContext *kctx, KonohaStack *sfp, int argc)
 {
 	KLIB KonohaRuntime_raise(kctx, EXPT_("TypeError"), SoftwareFault, NULL, sfp);
@@ -186,6 +185,7 @@ static void prototype_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 static kbool_t prototype_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
+	KImportPackage(ns, "konoha.field", trace);
 	prototype_defineClass(kctx, ns, option, trace);
 	prototype_defineMethod(kctx, ns, trace);
 	return true;
