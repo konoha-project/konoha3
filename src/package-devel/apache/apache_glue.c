@@ -22,6 +22,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#include <unistd.h> /* for off64_t @ CentOS on 32bit */
+#if defined( __i386__) &&  defined( __linux__) && !defined(__off64_t_defined)
+typedef unsigned long long int off64_t;
+#endif
+
 #include "httpd.h"
 #include "http_config.h"
 #include "http_protocol.h"
