@@ -879,10 +879,10 @@ static void KscheduleGC(KonohaContext *kctx, KTraceInfo *trace)
 }
 /* ------------------------------------------------------------------------ */
 
-kbool_t LoadMarkAndSweepGCModule(KonohaFactory *factory, ModuleType type)
+kbool_t LoadMSGCModule(KonohaFactory *factory, ModuleType type)
 {
 	static KModuleInfo ModuleInfo = {
-		"MarkAndSweepGC", "0.1", 0, "msgc",
+		"MSGC", "0.1", 0, "msgc",
 	};
 	factory->GCInfo            = &ModuleInfo;
 	factory->Kmalloc = Kmalloc;
