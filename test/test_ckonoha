@@ -834,6 +834,14 @@ run_test 4 6 minimum "-MOutputTest" 0152_Syntax/Syntax_Pattern.k
 run_test 5 6 minimum "-MOutputTest" 0152_Syntax/Syntax_TokenSequence.k
 run_test 6 6 minimum "-MOutputTest" 0152_Syntax/SyntaxStatement.k
 record_result 0152_Syntax $PASS 6
+## 0158_NameSpace
+PASS=0
+record_result 0158_NameSpace $PASS 0
+## 0159_DefineMacro
+PASS=0
+run_test 1 2 minimum "-MOutputTest" 0159_DefineMacro/DefineMacro.k
+run_test 2 2 minimum "-MOutputTest" 0159_DefineMacro/DefineMacro_Succ.k
+record_result 0159_DefineMacro $PASS 2
 ## 0180_Class
 PASS=0
 run_test 1 6 minimum "-MOutputTest" 0180_Class/Class_AsNull.k
@@ -1232,9 +1240,6 @@ record_result 0252_Console $PASS 4
 PASS=0
 run_test 1 1 minimum "-MOutputTest" 0253_Eval/Eval_DefineFunc.k
 record_result 0253_Eval $PASS 1
-## 0254_NameSpace
-PASS=0
-record_result 0254_NameSpace $PASS 0
 ## 0261_Var
 PASS=0
 run_test 1 7 minimum "-MOutputTest" 0261_Var/Var_GlobalFunc.k

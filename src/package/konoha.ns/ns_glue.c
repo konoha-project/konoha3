@@ -233,7 +233,7 @@ static kbool_t namespace_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kN
 KDEFINE_PACKAGE* ns_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "konoha", "1.0");
+	KSetPackageName(d, "konoha", K_VERSION);
 	d.PackupNameSpace    = namespace_PackupNameSpace;
 	d.ExportNameSpace   = namespace_ExportNameSpace;
 	return &d;

@@ -202,8 +202,8 @@ KDEFINE_PACKAGE* prototype_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);
-	d.PackupNameSpace    = prototype_PackupNameSpace;
-	d.ExportNameSpace   = prototype_ExportNameSpace;
+	d.PackupNameSpace = prototype_PackupNameSpace;
+	d.ExportNameSpace = prototype_ExportNameSpace;
 	return &d;
 }
 
