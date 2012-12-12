@@ -367,12 +367,12 @@ Expr expressionCommandReplace(Stmt stmt, Token[] tokenList, int beginIdx, int op
 	return expr;
 }
 
-addPatternMatch("$Shell", patternMatchShell);
-addStatement("$Shell", statementShell);
-addTopLevelStatement("$Shell", statementShell);
-addExpression("ask", expressionAsk);
+AddPatternMatch("$Shell", patternMatchShell);
+AddStatement("$Shell", statementShell);
+AddTopLevelStatement("$Shell", statementShell);
+AddExpression("ask", expressionAsk);
 
 syntax $Shell $Token*
 
-setTokenFunc("$CommandReplace", 22/*KonohaChar_Dollar*/, tokenFuncDollar);
-addExpression("$CommandReplace", expressionCommandReplace);
+AddTokenizer("$CommandReplace", 36/*KonohaChar_Dollar*/, tokenFuncDollar);
+AddExpression("$CommandReplace", expressionCommandReplace);

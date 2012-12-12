@@ -1,5 +1,5 @@
 // written by chenji
 
-import("dscript.shell");
+import("dshell");
 
 ls -al | head -1 > hello.txt
