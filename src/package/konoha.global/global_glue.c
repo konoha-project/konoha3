@@ -56,24 +56,24 @@ static	kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 // ---------------------------------------------------------------------------
 
-static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObject *o, kattrtype_t ty, ksymbol_t symbol)
+static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObject *o, ktypeattr_t ty, ksymbol_t symbol)
 {
 	kNameSpace *ns = Stmt_ns(stmt);
-	kMethod *mtd = KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, O_ct(o), symbol, TY_var);
+	kMethod *mtd = KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, kObject_class(o), symbol, TY_var);
 	if(mtd != NULL) {
 		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "already defined name: %s", SYM_t(symbol));
 		return NULL;
 	}
-	mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, O_ct(o), symbol);
+	mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, kObject_class(o), symbol);
 	if(mtd != NULL && kMethod_GetReturnType(mtd)->typeId != ty) {
 		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "differently defined name: %s", SYM_t(symbol));
 		return NULL;
 	}
-	KLIB KonohaClass_AddField(kctx, O_ct(o), ty, symbol);
-	return KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, O_ct(o), symbol, ty);
+	KLIB KonohaClass_AddField(kctx, kObject_class(o), ty, symbol);
+	return KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, kObject_class(o), symbol, ty);
 }
 
-static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kattrtype_t ty, kExpr *termExpr, kExpr *valueExpr, kObject *scr)
+static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktypeattr_t ty, kExpr *termExpr, kExpr *valueExpr, kObject *scr)
 {
 	kNameSpace *ns = Stmt_ns(stmt);
 	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termExpr->termToken->resolvedSymbol);
@@ -93,8 +93,8 @@ static kbool_t kNameSpace_InitGlobalObject(KonohaContext *kctx, kNameSpace *ns, 
 	if(ns->globalObjectNULL_OnList == NULL) {
 		KDEFINE_CLASS defGlobalObject = {0};
 		defGlobalObject.structname = "GlobalObject";
-		defGlobalObject.typeId = TY_newid;
-		defGlobalObject.cflag = kClass_Singleton|kClass_Final;
+		defGlobalObject.typeId = TypeAttr_NewId;
+		defGlobalObject.cflag = KClassFlag_Singleton|KClassFlag_Final;
 		defGlobalObject.cstruct_size = sizeof(kGlobalObject);
 		KonohaClass *cGlobalObject = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defGlobalObject, trace);
 		((kNameSpaceVar *)ns)->globalObjectNULL_OnList =  KLIB Knull(kctx, cGlobalObject);

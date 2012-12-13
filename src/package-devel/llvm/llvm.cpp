@@ -209,7 +209,7 @@ static inline kObject *new_CppObject(KonohaContext *kctx, const KonohaClass *ct,
 static inline kObject *new_ReturnCppObject(KonohaContext *kctx, KonohaStack *sfp, void *ptr)
 {
 	kObject *defobj = sfp[(-(K_CALLDELTA))].asObject;
-	kObject *ret = KLIB new_kObject(kctx, OnStack, O_ct(defobj), (uintptr_t)ptr);
+	kObject *ret = KLIB new_kObject(kctx, OnStack, kObject_class(defobj), (uintptr_t)ptr);
 	konoha::SetRawPtr(ret, ptr);
 	return ret;
 }
@@ -1210,7 +1210,7 @@ static KMETHOD IRBuilder_createGlobalString(KonohaContext *kctx, KonohaStack *sf
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	kString *Str = sfp[1].asString;
-	Value *ptr = self->CreateGlobalString(S_text(Str));
+	Value *ptr = self->CreateGlobalString(kString_text(Str));
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
@@ -1220,7 +1220,7 @@ static KMETHOD IRBuilder_createGlobalStringPtr(KonohaContext *kctx, KonohaStack 
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	kString *Str = sfp[1].asString;
-	Value *ptr = self->CreateGlobalStringPtr(S_text(Str));
+	Value *ptr = self->CreateGlobalStringPtr(kString_text(Str));
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
@@ -2028,7 +2028,7 @@ static KMETHOD Module_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *name = sfp[1].asString;
 	LLVMContext &Context = getGlobalContext();
-	Module *M = new Module(S_text(name), Context);
+	Module *M = new Module(kString_text(name), Context);
 #if 0
 	Triple T(sys::getDefaultTargetTriple());
 	const Target *Target = 0;
@@ -2066,7 +2066,7 @@ static KMETHOD Module_getTypeByName(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Module *self = konoha::object_cast<Module *>(sfp[0].asObject);
 	kString *name = sfp[1].asString;
-	Type *ptr = CONST_CAST(Type*, self->getTypeByName(S_text(name)));
+	Type *ptr = CONST_CAST(Type*, self->getTypeByName(kString_text(name)));
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
@@ -2085,7 +2085,7 @@ static KMETHOD Module_getOrInsertFunction(KonohaContext *kctx, KonohaStack *sfp)
 	Module *self = konoha::object_cast<Module *>(sfp[0].asObject);
 	kString *name = sfp[1].asString;
 	FunctionType *fnTy = konoha::object_cast<FunctionType *>(sfp[2].asObject);
-	Function *ptr = cast<Function>(self->getOrInsertFunction(S_text(name), fnTy));
+	Function *ptr = cast<Function>(self->getOrInsertFunction(kString_text(name), fnTy));
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
@@ -2098,7 +2098,7 @@ static KMETHOD Function_create(KonohaContext *kctx, KonohaStack *sfp)
 	Module *m = konoha::object_cast<Module *>(sfp[3].asObject);
 	kint_t v = sfp[4].intValue;
 	GlobalValue::LinkageTypes linkage = (GlobalValue::LinkageTypes) v;
-	Function *ptr = Function::Create(fnTy, linkage, S_text(name), m);
+	Function *ptr = Function::Create(fnTy, linkage, kString_text(name), m);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
@@ -2162,7 +2162,7 @@ static KMETHOD BasicBlock_create(KonohaContext *kctx, KonohaStack *sfp)
 	kString *name = sfp[2].asString;
 	const char *bbname = "";
 	if (IS_NOTNULL(name)) {
-		bbname = S_text(name);
+		bbname = kString_text(name);
 	}
 	BasicBlock *ptr = BasicBlock::Create(getGlobalContext(), bbname, parent);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -2256,7 +2256,7 @@ static KMETHOD StructType_create(KonohaContext *kctx, KonohaStack *sfp)
 #if LLVM_VERSION <= 209
 		ptr = StructType::get(getGlobalContext());
 #else
-		ptr = StructType::create(getGlobalContext(), S_text(name));
+		ptr = StructType::create(getGlobalContext(), kString_text(name));
 #endif
 	} else if (kArray_size(args) == 0) {
 #if LLVM_VERSION <= 209
@@ -2264,7 +2264,7 @@ static KMETHOD StructType_create(KonohaContext *kctx, KonohaStack *sfp)
 		ptr = StructType::get(getGlobalContext(), List, isPacked);
 #else
 		std::vector<Type*> List;
-		ptr = StructType::create(getGlobalContext(), S_text(name));
+		ptr = StructType::create(getGlobalContext(), kString_text(name));
 		ptr->setBody(List, isPacked);
 #endif
 	} else {
@@ -2275,7 +2275,7 @@ static KMETHOD StructType_create(KonohaContext *kctx, KonohaStack *sfp)
 #else
 		std::vector<Type*> List;
 		konoha::convert_array(List, args);
-		ptr = StructType::create(List, S_text(name), isPacked);
+		ptr = StructType::create(List, kString_text(name), isPacked);
 #endif
 	}
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -2350,7 +2350,7 @@ static KMETHOD GlobalVariable_new(KonohaContext *kctx, KonohaStack *sfp)
 	GlobalValue::LinkageTypes linkage = (GlobalValue::LinkageTypes) sfp[4].intValue;
 	kString *name = sfp[5].asString;
 	bool isConstant = (c) ? true : false;
-	GlobalVariable *ptr = new GlobalVariable(*m, ty, isConstant, linkage, c, S_text(name));
+	GlobalVariable *ptr = new GlobalVariable(*m, ty, isConstant, linkage, c, kString_text(name));
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
@@ -2540,7 +2540,7 @@ static KMETHOD Value_setName(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
 	Value *self = konoha::object_cast<Value *>(sfp[0].asObject);
 	kString *name = sfp[1].asString;
-	self->setName(S_text(name));
+	self->setName(kString_text(name));
 	KReturnVoid();
 }
 //## void LoadInst.setAlignment(int align);
@@ -2587,7 +2587,7 @@ static KMETHOD Type_dump(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 //## @Static boolean DynamicLibrary.loadLibraryPermanently(String libname);
 static KMETHOD DynamicLibrary_loadLibraryPermanently(KonohaContext *kctx, KonohaStack *sfp)
 {
-	const char *libname = S_text(sfp[1].asString);
+	const char *libname = kString_text(sfp[1].asString);
 	std::string ErrMsg;
 	kbool_t ret;
 #if LLVM_VERSION <= 208
@@ -2607,7 +2607,7 @@ static KMETHOD DynamicLibrary_loadLibraryPermanently(KonohaContext *kctx, Konoha
 //## @Static Int DynamicLibrary.searchForAddressOfSymbol(String fname);
 static KMETHOD DynamicLibrary_searchForAddressOfSymbol(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
-	const char *fname = S_text(sfp[1].asString);
+	const char *fname = kString_text(sfp[1].asString);
 	kint_t ret = 0;
 	void *symAddr = NULL;
 #if LLVM_VERSION <= 208
@@ -4397,13 +4397,13 @@ static KMETHOD LLVM_parseBitcodeFile(KonohaContext *kctx, KonohaStack *sfp)
 	std::string ErrMsg;
 	OwningPtr<MemoryBuffer> BufferPtr;
 #if LLVM_VERSION <= 208
-	const char *fname = S_text(Str);
+	const char *fname = kString_text(Str);
 	BufferPtr.reset(MemoryBuffer::getFile(fname, &ErrMsg));
 	if (!BufferPtr) {
 		std::cout << "Could not open file " << ErrMsg << std::endl;
 	}
 #else
-	std::string fname(S_text(Str));
+	std::string fname(kString_text(Str));
 	if (error_code ec = MemoryBuffer::getFile(fname, BufferPtr)) {
 		std::cout << "Could not open file " << ec.message() << std::endl;
 	}
@@ -4434,8 +4434,8 @@ static KMETHOD Instruction_setMetadata(KonohaContext *kctx _UNUSED_, KonohaStack
 	};
 	LLVMContext &Context = getGlobalContext();
 	MDNode *node = MDNode::get(Context, Info);
-	NamedMDNode *NMD = m->getOrInsertNamedMetadata(S_text(Str));
-	unsigned KindID = Context.getMDKindID(S_text(Str));
+	NamedMDNode *NMD = m->getOrInsertNamedMetadata(kString_text(Str));
+	unsigned KindID = Context.getMDKindID(kString_text(Str));
 	NMD->addOperand(node);
 	inst->setMetadata(KindID, node);
 #endif

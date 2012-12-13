@@ -59,7 +59,7 @@ static kinline uintptr_t strhash(const char *name, size_t len)
 }
 
 #define FileId_s(X)  FileId_s_(kctx, X)
-#define FileId_t(X)  S_text(FileId_s_(kctx, X))
+#define FileId_t(X)  kString_text(FileId_s_(kctx, X))
 static kinline kString* FileId_s_(KonohaContext *kctx, kfileline_t fileid)
 {
 	kfileline_t n = (fileid >> (sizeof(kshort_t) * 8));
@@ -68,7 +68,7 @@ static kinline kString* FileId_s_(KonohaContext *kctx, kfileline_t fileid)
 }
 
 #define PackageId_s(X)    PackageId_s_(kctx, X)
-#define PackageId_t(X)    S_text(PackageId_s_(kctx, X))
+#define PackageId_t(X)    kString_text(PackageId_s_(kctx, X))
 static kinline kString* PackageId_s_(KonohaContext *kctx, kpackageId_t packageId)
 {
 	DBG_ASSERT(packageId < kArray_size(kctx->share->packageIdList_OnGlobalConstList));
@@ -76,23 +76,23 @@ static kinline kString* PackageId_s_(KonohaContext *kctx, kpackageId_t packageId
 }
 
 #define CT_s(X)   CT_s_(kctx, X)
-#define CT_t(X)   S_text(CT_s_(kctx, X))
+#define CT_t(X)   kString_text(CT_s_(kctx, X))
 static kinline kString* CT_s_(KonohaContext *kctx, KonohaClass *ct)
 {
 	return kctx->klib->KonohaClass_shortName(kctx, ct);
 }
 
 #define TY_s(X)   TY_s_(kctx, X)
-#define TY_t(X)   S_text(TY_s(TypeAttr_Unmask(X)))
+#define TY_t(X)   kString_text(TY_s(TypeAttr_Unmask(X)))
 #define ATY_t(X)  TY_t(TypeAttr_Unmask(X))
-static kinline kString* TY_s_(KonohaContext *kctx, kattrtype_t ty)
+static kinline kString* TY_s_(KonohaContext *kctx, ktypeattr_t ty)
 {
 	DBG_ASSERT(ty < KARRAYSIZE(kctx->share->classTable.bytemax, intptr));
 	return CT_s_(kctx, CT_(ty));
 }
 
 #define SYM_s(sym)   SYM_s_(kctx, sym)
-#define SYM_t(sym)   S_text(SYM_s_(kctx, sym))
+#define SYM_t(sym)   kString_text(SYM_s_(kctx, sym))
 static kinline kString* SYM_s_(KonohaContext *kctx, ksymbol_t sym)
 {
 	size_t index = (size_t) Symbol_Unmask(sym);
@@ -103,7 +103,7 @@ static kinline kString* SYM_s_(KonohaContext *kctx, ksymbol_t sym)
 	return kctx->share->symbolList_OnGlobalConstList->stringItems[index];
 }
 
-#define PSYM_t(sym)   SYM_PRE(sym),S_text(SYM_s_(kctx, sym))
+#define PSYM_t(sym)   SYM_PRE(sym),kString_text(SYM_s_(kctx, sym))
 static kinline const char* SYM_PRE(ksymbol_t sym)
 {
 	size_t mask = ((size_t)(Symbol_Attr(sym)) >> ((sizeof(ksymbol_t) * 8)-3));
@@ -119,8 +119,8 @@ static kinline const char* SYM_PRE(ksymbol_t sym)
 static kinline kbool_t sym_equals(KonohaContext *kctx, ksymbol_t s1, ksymbol_t s2)
 {
 	if(Symbol_Attr(s1) == Symbol_Attr(s2)) {
-		const char *t1 = S_text(kctx->share->symbolList_OnGlobalConstList->stringItems[Symbol_Unmask(s1)]);
-		const char *t2 = S_text(kctx->share->symbolList_OnGlobalConstList->stringItems[Symbol_Unmask(s2)]);
+		const char *t1 = kString_text(kctx->share->symbolList_OnGlobalConstList->stringItems[Symbol_Unmask(s1)]);
+		const char *t2 = kString_text(kctx->share->symbolList_OnGlobalConstList->stringItems[Symbol_Unmask(s2)]);
 		while(1) {
 			if(t1[0] != t2[0]) {
 				if(t1[0] == '_') { t1++; continue; }
@@ -140,7 +140,7 @@ static kinline uintptr_t longid(kushort_t packageDomain, kushort_t un)
 	return (hcode << (sizeof(kshort_t)*8)) | un;
 }
 
-static kinline KonohaClass *CT_p0(KonohaContext *kctx, KonohaClass *ct, kattrtype_t ty)
+static kinline KonohaClass *CT_p0(KonohaContext *kctx, KonohaClass *ct, ktypeattr_t ty)
 {
 	kparamtype_t p = {ty, 0};
 	return KLIB KonohaClass_Generics(kctx, ct, TY_void, 1, &p);

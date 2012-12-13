@@ -69,7 +69,7 @@ static void kMethod_WriteToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuf
 
 // --------------------------------------------------------------------------
 
-static void copyMethodList(KonohaContext *kctx, kattrtype_t cid, kArray *s, kArray *d)
+static void copyMethodList(KonohaContext *kctx, ktypeattr_t cid, kArray *s, kArray *d)
 {
 	size_t i;
 	for(i = 0; i < kArray_size(s); i++) {
@@ -103,7 +103,7 @@ static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *list = kctx->stack->gcstack_OnContextConstList;
 	size_t start = kArray_size(list);
 	kNameSpace *ns = sfp[0].asNameSpace;
-	KonohaClass *ct = O_ct(sfp[1].asObject);
+	KonohaClass *ct = kObject_class(sfp[1].asObject);
 	DBG_P("*** man %s", TY_t(ct->typeId));
 	while(ns != NULL) {
 		copyMethodList(kctx, ct->typeId, ns->methodList_OnList, list);

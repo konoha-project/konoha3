@@ -137,16 +137,16 @@ static char* writePolicyToBuffer(KonohaContext *kctx, logconf_t *logconf, char *
 	if((logconf->policy & HasLocation)) {
 		buftop = writeKeyToBuffer(TEXTSIZE("LogPoint"), buftop, bufend);
 		writeToBuffer('"', buftop, bufend);
-		if(TFLAG_is(int, logconf->policy, PeriodicPoint)) {
+		if(KFlag_Is(int, logconf->policy, PeriodicPoint)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("PeriodicPoint,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, ResponseCheckPoint)) {
+		if(KFlag_Is(int, logconf->policy, ResponseCheckPoint)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("ResponseCheckPoint,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, SystemChangePoint)) {
+		if(KFlag_Is(int, logconf->policy, SystemChangePoint)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("SystemChangePoint,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, SecurityAudit)) {
+		if(KFlag_Is(int, logconf->policy, SecurityAudit)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("SecurityAudit,"), buftop, bufend);
 		}
 		buftop[-1] = '"';
@@ -164,19 +164,19 @@ static char* writePolicyToBuffer(KonohaContext *kctx, logconf_t *logconf, char *
 		}
 		buftop = writeKeyToBuffer(TEXTSIZE("FaultType"), buftop, bufend);
 		writeToBuffer('"', buftop, bufend);
-		if(TFLAG_is(int, logconf->policy, SystemFault)) {
+		if(KFlag_Is(int, logconf->policy, SystemFault)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("SystemFault,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, SoftwareFault)) {
+		if(KFlag_Is(int, logconf->policy, SoftwareFault)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("SoftwareFault,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, UserFault)) {
+		if(KFlag_Is(int, logconf->policy, UserFault)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("UserFault,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, ExternalFault)) {
+		if(KFlag_Is(int, logconf->policy, ExternalFault)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("ExternalFault,"), buftop, bufend);
 		}
-//		if(TFLAG_is(int, logconf->policy, UnknownFault)) {
+//		if(KFlag_Is(int, logconf->policy, UnknownFault)) {
 //			buftop = writeFixedTextToBuffer(TEXTSIZE("UnknownFault,"), buftop, bufend);
 //		}
 		buftop[-1] = '"';

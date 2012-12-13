@@ -33,20 +33,20 @@ extern "C"{
 // Object.getTypeId()
 static KMETHOD Object_getTypeId(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturnUnboxValue(O_ct(sfp[0].asObject)->typeId);
+	KReturnUnboxValue(kObject_class(sfp[0].asObject)->typeId);
 }
 
 // boolean Object.instanceOf(Object o)
 static KMETHOD Object_instanceOf(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaClass *selfClass = O_ct(sfp[0].asObject), *targetClass = O_ct(sfp[1].asObject);
+	KonohaClass *selfClass = kObject_class(sfp[0].asObject), *targetClass = kObject_class(sfp[1].asObject);
 	KReturnUnboxValue(selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
 }
 
 // @SmartReturn Object Object.as(Object target)
 static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaClass *selfClass = O_ct(sfp[0].asObject), *targetClass = KGetReturnType(sfp);
+	KonohaClass *selfClass = kObject_class(sfp[0].asObject), *targetClass = KGetReturnType(sfp);
 	kObject *returnValue;
 	if(selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass)) {
 		returnValue = sfp[0].asObject;
@@ -54,7 +54,7 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 	else {
 		returnValue = KLIB Knull(kctx, targetClass);
 	}
-	sfp[K_RTNIDX].unboxValue = O_unbox(returnValue);
+	sfp[K_RTNIDX].unboxValue = kObject_Unbox(returnValue);
 	KReturn(returnValue);
 }
 
@@ -80,7 +80,7 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 	kExpr *targetExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, CT_INFER, 0);
 	if(selfExpr != K_NULLEXPR && targetExpr != K_NULLEXPR) {
 		KonohaClass *selfClass = CT_(selfExpr->attrTypeId), *targetClass = CT_(targetExpr->attrTypeId);
-		if(CT_Is(Final, selfClass)) {
+		if(KClass_Is(Final, selfClass)) {
 			kbool_t staticSubType = (selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
 			KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, TY_boolean, staticSubType));
 		}

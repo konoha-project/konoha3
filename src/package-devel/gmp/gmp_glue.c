@@ -94,7 +94,7 @@ static KMETHOD Mpz_new_int(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpz_new_str(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *self = (kMpz *)sfp[0].asObject;
-	const char *src  = S_text(sfp[1].asString);
+	const char *src  = kString_text(sfp[1].asString);
 	mpz_set_str(self->mpz, src, 10);
 	KReturn(self);
 }
@@ -123,7 +123,7 @@ static KMETHOD Int_toMpz(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD String_toMpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
-	const char *src  = S_text(sfp[0].asString);
+	const char *src  = kString_text(sfp[0].asString);
 	mpz_set_str(ret->mpz, src, 10);
 	KReturn(ret);
 }
@@ -157,7 +157,7 @@ static KMETHOD Mpz_power(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpz_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz *)sfp[0].asObject;
-	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpz_neg(ret->mpz, lhs->mpz);
 	KReturn(ret);
 }
@@ -165,7 +165,7 @@ static KMETHOD Mpz_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpz_abs(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz *)sfp[0].asObject;
-	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpz_abs(ret->mpz, lhs->mpz);
 	KReturn(ret);
 }
@@ -174,7 +174,7 @@ static KMETHOD Mpz_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz *)sfp[0].asObject;
 	kMpz *rhs = (kMpz *)sfp[1].asObject;
-	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpz_add(ret->mpz, lhs->mpz, rhs->mpz);
 	KReturn(ret);
 }
@@ -182,7 +182,7 @@ static KMETHOD Mpz_opADD(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpz_opADD_int(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz *)sfp[0].asObject;
-	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpz_set_si(ret->mpz, sfp[1].intValue);
 	mpz_add(ret->mpz, ret->mpz, lhs->mpz);
 	KReturn(ret);
@@ -201,7 +201,7 @@ static KMETHOD Mpz_opSUB(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz *)sfp[0].asObject;
 	kMpz *rhs = (kMpz *)sfp[1].asObject;
-	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpz_sub(ret->mpz, lhs->mpz, rhs->mpz);
 	KReturn(ret);
 }
@@ -209,7 +209,7 @@ static KMETHOD Mpz_opSUB(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpz_opSUB_int(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz *)sfp[0].asObject;
-	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpz_set_si(ret->mpz, sfp[1].intValue);
 	mpz_sub(ret->mpz, lhs->mpz, ret->mpz);
 	KReturn(ret);
@@ -228,7 +228,7 @@ static KMETHOD Mpz_opMUL(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz *)sfp[0].asObject;
 	kMpz *rhs = (kMpz *)sfp[1].asObject;
-	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpz_mul(ret->mpz, lhs->mpz, rhs->mpz);
 	KReturn(ret);
 }
@@ -236,7 +236,7 @@ static KMETHOD Mpz_opMUL(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpz_opMUL_int(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz *)sfp[0].asObject;
-	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpz_mul_si(ret->mpz, lhs->mpz, sfp[1].intValue);
 	KReturn(ret);
 }
@@ -253,7 +253,7 @@ static KMETHOD Mpz_opMOD(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz *)sfp[0].asObject;
 	kMpz *rhs = (kMpz *)sfp[1].asObject;
-	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpz_mod(ret->mpz, lhs->mpz, rhs->mpz);
 	KReturn(ret);
 }
@@ -261,7 +261,7 @@ static KMETHOD Mpz_opMOD(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpz_opMOD_int(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz *)sfp[0].asObject;
-	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpz_set_si(ret->mpz, sfp[1].intValue);
 	mpz_mod(ret->mpz, lhs->mpz, ret->mpz);
 	KReturn(ret);
@@ -280,7 +280,7 @@ static KMETHOD Mpz_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz *)sfp[0].asObject;
 	kMpz *rhs = (kMpz *)sfp[1].asObject;
-	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	if(unlikely(mpz_sgn(rhs->mpz) == 0)){
 		THROW_ZeroDividedException(kctx, sfp);
 	}else{
@@ -293,7 +293,7 @@ static KMETHOD Mpz_opDIV_int(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz  *lhs = (kMpz *)sfp[0].asObject;
 	kint_t rhs = sfp[1].intValue;
-	kMpz  *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpz  *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	if(unlikely(rhs == 0)){
 		THROW_ZeroDividedException(kctx, sfp);
 	}else{
@@ -306,7 +306,7 @@ static KMETHOD Mpz_opDIV_int(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Int_opDIV_mpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *rhs = (kMpz *)sfp[1].asObject;
-	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(rhs), 0);
+	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(rhs), 0);
 	if(unlikely(mpz_sgn(rhs->mpz) == 0)){
 		THROW_ZeroDividedException(kctx, sfp);
 	}else{
@@ -320,7 +320,7 @@ static KMETHOD Mpz_opAND(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz *)sfp[0].asObject;
 	kMpz *rhs = (kMpz *)sfp[1].asObject;
-	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpz_and(ret->mpz, lhs->mpz, rhs->mpz);
 	KReturn(ret);
 }
@@ -329,7 +329,7 @@ static KMETHOD Mpz_opOR(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz *)sfp[0].asObject;
 	kMpz *rhs = (kMpz *)sfp[1].asObject;
-	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpz_ior(ret->mpz, lhs->mpz, rhs->mpz);
 	KReturn(ret);
 }
@@ -338,7 +338,7 @@ static KMETHOD Mpz_opXOR(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz *)sfp[0].asObject;
 	kMpz *rhs = (kMpz *)sfp[1].asObject;
-	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpz *ret = (kMpz *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpz_xor(ret->mpz, lhs->mpz, rhs->mpz);
 	KReturn(ret);
 }
@@ -515,7 +515,7 @@ static KMETHOD Mpf_new_float(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpf_new_str(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpf *self = (kMpf *)sfp[0].asObject;
-	const char *src  = S_text(sfp[1].asString);
+	const char *src  = kString_text(sfp[1].asString);
 	mpf_set_str(self->mpf, src, 10);
 	KReturn(self);
 }
@@ -569,7 +569,7 @@ static KMETHOD Float_toMpf(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD String_toMpf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
-	const char *src  = S_text(sfp[0].asString);
+	const char *src  = kString_text(sfp[0].asString);
 	mpf_set_str(ret->mpf, src, 10);
 	KReturn(ret);
 }
@@ -626,7 +626,7 @@ static KMETHOD Mpf_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpf *lhs = (kMpf *)sfp[0].asObject;
 	kMpf *rhs = (kMpf *)sfp[1].asObject;
-	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpf_add(ret->mpf, lhs->mpf, rhs->mpf);
 	KReturn(ret);
 }
@@ -634,7 +634,7 @@ static KMETHOD Mpf_opADD(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpf_opADD_int(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpf *lhs = (kMpf *)sfp[0].asObject;
-	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpf_set_si(ret->mpf, sfp[1].intValue);
 	mpf_add(ret->mpf, lhs->mpf, ret->mpf);
 	KReturn(ret);
@@ -653,7 +653,7 @@ static KMETHOD Mpf_opSUB(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpf *lhs = (kMpf *)sfp[0].asObject;
 	kMpf *rhs = (kMpf *)sfp[1].asObject;
-	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpf_sub(ret->mpf, lhs->mpf, rhs->mpf);
 	KReturn(ret);
 }
@@ -661,7 +661,7 @@ static KMETHOD Mpf_opSUB(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpf_opSUB_int(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpf *lhs = (kMpf *)sfp[0].asObject;
-	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpf_set_si(ret->mpf, sfp[1].intValue);
 	mpf_sub(ret->mpf, lhs->mpf, ret->mpf);
 	KReturn(ret);
@@ -680,7 +680,7 @@ static KMETHOD Mpf_opMUL(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpf *lhs = (kMpf *)sfp[0].asObject;
 	kMpf *rhs = (kMpf *)sfp[1].asObject;
-	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpf_mul(ret->mpf, lhs->mpf, rhs->mpf);
 	KReturn(ret);
 }
@@ -688,7 +688,7 @@ static KMETHOD Mpf_opMUL(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpf_opMUL_int(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpf *lhs = (kMpf *)sfp[0].asObject;
-	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	mpf_set_si(ret->mpf, sfp[1].intValue);
 	mpf_mul(ret->mpf, lhs->mpf, ret->mpf);
 	KReturn(ret);
@@ -707,7 +707,7 @@ static KMETHOD Mpf_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpf *lhs = (kMpf *)sfp[0].asObject;
 	kMpf *rhs = (kMpf *)sfp[1].asObject;
-	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	if(unlikely(mpf_sgn(rhs->mpf) == 0)){
 		THROW_ZeroDividedException(kctx, sfp);
 	}else{
@@ -720,7 +720,7 @@ static KMETHOD Mpf_opDIV_int(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpf  *lhs = (kMpf *)sfp[0].asObject;
 	kint_t rhs = sfp[1].intValue;
-	kMpf  *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpf  *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, kObject_class(lhs), 0);
 	if(unlikely(rhs == 0)){
 		THROW_ZeroDividedException(kctx, sfp);
 	}else{
@@ -733,7 +733,7 @@ static KMETHOD Mpf_opDIV_int(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Int_opDIV_mpf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpf *rhs = (kMpf *)sfp[1].asObject;
-	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, O_ct(rhs), 0);
+	kMpf *ret = (kMpf *)KLIB new_kObject(kctx, OnStack, kObject_class(rhs), 0);
 	if(unlikely(mpf_sgn(rhs->mpf) == 0)){
 		THROW_ZeroDividedException(kctx, sfp);
 	}else{
@@ -944,13 +944,13 @@ static kbool_t gmp_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 
 	static KDEFINE_CLASS MpzDef = {0};
 	SETSTRUCTNAME(MpzDef, Mpz);
-	MpzDef.cflag = kClass_Final;
+	MpzDef.cflag = KClassFlag_Final;
 	MpzDef.init  = Mpz_Init;
 	MpzDef.free  = Mpz_Free;
 	MpzDef.p     = Mpz_p;
 	static KDEFINE_CLASS MpfDef = {0};
 	SETSTRUCTNAME(MpfDef, Mpf);
-	MpfDef.cflag = kClass_Final;
+	MpfDef.cflag = KClassFlag_Final;
 	MpfDef.init  = Mpf_Init;
 	MpfDef.free  = Mpf_Free;
 	MpfDef.p     = Mpf_p;

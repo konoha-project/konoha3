@@ -46,7 +46,7 @@ static const char *getThisFileName(KonohaContext *kctx)
 	if(kv != NULL) {
 		kArray *sa = (kArray *)kv->ObjectValue;
 		if(sa->stringItems != NULL) {
-			const char *file = S_text(sa->stringItems[0]);
+			const char *file = kString_text(sa->stringItems[0]);
 			return file;
 		}
 	}
@@ -81,7 +81,7 @@ static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, k
 
 static void KBuffer_WriteValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass *c, KonohaStack *sfp)
 {
-	if(CT_IsUnbox(c)) {
+	if(KClass_IsUnbox(c)) {
 		c->p(kctx, sfp, 0, wb);
 	}
 	else {
@@ -352,16 +352,16 @@ static char* writePolicyToBuffer(KonohaContext *kctx, logconf_t *logconf, char *
 	if((logconf->policy & HasLocation)) {
 		buftop = writeKeyToBuffer(TEXTSIZE("LogPoint"), buftop, bufend);
 		writeToBuffer('"', buftop, bufend);
-		if(TFLAG_is(int, logconf->policy, PeriodicPoint)) {
+		if(KFlag_Is(int, logconf->policy, PeriodicPoint)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("PeriodicPoint,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, ResponseCheckPoint)) {
+		if(KFlag_Is(int, logconf->policy, ResponseCheckPoint)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("ResponseCheckPoint,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, SystemChangePoint)) {
+		if(KFlag_Is(int, logconf->policy, SystemChangePoint)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("SystemChangePoint,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, SecurityAudit)) {
+		if(KFlag_Is(int, logconf->policy, SecurityAudit)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("SecurityAudit,"), buftop, bufend);
 		}
 		buftop[-1] = '"';
@@ -379,16 +379,16 @@ static char* writePolicyToBuffer(KonohaContext *kctx, logconf_t *logconf, char *
 		}
 		buftop = writeKeyToBuffer(TEXTSIZE("FaultType"), buftop, bufend);
 		writeToBuffer('"', buftop, bufend);
-		if(TFLAG_is(int, logconf->policy, SystemFault)) {
+		if(KFlag_Is(int, logconf->policy, SystemFault)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("SystemFault,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, SoftwareFault)) {
+		if(KFlag_Is(int, logconf->policy, SoftwareFault)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("SoftwareFault,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, UserFault)) {
+		if(KFlag_Is(int, logconf->policy, UserFault)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("UserFault,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, ExternalFault)) {
+		if(KFlag_Is(int, logconf->policy, ExternalFault)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("ExternalFault,"), buftop, bufend);
 		}
 		buftop[-1] = '"';

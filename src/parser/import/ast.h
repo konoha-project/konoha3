@@ -216,7 +216,7 @@ static int TokenUtils_ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArr
 		nextIdx = beginIdx + 1;
 	}
 	else if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) { // check
-		foundClass = KLIB kNameSpace_GetClassByFullName(kctx, ns, S_text(tk->text), S_size(tk->text), NULL);
+		foundClass = KLIB kNameSpace_GetClassByFullName(kctx, ns, kString_text(tk->text), kString_size(tk->text), NULL);
 		if(foundClass != NULL) {
 			nextIdx = beginIdx + 1;
 		}
@@ -392,7 +392,7 @@ static kTokenVar* kToken_ToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameS
 	TokenSeq source = {ns, GetSugarContext(kctx)->preparedTokenList};
 	TokenSeq_Push(kctx, source);
 	KdumpToken(kctx, tk);
-	TokenSeq_Tokenize(kctx, &source, S_text(tk->text), tk->uline);
+	TokenSeq_Tokenize(kctx, &source, kString_text(tk->text), tk->uline);
 	KFieldSet(tk, tk->subTokenList, new_(TokenArray, 0, OnField));
 	tk->resolvedSyntaxInfo = SYN_(ns, KW_BraceGroup);
 	TokenSeq tokens = {ns, tk->subTokenList, 0};
@@ -505,8 +505,8 @@ static int TokenSeq_Preprocess(KonohaContext *kctx, TokenSeq *tokens, MacroSet *
 				return source->endIdx;  // resolved no more
 			}
 			if(tk->unresolvedTokenType == TokenType_SYMBOL) {
-				const char *t = S_text(tk->text);
-				ksymbol_t symbol = ksymbolA(t, S_size(tk->text), SYM_NEWID);
+				const char *t = kString_text(tk->text);
+				ksymbol_t symbol = ksymbolA(t, kString_size(tk->text), SYM_NEWID);
 				if(macroParam != NULL && TokenSeq_ExpandMacro(kctx, tokens, symbol, macroParam)) {
 					continue;
 				}
@@ -833,7 +833,7 @@ static int kStmt_AddAnnotation(KonohaContext *kctx, kStmtVar *stmt, TokenSeq *ra
 				currentIdx++;
 			}
 			if(value != NULL) {
-				KLIB kObjectProto_SetObject(kctx, stmt, tk->resolvedSymbol, O_typeId(value), value);
+				KLIB kObjectProto_SetObject(kctx, stmt, tk->resolvedSymbol, kObject_typeId(value), value);
 			}
 		}
 	}
@@ -902,7 +902,7 @@ static kBlock* kStmt_GetBlock(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, 
 // ---------------------------------------------------------------------------
 /* parsing syntax pattern */
 
-#define kTokenPattern_TopChar(tk) ((IS_String(tk->text) && S_size((tk)->text) == 1) ? S_text((tk)->text)[0] : 0)
+#define kTokenPattern_TopChar(tk) ((IS_String(tk->text) && kString_size((tk)->text) == 1) ? kString_text((tk)->text)[0] : 0)
 
 static int TokenSeq_FindCloseCharAsTopChar(KonohaContext *kctx, TokenSeq *tokens, int beginIdx, int closech)
 {
@@ -947,7 +947,7 @@ static kbool_t kArray_AddSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 				i = TokenSeq_NestedSyntaxPattern(kctx, patterns, i, KW_BracketGroup, ']');
 			}
 			else {
-				tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
+				tk->resolvedSymbol = ksymbolA(kString_text(tk->text), kString_size(tk->text), SYM_NEWID);
 			}
 			continue;
 		}
@@ -963,7 +963,7 @@ static kbool_t kArray_AddSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 		if(tk->hintChar == '$' && i+1 < patterns->endIdx) {  // $PatternName
 			tk = patterns->tokenList->TokenVarItems[++i];
 			if(IS_String(tk->text)) {
-				tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW) | KW_PATTERN;
+				tk->resolvedSymbol = ksymbolA(kString_text(tk->text), kString_size(tk->text), SYM_NEWRAW) | KW_PATTERN;
 				if(stmtEntryKey == 0) stmtEntryKey = tk->resolvedSymbol;
 				tk->stmtEntryKey = stmtEntryKey;
 				tk->resolvedSyntaxInfo = SYN_(patterns->ns, tk->resolvedSymbol/*KW_SymbolPattern*/);
@@ -973,7 +973,7 @@ static kbool_t kArray_AddSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 			}
 		}
 		if(i + 1 < patterns->endIdx && patterns->tokenList->TokenItems[i+1]->hintChar == ':' && IS_String(tk->text)) {
-			stmtEntryKey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW);
+			stmtEntryKey = ksymbolA(kString_text(tk->text), kString_size(tk->text), SYM_NEWRAW);
 			i++;
 			continue;
 		}

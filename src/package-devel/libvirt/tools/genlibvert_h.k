@@ -28,9 +28,9 @@ String2 generate(String type) {
 
 	konohaclass_defs = konohaclass_defs + "\tKDEFINE_CLASS def" + type + " = {\n";
 	konohaclass_defs = konohaclass_defs + "\t\t.structname = \"" + type + "\",\n";
-	konohaclass_defs = konohaclass_defs + "\t\t.typeId = TY_newid,\n";
+	konohaclass_defs = konohaclass_defs + "\t\t.typeId = TypeAttr_NewId,\n";
 	konohaclass_defs = konohaclass_defs + "\t\t.cstruct_size = sizeof(k" + type + "),\n";
-	konohaclass_defs = konohaclass_defs + "\t\t.cflag = kClass_Final,\n";
+	konohaclass_defs = konohaclass_defs + "\t\t.cflag = KClassFlag_Final,\n";
 	konohaclass_defs = konohaclass_defs + "\t\t.init = virt_common_ptr_Init,\n";
 	konohaclass_defs = konohaclass_defs + "\t\t.free = virt_common_ptr_Free,\n";
 	konohaclass_defs = konohaclass_defs + "\t};\n";

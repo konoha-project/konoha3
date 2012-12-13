@@ -652,7 +652,7 @@ static kbool_t Complex_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	KRequirePackage("konoha.float", trace);
 	KDEFINE_CLASS defComplex = {0};
 	SETSTRUCTNAME(defComplex, Complex);
-	defComplex.cflag     = kClass_Final;
+	defComplex.cflag     = KClassFlag_Final;
 	defComplex.init      = Complex_Init;
 	defComplex.free      = Complex_Free;
 	KonohaClass *ComplexClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defComplex, trace);

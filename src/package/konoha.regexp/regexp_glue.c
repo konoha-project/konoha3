@@ -44,12 +44,12 @@ extern "C" {
 //## flag RegExp IgnoreCase  2 - is set * *; // it is used only for RegExp_p
 //## flag RegExp Multiline   3 - is set * *; // it is used only for RegExp_p
 
-#define RegExp_isGlobal(o)        (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
-#define RegExp_setGlobal(o,b)     TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,b)
-#define RegExp_isIgnoreCase(o)    (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local2))
-#define RegExp_setIgnoreCase(o,b) TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local2,b)
-#define RegExp_isMultiline(o)     (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local3))
-#define RegExp_setMultiline(o,b)  TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local3,b)
+#define RegExp_isGlobal(o)        (KFlag_Is(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1))
+#define RegExp_setGlobal(o,b)     KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1,b)
+#define RegExp_isIgnoreCase(o)    (KFlag_Is(uintptr_t,(o)->h.magicflag,kObjectFlag_Local2))
+#define RegExp_setIgnoreCase(o,b) KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local2,b)
+#define RegExp_isMultiline(o)     (KFlag_Is(uintptr_t,(o)->h.magicflag,kObjectFlag_Local3))
+#define RegExp_setMultiline(o,b)  KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local3,b)
 
 typedef void kregexp_t;
 
@@ -301,7 +301,7 @@ static void RegExp_Free(KonohaContext *kctx, kObject *o)
 static void RegExp_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	kRegExp *re = v[pos].asRegExp;
-	KLIB KBuffer_printf(kctx, wb, "/%s/%s%s%s", S_text(re->pattern),
+	KLIB KBuffer_printf(kctx, wb, "/%s/%s%s%s", kString_text(re->pattern),
 			RegExp_isGlobal(re) ? "g" : "",
 			RegExp_isIgnoreCase(re) ? "i" : "",
 			RegExp_isMultiline(re) ? "m" : "");
@@ -309,13 +309,13 @@ static void RegExp_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 
 static void RegExp_set(KonohaContext *kctx, kRegExp *re, kString *ptns, kString *opts)
 {
-	const char *ptn = S_text(ptns);
-	const char *opt = S_text(opts);
+	const char *ptn = kString_text(ptns);
+	const char *opt = kString_text(opts);
 	kRegExp_setOptions(re, opt);
 	KFieldSet(re, re->pattern, ptns);
 	re->reg = pcre_regmalloc(kctx, ptns);
 	int cflags = pcre_ParseComplflags(kctx, opt);
-	if(!kString_is(ASCII, ptns)) {
+	if(!kString_Is(ASCII, ptns)) {
 		/* Add 'u' option when the pattern is multibyte string. */
 		cflags |= PCRE_UTF8;
 	}
@@ -388,13 +388,13 @@ static KMETHOD String_search(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRegExp *re = sfp[1].asRegExp;
 	intptr_t loc = -1;
-	if(!IS_NULL(re) && S_size(re->pattern) > 0) {
+	if(!IS_NULL(re) && kString_size(re->pattern) > 0) {
 		kregmatch_t pmatch[2]; // modified by @utrhira
-		const char *str = S_text(sfp[0].asString);  // necessary
+		const char *str = kString_text(sfp[0].asString);  // necessary
 		int res = pcre_regexec(kctx, re->reg, str, 1, pmatch, re->eflags);
 		if(res == 0) {
 			loc = pmatch[0].rm_so;
-			if(loc != -1 && !kString_is(ASCII, sfp[0].asString)) {
+			if(loc != -1 && !kString_Is(ASCII, sfp[0].asString)) {
 				loc = utf8_strlen(str, loc);
 			}
 		}
@@ -410,11 +410,11 @@ static KMETHOD String_search(KonohaContext *kctx, KonohaStack *sfp)
 
 static void kArray_executeRegExp(KonohaContext *kctx, kArray *resultArray, kRegExp *regex, kString *s0)
 {
-	int stringPolicy = kString_is(ASCII, s0) ? StringPolicy_ASCII : 0;
-	if(IS_NOTNULL(regex) && S_size(regex->pattern) > 0) {
-		const char *s = S_text(s0);  // necessary
+	int stringPolicy = kString_Is(ASCII, s0) ? StringPolicy_ASCII : 0;
+	if(IS_NOTNULL(regex) && kString_size(regex->pattern) > 0) {
+		const char *s = kString_text(s0);  // necessary
 		const char *base = s;
-		const char *eos = base + S_size(s0);
+		const char *eos = base + kString_size(s0);
 		size_t i, nmatch = pcre_nmatchsize(kctx, regex->reg);
 		kregmatch_t *p, pmatch[nmatch+1];
 		int isGlobalOption = RegExp_isGlobal(regex);
@@ -468,15 +468,15 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].asString;
 	kRegExp *re = sfp[1].asRegExp;
-	const char* fmttext = S_text(sfp[2].asString);
-	size_t fmtlen = S_size(sfp[2].asString);
+	const char* fmttext = kString_text(sfp[2].asString);
+	size_t fmtlen = kString_size(sfp[2].asString);
 	kString *s = s0;
-	if(IS_NOTNULL(re) && S_size(re->pattern) > 0) {
+	if(IS_NOTNULL(re) && kString_size(re->pattern) > 0) {
 		KGrowingBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-		const char *str = S_text(s0);  // necessary
+		const char *str = kString_text(s0);  // necessary
 		const char *base = str;
-		const char *eos = str + S_size(s0); // end of str
+		const char *eos = str + kString_size(s0); // end of str
 		kregmatch_t pmatch[KREGEXP_MATCHSIZE+1];
 		int isGlobalOption = RegExp_isGlobal(re);
 		do {
@@ -514,10 +514,10 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 
 static void kArray_split(KonohaContext *kctx, kArray *resultArray, kString *str, kRegExp *regex, size_t limit)
 {
-	int stringPolicy = kString_is(ASCII, str) ? StringPolicy_ASCII : 0;
-	if(IS_NOTNULL(regex) && S_size(regex->pattern) > 0) {
-		const char *s = S_text(str);  // necessary
-		const char *eos = s + S_size(str);
+	int stringPolicy = kString_Is(ASCII, str) ? StringPolicy_ASCII : 0;
+	if(IS_NOTNULL(regex) && kString_size(regex->pattern) > 0) {
+		const char *s = kString_text(str);  // necessary
+		const char *eos = s + kString_size(str);
 		kregmatch_t pmatch[2];
 		int res = 0;
 		while(s < eos && res == 0) {
@@ -537,9 +537,9 @@ static void kArray_split(KonohaContext *kctx, kArray *resultArray, kString *str,
 		}
 	}
 	else {
-		const unsigned char *s = (const unsigned char *)S_text(str);
-		size_t i, n = S_size(str);
-		if(kString_is(ASCII, str)) {
+		const unsigned char *s = (const unsigned char *)kString_text(str);
+		size_t i, n = kString_size(str);
+		if(kString_Is(ASCII, str)) {
 			for(i = 0; i < n; i++) {
 				KLIB new_kString(kctx, resultArray, (const char *)s + i, 1, StringPolicy_ASCII);
 			}
@@ -559,7 +559,7 @@ static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
 	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
-	kArray_split(kctx, resultArray, sfp[0].asString, sfp[1].asRegExp, S_size(sfp[0].asString));
+	kArray_split(kctx, resultArray, sfp[0].asString, sfp[1].asRegExp, kString_size(sfp[0].asString));
 	KReturnWith(resultArray, RESET_GCSTACK());
 }
 
@@ -567,7 +567,7 @@ static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD String_splitWithLimit(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
-	size_t limit = sfp[2].intValue < 0 ? S_size(sfp[0].asString) : (size_t) sfp[2].intValue;
+	size_t limit = sfp[2].intValue < 0 ? kString_size(sfp[0].asString) : (size_t) sfp[2].intValue;
 	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	kArray_split(kctx, resultArray, sfp[0].asString, sfp[1].asRegExp, limit);
 	KReturnWith(resultArray, RESET_GCSTACK());
@@ -581,10 +581,10 @@ static KMETHOD RegExp_test(KonohaContext *kctx, KonohaStack *sfp)
 	kString *s0 = sfp[1].asString;
 	kRegExp *re = sfp[0].asRegExp;
 	kbool_t matched = false;
-	if(IS_NOTNULL(re) && S_size(re->pattern) > 0) {
-		const char *str = S_text(s0);  // necessary
+	if(IS_NOTNULL(re) && kString_size(re->pattern) > 0) {
+		const char *str = kString_text(s0);  // necessary
 		const char *base = str;
-		const char *eos = base + S_size(s0);
+		const char *eos = base + kString_size(s0);
 		size_t i, nmatch = pcre_nmatchsize(kctx, re->reg);
 		kregmatch_t *p, pmatch[nmatch+1];
 		int isGlobalOption = RegExp_isGlobal(re);
@@ -633,7 +633,7 @@ static kbool_t regexp_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		CT_RegExp = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &RegExpDef, trace);
 	}
 
-	kattrtype_t TY_StringArray0 = CT_StringArray0->typeId;
+	ktypeattr_t TY_StringArray0 = CT_StringArray0->typeId;
 	KDEFINE_METHOD MethodData[] = {
 		/*JS*/_Public|_Const|_Im, _F(RegExp_getglobal), TY_boolean, TY_RegExp, MN_("getglobal"), 0,
 		/*JS*/_Public|_Const|_Im, _F(RegExp_getignoreCase), TY_boolean, TY_RegExp, MN_("getignoreCase"), 0,
@@ -659,7 +659,7 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *)sfp[1].asObject;
 	int ch, prev = '/', pos = 1;
-	const char *source = S_text(sfp[2].asString);
+	const char *source = kString_text(sfp[2].asString);
 	if(source[pos] == '*' || source[pos] == '/') {
 		KReturnUnboxValue(0);
 	}

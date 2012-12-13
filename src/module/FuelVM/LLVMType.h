@@ -192,7 +192,7 @@ static void LLVMType_Init()
 	LLVMTYPE_MethodPtr = llvm::PointerType::get(MethodTy, 0);
 }
 
-static llvm::Type *convert_type(KonohaContext *kctx, kattrtype_t type)
+static llvm::Type *convert_type(KonohaContext *kctx, ktypeattr_t type)
 {
 	switch (type) {
 		case TY_void:    return llvm::Type::getVoidTy(LLVM_CONTEXT());

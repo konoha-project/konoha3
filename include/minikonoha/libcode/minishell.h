@@ -97,11 +97,11 @@ static kstatus_t ReadStmt(KonohaContext *kctx, KGrowingBuffer *wb, kfileline_t *
 static void DumpEval(KonohaContext *kctx, KGrowingBuffer *wb)
 {
 	KonohaStackRuntimeVar *base = kctx->stack;
-	kattrtype_t ty = base->evalty;
+	ktypeattr_t ty = base->evalty;
 	if(ty != TY_void) {
 		KonohaStack *lsfp = base->stack + base->evalidx;
-		if(!TY_is(UnboxType, ty)) {
-			ty = O_typeId(lsfp[0].asObject);
+		if(!KType_Is(UnboxType, ty)) {
+			ty = kObject_typeId(lsfp[0].asObject);
 		}
 		CT_(ty)->p(kctx, lsfp, 0, wb);
 		fflush(stdout);

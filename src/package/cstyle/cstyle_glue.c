@@ -250,7 +250,7 @@ static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
 	size_t i = 0;
 	KonohaStack *p = sfp+1;
-	if(kArray_isUnboxData(a)) {
+	if(kArray_Is(UnboxData, a)) {
 		for(i = 0; p + i < kctx->esp; i++) {
 			a->unboxItems[i] = p[i].unboxValue;
 		}
@@ -325,7 +325,7 @@ static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *)sfp[1].asObject;
 	int ch, prev = '/', pos = 1;
-	const char *source = S_text(sfp[2].asString);
+	const char *source = kString_text(sfp[2].asString);
 	while((ch = source[pos++]) != 0) {
 		if(ch == '\n') {
 			break;
@@ -349,14 +349,14 @@ static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
-	if(S_size(tk->text) == 1) {
-		int ch = S_text(tk->text)[0];
+	if(kString_size(tk->text) == 1) {
+		int ch = kString_text(tk->text)[0];
 		KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, TY_int, ch));
 	}
-	else if(S_size(tk->text) == 2) {
-		int ch = S_text(tk->text)[0];
+	else if(kString_size(tk->text) == 2) {
+		int ch = kString_text(tk->text)[0];
 		if(ch == '\\') {
-			ch = S_text(tk->text)[1];
+			ch = kString_text(tk->text)[1];
 			switch(ch) {
 			case '\'': ch = '\''; break;
 			case '\\': ch = '\\'; break;
@@ -408,7 +408,7 @@ static KMETHOD Expression_Increment(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	kToken *tk = tokenList->TokenItems[operatorIdx];
-	KReturn(kStmtToken_Message(kctx, stmt, tk, ErrTag, "%s is defined as a statement", S_text(tk->text)));
+	KReturn(kStmtToken_Message(kctx, stmt, tk, ErrTag, "%s is defined as a statement", kString_text(tk->text)));
 }
 
 static void cstyle_defineExpression(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
@@ -515,7 +515,7 @@ static char parseBinaryDigit(char c)
 static KMETHOD TokenFunc_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *)sfp[1].asObject;
-	const char *source = S_text(sfp[2].asString);
+	const char *source = kString_text(sfp[2].asString);
 	const char *start = source, *end;
 	int c = *source++;
 	/*
@@ -649,7 +649,7 @@ static KMETHOD TypeCheck_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sf
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
-	long long n = kstrtoll(S_text(tk->text));
+	long long n = kstrtoll(kString_text(tk->text));
 	KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, TY_int, (uintptr_t)n));
 }
 

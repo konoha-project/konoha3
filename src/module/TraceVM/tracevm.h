@@ -33,7 +33,7 @@ typedef void (*TraceFunc)(KonohaContext *kctx, KonohaStack *sfp, KTraceInfo *tra
 
 typedef struct {
 	kMethod *mtd;
-	kattrtype_t typeId; kparamId_t signature;
+	ktypeattr_t typeId; kparamId_t signature;
 } kMethodInlineCache;
 
 #if defined(USE_DIRECT_THREADED_CODE)
@@ -108,8 +108,8 @@ typedef enum {
 
 /* ------------------------------------------------------------------------ */
 
-#define BasicBlock_isVisited(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
-#define BasicBlock_setVisited(o,B)   TFLAG_set(uintptr_t,((kObjectVar *)o)->h.magicflag,kObject_Local1,B)
+#define BasicBlock_isVisited(o)      (KFlag_Is(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1))
+#define BasicBlock_setVisited(o,B)   KFlag_Set(uintptr_t,((kObjectVar *)o)->h.magicflag,kObjectFlag_Local1,B)
 
 typedef struct kBasicBlockVar         kBasicBlock;
 typedef const struct kByteCodeVar     kByteCode;
@@ -139,8 +139,8 @@ struct kByteCodeVar {
 #define TY_BasicBlock    kmodcode->cBasicBlock->typeId
 #define CT_ByteCode      kmodcode->cByteCode
 
-#define IS_BasicBlock(O)  (O_ct(O) == CT_BasicBlock)
-#define IS_ByteCode(O)    (O_ct(O) == CT_ByteCode)
+#define IS_BasicBlock(O)  (kObject_class(O) == CT_BasicBlock)
+#define IS_ByteCode(O)    (kObject_class(O) == CT_ByteCode)
 
 #define CODE_ENTER        kmodcode->PRECOMPILED_ENTER
 #define CODE_NCALL        kmodcode->PRECOMPILED_NCALL
@@ -304,7 +304,7 @@ typedef struct OPLOOKUP {
 	kreg_t thisidx;
 	kNameSpace* ns;
 	kMethod*    mtd;
-	kattrtype_t typeId; kparamId_t signature;  // invisible
+	ktypeattr_t typeId; kparamId_t signature;  // invisible
 } OPLOOKUP;
 
 #define OPEXEC_LOOKUP(THIS, NS, MTD) do {\

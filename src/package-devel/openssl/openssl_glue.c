@@ -30,8 +30,8 @@ static KMETHOD kMD5_Init(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD kMD5_Update(KonohaContext *kctx, KonohaStack *sfp)
 {
 	MD5state_st *c = RawPtr(sfp[0].asObject);
-	unsigned char *data = (unsigned char *) S_text(sfp[1].asString);
-	unsigned long len = S_size(sfp[1].asString);
+	unsigned char *data = (unsigned char *) kString_text(sfp[1].asString);
+	unsigned long len = kString_size(sfp[1].asString);
 	int ret_ = MD5_Update(c, data, len);
 	KReturnUnboxValue(ret_);
 }
@@ -57,8 +57,8 @@ static KMETHOD kSHA1_Init(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD kSHA1_Update(KonohaContext *kctx, KonohaStack *sfp)
 {
 	SHAstate_st *c = RawPtr(sfp[0].asObject);
-	unsigned char *data = (unsigned char *) S_text(sfp[1].asString);
-	unsigned long len = S_size(sfp[1].asString);
+	unsigned char *data = (unsigned char *) kString_text(sfp[1].asString);
+	unsigned long len = kString_size(sfp[1].asString);
 	int ret_ = SHA1_Update(c, data, len);
 	KReturnUnboxValue(ret_);
 }
@@ -92,7 +92,7 @@ static kbool_t openssl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	KonohaClass *tbls[2];
 	static KDEFINE_CLASS Def = {
 			.structname = "",
-			.typeId = TY_newid,
+			.typeId = TypeAttr_NewId,
 			.init = RawPtr_Init,
 			.free = RawPtr_Free,
 	};

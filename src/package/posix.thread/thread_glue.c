@@ -269,7 +269,7 @@ static kbool_t thread_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 {
 	KDEFINE_CLASS defThread = {
 		STRUCTNAME(Thread),
-		.cflag    = kClass_Final,
+		.cflag    = KClassFlag_Final,
 		.init     = kThread_Init,
 		.reftrace = kThread_Reftrace,
 		.free     = kThread_Free,
@@ -277,13 +277,13 @@ static kbool_t thread_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	};
 	KDEFINE_CLASS defMutex = {
 		STRUCTNAME(Mutex),
-		.cflag = kClass_Final,
+		.cflag = KClassFlag_Final,
 		.init  = kMutex_Init,
 		.free  = kMutex_Free,
 	};
 	KDEFINE_CLASS defCond = {
 		STRUCTNAME(Cond),
-		.cflag = kClass_Final,
+		.cflag = KClassFlag_Final,
 		.init  = kCond_Init,
 		.free  = kCond_Free,
 	};

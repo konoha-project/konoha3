@@ -57,7 +57,7 @@ typedef struct kConnection {
 /* [ResultSet] */
 
 typedef struct KColumn {
-	kattrtype_t  type;
+	ktypeattr_t  type;
 	int          dbtype;
 	kString     *name;
 	krbp_t       val;
@@ -151,7 +151,7 @@ static void kResultSet_Reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor 
 	KColumn *end = col + rs->column_size;
 	while(col < end) {
 		KRefTrace(col->name);
-		if(TY_isUnbox(col->type)) {
+		if(KType_Is(UnboxType, col->type)) {
 			KRefTrace(col->val.asObject);
 		}
 	}
@@ -181,9 +181,9 @@ static void kResultSet_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingB
 			KLIB KBuffer_printf(kctx, wb, ",");
 		}
 		KLIB KBuffer_printf(kctx, wb, "(%d): ", i);
-		kattrtype_t type = rs->column[i].type;
+		ktypeattr_t type = rs->column[i].type;
 		krbp_t *val = &rs->column[i].val;
-		if(TY_isUnbox(type)) {
+		if(KType_Is(UnboxType, type)) {
 			KonohaValue sp[1]; sp[0].unboxValue = val[0].unboxValue;
 			CT_(type)->p(kctx, sp, 0, wb);
 		} else {
@@ -195,8 +195,8 @@ static void kResultSet_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingB
 
 static bool String_equal(KonohaContext *kctx, kString *str0, kString *str1)
 {
-	if(S_size(str0) == S_size(str1)) {
-		return strncmp(S_text(str0), S_text(str1), S_size(str0)) == 0;
+	if(kString_size(str0) == kString_size(str1)) {
+		return strncmp(kString_text(str0), kString_text(str1), kString_size(str0)) == 0;
 	}
 	return false;
 }
@@ -303,7 +303,7 @@ static KMETHOD Connection_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kConnection *con = (kConnection *) sfp[0].asObject;
 	KMakeTrace(trace, sfp);
-	const char  *dburl  = S_text(sfp[1].asString);
+	const char  *dburl  = kString_text(sfp[1].asString);
 	QueryDriver *driver = FindQueryDriverByScheme(kctx, dburl);
 	DBHandler *db = driver->qopen(kctx, dburl, trace);
 	if(db != NULL) {
@@ -319,7 +319,7 @@ static KMETHOD Connection_query(KonohaContext *kctx, KonohaStack *sfp)
 	INIT_GCSTACK();
 	KMakeTrace(trace, sfp);
 	kConnection *conn = (kConnection *)sfp[0].asObject;
-	const char *query = S_text(sfp[1].asString);
+	const char *query = kString_text(sfp[1].asString);
 	kResultSet *rs = (kResultSet *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)conn);
 	KCursor *qcur = conn->driver->qexec(kctx, conn->db, query, rs, trace);
 	if(qcur != NULL) {
@@ -401,7 +401,7 @@ static KMETHOD ResultSet_getInt(KonohaContext *kctx, KonohaStack *sfp)
 	int idx = ResultSet_FindColumn(kctx, rs, sfp[1].asString);
 	kint_t res = 0;
 	if(idx >= 0) {
-		kattrtype_t type = rs->column[idx].type;
+		ktypeattr_t type = rs->column[idx].type;
 		if(type == TY_int) {
 			res = rs->column[idx].val.intValue;
 		} else if(KDefinedKonohaCommonModule() && type == TY_float) {
@@ -418,7 +418,7 @@ static KMETHOD ResultSet_getFloat(KonohaContext *kctx, KonohaStack *sfp)
 	int idx = ResultSet_FindColumn(kctx, rs, sfp[1].asString);
 	kfloat_t res = 0.0;
 	if(idx >= 0) {
-		kattrtype_t type = rs->column[idx].type;
+		ktypeattr_t type = rs->column[idx].type;
 		if(type == TY_int) {
 			res = (kfloat_t) rs->column[idx].val.intValue;
 		} else if(KDefinedKonohaCommonModule() && type == TY_float) {
@@ -435,7 +435,7 @@ static KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 	kString *res = TS_EMPTY;
 	int idx = ResultSet_FindColumn(kctx, rs, sfp[1].asString);
 	if(idx >= 0) {
-		kattrtype_t type = rs->column[idx].type;
+		ktypeattr_t type = rs->column[idx].type;
 		krbp_t *val = &rs->column[idx].val;
 		if(type == TY_String) {
 			res = val[0].asString;
@@ -471,7 +471,7 @@ static KMETHOD ResultSet_get(KonohaContext *kctx, KonohaStack *sfp)
 		ResultSet_getFloat(kctx, sfp);
 	} else {
 		kObject *returnValue = KLIB Knull(kctx, retClass);
-		sfp[K_RTNIDX].unboxValue = O_unbox(returnValue);
+		sfp[K_RTNIDX].unboxValue = kObject_Unbox(returnValue);
 		KReturn(returnValue);
 	}
 }
@@ -485,14 +485,14 @@ static kbool_t sql_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 
 	static KDEFINE_CLASS ConnectionDef = {
 		STRUCTNAME(Connection),
-		.cflag = kClass_Final,
+		.cflag = KClassFlag_Final,
 		.init = kConnection_Init,
 		.free = kConnection_Free,
 	};
 
 	static KDEFINE_CLASS ResultSetDef = {
 		STRUCTNAME(ResultSet),
-		.cflag = kClass_Final,
+		.cflag = KClassFlag_Final,
 		.init = kResultSet_Init,
 		.free = kResultSet_Free,
 		.reftrace = kResultSet_Reftrace,

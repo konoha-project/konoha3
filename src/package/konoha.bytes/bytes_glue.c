@@ -146,15 +146,15 @@ static kBytes* new_kBytes(KonohaContext *kctx, kArray *gcstack, KonohaClass *c, 
 static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString* thisString = sfp[0].asString;
-	size_t size = S_size(thisString);
+	size_t size = kString_size(thisString);
 	if(PLATAPI isSystemCharsetUTF8(kctx)) {
-		KReturn(new_kBytes(kctx, OnStack, KGetReturnType(sfp), S_text(thisString), size));
+		KReturn(new_kBytes(kctx, OnStack, KGetReturnType(sfp), kString_text(thisString), size));
 	}
 	else {
 		KMakeTrace(trace, sfp);
 		KGrowingBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-		KBuffer_convertCharset(kctx, &wb, PLATAPI systemCharset, "UTF-8", S_text(thisString), size, trace);
+		KBuffer_convertCharset(kctx, &wb, PLATAPI systemCharset, "UTF-8", kString_text(thisString), size, trace);
 		KReturnWith(
 			new_kBytes(kctx, OnStack, KGetReturnType(sfp), KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb)),
 			KLIB KBuffer_Free(&wb)
@@ -203,7 +203,7 @@ static KMETHOD String_new_fromSubBytes_withSpecifiedDecode(KonohaContext *kctx, 
 	int offset = sfp[2].intValue;
 	int length = sfp[3].intValue;
 	kString *charsetStr = sfp[4].asString;
-	const char *charset = S_text(charsetStr);
+	const char *charset = kString_text(charsetStr);
 	kString *s = TS_EMPTY;
 	if(ba->bytesize != 0) {
 		// At this point, we assuem 'ba' is null terminated.
@@ -229,7 +229,7 @@ static KMETHOD String_new_fromBytes_withSpecifiedDecode(KonohaContext *kctx, Kon
 		KMakeTrace(trace, sfp);
 		KGrowingBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-		KBuffer_convertCharset(kctx, &wb, S_text(charset), "UTF-8", ba->buf, ba->bytesize, trace);
+		KBuffer_convertCharset(kctx, &wb, kString_text(charset), "UTF-8", ba->buf, ba->bytesize, trace);
 		s = KLIB new_kString(kctx, OnStack, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
 	}
 	KReturn(s);
@@ -250,7 +250,7 @@ static kbool_t bytes_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 	if(CT_Bytes == NULL) {
 		KDEFINE_CLASS defBytes = {0};
 		SETSTRUCTNAME(defBytes, Bytes);
-		defBytes.cflag   = kClass_Final;
+		defBytes.cflag   = KClassFlag_Final;
 		defBytes.free    = kBytes_Free;
 		defBytes.init    = kBytes_Init;
 		defBytes.p       = kBytes_p;

@@ -44,13 +44,13 @@
 //
 //// Module
 //
-//#define CFLAG_Exception                            kClass_Final
+//#define CFLAG_Exception                            KClassFlag_Final
 //
 //#define KonohaContext_getExceptionModule(kctx)           ((KonohaExceptionModule *)kctx->modshare[MOD_exception])
 //#define KonohaContext_getExceptionContext(kctx)          ((KonohaExceptionContext *)kctx->modlocal[MOD_exception])
 //#define CT_Exception         KonohaContext_getExceptionModule(kctx)->cException
 //#define TY_Exception         KonohaContext_getExceptionModule(kctx)->cException->typeId
-//#define IS_Exception(e)      (O_ct(e) == CT_Exception)
+//#define IS_Exception(e)      (kObject_class(e) == CT_Exception)
 //
 //typedef struct {
 //	KonohaModule  h;
@@ -188,7 +188,7 @@
 //
 //static void Exception_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 //{
-//	KLIB KBuffer_printf(kctx, wb, "%s", S_text(v[pos].asException->message));
+//	KLIB KBuffer_printf(kctx, wb, "%s", kString_text(v[pos].asException->message));
 //}
 //
 //static void kModuleException_Setup(KonohaContext *kctx, KonohaModule *def, int newctx)

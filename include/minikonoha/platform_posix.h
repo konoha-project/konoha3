@@ -945,7 +945,7 @@ static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, k
 
 static void KBuffer_WriteValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass *c, KonohaStack *sfp)
 {
-	if(CT_IsUnbox(c)) {
+	if(KClass_IsUnbox(c)) {
 		c->p(kctx, sfp, 0, wb);
 	}
 	else {
@@ -961,16 +961,16 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 	}
 	else {
 		PLATAPI printf_i("%s:", exceptionName);
-		if(TFLAG_is(int, fault, SoftwareFault)) {
+		if(KFlag_Is(int, fault, SoftwareFault)) {
 			PLATAPI printf_i(" SoftwareFault");
 		}
-		if(TFLAG_is(int, fault, UserFault)) {
+		if(KFlag_Is(int, fault, UserFault)) {
 			PLATAPI printf_i(" UserFault");
 		}
-		if(TFLAG_is(int, fault, SystemFault)) {
+		if(KFlag_Is(int, fault, SystemFault)) {
 			PLATAPI printf_i(" SystemFault");
 		}
-		if(TFLAG_is(int, fault, ExternalFault)) {
+		if(KFlag_Is(int, fault, ExternalFault)) {
 			PLATAPI printf_i(" ExternalFault");
 		}
 	}
@@ -986,8 +986,8 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 		const char *file = PLATAPI shortFilePath(FileId_t(uline));
 		PLATAPI printf_i(" [%ld] (%s:%d) %s.%s%s(", (sfp - kctx->stack->stack), file, (kushort_t)uline, Method_t(mtd));
 		KonohaClass *cThis = CT_(mtd->typeId);
-		if(!CT_IsUnbox(cThis)) {
-			cThis = O_ct(sfp[0].asObject);
+		if(!KClass_IsUnbox(cThis)) {
+			cThis = kObject_class(sfp[0].asObject);
 		}
 		if(!kMethod_Is(Static, mtd)) {
 			KBuffer_WriteValue(kctx, &wb, cThis, sfp);

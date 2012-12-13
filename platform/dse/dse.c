@@ -223,7 +223,7 @@ static void DSE_delete(DSE *dse);
 ////		DBG_P("name='%s'", namebuf);
 //		ksymbol_t key = KLIB Ksymbol(kctx, namebuf, len, 0, SYM_NEWID);
 //		uintptr_t unboxValue;
-//		kattrtype_t ty;
+//		ktypeattr_t ty;
 //		if(isdigit(p[1])) {
 //			ty = TY_int;
 //			unboxValue = (uintptr_t)strtol(p+1, NULL, 0);

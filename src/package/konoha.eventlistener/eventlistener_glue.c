@@ -156,7 +156,7 @@ static KMETHOD Event_getProperty(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((kEvent *)sfp[0].asObject)->j;
 	CHECK_JSON(obj, KReturn(KNULL(String)));
-	const char *key = S_text(sfp[1].asString);
+	const char *key = kString_text(sfp[1].asString);
 	json_t* ret = json_object_get(obj, key);
 	if(!json_is_string(ret)) {
 		KReturn(KNULL(String));
@@ -174,7 +174,7 @@ static KMETHOD Event_getInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((kEvent *)sfp[0].asObject)->j;
 	CHECK_JSON(obj, KReturnUnboxValue(0));
-	const char *key = S_text(sfp[1].asString);
+	const char *key = kString_text(sfp[1].asString);
 	json_t* ret = json_object_get(obj, key);
 	if(!json_is_integer(ret)) {
 		KReturnUnboxValue(0);
@@ -243,7 +243,7 @@ static KMETHOD HttpEventListener_start(KonohaContext *kctx, KonohaStack *sfp)
 	HttpEventQueue = (LocalQueue *)PLATAPI malloc_i(sizeof(LocalQueue));
 	LocalQueue_Init(kctx, HttpEventQueue);
 
-	const char *host = S_text(sfp[1].asString);
+	const char *host = kString_text(sfp[1].asString);
 	int port = sfp[2].intValue;
 	pthread_t t;
 	static targs_t targs = {};
@@ -432,7 +432,7 @@ static void enqueueEventToGlobalQueue(KonohaContext *kctx, RawEvent rawEvent)
 {
 	kEvent *ev = (kEvent *)KLIB new_kObject(kctx, OnStack, CT_Event, 0);
 	ev->j = (json_t *)rawEvent;
-	kattrtype_t resolve_type = kMethod_GetReturnType(KonohaContext_getEventContext(kctx)->enqFuncNULL->method);
+	ktypeattr_t resolve_type = kMethod_GetReturnType(KonohaContext_getEventContext(kctx)->enqFuncNULL->method);
 	BEGIN_UnusedStack(lsfp);
 	KUnsafeFieldSet(lsfp[0].asObject, K_NULL);
 	KUnsafeFieldSet(lsfp[1].asObject, (kObject *)ev);
@@ -525,7 +525,7 @@ static void MODEVENT_Init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace
 
 	KDEFINE_CLASS defEvent = {
 		STRUCTNAME(Event),
-		.cflag = kClass_Final,
+		.cflag = KClassFlag_Final,
 		.init = Event_Init,
 		.reftrace = Event_Reftrace,
 		.free = Event_Free,
@@ -563,11 +563,11 @@ static kbool_t eventlistener_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns
 
 	KDEFINE_CLASS defHttpEventListener = {
 		.structname = "HttpEventListener",
-		.typeId = TY_newid,
+		.typeId = TypeAttr_NewId,
 	};
 	KDEFINE_CLASS defSignalEventListener = {
 		.structname = "SignalEventListener",
-		.typeId = TY_newid,
+		.typeId = TypeAttr_NewId,
 	};
 	KonohaClass *cHttpEventListener = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defHttpEventListener, trace);
 	KonohaClass *cSignalEventListener = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSignalEventListener, trace);

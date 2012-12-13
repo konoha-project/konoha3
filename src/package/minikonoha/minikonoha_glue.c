@@ -64,7 +64,7 @@ static void kKonohaFactory_Free(KonohaContext *kctx, kObject *o)
 //{
 //	kKonohaFactory *file = (kKonohaFactory *)v[pos].asObject;
 //	if(file->PathInfoNULL != NULL) {
-//		KLIB KBuffer_Write(kctx, wb, S_text(file->PathInfoNULL), S_size(file->PathInfoNULL));
+//		KLIB KBuffer_Write(kctx, wb, kString_text(file->PathInfoNULL), kString_size(file->PathInfoNULL));
 //	}
 //	else {
 //		KLIB KBuffer_printf(kctx, wb, "FILE:%p", file->fp);
@@ -90,7 +90,7 @@ static void kKonoha_Free(KonohaContext *kctx, kObject *o)
 //{
 //	kKonoha *file = (kKonoha *)v[pos].asObject;
 //	if(file->PathInfoNULL != NULL) {
-//		KLIB KBuffer_Write(kctx, wb, S_text(file->PathInfoNULL), S_size(file->PathInfoNULL));
+//		KLIB KBuffer_Write(kctx, wb, kString_text(file->PathInfoNULL), kString_size(file->PathInfoNULL));
 //	}
 //	else {
 //		KLIB KBuffer_printf(kctx, wb, "FILE:%p", file->fp);
@@ -110,7 +110,7 @@ static KMETHOD KonohaFactory_new(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD KonohaFactory_loadModule(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kKonohaFactory *f = (kKonohaFactory *)sfp[0].asObject;
-	KReturnUnboxValue(f->factory->LoadPlatformModule(f->factory, S_text(sfp[1].asString), ReleaseModule));
+	KReturnUnboxValue(f->factory->LoadPlatformModule(f->factory, kString_text(sfp[1].asString), ReleaseModule));
 }
 
 //## Konoha KonohaFactory.create();
@@ -124,14 +124,14 @@ static KMETHOD KonohaFactory_create(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Konoha_loadScript(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kKonoha *ko = (kKonoha *)sfp[0].asObject;
-	KLIB Konoha_LoadScript(ko->konoha, S_text(sfp[1].asString));
+	KLIB Konoha_LoadScript(ko->konoha, kString_text(sfp[1].asString));
 }
 
 //## void Konoha.eval(String script);
 static KMETHOD Konoha_eval(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kKonoha *ko = (kKonoha *)sfp[0].asObject;
-	KLIB Konoha_Eval(ko->konoha, S_text(sfp[1].asString), 0);
+	KLIB Konoha_Eval(ko->konoha, kString_text(sfp[1].asString), 0);
 }
 
 #define _F(F) (intptr_t)(F)

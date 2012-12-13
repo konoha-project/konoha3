@@ -110,13 +110,13 @@
 //
 //static void kNameSpace_LookupMethodWithInlineCache(KonohaContext *kctx, KonohaStack *sfp, kNameSpace *ns, kMethod **cache)
 //{
-//	kattrtype_t typeId = O_typeId(sfp[0].asObject);
+//	ktypeattr_t typeId = kObject_typeId(sfp[0].asObject);
 //	kMethod *mtd = cache[0];
 //	if(mtd->typeId != typeId) {
 //		mtd = KLIB kNameSpace_GetMethodBySignatureNULL(kctx, ns, typeId, mtd->mn, mtd->paramdom, 0, NULL);
 //		cache[0] = mtd;
 //	}
-//	sfp[0].unboxValue = O_unbox(sfp[0].asObject);
+//	sfp[0].unboxValue = kObject_Unbox(sfp[0].asObject);
 //	sfp[K_MTDIDX].calledMethod = mtd;
 //}
 //

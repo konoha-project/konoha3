@@ -283,7 +283,7 @@ static KMETHOD System_usleep(KonohaContext *kctx, KonohaStack *sfp)
 //## int System.system(String command)
 static KMETHOD System_system(KonohaContext *kctx, KonohaStack *sfp)
 {
-	const char *command = S_text(sfp[1].asString);
+	const char *command = kString_text(sfp[1].asString);
 	int ret = system(command);
 	if(ret != 0) {
 		// TODO KTraceApi

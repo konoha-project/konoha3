@@ -59,7 +59,7 @@ static void Person_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 {
 	/* This function is called when serializing the object. */
 	struct Person *p = (struct Person *) v[pos].asObject;
-	KLIB KBuffer_Write(kctx, wb, S_text(p->name), S_size(p->name));
+	KLIB KBuffer_Write(kctx, wb, kString_text(p->name), kString_size(p->name));
 	KLIB KBuffer_Write(kctx, wb, ",", 1);
 	KLIB KBuffer_printf(kctx, wb, KINT_FMT, p->age);
 }
@@ -96,10 +96,10 @@ static KMETHOD Person_say(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct Person *p = (struct Person *) sfp[0].asObject;
 	kString *name = p->name;
-	/* When you want to operate with a raw string, please use S_text() macro
+	/* When you want to operate with a raw string, please use kString_text() macro
 	 * to acquire the pointer of a raw string. */
-	const char *text = S_text(name);
-	char *buf = (char *)alloca(16 + S_size(name));
+	const char *text = kString_text(name);
+	char *buf = (char *)alloca(16 + kString_size(name));
 	sprintf(buf, "hello , %s!", text);
 	KReturn(KLIB new_kString(kctx, OnStack, buf, strlen(buf), StringPolicy_TEXT));
 }
@@ -119,7 +119,7 @@ static kbool_t HelloWorld_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, i
 	/* If you want to create Generic class like Array<T>, see konoha.map package */
 	KDEFINE_CLASS defPerson = {0};
 	SETSTRUCTNAME(defPerson, Person);
-	defPerson.cflag     = kClass_Final;
+	defPerson.cflag     = KClassFlag_Final;
 	defPerson.init      = Person_Init;
 	defPerson.p         = Person_p;
 	defPerson.reftrace  = Person_Reftrace;

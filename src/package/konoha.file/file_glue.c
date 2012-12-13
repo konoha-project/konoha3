@@ -48,7 +48,7 @@ extern "C"{
 
 static const char* kFile_textPath(KonohaContext *kctx, kFile *file)
 {
-	return (file->PathInfoNULL == NULL) ? "unknown" : S_text(file->PathInfoNULL);
+	return (file->PathInfoNULL == NULL) ? "unknown" : kString_text(file->PathInfoNULL);
 }
 
 static int TRACE_fgetc(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
@@ -164,7 +164,7 @@ static void kFile_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer
 {
 	kFile *file = (kFile *)v[pos].asObject;
 	if(file->PathInfoNULL != NULL) {
-		KLIB KBuffer_Write(kctx, wb, S_text(file->PathInfoNULL), S_size(file->PathInfoNULL));
+		KLIB KBuffer_Write(kctx, wb, kString_text(file->PathInfoNULL), kString_size(file->PathInfoNULL));
 	}
 	else {
 		KLIB KBuffer_printf(kctx, wb, "FILE:%p", file->fp);
@@ -179,17 +179,17 @@ static KMETHOD File_new(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
-	const char *mode = S_text(sfp[2].asString);
+	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *mode = kString_text(sfp[2].asString);
 	FILE *fp = fopen(systemPath, mode);
 	if(fp == NULL) {
-		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "fopen",
-			LogText("filename", S_text(path)), LogText("mode", mode), LogErrno);
+			LogText("filename", kString_text(path)), LogText("mode", mode), LogErrno);
 		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), fault, NULL, sfp);
 	}
 	if(mode[0] == 'w' || mode[0] == 'a' || mode[1] == '+') {
-		KTraceChangeSystemPoint(trace, "fopen", LogFileName(S_text(path)), LogText("mode", mode));
+		KTraceChangeSystemPoint(trace, "fopen", LogFileName(kString_text(path)), LogText("mode", mode));
 	}
 	{
 		INIT_GCSTACK();
@@ -305,13 +305,13 @@ static KMETHOD File_print(KonohaContext *kctx, KonohaStack *sfp)
 	kFile   *file = sfp[0].asFile;
 	kString *line = sfp[1].asString;
 	KMakeTrace(trace, sfp);
-	if(file->writerIconv == ICONV_NULL || kString_is(ASCII, line)) {
-		TRACE_fwrite(kctx, file, S_text(line), S_size(line), trace);
+	if(file->writerIconv == ICONV_NULL || kString_Is(ASCII, line)) {
+		TRACE_fwrite(kctx, file, kString_text(line), kString_size(line), trace);
 	}
 	else {
 		KGrowingBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-		KLIB KBuffer_iconv(kctx, &wb, file->writerIconv, S_text(line), S_size(line), trace);
+		KLIB KBuffer_iconv(kctx, &wb, file->writerIconv, kString_text(line), kString_size(line), trace);
 		TRACE_fwrite(kctx, file, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), trace);
 		KLIB KBuffer_Free(&wb);
 	}
@@ -417,7 +417,7 @@ static KMETHOD File_setReaderCharset(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFile   *file = sfp[0].asFile;
 	KMakeTrace(trace, sfp);
-	file->readerIconv = PLATAPI iconv_open_i(kctx, "UTF-8", S_text(sfp[1].asString), trace);
+	file->readerIconv = PLATAPI iconv_open_i(kctx, "UTF-8", kString_text(sfp[1].asString), trace);
 }
 
 //## void setWriterCharset(String charset);
@@ -425,7 +425,7 @@ static KMETHOD File_setWriterCharset(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFile   *file = sfp[0].asFile;
 	KMakeTrace(trace, sfp);
-	file->writerIconv = PLATAPI iconv_open_i(kctx, S_text(sfp[1].asString), "UTF-8", trace);
+	file->writerIconv = PLATAPI iconv_open_i(kctx, kString_text(sfp[1].asString), "UTF-8", trace);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -434,10 +434,10 @@ static KMETHOD File_setWriterCharset(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD File_scriptPath(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char scriptPathBuf[K_PATHMAX];
-	const char *scriptPath = PLATAPI formatTransparentPath(scriptPathBuf, sizeof(scriptPathBuf), FileId_t(sfp[K_RTNIDX].calledFileLine), S_text(sfp[1].asString));
+	const char *scriptPath = PLATAPI formatTransparentPath(scriptPathBuf, sizeof(scriptPathBuf), FileId_t(sfp[K_RTNIDX].calledFileLine), kString_text(sfp[1].asString));
 	kStringVar *resultValue = (kStringVar *)KLIB new_kString(kctx, OnStack, scriptPath, strlen(scriptPath), 0);
-	if(kString_is(Literal, sfp[1].asString)) {
-		kString_set(Literal, resultValue, true);
+	if(kString_Is(Literal, sfp[1].asString)) {
+		kString_Set(Literal, resultValue, true);
 	}
 	KReturn(resultValue);
 }
@@ -530,9 +530,9 @@ static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	if(CT_File == NULL) {
 		KDEFINE_CLASS defFile = {
 			.structname = "File",
-			.typeId = TY_newid,
+			.typeId = TypeAttr_NewId,
 			.cstruct_size = sizeof(kFile),
-			.cflag = kClass_Final,
+			.cflag = KClassFlag_Final,
 			.init  = kFile_Init,
 			.reftrace = kFile_Reftrace,
 			.free  = kFile_Free,

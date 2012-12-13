@@ -137,7 +137,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 
 	KDEFINE_CLASS defSymbol = {0};
 	defSymbol.structname = "Symbol";
-	defSymbol.typeId = TY_newid;
+	defSymbol.typeId = TypeAttr_NewId;
 	defSymbol.cflag = CFLAG_int;
 	defSymbol.init = CT_(TY_int)->init;
 	defSymbol.unbox = CT_(TY_int)->unbox;
@@ -257,7 +257,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 static KMETHOD NameSpace_loadScript(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char pathbuf[512];
-	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), FileId_t(sfp[K_RTNIDX].calledFileLine), S_text(sfp[1].asString));
+	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), FileId_t(sfp[K_RTNIDX].calledFileLine), kString_text(sfp[1].asString));
 	KMakeTrace(trace, sfp);
 	kNameSpace_LoadScript(kctx, sfp[0].asNameSpace, path, trace);
 }
@@ -266,34 +266,34 @@ static KMETHOD NameSpace_loadScript(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD NameSpace_ImportPackage(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KMakeTrace(trace, sfp);
-	kNameSpace_ImportPackage(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), trace);
+	kNameSpace_ImportPackage(kctx, sfp[0].asNameSpace, kString_text(sfp[1].asString), trace);
 }
 
 // boolean NameSpace.import(String pkgname, String symbol);
 static KMETHOD NameSpace_ImportPackageSymbol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[2].asString;
-	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), _NEWID);
+	ksymbol_t keyword = ksymbolA(kString_text(key), kString_size(key), _NEWID);
 	KMakeTrace(trace, sfp);
-	kNameSpace_ImportPackageSymbol(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), keyword, trace);
+	kNameSpace_ImportPackageSymbol(kctx, sfp[0].asNameSpace, kString_text(sfp[1].asString), keyword, trace);
 }
 
 // boolean NameSpace.hate(String symbol);
 static KMETHOD NameSpace_hate(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[2].asString;
-	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), _NEWID);
+	ksymbol_t keyword = ksymbolA(kString_text(key), kString_size(key), _NEWID);
 	KMakeTrace(trace, sfp);
 	kNameSpace_RemoveSyntax(kctx, sfp[0].asNameSpace, keyword, trace);
 }
 
-static void kNameSpace_SetStaticFunction(KonohaContext *kctx, kNameSpace *ns, kArray *list, kattrtype_t cid, KTraceInfo *trace)
+static void kNameSpace_SetStaticFunction(KonohaContext *kctx, kNameSpace *ns, kArray *list, ktypeattr_t cid, KTraceInfo *trace)
 {
 	size_t i;
 	for(i = 0; i < kArray_size(list); i++) {
 		kMethod *mtd = list->MethodItems[i];
 		if(kMethod_Is(Static, mtd) && mtd->typeId == cid) {
-			uintptr_t mtdinfo = ((uintptr_t)cid | (((uintptr_t)mtd->mn) << (sizeof(kattrtype_t) * 8)));
+			uintptr_t mtdinfo = ((uintptr_t)cid | (((uintptr_t)mtd->mn) << (sizeof(ktypeattr_t) * 8)));
 			KLIB kNameSpace_SetConstData(kctx, ns, mtd->mn, VirtualType_StaticMethod, mtdinfo, false/*isOverride*/, trace);
 		}
 	}
@@ -303,7 +303,7 @@ static void kNameSpace_SetStaticFunction(KonohaContext *kctx, kNameSpace *ns, kA
 static KMETHOD NameSpace_useStaticFunc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KMakeTrace(trace, sfp);
-	KonohaClass *ct = O_ct(sfp[1].asObject);
+	KonohaClass *ct = kObject_class(sfp[1].asObject);
 	kNameSpace *ns = sfp[0].asNameSpace;
 	kNameSpace_SetStaticFunction(kctx, ns, ct->methodList_OnGlobalConstList, ct->typeId, trace);
 	while(ns != NULL) {
@@ -316,7 +316,7 @@ static KMETHOD NameSpace_useStaticFunc(KonohaContext *kctx, KonohaStack *sfp)
 //## @Public @Const @Immutable @Coercion Symbol String.toSymbol();
 static KMETHOD String_toSymbol(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturnUnboxValue(ksymbolA(S_text(sfp[0].asString), S_size(sfp[0].asString), _NEWID));
+	KReturnUnboxValue(ksymbolA(kString_text(sfp[0].asString), kString_size(sfp[0].asString), _NEWID));
 }
 
 #include <minikonoha/import/methoddecl.h>

@@ -129,8 +129,8 @@ struct kSubprocVar {
 #define R     0
 #define W     1
 
-//#define kSubProc_is(P, S)            (TFLAG_is(uintptr_t, (S)->h.magicflag, kSubProcFlag_##P))
-#define kSubProc_set(P, S, T)         TFLAG_set(uintptr_t,(S)->h.magicflag, kSubProcFlag_##P, T)
+//#define kSubProc_is(P, S)            (KFlag_Is(uintptr_t, (S)->h.magicflag, kSubProcFlag_##P))
+#define kSubProc_set(P, S, T)         KFlag_Set(uintptr_t,(S)->h.magicflag, kSubProcFlag_##P, T)
 
 //#define kSubProcFlag_CLOSEFDS         ((kshortflag_t)(1<<0))
 #define kSubProcFlag_RunningBackground       ((kshortflag_t)(1<<1))
@@ -244,15 +244,15 @@ static void kSubProc_execOnChild(KonohaContext *kctx, kSubProc *sbp, KTraceInfo 
 {
 	size_t i;
 	char *args[kArray_size(sbp->ArgumentList) + 2];
-	args[0] = (char *)S_text(sbp->Command);
+	args[0] = (char *)kString_text(sbp->Command);
 	args[kArray_size(sbp->ArgumentList) + 1] = NULL;
 	for(i = 0; i < kArray_size(sbp->ArgumentList); i++) {
-		args[i+1] = (char *)S_text(sbp->ArgumentList->StmtItems[i]);
+		args[i+1] = (char *)kString_text(sbp->ArgumentList->StmtItems[i]);
 	}
 	KTraceChangeSystemPoint(trace, "execvp", LogText("command", args[0]), LogTextArray("argv", args), LogUint("pid", getpid()));
-	//	shell mode execlp("sh", "sh", "-c", S_text(command), NULL);
+	//	shell mode execlp("sh", "sh", "-c", kString_text(command), NULL);
 	if(execvp(args[0], args) == -1) {
-		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(sbp->Command)|SystemError, trace);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(sbp->Command)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "execvp", LogText("command", args[0]), LogTextArray("argv", args), LogErrno);
 		_exit(1);
 	}
@@ -338,7 +338,7 @@ static int kSubProc_exec(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
 			ignoreSigchld(kctx, trace);
 		}
 //		if(!IS_NULL(sp->cwd)) { // TODO!!
-//			if(chdir(S_text((sp->cwd))) != 0) {
+//			if(chdir(kString_text((sp->cwd))) != 0) {
 //				//TODO: trace
 //				_exit(1);
 //			}
@@ -629,7 +629,7 @@ static KMETHOD SubProc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 	kSubProc *sbp  = (kSubProc *)sfp[0].asObject;
 	kString *input = sfp[1].asString;
 	KMakeTrace(trace, sfp);
-	if(fwrite(S_text(input), sizeof(char), S_size(input), sbp->InNULL->fp) > 0) {
+	if(fwrite(kString_text(input), sizeof(char), kString_size(input), sbp->InNULL->fp) > 0) {
 		fclose(sbp->InNULL->fp);
 		sbp->InNULL->fp = NULL;
 	} else {
@@ -671,7 +671,7 @@ static KMETHOD SubProc_getStatus(KonohaContext *kctx, KonohaStack *sfp)
 //## boolean SubProc.isCommand(String command);
 static KMETHOD SubProc_isCommand(KonohaContext *kctx, KonohaStack *sfp)
 {
-	const char *cmd = S_text(sfp[1].asString);
+	const char *cmd = kString_text(sfp[1].asString);
 	size_t bufsize = confstr(_CS_PATH, NULL, 0);
 	char buf[bufsize];
 	confstr(_CS_PATH, buf, bufsize);
@@ -701,7 +701,7 @@ static kbool_t subproc_InitSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 {
 	KDEFINE_CLASS defSubProc = {
 		STRUCTNAME(SubProc),
-		.cflag    = kClass_Final,
+		.cflag    = KClassFlag_Final,
 		.init     = kSubProc_Init,
 		.reftrace = kSubProc_Reftrace,
 	};
@@ -709,7 +709,7 @@ static kbool_t subproc_InitSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 	kparamtype_t ps = {TY_String, FN_("str")};
 	KonohaClass *CT_StringArray2 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_String, 1, &ps);
-	kattrtype_t TY_StringArray = CT_StringArray2->typeId, TY_SubProc = cSubproc->typeId;
+	ktypeattr_t TY_StringArray = CT_StringArray2->typeId, TY_SubProc = cSubproc->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public,     _F(SubProc_new),             TY_SubProc, TY_SubProc, MN_("new"), 1, TY_String, FN_("command"),
@@ -771,7 +771,7 @@ static kbool_t subproc_InitSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 //#define CT_Subproc         cSubproc
 #define TY_Subproc         cSubproc->typeId
-//#define IS_Subproc(O)      (O_ct(O) == CT_Subproc)
+//#define IS_Subproc(O)      (kObject_class(O) == CT_Subproc)
 
 /* ------------------------------------------------------------------------ */
 /* [global variables] */
@@ -914,7 +914,7 @@ static int spSplit(char* str, char* args[])
 static int subproc_Popen(KonohaContext *kctx, kString* command, kSubproc *p, int defaultMode)
 {
 	struct kSubprocVar *sp = (struct kSubprocVar *)p;
-	if(IS_NULL(command) || S_size(command) == 0) {
+	if(IS_NULL(command) || kString_size(command) == 0) {
 		return -1;
 	}
 	pid_t pid  = -1;
@@ -1014,7 +1014,7 @@ static int subproc_Popen(KonohaContext *kctx, kString* command, kSubproc *p, int
 		}
 		setsid(); // separate from tty
 		if(!IS_NULL(sp->cwd)) { // TODO!!
-			if(chdir(S_text((sp->cwd))) != 0) {
+			if(chdir(kString_text((sp->cwd))) != 0) {
 				//TODO: trace
 				_exit(1);
 			}
@@ -1023,7 +1023,7 @@ static int subproc_Popen(KonohaContext *kctx, kString* command, kSubproc *p, int
 		//		if(sp->shell == 0) {
 		if(!SUBPROC_IsShell(sp)) {
 			// division of a commnad parameter
-			if(spSplit((char *)S_text(command), args) < 0){
+			if(spSplit((char *)kString_text(command), args) < 0){
 				//TODO: error
 				args[0] = NULL;
 			}
@@ -1035,7 +1035,7 @@ static int subproc_Popen(KonohaContext *kctx, kString* command, kSubproc *p, int
 			char *envs[num+1];
 			int i;
 			for(i = 0; i < num; i++) {
-				envs[i] = (char *)S_text(a->stringItems[i]);
+				envs[i] = (char *)kString_text(a->stringItems[i]);
 			}
 			envs[num] = NULL;
 			// exec load new process image if success.
@@ -1047,7 +1047,7 @@ static int subproc_Popen(KonohaContext *kctx, kString* command, kSubproc *p, int
 				}
 			}
 			else {
-				if(execle("/bin/sh", "sh", "-c", S_text(command), NULL, envs) == -1) {
+				if(execle("/bin/sh", "sh", "-c", kString_text(command), NULL, envs) == -1) {
 					//todo: trace
 				}
 			}
@@ -1059,7 +1059,7 @@ static int subproc_Popen(KonohaContext *kctx, kString* command, kSubproc *p, int
 				}
 			}
 			else {
-				if(execlp("sh", "sh", "-c", S_text(command), NULL) == -1) {
+				if(execlp("sh", "sh", "-c", kString_text(command), NULL) == -1) {
 					//todo trace
 				}
 			}
@@ -1395,7 +1395,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	KMakeTrace(trace, sfp);
 	if(ONEXEC(sp)) {
-		if((sp->wmode == M_PIPE) && (S_size(sfp[1].asString) > 0)) {
+		if((sp->wmode == M_PIPE) && (kString_size(sfp[1].asString) > 0)) {
 			kString *s = sfp[1].asString;
 			// The measure against panic,
 			// if "Broken Pipe" is detected at the time of writing.
@@ -1404,7 +1404,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 #elif defined(__APPLE__) || defined(__NetBSD__)
 			sig_t oldset = signal(SIGPIPE, SIG_IGN);
 #endif
-			if(fwrite(S_text(s), sizeof(char), S_size(s), sp->wfp) > 0) {
+			if(fwrite(kString_text(s), sizeof(char), kString_size(s), sp->wfp) > 0) {
 //				fputc('\n', p->w.fp);
 //				fflush(p->w.fp);
 //				fsync(fileno(p->w.fp));
@@ -1486,7 +1486,7 @@ static KMETHOD Subproc_setCwd(KonohaContext *kctx, KonohaStack *sfp)
 	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	int ret = PREEXEC(sp);
 	if(ret) {
-		sp->cwd = KLIB new_kString(kctx, GcUnsafe, S_text(sfp[1].asString), S_size(sfp[1].asString), 0);
+		sp->cwd = KLIB new_kString(kctx, GcUnsafe, kString_text(sfp[1].asString), kString_size(sfp[1].asString), 0);
 	}
 	KReturnUnboxValue(ret);
 }
@@ -1828,7 +1828,7 @@ static kbool_t subproc_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	// old subproc ..
 	KDEFINE_CLASS defSubproc = {
 		STRUCTNAME(Subproc),
-		.cflag    = kClass_Final,
+		.cflag    = KClassFlag_Final,
 		.init     = kSubproc_Init,
 		.free     = kSubproc_Free,
 		.reftrace = kSubproc_Reftrace,
@@ -1838,7 +1838,7 @@ static kbool_t subproc_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 
 	kparamtype_t ps = {TY_String, FN_("str")};
 	KonohaClass *CT_StringArray2 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_String, 1, &ps);
-	kattrtype_t TY_StringArray = CT_StringArray2->typeId;
+	ktypeattr_t TY_StringArray = CT_StringArray2->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Subproc_new), TY_Subproc, TY_Subproc,MN_("new"), 2, TY_String, FN_("path"), TY_boolean, FN_("mode"),

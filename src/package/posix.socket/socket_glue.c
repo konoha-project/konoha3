@@ -212,7 +212,7 @@ KMETHOD System_bind(KonohaContext *kctx, KonohaStack* sfp)
 {
 	struct sockaddr_in addr;
 	toSockaddr(&addr,
-			S_text(sfp[2].asString),
+			kString_text(sfp[2].asString),
 			WORD2INT(sfp[3].intValue),
 			WORD2INT(sfp[4].intValue)
 	);
@@ -250,7 +250,7 @@ KMETHOD System_connect(KonohaContext *kctx, KonohaStack* sfp)
 {
 	struct sockaddr_in addr;
 	toSockaddr(&addr,
-				S_text(sfp[2].asString),
+				kString_text(sfp[2].asString),
 				WORD2INT(sfp[3].intValue),
 				WORD2INT(sfp[4].intValue)
 	);
@@ -491,7 +491,7 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 //	kBytes *ba = sfp[2].asBytes;
 //	struct sockaddr_in addr;
 //	kString* s = sfp[4].asString;
-//	toSockaddr(&addr, (char *)S_text(s), WORD2INT(sfp[5].intValue), WORD2INT(sfp[6].intValue));
+//	toSockaddr(&addr, (char *)kString_text(s), WORD2INT(sfp[5].intValue), WORD2INT(sfp[6].intValue));
 //	// Broken Pipe Signal Mask
 //#if defined(__linux__)
 //	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
@@ -621,14 +621,14 @@ static kbool_t socket_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 {
 	KDEFINE_CLASS defSockAddr = {
 		STRUCTNAME(SockAddr),
-		.cflag = kClass_Final,
+		.cflag = KClassFlag_Final,
 		.init = SockAddr_Init,
 		.free = SockAddr_Free,
 	};
 	KonohaClass *cSockAddr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSockAddr, trace);
 	kparamtype_t pi = {TY_int, FN_("intValue")};
 	KonohaClass *CT_IntArray = KLIB KonohaClass_Generics(kctx, CT_Array, TY_int, 1, &pi);
-	kattrtype_t TY_intArray = CT_IntArray->typeId;
+	ktypeattr_t TY_intArray = CT_IntArray->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static|_Const|_Im, _F(System_accept), TY_int, TY_System, MN_("accept"), 2, TY_int, FN_("fd"), TY_SockAddr, FN_("sockaddr"),

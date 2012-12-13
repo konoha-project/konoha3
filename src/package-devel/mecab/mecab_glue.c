@@ -86,7 +86,7 @@ static KMETHOD Tagger_new (KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Tagger_Parse(KonohaContext *kctx, KonohaStack *sfp)
 {
 	mecab_t * mecab = ((struct _kTagger *)(sfp[0].asObject))->mecab;
-	const char *input = S_text(sfp[1].asString);
+	const char *input = kString_text(sfp[1].asString);
 	const char* result = mecab_sparse_tostr(mecab, input);
 	KReturn(KLIB new_kString(kctx, GcUnsafe, result, strlen(result), 0));
 }
@@ -96,7 +96,7 @@ static KMETHOD Tagger_NBestParse(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kTagger *mecab = (struct _kTagger *)sfp[0].asObject;
 	kint_t ival = sfp[1].intValue;
-	const char *input = S_text(sfp[2].asString);
+	const char *input = kString_text(sfp[2].asString);
 	const char* result = mecab_nbest_sparse_tostr(mecab->mecab, ival, input);
 	KReturn(KLIB new_kString(kctx, GcUnsafe, result, strlen(result), 0));
 }
@@ -105,7 +105,7 @@ static KMETHOD Tagger_NBestParse(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Tagger_NBestInit(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kTagger *mecab = (struct _kTagger *)sfp[0].asObject;
-	const char *input = S_text(sfp[1].asString);
+	const char *input = kString_text(sfp[1].asString);
 	KReturnUnboxValue(mecab_nbest_init(mecab->mecab, input));
 }
 
@@ -121,7 +121,7 @@ static KMETHOD Tagger_NBestNext(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Tagger_ParseToNode(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kTagger *mecab = (struct _kTagger *)sfp[0].asObject;
-	const char *input = S_text(sfp[1].asString);
+	const char *input = kString_text(sfp[1].asString);
 	const mecab_node_t* node = mecab_sparse_tonode(mecab->mecab, input);
 	struct _kMecabNode* ret = (struct _kMecabNode *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 	ret->node = node;
@@ -333,14 +333,14 @@ static kbool_t mecab_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 {
 	static KDEFINE_CLASS TaggerDef = {
 		STRUCTNAME(Tagger),
-		.cflag = kClass_Final,
+		.cflag = KClassFlag_Final,
 		.init = Tagger_Init,
 		.free = Tagger_Free,
 	};
 
 	static KDEFINE_CLASS MecabNodeDef = {
 		STRUCTNAME(MecabNode),
-		.cflag = kClass_Final,
+		.cflag = KClassFlag_Final,
 		.init = MecabNode_Init,
 		.free = MecabNode_Free,
 	};

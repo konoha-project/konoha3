@@ -36,14 +36,14 @@ struct kConsoleVar {
 //## void Console.notify(String msg)
 static KMETHOD Console_notify(KonohaContext *kctx, KonohaStack *sfp)
 {
-	PLATAPI ReportUserMessage(kctx, NoticeTag, (sfp[K_RTNIDX].calledFileLine), S_text(sfp[1].asString), true);
+	PLATAPI ReportUserMessage(kctx, NoticeTag, (sfp[K_RTNIDX].calledFileLine), kString_text(sfp[1].asString), true);
 }
 
 //## void Console.readLine(String prompt)
 static KMETHOD Console_readLine(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s;
-	char *p = PLATAPI InputUserText(kctx, S_text(sfp[1].asString), 0);
+	char *p = PLATAPI InputUserText(kctx, kString_text(sfp[1].asString), 0);
 	if(p != NULL) {
 		s = KLIB new_kString(kctx, OnStack, p, strlen(p), 0);
 		free(p);
@@ -57,7 +57,7 @@ static KMETHOD Console_readLine(KonohaContext *kctx, KonohaStack *sfp)
 //## boolean Console.inputUserApproval(String msg, String yes, String no, kbool_t defval)
 static KMETHOD Console_inputUserApproval(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturnUnboxValue(PLATAPI InputUserApproval(kctx, S_text(sfp[1].asString), S_text(sfp[2].asString), S_text(sfp[3].asString), sfp[4].boolValue));
+	KReturnUnboxValue(PLATAPI InputUserApproval(kctx, kString_text(sfp[1].asString), kString_text(sfp[2].asString), kString_text(sfp[3].asString), sfp[4].boolValue));
 }
 
 static kString* kConsole_inputUserPassword(KonohaContext *kctx, const char *message)
@@ -77,7 +77,7 @@ static kString* kConsole_inputUserPassword(KonohaContext *kctx, const char *mess
 //## boolean Console.inputUserPassword(String msg)
 static KMETHOD Console_inputUserPassword(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturn(kConsole_inputUserPassword(kctx, S_text(sfp[1].asString)));
+	KReturn(kConsole_inputUserPassword(kctx, kString_text(sfp[1].asString)));
 }
 
 //## boolean Console.inputUserPassword(String msg)
@@ -97,7 +97,7 @@ static kbool_t console_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 {
 	KDEFINE_CLASS defConsole = {0};
 	SETSTRUCTNAME(defConsole, Console);
-	defConsole.cflag = kClass_Final | kClass_Singleton;
+	defConsole.cflag = KClassFlag_Final | KClassFlag_Singleton;
 
 	KonohaClass *cConsole = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defConsole, trace);
 	int TY_Console = cConsole->typeId;

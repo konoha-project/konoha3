@@ -117,7 +117,7 @@ static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeT
 			KLIB KBuffer_printf(kctx, wb, " %s.%s%s", TY_t(mtd->typeId), MethodName_t(mtd->mn));
 		}
 		else {
-			KLIB KBuffer_printf(kctx, wb, " (%s)", CT_t(O_ct(o)));
+			KLIB KBuffer_printf(kctx, wb, " (%s)", CT_t(kObject_class(o)));
 			KLIB kObject_WriteToBuffer(kctx, o, 0, wb, NULL, 0);
 		}
 		break;
@@ -160,13 +160,13 @@ static void DumpVirtualCode(KonohaContext *kctx, VirtualCode *c)
 
 static void kNameSpace_LookupMethodWithInlineCache(KonohaContext *kctx, KonohaStack *sfp, kNameSpace *ns, kMethod **cache)
 {
-	kattrtype_t typeId = O_typeId(sfp[0].asObject);
+	ktypeattr_t typeId = kObject_typeId(sfp[0].asObject);
 	kMethod *mtd = cache[0];
 	if(mtd->typeId != typeId) {
-		mtd = KLIB kNameSpace_GetMethodBySignatureNULL(kctx, ns, O_ct(sfp[0].asObject), mtd->mn, mtd->paramdom, 0, NULL);
+		mtd = KLIB kNameSpace_GetMethodBySignatureNULL(kctx, ns, kObject_class(sfp[0].asObject), mtd->mn, mtd->paramdom, 0, NULL);
 		cache[0] = mtd;
 	}
-	sfp[0].unboxValue = O_unbox(sfp[0].asObject);
+	sfp[0].unboxValue = kObject_Unbox(sfp[0].asObject);
 	sfp[K_MTDIDX].calledMethod = mtd;
 }
 
@@ -442,7 +442,7 @@ static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
 
 #define NC_(sfpidx)       (((sfpidx) * 2) + 1)
 #define OC_(sfpidx)       ((sfpidx) * 2)
-#define TC_(sfpidx, C) ((CT_Is(UnboxType, C)) ? NC_(sfpidx) : OC_(sfpidx))
+#define TC_(sfpidx, C) ((KClass_Is(UnboxType, C)) ? NC_(sfpidx) : OC_(sfpidx))
 #define SFP_(sfpidx)   ((sfpidx) * 2)
 
 
@@ -695,7 +695,7 @@ static void KBuilder_VisitConstExpr(KonohaContext *kctx, KBuilder *builder, kStm
 {
 	int a = builder->common.a;
 	kObject *v = expr->objectConstValue;
-	DBG_ASSERT(!TY_isUnbox(expr->attrTypeId));
+	DBG_ASSERT(!KType_Is(UnboxType, expr->attrTypeId));
 	DBG_ASSERT(Expr_hasObjectConstValue(expr));
 	v = KBuilder_AddConstPool(kctx, builder, v);
 	ASM(NSET, OC_(a), (uintptr_t)v, CT_(expr->attrTypeId));
@@ -716,7 +716,7 @@ static void KBuilder_VisitNewExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 static void KBuilder_VisitNullExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
 	int a = builder->common.a;
-	if(TY_isUnbox(expr->attrTypeId)) {
+	if(KType_Is(UnboxType, expr->attrTypeId)) {
 		ASM(NSET, NC_(a), 0, CT_(expr->attrTypeId));
 	}
 	else {

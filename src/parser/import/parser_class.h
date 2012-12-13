@@ -84,7 +84,7 @@ static const char *kToken_t(KonohaContext *kctx, kToken *tk)
 		if(tk->unresolvedTokenType == TokenType_CODE) {
 			return "{... }";
 		}
-		return S_text(tk->text);
+		return kString_text(tk->text);
 	}
 	else {
 		switch(tk->resolvedSymbol) {
@@ -111,7 +111,7 @@ static void KBuffer_WriteTokenSymbol(KonohaContext *kctx, KGrowingBuffer *wb, kT
 
 static void KBuffer_WriteTokenText(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
 {
-	const char *text = IS_String(tk->text) ? S_text(tk->text) : "...";
+	const char *text = IS_String(tk->text) ? kString_text(tk->text) : "...";
 	char c = kToken_GetOpenHintChar(tk);
 	if(c != 0) {
 		KLIB KBuffer_printf(kctx, wb, "%c%s%c", c, text, kToken_GetCloseHintChar(tk));
@@ -128,7 +128,7 @@ static void kToken_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowing
 	kToken *tk = values[pos].asToken;
 	KBuffer_WriteTokenSymbol(kctx, wb, tk);
 	if(IS_String(tk->text)) {
-		KLIB KBuffer_printf(kctx, wb, "'%s'", S_text(tk->text));
+		KLIB KBuffer_printf(kctx, wb, "'%s'", kString_text(tk->text));
 	}
 	else if(IS_Array(tk->subTokenList)) {
 		size_t i;
@@ -178,7 +178,7 @@ static void kExprTerm_p(KonohaContext *kctx, kObject *o, KonohaValue *values, in
 	}
 	else {
 		KUnsafeFieldSet(values[pos].asObject, o);
-		O_ct(o)->p(kctx, values, pos, wb);
+		kObject_class(o)->p(kctx, values, pos, wb);
 	}
 }
 #endif
@@ -313,11 +313,11 @@ static kExpr* kExpr_Add(KonohaContext *kctx, kExpr *expr, kExpr *e)
 static kExpr* SUGAR kExpr_SetConstValue(KonohaContext *kctx, kExprVar *expr, KonohaClass *typedClass, kObject *o)
 {
 	expr = (expr == NULL) ? new_(ExprVar, 0, OnGcStack) : expr;
-	if(typedClass == NULL) typedClass = O_ct(o);
+	if(typedClass == NULL) typedClass = kObject_class(o);
 	expr->attrTypeId = typedClass->typeId;
-	if(CT_Is(UnboxType, typedClass)) {
+	if(KClass_Is(UnboxType, typedClass)) {
 		expr->build = TEXPR_NCONST;
-		expr->unboxConstValue = N_toint(o);
+		expr->unboxConstValue = kNumber_ToInt(o);
 	}
 	else {
 		expr->build = TEXPR_CONST;
@@ -327,7 +327,7 @@ static kExpr* SUGAR kExpr_SetConstValue(KonohaContext *kctx, kExprVar *expr, Kon
 	return (kExpr *)expr;
 }
 
-static kExpr* SUGAR kExpr_SetUnboxConstValue(KonohaContext *kctx, kExprVar *expr, kattrtype_t attrTypeId, uintptr_t unboxValue)
+static kExpr* SUGAR kExpr_SetUnboxConstValue(KonohaContext *kctx, kExprVar *expr, ktypeattr_t attrTypeId, uintptr_t unboxValue)
 {
 	expr = (expr == NULL) ? new_(ExprVar, 0, OnGcStack) : (kExprVar *)expr;
 	expr->build = TEXPR_NCONST;
@@ -336,7 +336,7 @@ static kExpr* SUGAR kExpr_SetUnboxConstValue(KonohaContext *kctx, kExprVar *expr
 	return (kExpr *)expr;
 }
 
-static kExpr* SUGAR kExpr_SetVariable(KonohaContext *kctx, kExprVar *expr, kGamma *gma, kexpr_t build, kattrtype_t attrTypeId, intptr_t index)
+static kExpr* SUGAR kExpr_SetVariable(KonohaContext *kctx, kExprVar *expr, kGamma *gma, kexpr_t build, ktypeattr_t attrTypeId, intptr_t index)
 {
 	expr = (expr == NULL) ? new_(ExprVar, 0, OnGcStack) : (kExprVar *)expr;
 	expr->build = build;
@@ -434,11 +434,11 @@ static const char* kStmt_GetText(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw,
 	kExpr *expr = (kExpr *)kStmt_GetObjectNULL(kctx, stmt, kw);
 	if(expr != NULL) {
 		if(IS_Expr(expr) && Expr_isTerm(expr)) {
-			return S_text(expr->termToken->text);
+			return kString_text(expr->termToken->text);
 		}
 		else if(IS_Token(expr)) {
 			kToken *tk = (kToken *)expr;
-			if(IS_String(tk->text)) return S_text(tk->text);
+			if(IS_String(tk->text)) return kString_text(tk->text);
 		}
 	}
 	return def;

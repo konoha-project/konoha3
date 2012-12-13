@@ -106,13 +106,13 @@ static RawEvent* dequeueRawEventFromLocalQueue(LocalQueue *queue)
 //{
 //	int safepoint = ctx->safepoint;
 //	WCTX(ctx)->safepoint = 0;
-//	if(TFLAG_is(int, safepoint, SAFEPOINT_GC)) {
+//	if(KFlag_Is(int, safepoint, SAFEPOINT_GC)) {
 //		if(line != 0) {
 //			GC_LOG("%s:%d safepoint=%d", file, line, safepoint);
 //		}
 //		invoke_gc(ctx);
 //	}
-//	if(TFLAG_is(int, safepoint, SAFEPOINT_SIGNAL)) {
+//	if(KFlag_Is(int, safepoint, SAFEPOINT_SIGNAL)) {
 //		if(ctx->sighandlers != NULL) {
 //			KNH_ASSERT(ctx->signal < K_SIGNAL_MAX);
 //			kFunc *handler_func = (kFunc *)ctx->sighandlers[ctx->signal];
@@ -124,7 +124,7 @@ static RawEvent* dequeueRawEventFromLocalQueue(LocalQueue *queue)
 //		}
 //		WCTX(ctx)->signal = 0;
 //	}
-//	if(TFLAG_is(int, safepoint, SAFEPOINT_MONITOR)) {
+//	if(KFlag_Is(int, safepoint, SAFEPOINT_MONITOR)) {
 //		//
 //	}
 //}

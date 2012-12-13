@@ -44,7 +44,7 @@ typedef struct {
 
 static inline kObject *new_ReturnCppObject(KonohaContext *kctx,KonohaStack *sfp, void *ptr) {
 	kObject *defobj = sfp[(-(K_CALLDELTA))].asObject;
-	kObject *ret = KLIB new_kObject(kctx, OnStack, O_ct(defobj), (uintptr_t)ptr);
+	kObject *ret = KLIB new_kObject(kctx, OnStack, kObject_class(defobj), (uintptr_t)ptr);
 	((kRawPtr *)ret)->rawptr = ptr;
 	return ret;
 }
@@ -547,25 +547,25 @@ static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 	g_comm_world->comm = MPI_COMM_WORLD;
 	static KDEFINE_CLASS MPIDef = {
 		.structname = "MPI",
-		.typeId = TY_newid
+		.typeId = TypeAttr_NewId
 	};
 	static KDEFINE_CLASS MPICommDef = {
 		.structname = "MPIComm",
-		.typeId = TY_newid
+		.typeId = TypeAttr_NewId
 	};
 	static KDEFINE_CLASS MPIRequestDef = {
 		.structname = "MPIRequest",
-		.typeId = TY_newid,
+		.typeId = TypeAttr_NewId,
 		.free = MPIRequest_ptr_Free
 	};
 	static KDEFINE_CLASS MPIDataDef = {
 		.structname = "MPIData",
-		.typeId = TY_newid,
+		.typeId = TypeAttr_NewId,
 		.free = MPIData_ptr_Free
 	};
 	//static KDEFINE_CLASS MPIOpDef = {
 	//	.structname = "MPIOp",
-	//	.typeId = TY_newid
+	//	.typeId = TypeAttr_NewId
 	//};
 	KonohaClass *CT_MPI = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPIDef, trace);
 	KonohaClass *CT_MPIComm = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPICommDef, trace);

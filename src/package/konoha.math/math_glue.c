@@ -210,9 +210,9 @@ static kbool_t math_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 {
 	KRequirePackage("konoha.float", trace);
 	static KDEFINE_CLASS MathDef = {0};
-	MathDef.cflag = kClass_Singleton|kClass_Final;
+	MathDef.cflag = KClassFlag_Singleton|KClassFlag_Final;
 	MathDef.structname = "Math"; /*structname*/
-	MathDef.typeId = TY_newid; /*cid*/
+	MathDef.typeId = TypeAttr_NewId; /*cid*/
 
 	KonohaClass *cMath = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MathDef, trace);
 	int FN_x = FN_("x");

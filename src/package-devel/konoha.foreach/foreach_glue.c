@@ -35,9 +35,9 @@ extern "C" {
 
 // ---------------------------------------------------------------------------
 
-#define TY_isIterator(T)     (CT_(T)->baseTypeId == TY_Iterator)
+#define KType_IsIterator(T)     (CT_(T)->baseTypeId == TY_Iterator)
 
-static kToken* new_TypeToken(KonohaContext *kctx, kNameSpace *ns, kattrtype_t typeId)
+static kToken* new_TypeToken(KonohaContext *kctx, kNameSpace *ns, ktypeattr_t typeId)
 {
 	kToken *TypeToken = new_(Token, 0, OnGcStack);
 	kToken_setTypeId(kctx, TypeToken, ns, typeId);
@@ -121,7 +121,7 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 		kToken *VariableToken  = SUGAR kStmt_GetToken(kctx, stmt, KW_SymbolPattern, NULL);
 		DBG_P("typeToken=%p, varToken=%p", TypeToken, VariableToken);
 		kExpr *IteratorExpr = SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL);
-		if(!TY_isIterator(IteratorExpr->attrTypeId)) {
+		if(!KType_IsIterator(IteratorExpr->attrTypeId)) {
 			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, CT_(IteratorExpr->attrTypeId), MN_to(TY_Iterator), 0, MethodMatch_NoOption);
 			if(mtd == NULL) {
 				kStmtExpr_Message(kctx, stmt, IteratorExpr, ErrTag, "expected Iterator expression after in");

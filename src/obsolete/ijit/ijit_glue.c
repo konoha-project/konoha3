@@ -270,7 +270,7 @@ static KMETHOD System_AddConstPool(KonohaContext *kctx, KonohaStack *sfp)
 
 static uintptr_t jitcache_hash(kMethod *mtd)
 {
-	kattrtype_t cid = mtd->typeId;
+	ktypeattr_t cid = mtd->typeId;
 	kmethodn_t mn = mtd->mn;
 	return (cid << sizeof(short)*8) | mn;
 }
@@ -451,7 +451,7 @@ static KMETHOD Stmt_getObjectNULL(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Object_unbox(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kObject *o = sfp[0].asObject;
-	KReturnUnboxValue(O_unbox(o));
+	KReturnUnboxValue(kObject_Unbox(o));
 }
 
 
@@ -469,7 +469,7 @@ static KMETHOD Object_toExpr(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(sfp[0].asObject);
 }
 
-kObject *boxing_jit(KonohaContext *kctx, kattrtype_t cid, uintptr_t data)
+kObject *boxing_jit(KonohaContext *kctx, ktypeattr_t cid, uintptr_t data)
 {
 	return KLIB new_kObjectDontUseThis(kctx, CT_(cid), data);
 }
@@ -606,7 +606,7 @@ static KMETHOD Method_getFname(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Method_getCname(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	kattrtype_t cid = mtd->typeId;
+	ktypeattr_t cid = mtd->typeId;
 	const char *cname = TY_t(cid);
 	KReturn(KLIB new_kString(kctx, cname, strlen(cname), 0));
 }
@@ -614,7 +614,7 @@ static KMETHOD Method_getCname(KonohaContext *kctx, KonohaStack *sfp)
 //## Object System.getNULL(kctx, int type);
 static KMETHOD System_getNULL(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kattrtype_t cid = sfp[1].intValue;
+	ktypeattr_t cid = sfp[1].intValue;
 	kObject *o = KLIB Knull(kctx, CT_(cid));
 	KReturn(o);
 }

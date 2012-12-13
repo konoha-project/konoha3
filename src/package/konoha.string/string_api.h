@@ -76,9 +76,9 @@ static int MultiByteChar_length(unsigned char s)
 static size_t MultibyteString_length(KonohaContext *kctx, kString *self)
 {
 	size_t size = 0;
-	const unsigned char *pos = (const unsigned char *)S_text(self);
-	const unsigned char *end = pos + S_size(self);
-	assert(!kString_is(ASCII, self));
+	const unsigned char *pos = (const unsigned char *)kString_text(self);
+	const unsigned char *end = pos + kString_size(self);
+	assert(!kString_Is(ASCII, self));
 	while(pos < end) {
 		size++;
 		pos += utf8len(*pos);
@@ -86,23 +86,23 @@ static size_t MultibyteString_length(KonohaContext *kctx, kString *self)
 	return size;
 }
 
-#define StringPolicy_maskASCII(S)  (kString_is(ASCII, S) ? StringPolicy_ASCII : 0)
+#define StringPolicy_maskASCII(S)  (kString_Is(ASCII, S) ? StringPolicy_ASCII : 0)
 
 static int String_compareTo(KonohaContext *kctx, kString *self, kString *that)
 {
-	size_t llen = S_size(self);
-	size_t rlen = S_size(that);
+	size_t llen = kString_size(self);
+	size_t rlen = kString_size(that);
 	size_t n = (llen > rlen) ? llen : rlen;
-	int ret = strncmp(S_text(self), S_text(that), n);
+	int ret = strncmp(kString_text(self), kString_text(that), n);
 	return ret == 0 ? (intptr_t)(llen - rlen) : ret;
 }
 
 static int String_compareToIgnoreCase(KonohaContext *kctx, kString *self, kString *that)
 {
-	size_t llen = S_size(self);
-	size_t rlen = S_size(that);
+	size_t llen = kString_size(self);
+	size_t rlen = kString_size(that);
 	size_t n = (llen > rlen) ? llen : rlen;
-	int ret = strncasecmp(S_text(self), S_text(that), n);
+	int ret = strncasecmp(kString_text(self), kString_text(that), n);
 	return ret == 0 ? (intptr_t)(llen - rlen) : ret;
 }
 
@@ -119,29 +119,29 @@ static uint32_t fnv1a(const char *p, uint32_t len)
 
 static kushort_t String_hashCode(KonohaContext *kctx, kString *self)
 {
-	kushort_t hash = kObject_hashCode(self);
+	kushort_t hash = kObject_HashCode(self);
 	if(hash != 0)
 		return hash;
-	hash = fnv1a(S_text(self), S_size(self));
-	kObject_setHashCode(self, hash);
+	hash = fnv1a(kString_text(self), kString_size(self));
+	kObject_SetHashCode(self, hash);
 	return hash;
 }
 
 static size_t String_length(KonohaContext *kctx, kString *self)
 {
-	size_t bytesize = S_size(self);
-	return (kString_is(ASCII, self)) ? bytesize : MultibyteString_length(kctx, self);
+	size_t bytesize = kString_size(self);
+	return (kString_Is(ASCII, self)) ? bytesize : MultibyteString_length(kctx, self);
 }
 
 static uint32_t String_charAt(KonohaContext *kctx, kString *self, size_t index)
 {
-	const char *text = S_text(self);
-	if(kString_is(ASCII, self)) {
+	const char *text = kString_text(self);
+	if(kString_Is(ASCII, self)) {
 		return text[index];
 	}
 
 	unsigned char *s = (unsigned char *) (text + MultibyteText_length(text, index));
-	unsigned char *e = (unsigned char *) (text + S_size(self));
+	unsigned char *e = (unsigned char *) (text + kString_size(self));
 	uint32_t v = 0;
 	int i, length = MultiByteChar_length((unsigned char) (*s));
 	if(length == 2) v = *s++ & 0x1f;
@@ -159,25 +159,25 @@ static uint32_t String_charAt(KonohaContext *kctx, kString *self, size_t index)
 
 static bool String_startsWith(KonohaContext *kctx, kString *self, kString *prefix, size_t toffset)
 {
-	const char *ttext = S_text(self) + toffset;
-	const char *ptext = S_text(prefix);
-	return strncmp(ttext, ptext, S_size(prefix)) == 0;
+	const char *ttext = kString_text(self) + toffset;
+	const char *ptext = kString_text(prefix);
+	return strncmp(ttext, ptext, kString_size(prefix)) == 0;
 }
 
 static bool String_endsWith(KonohaContext *kctx, kString *self, kString *suffix)
 {
-	const char *ttext = S_text(self);
-	const char *stext = S_text(suffix);
-	size_t tlen = S_size(self);
-	size_t slen = S_size(suffix);
+	const char *ttext = kString_text(self);
+	const char *stext = kString_text(suffix);
+	size_t tlen = kString_size(self);
+	size_t slen = kString_size(suffix);
 	return strncmp(ttext + tlen - slen, stext, slen) == 0;
 }
 
 static int String_indexOfChar(KonohaContext *kctx, kString *self, int ch, size_t fromIndex)
 {
-	const char *base = S_text(self);
+	const char *base = kString_text(self);
 	const char *pos = base + fromIndex;
-	const char *end = base + S_size(self);
+	const char *end = base + kString_size(self);
 	while(pos < end) {
 		if(*pos == ch) {
 			return pos - base;
@@ -189,7 +189,7 @@ static int String_indexOfChar(KonohaContext *kctx, kString *self, int ch, size_t
 
 static int String_lastIndexOfChar(KonohaContext *kctx, kString *self, int ch, size_t fromIndex)
 {
-	const char *base = S_text(self);
+	const char *base = kString_text(self);
 	const char *pos = base + fromIndex;
 	while(pos >= base) {
 		if(*pos == ch) {
@@ -202,13 +202,13 @@ static int String_lastIndexOfChar(KonohaContext *kctx, kString *self, int ch, si
 
 static int String_indexOfString(KonohaContext *kctx, kString *self, kString *str, size_t fromIndex)
 {
-	const char *base = S_text(self);
+	const char *base = kString_text(self);
 	const char *pos  = base + fromIndex;
-	const char *text = S_text(str);
+	const char *text = kString_text(str);
 	pos = strstr(pos, text);
 	if(pos != NULL) {
 		intptr_t loc = pos - base;
-		if(!kString_is(ASCII, self)) {
+		if(!kString_Is(ASCII, self)) {
 			loc = MultibyteText_length(base, (size_t)loc);
 		}
 		return loc;
@@ -218,21 +218,21 @@ static int String_indexOfString(KonohaContext *kctx, kString *self, kString *str
 
 static int String_lastIndexOfString(KonohaContext *kctx, kString *self, kString *str, size_t fromIndex)
 {
-	const char *base = S_text(self);
+	const char *base = kString_text(self);
 	const char *pos  = base;
-	const char *text = S_text(str);
-	size_t offset = (kString_is(ASCII, self)? fromIndex : MultibyteText_bytesize(base, fromIndex));
+	const char *text = kString_text(str);
+	size_t offset = (kString_Is(ASCII, self)? fromIndex : MultibyteText_bytesize(base, fromIndex));
 	pos = pos + offset;
-	if(S_size(str) == 0) {
-		return kString_is(ASCII, self)?
-			fromIndex : MultibyteText_bytesize(S_text(self), fromIndex);
+	if(kString_size(str) == 0) {
+		return kString_Is(ASCII, self)?
+			fromIndex : MultibyteText_bytesize(kString_text(self), fromIndex);
 	}
 
 	intptr_t loc = -1;
 	while(pos >= base) {
-		if(strncmp(pos, text, S_size(str)) == 0) {
+		if(strncmp(pos, text, kString_size(str)) == 0) {
 			loc = (intptr_t)(pos - base);
-			if(!kString_is(ASCII, self)) {
+			if(!kString_Is(ASCII, self)) {
 				loc = MultibyteText_length(base, (size_t)(loc));
 			}
 			break;
@@ -244,24 +244,24 @@ static int String_lastIndexOfString(KonohaContext *kctx, kString *self, kString 
 
 static bool String_regionMatches(KonohaContext *kctx, kString *self, bool ignoreCase, size_t toffset, kString *other, size_t ooffset, size_t len)
 {
-	const char *base = S_text(self)  + toffset;
-	const char *text = S_text(other) + ooffset;
+	const char *base = kString_text(self)  + toffset;
+	const char *text = kString_text(other) + ooffset;
 	int ret = (ignoreCase == true) ? strncasecmp(base, text, len) : strncmp(base, text, len);
 	return ret == 0;
 }
 
 static kString* String_replaceFirst(KonohaContext *kctx, kString *self, kString *oldText, kString *newText)
 {
-	const char *text = S_text(self);
-	const char *end  = text + S_size(self);
-	const char *pos  = strstr(text, S_text(oldText));
-	const size_t oldLen = S_size(oldText);
+	const char *text = kString_text(self);
+	const char *end  = text + kString_size(self);
+	const char *pos  = strstr(text, kString_text(oldText));
+	const size_t oldLen = kString_size(oldText);
 	if(pos == NULL)
 		return self;
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KLIB KBuffer_Write(kctx, &wb, text, pos - text);
-	KLIB KBuffer_Write(kctx, &wb, S_text(newText), S_size(newText));
+	KLIB KBuffer_Write(kctx, &wb, kString_text(newText), kString_size(newText));
 	KLIB KBuffer_Write(kctx, &wb, pos + oldLen, end - pos - oldLen);
 	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_Stringfy(kctx, &wb, 0),
 			KBuffer_bytesize(&wb), StringPolicy_maskASCII(self));
@@ -271,8 +271,8 @@ static kString* String_replaceFirst(KonohaContext *kctx, kString *self, kString 
 
 static kString* String_replace(KonohaContext *kctx, kString *self, const char *oldText, size_t oldLen, const char *newText, size_t newLen)
 {
-	const char *text = S_text(self);
-	const char *end  = text + S_size(self);
+	const char *text = kString_text(self);
+	const char *end  = text + kString_size(self);
 	const char *pos  = strstr(text, oldText);
 	if(pos == NULL)
 		return self;
@@ -302,15 +302,15 @@ static kString* String_replaceChar(KonohaContext *kctx, kString *self, char oldC
 
 static kString* String_replaceAll(KonohaContext *kctx, kString *self, kString *pattern, kString *replacement)
 {
-	return String_replace(kctx, self, S_text(pattern), S_size(pattern),
-			S_text(replacement), S_size(replacement));
+	return String_replace(kctx, self, kString_text(pattern), kString_size(pattern),
+			kString_text(replacement), kString_size(replacement));
 }
 
 static kString *String_trim(KonohaContext *kctx, kString *self)
 {
-	const char *base = S_text(self);
+	const char *base = kString_text(self);
 	const char *text = base;
-	size_t len = S_size(self);
+	size_t len = kString_size(self);
 	while(isspace(*text)) {
 		++text;
 		--len;
@@ -321,7 +321,7 @@ static kString *String_trim(KonohaContext *kctx, kString *self)
 				break;
 		}
 	}
-	if(S_size(self) == len) {
+	if(kString_size(self) == len) {
 		return self;
 	}
 	return KLIB new_kString(kctx, OnStack, text, len, StringPolicy_maskASCII(self));
@@ -367,9 +367,9 @@ static kString* String_tolower(KonohaContext *kctx, kString *self, const char *t
 static kString *String_toUpperCase(KonohaContext *kctx, kString *self, kString *locale)
 {
 	/*FIXME(ide): support locale */
-	const char *base = S_text(self);
+	const char *base = kString_text(self);
 	const char *pos  = base;
-	const char *end  = base + S_size(self);
+	const char *end  = base + kString_size(self);
 	while(pos < end) {
 		int ch = *pos;
 		if('a' <= ch && ch <= 'z') {
@@ -383,9 +383,9 @@ static kString *String_toUpperCase(KonohaContext *kctx, kString *self, kString *
 static kString *String_toLowerCase(KonohaContext *kctx, kString *self, kString *locale)
 {
 	/*FIXME(ide): support locale */
-	const char *base = S_text(self);
+	const char *base = kString_text(self);
 	const char *pos  = base;
-	const char *end  = base + S_size(self);
+	const char *end  = base + kString_size(self);
 	while(pos < end) {
 		int ch = *pos;
 		if('A' <= ch && ch <= 'Z') {
@@ -400,19 +400,19 @@ static kString *new_UTF8SubString(KonohaContext *kctx, kString *self, size_t off
 {
 	const unsigned char *text, *pos, *end;
 	size_t beginIndex, endIndex;
-	assert(!kString_is(ASCII, self));
-	text       = (const unsigned char *) S_text(self);
+	assert(!kString_Is(ASCII, self));
+	text       = (const unsigned char *) kString_text(self);
 	beginIndex = MultibyteText_bytesize((const char *)text, offset);
 	pos        = text + beginIndex;
 	endIndex   = MultibyteText_bytesize((const char *)pos,  length);
-	end        = (endIndex + beginIndex > S_size(self)) ? (text + S_size(self)) : (pos  + endIndex);
+	end        = (endIndex + beginIndex > kString_size(self)) ? (text + kString_size(self)) : (pos  + endIndex);
 	return KLIB new_kString(kctx, OnField, (const char *)pos, end - pos, StringPolicy_UTF8);
 }
 
 static kString *String_substring(KonohaContext *kctx, kString *self, size_t beginIndex, size_t endIndex)
 {
-	if(kString_is(ASCII, self)) {
-		return KLIB new_kString(kctx, OnField, S_text(self) + beginIndex, endIndex - beginIndex, StringPolicy_ASCII);
+	if(kString_Is(ASCII, self)) {
+		return KLIB new_kString(kctx, OnField, kString_text(self) + beginIndex, endIndex - beginIndex, StringPolicy_ASCII);
 	} else {
 		return new_UTF8SubString(kctx, self, beginIndex, endIndex - beginIndex);
 	}
@@ -420,12 +420,12 @@ static kString *String_substring(KonohaContext *kctx, kString *self, size_t begi
 
 static kArray *String_split(KonohaContext *kctx, kArray *ret, kString *self, kString *pattern, int limit)
 {
-	const char *pos = S_text(self);
-	const char *end = pos + S_size(self);
-	if(S_size(pattern) == 0) {
+	const char *pos = kString_text(self);
+	const char *end = pos + kString_size(self);
+	if(kString_size(pattern) == 0) {
 		size_t i, len;
-		if(kString_is(ASCII, self)) {
-			len = S_size(self);
+		if(kString_Is(ASCII, self)) {
+			len = kString_size(self);
 			for(i = 0; i < len; i++) {
 				KLIB kArray_Add(kctx, ret, KLIB new_kString(kctx, OnField, pos + i, 1, StringPolicy_ASCII));
 			}
@@ -438,9 +438,9 @@ static kArray *String_split(KonohaContext *kctx, kArray *ret, kString *self, kSt
 		}
 	}
 	else {
-		size_t skip_length = S_size(pattern);
+		size_t skip_length = kString_size(pattern);
 		while(pos < end) {
-			const char *res = strstr(pos, S_text(pattern));
+			const char *res = strstr(pos, kString_text(pattern));
 			if(res == NULL) {
 				break;
 			}

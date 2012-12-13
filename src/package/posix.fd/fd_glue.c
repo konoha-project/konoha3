@@ -199,13 +199,13 @@ static KMETHOD System_getdtablesize(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_open(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[1].asString;
-	const char *pathname = S_text(s);
+	const char *pathname = kString_text(s);
 	int flags = sfp[2].intValue;
 	int ret = open(pathname, flags);
 	if(ret == -1) {
 		// TODO: throw
 		KMakeTrace(trace, sfp);
-		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(s)|SystemError, trace);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(s)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "open",
 						LogText("pathname", pathname),
 						LogUint("flags", flags)
@@ -218,14 +218,14 @@ static KMETHOD System_open(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_open_mode(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[1].asString;
-	const char *pathname = S_text(s);
+	const char *pathname = kString_text(s);
 	int flags = sfp[2].intValue;
 	mode_t mode = sfp[3].intValue;
 	int ret = open(pathname, flags, mode);
 	if(ret == -1) {
 		// TODO: throw
 		KMakeTrace(trace, sfp);
-		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(s)|SystemError, trace);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(s)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "open_mode",
 						LogText("pathname", pathname),
 						LogUint("flags", flags),

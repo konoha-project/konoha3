@@ -51,13 +51,13 @@ static kbool_t kMethod_CheckMethodKStackCall(KonohaContext *kctx, KonohaStack *s
 	int i;
 	kParam *param = kMethod_GetParam(mtd);
 	for(i = 1; i <= argc; i++) {
-		KonohaClass *paramClass = O_ct(sfp[i].asObject);
-		kattrtype_t ptype = param->paramtypeItems[i-1].attrTypeId;
+		KonohaClass *paramClass = kObject_class(sfp[i].asObject);
+		ktypeattr_t ptype = param->paramtypeItems[i-1].attrTypeId;
 		if(ptype != paramClass->typeId) {
 			return false;
 		}
-		if(CT_IsUnbox(paramClass)) {
-			sfp[i].unboxValue = O_unbox(sfp[i].asObject);
+		if(KClass_IsUnbox(paramClass)) {
+			sfp[i].unboxValue = kObject_Unbox(sfp[i].asObject);
 		}
 	}
 	return true;
@@ -73,7 +73,7 @@ static KMETHOD Dynamic_(KonohaContext *kctx, KonohaStack *sfp)
 //	kString  *symbolString = kctx->esp[-1].asString;
 	kNameSpace *ns = sfp[K_NSIDX].asNameSpace;
 	DBG_ASSERT(IS_NameSpace(ns));
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, O_ct(obj), symbol, argc, MethodMatch_CamelStyle);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, kObject_class(obj), symbol, argc, MethodMatch_CamelStyle);
 	if(mtd != NULL) {
 		if(kMethod_CheckMethodKStackCall(kctx, sfp, mtd, argc)) {
 			KStackSetArgc(sfp, argc);
@@ -96,7 +96,7 @@ static kbool_t dynamic_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 {
 	static KDEFINE_CLASS defDynamic = {0};
 	defDynamic.structname = "dynamic";
-	defDynamic.cflag = kClass_Final;
+	defDynamic.cflag = KClassFlag_Final;
 	KonohaClass *cDynamic = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDynamic, trace);
 	int TY_Dynamic = cDynamic->typeId;
 	KDEFINE_METHOD MethodData[] = {

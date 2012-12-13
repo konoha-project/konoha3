@@ -56,20 +56,20 @@ static KMETHOD MethodFunc_UnboxFieldSetter(KonohaContext *kctx, KonohaStack *sfp
 	(sfp[0].asObjectVar)->fieldUnboxItems[delta] = sfp[1].unboxValue;
 	KReturnUnboxValue(sfp[1].unboxValue);
 }
-static kMethod *new_FieldGetter(KonohaContext *kctx, kArray *gcstack, kattrtype_t cid, ksymbol_t sym, kattrtype_t ty, int idx)
+static kMethod *new_FieldGetter(KonohaContext *kctx, kArray *gcstack, ktypeattr_t cid, ksymbol_t sym, ktypeattr_t ty, int idx)
 {
 	kmethodn_t mn = MN_toGETTER(sym);
-	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxFieldGetter : MethodFunc_ObjectFieldGetter;
+	MethodFunc f = (KType_Is(UnboxType, ty)) ? MethodFunc_UnboxFieldGetter : MethodFunc_ObjectFieldGetter;
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public|kMethod_Immutable, cid, mn, f);
 	KLIB kMethod_SetParam(kctx, mtd, ty, 0, NULL);
 	((kMethodVar *)mtd)->delta = idx;  // FIXME
 	return mtd;
 }
 
-static kMethod *new_FieldSetter(KonohaContext *kctx, kArray *gcstack, kattrtype_t cid, kmethodn_t sym, kattrtype_t ty, int idx)
+static kMethod *new_FieldSetter(KonohaContext *kctx, kArray *gcstack, ktypeattr_t cid, kmethodn_t sym, ktypeattr_t ty, int idx)
 {
 	kmethodn_t mn = MN_toSETTER(sym);
-	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxFieldSetter : MethodFunc_ObjectFieldSetter;
+	MethodFunc f = (KType_Is(UnboxType, ty)) ? MethodFunc_UnboxFieldSetter : MethodFunc_ObjectFieldSetter;
 	kparamtype_t p = {ty, FN_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public, cid, mn, f);
 	KLIB kMethod_SetParam(kctx, mtd, ty, 1, &p);
@@ -105,7 +105,7 @@ static KMETHOD MethodFunc_ObjectPrototypeSetter(KonohaContext *kctx, KonohaStack
 {
 	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
-	KLIB kObjectProto_SetObject(kctx, sfp[0].asObject, key, O_typeId(sfp[1].asObject), sfp[1].asObject);
+	KLIB kObjectProto_SetObject(kctx, sfp[0].asObject, key, kObject_typeId(sfp[1].asObject), sfp[1].asObject);
 	KReturn(sfp[1].asObject);
 }
 
@@ -118,20 +118,20 @@ static KMETHOD MethodFunc_UnboxPrototypeSetter(KonohaContext *kctx, KonohaStack 
 	KReturnUnboxValue(sfp[1].unboxValue);
 }
 
-static kMethod *new_PrototypeGetter(KonohaContext *kctx, kArray *gcstack, kattrtype_t cid, ksymbol_t sym, kattrtype_t ty)
+static kMethod *new_PrototypeGetter(KonohaContext *kctx, kArray *gcstack, ktypeattr_t cid, ksymbol_t sym, ktypeattr_t ty)
 {
 	kmethodn_t mn = MN_toGETTER(sym);
-	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxPrototypeGetter : MethodFunc_ObjectPrototypeGetter;
+	MethodFunc f = (KType_Is(UnboxType, ty)) ? MethodFunc_UnboxPrototypeGetter : MethodFunc_ObjectPrototypeGetter;
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public|kMethod_Immutable, cid, mn, f);
 	KLIB kMethod_SetParam(kctx, mtd, ty, 0, NULL);
 	((kMethodVar *)mtd)->delta = sym;
 	return mtd;
 }
 
-static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, kattrtype_t cid, ksymbol_t sym, kattrtype_t ty)
+static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, ktypeattr_t cid, ksymbol_t sym, ktypeattr_t ty)
 {
 	kmethodn_t mn = MN_toSETTER(sym);
-	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxPrototypeSetter : MethodFunc_ObjectPrototypeSetter;
+	MethodFunc f = (KType_Is(UnboxType, ty)) ? MethodFunc_UnboxPrototypeSetter : MethodFunc_ObjectPrototypeSetter;
 	kparamtype_t p = {ty, FN_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public, cid, mn, f);
 	KLIB kMethod_SetParam(kctx, mtd, ty, 1, &p);
@@ -139,7 +139,7 @@ static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, kattrt
 	return mtd;
 }
 
-static kbool_t KonohaClass_AddField(KonohaContext *kctx, KonohaClass *ct, kattrtype_t typeattr, ksymbol_t sym)
+static kbool_t KonohaClass_AddField(KonohaContext *kctx, KonohaClass *ct, ktypeattr_t typeattr, ksymbol_t sym)
 {
 	kushort_t pos = ct->fieldsize;
 	if(unlikely(ct->methodList_OnGlobalConstList == K_EMPTYARRAY)) {
@@ -150,7 +150,7 @@ static kbool_t KonohaClass_AddField(KonohaContext *kctx, KonohaClass *ct, kattrt
 		KonohaClassVar *definedClass = (KonohaClassVar *)ct;
 		definedClass->fieldsize += 1;
 		definedClass->fieldItems[pos].name = sym;
-		if(TY_is(UnboxType, typeattr)) {
+		if(KType_Is(UnboxType, typeattr)) {
 			definedClass->defaultNullValueVar_OnGlobalConstList->fieldUnboxItems[pos] = 0;
 			definedClass->fieldItems[pos].attrTypeId = typeattr;
 		}
@@ -207,7 +207,7 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 				KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, CT_(reqty)));
 			}
 		}
-		SUGAR kStmt_Message2(kctx, stmt, fieldToken, ErrTag, "undefined field: %s", S_text(fieldToken->text));
+		SUGAR kStmt_Message2(kctx, stmt, fieldToken, ErrTag, "undefined field: %s", kString_text(fieldToken->text));
 	}
 }
 

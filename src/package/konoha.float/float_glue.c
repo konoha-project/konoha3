@@ -231,7 +231,7 @@ static KMETHOD Float_toString(KonohaContext *kctx, KonohaStack *sfp)
 /* String to float */
 static KMETHOD String_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturnFloatValue((kfloat_t)strtod(S_text(sfp[0].asString), NULL));
+	KReturnFloatValue((kfloat_t)strtod(kString_text(sfp[0].asString), NULL));
 }
 
 //## @Const method Int Int.opMINUS();
@@ -308,7 +308,7 @@ static KMETHOD TypeCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
-	sfp[4].floatValue = strtod(S_text(tk->text), NULL);   // just using tramsformation float
+	sfp[4].floatValue = strtod(kString_text(tk->text), NULL);   // just using tramsformation float
 	KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, TY_float, sfp[4].unboxValue));
 }
 

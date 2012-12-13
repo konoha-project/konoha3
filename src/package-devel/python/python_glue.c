@@ -150,7 +150,7 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 //		// [TODO] throw Exception
 //	}
 //	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-//	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
+//	kObject_class(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
 //	struct kBytesVar *ba = (struct kBytesVar *)new_Bytes(kctx, KBuffer_bytesize(&wb));
 //	ba->buf = KLIB KBuffer_Stringfy(kctx, &wb, 1);
 //	KLIB KBuffer_Free(&wb);
@@ -170,7 +170,7 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD String_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturnPyObject(PyUnicode_FromString(S_text(sfp[0].asString)));
+	KReturnPyObject(PyUnicode_FromString(kString_text(sfp[0].asString)));
 }
 
 static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
@@ -180,7 +180,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 	// assert
 	DBG_ASSERT(po->self != NULL);
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
+	kObject_class(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
 	kString *s = KLIB new_kString(kctx, OnStack, KLIB KBuffer_Stringfy(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
 	KLIB KBuffer_Free(&wb);
 	KReturn(s);
@@ -204,7 +204,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 	//else {
 	//	KGrowingBuffer wb;
 	//	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	//	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
+	//	kObject_class(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
 	//	kString *s = KLIB new_kString(kctx, KLIB KBuffer_Stringfy(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
 	//	KLIB KBuffer_Free(&wb);
 	//	KReturn(s);
@@ -236,7 +236,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 //	size_t i, n = kArray_size(a);
 //	Py_ssize_t pa_size = (n < PY_SSIZE_MAX)? n : PY_SSIZE_MAX - 1;
 //	PyObject *pa = PyList_New((Py_ssize_t)n);
-//	if(kArray_isUnboxData(a)) {
+//	if(kArray_Is(UnboxData, a)) {
 //		for (i = 0; i < pa_size; i++) {
 //			// [TODO] transfer array element to PyObject
 //			PyList_SetItem(pa, i, PyInt_FromLong(a->unboxItems[n]));
@@ -382,7 +382,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 //## Boolean Python.eval(String script);
 static KMETHOD Python_Eval(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturnUnboxValue(PyRun_SimpleString(S_text(sfp[1].asString)) == 0);
+	KReturnUnboxValue(PyRun_SimpleString(kString_text(sfp[1].asString)) == 0);
 }
 
 #define DEFAULT_SIZE 16
@@ -441,7 +441,7 @@ static KMETHOD PyObject_import(KonohaContext *kctx, KonohaStack *sfp)
 		free(pathes);
 	}
 	PySys_SetObject("path", (PyObject *)ppath);
-	KReturnPyObject(PyImport_ImportModule(S_text(sfp[1].asString)));
+	KReturnPyObject(PyImport_ImportModule(kString_text(sfp[1].asString)));
 }
 
 //## PyObject PyObject.(PyObject o);
@@ -453,7 +453,7 @@ static KMETHOD PyObject_(KonohaContext *kctx, KonohaStack *sfp)
 	//
 	int argc = kctx->esp - sfp - 2;   // believe me
 	kPyObject *pmod = (kPyObject *)sfp[0].asObject;
-	PyObject  *pFunc = PyObject_GetAttrString(pmod->self, S_text(kctx->esp[-1].asString));
+	PyObject  *pFunc = PyObject_GetAttrString(pmod->self, kString_text(kctx->esp[-1].asString));
 	PyObject  *pArgs = NULL, *pValue = NULL;
 	if(pFunc != NULL) {
 		if(PyCallable_Check(pFunc)) {

@@ -79,11 +79,11 @@ static KMETHOD String_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *self = sfp[0].asString;
 	size_t offset = sfp[1].intValue;
-	if(offset >= S_size(self)) {
+	if(offset >= kString_size(self)) {
 		Throw_IndexOutOfBoundsException(kctx, sfp, sfp[1].intValue);
 	}
-	kString *ret = (kString_is(ASCII, self)) ?
-		KLIB new_kString(kctx, OnStack, S_text(self) + offset, 1, StringPolicy_ASCII) :
+	kString *ret = (kString_Is(ASCII, self)) ?
+		KLIB new_kString(kctx, OnStack, kString_text(self) + offset, 1, StringPolicy_ASCII) :
 		new_UTF8SubString(kctx, self, offset, 1);
 	KReturn(ret);
 }
@@ -135,9 +135,9 @@ static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, si
 {
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	const char *text = S_text(tk->text) + start;
-	const char *end  = S_text(tk->text) + S_size(tk->text);
-	KLIB KBuffer_Write(kctx, &wb, S_text(tk->text), start);
+	const char *text = kString_text(tk->text) + start;
+	const char *end  = kString_text(tk->text) + kString_size(tk->text);
+	KLIB KBuffer_Write(kctx, &wb, kString_text(tk->text), start);
 	while(text < end) {
 		int ch = *text;
 		if(ch == '\\' && *(text+1) != '\0') {
@@ -173,9 +173,9 @@ static kString *remove_escapes(KonohaContext *kctx, kToken *tk)
 {
 	kString *text = tk->text;
 	if(kToken_is(RequiredReformat, tk)) {
-		const char *escape = strchr(S_text(text), '\\');
+		const char *escape = strchr(kString_text(text), '\\');
 		DBG_ASSERT(escape != NULL);
-		text = kToken_ResolveEscapeSequence(kctx, tk, escape - S_text(text));
+		text = kToken_ResolveEscapeSequence(kctx, tk, escape - kString_text(text));
 	}
 	return text;
 }
@@ -187,12 +187,12 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 	INIT_GCSTACK();
 	kString *text = remove_escapes(kctx, tk);
 	if(text == NULL) {
-		kString_set(Literal, ((kStringVar *)text), true);
+		kString_Set(Literal, ((kStringVar *)text), true);
 		KReturnWith(K_NULLEXPR, RESET_GCSTACK());
 	}
 
 	const char *end = NULL;
-	const char *str = S_text(text);
+	const char *str = kString_text(text);
 	const char *start = strstr(str, "${");
 	if(start == NULL) {
 		KReturnWith(K_NULLEXPR, RESET_GCSTACK());

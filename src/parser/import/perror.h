@@ -66,7 +66,7 @@ static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t tagle
 		KGrowingBuffer wb;
 		KLIB KBuffer_Init(&sugarContext->errorMessageBuffer, &wb);
 		kString *emsg = new_StringMessage(kctx, sugarContext->errorMessageList, &wb, taglevel, uline, fmt, ap);
-		PLATAPI ReportCompilerMessage(kctx, taglevel, uline, S_text(emsg));
+		PLATAPI ReportCompilerMessage(kctx, taglevel, uline, kString_text(emsg));
 		if(taglevel <= ErrTag) {
 			sugarContext->errorMessageCount++;
 		}
@@ -175,7 +175,7 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 		KLIB KBuffer_Init(&kctx->stack->cwb, &wb);
 		kString *emsg = new_StringMessage(kctx, _GcStack, &wb, taglevel, Trace_pline(trace), fmt, ap);
 		va_end(ap);
-		PLATAPI ReportCompilerMessage(kctx, taglevel, Trace_pline(trace), S_text(emsg));
+		PLATAPI ReportCompilerMessage(kctx, taglevel, Trace_pline(trace), kString_text(emsg));
 		if(taglevel <= ErrTag) {
 			if(trace == NULL) {
 				KExit(EXIT_FAILURE);
@@ -205,7 +205,7 @@ static kExpr* ERROR_SyntaxErrorToken(KonohaContext *kctx, kStmt *stmt, kToken *t
 
 static kExpr* ERROR_UndefinedEscapeSequence(KonohaContext *kctx, kStmt *stmt, kToken *tk)
 {
-	return kStmtToken_Message(kctx, stmt, tk, ErrTag, "undefined escape sequence: \"%s\"", S_text(tk->text));
+	return kStmtToken_Message(kctx, stmt, tk, ErrTag, "undefined escape sequence: \"%s\"", kString_text(tk->text));
 }
 
 #endif

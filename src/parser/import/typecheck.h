@@ -81,7 +81,7 @@ static void kExpr_PutConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *s
 {
 	if((kvisit_t)expr->build == TEXPR_CONST) {
 		KUnsafeFieldSet(sfp[0].asObject, expr->objectConstValue);
-		sfp[0].unboxValue = O_unbox(expr->objectConstValue);
+		sfp[0].unboxValue = kObject_Unbox(expr->objectConstValue);
 	} else if(expr->build == TEXPR_NCONST) {
 		sfp[0].unboxValue = expr->unboxConstValue;
 	} else if(expr->build == TEXPR_NEW) {
@@ -91,7 +91,7 @@ static void kExpr_PutConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *s
 		kMethod *mtd = expr->cons->MethodItems[0];
 		kExpr *texpr = expr->cons->ExprItems[1];
 		assert(mtd->mn == MN_box && kArray_size(expr->cons) == 2);
-		assert(TY_isUnbox(expr->attrTypeId) == true);
+		assert(KType_Is(UnboxType, expr->attrTypeId) == true);
 		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, OnField, CT_(expr->attrTypeId), texpr->unboxConstValue));
 	} else {
 		assert((kvisit_t)expr->build == TEXPR_NULL);
@@ -111,7 +111,7 @@ static kExpr* kStmtExpr_ToConstValue(KonohaContext *kctx, kStmt *stmt, kExprVar 
 	KStackSetMethodAll(lsfp, KLIB Knull(kctx, CT_(expr->attrTypeId)), stmt->uline, mtd, psize);
 	KStackCall(lsfp);
 	END_UnusedStack();
-	if(CT_Is(UnboxType, rtype) /* || rtype->typeId == TY_void*/) {
+	if(KClass_Is(UnboxType, rtype) /* || rtype->typeId == TY_void*/) {
 		return SUGAR kExpr_SetUnboxConstValue(kctx, expr, rtype->typeId, lsfp[K_RTNIDX].unboxValue);
 	}
 	return SUGAR kExpr_SetConstValue(kctx, expr, NULL, lsfp[K_RTNIDX].asObject);
@@ -148,14 +148,14 @@ static kExpr *kExpr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGa
 			}
 			return texpr;
 		}
-		if(CT_Is(TypeVar, typedClass)) {
+		if(KClass_Is(TypeVar, typedClass)) {
 			return kStmtExpr_Message(kctx, stmt, expr, ErrTag, "not type variable %s", CT_t(typedClass));
 		}
 		if(reqClass->typeId == TY_var || typedClass == reqClass || FLAG_is(pol, TypeCheckPolicy_NOCHECK)) {
 			return texpr;
 		}
-		if(CT_Isa(kctx, typedClass, reqClass)) {
-			if(CT_Is(UnboxType, typedClass) && !CT_Is(UnboxType, reqClass)) {
+		if(KClass_Isa(kctx, typedClass, reqClass)) {
+			if(KClass_Is(UnboxType, typedClass) && !KClass_Is(UnboxType, reqClass)) {
 				return kStmtExpr_ToBox(kctx, stmt, texpr, gma, reqClass);
 			}
 			return texpr;
@@ -294,10 +294,10 @@ static GammaAllocaData *kGamma_Pop(KonohaContext *kctx, kGamma *gma, GammaAlloca
 
 static kBlock* kMethod_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *source, kfileline_t uline)
 {
-	const char *script = S_text(source);
+	const char *script = kString_text(source);
 	if(IS_NULL(source) || script[0] == 0) {
 		DBG_ASSERT(IS_Token(mtd->SourceToken));
-		script = S_text(mtd->SourceToken->text);
+		script = kString_text(mtd->SourceToken->text);
 		uline = mtd->SourceToken->uline;
 	}
 	TokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList, 0};
@@ -364,7 +364,7 @@ static void kGamma_InitIt(KonohaContext *kctx, GammaAllocaData *genv, kParam *pa
 	}
 }
 
-static kattrtype_t kStmt_CheckReturnType(KonohaContext *kctx, kStmt *stmt)
+static ktypeattr_t kStmt_CheckReturnType(KonohaContext *kctx, kStmt *stmt)
 {
 	if(stmt->syn != NULL && stmt->syn->keyword == KW_ExprPattern) {
 		kExpr *expr = (kExpr *)kStmt_GetObjectNULL(kctx, stmt, KW_ExprPattern);
@@ -378,7 +378,7 @@ static kattrtype_t kStmt_CheckReturnType(KonohaContext *kctx, kStmt *stmt)
 	return TY_void;
 }
 
-static kstatus_t kMethod_RunEval(KonohaContext *kctx, kMethod *mtd, kattrtype_t rtype, kfileline_t uline, KTraceInfo *trace)
+static kstatus_t kMethod_RunEval(KonohaContext *kctx, kMethod *mtd, ktypeattr_t rtype, kfileline_t uline, KTraceInfo *trace)
 {
 	BEGIN_UnusedStack(lsfp);
 	KonohaStackRuntimeVar *runtime = kctx->stack;
@@ -446,7 +446,7 @@ static kstatus_t kBlock_EvalAtTopLevel(KonohaContext *kctx, kBlock *bk, kMethod 
 		}
 	}
 	if(isTryEval) {
-		kattrtype_t rtype = kStmt_CheckReturnType(kctx, stmt);
+		ktypeattr_t rtype = kStmt_CheckReturnType(kctx, stmt);
 		KLIB kMethod_GenCode(kctx, mtd, bk, DefaultCompileOption);
 		return kMethod_RunEval(kctx, mtd, rtype, stmt->uline, trace);
 	}

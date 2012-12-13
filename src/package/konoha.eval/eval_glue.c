@@ -54,7 +54,7 @@ static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char
 static KMETHOD NameSpace_Eval(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNameSpace *ns = sfp[0].asNameSpace;
-	const char *script = S_text(sfp[1].asString);
+	const char *script = kString_text(sfp[1].asString);
 	DBG_ASSERT(IS_NameSpace(ns));
 	kfileline_t uline = FILEID_("(eval)") | 1;
 	KMakeTrace(trace, sfp);

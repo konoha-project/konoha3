@@ -43,7 +43,7 @@ static void prototype_defineClass(KonohaContext *kctx, kNameSpace *ns, int optio
 	if(CT_Prototype == NULL) {
 		KDEFINE_CLASS defPrototype = {
 			.structname = "Prototype",
-			.typeId = TY_newid,
+			.typeId = TypeAttr_NewId,
 			.baseTypeId = TY_Object,
 			.p = kPrototype_p,
 		};
@@ -61,7 +61,7 @@ static KMETHOD Prototype_get(KonohaContext *kctx, KonohaStack *sfp)
 	if(kvs != NULL) {
 		KonohaClass *c = CT_(kvs->attrTypeId);
 		if(targetClass == c) {
-			if(CT_IsUnbox(targetClass)) {
+			if(KClass_IsUnbox(targetClass)) {
 				KReturnUnboxValue(kvs->unboxValue);
 			}
 			else {
@@ -70,8 +70,8 @@ static KMETHOD Prototype_get(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		DBG_P("requesting type=%s <: %s ? %d", CT_t(c), CT_t(targetClass), c->isSubType(kctx, c, targetClass));
 		if(c->isSubType(kctx, c, targetClass)) {
-			if(CT_Is(UnboxType, c)) {
-				if(CT_Is(UnboxType, targetClass)) {
+			if(KClass_Is(UnboxType, c)) {
+				if(KClass_Is(UnboxType, targetClass)) {
 					KReturnUnboxValue(kvs->unboxValue);
 				}
 				else {
@@ -89,9 +89,9 @@ static KMETHOD Prototype_get(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Prototype_setObject(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t symbol = (ksymbol_t)sfp[1].intValue;
-	KonohaClass *c = O_ct(sfp[2].asObject);
-	if(CT_Is(UnboxType, c)) {
-		KLIB kObjectProto_SetUnboxValue(kctx, sfp[0].asObject, symbol, c->typeId, O_unbox(sfp[2].asObject));
+	KonohaClass *c = kObject_class(sfp[2].asObject);
+	if(KClass_Is(UnboxType, c)) {
+		KLIB kObjectProto_SetUnboxValue(kctx, sfp[0].asObject, symbol, c->typeId, kObject_Unbox(sfp[2].asObject));
 	}
 	else {
 		KLIB kObjectProto_SetObject(kctx, sfp[0].asObject, symbol, c->typeId, sfp[2].asObject);
@@ -115,12 +115,12 @@ static void KStackDynamicTypeCheck(KonohaContext *kctx, KonohaStack *sfp, kMetho
 	int i;
 	kParam *pa = kMethod_GetParam(mtd);
 	for(i = 0; i < pa->psize; i++) {
-		KonohaClass *objectType = O_ct(sfp[i+1].asObject);
+		KonohaClass *objectType = kObject_class(sfp[i+1].asObject);
 		KonohaClass *paramType = CT_(pa->paramtypeItems[i].attrTypeId);
 		paramType = paramType->realtype(kctx, paramType, thisClass);
 		if(objectType == paramType || objectType->isSubType(kctx, objectType, paramType)) {
-			if(CT_Is(UnboxType, paramType)) {
-				sfp[i+1].unboxValue = O_unbox(sfp[i+1].asObject);
+			if(KClass_Is(UnboxType, paramType)) {
+				sfp[i+1].unboxValue = kObject_Unbox(sfp[i+1].asObject);
 			}
 			continue; // OK
 		}
@@ -134,7 +134,7 @@ static void KStackReturnTypeCheck(KonohaContext *kctx, KonohaStack *sfp, kMethod
 		KonohaClass *returnType = kMethod_GetReturnType(mtd);
 		returnType = returnType->realtype(kctx, returnType, thisClass);
 		if(reqType == returnType || returnType->isSubType(kctx, returnType, reqType)) {
-			if(CT_Is(UnboxType, returnType) && !CT_Is(UnboxType, reqType)) {
+			if(KClass_Is(UnboxType, returnType) && !KClass_Is(UnboxType, reqType)) {
 				KReturn(KLIB new_kObject(kctx, OnStack, returnType, sfp[K_RTNIDX].unboxValue));
 			}
 		}
@@ -156,7 +156,7 @@ static KMETHOD Prototype_(KonohaContext *kctx, KonohaStack *sfp)
 		KonohaClass *c = CT_(kvs->attrTypeId);
 		kParam *cparam = CT_cparam(c);
 		if(CT_isFunc(c) && cparam->psize <= KDynamicCallArgument(sfp)) {
-			KonohaClass *thisClass = O_ct(sfp[0].asObject), *returnType = KGetReturnType(sfp);
+			KonohaClass *thisClass = kObject_class(sfp[0].asObject), *returnType = KGetReturnType(sfp);
 			kFunc *fo = (kFunc*)kvs->FuncValue;
 			KStackSetFunc(sfp, fo);
 			KStackDynamicTypeCheck(kctx, sfp, fo->method, thisClass);

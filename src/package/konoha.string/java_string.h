@@ -67,7 +67,7 @@ static KMETHOD KString_charAt(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	kString *self = sfp[0].asString;
 	size_t index = sfp[1].intValue;
-	if(index > S_size(self)) {
+	if(index > kString_size(self)) {
 		Throw_IndexOutOfBoundsException(kctx, sfp, sfp[1].intValue);
 	}
 	uint32_t ret = String_charAt(kctx, self, index);
@@ -80,7 +80,7 @@ static KMETHOD KString_codePointAt(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	kString *self = sfp[0].asString;
 	size_t index = sfp[1].intValue;
-	if(index > S_size(self)) {
+	if(index > kString_size(self)) {
 		Throw_IndexOutOfBoundsException(kctx, sfp, sfp[1].intValue);
 	}
 	Throw_NotImplement(kctx, sfp, __FUNCTION__);
@@ -94,7 +94,7 @@ static KMETHOD KString_codePointBefore(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	kString *self = sfp[0].asString;
 	size_t index = sfp[1].intValue;
-	if(index > S_size(self)) {
+	if(index > kString_size(self)) {
 		Throw_IndexOutOfBoundsException(kctx, sfp, sfp[1].intValue);
 	}
 	Throw_NotImplement(kctx, sfp, __FUNCTION__);
@@ -109,10 +109,10 @@ static KMETHOD KString_codePointCount(KonohaContext *kctx,  KonohaStack *sfp)
 	kString *self = sfp[0].asString;
 	size_t beginIndex = sfp[1].intValue;
 	size_t endIndex = sfp[2].intValue;
-	if(beginIndex > S_size(self)) {
+	if(beginIndex > kString_size(self)) {
 		Throw_IndexOutOfBoundsException(kctx, sfp, sfp[1].intValue);
 	}
-	if(beginIndex > endIndex || endIndex > S_size(self)) {
+	if(beginIndex > endIndex || endIndex > kString_size(self)) {
 		Throw_IndexOutOfBoundsException(kctx, sfp, sfp[2].intValue);
 	}
 	Throw_NotImplement(kctx, sfp, __FUNCTION__);
@@ -166,7 +166,7 @@ static KMETHOD KString_indexOf0(KonohaContext *kctx,  KonohaStack *sfp)
 	kString *self = sfp[0].asString;
 	int ch = sfp[1].intValue;
 	size_t fromIndex = sfp[2].intValue;
-	int ret = (fromIndex < S_size(self)) ? String_indexOfChar(kctx, self, ch, fromIndex) : -1;
+	int ret = (fromIndex < kString_size(self)) ? String_indexOfChar(kctx, self, ch, fromIndex) : -1;
 	RETURNint(ret);
 }
 
@@ -177,8 +177,8 @@ static KMETHOD KString_indexOf1(KonohaContext *kctx,  KonohaStack *sfp)
 	kString *self = sfp[0].asString;
 	kString *str = sfp[1].asString;
 	size_t fromIndex = sfp[2].intValue;
-	int ret = (S_size(str) != 0) ?
-		(fromIndex < S_size(self)) ? String_indexOfString(kctx, self, str, fromIndex) : -1 :
+	int ret = (kString_size(str) != 0) ?
+		(fromIndex < kString_size(self)) ? String_indexOfString(kctx, self, str, fromIndex) : -1 :
 		(int)fromIndex;
 	RETURNint(ret);
 }
@@ -233,7 +233,7 @@ static KMETHOD KString_offsetByCodePoints(KonohaContext *kctx,  KonohaStack *sfp
 	kString *self = sfp[0].asString;
 	size_t index = sfp[1].intValue;
 	//int codePointOffset = sfp[2].intValue;
-	if(index > S_size(self)) {
+	if(index > kString_size(self)) {
 		Throw_IndexOutOfBoundsException(kctx, sfp, sfp[1].intValue);
 	}
 	Throw_NotImplement(kctx, sfp, __FUNCTION__);
@@ -254,10 +254,10 @@ static KMETHOD KString_regionMatches(KonohaContext *kctx,  KonohaStack *sfp)
 	if(toffset < 0 || ooffset < 0 || len < 0) {
 		RETURNboolean(false);
 	}
-	if((size_t)toffset + len > S_size(self)) {
+	if((size_t)toffset + len > kString_size(self)) {
 		RETURNboolean(false);
 	}
-	if((size_t)ooffset + len > S_size(other)) {
+	if((size_t)ooffset + len > kString_size(other)) {
 		RETURNboolean(false);
 	}
 	boolean ret = String_regionMatches(kctx, self, ignoreCase, toffset, other, ooffset, len);
@@ -316,7 +316,7 @@ static KMETHOD KString_startsWith(KonohaContext *kctx,  KonohaStack *sfp)
 	kString *self = sfp[0].asString;
 	String prefix = sfp[1].asString;
 	size_t toffset = sfp[2].intValue;
-	bool ret = (toffset <= S_size(self)) ? String_startsWith(kctx, self, prefix, toffset) : false;
+	bool ret = (toffset <= kString_size(self)) ? String_startsWith(kctx, self, prefix, toffset) : false;
 	RETURNboolean(ret);
 }
 
@@ -327,10 +327,10 @@ static KMETHOD KString_substring(KonohaContext *kctx,  KonohaStack *sfp)
 	kString *self = sfp[0].asString;
 	size_t beginIndex = sfp[1].intValue;
 	size_t endIndex = sfp[2].intValue;
-	if(beginIndex > S_size(self)) {
+	if(beginIndex > kString_size(self)) {
 		Throw_IndexOutOfBoundsException(kctx, sfp, sfp[1].intValue);
 	}
-	if(endIndex > S_size(self) || beginIndex > endIndex) {
+	if(endIndex > kString_size(self) || beginIndex > endIndex) {
 		Throw_IndexOutOfBoundsException(kctx, sfp, sfp[2].intValue);
 	}
 	String ret = String_substring(kctx, self, beginIndex, endIndex);

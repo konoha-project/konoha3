@@ -55,18 +55,18 @@ static KMETHOD NameSpace_GetParentNameSpace(KonohaContext *kctx, KonohaStack *sf
 //## boolean NameSpace.DefineMacro(String symbol, String source);
 static KMETHOD NameSpace_DefineMacro2(KonohaContext *kctx, KonohaStack *sfp)
 {
-	ksymbol_t keyword = ksymbolA(S_text(sfp[1].asString), S_size(sfp[1].asString), _NEWID);
+	ksymbol_t keyword = ksymbolA(kString_text(sfp[1].asString), kString_size(sfp[1].asString), _NEWID);
 	kString *source = sfp[2].asString;
-	KReturnUnboxValue(SUGAR kNameSpace_SetMacroData(kctx, sfp[0].asNameSpace, keyword, 0, S_text(source), true));
+	KReturnUnboxValue(SUGAR kNameSpace_SetMacroData(kctx, sfp[0].asNameSpace, keyword, 0, kString_text(source), true));
 }
 
 //## boolean NameSpace.DefineMacro(String symbol, int param, String source);
 static KMETHOD NameSpace_DefineMacro(KonohaContext *kctx, KonohaStack *sfp)
 {
-	ksymbol_t keyword = ksymbolA(S_text(sfp[1].asString), S_size(sfp[1].asString), _NEWID);
+	ksymbol_t keyword = ksymbolA(kString_text(sfp[1].asString), kString_size(sfp[1].asString), _NEWID);
 	int paramsize = (int)sfp[2].intValue;
 	kString *source = sfp[3].asString;
-	KReturnUnboxValue(SUGAR kNameSpace_SetMacroData(kctx, sfp[0].asNameSpace, keyword, paramsize, S_text(source), true));
+	KReturnUnboxValue(SUGAR kNameSpace_SetMacroData(kctx, sfp[0].asNameSpace, keyword, paramsize, kString_text(source), true));
 }
 
 static void namespace_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
@@ -100,7 +100,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 		kNameSpace *ns = new_(NameSpace, Stmt_ns(stmt), _GcStack);
 		kArray *a = GetSugarContext(kctx)->preparedTokenList;
 		TokenSeq range = {ns, a, kArray_size(a), kArray_size(a)};
-		SUGAR TokenSeq_Tokenize(kctx, &range, S_text(tk->text), tk->uline);
+		SUGAR TokenSeq_Tokenize(kctx, &range, kString_text(tk->text), tk->uline);
 		result = SUGAR TokenSeq_Eval(kctx, &range, NULL/*trace*/);
 		RESET_GCSTACK();
 		kStmt_done(kctx, stmt);
@@ -120,7 +120,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 	if(result) {
 		kExpr *constExpr = SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL);
 		KonohaClass *constClass = CT_(constExpr->attrTypeId);
-		kattrtype_t type = constClass->typeId;
+		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
 		result = false;
 		if(constExpr->build == TEXPR_NULL) {   // const C = String

@@ -250,7 +250,7 @@ struct Tokenizer {
 		kStmt *STMT = (kStmt *)sfp[1].asObject;\
 		kExprVar *EXPR = (kExprVar *)sfp[2].asObject;\
 		kGamma *GMA = (kGamma *)sfp[3].asObject;\
-		kattrtype_t TY = (kattrtype_t)sfp[4].intValue;\
+		ktypeattr_t TY = (ktypeattr_t)sfp[4].intValue;\
 		VAR_TRACE; (void)STMT; (void)EXPR; (void)GMA; (void)TY
 
 
@@ -277,8 +277,8 @@ typedef enum {
 #define SYNFLAG_StmtJumpAhead0      ((kshortflag_t)1 << 9)  /* continue */
 #define SYNFLAG_StmtJumpSkip0       ((kshortflag_t)1 << 10)  /* break */
 
-#define SYN_Is(P, o)       (TFLAG_is(uintptr_t,(o)->flag, SYNFLAG_##P))
-#define SYN_Set(P,o,B)     TFLAG_set(uintptr_t,(o)->flag, SYNFLAG_##P, B)
+#define SYN_Is(P, o)       (KFlag_Is(uintptr_t,(o)->flag, SYNFLAG_##P))
+#define SYN_Set(P,o,B)     KFlag_Set(uintptr_t,(o)->flag, SYNFLAG_##P, B)
 
 struct SugarSyntaxVar {
 	ksymbol_t  keyword;               kshortflag_t  flag;
@@ -355,7 +355,7 @@ struct kTokenVar {
 	union {
 		ksymbol_t   unresolvedTokenType; // (resolvedSyntaxInfo == NULL)
 		ksymbol_t   resolvedSymbol;      // symbol (resolvedSyntaxInfo != NULL)
-		kattrtype_t resolvedTypeId;      // typeid if KW_TypePattern
+		ktypeattr_t resolvedTypeId;      // typeid if KW_TypePattern
 	};
 	union {
 		kushort_t   indent;               // indent when kw == TokenType_INDENT
@@ -366,13 +366,13 @@ struct kTokenVar {
 
 #define kToken_isIndent(T)  ((T)->unresolvedTokenType == TokenType_INDENT && (T)->resolvedSyntaxInfo == NULL)
 
-#define kTokenFlag_StatementSeparator    kObject_Local1
-#define kTokenFlag_MatchPreviousPattern  kObject_Local1
-#define kTokenFlag_RequiredReformat      kObject_Local2
-#define kTokenFlag_BeforeWhiteSpace      kObject_Local3
+#define kTokenFlag_StatementSeparator    kObjectFlag_Local1
+#define kTokenFlag_MatchPreviousPattern  kObjectFlag_Local1
+#define kTokenFlag_RequiredReformat      kObjectFlag_Local2
+#define kTokenFlag_BeforeWhiteSpace      kObjectFlag_Local3
 
-#define kToken_is(P, o)      (TFLAG_is(uintptr_t,(o)->h.magicflag, kTokenFlag_##P))
-#define kToken_set(P,o,B)    TFLAG_set(uintptr_t,(o)->h.magicflag, kTokenFlag_##P, B)
+#define kToken_is(P, o)      (KFlag_Is(uintptr_t,(o)->h.magicflag, kTokenFlag_##P))
+#define kToken_set(P,o,B)    KFlag_Set(uintptr_t,(o)->h.magicflag, kTokenFlag_##P, B)
 
 typedef struct MacroSet {
 	int/*ksymbol_t*/          symbol;
@@ -448,11 +448,11 @@ typedef enum {
 #define TEXPR_MAX           12
 
 #define kExpr_IsConstValue(o)     (TEXPR_CONST <= (o)->build && (o)->build <= TEXPR_NCONST)
-#define Expr_isTerm(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
-#define Expr_setTerm(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
+#define Expr_isTerm(o)      (KFlag_Is(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1))
+#define Expr_setTerm(o,B)   KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1,B)
 
-#define Expr_hasObjectConstValue(o)     (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local2))
-#define Expr_setObjectConstValue(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local2,B)
+#define Expr_hasObjectConstValue(o)     (KFlag_Is(uintptr_t,(o)->h.magicflag,kObjectFlag_Local2))
+#define Expr_setObjectConstValue(o,B)   KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local2,B)
 
 #define kExpr_at(E,N)                   ((E)->cons->ExprItems[(N)])
 
@@ -466,7 +466,7 @@ struct kExprVar {
 		kArray*  cons;          // Cons
 		kBlock*  block;
 	};
-	kattrtype_t attrTypeId;    kexpr_t build;
+	ktypeattr_t attrTypeId;    kexpr_t build;
 	union {
 		kObject*   objectConstValue;
 		uintptr_t  unboxConstValue;
@@ -487,7 +487,7 @@ struct kStmtVar {
 
 #define kStmt_GetObjectNULL(CTX, O, K)            (KLIB kObject_getObject(CTX, UPCAST(O), K, NULL))
 #define kStmt_GetObject(CTX, O, K, DEF)           (KLIB kObject_getObject(CTX, UPCAST(O), K, DEF))
-#define kStmt_setObject(CTX, O, K, V)             KLIB kObjectProto_SetObject(CTX, UPCAST(O), K, O_typeId(V), UPCAST(V))
+#define kStmt_setObject(CTX, O, K, V)             KLIB kObjectProto_SetObject(CTX, UPCAST(O), K, kObject_typeId(V), UPCAST(V))
 #define kStmt_setUnboxValue(CTX, O, K, T, V)      KLIB kObjectProto_SetUnboxValue(CTX, UPCAST(O), K, T, V)
 #define kStmt_removeKey(CTX, O, K)                KLIB kObjectProto_RemoveKey(CTX, UPCAST(O), K)
 #define kStmt_protoEach(CTX, O, THUNK, F)         KLIB kObjectProto_DoEach(CTX, UPCAST(O), THUNK, F)
@@ -496,12 +496,12 @@ struct kStmtVar {
 #define kStmtToken_Message(kctx, STMT, TK, PE, FMT, ...)   SUGAR kStmt_Message2(kctx, STMT, TK, PE, FMT, ## __VA_ARGS__)
 #define kStmtExpr_Message(kctx, STMT, EXPR, PE, FMT, ...)  SUGAR kStmt_Message2(kctx, STMT, (kToken *)EXPR, PE, FMT, ## __VA_ARGS__)
 
-#define kStmtFlag_RedoLoop           kObject_Local1
-#define kStmtFlag_CatchContinue      kObject_Local2
-#define kStmtFlag_CatchBreak         kObject_Local3
+#define kStmtFlag_RedoLoop           kObjectFlag_Local1
+#define kStmtFlag_CatchContinue      kObjectFlag_Local2
+#define kStmtFlag_CatchBreak         kObjectFlag_Local3
 
-#define kStmt_Is(P, O)       (TFLAG_is(uintptr_t, (O)->h.magicflag, kStmtFlag_##P))
-#define kStmt_Set(P, O, B)   TFLAG_set(uintptr_t,((kStmtVar *)O)->h.magicflag, kStmtFlag_##P, B)
+#define kStmt_Is(P, O)       (KFlag_Is(uintptr_t, (O)->h.magicflag, kStmtFlag_##P))
+#define kStmt_Set(P, O, B)   KFlag_Set(uintptr_t,((kStmtVar *)O)->h.magicflag, kStmtFlag_##P, B)
 
 struct kBlockVar {
 	KonohaObjectHeader   h;
@@ -512,14 +512,14 @@ struct kBlockVar {
 };
 
 typedef struct {
-	kattrtype_t    attrTypeId;    ksymbol_t  name;
+	ktypeattr_t    attrTypeId;    ksymbol_t  name;
 } GammaStackDecl;
 
 #define kGamma_TopLevel        (kshortflag_t)(1)
-#define Gamma_isTopLevel(GMA)  TFLAG_is(kshortflag_t, GMA->genv->flag, kGamma_TopLevel)
+#define Gamma_isTopLevel(GMA)  KFlag_Is(kshortflag_t, GMA->genv->flag, kGamma_TopLevel)
 #define kGamma_ERROR           (kshortflag_t)(1<<1)
-#define Gamma_hasERROR(GMA)    TFLAG_is(kshortflag_t, GMA->genv->flag, kGamma_ERROR)
-#define Gamma_setERROR(GMA,B) TFLAG_set(kshortflag_t, GMA->genv->flag, kGamma_ERROR, B)
+#define Gamma_hasERROR(GMA)    KFlag_Is(kshortflag_t, GMA->genv->flag, kGamma_ERROR)
+#define Gamma_setERROR(GMA,B) KFlag_Set(kshortflag_t, GMA->genv->flag, kGamma_ERROR, B)
 
 typedef struct {
 	GammaStackDecl *varItems;
@@ -531,7 +531,7 @@ typedef struct {
 typedef struct  {
 	kshortflag_t  flag;      kshortflag_t  cflag;
 	KonohaClass   *thisClass;
-	//kattrtype_t      static_cid;
+	//ktypeattr_t      static_cid;
 	kMethod      *currentWorkingMethod;
 	GammaStack    localScope;
 	int           blockScopeShiftSize;
@@ -567,17 +567,17 @@ struct kGammaVar {
 #define CT_StmtArray            CT_Array
 #define kStmtArray              kArray
 
-#define IS_Token(O)  (O_ct(O) == CT_Token)
-#define IS_Expr(O)   (O_ct(O) == CT_Expr)
-#define IS_Stmt(O)   (O_ct(O) == CT_Stmt)
-#define IS_Block(O)  (O_ct(O) == CT_Block)
-#define IS_Gamma(O)  (O_ct(O) == CT_Gamma)
+#define IS_Token(O)  (kObject_class(O) == CT_Token)
+#define IS_Expr(O)   (kObject_class(O) == CT_Expr)
+#define IS_Stmt(O)   (kObject_class(O) == CT_Stmt)
+#define IS_Block(O)  (kObject_class(O) == CT_Block)
+#define IS_Gamma(O)  (kObject_class(O) == CT_Gamma)
 
 #define K_NULLTOKEN  (kToken *)((CT_Token)->defaultNullValue_OnGlobalConstList)
 #define K_NULLEXPR   (kExpr *)((CT_Expr)->defaultNullValue_OnGlobalConstList)
 #define K_NULLBLOCK  (kBlock *)((CT_Block)->defaultNullValue_OnGlobalConstList)
 
-typedef kStmt* (*TypeDeclFunc)(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kattrtype_t ty, kExpr *termExpr, kExpr *vexpr, kObject *thunk);
+typedef kStmt* (*TypeDeclFunc)(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktypeattr_t ty, kExpr *termExpr, kExpr *vexpr, kObject *thunk);
 struct KBuilder;
 
 typedef struct {
@@ -626,16 +626,16 @@ typedef struct {
 	kExpr*       (*kStmt_RightJoinExpr)(KonohaContext *, kStmt *, kExpr *, kArray *, int, int);
 
 	kExpr*       (*kExpr_SetConstValue)(KonohaContext *, kExprVar *, KonohaClass *, kObject *o);
-	kExpr*       (*kExpr_SetUnboxConstValue)(KonohaContext *, kExprVar *, kattrtype_t, uintptr_t unboxValue);
-	kExpr*       (*kExpr_SetVariable)(KonohaContext *, kExprVar *, kGamma *, kexpr_t build, kattrtype_t, intptr_t index);
+	kExpr*       (*kExpr_SetUnboxConstValue)(KonohaContext *, kExprVar *, ktypeattr_t, uintptr_t unboxValue);
+	kExpr*       (*kExpr_SetVariable)(KonohaContext *, kExprVar *, kGamma *, kexpr_t build, ktypeattr_t, intptr_t index);
 	kExpr *      (*new_TypedCallExpr)(KonohaContext *, kStmt *, kGamma *, KonohaClass *, kMethod *mtd, int n, ...);
 
 	kbool_t     (*kBlock_TypeCheckAll)(KonohaContext *, kBlock *, kGamma *);
 	kbool_t     (*kStmt_TypeCheckByName)(KonohaContext *, kStmt*, ksymbol_t, kGamma *, KonohaClass *, int);
 	kExpr*      (*kStmt_TypeCheckExprAt)(KonohaContext *, kStmt *, kExpr *, size_t, kGamma *, KonohaClass *, int);
 	kExpr *     (*kStmtkExpr_TypeCheckCallParam)(KonohaContext *, kStmt *, kExprVar *, kMethod *, kGamma *, KonohaClass *);
-	int         (*kGamma_AddLocalVariable)(KonohaContext *, kGamma *, kattrtype_t, ksymbol_t);
-	kbool_t     (*kStmt_DeclType)(KonohaContext *, kStmt *, kGamma *, kattrtype_t, kExpr *, kObject *, TypeDeclFunc, kStmt **);
+	int         (*kGamma_AddLocalVariable)(KonohaContext *, kGamma *, ktypeattr_t, ksymbol_t);
+	kbool_t     (*kStmt_DeclType)(KonohaContext *, kStmt *, kGamma *, ktypeattr_t, kExpr *, kObject *, TypeDeclFunc, kStmt **);
 	kExpr*      (*kStmt_TypeCheckVariableNULL)(KonohaContext *, kStmt *, kExprVar *, kGamma *, KonohaClass *);
 
 	void       (*kToken_ToError)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
@@ -681,9 +681,9 @@ typedef enum {
 
 #define SUGAR
 
-//static kExpr* kExpr_SetConstValue(KonohaContext *kctx, kExprVar *expr, kattrtype_t ty, kObject *o);
-//static kExpr* kExpr_SetUnboxConstValue(KonohaContext *kctx, kExprVar *expr, kattrtype_t ty, uintptr_t unboxValue);
-//static kExpr* kExpr_SetVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, kexpr_t build, kattrtype_t ty, intptr_t index);
+//static kExpr* kExpr_SetConstValue(KonohaContext *kctx, kExprVar *expr, ktypeattr_t ty, kObject *o);
+//static kExpr* kExpr_SetUnboxConstValue(KonohaContext *kctx, kExprVar *expr, ktypeattr_t ty, uintptr_t unboxValue);
+//static kExpr* kExpr_SetVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, kexpr_t build, ktypeattr_t ty, intptr_t index);
 
 #define TY_Symbol                          kmodsugar->cSymbol->typeId
 #define TY_Token                           kmodsugar->cToken->typeId
@@ -800,7 +800,7 @@ struct KBuilderAPI2 {
 
 /* ------------------------------------------------------------------------ */
 
-static inline void kToken_setTypeId(KonohaContext *kctx, kToken *tk, kNameSpace *ns, kattrtype_t type)
+static inline void kToken_setTypeId(KonohaContext *kctx, kToken *tk, kNameSpace *ns, ktypeattr_t type)
 {
 	((kTokenVar *)tk)->resolvedTypeId = type;
 	((kTokenVar *)tk)->resolvedSyntaxInfo = kmodsugar->kNameSpace_GetSyntax(kctx, ns, KW_TypePattern, 0);
@@ -846,7 +846,7 @@ static inline void kExpr_Setsyn(kExpr *expr, SugarSyntax *syn)
 }
 
 #define kExpr_typed(E, B, TY)   Expr_typed(E, TEXPR_##B, TY)
-static inline kExpr *Expr_typed(kExprVar *expr, int build, kattrtype_t ty)
+static inline kExpr *Expr_typed(kExprVar *expr, int build, ktypeattr_t ty)
 {
 	expr->build = build;
 	expr->attrTypeId = ty;

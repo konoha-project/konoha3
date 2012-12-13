@@ -54,7 +54,7 @@ static void Nothing_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
 static void Iterator_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kIterator *itr = (kIterator *)o;
-	int isUnboxEntry = TY_isUnbox(O_ct(itr)->p0);
+	int isUnboxEntry = KType_Is(UnboxType, kObject_class(itr)->p0);
 	KFieldInit(itr, itr->source, K_NULL);
 	itr->current_pos = 0;
 	itr->hasNext = Nothing_hasNext;
@@ -122,11 +122,11 @@ static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
 static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	KonohaClass *cIterator = CT_p0(kctx, CT_Iterator, O_ct(a)->p0);
+	KonohaClass *cIterator = CT_p0(kctx, CT_Iterator, kObject_class(a)->p0);
 	kIterator *itr = (kIterator *)KLIB new_kObject(kctx, OnStack, cIterator, 0);
 	KFieldSet(itr, itr->arrayList, a);
 	itr->hasNext = Array_hasNext;
-	itr->setNextResult = TY_isUnbox(O_ct(a)->p0) ? Array_setNextResultUnbox : Array_setNextResult;
+	itr->setNextResult = KType_Is(UnboxType, kObject_class(a)->p0) ? Array_setNextResultUnbox : Array_setNextResult;
 	KReturn(itr);
 }
 
@@ -134,14 +134,14 @@ static kbool_t String_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kIterator *itr = sfp[0].asIterator;
 	kString *s = (kString *)itr->source;
-	return (itr->current_pos < S_size(s));
+	return (itr->current_pos < kString_size(s));
 }
 
 static void String_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kIterator *itr = sfp[0].asIterator;
 	kString *s = (kString *)itr->source;
-	const char *t = S_text(s) + itr->current_pos;
+	const char *t = kString_text(s) + itr->current_pos;
 	size_t charsize = utf8len(t[0]);
 	itr->current_pos += charsize;
 	KReturn(KLIB new_kString(kctx, OnStack, t, charsize, (charsize == 1) ? StringPolicy_ASCII : StringPolicy_UTF8));

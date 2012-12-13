@@ -116,12 +116,12 @@ static KMETHOD System_stat(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
+	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	struct stat buf = {}; /* zero */
 	int ret = stat(systemPath, &buf);
 	if(ret == -1) {
-		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
-		KTraceErrorPoint(trace, fault, "stat", LogText("path", S_text(path)), LogErrno);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(path)|SystemError, trace);
+		KTraceErrorPoint(trace, fault, "stat", LogText("path", kString_text(path)), LogErrno);
 	}
 	KReturn(KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)&buf));
 }
@@ -132,12 +132,12 @@ static KMETHOD System_lstat(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
+	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	struct stat buf = {}; /* zero */
 	int ret = lstat(systemPath, &buf);
 	if(ret == -1) {
-		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
-		KTraceErrorPoint(trace, fault, "lstat", LogText("path", S_text(path)), LogErrno);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(path)|SystemError, trace);
+		KTraceErrorPoint(trace, fault, "lstat", LogText("path", kString_text(path)), LogErrno);
 	}
 	KReturn(KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)&buf));
 }
@@ -292,9 +292,9 @@ static void stat_defineClassAndMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 {
 	KDEFINE_CLASS defStat = {};
 	defStat.structname = "FileStatus";
-	defStat.typeId = TY_newid;
+	defStat.typeId = TypeAttr_NewId;
 	defStat.cstruct_size = sizeof(struct kFileStatusVar);
-	defStat.cflag = kClass_Final;
+	defStat.cflag = KClassFlag_Final;
 	defStat.init  = kFileStatus_Init;
 	defStat.free  = kFileStatus_Free;
 	defStat.p     = kFileStatus_p;

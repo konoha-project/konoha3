@@ -89,10 +89,10 @@ static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 	size_t i;
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	if(O_typeId(tokenList) == TY_Token) {
+	if(kObject_typeId(tokenList) == TY_Token) {
 		/* Single token was passed (e.g. "dsh ls;"). */
 		kToken *token = (kToken *)tokenList;
-		KLIB KBuffer_Write(kctx, &wb, S_text(token->text), S_size(token->text));
+		KLIB KBuffer_Write(kctx, &wb, kString_text(token->text), kString_size(token->text));
 	}
 	else {
 		/* Multiple tokens was passed (e.g. "dsh ls -la;"). */
@@ -117,7 +117,7 @@ static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 				}
 			}
 			else {
-				KLIB KBuffer_Write(kctx, &wb, S_text(token->text), S_size(token->text));
+				KLIB KBuffer_Write(kctx, &wb, kString_text(token->text), kString_size(token->text));
 			}
 			if(kToken_is(BeforeWhiteSpace, token)) {
 				KLIB KBuffer_Write(kctx, &wb, " ", 1);
@@ -141,8 +141,8 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 	if(cmd == NULL) {
 		KReturnUnboxValue(false);
 	}
-	DBG_P("cmd=%s", S_text(cmd));
-	DBG_P("iscommand=%d", isCommand(S_text(cmd)));
+	DBG_P("cmd=%s", kString_text(cmd));
+	DBG_P("iscommand=%d", isCommand(kString_text(cmd)));
 
 	//TODO: generate eval("cmd") syntax
 
@@ -204,8 +204,8 @@ static KMETHOD PatternMatch_Shell(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, nameid, tokenList, beginIdx, endIdx);
 	kToken *firstToken = tokenList->TokenItems[beginIdx];
-	DBG_P("firstToken='%s', isCommand=%d", S_text(firstToken->text), DSLib_isCommand(kctx, S_text(firstToken->text)));
-	KReturnUnboxValue((firstToken->resolvedSyntaxInfo->keyword == KW_SymbolPattern && DSLib_isCommand(kctx, S_text(firstToken->text))) ? beginIdx : -1);
+	DBG_P("firstToken='%s', isCommand=%d", kString_text(firstToken->text), DSLib_isCommand(kctx, kString_text(firstToken->text)));
+	KReturnUnboxValue((firstToken->resolvedSyntaxInfo->keyword == KW_SymbolPattern && DSLib_isCommand(kctx, kString_text(firstToken->text))) ? beginIdx : -1);
 }
 
 static KMETHOD Statement_Shell(KonohaContext *kctx, KonohaStack *sfp)
@@ -221,8 +221,8 @@ static KMETHOD Statement_Shell(KonohaContext *kctx, KonohaStack *sfp)
 			DBG_ASSERT(IS_Array(tokenList));
 			cmd = splitWhiteSpace(kctx, tokenList);  // forget GC
 		}
-		DBG_P("cmd=%s", S_text(cmd));
-		system(S_text(cmd));  // FIXME: This is for demo
+		DBG_P("cmd=%s", kString_text(cmd));
+		system(kString_text(cmd));  // FIXME: This is for demo
 		kStmt_done(kctx, stmt);
 	}
 	KReturnUnboxValue(false);

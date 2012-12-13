@@ -216,7 +216,7 @@ static int MethodName_isUnaryOperator(KonohaContext *kctx, kmethodn_t mn)
 
 static kbool_t JSBuilder_VisitErrStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
-	JSBuilder_EmitString(kctx, builder, S_text(kStmt_GetObjectNULL(kctx, stmt, KW_ERR)), "", "");
+	JSBuilder_EmitString(kctx, builder, kString_text(kStmt_GetObjectNULL(kctx, stmt, KW_ERR)), "", "");
 	return true;
 }
 
@@ -319,7 +319,7 @@ static void JSBuilder_EmitConstValue(KonohaContext *kctx, KBuilder *builder, kOb
 {
 	KonohaStack sfp[1];
 	sfp[0].asObject = obj;
-	JSBuilder_EmitKonohaValue(kctx, builder, O_ct(obj), sfp);
+	JSBuilder_EmitKonohaValue(kctx, builder, kObject_class(obj), sfp);
 }
 
 static void JSBuilder_EmitNConstValue(KonohaContext *kctx, KBuilder *builder, KonohaClass *ct, unsigned long long unboxVal)
@@ -352,7 +352,7 @@ static void JSBuilder_VisitNullExpr(KonohaContext *kctx, KBuilder *builder, kStm
 static void JSBuilder_VisitLocalExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
 	kToken *tk = (kToken *)expr->termToken;
-	JSBuilder_EmitString(kctx, builder, S_text(tk->text), "", "");
+	JSBuilder_EmitString(kctx, builder, kString_text(tk->text), "", "");
 }
 
 static void JSBuilder_VisitBlockExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
@@ -363,13 +363,13 @@ static void JSBuilder_VisitBlockExpr(KonohaContext *kctx, KBuilder *builder, kSt
 static void JSBuilder_VisitFieldExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
 	kToken *tk = (kToken *)expr->termToken;
-	JSBuilder_EmitString(kctx, builder, S_text(tk->text), "", "");
+	JSBuilder_EmitString(kctx, builder, kString_text(tk->text), "", "");
 }
 
 static bool JSBuilder_importPackage(KonohaContext *kctx, kNameSpace *ns, kString *package, kfileline_t uline)
 {
 	KBaseTrace(trace);
-	KImportPackage(ns, S_text(package), trace);
+	KImportPackage(ns, kString_text(package), trace);
 	return true;
 }
 
@@ -527,7 +527,7 @@ static void compileAllDefinedMethods(KonohaContext *kctx)
 	size_t i;
 	for(i = 0; i < kArray_size(share->GlobalConstList); i++) {
 		kObject *o = share->GlobalConstList->ObjectItems[i];
-		if(O_ct(o) == CT_NameSpace) {
+		if(kObject_class(o) == CT_NameSpace) {
 			kNameSpace *ns = (kNameSpace  *) o;
 			size_t j;
 			for(j = 0; j < kArray_size(ns->methodList_OnList); j++) {
@@ -559,7 +559,7 @@ static void JSBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder, K
 	kObject *constList = kclass->defaultNullValue_OnGlobalConstList;
 	for(i = 0; i < kclass->fieldsize; ++i) {
 		JSBuilder_EmitString(kctx, builder, "this.", SYM_t(field[i].name), " = ");
-		if(TY_isUnbox(field[i].attrTypeId)) {
+		if(KType_Is(UnboxType, field[i].attrTypeId)) {
 			JSBuilder_EmitNConstValue(kctx, builder, CT_(field[i].attrTypeId), constList->fieldUnboxItems[i]);
 		}else{
 			JSBuilder_EmitConstValue(kctx, builder, constList->fieldObjectItems[i]);

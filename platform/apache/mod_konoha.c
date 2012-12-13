@@ -91,7 +91,7 @@ static KMETHOD Request_puts(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
 	kString *data = sfp[1].asString;
-	ap_rputs(S_text(data), self->r);
+	ap_rputs(kString_text(data), self->r);
 	KReturnVoid();
 }
 
@@ -133,7 +133,7 @@ static KMETHOD Request_setContentType(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
 	kString *type = sfp[1].asString;
-	self->r->content_type = apr_pstrdup(self->r->pool, S_text(type));
+	self->r->content_type = apr_pstrdup(self->r->pool, kString_text(type));
 	KReturnVoid();
 }
 // ##void Request.setContentEncoding(String enc);
@@ -141,7 +141,7 @@ static KMETHOD Request_setContentEncoding(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
 	kString *enc = sfp[1].asString;
-	self->r->content_encoding = apr_pstrdup(self->r->pool, S_text(enc));
+	self->r->content_encoding = apr_pstrdup(self->r->pool, kString_text(enc));
 	KReturnVoid();
 }
 // ## void Request.logRerror(int level, int status, String msg);
@@ -150,7 +150,7 @@ static KMETHOD Request_logError(KonohaContext *kctx, KonohaStack *sfp)
 	kRequest *self = (kRequest *) sfp[0].asObject;
 	int level = sfp[1].intValue;
 	apr_status_t status = (apr_status_t)sfp[2].intValue;
-	const char *msg = S_text(sfp[3].asString);
+	const char *msg = kString_text(sfp[3].asString);
 	ap_log_rerror(APLOG_MARK, level, status, self->r, msg, NULL);
 	KReturnVoid();
 }
@@ -171,8 +171,8 @@ static KMETHOD Request_getHeadersOut(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD AprTable_Add(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTable *self = (kAprTable *) sfp[0].asObject;
-	const char *key = S_text(sfp[1].asString);
-	const char *val = S_text(sfp[2].asString);
+	const char *key = kString_text(sfp[1].asString);
+	const char *val = kString_text(sfp[2].asString);
 	apr_table_add(self->tbl, key, val);
 	KReturnVoid();
 }
@@ -180,8 +180,8 @@ static KMETHOD AprTable_Add(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD AprTable_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTable *self = (kAprTable *) sfp[0].asObject;
-	const char *key = S_text(sfp[1].asString);
-	const char *val = S_text(sfp[2].asString);
+	const char *key = kString_text(sfp[1].asString);
+	const char *val = kString_text(sfp[2].asString);
 	apr_table_set(self->tbl, key, val);
 	KReturnVoid();
 }
@@ -236,7 +236,7 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 #define TY_TblEntry  (CT_AprTableEntry->typeId)
 
 	KonohaClass *CT_TblEntryArray = CT_p0(kctx, CT_Array, TY_TblEntry);
-	kattrtype_t TY_TblEntryArray = CT_TblEntryArray->typeId;
+	ktypeattr_t TY_TblEntryArray = CT_TblEntryArray->typeId;
 
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {

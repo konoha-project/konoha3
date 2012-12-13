@@ -51,7 +51,7 @@ struct kCurlVar {
 
 static const char *kCurl_urlInfo(KonohaContext *kctx, kCurl *kcurl)
 {
-	return (kcurl->URLInfoNULL == NULL) ? "Unknown" : S_text(kcurl->URLInfoNULL);
+	return (kcurl->URLInfoNULL == NULL) ? "Unknown" : kString_text(kcurl->URLInfoNULL);
 }
 
 #define CASE_CURLOPT(T) case CURLOPT_##T : return "CURLOPT_"#T
@@ -338,7 +338,7 @@ static KMETHOD Curl_setOptString(KonohaContext *kctx, KonohaStack *sfp)
 	case CURLOPT_SSLKEYTYPE:
 	case CURLOPT_USERAGENT:
 	case CURLOPT_USERPWD: {
-		curl_easy_setopt(kcurl->curl, curlopt, S_text(sfp[2].asString));
+		curl_easy_setopt(kcurl->curl, curlopt, kString_text(sfp[2].asString));
 		break;
 	}
 	default: {
@@ -426,7 +426,7 @@ static KMETHOD Curl_appendHeader(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCurl* kcurl = (kCurl *)sfp[0].asObject;
 
-	const char *h = S_text(sfp[1].asString);
+	const char *h = kString_text(sfp[1].asString);
 	kcurl->headers = curl_slist_append(kcurl->headers, h);
 	KReturnVoid();
 }
@@ -646,7 +646,7 @@ static KMETHOD Curl_perform(KonohaContext *kctx, KonohaStack *sfp)
 		res = curl_easy_perform(kcurl->curl)
 	);
 	if(res != CURLE_OK){
-		int fault = diagnosisCurlFaultType(kctx, res, (kcurl->URLInfoNULL == NULL) ? 0 : kString_guessUserFault(kcurl->URLInfoNULL));
+		int fault = diagnosisCurlFaultType(kctx, res, (kcurl->URLInfoNULL == NULL) ? 0 : kString_GuessUserFault(kcurl->URLInfoNULL));
 		KTraceErrorPoint(trace, fault, "curl_easy_perform", LogURL(kcurl), LogCurlStrError(res));
 	}
 	KReturnUnboxValue((res == CURLE_OK));
@@ -690,7 +690,7 @@ static KMETHOD Curl_receiveString(KonohaContext *kctx, KonohaStack *sfp)
 		res = curl_easy_perform(kcurl->curl)
 	);
 	if(res != CURLE_OK) {
-		int fault = diagnosisCurlFaultType(kctx, res, (kcurl->URLInfoNULL == NULL) ? 0 : kString_guessUserFault(kcurl->URLInfoNULL));
+		int fault = diagnosisCurlFaultType(kctx, res, (kcurl->URLInfoNULL == NULL) ? 0 : kString_GuessUserFault(kcurl->URLInfoNULL));
 		KTraceErrorPoint(trace, fault, "curl_easy_perform", LogURL(kcurl), LogCurlStrError(res));
 	}
 
@@ -760,7 +760,7 @@ static kbool_t curl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 
 	KDEFINE_CLASS defCurl = {
 		STRUCTNAME(Curl),
-		.cflag = kClass_Final,
+		.cflag = KClassFlag_Final,
 		.init = Curl_Init,
 		.reftrace = Curl_Reftrace,
 		.free = Curl_Free,

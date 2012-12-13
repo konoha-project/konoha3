@@ -187,23 +187,23 @@ static void checkASCII(KonohaContext *kctx, kStringBase *s, const char *text, si
 		case 1:     ch |= *p++;
 		} while(--n>0);
 	}
-	kString_set(ASCII, (kStringVar *)s, (ch < 128));
+	kString_Set(ASCII, (kStringVar *)s, (ch < 128));
 }
 
 static kString *new_kString(KonohaContext *kctx, kArray *gcstack, const char *text, size_t len, int policy)
 {
 	kStringBase *s = (kStringBase *) new_kStringBase(kctx, gcstack, 0);
-	if(TFLAG_is(int, policy, StringPolicy_ASCII)) {
-		kString_set(ASCII, s, 1);
-	} else if(TFLAG_is(int, policy, StringPolicy_UTF8)) {
-		kString_set(ASCII, s, 0);
+	if(KFlag_Is(int, policy, StringPolicy_ASCII)) {
+		kString_Set(ASCII, s, 1);
+	} else if(KFlag_Is(int, policy, StringPolicy_UTF8)) {
+		kString_Set(ASCII, s, 0);
 	} else {
 		checkASCII(kctx, s, text, len);
 	}
 
 	if(len < SIZEOF_INLINETEXT)
 		return (kString *) kStringBase_InitInline(kctx, s, text, len);
-	if(TFLAG_is(int, policy, StringPolicy_TEXT))
+	if(KFlag_Is(int, policy, StringPolicy_TEXT))
 		return (kString *) kStringBase_InitExternal(kctx, s, text, len);
 	return (kString *) kStringBase_InitLiner(kctx, s, text, len);
 }
@@ -332,7 +332,7 @@ static kStringBase *kStringBase_concat(KonohaContext *kctx, kArray *gcstack, kSt
 	}
 	size_t length = leftLen + rightLen;
 
-	bool isASCII = kString_is(ASCII, left) && kString_is(ASCII, right);
+	bool isASCII = kString_Is(ASCII, left) && kString_Is(ASCII, right);
 	kStringBase *result = NULL;
 
 	if(length + 1 < SIZEOF_INLINETEXT) {
@@ -349,7 +349,7 @@ static kStringBase *kStringBase_concat(KonohaContext *kctx, kArray *gcstack, kSt
 	} else {
 		result = kStringBase_InitRope(kctx, gcstack, left, right, length);
 	}
-	kString_set(ASCII, (kStringVar *)result, isASCII);
+	kString_Set(ASCII, (kStringVar *)result, isASCII);
 	return result;
 }
 

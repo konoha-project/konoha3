@@ -154,7 +154,7 @@ static enum UnaryOp MethodName_toUnaryOperator(KonohaContext *kctx, kmethodn_t m
 	return UnaryOp_NotFound;
 }
 
-static INode *FetchINode(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr, unsigned idx, kattrtype_t reqTy)
+static INode *FetchINode(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr, unsigned idx, ktypeattr_t reqTy)
 {
 	kExpr *exprN = kExpr_at(expr, idx);
 	DBG_ASSERT(IS_Expr(exprN));
@@ -168,9 +168,9 @@ static INode *FetchINode(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kE
 
 static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, kMethod *mtd, kStmt *stmt, kExpr *expr)
 {
-	kattrtype_t thisTy = mtd->typeId;
+	ktypeattr_t thisTy = mtd->typeId;
 	kmethodn_t  mn     = mtd->mn;
-	kattrtype_t retTy  = kMethod_GetReturnType(mtd)->typeId;
+	ktypeattr_t retTy  = kMethod_GetReturnType(mtd)->typeId;
 	kParam     *params = kMethod_GetParam(mtd);
 	if(thisTy == TY_int) {
 		if(params->psize == 0) { /* UnaryOperator */
@@ -182,7 +182,7 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 			}
 		}
 		else if(params->psize == 1) { /* BinaryOperator */
-			kattrtype_t ptype = params->paramtypeItems[0].attrTypeId;
+			ktypeattr_t ptype = params->paramtypeItems[0].attrTypeId;
 			if(retTy == TY_boolean && ptype == TY_int) {
 				/* boolean int.(opEQ|opNE|opGT|opGE|opLT|opLE) (int x) */
 				enum BinaryOp Op = MethodName_toBinaryOperator(kctx, mn);
@@ -324,14 +324,14 @@ static bool FuelVM_VisitUndefinedStmt(KonohaContext *kctx, KBuilder *builder, kS
 static void FuelVM_VisitConstExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
 	kObject *v = expr->objectConstValue;
-	DBG_ASSERT(!TY_isUnbox(expr->attrTypeId));
+	DBG_ASSERT(!KType_Is(UnboxType, expr->attrTypeId));
 	DBG_ASSERT(Expr_hasObjectConstValue(expr));
 	builder->Value = CreateObject(BLD(builder), expr->attrTypeId, (void *)v);
 }
 
 static void FuelVM_VisitNConstExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
-	DBG_ASSERT(TY_isUnbox(expr->attrTypeId));
+	DBG_ASSERT(KType_Is(UnboxType, expr->attrTypeId));
 	DBG_ASSERT(!Expr_hasObjectConstValue(expr));
 
 	SValue Val = {};
@@ -349,8 +349,8 @@ static void FuelVM_VisitNewExpr(KonohaContext *kctx, KBuilder *builder, kStmt *s
 static void FuelVM_VisitNullExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
 	SValue Val = {};
-	kattrtype_t type = expr->attrTypeId;
-	if(TY_isUnbox(type)) {
+	ktypeattr_t type = expr->attrTypeId;
+	if(KType_Is(UnboxType, type)) {
 		Val.bits = 0;
 	} else {
 		Val.ptr = (void *) KLIB Knull(kctx, CT_(type));
@@ -414,7 +414,7 @@ static void FuelVM_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt *
 			SUGAR VisitExpr(kctx, builder, stmt, exprN);
 			INode *Node = FuelVM_getExpression(builder);
 			if(Node->Type == TYPE_void) {
-				kattrtype_t type = params->paramtypeItems[i-2].attrTypeId;
+				ktypeattr_t type = params->paramtypeItems[i-2].attrTypeId;
 				INode_setType(Node, type);
 			}
 			Params[i] = Node;
@@ -529,7 +529,7 @@ static void SetUpArguments(KonohaContext *kctx, FuelIRBuilder *builder, kMethod 
 		IField_setHash((IField *) Val, 0);
 	}
 	for(i = 0; i < params->psize; ++i) {
-		kattrtype_t type = params->paramtypeItems[i].attrTypeId;
+		ktypeattr_t type = params->paramtypeItems[i].attrTypeId;
 		Arg = CreateArgument(builder, i+1);
 		Val = CreateLocal(builder, type);
 		CreateUpdate(builder, Val, Arg);

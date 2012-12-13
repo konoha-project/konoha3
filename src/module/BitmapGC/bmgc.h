@@ -573,9 +573,9 @@ static const unsigned BM_SIZE[] = {
 #define gc_stat(fmt, ...)  fprintf(global_gc_stat.fp, "(%s:%d) " fmt "\n" , __func__, __LINE__,  ## __VA_ARGS__)
 #endif
 
-#define Object_setTenure(o) TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_GCFlag,1)
-#define Object_setYoung(o)  TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_GCFlag,0)
-#define Object_isTenure(o) (TFLAG_is(uintptr_t,(o)->h.magicflag, kObject_GCFlag))
+#define Object_setTenure(o) KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_GCFlag,1)
+#define Object_setYoung(o)  KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_GCFlag,0)
+#define Object_isTenure(o) (KFlag_Is(uintptr_t,(o)->h.magicflag, kObjectFlag_GCFlag))
 #define Object_isYoung(o)  (!Object_isTenure(o))
 
 enum gc_mode {
@@ -1369,7 +1369,7 @@ static void deferred_sweep(HeapManager *mng, kObject *o)
 #endif
 	bmgc_Object_Free(mng->kctx, o);
 #else
-	assert(O_ct(o) == NULL);
+	assert(kObject_class(o) == NULL);
 #endif
 }
 
@@ -1522,7 +1522,7 @@ static void b0_final_sweep(KonohaContext *kctx, bitmap_t bm, size_t idx, Segment
 	while(mask) {
 		o = indexToAddr(seg, idx, mask);
 #if GCDEBUG
-		if(O_ct(o)) {
+		if(kObject_class(o)) {
 			global_gc_stat.collected[seg->heap_klass] += 1;
 		}
 #endif
@@ -2073,7 +2073,7 @@ static void *concgc_thread_entry(void *o)
 
 static inline void bmgc_Object_Free(KonohaContext *kctx, kObject *o)
 {
-	KonohaClass *ct = O_ct(o);
+	KonohaClass *ct = kObject_class(o);
 	if(ct) {
 #if GCDEBUG
 		OLDTRACE_SWITCH_TO_KTrace(LOGPOL_DEBUG,

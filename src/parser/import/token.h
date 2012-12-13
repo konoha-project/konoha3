@@ -163,7 +163,7 @@ static int ParseAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeni
 	if(isalnum(tokenizer->source[tok_start+1])) {
 		int pos = ParseSymbol(kctx, tk, tokenizer, tok_start+1);
 		if(IS_NOTNULL(tk)) {  // pre-resolved
-			tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID) | MN_Annotation;
+			tk->resolvedSymbol = ksymbolA(kString_text(tk->text), kString_size(tk->text), SYM_NEWID) | MN_Annotation;
 			tk->resolvedSyntaxInfo = SYN_(tokenizer->ns, KW_SymbolPattern);
 		}
 		return pos;
@@ -177,7 +177,7 @@ static int ParseAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeni
 //	if(isalnum(tokenizer->source[tok_start+1])) {  // tokenizer, tok_start is older style of tokneizer
 //		int pos = ParseSymbol(kctx, tk, tokenizer, tok_start+1);
 //		if(IS_NOTNULL(tk)) {  // pre-resolved
-//			tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID) | MN_Annotation;
+//			tk->resolvedSymbol = ksymbolA(kString_text(tk->text), kString_size(tk->text), SYM_NEWID) | MN_Annotation;
 //			tk->resolvedSyntaxInfo = SYN_(tokenizer->ns, KW_SymbolPattern);
 //		}
 //		KReturnUnboxValue(pos - tok_start);

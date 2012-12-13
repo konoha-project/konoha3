@@ -129,7 +129,7 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 					}
 					else {
 						dumpIndent(kctx, nest+1);
-						if(O_ct(o) == CT_Token) {
+						if(kObject_class(o) == CT_Token) {
 							kToken *tk = (kToken *)o;
 							DUMP_P("[%d] O: %s ", i, CT_t(o->h.ct));
 							dumpToken(kctx, tk, -1);

@@ -38,14 +38,14 @@ struct kMapVar {
 	KHashMap *map;
 };
 
-#define Map_isUnboxData(o)    (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
-#define Map_setUnboxData(o,b) TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,b)
+#define Map_isUnboxData(o)    (KFlag_Is(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1))
+#define Map_setUnboxData(o,b) KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1,b)
 
 static void kMap_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kMap *map = (kMap *)o;
 	map->map = KLIB KHashMap_Init(kctx, 17);
-	if(TY_isUnbox(O_p0(map))) {
+	if(KType_Is(UnboxType, kObject_p0(map))) {
 		Map_setUnboxData(map, true);
 	}
 }
@@ -66,7 +66,7 @@ static void MapObjectEntry_Reftrace(KonohaContext *kctx, KHashMapEntry *p, void 
 static void kMap_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kMap *map = (kMap *)o;
-	if(TY_isUnbox(O_p0(map))) {
+	if(KType_Is(UnboxType, kObject_p0(map))) {
 		KLIB KHashMap_DoEach(kctx, map->map, (void *)visitor, MapUnboxEntry_Reftrace);
 	}
 	else {
@@ -92,18 +92,18 @@ static void kMap_Free(KonohaContext *kctx, kObject *o)
 
 static uintptr_t String_hashCode(KonohaContext *kctx, kString *s)
 {
-	return strhash(S_text(s), S_size(s));  // FIXME: slow
+	return strhash(kString_text(s), kString_size(s));  // FIXME: slow
 
 }
 
 static KHashMapEntry* kMap_getEntry(KonohaContext *kctx, kMap *m, kString *key, kbool_t isNewIfNULL)
 {
 	uintptr_t hcode = String_hashCode(kctx, key);
-	const char *tkey = S_text(key);
-	size_t tlen = S_size(key);
+	const char *tkey = kString_text(key);
+	size_t tlen = kString_size(key);
 	KHashMapEntry *e = KLIB KHashMap_get(kctx, m->map, hcode);
 	while(e != NULL) {
-		if(e->hcode == hcode && tlen == S_size(e->StringKey) && strncmp(S_text(e->StringKey), tkey, tlen) == 0) {
+		if(e->hcode == hcode && tlen == kString_size(e->StringKey) && strncmp(kString_text(e->StringKey), tkey, tlen) == 0) {
 			return e;
 		}
 		e = e->next;
@@ -178,7 +178,7 @@ static KMETHOD Map_keys(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
 	kMap *m = (kMap *)sfp[0].asObject;
-	KonohaClass *cArray = CT_p0(kctx, CT_Array, O_p0(m));
+	KonohaClass *cArray = CT_p0(kctx, CT_Array, kObject_p0(m));
 	kArray *a = (kArray *)(KLIB new_kObject(kctx, _GcStack, cArray, m->map->size));
 	KLIB KHashMap_DoEach(kctx, m->map, (void *)a, MapEntry_appendKey);
 	KReturnWith(a, RESET_GCSTACK());
@@ -204,7 +204,7 @@ static kbool_t map_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 	kparamtype_t cparam = {TY_Object};
 	KDEFINE_CLASS defMap = {0};
 	SETSTRUCTNAME(defMap, Map);
-	defMap.cflag     = kClass_Final;
+	defMap.cflag     = KClassFlag_Final;
 	defMap.cparamsize = 1;
 	defMap.cParamItems = &cparam;
 	defMap.init      = kMap_Init;
@@ -234,7 +234,7 @@ static KMETHOD TypeCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *termToken = expr->termToken;
 	if(Expr_isTerm(expr) && IS_Token(termToken)) {
-		DBG_P("termToken='%s'", S_text(termToken->text));
+		DBG_P("termToken='%s'", kString_text(termToken->text));
 
 	}
 }

@@ -72,14 +72,14 @@ static inline void KonohaCommonModule_Init(KonohaContext *kctx, KTraceInfo *trac
 
 #define CT_Bytes         (KGetKonohaCommonModule()->cBytes)
 #define TY_Bytes         ((CT_Bytes)->typeId)
-#define IS_Bytes(O)      (O_ct(O) == CT_Bytes)
+#define IS_Bytes(O)      (kObject_class(O) == CT_Bytes)
 
 /* ------------------------------------------------------------------------ */
 /* RegExp */
 
 #define CT_RegExp         (KGetKonohaCommonModule()->cRegExp)
 #define TY_RegExp         ((CT_RegExp)->typeId)
-#define IS_RegExp(O)      (O_ct(O) == CT_RegExp)
+#define IS_RegExp(O)      (kObject_class(O) == CT_RegExp)
 
 
 /* ------------------------------------------------------------------------ */
@@ -87,7 +87,7 @@ static inline void KonohaCommonModule_Init(KonohaContext *kctx, KTraceInfo *trac
 
 #define CT_Prototype          (KGetKonohaCommonModule()->cPrototype)
 #define TY_Prototype          ((CT_Prototype)->typeId)
-#define IS_Prototype(O)       (O_ct(O)->baseTypeId == TY_Prototype)
+#define IS_Prototype(O)       (kObject_class(O)->baseTypeId == TY_Prototype)
 //#define KFLOAT_FMT        "%.4f"  // NEVER CHANGE THIS
 
 typedef const struct kPrototypeVar kPrototype;
@@ -101,7 +101,7 @@ struct kPrototypeVar {
 
 #define CT_Float          (KGetKonohaCommonModule()->cFloat)
 #define TY_float          ((CT_Float)->typeId)
-#define IS_Float(O)       (O_ct(O) == CT_Float)
+#define IS_Float(O)       (kObject_class(O) == CT_Float)
 #define KFLOAT_FMT        "%.4f"  // NEVER CHANGE THIS
 
 typedef const struct kFloatVar kFloat;
@@ -113,7 +113,7 @@ struct kFloatVar {
 /* ------- */
 /* Iterator */
 
-#define CFLAG_Iterator         kClass_Final
+#define CFLAG_Iterator         KClassFlag_Final
 #define CT_Iterator            KGetKonohaCommonModule()->cIterator
 #define TY_Iterator            KGetKonohaCommonModule()->cIterator->typeId
 #define CT_StringIterator      KGetKonohaCommonModule()->cStringIterator
@@ -121,7 +121,7 @@ struct kFloatVar {
 #define CT_GenericIterator      KGetKonohaCommonModule()->cGenericIterator
 #define TY_GenericIterator      KGetKonohaCommonModule()->cGenericIterator->typeId
 
-#define IS_Iterator(O)         (O_ct(O)->baseTypeId == TY_Iterator)
+#define IS_Iterator(O)         (kObject_class(O)->baseTypeId == TY_Iterator)
 
 typedef struct kIteratorVar kIterator;
 struct kIteratorVar {
@@ -141,7 +141,7 @@ struct kIteratorVar {
 
 #define CT_File         KGetKonohaCommonModule()->cFile
 #define TY_File         (CT_File)->typeId
-#define IS_File(O)      (O_ct(O) == CT_File)
+#define IS_File(O)      (kObject_class(O) == CT_File)
 #define CT_FILE         KGetKonohaCommonModule()->cFile
 #define TY_FILE         (CT_File)->typeId
 #define KFileStdIn       KGetKonohaCommonModule()->fileStdIn_OnGlobalConstList
@@ -149,9 +149,9 @@ struct kIteratorVar {
 #define KFileStdErr      KGetKonohaCommonModule()->fileStdErr_OnGlobalConstList
 
 
-#define kFileFlag_ChangeLessStream    kObject_Local1
-#define kFile_is(P, o)        (TFLAG_is(uintptr_t,(o)->h.magicflag, kFileFlag_##P))
-#define kFile_set(P, o, b)     TFLAG_set(uintptr_t,(o)->h.magicflag, kFileFlag_##P, b)
+#define kFileFlag_ChangeLessStream    kObjectFlag_Local1
+#define kFile_is(P, o)        (KFlag_Is(uintptr_t,(o)->h.magicflag, kFileFlag_##P))
+#define kFile_set(P, o, b)     KFlag_Set(uintptr_t,(o)->h.magicflag, kFileFlag_##P, b)
 
 typedef struct kFileVar kFile;
 

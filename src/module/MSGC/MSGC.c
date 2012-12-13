@@ -63,9 +63,9 @@ extern "C" {
 
 #define ArenaTable_InitSize     32
 
-#define Object_unsetMark(o) TFLAG_set0(uintptr_t,(o)->h.magicflag,kObject_GCFlag)
-#define Object_setMark(o)   TFLAG_set1(uintptr_t,(o)->h.magicflag,kObject_GCFlag)
-#define Object_isMark(o)   (TFLAG_is(uintptr_t,(o)->h.magicflag, kObject_GCFlag))
+#define Object_unsetMark(o) KFlag_Set0(uintptr_t,(o)->h.magicflag,kObjectFlag_GCFlag)
+#define Object_setMark(o)   KFlag_Set1(uintptr_t,(o)->h.magicflag,kObjectFlag_GCFlag)
+#define Object_isMark(o)   (KFlag_Is(uintptr_t,(o)->h.magicflag, kObjectFlag_GCFlag))
 static int verbose_gc = 0;
 static inline void *do_malloc(size_t size);
 static inline void *do_calloc(size_t count, size_t size);
@@ -759,10 +759,10 @@ static size_t sweep0(GcContext *mng, void *p, int n, size_t sizeOfObject)
 	for(i = 0; i < pageSize; ++i) {
 		kGCObject0 *o = (kGCObject0 *)ShiftPointer(p,sizeOfObject*i);
 		if(!Object_isMark((kObject *)o)) {
-			if( O_ct(o)) {
-				DBG_P("~Object%d %s", n, O_ct(o)->DBG_NAME);
+			if( kObject_class(o)) {
+				DBG_P("~Object%d %s", n, kObject_class(o)->DBG_NAME);
 				KLIB kObjectProto_Free(kctx, (kObjectVar *)o);
-				assert(O_ct(o)->cstruct_size == sizeOfObject);
+				assert(kObject_class(o)->cstruct_size == sizeOfObject);
 				++collected;
 				OBJECT_REUSE(o, n);
 				MSGC(n).freelist.size += 1;

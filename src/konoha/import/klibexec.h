@@ -245,7 +245,7 @@ KLIBDECL void KDict_Set(KonohaContext *kctx, KDict *dict, KKeyValue *kvs0)
 {
 	KKeyValue *kvs = KDict_GetNULL(kctx, dict, kvs0->key);
 	if(kvs != NULL) {
-		//KObjectRefDec(TY_is(Boxed, kvs->attrTypeId), kvs->ObjectValue);
+		//KObjectRefDec(KType_Is(Boxed, kvs->attrTypeId), kvs->ObjectValue);
 		kvs->unboxValue = kvs0->unboxValue;
 		kvs->attrTypeId = kvs0->attrTypeId;
 		return;
@@ -257,7 +257,7 @@ KLIBDECL void KDict_Remove(KonohaContext *kctx, KDict *dict, ksymbol_t queryKey)
 {
 	KKeyValue *kvs = KDict_GetNULL(kctx, dict, queryKey);
 	if(kvs != NULL) {
-		//KObjectRefDec(TY_is(Boxed, kvs->attrTypeId), kvs->ObjectValue);
+		//KObjectRefDec(KType_Is(Boxed, kvs->attrTypeId), kvs->ObjectValue);
 		kvs->unboxValue = 0;
 		kvs->attrTypeId = 0;
 	}
@@ -487,7 +487,7 @@ static ksymbol_t KHashMap_getcode(KonohaContext *kctx, KHashMap *kmp, kArray *li
 {
 	KHashMapEntry *e = KLIB KHashMap_get(kctx, kmp, hcode);
 	while(e != NULL) {
-		if(e->hcode == hcode && len == S_size(e->StringKey) && strncmp(S_text(e->StringKey), name, len) == 0) {
+		if(e->hcode == hcode && len == kString_size(e->StringKey) && strncmp(kString_text(e->StringKey), name, len) == 0) {
 			return (ksymbol_t)e->unboxValue;
 		}
 		e = e->next;
@@ -578,7 +578,7 @@ static void KProtoMap_Free(KonohaContext *kctx, KProtoMap* p)
 
 static void kObjectProto_Free(KonohaContext *kctx, kObjectVar *o)
 {
-	KonohaClass *ct = O_ct(o);
+	KonohaClass *ct = kObject_class(o);
 	ct->free(kctx, o);
 	if(KGetProtoMap(o) != NULL) {
 		KProtoMap_Free(kctx, KGetProtoMap(o));
@@ -588,7 +588,7 @@ static void kObjectProto_Free(KonohaContext *kctx, kObjectVar *o)
 
 static void kObjectProto_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
-	O_ct(o)->reftrace(kctx, o, visitor);
+	kObject_class(o)->reftrace(kctx, o, visitor);
 	KProtoMap *pm = KGetProtoMap(o);
 	if(pm != NULL) {
 		KDict_Reftrace(kctx, &(pm->dict), visitor);
@@ -613,7 +613,7 @@ static kObject* kObjectProto_GetObject(KonohaContext *kctx, kAbstractObject *o, 
 	return (d != NULL) ? d->ObjectValue : defval;
 }
 
-static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *ao, ksymbol_t key, kattrtype_t ty, kAbstractObject *val)
+static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *ao, ksymbol_t key, ktypeattr_t ty, kAbstractObject *val)
 {
 	kObjectVar *o = (kObjectVar *)ao;
 	KKeyValue kvs = {key, ty | TypeAttr_Boxed, {(uintptr_t)val}};
@@ -625,7 +625,7 @@ static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *ao, ksy
 	PLATAPI WriteBarrier(kctx, o);
 }
 
-static void kObjectProto_SetUnboxValue(KonohaContext *kctx, kAbstractObject *ao, ksymbol_t key, kattrtype_t ty, uintptr_t unboxValue)
+static void kObjectProto_SetUnboxValue(KonohaContext *kctx, kAbstractObject *ao, ksymbol_t key, ktypeattr_t ty, uintptr_t unboxValue)
 {
 	kObjectVar *o = (kObjectVar *)ao;
 	KKeyValue kvs = {key, ty, {unboxValue}};
@@ -661,7 +661,7 @@ static void kObjectProto_DoEach(KonohaContext *kctx, kAbstractObject *ao, void *
 
 static void kObjectProto_Free(KonohaContext *kctx, kObjectVar *o)
 {
-	KonohaClass *ct = O_ct(o);
+	KonohaClass *ct = kObject_class(o);
 	protomap_delete((Kprotomap_t *)o->h.prototypePtr);
 	ct->free(kctx, o);
 }
@@ -669,7 +669,7 @@ static void kObjectProto_Free(KonohaContext *kctx, kObjectVar *o)
 static void kObjectProto_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	unsigned map_size;
-	O_ct(o)->reftrace(kctx, o, visitor);
+	kObject_class(o)->reftrace(kctx, o, visitor);
 	map_size = protomap_size((Kprotomap_t *)o->h.prototypePtr);
 	if(map_size) {
 		protomap_iterator itr = {0};
@@ -695,15 +695,15 @@ static kObject* kObjectProto_GetObject(KonohaContext *kctx, kAbstractObject *o, 
 	return (d != NULL) ? d->ObjectValue : defval;
 }
 
-static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, kattrtype_t ty, kAbstractObject *val)
+static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktypeattr_t ty, kAbstractObject *val)
 {
 	kObjectVar *v = (kObjectVar *)o;
-	if(ty == 0) ty = O_ct(v)->typeId;
+	if(ty == 0) ty = kObject_class(v)->typeId;
 	protomap_set((Kprotomap_t **)&v->h.prototypePtr, key, ty | TypeAttr_Boxed, (void *)val);
 	PLATAPI WriteBarrier(kctx, v);
 }
 
-static void kObjectProto_SetUnboxValue(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, kattrtype_t ty, uintptr_t unboxValue)
+static void kObjectProto_SetUnboxValue(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktypeattr_t ty, uintptr_t unboxValue)
 {
 	kObjectVar *v = (kObjectVar *)o;
 	//PLATAPI WriteBarrier(kctx, v);   // why ? need this? by kimio
@@ -753,7 +753,7 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 	else {
 		w->values[w->pos].unboxValue = d->unboxValue;
 	}
-	O_ct(d->ObjectValue)->p(kctx, w->values, w->pos, w->wb);
+	kObject_class(d->ObjectValue)->p(kctx, w->values, w->pos, w->wb);
 	w->count++;
 }
 
@@ -770,13 +770,13 @@ static void DumpObject(KonohaContext *kctx, kObject *o, const char *file, const 
 	KonohaStack *lsfp = kctx->esp;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KUnsafeFieldSet(lsfp[0].asObject, o);
-	O_ct(o)->p(kctx, lsfp, 0, &wb);
+	kObject_class(o)->p(kctx, lsfp, 0, &wb);
 	const char *msg = KLIB KBuffer_Stringfy(kctx, &wb, 1);
 	if(file == NULL) {
-		PLATAPI printf_i("(%s)%s\n", CT_t(O_ct(o)), msg);
+		PLATAPI printf_i("(%s)%s\n", CT_t(kObject_class(o)), msg);
 	}
 	else {
-		PLATAPI ReportDebugMessage(file, func, line, "(%s)%s", CT_t(O_ct(o)), msg);
+		PLATAPI ReportDebugMessage(file, func, line, "(%s)%s", CT_t(kObject_class(o)), msg);
 	}
 	KLIB KBuffer_Free(&wb);
 }
@@ -802,7 +802,7 @@ static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp
 		KStackCall(sfp);
 	}
 	else {
-		PLATAPI ReportCaughtException(kctx, SYM_t(jumpResult), runtime->faultInfo, S_text(runtime->OptionalErrorInfo), runtime->bottomStack, runtime->topStack);
+		PLATAPI ReportCaughtException(kctx, SYM_t(jumpResult), runtime->faultInfo, kString_text(runtime->OptionalErrorInfo), runtime->bottomStack, runtime->topStack);
 		result = false;
 	}
 	RESET_GCSTACK();
@@ -829,25 +829,25 @@ static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, int fault, kStr
 
 static int DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 {
-	//DBG_P("IN fault=%d %d,%d,%d,%d", fault, TFLAG_is(int, fault, SoftwareFault), TFLAG_is(int, fault, UserFault), TFLAG_is(int, fault, SystemFault), TFLAG_is(int, fault, ExternalFault));
-	if(TFLAG_is(int, fault, SystemError)) {
+	//DBG_P("IN fault=%d %d,%d,%d,%d", fault, KFlag_Is(int, fault, SoftwareFault), KFlag_Is(int, fault, UserFault), KFlag_Is(int, fault, SystemFault), KFlag_Is(int, fault, ExternalFault));
+	if(KFlag_Is(int, fault, SystemError)) {
 		fault = PLATAPI DiagnosisSystemError(kctx, fault);
 	}
-	if(TFLAG_is(int, fault, NotSoftwareFault)) {
+	if(KFlag_Is(int, fault, NotSoftwareFault)) {
 		fault ^= SoftwareFault;
 	}
-	if(TFLAG_is(int, fault, NotUserFault)) {
+	if(KFlag_Is(int, fault, NotUserFault)) {
 		fault ^= UserFault;
 	}
-	if(TFLAG_is(int, fault, NotSystemFault)) {
+	if(KFlag_Is(int, fault, NotSystemFault)) {
 		fault ^= SystemFault;
 	}
-	if(TFLAG_is(int, fault, NotExternalFault)) {
+	if(KFlag_Is(int, fault, NotExternalFault)) {
 		fault ^= ExternalFault;
 	}
-	if(TFLAG_is(int, fault, SoftwareFault)) {
+	if(KFlag_Is(int, fault, SoftwareFault)) {
 		if(PLATAPI DiagnosisCheckSoftwareTestIsPass(kctx, FileId_t(trace->pline), (kushort_t)trace->pline)) {
-			TFLAG_set(int, fault, SoftwareFault, false);
+			KFlag_Set(int, fault, SoftwareFault, false);
 		}
 	}
 	return fault;
