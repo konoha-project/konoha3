@@ -255,9 +255,9 @@ macro(add_konoha_package _PKGNAME)
 		file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/*.k)
 		foreach(f ${test_files})
 			string(REPLACE // / f ${f})
-			string(REPLACE ${PARENT_SOURCE_DIR}/src/package/ "" f ${f})
-			string(REPLACE ${PARENT_SOURCE_DIR}/src/package-devel/ "" f ${f})
-			string(REPLACE /test "" test_name ${f})
+			string(REPLACE ${PARENT_SOURCE_DIR}/src/package/ "" test_name ${f})
+			string(REPLACE ${PARENT_SOURCE_DIR}/src/package-devel/ "" test_name ${test_name})
+			string(REPLACE /test "" test_name ${test_name})
 			add_konoha_test(${test_name} ${f})
 			if(PACKAGE_ENV)
 				set_tests_properties(${test_name} PROPERTIES ENVIRONMENT ${PACKAGE_ENV})
@@ -291,11 +291,14 @@ macro(add_konoha_package _PKGNAME)
 		if(PACKAGE_SCRIPT_CODE)
 			install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGE_SCRIPT_CODE}
 				DESTINATION ${_KONOHA_PACKAGE_DIR})
-			add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE}
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGE_SCRIPT_CODE}
-				${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE})
-			add_custom_target(copy_${PACKAGE_SCRIPT_CODE} ALL DEPENDS
+			foreach(scriptcode ${PACKAGE_SCRIPT_CODE})
+				add_custom_command(OUTPUT
+					${CMAKE_CURRENT_BINARY_DIR}/${scriptcode}
+					COMMAND ${CMAKE_COMMAND} -E copy_if_different
+					${CMAKE_CURRENT_SOURCE_DIR}/${scriptcode}
+					${CMAKE_CURRENT_BINARY_DIR}/${scriptcode})
+			endforeach(scriptcode ${PACKAGE_SCRIPT_CODE})
+			add_custom_target(copy_${_PKGNAME}_scriptcode ALL DEPENDS
 				${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE})
 		endif(PACKAGE_SCRIPT_CODE)
 		# for copy test files

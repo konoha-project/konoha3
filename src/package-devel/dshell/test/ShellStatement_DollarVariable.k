@@ -1,6 +1,6 @@
 // written by chenji
 
-import("dscript.shell");
+import("dshell");
 
 void test1() {
 	String s = "abc";
