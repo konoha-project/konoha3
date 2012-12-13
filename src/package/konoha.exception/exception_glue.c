@@ -48,9 +48,9 @@
 //
 //#define KonohaContext_getExceptionModule(kctx)           ((KonohaExceptionModule *)kctx->modshare[MOD_exception])
 //#define KonohaContext_getExceptionContext(kctx)          ((KonohaExceptionContext *)kctx->modlocal[MOD_exception])
-//#define CT_Exception         KonohaContext_getExceptionModule(kctx)->cException
-//#define TY_Exception         KonohaContext_getExceptionModule(kctx)->cException->typeId
-//#define IS_Exception(e)      (kObject_class(e) == CT_Exception)
+//#define KClass_Exception         KonohaContext_getExceptionModule(kctx)->cException
+//#define KType_Exception         KonohaContext_getExceptionModule(kctx)->cException->typeId
+//#define IS_Exception(e)      (kObject_class(e) == KClass_Exception)
 //
 //typedef struct {
 //	KonohaModule  h;
@@ -223,8 +223,8 @@
 //	mod->cException = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defException, trace);
 //
 //	KDEFINE_METHOD MethodData[] = {
-//		_Public, _F(Exception_new), TY_Exception,  TY_Exception, MN_("new"), 0, _Public|_Hidden, _F(System_throw), TY_void,  TY_System, MN_("throw"), 1, TY_Exception, FN_("e"),
-//		_Public|_Hidden, _F(System_getThrownException), TY_Exception, TY_System, MN_("getThrownException"), 0,
+//		_Public, _F(Exception_new), KType_Exception,  KType_Exception, MN_("new"), 0, _Public|_Hidden, _F(System_throw), KType_void,  KType_System, MN_("throw"), 1, KType_Exception, FN_("e"),
+//		_Public|_Hidden, _F(System_getThrownException), KType_Exception, KType_System, MN_("getThrownException"), 0,
 //		DEND,
 //	};
 //	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -264,7 +264,7 @@
 //	DBG_P("try statement .. \n");
 //	int ret = false;
 //	kBlock *tryBlock, *catchBlock, *finallyBlock;
-//	tryBlock     = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
+//	tryBlock     = SUGAR kStmt_GetBlock(kctx, stmt, NULL, Symbol_BlockPattern, K_NULLBLOCK);
 //	ret = SUGAR kBlock_TypeCheckAll(kctx, tryBlock,   gma);
 //	if(ret == false) {
 //		KReturnUnboxValue(ret);
@@ -293,16 +293,16 @@
 //	int ret = false;
 //
 //	// check "catch(...)"
-//	//ret = SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, CT_Exception, 0);
+//	//ret = SUGAR kStmt_TypeCheckByName(kctx, stmt, Symbol_ExprPattern, gma, KClass_Exception, 0);
 //
-//	kBlock *catchBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
+//	kBlock *catchBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, Symbol_BlockPattern, K_NULLBLOCK);
 //	kStmt *parentStmt = Stmt_LookupTryOrCatchStmtNULL(kctx, stmt);
 //
 //	if(catchBlock != K_NULLBLOCK && parentStmt != NULL) {
 //		ret = SUGAR kBlock_TypeCheckAll(kctx, catchBlock, gma);
-//		kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, K_NULLEXPR);
-//		KLIB kObjectProto_SetObject(kctx, parentStmt, KW_ExprPattern, TY_Exception, expr);
-//		KLIB kObjectProto_SetObject(kctx, parentStmt, SYM_("catch"), TY_Block, stmt);
+//		kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, K_NULLEXPR);
+//		KLIB kObjectProto_SetObject(kctx, parentStmt, Symbol_ExprPattern, KType_Exception, expr);
+//		KLIB kObjectProto_SetObject(kctx, parentStmt, SYM_("catch"), KType_Block, stmt);
 //		kStmt_done(kctx, stmt);
 //	} else {
 //		kStmt_Message(kctx, stmt, ErrTag, "upper stmt is not try/catch");
@@ -316,13 +316,13 @@
 //	VAR_Statement(stmt, gma);
 //	DBG_P("finally statement .. \n");
 //	int ret = false;
-//	kBlock *finallyBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
+//	kBlock *finallyBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, Symbol_BlockPattern, K_NULLBLOCK);
 //
 //	if(finallyBlock != K_NULLBLOCK) {
 //		kStmt *tryStmt = Stmt_LookupTryOrCatchStmtNULL(kctx, stmt);
 //		if(tryStmt != NULL) {
 //			ret = SUGAR kBlock_TypeCheckAll(kctx, finallyBlock, gma);
-//			KLIB kObjectProto_SetObject(kctx, tryStmt, SYM_("finally"), TY_Block, finallyBlock);
+//			KLIB kObjectProto_SetObject(kctx, tryStmt, SYM_("finally"), KType_Block, finallyBlock);
 //			kStmt_done(kctx, stmt);
 //		}
 //	}
@@ -336,7 +336,7 @@
 //		{ .keyword = SYM_("try"), Statement_(try), .rule = "\"try\" $Block [ \"catch\" \"(\" $Type $Symbol \")\" catch: $Block ] [ \"finally\" finally: $Block ]",},
 //		{ .keyword = SYM_("catch"), Statement_(catch), .rule = "\"catch\" \"(\" $Type $Symbol \")\" $Block",},
 //		{ .keyword = SYM_("finally"), Statement_(finally), .rule = "\"finally\" $Block ",},
-//		{ .keyword = KW_END, },
+//		{ .keyword = Symbol_END, },
 //	};
 //	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 //	return true;

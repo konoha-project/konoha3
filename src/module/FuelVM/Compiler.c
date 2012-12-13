@@ -37,17 +37,17 @@ extern "C" {
 
 static kBlock* Stmt_getFirstBlock(KonohaContext *kctx, kStmt *stmt)
 {
-	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
+	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, Symbol_BlockPattern, K_NULLBLOCK);
 }
 
 static kBlock* Stmt_getElseBlock(KonohaContext *kctx, kStmt *stmt)
 {
-	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, KW_else, K_NULLBLOCK);
+	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, Symbol_else, K_NULLBLOCK);
 }
 
 static kExpr* Stmt_getFirstExpr(KonohaContext *kctx, kStmt *stmt)
 {
-	return SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL);
+	return SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
 }
 
 static kStmt *kStmt_GetStmt(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw)
@@ -67,14 +67,14 @@ static int CallExpr_getArgCount(kExpr *expr)
 
 static kString *Stmt_getErrorMessage(KonohaContext *kctx, kStmt *stmt)
 {
-	kString* msg = (kString *)kStmt_GetObjectNULL(kctx, stmt, KW_ERR);
+	kString* msg = (kString *)kStmt_GetObjectNULL(kctx, stmt, Symbol_ERR);
 	DBG_ASSERT(IS_String(msg));
 	return msg;
 }
 
 static void kStmt_setLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label, Block *block)
 {
-	KLIB kObjectProto_SetUnboxValue(kctx, stmt, label, TY_int, (uintptr_t) block);
+	KLIB kObjectProto_SetUnboxValue(kctx, stmt, label, KType_int, (uintptr_t) block);
 }
 
 static Block *kStmt_GetTargetBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t keyword)
@@ -126,7 +126,7 @@ static INode *FuelVM_getExpression(KBuilder *builder)
 #define MN_opLSFT MN_("<<")
 #define MN_opRSFT MN_(">>")
 
-static enum BinaryOp MethodName_toBinaryOperator(KonohaContext *kctx, kmethodn_t mn)
+static enum BinaryOp MethodName_Fmt2oBinaryOperator(KonohaContext *kctx, kmethodn_t mn)
 {
 	if(mn == MN_opADD ) return Add;
 	if(mn == MN_opSUB ) return Sub;
@@ -147,7 +147,7 @@ static enum BinaryOp MethodName_toBinaryOperator(KonohaContext *kctx, kmethodn_t
 	return BinaryOp_NotFound;
 }
 
-static enum UnaryOp MethodName_toUnaryOperator(KonohaContext *kctx, kmethodn_t mn)
+static enum UnaryOp MethodName_Fmt2oUnaryOperator(KonohaContext *kctx, kmethodn_t mn)
 {
 	if(mn == MN_opSUB) return Neg;
 	if(mn == MN_opNOT) return Not;
@@ -160,7 +160,7 @@ static INode *FetchINode(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kE
 	DBG_ASSERT(IS_Expr(exprN));
 	SUGAR VisitExpr(kctx, builder, stmt, exprN);
 	INode *Node = FuelVM_getExpression(builder);
-	if(Node->Type == TY_void) {
+	if(Node->Type == KType_void) {
 		INode_setType(Node, reqTy);
 	}
 	return Node;
@@ -172,29 +172,29 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 	kmethodn_t  mn     = mtd->mn;
 	ktypeattr_t retTy  = kMethod_GetReturnType(mtd)->typeId;
 	kParam     *params = kMethod_GetParam(mtd);
-	if(thisTy == TY_int) {
+	if(thisTy == KType_int) {
 		if(params->psize == 0) { /* UnaryOperator */
-			if(retTy == TY_int) {
+			if(retTy == KType_int) {
 				/* int int.opSUB() */
-				enum UnaryOp Op = MethodName_toUnaryOperator(kctx, mn);
-				INode *Param = FetchINode(kctx, builder, stmt, expr, 1, TY_int);
+				enum UnaryOp Op = MethodName_Fmt2oUnaryOperator(kctx, mn);
+				INode *Param = FetchINode(kctx, builder, stmt, expr, 1, KType_int);
 				return CreateUnaryInst(BLD(builder), Op, Param);
 			}
 		}
 		else if(params->psize == 1) { /* BinaryOperator */
 			ktypeattr_t ptype = params->paramtypeItems[0].attrTypeId;
-			if(retTy == TY_boolean && ptype == TY_int) {
+			if(retTy == KType_boolean && ptype == KType_int) {
 				/* boolean int.(opEQ|opNE|opGT|opGE|opLT|opLE) (int x) */
-				enum BinaryOp Op = MethodName_toBinaryOperator(kctx, mn);
-				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, TY_int);
-				INode *RHS = FetchINode(kctx, builder, stmt, expr, 2, TY_int);
+				enum BinaryOp Op = MethodName_Fmt2oBinaryOperator(kctx, mn);
+				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, KType_int);
+				INode *RHS = FetchINode(kctx, builder, stmt, expr, 2, KType_int);
 				return CreateBinaryInst(BLD(builder), Op, LHS, RHS);
 			}
-			else if(retTy == TY_int && ptype == TY_int) {
+			else if(retTy == KType_int && ptype == KType_int) {
 				/* int int.(opADD|opSUB|opMUL|opDIV|opMOD|opLSHIFT|opRSHIFT|opAND|opOR|opXOR) (int x) */
-				enum BinaryOp Op = MethodName_toBinaryOperator(kctx, mn);
-				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, TY_int);
-				INode *RHS = FetchINode(kctx, builder, stmt, expr, 2, TY_int);
+				enum BinaryOp Op = MethodName_Fmt2oBinaryOperator(kctx, mn);
+				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, KType_int);
+				INode *RHS = FetchINode(kctx, builder, stmt, expr, 2, KType_int);
 				return CreateBinaryInst(BLD(builder), Op, LHS, RHS);
 			}
 		}
@@ -230,8 +230,8 @@ static bool FuelVM_VisitBlockStmt(KonohaContext *kctx, KBuilder *builder, kStmt 
 
 static bool FuelVM_VisitReturnStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
-	kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL);
-	if(expr != NULL && IS_Expr(expr) && expr->attrTypeId != TY_void) {
+	kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
+	if(expr != NULL && IS_Expr(expr) && expr->attrTypeId != KType_void) {
 		SUGAR VisitExpr(kctx, builder, stmt, expr);
 		INode *Ret  = FuelVM_getExpression(builder);
 		INode *Inst = CreateReturn(BLD(builder), Ret);
@@ -353,7 +353,7 @@ static void FuelVM_VisitNullExpr(KonohaContext *kctx, KBuilder *builder, kStmt *
 	if(KType_Is(UnboxType, type)) {
 		Val.bits = 0;
 	} else {
-		Val.ptr = (void *) KLIB Knull(kctx, CT_(type));
+		Val.ptr = (void *) KLIB Knull(kctx, KClass_(type));
 	}
 	builder->Value = CreateConstant(BLD(builder), expr->attrTypeId, Val);
 }
@@ -381,7 +381,7 @@ static void FuelVM_VisitFieldExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 	TODO();
 	//kshort_t index = (kshort_t)expr->index;
 	//kshort_t xindex = (kshort_t)(expr->index >> (sizeof(kshort_t)*8));
-	//ASM(NMOVx, TC_(a, expr->attrTypeId), OC_(index), xindex, CT_(expr->attrTypeId));
+	//ASM(NMOVx, TC_(a, expr->attrTypeId), OC_(index), xindex, KClass_(expr->attrTypeId));
 }
 
 static void FuelVM_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
@@ -404,7 +404,7 @@ static void FuelVM_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt *
 		kParam *params = kMethod_GetParam(mtd);
 
 		if(kMethod_Is(Static, mtd)) {
-			kObject *obj = KLIB Knull(kctx, CT_(mtd->typeId));
+			kObject *obj = KLIB Knull(kctx, KClass_(mtd->typeId));
 			INode *Self = CreateObject(BLD(builder), mtd->typeId, (void *) obj);
 			Params[1] = Self;
 		}
@@ -420,11 +420,11 @@ static void FuelVM_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt *
 			Params[i] = Node;
 		}
 
-		INode *MtdObj = CreateObject(BLD(builder), TY_Method, (void *) mtd);
+		INode *MtdObj = CreateObject(BLD(builder), KType_Method, (void *) mtd);
 		if(kMethod_Is(Virtual, mtd)) {
 			Inst = CreateCall(BLD(builder), VirtualCall);
 			/* set namespace to enable method lookups */
-			INode *Node = CreateObject(BLD(builder), TY_NameSpace, (void *) Stmt_ns(stmt));
+			INode *Node = CreateObject(BLD(builder), KType_NameSpace, (void *) Stmt_ns(stmt));
 			CallInst_addParam((ICall *)Inst, MtdObj);
 			CallInst_addParam((ICall *)Inst, Node);
 			DBG_P("TODO VirtualCall");
@@ -444,7 +444,7 @@ static void FuelVM_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt *
 	INode_setType(Inst, kMethod_GetReturnType(mtd)->typeId);
 	if(mtd->mn == MN_box) { /* boxed value of unbox value must be shifted to OC */
 		asm volatile("int3");
-		((kExprVar *)expr)->attrTypeId = TY_Object;
+		((kExprVar *)expr)->attrTypeId = KType_Object;
 	}
 	builder->Value = Inst;
 }
@@ -498,9 +498,9 @@ static void FuelVM_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt *s
 		//SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
 		//kshort_t index  = (kshort_t)leftHandExpr->index;
 		//kshort_t xindex = (kshort_t)(leftHandExpr->index >> (sizeof(kshort_t)*8));
-		//KonohaClass *lhsClass = CT_(leftHandExpr->attrTypeId);
+		//KonohaClass *lhsClass = KClass_(leftHandExpr->attrTypeId);
 		//ASM(XNMOV, OC_(index), xindex, TC_(espidx, rightHandExpr->attrTypeId), lhsClass);
-		//if(expr->attrTypeId != TY_void) {
+		//if(expr->attrTypeId != KType_void) {
 		//	ASM(NMOVx, TC_(a, rightHandExpr->attrTypeId), OC_(index), xindex, lhsClass);
 		//}
 	}
@@ -606,7 +606,7 @@ typedef void (*GenCodeFunc)(KonohaContext*, kMethod*, kBlock *, int options);
 
 void RecompileMethod(KonohaContext *kctx, kMethod *mtd)
 {
-	DBG_P("[Recompile]: %s.%s%s", TY_t(mtd->typeId), MethodName_t(mtd->mn));
+	DBG_P("[Recompile]: %s.%s%s", KType_t(mtd->typeId), MethodName_Fmt2(mtd->mn));
 	KonohaLibVar *l = (KonohaLibVar *) kctx->klib;
 	GenCodeFunc OldFunc = l->kMethod_GenCode;
 #ifdef FUELVM_USE_LLVM

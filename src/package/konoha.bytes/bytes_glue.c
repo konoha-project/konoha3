@@ -247,32 +247,32 @@ static kbool_t bytes_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 {
 	KRequireKonohaCommonModule(trace);
 	KImportPackageSymbol(ns, "cstyle", "$SingleQuotedChar", trace);
-	if(CT_Bytes == NULL) {
+	if(KClass_Bytes == NULL) {
 		KDEFINE_CLASS defBytes = {0};
 		SETSTRUCTNAME(defBytes, Bytes);
 		defBytes.cflag   = KClassFlag_Final;
 		defBytes.free    = kBytes_Free;
 		defBytes.init    = kBytes_Init;
 		defBytes.p       = kBytes_p;
-		CT_Bytes = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defBytes, trace);
+		KClass_Bytes = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defBytes, trace);
 	}
 	int FN_index = FN_("index");
 	int FN_c     = FN_("c");
 	int FN_size  = FN_("size");
 	KDEFINE_METHOD MethodData[] = {
-		_Public,     _F(Bytes_new),     TY_Bytes,  TY_Bytes, MN_("new"),     1, TY_int, FN_size,
-		_Public|_Im, _F(Bytes_getSize), TY_int,    TY_Bytes, MN_("getSize"), 0,
-		_Public|_Im, _F(Bytes_get),     TY_int,    TY_Bytes, MN_("get"),     1, TY_int, FN_index,
-		_Public,     _F(Bytes_set),     TY_void,   TY_Bytes, MN_("set"),     2, TY_int, FN_index, TY_int, FN_c,
-		_Public,     _F(Bytes_setAll),  TY_void,   TY_Bytes, MN_("setAll"),  1, TY_int, FN_c,
-		_Public|_Im|_Coercion, _F(String_toBytes), TY_Bytes, TY_String, MN_to(TY_Bytes),   0,
-		//_Public|_Im|_Coercion, _F(Bytes_toString), TY_String, TY_Bytes,  MN_to(TY_String),  0,
-		//_Public|_Const, _F(Bytes_encodeTo),   TY_Bytes,  TY_Bytes,  MN_("encodeTo"),    1, TY_String, FN_encoding,
-		//_Public|_Const, _F(Bytes_decodeFrom),   TY_String, TY_Bytes,  MN_("decodeFrom"),    1, TY_String, FN_encoding,
-		_Public, _F(String_new_fromBytes_withDefaultDecode),      TY_String, TY_String, MN_("new"), 1, TY_Bytes, FN_("ba"),
-		_Public, _F(String_new_fromBytes_withSpecifiedDecode),    TY_String, TY_String, MN_("new"), 2, TY_Bytes, FN_("ba"), TY_String, FN_("charset"),
-		_Public, _F(String_new_fromSubBytes_withDefaultDecode),   TY_String, TY_String, MN_("new"), 3, TY_Bytes, FN_("ba"), TY_int,    FN_("offset"), TY_int, FN_("length"),
-		_Public, _F(String_new_fromSubBytes_withSpecifiedDecode), TY_String, TY_String, MN_("new"), 4, TY_Bytes, FN_("ba"), TY_int,    FN_("offset"), TY_int, FN_("length"), TY_String, FN_("charset"),
+		_Public,     _F(Bytes_new),     KType_Bytes,  KType_Bytes, MN_("new"),     1, KType_int, FN_size,
+		_Public|_Im, _F(Bytes_getSize), KType_int,    KType_Bytes, MN_("getSize"), 0,
+		_Public|_Im, _F(Bytes_get),     KType_int,    KType_Bytes, MN_("get"),     1, KType_int, FN_index,
+		_Public,     _F(Bytes_set),     KType_void,   KType_Bytes, MN_("set"),     2, KType_int, FN_index, KType_int, FN_c,
+		_Public,     _F(Bytes_setAll),  KType_void,   KType_Bytes, MN_("setAll"),  1, KType_int, FN_c,
+		_Public|_Im|_Coercion, _F(String_toBytes), KType_Bytes, KType_String, MethodName_To(KType_Bytes),   0,
+		//_Public|_Im|_Coercion, _F(Bytes_toString), KType_String, KType_Bytes,  MethodName_To(KType_String),  0,
+		//_Public|_Const, _F(Bytes_encodeTo),   KType_Bytes,  KType_Bytes,  MN_("encodeTo"),    1, KType_String, FN_encoding,
+		//_Public|_Const, _F(Bytes_decodeFrom),   KType_String, KType_Bytes,  MN_("decodeFrom"),    1, KType_String, FN_encoding,
+		_Public, _F(String_new_fromBytes_withDefaultDecode),      KType_String, KType_String, MN_("new"), 1, KType_Bytes, FN_("ba"),
+		_Public, _F(String_new_fromBytes_withSpecifiedDecode),    KType_String, KType_String, MN_("new"), 2, KType_Bytes, FN_("ba"), KType_String, FN_("charset"),
+		_Public, _F(String_new_fromSubBytes_withDefaultDecode),   KType_String, KType_String, MN_("new"), 3, KType_Bytes, FN_("ba"), KType_int,    FN_("offset"), KType_int, FN_("length"),
+		_Public, _F(String_new_fromSubBytes_withSpecifiedDecode), KType_String, KType_String, MN_("new"), 4, KType_Bytes, FN_("ba"), KType_int,    FN_("offset"), KType_int, FN_("length"), KType_String, FN_("charset"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

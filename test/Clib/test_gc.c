@@ -88,7 +88,7 @@ static KDEFINE_CLASS DummyDef = {
 
 void test_gc(KonohaContext *kctx)
 {
-#define CT_Dummy ct
+#define KClass_Dummy ct
 	int i, j;
 	KonohaClass *ct = KLIB KonohaClass_define(kctx, 0, NULL, &DummyDef, 0);
 	/* small size */

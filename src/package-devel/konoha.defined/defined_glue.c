@@ -40,31 +40,31 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	int popIsBlockingErrorMessage = sugarContext->isBlockedErrorMessage;
 	sugarContext->isBlockedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->cons); i++) {
-		kExpr *typedExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, i, gma, CT_INFER, TypeCheckPolicy_ALLOWVOID);
+		kExpr *typedExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, i, gma, KClass_INFER, TypeCheckPolicy_ALLOWVOID);
 		if(typedExpr == K_NULLEXPR) {
 			isDefined = false;
 			break;
 		}
 	}
 	sugarContext->isBlockedErrorMessage = popIsBlockingErrorMessage;
-	KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, TY_boolean, isDefined));
+	KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_boolean, isDefined));
 }
 
 static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
 	int i;
 	for(i = beginIdx; i < endIdx; i++) {
-		if(i + 1 == endIdx || tokenList->TokenItems[i+1]->resolvedSyntaxInfo->keyword == KW_COMMA) {
+		if(i + 1 == endIdx || tokenList->TokenItems[i+1]->resolvedSyntaxInfo->keyword == Symbol_COMMA) {
 			kTokenVar *tk = tokenList->TokenVarItems[i];
-			if(tk->resolvedSyntaxInfo->keyword != KW_SymbolPattern) {  // defined
-				tk->resolvedSyntaxInfo = SYN_(ns, KW_TextPattern);  // switch to text pattern
+			if(tk->resolvedSyntaxInfo->keyword != Symbol_SymbolPattern) {  // defined
+				tk->resolvedSyntaxInfo = SYN_(ns, Symbol_TextPattern);  // switch to text pattern
 			}
 			i++;
 		}
 		while(i < endIdx) {
 			kTokenVar *tk = tokenList->TokenVarItems[i];
 			i++;
-			if(tk->resolvedSyntaxInfo->keyword == KW_COMMA) break;
+			if(tk->resolvedSyntaxInfo->keyword == Symbol_COMMA) break;
 		}
 	}
 }
@@ -88,7 +88,7 @@ static kbool_t defined_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Expression_Defined, NULL, NULL, TypeCheck_Defined, },
-		{ KW_END, },
+		{ Symbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;

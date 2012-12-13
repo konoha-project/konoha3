@@ -221,11 +221,11 @@ static void DSE_delete(DSE *dse);
 //		char *namebuf = ALLOCA(char, len+1);
 //		memcpy(namebuf, keyvalue, len); namebuf[len] = 0;
 ////		DBG_P("name='%s'", namebuf);
-//		ksymbol_t key = KLIB Ksymbol(kctx, namebuf, len, 0, SYM_NEWID);
+//		ksymbol_t key = KLIB Ksymbol(kctx, namebuf, len, 0, Symbol_NewId);
 //		uintptr_t unboxValue;
 //		ktypeattr_t ty;
 //		if(isdigit(p[1])) {
-//			ty = TY_int;
+//			ty = KType_int;
 //			unboxValue = (uintptr_t)strtol(p+1, NULL, 0);
 //		}
 //		else {
@@ -401,7 +401,7 @@ static void DSE_defineConstData(DSE *dse, KonohaContext *kctx, Message *msg)
 		KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), false/*isOverride*/, 0);
 	}
 	KDEFINE_INT_CONST IntData[] = {
-		{"DSE_DEBUG", TY_int, verbose_debug}, {}
+		{"DSE_DEBUG", KType_int, verbose_debug}, {}
 	};
 	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(IntData), false/*isOverride*/, 0);
 }

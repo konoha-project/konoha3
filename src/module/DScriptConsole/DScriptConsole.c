@@ -40,7 +40,7 @@ extern "C" {
 static const char *getThisFileName(KonohaContext *kctx)
 {
 	static char shell[] = "shell";
-	kNameSpace *ns = (kNameSpace *)KLIB Knull(kctx, CT_NameSpace);
+	kNameSpace *ns = (kNameSpace *)KLIB Knull(kctx, KClass_NameSpace);
 	ksymbol_t sym = SYM_("SCRIPT_ARGV");
 	KKeyValue *kv = KLIB kNameSpace_GetConstNULL(kctx, ns, sym);
 	if(kv != NULL) {
@@ -81,7 +81,7 @@ static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, k
 
 static void KBuffer_WriteValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass *c, KonohaStack *sfp)
 {
-	if(KClass_IsUnbox(c)) {
+	if(KClass_Is(UnboxType, c)) {
 		c->p(kctx, sfp, 0, wb);
 	}
 	else {

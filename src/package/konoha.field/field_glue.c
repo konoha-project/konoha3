@@ -58,7 +58,7 @@ static KMETHOD MethodFunc_UnboxFieldSetter(KonohaContext *kctx, KonohaStack *sfp
 }
 static kMethod *new_FieldGetter(KonohaContext *kctx, kArray *gcstack, ktypeattr_t cid, ksymbol_t sym, ktypeattr_t ty, int idx)
 {
-	kmethodn_t mn = MN_toGETTER(sym);
+	kmethodn_t mn = MethodName_ToGetter(sym);
 	MethodFunc f = (KType_Is(UnboxType, ty)) ? MethodFunc_UnboxFieldGetter : MethodFunc_ObjectFieldGetter;
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public|kMethod_Immutable, cid, mn, f);
 	KLIB kMethod_SetParam(kctx, mtd, ty, 0, NULL);
@@ -68,7 +68,7 @@ static kMethod *new_FieldGetter(KonohaContext *kctx, kArray *gcstack, ktypeattr_
 
 static kMethod *new_FieldSetter(KonohaContext *kctx, kArray *gcstack, ktypeattr_t cid, kmethodn_t sym, ktypeattr_t ty, int idx)
 {
-	kmethodn_t mn = MN_toSETTER(sym);
+	kmethodn_t mn = MethodName_ToSetter(sym);
 	MethodFunc f = (KType_Is(UnboxType, ty)) ? MethodFunc_UnboxFieldSetter : MethodFunc_ObjectFieldSetter;
 	kparamtype_t p = {ty, FN_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public, cid, mn, f);
@@ -120,7 +120,7 @@ static KMETHOD MethodFunc_UnboxPrototypeSetter(KonohaContext *kctx, KonohaStack 
 
 static kMethod *new_PrototypeGetter(KonohaContext *kctx, kArray *gcstack, ktypeattr_t cid, ksymbol_t sym, ktypeattr_t ty)
 {
-	kmethodn_t mn = MN_toGETTER(sym);
+	kmethodn_t mn = MethodName_ToGetter(sym);
 	MethodFunc f = (KType_Is(UnboxType, ty)) ? MethodFunc_UnboxPrototypeGetter : MethodFunc_ObjectPrototypeGetter;
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public|kMethod_Immutable, cid, mn, f);
 	KLIB kMethod_SetParam(kctx, mtd, ty, 0, NULL);
@@ -130,7 +130,7 @@ static kMethod *new_PrototypeGetter(KonohaContext *kctx, kArray *gcstack, ktypea
 
 static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, ktypeattr_t cid, ksymbol_t sym, ktypeattr_t ty)
 {
-	kmethodn_t mn = MN_toSETTER(sym);
+	kmethodn_t mn = MethodName_ToSetter(sym);
 	MethodFunc f = (KType_Is(UnboxType, ty)) ? MethodFunc_UnboxPrototypeSetter : MethodFunc_ObjectPrototypeSetter;
 	kparamtype_t p = {ty, FN_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public, cid, mn, f);
@@ -156,7 +156,7 @@ static kbool_t KonohaClass_AddField(KonohaContext *kctx, KonohaClass *ct, ktypea
 		}
 		else {
 			kObjectVar *o = definedClass->defaultNullValueVar_OnGlobalConstList;
-			KFieldSet(o, o->fieldObjectItems[pos], KLIB Knull(kctx, CT_(typeattr)));
+			KFieldSet(o, o->fieldObjectItems[pos], KLIB Knull(kctx, KClass_(typeattr)));
 			definedClass->fieldItems[pos].attrTypeId = typeattr | TypeAttr_Boxed;
 		}
 		if(1/*FLAG_is(flag, kField_Getter)*/) {
@@ -189,22 +189,22 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *fieldToken = expr->cons->TokenItems[0];
 	ksymbol_t fn = fieldToken->resolvedSymbol;
-	kExpr *self = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, CT_INFER, 0);
+	kExpr *self = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, KClass_INFER, 0);
 	kNameSpace *ns = Stmt_ns(stmt);
 	if(self != K_NULLEXPR) {
-		kMethod *mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, CT_(self->attrTypeId), fn);
+		kMethod *mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, KClass_(self->attrTypeId), fn);
 		if(mtd != NULL) {
 			KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
-			KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, CT_(reqty)));
+			KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, KClass_(reqty)));
 		}
 		else {  // dynamic field    o.name => o.get(name)
-			kparamtype_t p[1] = {{TY_Symbol}};
+			kparamtype_t p[1] = {{KType_Symbol}};
 			kparamId_t paramdom = KLIB Kparamdom(kctx, 1, p);
-			mtd = KLIB kNameSpace_GetMethodBySignatureNULL(kctx, ns, CT_(self->attrTypeId), MN_GETTER, paramdom, 1, p);
+			mtd = KLIB kNameSpace_GetMethodBySignatureNULL(kctx, ns, KClass_(self->attrTypeId), MethodNameAttr_Getter, paramdom, 1, p);
 			if(mtd != NULL) {
 				KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
-				KLIB kArray_Add(kctx, expr->cons, new_UnboxConstValueExpr(kctx, TY_Symbol, Symbol_Unmask(fn)));
-				KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, CT_(reqty)));
+				KLIB kArray_Add(kctx, expr->cons, new_UnboxConstValueExpr(kctx, KType_Symbol, Symbol_Unmask(fn)));
+				KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, KClass_(reqty)));
 			}
 		}
 		SUGAR kStmt_Message2(kctx, stmt, fieldToken, ErrTag, "undefined field: %s", kString_text(fieldToken->text));
@@ -215,7 +215,7 @@ static kbool_t field_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("."), 0, NULL, -1, 0, NULL, NULL, NULL, NULL, TypeCheck_Getter, },
-		{ KW_END, },
+		{ Symbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;

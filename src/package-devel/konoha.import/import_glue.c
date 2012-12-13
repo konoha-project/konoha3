@@ -29,7 +29,7 @@
 extern "C"{
 #endif
 
-#define makeStringConstValue(kctx, text) new_ConstValueExpr(kctx, CT_String, UPCAST(text))
+#define makeStringConstValue(kctx, text) new_ConstValueExpr(kctx, KClass_String, UPCAST(text))
 
 static kExpr *CreateImportCall(KonohaContext *kctx, SugarSyntaxVar *syn, kToken *tkImport, kNameSpace *ns, kString *pkgname)
 {
@@ -43,12 +43,12 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int ret = false;
 	VAR_Statement(stmt, gma);
-	kTokenArray *tokenList = (kTokenArray *) kStmt_GetObjectNULL(kctx, stmt, KW_TokenPattern);
+	kTokenArray *tokenList = (kTokenArray *) kStmt_GetObjectNULL(kctx, stmt, Symbol_TokenPattern);
 	if(tokenList == NULL) {
 		KReturnUnboxValue(false);
 	}
 	kNameSpace *ns = Stmt_ns(stmt);
-	SugarSyntaxVar *syn = (SugarSyntaxVar *) SYN_(ns, KW_ExprMethodCall);
+	SugarSyntaxVar *syn = (SugarSyntaxVar *) SYN_(ns, Symbol_ExprMethodCall);
 	kExpr *expr;
 	kTokenVar *tkImport = /*G*/new_(TokenVar, 0, OnGcStack);
 	tkImport->resolvedSymbol = MN_("import");
@@ -101,8 +101,8 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 		kString *pkgname = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_Stringfy(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
 		expr = CreateImportCall(kctx, syn, tkImport, ns, pkgname);
 	}
-	KLIB kObjectProto_SetObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);
-	ret = SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, CT_void, TypeCheckPolicy_ALLOWVOID);
+	KLIB kObjectProto_SetObject(kctx, stmt, Symbol_ExprPattern, KType_Expr, expr);
+	ret = SUGAR kStmt_TypeCheckByName(kctx, stmt, Symbol_ExprPattern, gma, KClass_void, TypeCheckPolicy_ALLOWVOID);
 	if(ret) {
 		kStmt_typed(stmt, EXPR);
 	}
@@ -115,7 +115,7 @@ static kbool_t import_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("import"), 0, "\"import\" $Token $Token* [ \".*\"] ", 0, 0, NULL, NULL, Statement_import, NULL, NULL, },
-		{ KW_END, },
+		{ Symbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;

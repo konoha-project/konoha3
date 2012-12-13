@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#define USE_DIRECT_THREADED_CODE
+#define USE_DIREKClass_THREADED_CODE
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/klib.h>
@@ -107,17 +107,17 @@ static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeT
 		KLIB KBuffer_printf(kctx, wb, " i%ld", (long)c->data[i]); break;
 	case VMT_C:
 	case VMT_TY:
-		KLIB KBuffer_printf(kctx, wb, "(%s)", CT_t(c->ct[i])); break;
+		KLIB KBuffer_printf(kctx, wb, "(%s)", KClass_t(c->ct[i])); break;
 	case VMT_F:
 		KLIB KBuffer_printf(kctx, wb, " function(%p)", c->p[i]); break;
 	case VMT_Object: {
 		kObject *o = c->o[i];
 		if(IS_Method(o)) {
 			kMethod *mtd = (kMethod *)o;
-			KLIB KBuffer_printf(kctx, wb, " %s.%s%s", TY_t(mtd->typeId), MethodName_t(mtd->mn));
+			KLIB KBuffer_printf(kctx, wb, " %s.%s%s", KType_t(mtd->typeId), MethodName_Fmt2(mtd->mn));
 		}
 		else {
-			KLIB KBuffer_printf(kctx, wb, " (%s)", CT_t(kObject_class(o)));
+			KLIB KBuffer_printf(kctx, wb, " (%s)", KClass_t(kObject_class(o)));
 			KLIB kObject_WriteToBuffer(kctx, o, 0, wb, NULL, 0);
 		}
 		break;
@@ -195,7 +195,7 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 	return pc;
 }
 
-#ifdef USE_DIRECT_THREADED_CODE
+#ifdef USE_DIREKClass_THREADED_CODE
 #define NEXT_OP   (pc->codeaddr)
 #define JUMP      *(NEXT_OP)
 #ifdef K_USING_VMASMDISPATCH
@@ -213,7 +213,7 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 #define OPEXEC(T)  L_##T : { OPEXEC_##T(); pc++; goto *(pc->codeaddr); }
 
 
-#else/*USE_DIRECT_THREADED_CODE*/
+#else/*USE_DIREKClass_THREADED_CODE*/
 #define OPJUMP      NULL
 #define NEXT_OP     L_HEAD
 #define GOTO_NEXT() goto NEXT_OP
@@ -224,11 +224,11 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 
 #define OPEXEC(T)  case OPCODE_##T : { OPEXEC_##T(); pc++; GOTO_NEXT(); }
 
-#endif/*USE_DIRECT_THREADED_CODE*/
+#endif/*USE_DIREKClass_THREADED_CODE*/
 
 static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaStack *sfp0, struct VirtualCode *pc)
 {
-#ifdef USE_DIRECT_THREADED_CODE
+#ifdef USE_DIREKClass_THREADED_CODE
 	static void *OPJUMP[] = {
 		OPDEFINE(OPLABEL)
 	};
@@ -424,7 +424,7 @@ static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
 	return BasicBlock_id(kctx, bb);
 }
 
-#if defined(USE_DIRECT_THREADED_CODE)
+#if defined(USE_DIREKClass_THREADED_CODE)
 #define ASM(T, ...) do {\
 	OP##T op_ = {OP_(T), ## __VA_ARGS__};\
 	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
@@ -438,7 +438,7 @@ static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
 	KBuilder_Asm(kctx, builder, &tmp_.op, sizeof(OP##T));\
 } while(0)
 
-#endif/*USE_DIRECT_THREADED_CODE*/
+#endif/*USE_DIREKClass_THREADED_CODE*/
 
 #define NC_(sfpidx)       (((sfpidx) * 2) + 1)
 #define OC_(sfpidx)       ((sfpidx) * 2)
@@ -453,7 +453,7 @@ static void KBuilder_Asm(KonohaContext *kctx, KBuilder *builder, VirtualCode *op
 
 static void kStmt_setLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label, bblock_t labelId)
 {
-	KLIB kObjectProto_SetUnboxValue(kctx, stmt, label, TY_int, labelId);
+	KLIB kObjectProto_SetUnboxValue(kctx, stmt, label, KType_int, labelId);
 }
 
 static bblock_t kStmt_GetLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label)
@@ -536,17 +536,17 @@ static void KBuilder_AsmNMOV(KonohaContext *kctx, KBuilder *builder, int a, Kono
 
 static kBlock* Stmt_getFirstBlock(KonohaContext *kctx, kStmt *stmt)
 {
-	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
+	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, Symbol_BlockPattern, K_NULLBLOCK);
 }
 
 static kBlock* Stmt_getElseBlock(KonohaContext *kctx, kStmt *stmt)
 {
-	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, KW_else, K_NULLBLOCK);
+	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, Symbol_else, K_NULLBLOCK);
 }
 
 static kExpr* Stmt_getFirstExpr(KonohaContext *kctx, kStmt *stmt)
 {
-	return SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL);
+	return SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
 }
 
 static kStmt *kStmt_GetStmt(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw)
@@ -566,7 +566,7 @@ static int CallExpr_getArgCount(kExpr *expr)
 
 static kString* Stmt_getErrorMessage(KonohaContext *kctx, kStmt *stmt)
 {
-	kString* msg = (kString *)kStmt_GetObjectNULL(kctx, stmt, KW_ERR);
+	kString* msg = (kString *)kStmt_GetObjectNULL(kctx, stmt, Symbol_ERR);
 	DBG_ASSERT(IS_String(msg));
 	return msg;
 }
@@ -595,8 +595,8 @@ static kbool_t KBuilder_VisitBlockStmt(KonohaContext *kctx, KBuilder *builder, k
 
 static kbool_t KBuilder_VisitReturnStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
-	kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL);
-	if(expr != NULL && IS_Expr(expr) && expr->attrTypeId != TY_void) {
+	kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
+	if(expr != NULL && IS_Expr(expr) && expr->attrTypeId != KType_void) {
 		int a = builder->common.a;
 		builder->common.a = K_RTNIDX;
 		SUGAR VisitExpr(kctx, builder, stmt, expr);
@@ -698,35 +698,35 @@ static void KBuilder_VisitConstExpr(KonohaContext *kctx, KBuilder *builder, kStm
 	DBG_ASSERT(!KType_Is(UnboxType, expr->attrTypeId));
 	DBG_ASSERT(Expr_hasObjectConstValue(expr));
 	v = KBuilder_AddConstPool(kctx, builder, v);
-	ASM(NSET, OC_(a), (uintptr_t)v, CT_(expr->attrTypeId));
+	ASM(NSET, OC_(a), (uintptr_t)v, KClass_(expr->attrTypeId));
 }
 
 static void KBuilder_VisitNConstExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
 	int a = builder->common.a;
-	ASM(NSET, NC_(a), expr->unboxConstValue, CT_(expr->attrTypeId));
+	ASM(NSET, NC_(a), expr->unboxConstValue, KClass_(expr->attrTypeId));
 }
 
 static void KBuilder_VisitNewExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
 	int a = builder->common.a;
-	ASM(NEW, OC_(a), expr->index, CT_(expr->attrTypeId));
+	ASM(NEW, OC_(a), expr->index, KClass_(expr->attrTypeId));
 }
 
 static void KBuilder_VisitNullExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
 	int a = builder->common.a;
 	if(KType_Is(UnboxType, expr->attrTypeId)) {
-		ASM(NSET, NC_(a), 0, CT_(expr->attrTypeId));
+		ASM(NSET, NC_(a), 0, KClass_(expr->attrTypeId));
 	}
 	else {
-		ASM(NUL, OC_(a), CT_(expr->attrTypeId));
+		ASM(NUL, OC_(a), KClass_(expr->attrTypeId));
 	}
 }
 
 static void KBuilder_VisitLocalExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
-	KBuilder_AsmNMOV(kctx, builder, builder->common.a, CT_(expr->attrTypeId), expr->index);
+	KBuilder_AsmNMOV(kctx, builder, builder->common.a, KClass_(expr->attrTypeId), expr->index);
 }
 
 static void KBuilder_VisitBlockExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
@@ -738,7 +738,7 @@ static void KBuilder_VisitBlockExpr(KonohaContext *kctx, KBuilder *builder, kStm
 	builder->common.shift = builder->common.espidx;
 	SUGAR VisitBlock(kctx, builder, expr->block);
 	builder->common.shift = shift;
-	KBuilder_AsmNMOV(kctx, builder, a, CT_(expr->attrTypeId), espidx);
+	KBuilder_AsmNMOV(kctx, builder, a, KClass_(expr->attrTypeId), espidx);
 	builder->common.espidx = espidx;
 }
 
@@ -747,7 +747,7 @@ static void KBuilder_VisitFieldExpr(KonohaContext *kctx, KBuilder *builder, kStm
 	int a = builder->common.a;
 	kshort_t index = (kshort_t)expr->index;
 	kshort_t xindex = (kshort_t)(expr->index >> (sizeof(kshort_t)*8));
-	KonohaClass *ty = CT_(expr->attrTypeId);
+	KonohaClass *ty = KClass_(expr->attrTypeId);
 	ASM(NMOVx, TC_(a, ty), OC_(index), xindex, ty);
 }
 
@@ -775,26 +775,26 @@ static void KBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 	builder->common.a = a;
 
 	if(kMethod_Is(Final, mtd) || !kMethod_Is(Virtual, mtd)) {
-		ASM(NSET, NC_(thisidx-1), (intptr_t)mtd, CT_Method);
+		ASM(NSET, NC_(thisidx-1), (intptr_t)mtd, KClass_Method);
 		if(kMethod_Is(Virtual, mtd)) {
 			// set namespace to enable method lookups
-			ASM(NSET, OC_(thisidx-2), (intptr_t)Stmt_ns(stmt), CT_NameSpace);
+			ASM(NSET, OC_(thisidx-2), (intptr_t)Stmt_ns(stmt), KClass_NameSpace);
 		}
 	}
 	else {
-		ASM(NSET, OC_(thisidx-2), (intptr_t)Stmt_ns(stmt), CT_NameSpace);
+		ASM(NSET, OC_(thisidx-2), (intptr_t)Stmt_ns(stmt), KClass_NameSpace);
 		ASM(LOOKUP, SFP_(thisidx), Stmt_ns(stmt), mtd);
 	}
 
 	int esp_ = SFP_(espidx + argc + K_CALLDELTA + 1);
-	ASM(CALL, builder->common.uline, SFP_(thisidx), esp_, KLIB Knull(kctx, CT_(expr->attrTypeId)));
+	ASM(CALL, builder->common.uline, SFP_(thisidx), esp_, KLIB Knull(kctx, KClass_(expr->attrTypeId)));
 
 	if(mtd->mn == MN_box) {  /* boxed value of unbox value must be shifted to OC */
-		((kExprVar *)expr)->attrTypeId = TY_Object;
+		((kExprVar *)expr)->attrTypeId = KType_Object;
 	}
 
 	if(a != espidx) {
-		KBuilder_AsmNMOV(kctx, builder, a, CT_(expr->attrTypeId), espidx);
+		KBuilder_AsmNMOV(kctx, builder, a, KClass_(expr->attrTypeId), espidx);
 	}
 }
 
@@ -831,13 +831,13 @@ static void KBuilder_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 
 	kExpr *leftHandExpr = kExpr_at(expr, 1);
 	kExpr *rightHandExpr = kExpr_at(expr, 2);
-	//DBG_P("LET (%s) a=%d, shift=%d, espidx=%d", TY_t(expr->attrTypeId), a, shift, espidx);
+	//DBG_P("LET (%s) a=%d, shift=%d, espidx=%d", KType_t(expr->attrTypeId), a, shift, espidx);
 	if(leftHandExpr->build == TEXPR_LOCAL) {
 		builder->common.a = leftHandExpr->index;
 		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
 		builder->common.a = a;
-		if(expr->attrTypeId != TY_void && a != leftHandExpr->index) {
-			KBuilder_AsmNMOV(kctx, builder, a, CT_(leftHandExpr->attrTypeId), leftHandExpr->index);
+		if(expr->attrTypeId != KType_void && a != leftHandExpr->index) {
+			KBuilder_AsmNMOV(kctx, builder, a, KClass_(leftHandExpr->attrTypeId), leftHandExpr->index);
 		}
 	}
 	else if(leftHandExpr->build == TEXPR_STACKTOP) {
@@ -845,8 +845,8 @@ static void KBuilder_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 		builder->common.a = leftHandExpr->index + shift;
 		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
 		builder->common.a = a;
-		if(expr->attrTypeId != TY_void && a != leftHandExpr->index + shift) {
-			KBuilder_AsmNMOV(kctx, builder, a, CT_(leftHandExpr->attrTypeId), leftHandExpr->index + shift);
+		if(expr->attrTypeId != KType_void && a != leftHandExpr->index + shift) {
+			KBuilder_AsmNMOV(kctx, builder, a, KClass_(leftHandExpr->attrTypeId), leftHandExpr->index + shift);
 		}
 	}
 	else{
@@ -856,10 +856,10 @@ static void KBuilder_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 		builder->common.a = a;
 		kshort_t index  = (kshort_t)leftHandExpr->index;
 		kshort_t xindex = (kshort_t)(leftHandExpr->index >> (sizeof(kshort_t)*8));
-		KonohaClass *lhsClass = CT_(leftHandExpr->attrTypeId), *rhClass = CT_(rightHandExpr->attrTypeId);
+		KonohaClass *lhsClass = KClass_(leftHandExpr->attrTypeId), *rhClass = KClass_(rightHandExpr->attrTypeId);
 
 		ASM(XNMOV, OC_(index), xindex, TC_(espidx, rhClass), lhsClass);
-		if(expr->attrTypeId != TY_void) {
+		if(expr->attrTypeId != KType_void) {
 			ASM(NMOVx, TC_(a, rhClass), OC_(index), xindex, lhsClass);
 		}
 	}
@@ -871,7 +871,7 @@ static void KBuilder_VisitStackTopExpr(KonohaContext *kctx, KBuilder *builder, k
 	int a = builder->common.a;
 	int espidx = builder->common.espidx;
 	DBG_ASSERT(expr->index + shift < espidx);
-	KBuilder_AsmNMOV(kctx, builder, a, CT_(expr->attrTypeId), expr->index + shift);
+	KBuilder_AsmNMOV(kctx, builder, a, KClass_(expr->attrTypeId), expr->index + shift);
 }
 
 // end of Visitor
@@ -918,7 +918,7 @@ static struct VirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *bui
 
 static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr, size_t codesize)
 {
-#ifdef USE_DIRECT_THREADED_CODE
+#ifdef USE_DIREKClass_THREADED_CODE
 	size_t i, n = codesize / sizeof(VirtualCode);
 	for(i = 0; i < n; i++) {
 		pc->codeaddr = codeaddr[pc->opcode];
@@ -953,7 +953,7 @@ static struct VirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMeth
 	builder->common.shift = 0;
 	ASM_LABEL(kctx, builder,  builder->bbReturnId);
 	if(mtd->mn == MN_new) {
-		ASM(NMOV, OC_(K_RTNIDX), OC_(0), CT_(mtd->typeId));   // FIXME: Type 'This' must be resolved
+		ASM(NMOV, OC_(K_RTNIDX), OC_(0), KClass_(mtd->typeId));   // FIXME: Type 'This' must be resolved
 	}
 	ASM(RET);
 	VirtualCode *vcode = CompileVirtualCode(kctx, builder, builder->bbBeginId, builder->bbReturnId);

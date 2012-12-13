@@ -29,9 +29,9 @@ typedef union LIRHeader {
 #include "LIR.h"
 
 typedef union ByteCode {
-#define DEFINE_ABSTRACT_INST(X) OP##X X;
-	BYTECODE_LIST(DEFINE_ABSTRACT_INST)
-#undef DEFINE_ABSTRACT_INST
+#define DEFINE_ABSTRAKClass_INST(X) OP##X X;
+	BYTECODE_LIST(DEFINE_ABSTRAKClass_INST)
+#undef DEFINE_ABSTRAKClass_INST
 } ByteCode;
 
 typedef enum OPCODE {

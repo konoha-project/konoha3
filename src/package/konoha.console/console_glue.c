@@ -91,7 +91,7 @@ static KMETHOD Console_inputUserPassword0(KonohaContext *kctx, KonohaStack *sfp)
 #define _Public   kMethod_Public
 #define _Static   kMethod_Static
 #define _F(F)   (intptr_t)(F)
-#define TY_Date     cDate->typeId
+#define KType_Date     cDate->typeId
 
 static kbool_t console_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
@@ -100,15 +100,15 @@ static kbool_t console_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	defConsole.cflag = KClassFlag_Final | KClassFlag_Singleton;
 
 	KonohaClass *cConsole = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defConsole, trace);
-	int TY_Console = cConsole->typeId;
+	int KType_Console = cConsole->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static, _F(Console_notify), TY_void, TY_Console, MN_("notify"), 1, TY_String, FN_("message"),
-		_Public|_Static, _F(Console_readLine), TY_String, TY_Console, MN_("readLine"), 1, TY_String, FN_("message"),
-		_Public|_Static, _F(Console_inputUserApproval), TY_boolean, TY_Console, MN_("inputUserApproval"), 4,
-		    TY_String, FN_("message"), TY_String, FN_("yes"), TY_String, FN_("no"), TY_boolean, FN_("defval"),
-		_Public|_Static, _F(Console_inputUserPassword), TY_String, TY_Console, MN_("inputUserPassword"), 1, TY_String, FN_("message"),
-		_Public|_Static, _F(Console_inputUserPassword0), TY_String, TY_Console, MN_("inputUserPassword"), 0,
+		_Public|_Static, _F(Console_notify), KType_void, KType_Console, MN_("notify"), 1, KType_String, FN_("message"),
+		_Public|_Static, _F(Console_readLine), KType_String, KType_Console, MN_("readLine"), 1, KType_String, FN_("message"),
+		_Public|_Static, _F(Console_inputUserApproval), KType_boolean, KType_Console, MN_("inputUserApproval"), 4,
+		    KType_String, FN_("message"), KType_String, FN_("yes"), KType_String, FN_("no"), KType_boolean, FN_("defval"),
+		_Public|_Static, _F(Console_inputUserPassword), KType_String, KType_Console, MN_("inputUserPassword"), 1, KType_String, FN_("message"),
+		_Public|_Static, _F(Console_inputUserPassword0), KType_String, KType_Console, MN_("inputUserPassword"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

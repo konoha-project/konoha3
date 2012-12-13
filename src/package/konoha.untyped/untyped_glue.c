@@ -42,11 +42,11 @@ static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktypeatt
 			kStmtToken_Message(kctx, stmt, termToken, ErrTag, "unavailable global variable");
 			return;
 		}
-		kStmtToken_Message(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", PSYM_t(termToken->resolvedSymbol), TY_t(ty));
+		kStmtToken_Message(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", PSYM_t(termToken->resolvedSymbol), KType_t(ty));
 		KLIB KonohaClass_AddField(kctx, kObject_class(ns->globalObjectNULL_OnList), ty, termToken->resolvedSymbol);
 	}
 	else {
-		kStmtToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", PSYM_t(termToken->resolvedSymbol), TY_t(ty));
+		kStmtToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", PSYM_t(termToken->resolvedSymbol), KType_t(ty));
 		SUGAR kGamma_AddLocalVariable(kctx, gma, ty, termToken->resolvedSymbol);
 	}
 }
@@ -56,9 +56,9 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kExprVar *leftHandExpr = (kExprVar *)kExpr_at(expr, 1);
 	if(kExpr_isSymbolTerm(leftHandExpr)) {
-		kExpr *texpr = SUGAR kStmt_TypeCheckVariableNULL(kctx, stmt, leftHandExpr, gma, CT_INFER);
+		kExpr *texpr = SUGAR kStmt_TypeCheckVariableNULL(kctx, stmt, leftHandExpr, gma, KClass_INFER);
 		if(texpr == NULL) {
-			kExpr *rightHandExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, CT_INFER, 0);
+			kExpr *rightHandExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, KClass_INFER, 0);
 			if(rightHandExpr != K_NULLEXPR) {
 				DeclVariable(kctx, stmt, gma, rightHandExpr->attrTypeId, leftHandExpr);
 			}

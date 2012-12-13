@@ -323,7 +323,7 @@ static void dictmap_api_dispose(kmap_t *_m)
     free(m->base.records/*, m->used_size * sizeof(map_record_t)*/);
 }
 
-const kmap_api_t DICT_API = {
+const kmap_api_t DIKClass_API = {
     dictmap_api_get,
     dictmap_api_set,
     dictmap_api_next,

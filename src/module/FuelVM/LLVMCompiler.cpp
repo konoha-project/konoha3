@@ -169,7 +169,7 @@ static Value *GetStackTop(LLVMIRBuilder *writer)
 
 static void StoreValueToStack(IRBuilder<> *builder, KonohaClass *ct, int Idx, Value *Vsfp, Value *V)
 {
-	int fieldIdx = (CT_IsUnbox(ct)) ?KonohaValueVar_unboxValue : KonohaValueVar_asObject;
+	int fieldIdx = (KClass_IsUnbox(ct)) ?KonohaValueVar_unboxValue : KonohaValueVar_asObject;
 	Value *Dst = builder->CreateConstInBoundsGEP2_32(Vsfp, Idx, fieldIdx);
 	builder->CreateStore(V, Dst, false);
 }
@@ -177,7 +177,7 @@ static void StoreValueToStack(IRBuilder<> *builder, KonohaClass *ct, int Idx, Va
 
 static Value *LoadValueFromStack(IRBuilder<> *builder, KonohaClass *ct, int Idx, Value *Vsfp)
 {
-	int fieldIdx = (CT_IsUnbox(ct)) ?KonohaValueVar_unboxValue : KonohaValueVar_asObject;
+	int fieldIdx = (KClass_IsUnbox(ct)) ?KonohaValueVar_unboxValue : KonohaValueVar_asObject;
 	Value *Src = builder->CreateConstInBoundsGEP2_32(Vsfp, Idx, fieldIdx);
 	return builder->CreateLoad(Src);
 }
@@ -195,11 +195,11 @@ static void CreateCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::
 	Value *Vsfp = GetStackTop(writer);
 
 	kParam *params = kMethod_GetParam(method);
-	StoreValueToStack(builder, CT_(method->typeId), 0, Vsfp, List[0]);
+	StoreValueToStack(builder, KClass_(method->typeId), 0, Vsfp, List[0]);
 	for(unsigned i = 1; i < params->psize+1; ++i) {
 		kattrtype_t type = params->paramtypeItems[i-1].attrTypeId;
 		Value *V = List[i];
-		StoreValueToStack(builder, CT_(type), i, Vsfp, V);
+		StoreValueToStack(builder, KClass_(type), i, Vsfp, V);
 	}
 
 	FuncPtr = builder->CreateLoad(FuncPtr);
@@ -425,11 +425,11 @@ static void LLVMIRBuilder_visitValue(Visitor *visitor, INode *Node, const char *
 
 static const char *ConstructMethodName(KonohaContext *kctx, kMethod *mtd, const char *suffix)
 {
-	KonohaClass *kclass = CT_(mtd->typeId);
+	KonohaClass *kclass = KClass_(mtd->typeId);
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KLIB KBuffer_printf(kctx, &wb, "%s_%s%s%s",
-			CT_t(kclass), MethodName_t(mtd->mn), suffix);
+			KClass_t(kclass), MethodName_Fmt2(mtd->mn), suffix);
 	return KLIB KBuffer_Stringfy(kctx, &wb, 1);
 }
 
@@ -482,12 +482,12 @@ static Function *CreateFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Fu
 	Params.push_back(Vctx);
 	for(unsigned i = 0; i < params->psize; ++i) {
 		kattrtype_t type = params->paramtypeItems[i].attrTypeId;
-		Value *V = LoadValueFromStack(builder, CT_(type), i, Vsfp);
+		Value *V = LoadValueFromStack(builder, KClass_(type), i, Vsfp);
 		Params.push_back(V);
 	}
 	KonohaClass *RetTy = kMethod_GetReturnType(mtd);
 	Value *Ret = builder->CreateCall(Func, Params);
-	if(RetTy != CT_void) {
+	if(RetTy != KClass_void) {
 		StoreValueToStack(builder, RetTy, -4, Vsfp, Ret);
 	}
 	builder->CreateRetVoid();

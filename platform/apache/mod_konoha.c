@@ -158,13 +158,13 @@ static KMETHOD Request_logError(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Request_getHeadersIn(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
-	KReturn(KLIB new_kObject(kctx, OnStack, CT_AprTable, (uintptr_t)self->r->headers_in));
+	KReturn(KLIB new_kObject(kctx, OnStack, KClass_AprTable, (uintptr_t)self->r->headers_in));
 }
 // ## AprTable Request.getHeadersOut();
 static KMETHOD Request_getHeadersOut(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
-	KReturn(KLIB new_kObject(kctx, OnStack,CT_AprTable, (uintptr_t)self->r->headers_out));
+	KReturn(KLIB new_kObject(kctx, OnStack,KClass_AprTable, (uintptr_t)self->r->headers_out));
 }
 
 // ## void AprTable.add(String key, String val)
@@ -189,12 +189,12 @@ static KMETHOD AprTable_set(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD AprTable_getElts(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTable *self = (kAprTable *) sfp[0].asObject;
-	kArray *arr = (kArray*)KLIB new_kObject(kctx, OnStack, CT_Array, 0);
+	kArray *arr = (kArray*)KLIB new_kObject(kctx, OnStack, KClass_Array, 0);
 	const apr_array_header_t *apr_arr = apr_table_elts(self->tbl);
 	const apr_table_entry_t *entries = (apr_table_entry_t *)apr_arr->elts;
 	int i=0;
 	for (i=0; i<apr_arr->nelts; i++) {
-		KLIB kArray_Add(kctx, arr, (kAprTableEntry *)KLIB new_kObject(kctx, OnStack, CT_AprTableEntry, (uintptr_t)entries));
+		KLIB kArray_Add(kctx, arr, (kAprTableEntry *)KLIB new_kObject(kctx, OnStack, KClass_AprTableEntry, (uintptr_t)entries));
 		entries++;
 	}
 	KReturn(arr);
@@ -228,34 +228,34 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 	KBaseTrace(trace);
 	kNameSpace *ns = KNULL(NameSpace);
 	KImportPackage(ns, "apache", trace);
-	*cRequest = CT_Request;
+	*cRequest = KClass_Request;
 #define _P    kMethod_Public
 #define _F(F) (intptr_t)(F)
-#define TY_Req  (CT_Request->typeId)
-#define TY_Tbl  (CT_AprTable->typeId)
-#define TY_TblEntry  (CT_AprTableEntry->typeId)
+#define KType_Req  (KClass_Request->typeId)
+#define KType_Tbl  (KClass_AprTable->typeId)
+#define KType_TblEntry  (KClass_AprTableEntry->typeId)
 
-	KonohaClass *CT_TblEntryArray = CT_p0(kctx, CT_Array, TY_TblEntry);
-	ktypeattr_t TY_TblEntryArray = CT_TblEntryArray->typeId;
+	KonohaClass *KClass_TblEntryArray = KClass_p0(kctx, KClass_Array, KType_TblEntry);
+	ktypeattr_t KType_TblEntryArray = KClass_TblEntryArray->typeId;
 
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_P, _F(Request_puts), TY_void, TY_Req, MN_("puts"), 1, TY_String, FN_x,
-		_P, _F(Request_getMethod), TY_String, TY_Req, MN_("getMethod"), 0,
-		_P, _F(Request_getArgs), TY_String, TY_Req, MN_("getArgs"), 0,
-		_P, _F(Request_getUri), TY_String, TY_Req, MN_("getUri"), 0,
-		_P, _F(Request_getPathInfo), TY_String, TY_Req, MN_("getPathInfo"), 0,
-		_P, _F(Request_getHandler), TY_String, TY_Req, MN_("getHandler"), 0,
-		_P, _F(Request_setContentType), TY_void, TY_Req, MN_("setContentType"), 1, TY_String, FN_("type"),
-		_P, _F(Request_setContentEncoding), TY_void, TY_Req, MN_("setContentEncoding"), 1, TY_String, FN_("enc"),
-		_P, _F(Request_logError), TY_void, TY_Req, MN_("logError"), 3, TY_int, FN_("level"), TY_int, FN_("status"), TY_String, FN_("msg"),
-		_P, _F(Request_getHeadersIn), TY_Tbl, TY_Req, MN_("getHeadersIn"), 0,
-		_P, _F(Request_getHeadersOut), TY_Tbl, TY_Req, MN_("getHeadersOut"), 0,
-		_P, _F(AprTable_Add), TY_void, TY_Tbl, MN_("add"), 2, TY_String, FN_("key"), TY_String, FN_("val"),
-		_P, _F(AprTable_set), TY_void, TY_Tbl, MN_("set"), 2, TY_String, FN_("key"), TY_String, FN_("val"),
-		_P, _F(AprTable_getElts), TY_TblEntryArray, TY_Tbl, MN_("getElts"), 0,
-		_P, _F(AprTableEntry_getKey), TY_String, TY_TblEntry, MN_("getKey"), 0,
-		_P, _F(AprTableEntry_getVal), TY_String, TY_TblEntry, MN_("getVal"), 0,
+		_P, _F(Request_puts), KType_void, KType_Req, MN_("puts"), 1, KType_String, FN_x,
+		_P, _F(Request_getMethod), KType_String, KType_Req, MN_("getMethod"), 0,
+		_P, _F(Request_getArgs), KType_String, KType_Req, MN_("getArgs"), 0,
+		_P, _F(Request_getUri), KType_String, KType_Req, MN_("getUri"), 0,
+		_P, _F(Request_getPathInfo), KType_String, KType_Req, MN_("getPathInfo"), 0,
+		_P, _F(Request_getHandler), KType_String, KType_Req, MN_("getHandler"), 0,
+		_P, _F(Request_setContentType), KType_void, KType_Req, MN_("setContentType"), 1, KType_String, FN_("type"),
+		_P, _F(Request_setContentEncoding), KType_void, KType_Req, MN_("setContentEncoding"), 1, KType_String, FN_("enc"),
+		_P, _F(Request_logError), KType_void, KType_Req, MN_("logError"), 3, KType_int, FN_("level"), KType_int, FN_("status"), KType_String, FN_("msg"),
+		_P, _F(Request_getHeadersIn), KType_Tbl, KType_Req, MN_("getHeadersIn"), 0,
+		_P, _F(Request_getHeadersOut), KType_Tbl, KType_Req, MN_("getHeadersOut"), 0,
+		_P, _F(AprTable_Add), KType_void, KType_Tbl, MN_("add"), 2, KType_String, FN_("key"), KType_String, FN_("val"),
+		_P, _F(AprTable_set), KType_void, KType_Tbl, MN_("set"), 2, KType_String, FN_("key"), KType_String, FN_("val"),
+		_P, _F(AprTable_getElts), KType_TblEntryArray, KType_Tbl, MN_("getElts"), 0,
+		_P, _F(AprTableEntry_getKey), KType_String, KType_TblEntry, MN_("getKey"), 0,
+		_P, _F(AprTableEntry_getVal), KType_String, KType_TblEntry, MN_("getVal"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -285,7 +285,7 @@ static int konoha_handler(request_rec *r)
 
 	KonohaContext *kctx = konoha;
 	kNameSpace *ns = KNULL(NameSpace);
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_System, MN_("handler"), -1);  // fixme
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KType_System, MN_("handler"), -1);  // fixme
 	if(mtd == NULL) {
 		ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "System.handler() not found");
 		return -1;
@@ -298,7 +298,7 @@ static int konoha_handler(request_rec *r)
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, req_obj);
 	{
 		KonohaStack *sfp = lsfp + K_CALLDELTA;
-		KStackSetMethodAll(sfp, 0/*UL*/, mtd, 1, KLIB Knull(kctx, CT_Int));
+		KStackSetMethodAll(sfp, 0/*UL*/, mtd, 1, KLIB Knull(kctx, KClass_Int));
 		KStackCall(sfp);
 	}
 	END_UnusedStack();

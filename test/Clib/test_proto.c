@@ -49,7 +49,7 @@ static void test_proto_value(KonohaContext *kctx)
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObjectProto_SetUnboxValue(kctx, o0, i, TY_int, i);
+		KLIB kObjectProto_SetUnboxValue(kctx, o0, i, KType_int, i);
 	}
 	show_timer(&timer, "Map.setN");
 
@@ -91,7 +91,7 @@ static void test_proto_value(KonohaContext *kctx)
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObjectProto_SetUnboxValue(kctx, o1, i%4, TY_int, i%4);
+		KLIB kObjectProto_SetUnboxValue(kctx, o1, i%4, KType_int, i%4);
 	}
 	show_timer(&timer, "Map[4].setN");
 
@@ -118,7 +118,7 @@ static void test_proto_value(KonohaContext *kctx)
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObjectProto_SetUnboxValue(kctx, o2, i%16, TY_int, i%16);
+		KLIB kObjectProto_SetUnboxValue(kctx, o2, i%16, KType_int, i%16);
 	}
 	show_timer(&timer, "Map[16].setN");
 
@@ -161,7 +161,7 @@ static void test_proto_object(KonohaContext *kctx)
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObjectProto_SetObject(kctx, o0, i, TY_Object, o0);
+		KLIB kObjectProto_SetObject(kctx, o0, i, KType_Object, o0);
 	}
 	show_timer(&timer, "Map.setO");
 
@@ -203,7 +203,7 @@ static void test_proto_object(KonohaContext *kctx)
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObjectProto_SetObject(kctx, o1, i%4, TY_Object, o1);
+		KLIB kObjectProto_SetObject(kctx, o1, i%4, KType_Object, o1);
 	}
 	show_timer(&timer, "Map[4].setO");
 
@@ -230,7 +230,7 @@ static void test_proto_object(KonohaContext *kctx)
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObjectProto_SetObject(kctx, o2, i%16, TY_Object, o2);
+		KLIB kObjectProto_SetObject(kctx, o2, i%16, KType_Object, o2);
 	}
 	show_timer(&timer, "Map[16].setO");
 

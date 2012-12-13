@@ -613,9 +613,9 @@ static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-#define TY_SockAddr         cSockAddr->typeId
+#define KType_SockAddr         cSockAddr->typeId
 
-#define KDefineConstInt(T) #T, TY_int, T
+#define KDefineConstInt(T) #T, KType_int, T
 
 static kbool_t socket_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
@@ -626,32 +626,32 @@ static kbool_t socket_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		.free = SockAddr_Free,
 	};
 	KonohaClass *cSockAddr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSockAddr, trace);
-	kparamtype_t pi = {TY_int, FN_("intValue")};
-	KonohaClass *CT_IntArray = KLIB KonohaClass_Generics(kctx, CT_Array, TY_int, 1, &pi);
-	ktypeattr_t TY_intArray = CT_IntArray->typeId;
+	kparamtype_t pi = {KType_int, FN_("intValue")};
+	KonohaClass *KClass_IntArray = KLIB KonohaClass_Generics(kctx, KClass_Array, KType_int, 1, &pi);
+	ktypeattr_t KType_intArray = KClass_IntArray->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static|_Const|_Im, _F(System_accept), TY_int, TY_System, MN_("accept"), 2, TY_int, FN_("fd"), TY_SockAddr, FN_("sockaddr"),
-		_Public|_Static|_Const|_Im, _F(System_bind), TY_int, TY_System, MN_("bind"), 4, TY_int, FN_("fd"), TY_String, FN_("srcIP"), TY_int, FN_("srcPort"), TY_int, FN_("family"),
-		_Public|_Static|_Const|_Im, _F(System_close), TY_int, TY_System, MN_("close"), 1, TY_int, FN_("fd"),
-		_Public|_Static|_Const|_Im, _F(System_connect), TY_int, TY_System, MN_("connect"), 4, TY_int, FN_("fd"), TY_String, FN_("dstIP"), TY_int, FN_("dstPort"), TY_int, FN_("family"),
-		_Public|_Static|_Const|_Im, _F(System_listen), TY_int, TY_System, MN_("listen"), 2, TY_int, FN_("fd"), TY_int, FN_("backlog"),
-//		_Public|_Static|_Const|_Im, _F(System_getsockname), TY_Map TY_System, MN_("getsockname"),1, TY_int, FN_("fd"),
-		_Public|_Static|_Const|_Im, _F(System_getsockopt), TY_int, TY_System, MN_("getsockopt"), 2, TY_int, FN_("fd"), TY_int, FN_("opt"),
-		_Public|_Static|_Const|_Im, _F(System_setsockopt), TY_int, TY_System, MN_("setsockopt"), 3, TY_int, FN_("fd"), TY_int, FN_("opt"), TY_int, FN_("value"),
-//		_Public|_Static|_Const|_Im, _F(System_getpeername), TY_Map, TY_System, MN_("getpeername"), 1, TY_int, FN_("fd"),
-//		_Public|_Static, _F(System_Select), TY_int, TY_System, MN_("select"), 5, TY_intArray, FN_("readsocks"), TY_intArray, FN_("writesocks"), TY_intArray, FN_("exceptsocks"), TY_int, FN_("timeoutSec"), TY_int, FN_("timeoutUSec"),
-		_Public|_Static|_Const|_Im, _F(System_shutdown), TY_int, TY_System, MN_("shutdown"), 2, TY_int, FN_("fd"), TY_int, FN_("how"),
-		_Public|_Static|_Const|_Im, _F(System_sockatmark), TY_int, TY_System, MN_("sockatmark"), 1, TY_int, FN_("fd"),
-		_Public|_Static|_Const|_Im, _F(System_socket), TY_int, TY_System, MN_("socket"), 3, TY_int, FN_("family"), TY_int, FN_("type"), TY_int, FN_("protocol"),
-		_Public|_Static|_Const|_Im, _F(System_socketpair), TY_int, TY_System, MN_("socketpair"), 4, TY_int, FN_("family"), TY_int, FN_("type"), TY_int, FN_("protocol"), TY_intArray, FN_("pairsock"),
-		_Public|_Const|_Im, _F(SockAddr_new), TY_SockAddr, TY_SockAddr, MN_("new"), 0,
+		_Public|_Static|_Const|_Im, _F(System_accept), KType_int, KType_System, MN_("accept"), 2, KType_int, FN_("fd"), KType_SockAddr, FN_("sockaddr"),
+		_Public|_Static|_Const|_Im, _F(System_bind), KType_int, KType_System, MN_("bind"), 4, KType_int, FN_("fd"), KType_String, FN_("srcIP"), KType_int, FN_("srcPort"), KType_int, FN_("family"),
+		_Public|_Static|_Const|_Im, _F(System_close), KType_int, KType_System, MN_("close"), 1, KType_int, FN_("fd"),
+		_Public|_Static|_Const|_Im, _F(System_connect), KType_int, KType_System, MN_("connect"), 4, KType_int, FN_("fd"), KType_String, FN_("dstIP"), KType_int, FN_("dstPort"), KType_int, FN_("family"),
+		_Public|_Static|_Const|_Im, _F(System_listen), KType_int, KType_System, MN_("listen"), 2, KType_int, FN_("fd"), KType_int, FN_("backlog"),
+//		_Public|_Static|_Const|_Im, _F(System_getsockname), KType_Map KType_System, MN_("getsockname"),1, KType_int, FN_("fd"),
+		_Public|_Static|_Const|_Im, _F(System_getsockopt), KType_int, KType_System, MN_("getsockopt"), 2, KType_int, FN_("fd"), KType_int, FN_("opt"),
+		_Public|_Static|_Const|_Im, _F(System_setsockopt), KType_int, KType_System, MN_("setsockopt"), 3, KType_int, FN_("fd"), KType_int, FN_("opt"), KType_int, FN_("value"),
+//		_Public|_Static|_Const|_Im, _F(System_getpeername), KType_Map, KType_System, MN_("getpeername"), 1, KType_int, FN_("fd"),
+//		_Public|_Static, _F(System_Select), KType_int, KType_System, MN_("select"), 5, KType_intArray, FN_("readsocks"), KType_intArray, FN_("writesocks"), KType_intArray, FN_("exceptsocks"), KType_int, FN_("timeoutSec"), KType_int, FN_("timeoutUSec"),
+		_Public|_Static|_Const|_Im, _F(System_shutdown), KType_int, KType_System, MN_("shutdown"), 2, KType_int, FN_("fd"), KType_int, FN_("how"),
+		_Public|_Static|_Const|_Im, _F(System_sockatmark), KType_int, KType_System, MN_("sockatmark"), 1, KType_int, FN_("fd"),
+		_Public|_Static|_Const|_Im, _F(System_socket), KType_int, KType_System, MN_("socket"), 3, KType_int, FN_("family"), KType_int, FN_("type"), KType_int, FN_("protocol"),
+		_Public|_Static|_Const|_Im, _F(System_socketpair), KType_int, KType_System, MN_("socketpair"), 4, KType_int, FN_("family"), KType_int, FN_("type"), KType_int, FN_("protocol"), KType_intArray, FN_("pairsock"),
+		_Public|_Const|_Im, _F(SockAddr_new), KType_SockAddr, KType_SockAddr, MN_("new"), 0,
 		// the function below uses Bytes
 		// FIXME
-//		_Public|_Static|_Const|_Im, _F(System_sendto), TY_int, TY_System, MN_("sendto"), 6, TY_int, FN_("socket"), TY_Bytes, FN_("msg"), TY_int, FN_("flag"), TY_String, FN_("dstIP"), TY_int, FN_("dstPort"), TY_int, FN_("family"),
-//		_Public|_Static|_Const|_Im, _F(System_recv), TY_int, TY_System, MN_("recv"), 3, TY_int, FN_("fd"), TY_Bytes, FN_("buf"), TY_int, FN_("flags"),
-//		_Public|_Static|_Const|_Im, _F(System_recvfrom), TY_int, TY_System, MN_("recvfrom"), 4, TY_int, FN_x, TY_Bytes, FN_y, TY_int, FN_z, TY_Map, FN_v,
-//		_Public|_Static|_Const|_Im, _F(System_send), TY_int, TY_System, MN_("send"), 3, TY_int, FN_("fd"), TY_Bytes, FN_("msg"), TY_int, FN_("flags"),
+//		_Public|_Static|_Const|_Im, _F(System_sendto), KType_int, KType_System, MN_("sendto"), 6, KType_int, FN_("socket"), KType_Bytes, FN_("msg"), KType_int, FN_("flag"), KType_String, FN_("dstIP"), KType_int, FN_("dstPort"), KType_int, FN_("family"),
+//		_Public|_Static|_Const|_Im, _F(System_recv), KType_int, KType_System, MN_("recv"), 3, KType_int, FN_("fd"), KType_Bytes, FN_("buf"), KType_int, FN_("flags"),
+//		_Public|_Static|_Const|_Im, _F(System_recvfrom), KType_int, KType_System, MN_("recvfrom"), 4, KType_int, FN_x, KType_Bytes, FN_y, KType_int, FN_z, KType_Map, FN_v,
+//		_Public|_Static|_Const|_Im, _F(System_send), KType_int, KType_System, MN_("send"), 3, KType_int, FN_("fd"), KType_Bytes, FN_("msg"), KType_int, FN_("flags"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

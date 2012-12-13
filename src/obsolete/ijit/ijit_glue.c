@@ -471,7 +471,7 @@ static KMETHOD Object_toExpr(KonohaContext *kctx, KonohaStack *sfp)
 
 kObject *boxing_jit(KonohaContext *kctx, ktypeattr_t cid, uintptr_t data)
 {
-	return KLIB new_kObjectDontUseThis(kctx, CT_(cid), data);
+	return KLIB new_kObjectDontUseThis(kctx, KClass_(cid), data);
 }
 
 // --------------------------------------------------------------------------
@@ -597,7 +597,7 @@ static KMETHOD Method_getFname(KonohaContext *kctx, KonohaStack *sfp)
 	kMethod *mtd = sfp[0].asMethod;
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	KLIB KBuffer_printf(kctx, &wb, "%s%s", MethodName_t(mtd->mn));
+	KLIB KBuffer_printf(kctx, &wb, "%s%s", MethodName_Fmt2(mtd->mn));
 	kString *fname = KLIB new_kString(kctx, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), StringPolicy_POOL);
 	KReturn(fname);
 }
@@ -607,7 +607,7 @@ static KMETHOD Method_getCname(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
 	ktypeattr_t cid = mtd->typeId;
-	const char *cname = TY_t(cid);
+	const char *cname = KType_t(cid);
 	KReturn(KLIB new_kString(kctx, cname, strlen(cname), 0));
 }
 
@@ -615,7 +615,7 @@ static KMETHOD Method_getCname(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_getNULL(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ktypeattr_t cid = sfp[1].intValue;
-	kObject *o = KLIB Knull(kctx, CT_(cid));
+	kObject *o = KLIB Knull(kctx, KClass_(cid));
 	KReturn(o);
 }
 
@@ -730,7 +730,7 @@ static kbool_t ijit_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 
 	//FIXME
 	//KDEFINE_INT_CONST IntData[] = {
-	//	{"PTRSIZE", TY_int, sizeof(void *)},
+	//	{"PTRSIZE", KType_int, sizeof(void *)},
 	//	{NULL},
 	//};
 	//KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), trace);
@@ -742,96 +742,96 @@ static kbool_t ijit_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 static kbool_t ijit_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	/* Array[Expr] */
-	kparamtype_t P_ExprArray[] = {{TY_Expr}};
-	int TY_ExprArray = (KLIB KonohaClass_Generics(kctx, CT_Array, TY_void, 1, P_ExprArray))->typeId;
+	kparamtype_t P_ExprArray[] = {{KType_Expr}};
+	int KType_ExprArray = (KLIB KonohaClass_Generics(kctx, KClass_Array, KType_void, 1, P_ExprArray))->typeId;
 
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_System, MN_("genCode"), 0, MPOL_FIRST);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KType_System, MN_("genCode"), 0, MPOL_FIRST);
 	KUnsafeFieldInit(kmodjit->genCode, mtd);
-#define TY_Pointer kmodjit->cPointer->typeId
+#define KType_Pointer kmodjit->cPointer->typeId
 #define _Public   kMethod_Public
 #define _Static   kMethod_Static
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
-#define TY_O  TY_Object
+#define KType_O  KType_Object
 	int FN_x = FN_("x");
 	int FN_y = FN_("y");
 	int FN_z = FN_("z");
 	int FN_w = FN_("w");
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static, _F(System_setUline), TY_void, TY_System, MN_("setUline"), 1, TY_int, FN_x,
-		_Public|_Static, _F(System_getUline), TY_int,  TY_System, MN_("getUline"), 0,
-		_Public|_Static|_Coercion, _F(System_getValue), TY_Object, TY_System, MN_("getValue"), 1, TY_int, FN_x,
-		_Public|_Static|_Coercion, _F(System_setValue), TY_void  , TY_System, MN_("setValue"), 2, TY_int, FN_x, TY_Object, FN_y,
-		_Public|_Static|_Coercion, _F(System_clearValue), TY_void  , TY_System, MN_("clearValue"), 0,
-		_Public|_Static|_Coercion, _F(System_getModule), TY_Object, TY_System, MN_("getModule"), 0,
-		_Public|_Static|_Coercion, _F(System_setModule), TY_void  , TY_System, MN_("setModule"), 1, TY_Object, FN_y,
-		_Public|_Static|_Coercion, _F(System_getExecutionEngine), TY_Object, TY_System, MN_("getExecutionEngine"), 0,
-		_Public|_Static|_Coercion, _F(System_setExecutionEngine), TY_void  , TY_System, MN_("setExecutionEngine"), 1, TY_Object, FN_y,
-		_Public|_Static|_Coercion, _F(System_getBuilder), TY_Object, TY_System, MN_("getBuilder"),0,
-		_Public|_Static|_Coercion, _F(System_setBuilder), TY_void  , TY_System, MN_("setBuilder"),1, TY_Object, FN_y,
-		_Public|_Static|_Coercion, _F(System_getFunction), TY_Object, TY_System, MN_("getFunction"),0,
-		_Public|_Static|_Coercion, _F(System_setFunction), TY_void  , TY_System, MN_("setFunction"),1, TY_Object, FN_y,
-		_Public|_Static|_Coercion, _F(System_getCTX), TY_Object, TY_System, MN_("getCTX"),0,
-		_Public|_Static|_Coercion, _F(System_setCTX), TY_void  , TY_System, MN_("setCTX"),1, TY_Object, FN_y,
-		_Public|_Static|_Coercion, _F(System_getSFP), TY_Object, TY_System, MN_("getSFP"),0,
-		_Public|_Static|_Coercion, _F(System_setSFP), TY_void  , TY_System, MN_("setSFP"),1, TY_Object, FN_y,
-		_Public|_Static|_Coercion, _F(System_getRetVal), TY_Object, TY_System, MN_("getRetVal"),0,
-		_Public|_Static|_Coercion, _F(System_setRetVal), TY_void  , TY_System, MN_("setRetVal"),1, TY_Object, FN_y,
-		_Public|_Static|_Coercion, _F(System_getJITCache), TY_Object, TY_System, MN_("getJITCache"), 1, TY_Method, FN_x,
-		_Public|_Static|_Coercion, _F(System_setJITCache), TY_void  , TY_System, MN_("setJITCache"), 2, TY_Method, FN_x, TY_Object, FN_y,
-		_Public|_Static|_Coercion, _F(System_setTyHObject),  TY_void, TY_System, MN_("setTyHObject"),  1, TY_O, FN_x,
-		_Public|_Static|_Coercion, _F(System_setTyObject),   TY_void, TY_System, MN_("setTyObject"),   1, TY_O, FN_x,
-		_Public|_Static|_Coercion, _F(System_setTyFunction), TY_void, TY_System, MN_("setTyFunction"), 1, TY_O, FN_x,
-		_Public|_Static|_Coercion, _F(System_setTyFunctionP),TY_void, TY_System, MN_("setTyFunctionP"),1, TY_O, FN_x,
-		_Public|_Static|_Coercion, _F(System_setTyMethod),   TY_void, TY_System, MN_("setTyMethod"),   1, TY_O, FN_x,
-		_Public|_Static|_Coercion, _F(System_setTyContext),  TY_void, TY_System, MN_("setTyContext"),  1, TY_O, FN_x,
-		_Public|_Static|_Coercion, _F(System_setTyStack),    TY_void, TY_System, MN_("setTyStack"),    1, TY_O, FN_x,
-		_Public|_Static|_Coercion, _F(System_getTyHObject),  TY_O,    TY_System, MN_("getTyHObject"), 0,
-		_Public|_Static|_Coercion, _F(System_getTyObject),   TY_O,    TY_System, MN_("getTyObject"), 0,
-		_Public|_Static|_Coercion, _F(System_getTyFunction), TY_O,    TY_System, MN_("getTyFunction"), 0,
-		_Public|_Static|_Coercion, _F(System_getTyFunctionP),TY_O,    TY_System, MN_("getTyFunctionP"), 0,
-		_Public|_Static|_Coercion, _F(System_getTyMethod),   TY_O,    TY_System, MN_("getTyMethod"), 0,
-		_Public|_Static|_Coercion, _F(System_getTyContext),  TY_O,    TY_System, MN_("getTyContext"), 0,
-		_Public|_Static|_Coercion, _F(System_getTyStack),    TY_O,    TY_System, MN_("getTyStack"), 0,
-		_Public, _F(Block_getEspIndex), TY_int, TY_Block, MN_("getEspIndex"), 0,
-		_Public, _F(Block_getBlocks), TY_Array, TY_Block, MN_("getBlocks"), 0,
-		_Public, _F(Array_getSize), TY_int, TY_Array, MN_("getSize"), 0,
-		_Public, _F(Stmt_getUline), TY_int, TY_Stmt,  MN_("getUline"), 0,
-		_Public, _F(Stmt_hasSyntax), TY_boolean, TY_Stmt,  MN_("hasSyntax"), 0,
-		_Public, _F(Stmt_getObjectNULL), TY_O, TY_Stmt, MN_("getObjectNULL"), 1, TY_int, FN_x,
-		_Public, _F(System_AddConstPool), TY_void, TY_System, MN_("addConstPool"), 1, TY_O, FN_x,
-		_Public, _F(Object_unbox), TY_int, TY_O, MN_("unbox"), 0,
-		_Public|_Static, _F(Array_new1), TY_Array, TY_Array, MN_("new1"), 1, TY_O, FN_x,
-		_Public|_Static, _F(Array_new2), TY_Array, TY_Array, MN_("new2"), 2, TY_O, FN_x, TY_O, FN_y,
-		_Public|_Static, _F(Array_new3), TY_Array, TY_Array, MN_("new3"), 3, TY_O, FN_x, TY_O, FN_y, TY_O, FN_z,
-		_Public|_Static, _F(Array_newN), TY_Array, TY_Array, MN_("newN"), 1, TY_int, FN_x,
-		_Public, _F(Array_getO), TY_Object, TY_Array, MN_("get"), 1, TY_int, FN_x,
-		_Public, _F(Array_setO), TY_void,   TY_Array, MN_("set"), 2, TY_int, FN_x, TY_O, FN_y,
-		_Public, _F(Array_erase), TY_Array, TY_Array, MN_("erase"), 1, TY_int, FN_x,
-		_Public, _F(Method_getParamSize), TY_int, TY_Method, MN_("getParamSize"), 0,
-		_Public, _F(Method_getParam), TY_Param, TY_Method, MN_("getParam"), 0,
-		_Public, _F(Param_getType), TY_int, TY_Param, MN_("getType"), 1, TY_int, FN_x,
-		_Public, _F(Method_getReturnType), TY_int, TY_Method, MN_("getReturnType"), 0,
-		_Public, _F(Method_getCname), TY_String, TY_Method, MN_("getCname"), 0,
-		_Public, _F(Method_getFname), TY_String, TY_Method, MN_("getFname"), 0,
-		_Public|_Static, _F(System_getNULL), TY_Object, TY_System, MN_("getNULL"), 1, TY_int, FN_x,
-		_Public, _F(Method_isStatic_), TY_boolean, TY_Method, MN_("isStatic"), 0,
-		_Public, _F(Method_isVirtual_), TY_boolean, TY_Method, MN_("isVirtual"), 0,
-		_Public|_Coercion, _F(Object_toStmt), TY_Stmt, TY_Object, MN_to(TY_Stmt), 0,
-		_Public|_Coercion, _F(Object_toExpr), TY_Expr, TY_Object, MN_to(TY_Expr), 0,
-		_Public, _F(Expr_getSingle), TY_Expr, TY_Expr, MN_("getSingle"), 0,
-		_Public, _F(Expr_getCons), TY_ExprArray, TY_Expr, MN_("getCons"), 0,
+		_Public|_Static, _F(System_setUline), KType_void, KType_System, MN_("setUline"), 1, KType_int, FN_x,
+		_Public|_Static, _F(System_getUline), KType_int,  KType_System, MN_("getUline"), 0,
+		_Public|_Static|_Coercion, _F(System_getValue), KType_Object, KType_System, MN_("getValue"), 1, KType_int, FN_x,
+		_Public|_Static|_Coercion, _F(System_setValue), KType_void  , KType_System, MN_("setValue"), 2, KType_int, FN_x, KType_Object, FN_y,
+		_Public|_Static|_Coercion, _F(System_clearValue), KType_void  , KType_System, MN_("clearValue"), 0,
+		_Public|_Static|_Coercion, _F(System_getModule), KType_Object, KType_System, MN_("getModule"), 0,
+		_Public|_Static|_Coercion, _F(System_setModule), KType_void  , KType_System, MN_("setModule"), 1, KType_Object, FN_y,
+		_Public|_Static|_Coercion, _F(System_getExecutionEngine), KType_Object, KType_System, MN_("getExecutionEngine"), 0,
+		_Public|_Static|_Coercion, _F(System_setExecutionEngine), KType_void  , KType_System, MN_("setExecutionEngine"), 1, KType_Object, FN_y,
+		_Public|_Static|_Coercion, _F(System_getBuilder), KType_Object, KType_System, MN_("getBuilder"),0,
+		_Public|_Static|_Coercion, _F(System_setBuilder), KType_void  , KType_System, MN_("setBuilder"),1, KType_Object, FN_y,
+		_Public|_Static|_Coercion, _F(System_getFunction), KType_Object, KType_System, MN_("getFunction"),0,
+		_Public|_Static|_Coercion, _F(System_setFunction), KType_void  , KType_System, MN_("setFunction"),1, KType_Object, FN_y,
+		_Public|_Static|_Coercion, _F(System_getCTX), KType_Object, KType_System, MN_("getCTX"),0,
+		_Public|_Static|_Coercion, _F(System_setCTX), KType_void  , KType_System, MN_("setCTX"),1, KType_Object, FN_y,
+		_Public|_Static|_Coercion, _F(System_getSFP), KType_Object, KType_System, MN_("getSFP"),0,
+		_Public|_Static|_Coercion, _F(System_setSFP), KType_void  , KType_System, MN_("setSFP"),1, KType_Object, FN_y,
+		_Public|_Static|_Coercion, _F(System_getRetVal), KType_Object, KType_System, MN_("getRetVal"),0,
+		_Public|_Static|_Coercion, _F(System_setRetVal), KType_void  , KType_System, MN_("setRetVal"),1, KType_Object, FN_y,
+		_Public|_Static|_Coercion, _F(System_getJITCache), KType_Object, KType_System, MN_("getJITCache"), 1, KType_Method, FN_x,
+		_Public|_Static|_Coercion, _F(System_setJITCache), KType_void  , KType_System, MN_("setJITCache"), 2, KType_Method, FN_x, KType_Object, FN_y,
+		_Public|_Static|_Coercion, _F(System_setTyHObject),  KType_void, KType_System, MN_("setTyHObject"),  1, KType_O, FN_x,
+		_Public|_Static|_Coercion, _F(System_setTyObject),   KType_void, KType_System, MN_("setTyObject"),   1, KType_O, FN_x,
+		_Public|_Static|_Coercion, _F(System_setTyFunction), KType_void, KType_System, MN_("setTyFunction"), 1, KType_O, FN_x,
+		_Public|_Static|_Coercion, _F(System_setTyFunctionP),KType_void, KType_System, MN_("setTyFunctionP"),1, KType_O, FN_x,
+		_Public|_Static|_Coercion, _F(System_setTyMethod),   KType_void, KType_System, MN_("setTyMethod"),   1, KType_O, FN_x,
+		_Public|_Static|_Coercion, _F(System_setTyContext),  KType_void, KType_System, MN_("setTyContext"),  1, KType_O, FN_x,
+		_Public|_Static|_Coercion, _F(System_setTyStack),    KType_void, KType_System, MN_("setTyStack"),    1, KType_O, FN_x,
+		_Public|_Static|_Coercion, _F(System_getTyHObject),  KType_O,    KType_System, MN_("getTyHObject"), 0,
+		_Public|_Static|_Coercion, _F(System_getTyObject),   KType_O,    KType_System, MN_("getTyObject"), 0,
+		_Public|_Static|_Coercion, _F(System_getTyFunction), KType_O,    KType_System, MN_("getTyFunction"), 0,
+		_Public|_Static|_Coercion, _F(System_getTyFunctionP),KType_O,    KType_System, MN_("getTyFunctionP"), 0,
+		_Public|_Static|_Coercion, _F(System_getTyMethod),   KType_O,    KType_System, MN_("getTyMethod"), 0,
+		_Public|_Static|_Coercion, _F(System_getTyContext),  KType_O,    KType_System, MN_("getTyContext"), 0,
+		_Public|_Static|_Coercion, _F(System_getTyStack),    KType_O,    KType_System, MN_("getTyStack"), 0,
+		_Public, _F(Block_getEspIndex), KType_int, KType_Block, MN_("getEspIndex"), 0,
+		_Public, _F(Block_getBlocks), KType_Array, KType_Block, MN_("getBlocks"), 0,
+		_Public, _F(Array_getSize), KType_int, KType_Array, MN_("getSize"), 0,
+		_Public, _F(Stmt_getUline), KType_int, KType_Stmt,  MN_("getUline"), 0,
+		_Public, _F(Stmt_hasSyntax), KType_boolean, KType_Stmt,  MN_("hasSyntax"), 0,
+		_Public, _F(Stmt_getObjectNULL), KType_O, KType_Stmt, MN_("getObjectNULL"), 1, KType_int, FN_x,
+		_Public, _F(System_AddConstPool), KType_void, KType_System, MN_("addConstPool"), 1, KType_O, FN_x,
+		_Public, _F(Object_unbox), KType_int, KType_O, MN_("unbox"), 0,
+		_Public|_Static, _F(Array_new1), KType_Array, KType_Array, MN_("new1"), 1, KType_O, FN_x,
+		_Public|_Static, _F(Array_new2), KType_Array, KType_Array, MN_("new2"), 2, KType_O, FN_x, KType_O, FN_y,
+		_Public|_Static, _F(Array_new3), KType_Array, KType_Array, MN_("new3"), 3, KType_O, FN_x, KType_O, FN_y, KType_O, FN_z,
+		_Public|_Static, _F(Array_newN), KType_Array, KType_Array, MN_("newN"), 1, KType_int, FN_x,
+		_Public, _F(Array_getO), KType_Object, KType_Array, MN_("get"), 1, KType_int, FN_x,
+		_Public, _F(Array_setO), KType_void,   KType_Array, MN_("set"), 2, KType_int, FN_x, KType_O, FN_y,
+		_Public, _F(Array_erase), KType_Array, KType_Array, MN_("erase"), 1, KType_int, FN_x,
+		_Public, _F(Method_getParamSize), KType_int, KType_Method, MN_("getParamSize"), 0,
+		_Public, _F(Method_getParam), KType_Param, KType_Method, MN_("getParam"), 0,
+		_Public, _F(Param_getType), KType_int, KType_Param, MN_("getType"), 1, KType_int, FN_x,
+		_Public, _F(Method_getReturnType), KType_int, KType_Method, MN_("getReturnType"), 0,
+		_Public, _F(Method_getCname), KType_String, KType_Method, MN_("getCname"), 0,
+		_Public, _F(Method_getFname), KType_String, KType_Method, MN_("getFname"), 0,
+		_Public|_Static, _F(System_getNULL), KType_Object, KType_System, MN_("getNULL"), 1, KType_int, FN_x,
+		_Public, _F(Method_isStatic_), KType_boolean, KType_Method, MN_("isStatic"), 0,
+		_Public, _F(Method_isVirtual_), KType_boolean, KType_Method, MN_("isVirtual"), 0,
+		_Public|_Coercion, _F(Object_toStmt), KType_Stmt, KType_Object, MethodName_To(KType_Stmt), 0,
+		_Public|_Coercion, _F(Object_toExpr), KType_Expr, KType_Object, MethodName_To(KType_Expr), 0,
+		_Public, _F(Expr_getSingle), KType_Expr, KType_Expr, MN_("getSingle"), 0,
+		_Public, _F(Expr_getCons), KType_ExprArray, KType_Expr, MN_("getCons"), 0,
 
 
-		_Public|_Static, _F(Pointer_get), TY_int,  TY_System, MN_("getPointer"),3, TY_int, FN_x, TY_int, FN_y, TY_int, FN_z,
-		_Public|_Static, _F(Pointer_set), TY_void, TY_System, MN_("setPointer"),4, TY_int, FN_x, TY_int, FN_y, TY_int, FN_z,TY_int, FN_w,
-		_Public|_Coercion, _F(Object_getAddr), TY_int, TY_O, MN_("getAddr"), 0,
-		_Public, _F(Object_getCid), TY_int, TY_O, MN_("getCid"), 0,
-		_Public, _F(Method_getCid), TY_int, TY_Method, MN_("getCid"), 0,
-		//_Public|_Coercion, _F(Object_toStmt), TY_Stmt, TY_Object, MN_to(TY_Stmt), 0,
+		_Public|_Static, _F(Pointer_get), KType_int,  KType_System, MN_("getPointer"),3, KType_int, FN_x, KType_int, FN_y, KType_int, FN_z,
+		_Public|_Static, _F(Pointer_set), KType_void, KType_System, MN_("setPointer"),4, KType_int, FN_x, KType_int, FN_y, KType_int, FN_z,KType_int, FN_w,
+		_Public|_Coercion, _F(Object_getAddr), KType_int, KType_O, MN_("getAddr"), 0,
+		_Public, _F(Object_getCid), KType_int, KType_O, MN_("getCid"), 0,
+		_Public, _F(Method_getCid), KType_int, KType_Method, MN_("getCid"), 0,
+		//_Public|_Coercion, _F(Object_toStmt), KType_Stmt, KType_Object, MethodName_To(KType_Stmt), 0,
 
-#define TO(T) _Public|_Static, _F(Pointer_toObject), TY_##T, TY_System, MN_("convertTo" # T), 1, TY_int, FN_x
+#define TO(T) _Public|_Static, _F(Pointer_toObject), KType_##T, KType_System, MN_("convertTo" # T), 1, KType_int, FN_x
 		TO(Array),
 		TO(Object),
 		TO(Method),

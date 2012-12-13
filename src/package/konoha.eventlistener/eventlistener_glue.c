@@ -40,7 +40,7 @@ extern "C"{
 #define KonohaContext_getEventContext(kctx)    ((EventContext *)kctx->modlocal[MOD_EVENT])
 #define kmodevent ((KModuleEvent *)kctx->modshare[MOD_EVENT])
 #define FLAG_EVENT (1 << 0)
-#define CT_Event (kmodevent->cEvent)
+#define KClass_Event (kmodevent->cEvent)
 
 typedef json_t*  RawEvent;
 typedef RawEvent* RawEventList;
@@ -430,13 +430,13 @@ static KMETHOD System_setEnqFunc(KonohaContext *kctx, KonohaStack *sfp)
 // function of enequeueing global queue
 static void enqueueEventToGlobalQueue(KonohaContext *kctx, RawEvent rawEvent)
 {
-	kEvent *ev = (kEvent *)KLIB new_kObject(kctx, OnStack, CT_Event, 0);
+	kEvent *ev = (kEvent *)KLIB new_kObject(kctx, OnStack, KClass_Event, 0);
 	ev->j = (json_t *)rawEvent;
 	ktypeattr_t resolve_type = kMethod_GetReturnType(KonohaContext_getEventContext(kctx)->enqFuncNULL->method);
 	BEGIN_UnusedStack(lsfp);
 	KUnsafeFieldSet(lsfp[0].asObject, K_NULL);
 	KUnsafeFieldSet(lsfp[1].asObject, (kObject *)ev);
-	KStackSetFuncAll(lsfp, KLIB Knull(kctx, CT_(resolve_type)), 0/*UL*/, KonohaContext_getEventContext(kctx)->enqFuncNULL, 1);
+	KStackSetFuncAll(lsfp, KLIB Knull(kctx, KClass_(resolve_type)), 0/*UL*/, KonohaContext_getEventContext(kctx)->enqFuncNULL, 1);
 	KStackCall(lsfp);
 	END_UnusedStack();
 }
@@ -551,11 +551,11 @@ static void MODEVENT_Init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace
 #define _Im       kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-#define TY_Event cEvent->typeId
-#define TY_HttpEventListener cHttpEventListener->typeId
-#define TY_SignalEventListener cSignalEventListener->typeId
+#define KType_Event cEvent->typeId
+#define KType_HttpEventListener cHttpEventListener->typeId
+#define KType_SignalEventListener cSignalEventListener->typeId
 
-#define KDefineConstInt(T) #T, TY_int, T
+#define KDefineConstInt(T) #T, KType_int, T
 
 static kbool_t eventlistener_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
@@ -573,21 +573,21 @@ static kbool_t eventlistener_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns
 	KonohaClass *cSignalEventListener = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSignalEventListener, trace);
 	KonohaClass *cEvent = kmodevent->cEvent;
 
-	kparamtype_t P_Func[] = {{TY_Event}};
-	int TY_EnqFunc = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_void, 1, P_Func))->typeId;
+	kparamtype_t P_Func[] = {{KType_Event}};
+	int KType_EnqFunc = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_void, 1, P_Func))->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
 		/* event gen */
-		_Public|_Static, _F(HttpEventListener_start), TY_void, TY_HttpEventListener, MN_("start"), 2, TY_String, FN_("host"), TY_int, FN_("port"),
-		_Public|_Static, _F(SignalEventListener_start), TY_void, TY_SignalEventListener, MN_("start"), 0,
+		_Public|_Static, _F(HttpEventListener_start), KType_void, KType_HttpEventListener, MN_("start"), 2, KType_String, FN_("host"), KType_int, FN_("port"),
+		_Public|_Static, _F(SignalEventListener_start), KType_void, KType_SignalEventListener, MN_("start"), 0,
 		/* event */
-		_Public|_Const|_Im, _F(Event_getProperty), TY_String,    TY_Event, MN_("getProperty"), 1, TY_String, FN_("key"),
-		_Public|_Const|_Im, _F(Event_getInt),      TY_int,       TY_Event, MN_("getInt"),    1, TY_String, FN_("key"),
+		_Public|_Const|_Im, _F(Event_getProperty), KType_String,    KType_Event, MN_("getProperty"), 1, KType_String, FN_("key"),
+		_Public|_Const|_Im, _F(Event_getInt),      KType_int,       KType_Event, MN_("getInt"),    1, KType_String, FN_("key"),
 
 		/* dispatch */
-		_Public|_Static, _F(System_setSafepoint), TY_void, TY_System, MN_("setSafepoint"), 0,
-		_Public|_Static, _F(System_setEventInvokeFunc), TY_void, TY_System, MN_("setEventInvokeFunc"), 1, TY_Func, FN_("f"),
-		_Public|_Static, _F(System_setEnqFunc), TY_void, TY_System, MN_("setEnqFunc"), 1, TY_EnqFunc, FN_("f"),
+		_Public|_Static, _F(System_setSafepoint), KType_void, KType_System, MN_("setSafepoint"), 0,
+		_Public|_Static, _F(System_setEventInvokeFunc), KType_void, KType_System, MN_("setEventInvokeFunc"), 1, KType_Func, FN_("f"),
+		_Public|_Static, _F(System_setEnqFunc), KType_void, KType_System, MN_("setEnqFunc"), 1, KType_EnqFunc, FN_("f"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

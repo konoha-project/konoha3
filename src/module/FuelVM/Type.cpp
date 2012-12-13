@@ -1,4 +1,4 @@
-enum STRUCT_TYPE_ID {
+enum STRUKClass_TYPE_ID {
 	ID_void,
 	ID_Ptrvoid,
 	ID_long,
@@ -31,10 +31,10 @@ enum STRUCT_TYPE_ID {
 struct TypeInfo {
 	const char *Name;
 	bool     IsFunction;
-	enum STRUCT_TYPE_ID ReturnTypeId;
+	enum STRUKClass_TYPE_ID ReturnTypeId;
 	unsigned ParamSize;
 	struct Param {
-		enum STRUCT_TYPE_ID TypeId;
+		enum STRUKClass_TYPE_ID TypeId;
 #ifdef PARAM_DEBUG
 		const char *name;
 #endif
@@ -101,7 +101,7 @@ static Type *LLVMTYPE_MethodFunc = NULL;
 #define LLVMTYPE_Bool  (Type::getInt64Ty(LLVM_CONTEXT()))
 #define LLVMTYPE_Float (Type::getDoubleTy(LLVM_CONTEXT()))
 
-static Type *ToType(enum STRUCT_TYPE_ID ID)
+static Type *ToType(enum STRUKClass_TYPE_ID ID)
 {
 	switch(ID) {
 	case ID_void:    return Type::getVoidTy(LLVM_CONTEXT());
@@ -166,11 +166,11 @@ static void LLVMType_Init(Module *M)
 static Type *convert_type(KonohaContext *kctx, kattrtype_t Type)
 {
 	switch (Type) {
-		case TY_void:    return LLVMTYPE_Void;
-		case TY_boolean: return LLVMTYPE_Bool;
-		case TY_int:     return LLVMTYPE_Int;
+		case KType_void:    return LLVMTYPE_Void;
+		case KType_boolean: return LLVMTYPE_Bool;
+		case KType_int:     return LLVMTYPE_Int;
 	}
-	if(Type == TY_float)
+	if(Type == KType_float)
 		return LLVMTYPE_Float;
 	return LLVMTYPE_Object;
 }

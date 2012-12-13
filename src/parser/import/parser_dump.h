@@ -42,8 +42,8 @@ static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 //		else if(Token_isRule(tk)) {
 //			DUMP_P("RuleToken(%d) '%s' resolvedSymbol=%s%s classNameSymbol=%s%s\n", n, KToken_t(tk), PSYM_t(tk->resolvedSymbol), PSYM_t(tk->indent));
 //		}
-		else if(tk->resolvedSyntaxInfo->keyword == KW_TypePattern) {
-			DUMP_P("Token(%d) '%s' type=%s\n", n, KToken_t(tk), TY_t(tk->resolvedTypeId));
+		else if(tk->resolvedSyntaxInfo->keyword == Symbol_TypePattern) {
+			DUMP_P("Token(%d) '%s' type=%s\n", n, KToken_t(tk), KType_t(tk->resolvedTypeId));
 		}
 		else {
 			DUMP_P("Token(%d) '%s' syntax=%s%s, symbol=``%s%s''\n", n, KToken_t(tk), PSYM_t(tk->resolvedSyntaxInfo->keyword), PSYM_t(tk->resolvedSymbol));
@@ -62,9 +62,9 @@ static void dumpIndent(KonohaContext *kctx, int nest)
 static int dumpBeginTokenList(int closure)
 {
 	switch(closure) {
-	case KW_ParenthesisGroup: return '(';
-	case KW_BraceGroup: return '{';
-	case KW_BracketGroup: return '[';
+	case Symbol_ParenthesisGroup: return '(';
+	case Symbol_BraceGroup: return '{';
+	case Symbol_BracketGroup: return '[';
 	}
 	return '<';
 }
@@ -72,9 +72,9 @@ static int dumpBeginTokenList(int closure)
 static int dumpEndTokenList(int closure)
 {
 	switch(closure) {
-	case KW_ParenthesisGroup: return ')';
-	case KW_BraceGroup: return '}';
-	case KW_BracketGroup: return ']';
+	case Symbol_ParenthesisGroup: return ')';
+	case Symbol_BraceGroup: return '}';
+	case Symbol_BracketGroup: return ']';
 	}
 	return '>';
 }
@@ -129,16 +129,16 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 					}
 					else {
 						dumpIndent(kctx, nest+1);
-						if(kObject_class(o) == CT_Token) {
+						if(kObject_class(o) == KClass_Token) {
 							kToken *tk = (kToken *)o;
-							DUMP_P("[%d] O: %s ", i, CT_t(o->h.ct));
+							DUMP_P("[%d] O: %s ", i, KClass_t(o->h.ct));
 							dumpToken(kctx, tk, -1);
 						}
 						else if(o == K_NULL) {
 							DUMP_P("[%d] O: null\n", i);
 						}
 						else {
-							DUMP_P("[%d] O: %s\n", i, CT_t(o->h.ct));
+							DUMP_P("[%d] O: %s\n", i, KClass_t(o->h.ct));
 						}
 					}
 				}

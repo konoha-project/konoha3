@@ -118,8 +118,8 @@ struct kRawPtr {
 
 #define MOD_llvm 19/*TODO*/
 #define kmodllvm ((kmodllvm_t*)kctx->modshare[MOD_llvm])
-#define CT_Value (kmodllvm)->cValue
-#define TY_Value (CT_Value)->typeId
+#define KClass_Value (kmodllvm)->cValue
+#define KType_Value (KClass_Value)->typeId
 #define LLVM_TODO(MSG) do {\
     fprintf(stderr, "FIXME " MSG "\n");\
     abort();\
@@ -2514,15 +2514,15 @@ static KMETHOD kMethod_setFunction(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Function_getArguments(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Function *func = konoha::object_cast<Function *>(sfp[0].asObject);
-	kattrtype_t cid = TY_Value;
+	kattrtype_t cid = KType_Value;
 	/*FIXME Generics Array */
 	//kattrtype_t rtype = sfp[K_MTDIDX].mtdNC->pa->rtype;
-	//kattrtype_t cid = CT_(rtype)->p1;
+	//kattrtype_t cid = KClass_(rtype)->p1;
 	kArray *a = new_(Array, 0, OnStack);
 	for (Function::arg_iterator I = func->arg_begin(), E = func->arg_end();
 			I != E; ++I) {
 		Value *v = I;
-		kObject *o = new_CppObject(kctx, CT_(cid)/*"Value"*/, WRAP(v));
+		kObject *o = new_CppObject(kctx, KClass_(cid)/*"Value"*/, WRAP(v));
 		KLIB kArray_Add(kctx, a, o);
 	}
 	KReturn(a);
@@ -4499,43 +4499,43 @@ static KMETHOD Object_toLLVMBasicBlock(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 static KDEFINE_INT_CONST IntIntrinsic[] = {
-	{"Pow"  , TY_int, (int) Intrinsic::pow},
-	{"Sqrt" , TY_int, (int) Intrinsic::sqrt},
-	{"Exp"  , TY_int, (int) Intrinsic::exp},
-	{"Log10", TY_int, (int) Intrinsic::log10},
-	{"Log"  , TY_int, (int) Intrinsic::log},
-	{"Sin"  , TY_int, (int) Intrinsic::sin},
-	{"Cos"  , TY_int, (int) Intrinsic::cos},
+	{"Pow"  , KType_int, (int) Intrinsic::pow},
+	{"Sqrt" , KType_int, (int) Intrinsic::sqrt},
+	{"Exp"  , KType_int, (int) Intrinsic::exp},
+	{"Log10", KType_int, (int) Intrinsic::log10},
+	{"Log"  , KType_int, (int) Intrinsic::log},
+	{"Sin"  , KType_int, (int) Intrinsic::sin},
+	{"Cos"  , KType_int, (int) Intrinsic::cos},
 	{NULL, 0, 0}
 };
 
 static KDEFINE_INT_CONST IntGlobalVariable[] = {
-	{"ExternalLinkage",                 TY_int, GlobalValue::ExternalLinkage},
-	{"AvailableExternallyLinkage",      TY_int, GlobalValue::AvailableExternallyLinkage},
-	{"LinkOnceAnyLinkage",              TY_int, GlobalValue::LinkOnceODRLinkage},
-	{"WeakAnyLinkage",                  TY_int, GlobalValue::WeakAnyLinkage},
-	{"WeakODRLinkage",                  TY_int, GlobalValue::WeakODRLinkage},
-	{"AppendingLinkage",                TY_int, GlobalValue::AppendingLinkage},
-	{"InternalLinkage",                 TY_int, GlobalValue::InternalLinkage},
-	{"PrivateLinkage",                  TY_int, GlobalValue::PrivateLinkage},
-	{"LinkerPrivateLinkage",            TY_int, GlobalValue::LinkerPrivateLinkage},
-	{"LinkerPrivateWeakLinkage",        TY_int, GlobalValue::LinkerPrivateWeakLinkage},
+	{"ExternalLinkage",                 KType_int, GlobalValue::ExternalLinkage},
+	{"AvailableExternallyLinkage",      KType_int, GlobalValue::AvailableExternallyLinkage},
+	{"LinkOnceAnyLinkage",              KType_int, GlobalValue::LinkOnceODRLinkage},
+	{"WeakAnyLinkage",                  KType_int, GlobalValue::WeakAnyLinkage},
+	{"WeakODRLinkage",                  KType_int, GlobalValue::WeakODRLinkage},
+	{"AppendingLinkage",                KType_int, GlobalValue::AppendingLinkage},
+	{"InternalLinkage",                 KType_int, GlobalValue::InternalLinkage},
+	{"PrivateLinkage",                  KType_int, GlobalValue::PrivateLinkage},
+	{"LinkerPrivateLinkage",            KType_int, GlobalValue::LinkerPrivateLinkage},
+	{"LinkerPrivateWeakLinkage",        KType_int, GlobalValue::LinkerPrivateWeakLinkage},
 #if LLVM_VERSION < 302
-	{"LinkerPrivateWeakDefAutoLinkage", TY_int, GlobalValue::LinkerPrivateWeakDefAutoLinkage},
+	{"LinkerPrivateWeakDefAutoLinkage", KType_int, GlobalValue::LinkerPrivateWeakDefAutoLinkage},
 #endif
-	{"DLLImportLinkage",                TY_int, GlobalValue::DLLImportLinkage},
-	{"DLLExportLinkage",                TY_int, GlobalValue::DLLExportLinkage},
-	{"ExternalWeakLinkage",             TY_int, GlobalValue::ExternalWeakLinkage},
-	{"CommonLinkage",                   TY_int, GlobalValue::CommonLinkage},
+	{"DLLImportLinkage",                KType_int, GlobalValue::DLLImportLinkage},
+	{"DLLExportLinkage",                KType_int, GlobalValue::DLLExportLinkage},
+	{"ExternalWeakLinkage",             KType_int, GlobalValue::ExternalWeakLinkage},
+	{"CommonLinkage",                   KType_int, GlobalValue::CommonLinkage},
 	{NULL, 0, 0}
 };
 
 #if LLVM_VERSION == 301
-#define C_(S) {#S , TY_int, S ## _i}
+#define C_(S) {#S , KType_int, S ## _i}
 #elif LLVM_VERSION == 302
-#define C_(S) {#S , TY_int, Attributes::S}
+#define C_(S) {#S , KType_int, Attributes::S}
 #else
-#define C_(S) {#S , TY_int, S}
+#define C_(S) {#S , KType_int, S}
 #endif
 #if LLVM_VERSION <= 301
 using namespace llvm::Attribute;
@@ -4685,7 +4685,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 
 #define DEFINE_CLASS_0(NAME, FN_INIT, FN_FREE, FN_COMPARE) DEFINE_CLASS_CPP(\
 		NAME,\
-		TY_newid, 0,\
+		KType_newid, 0,\
 		0, 0,\
 		0, 0,\
 		NULL,\
@@ -4720,45 +4720,45 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		"ArrayType",
 		"StructType"
 	};
-	KonohaClass *CT_TypeTBL[6];
-	KonohaClass *CT_BasicBlock, *CT_IRBuilder;
-#define TY_BasicBlock  (CT_BasicBlock)->typeId
-#define TY_IRBuilder   (CT_IRBuilder)->typeId
-#define TY_Type         (CT_TypeTBL[0])->typeId
-//#define TY_integerType  (CT_TypeTBL[1])->typeId
-#define TY_PointerType  (CT_TypeTBL[2])->typeId
-#define TY_FunctionType (CT_TypeTBL[3])->typeId
-#define TY_ArrayType    (CT_TypeTBL[4])->typeId
-#define TY_StructType   (CT_TypeTBL[5])->typeId
+	KonohaClass *KClass_TypeTBL[6];
+	KonohaClass *KClass_BasicBlock, *KClass_IRBuilder;
+#define KType_BasicBlock  (KClass_BasicBlock)->typeId
+#define KType_IRBuilder   (KClass_IRBuilder)->typeId
+#define KType_Type         (KClass_TypeTBL[0])->typeId
+//#define KType_integerType  (KClass_TypeTBL[1])->typeId
+#define KType_PointerType  (KClass_TypeTBL[2])->typeId
+#define KType_FunctionType (KClass_TypeTBL[3])->typeId
+#define KType_ArrayType    (KClass_TypeTBL[4])->typeId
+#define KType_StructType   (KClass_TypeTBL[5])->typeId
 	{
 		static KDEFINE_CLASS TypeDef;
 		bzero(&TypeDef, sizeof(KDEFINE_CLASS));
-		TypeDef.typeId  = TY_newid;
+		TypeDef.typeId  = KType_newid;
 		TypeDef.init = Type_init;
 		TypeDef.free = Type_free;
 		for (int i = 0; i < 6; i++) {
 			TypeDef.structname = TypeDefName[i];
-			CT_TypeTBL[i] = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &TypeDef, 0);
+			KClass_TypeTBL[i] = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &TypeDef, 0);
 		}
 	}
 	static KDEFINE_CLASS BasicBlockDef = DEFINE_CLASS_0("LLVMBasicBlock",0, 0, BasicBlock_compareTo);
-	CT_BasicBlock = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &BasicBlockDef, trace);
+	KClass_BasicBlock = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &BasicBlockDef, trace);
 
 	static KDEFINE_CLASS IRBuilderDef = DEFINE_CLASS_0("IRBuilder", 0, 0, 0);
-	CT_IRBuilder = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &IRBuilderDef, trace);
+	KClass_IRBuilder = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &IRBuilderDef, trace);
 #if LLVM_VERSION >= 300
 	static KDEFINE_CLASS PassManagerBuilderDef = DEFINE_CLASS_0("PassManagerBuilder",
 			PassManagerBuilder_ptr_init, PassManagerBuilder_ptr_free, 0);
-	KonohaClass *CT_PassManagerBuilder = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PassManagerBuilderDef, trace);
-#define TY_PassManagerBuilder         (CT_PassManagerBuilder)->typeId
+	KonohaClass *KClass_PassManagerBuilder = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PassManagerBuilderDef, trace);
+#define KType_PassManagerBuilder         (KClass_PassManagerBuilder)->typeId
 #endif
 	static KDEFINE_CLASS PassManagerDef = DEFINE_CLASS_0("PassManager",
 		PassManager_ptr_init, PassManager_ptr_free, 0);
 	static KDEFINE_CLASS FunctionPassManagerDef = DEFINE_CLASS_0("FunctionPassManager",
 			FunctionPassManager_ptr_init, FunctionPassManager_ptr_free, 0);
-	KonohaClass *CT_PassManager = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PassManagerDef, trace);
-	KonohaClass *CT_FunctionPassManager = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &FunctionPassManagerDef, trace);
-	KonohaClass *CT_InstTBL[21];
+	KonohaClass *KClass_PassManager = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PassManagerDef, trace);
+	KonohaClass *KClass_FunctionPassManager = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &FunctionPassManagerDef, trace);
+	KonohaClass *KClass_InstTBL[21];
 	{
 		static const char *InstDefName[] = {
 			"Instruction",
@@ -4785,7 +4785,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		};
 		static KDEFINE_CLASS InstDef;
 		bzero(&InstDef, sizeof(KDEFINE_CLASS));
-		InstDef.typeId  = TY_newid;
+		InstDef.typeId  = KType_newid;
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 #endif
@@ -4793,32 +4793,32 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		//InstDef.free = Inst_free;
 		for (unsigned int i = 0; i < ARRAY_SIZE(InstDefName); i++) {
 			InstDef.structname = InstDefName[i];
-			CT_InstTBL[i] = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &InstDef, trace);
+			KClass_InstTBL[i] = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &InstDef, trace);
 		}
 	}
-#define TY_Instruction         (CT_InstTBL[ 0])->typeId
-#define TY_AllocaInst          (CT_InstTBL[ 1])->typeId
-#define TY_LoadInst            (CT_InstTBL[ 2])->typeId
-#define TY_StoreInst           (CT_InstTBL[ 3])->typeId
-#define TY_GetElementPtrInst   (CT_InstTBL[ 4])->typeId
-#define TY_PHINode             (CT_InstTBL[ 5])->typeId
-#define TY_Module              (CT_InstTBL[ 6])->typeId
-#define TY_Function            (CT_InstTBL[ 7])->typeId
-#define TY_ExecutionEngine     (CT_InstTBL[ 8])->typeId
-#define TY_GlobalVariable      (CT_InstTBL[ 9])->typeId
-#define TY_Argument            (CT_InstTBL[10])->typeId
-#define TY_Constant            (CT_InstTBL[11])->typeId
-#define TY_ConstantInt         (CT_InstTBL[12])->typeId
-#define TY_ConstantFP          (CT_InstTBL[13])->typeId
-#define TY_ConstantStruct      (CT_InstTBL[14])->typeId
-#define TY_ConstantPointerNull (CT_InstTBL[15])->typeId
-#define TY_ConstantExpr        (CT_InstTBL[16])->typeId
-#define TY_LLVM                (CT_InstTBL[17])->typeId
-#define TY_LibCallInfo         (CT_InstTBL[18])->typeId
-#define TY_DynamicLibrary      (CT_InstTBL[19])->typeId
-#define TY_intrinsic           (CT_InstTBL[20])->typeId
+#define KType_Instruction         (KClass_InstTBL[ 0])->typeId
+#define KType_AllocaInst          (KClass_InstTBL[ 1])->typeId
+#define KType_LoadInst            (KClass_InstTBL[ 2])->typeId
+#define KType_StoreInst           (KClass_InstTBL[ 3])->typeId
+#define KType_GetElementPtrInst   (KClass_InstTBL[ 4])->typeId
+#define KType_PHINode             (KClass_InstTBL[ 5])->typeId
+#define KType_Module              (KClass_InstTBL[ 6])->typeId
+#define KType_Function            (KClass_InstTBL[ 7])->typeId
+#define KType_ExecutionEngine     (KClass_InstTBL[ 8])->typeId
+#define KType_GlobalVariable      (KClass_InstTBL[ 9])->typeId
+#define KType_Argument            (KClass_InstTBL[10])->typeId
+#define KType_Constant            (KClass_InstTBL[11])->typeId
+#define KType_ConstantInt         (KClass_InstTBL[12])->typeId
+#define KType_ConstantFP          (KClass_InstTBL[13])->typeId
+#define KType_ConstantStruct      (KClass_InstTBL[14])->typeId
+#define KType_ConstantPointerNull (KClass_InstTBL[15])->typeId
+#define KType_ConstantExpr        (KClass_InstTBL[16])->typeId
+#define KType_LLVM                (KClass_InstTBL[17])->typeId
+#define KType_LibCallInfo         (KClass_InstTBL[18])->typeId
+#define KType_DynamicLibrary      (KClass_InstTBL[19])->typeId
+#define KType_intrinsic           (KClass_InstTBL[20])->typeId
 
-	KonohaClass *CT_PassTBL[4];
+	KonohaClass *KClass_PassTBL[4];
 	{
 		static const char *PassDefName[] = {
 			"Pass",
@@ -4828,431 +4828,431 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		};
 		static KDEFINE_CLASS PassDef;
 		bzero(&PassDef, sizeof(KDEFINE_CLASS));
-		PassDef.typeId  = TY_newid;
+		PassDef.typeId  = KType_newid;
 		//InstDef.init = Inst_init;
 		//InstDef.free = Inst_free;
 		for (int i = 0; i < 4; i++) {
 			PassDef.structname = PassDefName[i];
-			CT_PassTBL[i] = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PassDef, trace);
+			KClass_PassTBL[i] = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PassDef, trace);
 		}
 	}
-#define TY_Pass          (CT_PassTBL[0])->typeId
-#define TY_ImmutablePass (CT_PassTBL[1])->typeId
-#define TY_FunctionPass  (CT_PassTBL[2])->typeId
-#define TY_ModulePass    (CT_PassTBL[3])->typeId
+#define KType_Pass          (KClass_PassTBL[0])->typeId
+#define KType_ImmutablePass (KClass_PassTBL[1])->typeId
+#define KType_FunctionPass  (KClass_PassTBL[2])->typeId
+#define KType_ModulePass    (KClass_PassTBL[3])->typeId
 
-#define TY_PassManager         (CT_PassManager)->typeId
-#define TY_FunctionPassManager (CT_FunctionPassManager)->typeId
+#define KType_PassManager         (KClass_PassManager)->typeId
+#define KType_FunctionPassManager (KClass_FunctionPassManager)->typeId
 	/* TODO */
-	kparamtype_t P_TypeArray[] = {{TY_Type, 0}};
-	int TY_TypeArray = (KLIB KonohaClass_Generics(kctx, CT_Array, TY_void, 1, P_TypeArray))->typeId;
+	kparamtype_t P_TypeArray[] = {{KType_Type, 0}};
+	int KType_TypeArray = (KLIB KonohaClass_Generics(kctx, KClass_Array, KType_void, 1, P_TypeArray))->typeId;
 
-	kparamtype_t P_ValueArray[] = {{TY_Value, 0}};
-	int TY_ValueArray = (KLIB KonohaClass_Generics(kctx, CT_Array, TY_void, 1, P_ValueArray))->typeId;
-#define TY_Array_Value    (TY_ValueArray)
-#define TY_Array_Type     (TY_TypeArray)
-#define TY_Array_Constant (TY_Array)
-#define TY_Array_Int      (TY_Array)
-#define TY_NativeFunction (TY_int)
+	kparamtype_t P_ValueArray[] = {{KType_Value, 0}};
+	int KType_ValueArray = (KLIB KonohaClass_Generics(kctx, KClass_Array, KType_void, 1, P_ValueArray))->typeId;
+#define KType_Array_Value    (KType_ValueArray)
+#define KType_Array_Type     (KType_TypeArray)
+#define KType_Array_Constant (KType_Array)
+#define KType_Array_Int      (KType_Array)
+#define KType_NativeFunction (KType_int)
 
-	assert(CT_Float != NULL && "please import konoha.float PACKAGE first");
+	assert(KClass_Float != NULL && "please import konoha.float PACKAGE first");
 	intptr_t methoddata[] = {
-		_Public|_Static, _F(Type_getVoidTy), TY_Type, TY_Type, MN_("getVoidTy"), 0,
-		_Public|_Static, _F(Type_getLabelTy), TY_Type, TY_Type, MN_("getLabelTy"), 0,
-		_Public|_Static, _F(Type_getFloatTy), TY_Type, TY_Type, MN_("getFloatTy"), 0,
-		_Public|_Static, _F(Type_getDoubleTy), TY_Type, TY_Type, MN_("getDoubleTy"), 0,
-		_Public|_Static, _F(Type_getMetadataTy), TY_Type, TY_Type, MN_("getMetadataTy"), 0,
-		_Public|_Static, _F(Type_getX86FP80Ty), TY_Type, TY_Type, MN_("getX86_FP80Ty"), 0,
-		_Public|_Static, _F(Type_getFP128Ty), TY_Type, TY_Type, MN_("getFP128Ty"), 0,
-		_Public|_Static, _F(Type_getPPCFP128Ty), TY_Type, TY_Type, MN_("getPPC_FP128Ty"), 0,
-		_Public|_Static, _F(Type_getX86MMXTy), TY_Type, TY_Type, MN_("getX86_MMXTy"), 0,
-		_Public|_Static, _F(Type_getInt1Ty), TY_Type, TY_Type, MN_("getInt1Ty"), 0,
-		_Public|_Static, _F(Type_getInt8Ty), TY_Type, TY_Type, MN_("getInt8Ty"), 0,
-		_Public|_Static, _F(Type_getInt16Ty), TY_Type, TY_Type, MN_("getInt16Ty"), 0,
-		_Public|_Static, _F(Type_getInt32Ty), TY_Type, TY_Type, MN_("getInt32Ty"), 0,
-		_Public|_Static, _F(Type_getInt64Ty), TY_Type, TY_Type, MN_("getInt64Ty"), 0,
-		_Public|_Static, _F(PointerType_get), TY_Type/*TODO*/, TY_PointerType, MN_("get"), 1, TY_Type, FN_("type"),
-		_Public|_Static, _F(Type_getFloatPtrTy),    TY_Type, TY_Type, MN_("getFloatPtrTy"), 0,
-		_Public|_Static, _F(Type_getDoublePtrTy),   TY_Type, TY_Type, MN_("getDoublePtrTy"), 0,
-		_Public|_Static, _F(Type_getX86FP80PtrTy),  TY_Type, TY_Type, MN_("getX86_FP80PtrTy"), 0,
-		_Public|_Static, _F(Type_getFP128PtrTy),    TY_Type, TY_Type, MN_("getFP128PtrTy"), 0,
-		_Public|_Static, _F(Type_getPPCFP128PtrTy), TY_Type, TY_Type, MN_("getPPC_FP128PtrTy"), 0,
-		_Public|_Static, _F(Type_getX86MMXPtrTy),   TY_Type, TY_Type, MN_("getX86_MMXPtrTy"), 0,
-		_Public|_Static, _F(Type_getInt1PtrTy),  TY_Type, TY_Type, MN_("getInt1PtrTy"), 0,
-		_Public|_Static, _F(Type_getInt8PtrTy),  TY_Type, TY_Type, MN_("getInt8PtrTy"), 0,
-		_Public|_Static, _F(Type_getInt16PtrTy), TY_Type, TY_Type, MN_("getInt16PtrTy"), 0,
-		_Public|_Static, _F(Type_getInt32PtrTy), TY_Type, TY_Type, MN_("getInt32PtrTy"), 0,
-		_Public|_Static, _F(Type_getInt64PtrTy), TY_Type, TY_Type, MN_("getInt64PtrTy"), 0,
-		_Public, _F(IRBuilder_new), TY_IRBuilder, TY_IRBuilder, MN_("new"), 1, TY_BasicBlock, FN_("bb"),
-		_Public, _F(IRBuilder_createRetVoid), TY_Value, TY_IRBuilder, MN_("createRetVoid"), 0,
-		_Public, _F(IRBuilder_createRet),     TY_Value, TY_IRBuilder, MN_("createRet"), 1, TY_Value, FN_("v"),
-		_Public, _F(IRBuilder_createBr),      TY_Value, TY_IRBuilder, MN_("createBr"), 1, TY_BasicBlock, FN_("dest"),
-		_Public, _F(IRBuilder_createCondBr),  TY_Value, TY_IRBuilder, MN_("createCondBr"), 3, TY_Value, FN_("cond"),TY_BasicBlock, FN_("trueBB"),TY_BasicBlock, FN_("falseBB"),
-		_Public, _F(IRBuilder_createSwitch),  TY_Value, TY_IRBuilder, MN_("createSwitch"), 2, TY_Value, FN_("v"),TY_BasicBlock, FN_("dest"),
-		_Public, _F(IRBuilder_createIndirectBr), TY_Value, TY_IRBuilder, MN_("createIndirectBr"), 1, TY_Value, FN_("addr"),
-		_Public, _F(IRBuilder_createInvoke0), TY_Value, TY_IRBuilder, MN_("createInvoke0"), 3, TY_Value, FN_("callee"),TY_BasicBlock, FN_("normalDest"),TY_BasicBlock, FN_("unwindDest"),
-		_Public, _F(IRBuilder_createInvoke1), TY_Value, TY_IRBuilder, MN_("createInvoke1"), 4, TY_Value, FN_("callee"),TY_BasicBlock, FN_("normalDest"),TY_BasicBlock, FN_("unwindDest"),TY_Value, FN_("arg1"),
-		_Public, _F(IRBuilder_createInvoke3), TY_Value, TY_IRBuilder, MN_("createInvoke3"), 6, TY_Value, FN_("callee"),TY_BasicBlock, FN_("normalDest"),TY_BasicBlock, FN_("unwindDest"),TY_Value, FN_("arg1"),TY_Value, FN_("arg2"),TY_Value, FN_("arg3"),
-		_Public, _F(IRBuilder_createUnreachable), TY_Value, TY_IRBuilder, MN_("createUnreachable"), 0,
-		_Public, _F(IRBuilder_createAdd),    TY_Value, TY_IRBuilder, MN_("createAdd"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createNSWAdd), TY_Value, TY_IRBuilder, MN_("createNSWAdd"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createNUWAdd), TY_Value, TY_IRBuilder, MN_("createNUWAdd"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFAdd),   TY_Value, TY_IRBuilder, MN_("createFAdd"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createSub),    TY_Value, TY_IRBuilder, MN_("createSub"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createNSWSub), TY_Value, TY_IRBuilder, MN_("createNSWSub"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createNUWSub), TY_Value, TY_IRBuilder, MN_("createNUWSub"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFSub),   TY_Value, TY_IRBuilder, MN_("createFSub"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createMul),    TY_Value, TY_IRBuilder, MN_("createMul"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createNSWMul), TY_Value, TY_IRBuilder, MN_("createNSWMul"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createNUWMul), TY_Value, TY_IRBuilder, MN_("createNUWMul"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFMul),   TY_Value, TY_IRBuilder, MN_("createFMul"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createUDiv),   TY_Value, TY_IRBuilder, MN_("createUDiv"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createExactUDiv), TY_Value, TY_IRBuilder, MN_("createExactUDiv"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createSDiv),      TY_Value, TY_IRBuilder, MN_("createSDiv"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createExactSDiv), TY_Value, TY_IRBuilder, MN_("createExactSDiv"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFDiv),   TY_Value, TY_IRBuilder, MN_("createFDiv"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createURem),   TY_Value, TY_IRBuilder, MN_("createURem"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createSRem),   TY_Value, TY_IRBuilder, MN_("createSRem"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFRem),   TY_Value, TY_IRBuilder, MN_("createFRem"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createShl),    TY_Value, TY_IRBuilder, MN_("createShl"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createLShr),   TY_Value, TY_IRBuilder, MN_("createLShr"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createAShr),   TY_Value, TY_IRBuilder, MN_("createAShr"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createAnd),    TY_Value, TY_IRBuilder, MN_("createAnd"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createOr),     TY_Value, TY_IRBuilder, MN_("createOr"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createXor),    TY_Value, TY_IRBuilder, MN_("createXor"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createNeg),    TY_Value, TY_IRBuilder, MN_("createNeg"), 1, TY_Value, FN_("v"),
-		_Public, _F(IRBuilder_createNSWNeg), TY_Value, TY_IRBuilder, MN_("createNSWNeg"), 1, TY_Value, FN_("v"),
-		_Public, _F(IRBuilder_createNUWNeg), TY_Value, TY_IRBuilder, MN_("createNUWNeg"), 1, TY_Value, FN_("v"),
-		_Public, _F(IRBuilder_createFNeg),   TY_Value, TY_IRBuilder, MN_("createFNeg"), 1, TY_Value, FN_("v"),
-		_Public, _F(IRBuilder_createNot),    TY_Value, TY_IRBuilder, MN_("createNot"), 1, TY_Value, FN_("v"),
-		_Public, _F(IRBuilder_createAlloca), TY_Value, TY_IRBuilder, MN_("createAlloca"), 2, TY_Type, FN_("ty"),TY_Value, FN_("arraySize"),
-		_Public, _F(AllocaInst_new), TY_AllocaInst, TY_AllocaInst, MN_("new"), 2, TY_Type, FN_("ty"),TY_Value, FN_("arraySize"),
-		_Public, _F(IRBuilder_createLoad), TY_Value, TY_IRBuilder, MN_("createLoad"), 2, TY_Value, FN_("ptr"),TY_boolean, FN_("isVolatile"),
-		_Public, _F(LoadInst_new), TY_LoadInst, TY_LoadInst, MN_("new"), 1, TY_Value, FN_("ptr"),
-		_Public, _F(IRBuilder_createStore), TY_Value, TY_IRBuilder, MN_("createStore"), 3, TY_Value, FN_("val"),TY_Value, FN_("ptr"),TY_boolean, FN_("isVolatile"),
-		_Public, _F(StoreInst_new), TY_StoreInst, TY_StoreInst, MN_("new"), 2, TY_Value, FN_("val"),TY_Value, FN_("ptr"),
-		_Public|_Static, _F(GetElementPtrInst_create), TY_GetElementPtrInst, TY_GetElementPtrInst, MN_("create"), 2, TY_Value, FN_("ptr"),TY_Array_Value, FN_("idxList"),
-		_Public|_Static, _F(GetElementPtrInst_createInBounds), TY_GetElementPtrInst, TY_GetElementPtrInst, MN_("createInBounds"), 2, TY_Value, FN_("ptr"),TY_Array_Value, FN_("idxList"),
-		_Public, _F(IRBuilder_createGEP), TY_Value, TY_IRBuilder, MN_("createGEP"), 2, TY_Value, FN_("ptr"),TY_Array_Value, FN_("idxList"),
-		_Public, _F(IRBuilder_createInBoundsGEP), TY_Value, TY_IRBuilder, MN_("createInBoundsGEP"), 2, TY_Value, FN_("ptr"),TY_Array_Value, FN_("idxList"),
-		_Public, _F(IRBuilder_createGEP1), TY_Value, TY_IRBuilder, MN_("createGEP1"), 2, TY_Value, FN_("ptr"),TY_Value, FN_("idx"),
-		_Public, _F(IRBuilder_createInBoundsGEP1), TY_Value, TY_IRBuilder, MN_("createInBoundsGEP1"), 2, TY_Value, FN_("ptr"),TY_Value, FN_("idx"),
-		_Public, _F(IRBuilder_createConstGEP132),  TY_Value, TY_IRBuilder, MN_("createConstGEP1_32"), 2, TY_Value, FN_("ptr"),TY_int, FN_("idx0"),
-		_Public, _F(IRBuilder_createConstGEP232),  TY_Value, TY_IRBuilder, MN_("createConstGEP2_32"), 3, TY_Value, FN_("ptr"),TY_int, FN_("idx0"),TY_int, FN_("idx1"),
-		_Public, _F(IRBuilder_createConstGEP164),  TY_Value, TY_IRBuilder, MN_("createConstGEP1_64"), 2, TY_Value, FN_("ptr"),TY_int, FN_("idx0"),
-		_Public, _F(IRBuilder_createConstGEP264),  TY_Value, TY_IRBuilder, MN_("createConstGEP2_64"), 3, TY_Value, FN_("ptr"),TY_int, FN_("idx0"),TY_int, FN_("idx1"),
-		_Public, _F(IRBuilder_createConstInBoundsGEP132), TY_Value, TY_IRBuilder, MN_("createConstInBoundsGEP1_32"), 2, TY_Value, FN_("ptr"),TY_int, FN_("idx0"),
-		_Public, _F(IRBuilder_createConstInBoundsGEP232), TY_Value, TY_IRBuilder, MN_("createConstInBoundsGEP2_32"), 3, TY_Value, FN_("ptr"),TY_int, FN_("idx0"),TY_int, FN_("idx1"),
-		_Public, _F(IRBuilder_createConstInBoundsGEP164), TY_Value, TY_IRBuilder, MN_("createConstInBoundsGEP1_64"), 2, TY_Value, FN_("ptr"),TY_int, FN_("idx0"),
-		_Public, _F(IRBuilder_createConstInBoundsGEP264), TY_Value, TY_IRBuilder, MN_("createConstInBoundsGEP2_64"), 3, TY_Value, FN_("ptr"),TY_int, FN_("idx0"),TY_int, FN_("idx1"),
-		_Public, _F(IRBuilder_createStructGEP), TY_Value, TY_IRBuilder, MN_("createStructGEP"), 2, TY_Value, FN_("ptr"),TY_int, FN_("idx"),
-		_Public, _F(IRBuilder_createGlobalString), TY_Value, TY_IRBuilder, MN_("createGlobalString"), 1, TY_String, FN_("str"),
-		_Public, _F(IRBuilder_createGlobalStringPtr), TY_Value, TY_IRBuilder, MN_("createGlobalStringPtr"), 1, TY_String, FN_("str"),
-		_Public, _F(IRBuilder_createTrunc),    TY_Value, TY_IRBuilder, MN_("createTrunc"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createZExt),     TY_Value, TY_IRBuilder, MN_("createZExt"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createSExt),     TY_Value, TY_IRBuilder, MN_("createSExt"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createFPToUI),   TY_Value, TY_IRBuilder, MN_("createFPToUI"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createFPToSI),   TY_Value, TY_IRBuilder, MN_("createFPToSI"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createUIToFP),   TY_Value, TY_IRBuilder, MN_("createUIToFP"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createSIToFP),   TY_Value, TY_IRBuilder, MN_("createSIToFP"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createFPTrunc),  TY_Value, TY_IRBuilder, MN_("createFPTrunc"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createFPExt),    TY_Value, TY_IRBuilder, MN_("createFPExt"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createPtrToInt), TY_Value, TY_IRBuilder, MN_("createPtrToInt"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createIntToPtr), TY_Value, TY_IRBuilder, MN_("createIntToPtr"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createBitCast),  TY_Value, TY_IRBuilder, MN_("createBitCast"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createZExtOrBitCast),  TY_Value, TY_IRBuilder, MN_("createZExtOrBitCast"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createSExtOrBitCast),  TY_Value, TY_IRBuilder, MN_("createSExtOrBitCast"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createTruncOrBitCast), TY_Value, TY_IRBuilder, MN_("createTruncOrBitCast"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createPointerCast),    TY_Value, TY_IRBuilder, MN_("createPointerCast"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createIntCast), TY_Value, TY_IRBuilder, MN_("createIntCast"), 3, TY_Value, FN_("v"),TY_Type, FN_("destTy"),TY_boolean, FN_("isSigned"),
-		_Public, _F(IRBuilder_createFPCast),  TY_Value, TY_IRBuilder, MN_("createFPCast"), 2, TY_Value, FN_("v"),TY_Type, FN_("destTy"),
-		_Public, _F(IRBuilder_createICmpEQ),  TY_Value, TY_IRBuilder, MN_("createICmpEQ"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createICmpNE),  TY_Value, TY_IRBuilder, MN_("createICmpNE"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createICmpUGT), TY_Value, TY_IRBuilder, MN_("createICmpUGT"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createICmpUGE), TY_Value, TY_IRBuilder, MN_("createICmpUGE"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createICmpULT), TY_Value, TY_IRBuilder, MN_("createICmpULT"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createICmpULE), TY_Value, TY_IRBuilder, MN_("createICmpULE"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createICmpSGT), TY_Value, TY_IRBuilder, MN_("createICmpSGT"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createICmpSGE), TY_Value, TY_IRBuilder, MN_("createICmpSGE"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createICmpSLT), TY_Value, TY_IRBuilder, MN_("createICmpSLT"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createICmpSLE), TY_Value, TY_IRBuilder, MN_("createICmpSLE"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFCmpOEQ), TY_Value, TY_IRBuilder, MN_("createFCmpOEQ"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFCmpOGT), TY_Value, TY_IRBuilder, MN_("createFCmpOGT"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFCmpOGE), TY_Value, TY_IRBuilder, MN_("createFCmpOGE"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFCmpOLT), TY_Value, TY_IRBuilder, MN_("createFCmpOLT"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFCmpOLE), TY_Value, TY_IRBuilder, MN_("createFCmpOLE"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFCmpONE), TY_Value, TY_IRBuilder, MN_("createFCmpONE"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFCmpORD), TY_Value, TY_IRBuilder, MN_("createFCmpORD"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFCmpUNO), TY_Value, TY_IRBuilder, MN_("createFCmpUNO"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFCmpUEQ), TY_Value, TY_IRBuilder, MN_("createFCmpUEQ"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFCmpUGT), TY_Value, TY_IRBuilder, MN_("createFCmpUGT"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFCmpUGE), TY_Value, TY_IRBuilder, MN_("createFCmpUGE"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFCmpULT), TY_Value, TY_IRBuilder, MN_("createFCmpULT"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFCmpULE), TY_Value, TY_IRBuilder, MN_("createFCmpULE"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createFCmpUNE), TY_Value, TY_IRBuilder, MN_("createFCmpUNE"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_createPHI),   TY_PHINode, TY_IRBuilder, MN_("createPHI"), 2, TY_Type, FN_("ty"),TY_int, FN_("numReservedValues"),
-		_Public, _F(PHINode_addIncoming),   TY_void, TY_PHINode, MN_("addIncoming"), 2, TY_Value, FN_("v"),TY_BasicBlock, FN_("bb"),
-		_Public, _F(IRBuilder_createCall1), TY_Value, TY_IRBuilder, MN_("createCall1"), 2, TY_Value, FN_("callee"),TY_Value, FN_("arg"),
-		_Public, _F(IRBuilder_createCall2), TY_Value, TY_IRBuilder, MN_("createCall2"), 3, TY_Value, FN_("callee"),TY_Value, FN_("arg1"),TY_Value, FN_("arg2"),
-		_Public, _F(IRBuilder_createCall3), TY_Value, TY_IRBuilder, MN_("createCall3"), 4, TY_Value, FN_("callee"),TY_Value, FN_("arg1"),TY_Value, FN_("arg2"),TY_Value, FN_("arg3"),
-		_Public, _F(IRBuilder_createCall4), TY_Value, TY_IRBuilder, MN_("createCall4"), 5, TY_Value, FN_("callee"),TY_Value, FN_("arg1"),TY_Value, FN_("arg2"),TY_Value, FN_("arg3"),TY_Value, FN_("arg4"),
-		_Public, _F(IRBuilder_createCall5), TY_Value, TY_IRBuilder, MN_("createCall5"), 6, TY_Value, FN_("callee"),TY_Value, FN_("arg1"),TY_Value, FN_("arg2"),TY_Value, FN_("arg3"),TY_Value, FN_("arg4"),TY_Value, FN_("arg5"),
-		_Public, _F(IRBuilder_createCall),  TY_Value, TY_IRBuilder, MN_("createCall"), 2, TY_Value, FN_("callee"),TY_Array_Value, FN_("args"),
-		_Public, _F(IRBuilder_createSelect), TY_Value, TY_IRBuilder, MN_("createSelect"), 3, TY_Value, FN_("c"),TY_Value, FN_("trueV"),TY_Value, FN_("falseV"),
-		_Public, _F(IRBuilder_createVAArg),  TY_Value, TY_IRBuilder, MN_("createVAArg"), 2, TY_Value, FN_("list"),TY_Type, FN_("ty"),
-		_Public, _F(IRBuilder_createExtractElement), TY_Value, TY_IRBuilder, MN_("createExtractElement"), 2, TY_Value, FN_("vec"),TY_Value, FN_("idx"),
-		_Public, _F(IRBuilder_createInsertElement),  TY_Value, TY_IRBuilder, MN_("createInsertElement"), 3, TY_Value, FN_("vec"),TY_Value, FN_("newElt"),TY_Value, FN_("idx"),
-		_Public, _F(IRBuilder_createShuffleVector),  TY_Value, TY_IRBuilder, MN_("createShuffleVector"), 3, TY_Value, FN_("v1"),TY_Value, FN_("v2"),TY_Value, FN_("mask"),
-		_Public, _F(IRBuilder_createIsNull),    TY_Value, TY_IRBuilder, MN_("createIsNull"), 1, TY_Value, FN_("arg"),
-		_Public, _F(IRBuilder_createIsNotNull), TY_Value, TY_IRBuilder, MN_("createIsNotNull"), 1, TY_Value, FN_("arg"),
-		_Public, _F(IRBuilder_createPtrDiff),   TY_Value, TY_IRBuilder, MN_("createPtrDiff"), 2, TY_Value, FN_("lhs"),TY_Value, FN_("rhs"),
-		_Public, _F(IRBuilder_setInsertPoint),  TY_Value, TY_IRBuilder, MN_("setInsertPoint"), 1, TY_BasicBlock, FN_("bb"),
-		_Public, _F(IRBuilder_getInsertBlock),  TY_BasicBlock, TY_IRBuilder, MN_("getInsertBlock"), 0,
-		_Public, _F(BasicBlock_getParent), TY_Function, TY_BasicBlock, MN_("getParent"), 0,
-		_Public, _F(BasicBlock_insertBefore), TY_void, TY_BasicBlock, MN_("insertBefore"), 2, TY_Instruction, FN_("before"),TY_Instruction, FN_("inst"),
-		_Public, _F(BasicBlock_getLastInst),  TY_Value/*TODO*/, TY_BasicBlock, MN_("getLastInst"), 0,
-		_Public, _F(BasicBlock_getTerminator), TY_Value/*TODO*/, TY_BasicBlock, MN_("getTerminator"), 0,
-		_Public, _F(Instruction_setMetadata), TY_void, TY_Instruction, MN_("setMetadata"), 3, TY_Module, FN_("m"),TY_String, FN_("name"),TY_int, FN_("value"),
-		_Public, _F(Function_dump), TY_void, TY_Function, MN_("dump"), 0,
-		_Public, _F(Value_dump), TY_void, TY_Value, MN_("dump"), 0,
-		_Public, _F(Type_dump), TY_void, TY_Type, MN_("dump"), 0,
-		_Public, _F(BasicBlock_dump), TY_void, TY_BasicBlock, MN_("dump"), 0,
-		_Public|_Static, _F(Function_create), TY_Function, TY_Function, MN_("create"), 4, TY_String, FN_("name"),TY_FunctionType, FN_("fnTy"),TY_Module, FN_("m"),TY_int, FN_("linkage"),
-		_Public, _F(Function_addFnAttr), TY_void, TY_Function, MN_("addFnAttr"), 1, TY_int, FN_("attributes"),
-		_Public, _F(BasicBlock_size), TY_int, TY_BasicBlock, MN_("size"), 0,
-		_Public, _F(BasicBlock_empty), TY_boolean, TY_BasicBlock, MN_("empty"), 0,
-		_Public, _F(Module_new), TY_Module, TY_Module, MN_("new"), 1, TY_String, FN_("name"),
-		_Public, _F(Module_getTypeByName), TY_Type, TY_Module, MN_("getTypeByName"), 1, TY_String, FN_("name"),
-		_Public, _F(Module_dump), TY_void, TY_Module, MN_("dump"), 0,
-		_Public, _F(Module_getOrInsertFunction), TY_Function, TY_Module, MN_("getOrInsertFunction"), 2, TY_String, FN_("name"),TY_FunctionType, FN_("fnTy"),
-		_Public, _F(Module_createExecutionEngine), TY_ExecutionEngine, TY_Module, MN_("createExecutionEngine"), 1, TY_int, FN_("optLevel"),
-		_Public|_Static, _F(BasicBlock_create), TY_BasicBlock, TY_BasicBlock, MN_("create"), 2, TY_Function, FN_("parent"),TY_String, FN_("name"),
-		_Public|_Static, _F(FunctionType_get), TY_FunctionType, TY_FunctionType, MN_("get"), 3, TY_Type, FN_("retTy"),TY_Array_Type, FN_("args"),TY_boolean, FN_("b"),
-		_Public|_Static, _F(ArrayType_get),    TY_Type, TY_ArrayType, MN_("get"), 2, TY_Type, FN_("t"),TY_int, FN_("elemSize"),
-		_Public|_Static, _F(StructType_get),   TY_Type, TY_StructType, MN_("get"), 2, TY_Array_Type, FN_("args"),TY_boolean, FN_("isPacked"),
-		_Public|_Static, _F(StructType_create), TY_Type, TY_StructType, MN_("create"), 3, TY_Array_Type, FN_("args"),TY_String, FN_("name"),TY_boolean, FN_("isPacked"),
-		_Public, _F(StructType_setBody), TY_void, TY_StructType, MN_("setBody"), 2, TY_Array_Type, FN_("args"),TY_boolean, FN_("isPacked"),
-		_Public, _F(StructType_isOpaque), TY_boolean, TY_StructType, MN_("isOpaque"), 0,
-		_Public, _F(ExecutionEngine_getPointerToFunction), TY_NativeFunction, TY_ExecutionEngine, MN_("getPointerToFunction"), 1, TY_Function, FN_("func"),
-		_Public, _F(ExecutionEngine_addGlobalMapping), TY_void, TY_ExecutionEngine, MN_("addGlobalMapping"), 2, TY_GlobalVariable, FN_("g"),TY_int, FN_("addr"),
-		_Public, _F(GlobalVariable_new), TY_Value, TY_GlobalVariable, MN_("new"), 5, TY_Module, FN_("m"),TY_Type, FN_("ty"),TY_Constant, FN_("c"),TY_int, FN_("linkage"),TY_String, FN_("name"),
+		_Public|_Static, _F(Type_getVoidTy), KType_Type, KType_Type, MN_("getVoidTy"), 0,
+		_Public|_Static, _F(Type_getLabelTy), KType_Type, KType_Type, MN_("getLabelTy"), 0,
+		_Public|_Static, _F(Type_getFloatTy), KType_Type, KType_Type, MN_("getFloatTy"), 0,
+		_Public|_Static, _F(Type_getDoubleTy), KType_Type, KType_Type, MN_("getDoubleTy"), 0,
+		_Public|_Static, _F(Type_getMetadataTy), KType_Type, KType_Type, MN_("getMetadataTy"), 0,
+		_Public|_Static, _F(Type_getX86FP80Ty), KType_Type, KType_Type, MN_("getX86_FP80Ty"), 0,
+		_Public|_Static, _F(Type_getFP128Ty), KType_Type, KType_Type, MN_("getFP128Ty"), 0,
+		_Public|_Static, _F(Type_getPPCFP128Ty), KType_Type, KType_Type, MN_("getPPC_FP128Ty"), 0,
+		_Public|_Static, _F(Type_getX86MMXTy), KType_Type, KType_Type, MN_("getX86_MMXTy"), 0,
+		_Public|_Static, _F(Type_getInt1Ty), KType_Type, KType_Type, MN_("getInt1Ty"), 0,
+		_Public|_Static, _F(Type_getInt8Ty), KType_Type, KType_Type, MN_("getInt8Ty"), 0,
+		_Public|_Static, _F(Type_getInt16Ty), KType_Type, KType_Type, MN_("getInt16Ty"), 0,
+		_Public|_Static, _F(Type_getInt32Ty), KType_Type, KType_Type, MN_("getInt32Ty"), 0,
+		_Public|_Static, _F(Type_getInt64Ty), KType_Type, KType_Type, MN_("getInt64Ty"), 0,
+		_Public|_Static, _F(PointerType_get), KType_Type/*TODO*/, KType_PointerType, MN_("get"), 1, KType_Type, FN_("type"),
+		_Public|_Static, _F(Type_getFloatPtrTy),    KType_Type, KType_Type, MN_("getFloatPtrTy"), 0,
+		_Public|_Static, _F(Type_getDoublePtrTy),   KType_Type, KType_Type, MN_("getDoublePtrTy"), 0,
+		_Public|_Static, _F(Type_getX86FP80PtrTy),  KType_Type, KType_Type, MN_("getX86_FP80PtrTy"), 0,
+		_Public|_Static, _F(Type_getFP128PtrTy),    KType_Type, KType_Type, MN_("getFP128PtrTy"), 0,
+		_Public|_Static, _F(Type_getPPCFP128PtrTy), KType_Type, KType_Type, MN_("getPPC_FP128PtrTy"), 0,
+		_Public|_Static, _F(Type_getX86MMXPtrTy),   KType_Type, KType_Type, MN_("getX86_MMXPtrTy"), 0,
+		_Public|_Static, _F(Type_getInt1PtrTy),  KType_Type, KType_Type, MN_("getInt1PtrTy"), 0,
+		_Public|_Static, _F(Type_getInt8PtrTy),  KType_Type, KType_Type, MN_("getInt8PtrTy"), 0,
+		_Public|_Static, _F(Type_getInt16PtrTy), KType_Type, KType_Type, MN_("getInt16PtrTy"), 0,
+		_Public|_Static, _F(Type_getInt32PtrTy), KType_Type, KType_Type, MN_("getInt32PtrTy"), 0,
+		_Public|_Static, _F(Type_getInt64PtrTy), KType_Type, KType_Type, MN_("getInt64PtrTy"), 0,
+		_Public, _F(IRBuilder_new), KType_IRBuilder, KType_IRBuilder, MN_("new"), 1, KType_BasicBlock, FN_("bb"),
+		_Public, _F(IRBuilder_createRetVoid), KType_Value, KType_IRBuilder, MN_("createRetVoid"), 0,
+		_Public, _F(IRBuilder_createRet),     KType_Value, KType_IRBuilder, MN_("createRet"), 1, KType_Value, FN_("v"),
+		_Public, _F(IRBuilder_createBr),      KType_Value, KType_IRBuilder, MN_("createBr"), 1, KType_BasicBlock, FN_("dest"),
+		_Public, _F(IRBuilder_createCondBr),  KType_Value, KType_IRBuilder, MN_("createCondBr"), 3, KType_Value, FN_("cond"),KType_BasicBlock, FN_("trueBB"),KType_BasicBlock, FN_("falseBB"),
+		_Public, _F(IRBuilder_createSwitch),  KType_Value, KType_IRBuilder, MN_("createSwitch"), 2, KType_Value, FN_("v"),KType_BasicBlock, FN_("dest"),
+		_Public, _F(IRBuilder_createIndirectBr), KType_Value, KType_IRBuilder, MN_("createIndirectBr"), 1, KType_Value, FN_("addr"),
+		_Public, _F(IRBuilder_createInvoke0), KType_Value, KType_IRBuilder, MN_("createInvoke0"), 3, KType_Value, FN_("callee"),KType_BasicBlock, FN_("normalDest"),KType_BasicBlock, FN_("unwindDest"),
+		_Public, _F(IRBuilder_createInvoke1), KType_Value, KType_IRBuilder, MN_("createInvoke1"), 4, KType_Value, FN_("callee"),KType_BasicBlock, FN_("normalDest"),KType_BasicBlock, FN_("unwindDest"),KType_Value, FN_("arg1"),
+		_Public, _F(IRBuilder_createInvoke3), KType_Value, KType_IRBuilder, MN_("createInvoke3"), 6, KType_Value, FN_("callee"),KType_BasicBlock, FN_("normalDest"),KType_BasicBlock, FN_("unwindDest"),KType_Value, FN_("arg1"),KType_Value, FN_("arg2"),KType_Value, FN_("arg3"),
+		_Public, _F(IRBuilder_createUnreachable), KType_Value, KType_IRBuilder, MN_("createUnreachable"), 0,
+		_Public, _F(IRBuilder_createAdd),    KType_Value, KType_IRBuilder, MN_("createAdd"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createNSWAdd), KType_Value, KType_IRBuilder, MN_("createNSWAdd"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createNUWAdd), KType_Value, KType_IRBuilder, MN_("createNUWAdd"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFAdd),   KType_Value, KType_IRBuilder, MN_("createFAdd"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createSub),    KType_Value, KType_IRBuilder, MN_("createSub"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createNSWSub), KType_Value, KType_IRBuilder, MN_("createNSWSub"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createNUWSub), KType_Value, KType_IRBuilder, MN_("createNUWSub"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFSub),   KType_Value, KType_IRBuilder, MN_("createFSub"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createMul),    KType_Value, KType_IRBuilder, MN_("createMul"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createNSWMul), KType_Value, KType_IRBuilder, MN_("createNSWMul"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createNUWMul), KType_Value, KType_IRBuilder, MN_("createNUWMul"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFMul),   KType_Value, KType_IRBuilder, MN_("createFMul"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createUDiv),   KType_Value, KType_IRBuilder, MN_("createUDiv"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createExactUDiv), KType_Value, KType_IRBuilder, MN_("createExactUDiv"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createSDiv),      KType_Value, KType_IRBuilder, MN_("createSDiv"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createExactSDiv), KType_Value, KType_IRBuilder, MN_("createExactSDiv"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFDiv),   KType_Value, KType_IRBuilder, MN_("createFDiv"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createURem),   KType_Value, KType_IRBuilder, MN_("createURem"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createSRem),   KType_Value, KType_IRBuilder, MN_("createSRem"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFRem),   KType_Value, KType_IRBuilder, MN_("createFRem"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createShl),    KType_Value, KType_IRBuilder, MN_("createShl"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createLShr),   KType_Value, KType_IRBuilder, MN_("createLShr"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createAShr),   KType_Value, KType_IRBuilder, MN_("createAShr"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createAnd),    KType_Value, KType_IRBuilder, MN_("createAnd"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createOr),     KType_Value, KType_IRBuilder, MN_("createOr"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createXor),    KType_Value, KType_IRBuilder, MN_("createXor"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createNeg),    KType_Value, KType_IRBuilder, MN_("createNeg"), 1, KType_Value, FN_("v"),
+		_Public, _F(IRBuilder_createNSWNeg), KType_Value, KType_IRBuilder, MN_("createNSWNeg"), 1, KType_Value, FN_("v"),
+		_Public, _F(IRBuilder_createNUWNeg), KType_Value, KType_IRBuilder, MN_("createNUWNeg"), 1, KType_Value, FN_("v"),
+		_Public, _F(IRBuilder_createFNeg),   KType_Value, KType_IRBuilder, MN_("createFNeg"), 1, KType_Value, FN_("v"),
+		_Public, _F(IRBuilder_createNot),    KType_Value, KType_IRBuilder, MN_("createNot"), 1, KType_Value, FN_("v"),
+		_Public, _F(IRBuilder_createAlloca), KType_Value, KType_IRBuilder, MN_("createAlloca"), 2, KType_Type, FN_("ty"),KType_Value, FN_("arraySize"),
+		_Public, _F(AllocaInst_new), KType_AllocaInst, KType_AllocaInst, MN_("new"), 2, KType_Type, FN_("ty"),KType_Value, FN_("arraySize"),
+		_Public, _F(IRBuilder_createLoad), KType_Value, KType_IRBuilder, MN_("createLoad"), 2, KType_Value, FN_("ptr"),KType_boolean, FN_("isVolatile"),
+		_Public, _F(LoadInst_new), KType_LoadInst, KType_LoadInst, MN_("new"), 1, KType_Value, FN_("ptr"),
+		_Public, _F(IRBuilder_createStore), KType_Value, KType_IRBuilder, MN_("createStore"), 3, KType_Value, FN_("val"),KType_Value, FN_("ptr"),KType_boolean, FN_("isVolatile"),
+		_Public, _F(StoreInst_new), KType_StoreInst, KType_StoreInst, MN_("new"), 2, KType_Value, FN_("val"),KType_Value, FN_("ptr"),
+		_Public|_Static, _F(GetElementPtrInst_create), KType_GetElementPtrInst, KType_GetElementPtrInst, MN_("create"), 2, KType_Value, FN_("ptr"),KType_Array_Value, FN_("idxList"),
+		_Public|_Static, _F(GetElementPtrInst_createInBounds), KType_GetElementPtrInst, KType_GetElementPtrInst, MN_("createInBounds"), 2, KType_Value, FN_("ptr"),KType_Array_Value, FN_("idxList"),
+		_Public, _F(IRBuilder_createGEP), KType_Value, KType_IRBuilder, MN_("createGEP"), 2, KType_Value, FN_("ptr"),KType_Array_Value, FN_("idxList"),
+		_Public, _F(IRBuilder_createInBoundsGEP), KType_Value, KType_IRBuilder, MN_("createInBoundsGEP"), 2, KType_Value, FN_("ptr"),KType_Array_Value, FN_("idxList"),
+		_Public, _F(IRBuilder_createGEP1), KType_Value, KType_IRBuilder, MN_("createGEP1"), 2, KType_Value, FN_("ptr"),KType_Value, FN_("idx"),
+		_Public, _F(IRBuilder_createInBoundsGEP1), KType_Value, KType_IRBuilder, MN_("createInBoundsGEP1"), 2, KType_Value, FN_("ptr"),KType_Value, FN_("idx"),
+		_Public, _F(IRBuilder_createConstGEP132),  KType_Value, KType_IRBuilder, MN_("createConstGEP1_32"), 2, KType_Value, FN_("ptr"),KType_int, FN_("idx0"),
+		_Public, _F(IRBuilder_createConstGEP232),  KType_Value, KType_IRBuilder, MN_("createConstGEP2_32"), 3, KType_Value, FN_("ptr"),KType_int, FN_("idx0"),KType_int, FN_("idx1"),
+		_Public, _F(IRBuilder_createConstGEP164),  KType_Value, KType_IRBuilder, MN_("createConstGEP1_64"), 2, KType_Value, FN_("ptr"),KType_int, FN_("idx0"),
+		_Public, _F(IRBuilder_createConstGEP264),  KType_Value, KType_IRBuilder, MN_("createConstGEP2_64"), 3, KType_Value, FN_("ptr"),KType_int, FN_("idx0"),KType_int, FN_("idx1"),
+		_Public, _F(IRBuilder_createConstInBoundsGEP132), KType_Value, KType_IRBuilder, MN_("createConstInBoundsGEP1_32"), 2, KType_Value, FN_("ptr"),KType_int, FN_("idx0"),
+		_Public, _F(IRBuilder_createConstInBoundsGEP232), KType_Value, KType_IRBuilder, MN_("createConstInBoundsGEP2_32"), 3, KType_Value, FN_("ptr"),KType_int, FN_("idx0"),KType_int, FN_("idx1"),
+		_Public, _F(IRBuilder_createConstInBoundsGEP164), KType_Value, KType_IRBuilder, MN_("createConstInBoundsGEP1_64"), 2, KType_Value, FN_("ptr"),KType_int, FN_("idx0"),
+		_Public, _F(IRBuilder_createConstInBoundsGEP264), KType_Value, KType_IRBuilder, MN_("createConstInBoundsGEP2_64"), 3, KType_Value, FN_("ptr"),KType_int, FN_("idx0"),KType_int, FN_("idx1"),
+		_Public, _F(IRBuilder_createStructGEP), KType_Value, KType_IRBuilder, MN_("createStructGEP"), 2, KType_Value, FN_("ptr"),KType_int, FN_("idx"),
+		_Public, _F(IRBuilder_createGlobalString), KType_Value, KType_IRBuilder, MN_("createGlobalString"), 1, KType_String, FN_("str"),
+		_Public, _F(IRBuilder_createGlobalStringPtr), KType_Value, KType_IRBuilder, MN_("createGlobalStringPtr"), 1, KType_String, FN_("str"),
+		_Public, _F(IRBuilder_createTrunc),    KType_Value, KType_IRBuilder, MN_("createTrunc"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createZExt),     KType_Value, KType_IRBuilder, MN_("createZExt"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createSExt),     KType_Value, KType_IRBuilder, MN_("createSExt"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createFPToUI),   KType_Value, KType_IRBuilder, MN_("createFPToUI"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createFPToSI),   KType_Value, KType_IRBuilder, MN_("createFPToSI"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createUIToFP),   KType_Value, KType_IRBuilder, MN_("createUIToFP"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createSIToFP),   KType_Value, KType_IRBuilder, MN_("createSIToFP"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createFPTrunc),  KType_Value, KType_IRBuilder, MN_("createFPTrunc"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createFPExt),    KType_Value, KType_IRBuilder, MN_("createFPExt"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createPtrToInt), KType_Value, KType_IRBuilder, MN_("createPtrToInt"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createIntToPtr), KType_Value, KType_IRBuilder, MN_("createIntToPtr"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createBitCast),  KType_Value, KType_IRBuilder, MN_("createBitCast"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createZExtOrBitCast),  KType_Value, KType_IRBuilder, MN_("createZExtOrBitCast"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createSExtOrBitCast),  KType_Value, KType_IRBuilder, MN_("createSExtOrBitCast"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createTruncOrBitCast), KType_Value, KType_IRBuilder, MN_("createTruncOrBitCast"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createPointerCast),    KType_Value, KType_IRBuilder, MN_("createPointerCast"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createIntCast), KType_Value, KType_IRBuilder, MN_("createIntCast"), 3, KType_Value, FN_("v"),KType_Type, FN_("destTy"),KType_boolean, FN_("isSigned"),
+		_Public, _F(IRBuilder_createFPCast),  KType_Value, KType_IRBuilder, MN_("createFPCast"), 2, KType_Value, FN_("v"),KType_Type, FN_("destTy"),
+		_Public, _F(IRBuilder_createICmpEQ),  KType_Value, KType_IRBuilder, MN_("createICmpEQ"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createICmpNE),  KType_Value, KType_IRBuilder, MN_("createICmpNE"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createICmpUGT), KType_Value, KType_IRBuilder, MN_("createICmpUGT"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createICmpUGE), KType_Value, KType_IRBuilder, MN_("createICmpUGE"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createICmpULT), KType_Value, KType_IRBuilder, MN_("createICmpULT"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createICmpULE), KType_Value, KType_IRBuilder, MN_("createICmpULE"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createICmpSGT), KType_Value, KType_IRBuilder, MN_("createICmpSGT"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createICmpSGE), KType_Value, KType_IRBuilder, MN_("createICmpSGE"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createICmpSLT), KType_Value, KType_IRBuilder, MN_("createICmpSLT"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createICmpSLE), KType_Value, KType_IRBuilder, MN_("createICmpSLE"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFCmpOEQ), KType_Value, KType_IRBuilder, MN_("createFCmpOEQ"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFCmpOGT), KType_Value, KType_IRBuilder, MN_("createFCmpOGT"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFCmpOGE), KType_Value, KType_IRBuilder, MN_("createFCmpOGE"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFCmpOLT), KType_Value, KType_IRBuilder, MN_("createFCmpOLT"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFCmpOLE), KType_Value, KType_IRBuilder, MN_("createFCmpOLE"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFCmpONE), KType_Value, KType_IRBuilder, MN_("createFCmpONE"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFCmpORD), KType_Value, KType_IRBuilder, MN_("createFCmpORD"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFCmpUNO), KType_Value, KType_IRBuilder, MN_("createFCmpUNO"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFCmpUEQ), KType_Value, KType_IRBuilder, MN_("createFCmpUEQ"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFCmpUGT), KType_Value, KType_IRBuilder, MN_("createFCmpUGT"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFCmpUGE), KType_Value, KType_IRBuilder, MN_("createFCmpUGE"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFCmpULT), KType_Value, KType_IRBuilder, MN_("createFCmpULT"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFCmpULE), KType_Value, KType_IRBuilder, MN_("createFCmpULE"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createFCmpUNE), KType_Value, KType_IRBuilder, MN_("createFCmpUNE"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_createPHI),   KType_PHINode, KType_IRBuilder, MN_("createPHI"), 2, KType_Type, FN_("ty"),KType_int, FN_("numReservedValues"),
+		_Public, _F(PHINode_addIncoming),   KType_void, KType_PHINode, MN_("addIncoming"), 2, KType_Value, FN_("v"),KType_BasicBlock, FN_("bb"),
+		_Public, _F(IRBuilder_createCall1), KType_Value, KType_IRBuilder, MN_("createCall1"), 2, KType_Value, FN_("callee"),KType_Value, FN_("arg"),
+		_Public, _F(IRBuilder_createCall2), KType_Value, KType_IRBuilder, MN_("createCall2"), 3, KType_Value, FN_("callee"),KType_Value, FN_("arg1"),KType_Value, FN_("arg2"),
+		_Public, _F(IRBuilder_createCall3), KType_Value, KType_IRBuilder, MN_("createCall3"), 4, KType_Value, FN_("callee"),KType_Value, FN_("arg1"),KType_Value, FN_("arg2"),KType_Value, FN_("arg3"),
+		_Public, _F(IRBuilder_createCall4), KType_Value, KType_IRBuilder, MN_("createCall4"), 5, KType_Value, FN_("callee"),KType_Value, FN_("arg1"),KType_Value, FN_("arg2"),KType_Value, FN_("arg3"),KType_Value, FN_("arg4"),
+		_Public, _F(IRBuilder_createCall5), KType_Value, KType_IRBuilder, MN_("createCall5"), 6, KType_Value, FN_("callee"),KType_Value, FN_("arg1"),KType_Value, FN_("arg2"),KType_Value, FN_("arg3"),KType_Value, FN_("arg4"),KType_Value, FN_("arg5"),
+		_Public, _F(IRBuilder_createCall),  KType_Value, KType_IRBuilder, MN_("createCall"), 2, KType_Value, FN_("callee"),KType_Array_Value, FN_("args"),
+		_Public, _F(IRBuilder_createSelect), KType_Value, KType_IRBuilder, MN_("createSelect"), 3, KType_Value, FN_("c"),KType_Value, FN_("trueV"),KType_Value, FN_("falseV"),
+		_Public, _F(IRBuilder_createVAArg),  KType_Value, KType_IRBuilder, MN_("createVAArg"), 2, KType_Value, FN_("list"),KType_Type, FN_("ty"),
+		_Public, _F(IRBuilder_createExtractElement), KType_Value, KType_IRBuilder, MN_("createExtractElement"), 2, KType_Value, FN_("vec"),KType_Value, FN_("idx"),
+		_Public, _F(IRBuilder_createInsertElement),  KType_Value, KType_IRBuilder, MN_("createInsertElement"), 3, KType_Value, FN_("vec"),KType_Value, FN_("newElt"),KType_Value, FN_("idx"),
+		_Public, _F(IRBuilder_createShuffleVector),  KType_Value, KType_IRBuilder, MN_("createShuffleVector"), 3, KType_Value, FN_("v1"),KType_Value, FN_("v2"),KType_Value, FN_("mask"),
+		_Public, _F(IRBuilder_createIsNull),    KType_Value, KType_IRBuilder, MN_("createIsNull"), 1, KType_Value, FN_("arg"),
+		_Public, _F(IRBuilder_createIsNotNull), KType_Value, KType_IRBuilder, MN_("createIsNotNull"), 1, KType_Value, FN_("arg"),
+		_Public, _F(IRBuilder_createPtrDiff),   KType_Value, KType_IRBuilder, MN_("createPtrDiff"), 2, KType_Value, FN_("lhs"),KType_Value, FN_("rhs"),
+		_Public, _F(IRBuilder_setInsertPoint),  KType_Value, KType_IRBuilder, MN_("setInsertPoint"), 1, KType_BasicBlock, FN_("bb"),
+		_Public, _F(IRBuilder_getInsertBlock),  KType_BasicBlock, KType_IRBuilder, MN_("getInsertBlock"), 0,
+		_Public, _F(BasicBlock_getParent), KType_Function, KType_BasicBlock, MN_("getParent"), 0,
+		_Public, _F(BasicBlock_insertBefore), KType_void, KType_BasicBlock, MN_("insertBefore"), 2, KType_Instruction, FN_("before"),KType_Instruction, FN_("inst"),
+		_Public, _F(BasicBlock_getLastInst),  KType_Value/*TODO*/, KType_BasicBlock, MN_("getLastInst"), 0,
+		_Public, _F(BasicBlock_getTerminator), KType_Value/*TODO*/, KType_BasicBlock, MN_("getTerminator"), 0,
+		_Public, _F(Instruction_setMetadata), KType_void, KType_Instruction, MN_("setMetadata"), 3, KType_Module, FN_("m"),KType_String, FN_("name"),KType_int, FN_("value"),
+		_Public, _F(Function_dump), KType_void, KType_Function, MN_("dump"), 0,
+		_Public, _F(Value_dump), KType_void, KType_Value, MN_("dump"), 0,
+		_Public, _F(Type_dump), KType_void, KType_Type, MN_("dump"), 0,
+		_Public, _F(BasicBlock_dump), KType_void, KType_BasicBlock, MN_("dump"), 0,
+		_Public|_Static, _F(Function_create), KType_Function, KType_Function, MN_("create"), 4, KType_String, FN_("name"),KType_FunctionType, FN_("fnTy"),KType_Module, FN_("m"),KType_int, FN_("linkage"),
+		_Public, _F(Function_addFnAttr), KType_void, KType_Function, MN_("addFnAttr"), 1, KType_int, FN_("attributes"),
+		_Public, _F(BasicBlock_size), KType_int, KType_BasicBlock, MN_("size"), 0,
+		_Public, _F(BasicBlock_empty), KType_boolean, KType_BasicBlock, MN_("empty"), 0,
+		_Public, _F(Module_new), KType_Module, KType_Module, MN_("new"), 1, KType_String, FN_("name"),
+		_Public, _F(Module_getTypeByName), KType_Type, KType_Module, MN_("getTypeByName"), 1, KType_String, FN_("name"),
+		_Public, _F(Module_dump), KType_void, KType_Module, MN_("dump"), 0,
+		_Public, _F(Module_getOrInsertFunction), KType_Function, KType_Module, MN_("getOrInsertFunction"), 2, KType_String, FN_("name"),KType_FunctionType, FN_("fnTy"),
+		_Public, _F(Module_createExecutionEngine), KType_ExecutionEngine, KType_Module, MN_("createExecutionEngine"), 1, KType_int, FN_("optLevel"),
+		_Public|_Static, _F(BasicBlock_create), KType_BasicBlock, KType_BasicBlock, MN_("create"), 2, KType_Function, FN_("parent"),KType_String, FN_("name"),
+		_Public|_Static, _F(FunctionType_get), KType_FunctionType, KType_FunctionType, MN_("get"), 3, KType_Type, FN_("retTy"),KType_Array_Type, FN_("args"),KType_boolean, FN_("b"),
+		_Public|_Static, _F(ArrayType_get),    KType_Type, KType_ArrayType, MN_("get"), 2, KType_Type, FN_("t"),KType_int, FN_("elemSize"),
+		_Public|_Static, _F(StructType_get),   KType_Type, KType_StructType, MN_("get"), 2, KType_Array_Type, FN_("args"),KType_boolean, FN_("isPacked"),
+		_Public|_Static, _F(StructType_create), KType_Type, KType_StructType, MN_("create"), 3, KType_Array_Type, FN_("args"),KType_String, FN_("name"),KType_boolean, FN_("isPacked"),
+		_Public, _F(StructType_setBody), KType_void, KType_StructType, MN_("setBody"), 2, KType_Array_Type, FN_("args"),KType_boolean, FN_("isPacked"),
+		_Public, _F(StructType_isOpaque), KType_boolean, KType_StructType, MN_("isOpaque"), 0,
+		_Public, _F(ExecutionEngine_getPointerToFunction), KType_NativeFunction, KType_ExecutionEngine, MN_("getPointerToFunction"), 1, KType_Function, FN_("func"),
+		_Public, _F(ExecutionEngine_addGlobalMapping), KType_void, KType_ExecutionEngine, MN_("addGlobalMapping"), 2, KType_GlobalVariable, FN_("g"),KType_int, FN_("addr"),
+		_Public, _F(GlobalVariable_new), KType_Value, KType_GlobalVariable, MN_("new"), 5, KType_Module, FN_("m"),KType_Type, FN_("ty"),KType_Constant, FN_("c"),KType_int, FN_("linkage"),KType_String, FN_("name"),
 #if LLVM_VERSION >= 300
-		_Public, _F(PassManagerBuilder_new), TY_PassManagerBuilder, TY_PassManagerBuilder, MN_("new"), 0,
-		_Public, _F(PassManagerBuilder_populateModulePassManager), TY_void, TY_PassManagerBuilder, MN_("populateModulePassManager"), 1, TY_PassManager, FN_("manager"),
+		_Public, _F(PassManagerBuilder_new), KType_PassManagerBuilder, KType_PassManagerBuilder, MN_("new"), 0,
+		_Public, _F(PassManagerBuilder_populateModulePassManager), KType_void, KType_PassManagerBuilder, MN_("populateModulePassManager"), 1, KType_PassManager, FN_("manager"),
 #endif
-		_Public, _F(PassManager_new), TY_PassManager, TY_PassManager, MN_("new"), 0,
-		_Public, _F(FunctionPassManager_new), TY_FunctionPassManager, TY_FunctionPassManager, MN_("new"), 1, TY_Module, FN_("m"),
-		_Public, _F(PassManager_run), TY_void, TY_PassManager, MN_("run"), 1, TY_Function, FN_("func"),
-		_Public, _F(PassManager_addPass), TY_void, TY_PassManager, MN_("addPass"), 1, TY_Pass, FN_("p"),
-		_Public, _F(PassManager_addImmutablePass), TY_void, TY_PassManager, MN_("addImmutablePass"), 1, TY_ImmutablePass, FN_("p"),
-		_Public, _F(PassManager_addFunctionPass), TY_void, TY_PassManager, MN_("addFunctionPass"), 1, TY_FunctionPass, FN_("p"),
-		_Public, _F(PassManager_addModulePass), TY_void, TY_PassManager, MN_("addModulePass"), 1, TY_ModulePass, FN_("p"),
-		_Public, _F(FunctionPassManager_add), TY_void, TY_FunctionPassManager, MN_("add"), 1, TY_Pass, FN_("p"),
-		_Public, _F(FunctionPassManager_run), TY_void, TY_FunctionPassManager, MN_("run"), 1, TY_Function, FN_("func"),
-		_Public, _F(FunctionPassManager_doInitialization), TY_void, TY_FunctionPassManager, MN_("doInitialization"), 0,
+		_Public, _F(PassManager_new), KType_PassManager, KType_PassManager, MN_("new"), 0,
+		_Public, _F(FunctionPassManager_new), KType_FunctionPassManager, KType_FunctionPassManager, MN_("new"), 1, KType_Module, FN_("m"),
+		_Public, _F(PassManager_run), KType_void, KType_PassManager, MN_("run"), 1, KType_Function, FN_("func"),
+		_Public, _F(PassManager_addPass), KType_void, KType_PassManager, MN_("addPass"), 1, KType_Pass, FN_("p"),
+		_Public, _F(PassManager_addImmutablePass), KType_void, KType_PassManager, MN_("addImmutablePass"), 1, KType_ImmutablePass, FN_("p"),
+		_Public, _F(PassManager_addFunctionPass), KType_void, KType_PassManager, MN_("addFunctionPass"), 1, KType_FunctionPass, FN_("p"),
+		_Public, _F(PassManager_addModulePass), KType_void, KType_PassManager, MN_("addModulePass"), 1, KType_ModulePass, FN_("p"),
+		_Public, _F(FunctionPassManager_add), KType_void, KType_FunctionPassManager, MN_("add"), 1, KType_Pass, FN_("p"),
+		_Public, _F(FunctionPassManager_run), KType_void, KType_FunctionPassManager, MN_("run"), 1, KType_Function, FN_("func"),
+		_Public, _F(FunctionPassManager_doInitialization), KType_void, KType_FunctionPassManager, MN_("doInitialization"), 0,
 #if LLVM_VERSION < 302
-		_Public, _F(ExecutionEngine_getTargetData), TY_String/*TODO*/, TY_ExecutionEngine, MN_("getTargetData"), 0,
+		_Public, _F(ExecutionEngine_getTargetData), KType_String/*TODO*/, KType_ExecutionEngine, MN_("getTargetData"), 0,
 #endif
-		_Public, _F(Argument_new), TY_Value/*TODO*/, TY_Argument, MN_("new"), 1, TY_Type, FN_("type"),
-		_Public, _F(Value_replaceAllUsesWith), TY_void, TY_Value, MN_("replaceAllUsesWith"), 1, TY_Value, FN_("v"),
-		_Public, _F(Value_setName), TY_void, TY_Value, MN_("setName"), 1, TY_String, FN_("name"),
-		_Public, _F(Value_getType), TY_Type, TY_Value, MN_("getType"), 0,
-		_Public, _F(Function_getArguments), TY_Array_Value, TY_Function, MN_("getArguments"), 0,
-		_Public, _F(Function_getReturnType), TY_Type, TY_Function, MN_("getReturnType"), 0,
-		_Public, _F(LoadInst_setAlignment),  TY_void, TY_LoadInst, MN_("setAlignment"), 1, TY_int, FN_("align"),
-		_Public, _F(StoreInst_setAlignment), TY_void, TY_StoreInst, MN_("setAlignment"), 1, TY_int, FN_("align"),
-		_Public, _F(kMethod_setFunction), TY_void, TY_Method, MN_("setFunction"), 1, TY_NativeFunction, FN_("nf"),
-		_Public|_Static, _F(ConstantInt_get),         TY_Constant, TY_ConstantInt, MN_("getValue"), 2, TY_Type, FN_("type"),TY_int, FN_("v"),
-		_Public|_Static, _F(ConstantFP_get),          TY_Constant, TY_ConstantFP, MN_("getValue"), 2, TY_Type, FN_("type"),TY_float, FN_("v"),
-		_Public|_Static, _F(ConstantFP_get),          TY_Constant, TY_ConstantFP, MN_("getValueFromBits"), 2, TY_Type, FN_("type"),TY_int, FN_("v"),
-		_Public|_Static, _F(ConstantPointerNull_get), TY_Constant, TY_ConstantPointerNull, MN_("getValue"), 1, TY_Type, FN_("type"),
-		_Public|_Static, _F(ConstantStruct_get),      TY_Constant, TY_ConstantStruct, MN_("getValue"), 2, TY_Type, FN_("type"),TY_Array_Constant, FN_("v"),
-		_Public|_Static, _F(DynamicLibrary_loadLibraryPermanently),   TY_boolean, TY_DynamicLibrary, MN_("loadLibraryPermanently"), 1, TY_String, FN_("libname"),
-		_Public|_Static, _F(DynamicLibrary_searchForAddressOfSymbol), TY_int, TY_DynamicLibrary, MN_("searchForAddressOfSymbol"), 1, TY_String, FN_("fname"),
-		_Public|_Static, _F(LLVM_createDomPrinterPass),     TY_Pass, TY_LLVM, MN_("createDomPrinterPass"), 0,
-		_Public|_Static, _F(LLVM_createDomOnlyPrinterPass), TY_Pass, TY_LLVM, MN_("createDomOnlyPrinterPass"), 0,
-		_Public|_Static, _F(LLVM_createDomViewerPass),      TY_Pass, TY_LLVM, MN_("createDomViewerPass"), 0,
-		_Public|_Static, _F(LLVM_createDomOnlyViewerPass),  TY_Pass, TY_LLVM, MN_("createDomOnlyViewerPass"), 0,
-		_Public|_Static, _F(LLVM_createPostDomPrinterPass), TY_Pass, TY_LLVM, MN_("createPostDomPrinterPass"), 0,
-		_Public|_Static, _F(LLVM_createPostDomOnlyPrinterPass),     TY_Pass, TY_LLVM, MN_("createPostDomOnlyPrinterPass"), 0,
-		_Public|_Static, _F(LLVM_createPostDomViewerPass),          TY_Pass, TY_LLVM, MN_("createPostDomViewerPass"), 0,
-		_Public|_Static, _F(LLVM_createPostDomOnlyViewerPass),      TY_Pass, TY_LLVM, MN_("createPostDomOnlyViewerPass"), 0,
-		_Public|_Static, _F(LLVM_createGlobalsModRefPass),          TY_Pass, TY_LLVM, MN_("createGlobalsModRefPass"), 0,
-		_Public|_Static, _F(LLVM_createAliasDebugger),              TY_Pass, TY_LLVM, MN_("createAliasDebugger"), 0,
-		_Public|_Static, _F(LLVM_createAliasAnalysisCounterPass),   TY_Pass, TY_LLVM, MN_("createAliasAnalysisCounterPass"), 0,
-		_Public|_Static, _F(LLVM_createAAEvalPass),                 TY_Pass, TY_LLVM, MN_("createAAEvalPass"), 0,
-		_Public|_Static, _F(LLVM_createLibCallAliasAnalysisPass),   TY_Pass, TY_LLVM, MN_("createLibCallAliasAnalysisPass"), 1, TY_LibCallInfo, FN_("lci"),
-		_Public|_Static, _F(LLVM_createScalarEvolutionAliasAnalysisPass), TY_Pass, TY_LLVM, MN_("createScalarEvolutionAliasAnalysisPass"), 0,
-		_Public|_Static, _F(LLVM_createProfileLoaderPass),          TY_Pass, TY_LLVM, MN_("createProfileLoaderPass"), 0,
-		_Public|_Static, _F(LLVM_createProfileEstimatorPass),       TY_Pass, TY_LLVM, MN_("createProfileEstimatorPass"), 0,
-		_Public|_Static, _F(LLVM_createProfileVerifierPass),        TY_Pass, TY_LLVM, MN_("createProfileVerifierPass"), 0,
-		_Public|_Static, _F(LLVM_createPathProfileLoaderPass),      TY_Pass, TY_LLVM, MN_("createPathProfileLoaderPass"), 0,
-		_Public|_Static, _F(LLVM_createPathProfileVerifierPass),    TY_Pass, TY_LLVM, MN_("createPathProfileVerifierPass"), 0,
-		_Public|_Static, _F(LLVM_createLazyValueInfoPass),          TY_Pass, TY_LLVM, MN_("createLazyValueInfoPass"), 0,
-		_Public|_Static, _F(LLVM_createLoopDependenceAnalysisPass), TY_Pass, TY_LLVM, MN_("createLoopDependenceAnalysisPass"), 0,
-		_Public|_Static, _F(LLVM_createInstCountPass),              TY_Pass, TY_LLVM, MN_("createInstCountPass"), 0,
-		_Public|_Static, _F(LLVM_createDbgInfoPrinterPass),         TY_Pass, TY_LLVM, MN_("createDbgInfoPrinterPass"), 0,
-		_Public|_Static, _F(LLVM_createRegionInfoPass),             TY_Pass, TY_LLVM, MN_("createRegionInfoPass"), 0,
-		_Public|_Static, _F(LLVM_createModuleDebugInfoPrinterPass), TY_Pass, TY_LLVM, MN_("createModuleDebugInfoPrinterPass"), 0,
-		_Public|_Static, _F(LLVM_createMemDepPrinter),              TY_Pass, TY_LLVM, MN_("createMemDepPrinter"), 0,
-		_Public|_Static, _F(LLVM_createPostDomTree),                TY_Pass, TY_LLVM, MN_("createPostDomTree"), 0,
-		_Public|_Static, _F(LLVM_createRegionViewerPass),           TY_Pass, TY_LLVM, MN_("createRegionViewerPass"), 0,
-		_Public|_Static, _F(LLVM_createRegionOnlyViewerPass),       TY_Pass, TY_LLVM, MN_("createRegionOnlyViewerPass"), 0,
-		_Public|_Static, _F(LLVM_createRegionPrinterPass),          TY_Pass, TY_LLVM, MN_("createRegionPrinterPass"), 0,
-		_Public|_Static, _F(LLVM_createRegionOnlyPrinterPass),      TY_Pass, TY_LLVM, MN_("createRegionOnlyPrinterPass"), 0,
-		_Public|_Static, _F(LLVM_createLintPass),                   TY_Pass, TY_LLVM, MN_("createLintPass"), 0,
-		_Public|_Static, _F(LLVM_createStripSymbolsPass),           TY_Pass, TY_LLVM, MN_("createStripSymbolsPass"), 1, TY_boolean, FN_("onlyDebugInfo"),
-		_Public|_Static, _F(LLVM_createStripNonDebugSymbolsPass),   TY_Pass, TY_LLVM, MN_("createStripNonDebugSymbolsPass"), 0,
-		_Public|_Static, _F(LLVM_createStripDeadDebugInfoPass),     TY_Pass, TY_LLVM, MN_("createStripDeadDebugInfoPass"), 0,
-		_Public|_Static, _F(LLVM_createConstantMergePass),          TY_Pass, TY_LLVM, MN_("createConstantMergePass"), 0,
-		_Public|_Static, _F(LLVM_createGlobalOptimizerPass),        TY_Pass, TY_LLVM, MN_("createGlobalOptimizerPass"), 0,
-		_Public|_Static, _F(LLVM_createGlobalDCEPass),              TY_Pass, TY_LLVM, MN_("createGlobalDCEPass"), 0,
-		_Public|_Static, _F(LLVM_createFunctionInliningPass),       TY_Pass, TY_LLVM, MN_("createFunctionInliningPass"), 1, TY_int, FN_("threshold"),
-		_Public|_Static, _F(LLVM_createAlwaysInlinerPass),          TY_Pass, TY_LLVM, MN_("createAlwaysInlinerPass"), 0,
-		_Public|_Static, _F(LLVM_createPruneEHPass),                TY_Pass, TY_LLVM, MN_("createPruneEHPass"), 0,
-		_Public|_Static, _F(LLVM_createInternalizePass),            TY_Pass, TY_LLVM, MN_("createInternalizePass"), 1, TY_boolean, FN_("allButMain"),
-		_Public|_Static, _F(LLVM_createDeadArgEliminationPass),     TY_Pass, TY_LLVM, MN_("createDeadArgEliminationPass"), 0,
-		_Public|_Static, _F(LLVM_createArgumentPromotionPass),      TY_Pass, TY_LLVM, MN_("createArgumentPromotionPass"), 1, TY_int, FN_("maxElements"),
-		_Public|_Static, _F(LLVM_createIPConstantPropagationPass),  TY_Pass, TY_LLVM, MN_("createIPConstantPropagationPass"), 0,
-		_Public|_Static, _F(LLVM_createIPSCCPPass),                 TY_Pass, TY_LLVM, MN_("createIPSCCPPass"), 0,
-		_Public|_Static, _F(LLVM_createLoopExtractorPass),          TY_Pass, TY_LLVM, MN_("createLoopExtractorPass"), 0,
-		_Public|_Static, _F(LLVM_createSingleLoopExtractorPass),    TY_Pass, TY_LLVM, MN_("createSingleLoopExtractorPass"), 0,
-		_Public|_Static, _F(LLVM_createBlockExtractorPass),         TY_Pass, TY_LLVM, MN_("createBlockExtractorPass"), 0,
-		_Public|_Static, _F(LLVM_createStripDeadPrototypesPass),    TY_Pass, TY_LLVM, MN_("createStripDeadPrototypesPass"), 0,
-		_Public|_Static, _F(LLVM_createFunctionAttrsPass),          TY_Pass, TY_LLVM, MN_("createFunctionAttrsPass"), 0,
-		_Public|_Static, _F(LLVM_createMergeFunctionsPass),         TY_Pass, TY_LLVM, MN_("createMergeFunctionsPass"), 0,
-		_Public|_Static, _F(LLVM_createPartialInliningPass),        TY_Pass, TY_LLVM, MN_("createPartialInliningPass"), 0,
-		_Public|_Static, _F(LLVM_createConstantPropagationPass),    TY_Pass, TY_LLVM, MN_("createConstantPropagationPass"), 0,
-		_Public|_Static, _F(LLVM_createSCCPPass),                   TY_Pass, TY_LLVM, MN_("createSCCPPass"), 0,
-		_Public|_Static, _F(LLVM_createDeadInstEliminationPass),    TY_Pass, TY_LLVM, MN_("createDeadInstEliminationPass"), 0,
-		_Public|_Static, _F(LLVM_createDeadCodeEliminationPass),    TY_Pass, TY_LLVM, MN_("createDeadCodeEliminationPass"), 0,
-		_Public|_Static, _F(LLVM_createDeadStoreEliminationPass),   TY_Pass, TY_LLVM, MN_("createDeadStoreEliminationPass"), 0,
-		_Public|_Static, _F(LLVM_createAggressiveDCEPass),          TY_Pass, TY_LLVM, MN_("createAggressiveDCEPass"), 0,
-		_Public|_Static, _F(LLVM_createScalarReplAggregatesPass),   TY_Pass, TY_LLVM, MN_("createScalarReplAggregatesPass"), 1, TY_int, FN_("threshold"),
-		_Public|_Static, _F(LLVM_createIndVarSimplifyPass),         TY_Pass, TY_LLVM, MN_("createIndVarSimplifyPass"), 0,
-		_Public|_Static, _F(LLVM_createInstructionCombiningPass),   TY_Pass, TY_LLVM, MN_("createInstructionCombiningPass"), 0,
-		_Public|_Static, _F(LLVM_createLICMPass),                   TY_Pass, TY_LLVM, MN_("createLICMPass"), 0,
-		_Public|_Static, _F(LLVM_createLoopUnswitchPass),           TY_Pass, TY_LLVM, MN_("createLoopUnswitchPass"), 1, TY_boolean, FN_("optimizeForSize"),
-		_Public|_Static, _F(LLVM_createLoopInstSimplifyPass),       TY_Pass, TY_LLVM, MN_("createLoopInstSimplifyPass"), 0,
-		_Public|_Static, _F(LLVM_createLoopUnrollPass),             TY_Pass, TY_LLVM, MN_("createLoopUnrollPass"), 3, TY_int, FN_("threshold"),TY_int, FN_("count"),TY_int, FN_("allowPartial"),
-		_Public|_Static, _F(LLVM_createLoopRotatePass),             TY_Pass, TY_LLVM, MN_("createLoopRotatePass"), 0,
-		_Public|_Static, _F(LLVM_createLoopIdiomPass),              TY_Pass, TY_LLVM, MN_("createLoopIdiomPass"), 0,
-		_Public|_Static, _F(LLVM_createPromoteMemoryToRegisterPass), TY_Pass, TY_LLVM, MN_("createPromoteMemoryToRegisterPass"), 0,
-		_Public|_Static, _F(LLVM_createDemoteRegisterToMemoryPass),  TY_Pass, TY_LLVM, MN_("createDemoteRegisterToMemoryPass"), 0,
-		_Public|_Static, _F(LLVM_createReassociatePass),             TY_Pass, TY_LLVM, MN_("createReassociatePass"), 0,
-		_Public|_Static, _F(LLVM_createJumpThreadingPass),           TY_Pass, TY_LLVM, MN_("createJumpThreadingPass"), 0,
-		_Public|_Static, _F(LLVM_createCFGSimplificationPass),       TY_Pass, TY_LLVM, MN_("createCFGSimplificationPass"), 0,
-		_Public|_Static, _F(LLVM_createBreakCriticalEdgesPass),      TY_Pass, TY_LLVM, MN_("createBreakCriticalEdgesPass"), 0,
-		_Public|_Static, _F(LLVM_createLoopSimplifyPass),            TY_Pass, TY_LLVM, MN_("createLoopSimplifyPass"), 0,
-		_Public|_Static, _F(LLVM_createTailCallEliminationPass),     TY_Pass, TY_LLVM, MN_("createTailCallEliminationPass"), 0,
-		_Public|_Static, _F(LLVM_createLowerSwitchPass),             TY_Pass, TY_LLVM, MN_("createLowerSwitchPass"), 0,
-		_Public|_Static, _F(LLVM_createBlockPlacementPass),          TY_Pass, TY_LLVM, MN_("createBlockPlacementPass"), 0,
-		_Public|_Static, _F(LLVM_createLCSSAPass),                   TY_Pass, TY_LLVM, MN_("createLCSSAPass"), 0,
-		_Public|_Static, _F(LLVM_createEarlyCSEPass),                TY_Pass, TY_LLVM, MN_("createEarlyCSEPass"), 0,
-		_Public|_Static, _F(LLVM_createGVNPass),                     TY_Pass, TY_LLVM, MN_("createGVNPass"), 1, TY_boolean, FN_("noLoads"),
-		_Public|_Static, _F(LLVM_createMemCpyOptPass),               TY_Pass, TY_LLVM, MN_("createMemCpyOptPass"), 0,
-		_Public|_Static, _F(LLVM_createLoopDeletionPass),            TY_Pass, TY_LLVM, MN_("createLoopDeletionPass"), 0,
-		_Public|_Static, _F(LLVM_createSimplifyLibCallsPass),        TY_Pass, TY_LLVM, MN_("createSimplifyLibCallsPass"), 0,
-		_Public|_Static, _F(LLVM_createInstructionNamerPass),        TY_Pass, TY_LLVM, MN_("createInstructionNamerPass"), 0,
-		_Public|_Static, _F(LLVM_createSinkingPass),                 TY_Pass, TY_LLVM, MN_("createSinkingPass"), 0,
-		_Public|_Static, _F(LLVM_createLowerAtomicPass),             TY_Pass, TY_LLVM, MN_("createLowerAtomicPass"), 0,
-		_Public|_Static, _F(LLVM_createCorrelatedValuePropagationPass), TY_Pass, TY_LLVM, MN_("createCorrelatedValuePropagationPass"), 0,
+		_Public, _F(Argument_new), KType_Value/*TODO*/, KType_Argument, MN_("new"), 1, KType_Type, FN_("type"),
+		_Public, _F(Value_replaceAllUsesWith), KType_void, KType_Value, MN_("replaceAllUsesWith"), 1, KType_Value, FN_("v"),
+		_Public, _F(Value_setName), KType_void, KType_Value, MN_("setName"), 1, KType_String, FN_("name"),
+		_Public, _F(Value_getType), KType_Type, KType_Value, MN_("getType"), 0,
+		_Public, _F(Function_getArguments), KType_Array_Value, KType_Function, MN_("getArguments"), 0,
+		_Public, _F(Function_getReturnType), KType_Type, KType_Function, MN_("getReturnType"), 0,
+		_Public, _F(LoadInst_setAlignment),  KType_void, KType_LoadInst, MN_("setAlignment"), 1, KType_int, FN_("align"),
+		_Public, _F(StoreInst_setAlignment), KType_void, KType_StoreInst, MN_("setAlignment"), 1, KType_int, FN_("align"),
+		_Public, _F(kMethod_setFunction), KType_void, KType_Method, MN_("setFunction"), 1, KType_NativeFunction, FN_("nf"),
+		_Public|_Static, _F(ConstantInt_get),         KType_Constant, KType_ConstantInt, MN_("getValue"), 2, KType_Type, FN_("type"),KType_int, FN_("v"),
+		_Public|_Static, _F(ConstantFP_get),          KType_Constant, KType_ConstantFP, MN_("getValue"), 2, KType_Type, FN_("type"),KType_float, FN_("v"),
+		_Public|_Static, _F(ConstantFP_get),          KType_Constant, KType_ConstantFP, MN_("getValueFromBits"), 2, KType_Type, FN_("type"),KType_int, FN_("v"),
+		_Public|_Static, _F(ConstantPointerNull_get), KType_Constant, KType_ConstantPointerNull, MN_("getValue"), 1, KType_Type, FN_("type"),
+		_Public|_Static, _F(ConstantStruct_get),      KType_Constant, KType_ConstantStruct, MN_("getValue"), 2, KType_Type, FN_("type"),KType_Array_Constant, FN_("v"),
+		_Public|_Static, _F(DynamicLibrary_loadLibraryPermanently),   KType_boolean, KType_DynamicLibrary, MN_("loadLibraryPermanently"), 1, KType_String, FN_("libname"),
+		_Public|_Static, _F(DynamicLibrary_searchForAddressOfSymbol), KType_int, KType_DynamicLibrary, MN_("searchForAddressOfSymbol"), 1, KType_String, FN_("fname"),
+		_Public|_Static, _F(LLVM_createDomPrinterPass),     KType_Pass, KType_LLVM, MN_("createDomPrinterPass"), 0,
+		_Public|_Static, _F(LLVM_createDomOnlyPrinterPass), KType_Pass, KType_LLVM, MN_("createDomOnlyPrinterPass"), 0,
+		_Public|_Static, _F(LLVM_createDomViewerPass),      KType_Pass, KType_LLVM, MN_("createDomViewerPass"), 0,
+		_Public|_Static, _F(LLVM_createDomOnlyViewerPass),  KType_Pass, KType_LLVM, MN_("createDomOnlyViewerPass"), 0,
+		_Public|_Static, _F(LLVM_createPostDomPrinterPass), KType_Pass, KType_LLVM, MN_("createPostDomPrinterPass"), 0,
+		_Public|_Static, _F(LLVM_createPostDomOnlyPrinterPass),     KType_Pass, KType_LLVM, MN_("createPostDomOnlyPrinterPass"), 0,
+		_Public|_Static, _F(LLVM_createPostDomViewerPass),          KType_Pass, KType_LLVM, MN_("createPostDomViewerPass"), 0,
+		_Public|_Static, _F(LLVM_createPostDomOnlyViewerPass),      KType_Pass, KType_LLVM, MN_("createPostDomOnlyViewerPass"), 0,
+		_Public|_Static, _F(LLVM_createGlobalsModRefPass),          KType_Pass, KType_LLVM, MN_("createGlobalsModRefPass"), 0,
+		_Public|_Static, _F(LLVM_createAliasDebugger),              KType_Pass, KType_LLVM, MN_("createAliasDebugger"), 0,
+		_Public|_Static, _F(LLVM_createAliasAnalysisCounterPass),   KType_Pass, KType_LLVM, MN_("createAliasAnalysisCounterPass"), 0,
+		_Public|_Static, _F(LLVM_createAAEvalPass),                 KType_Pass, KType_LLVM, MN_("createAAEvalPass"), 0,
+		_Public|_Static, _F(LLVM_createLibCallAliasAnalysisPass),   KType_Pass, KType_LLVM, MN_("createLibCallAliasAnalysisPass"), 1, KType_LibCallInfo, FN_("lci"),
+		_Public|_Static, _F(LLVM_createScalarEvolutionAliasAnalysisPass), KType_Pass, KType_LLVM, MN_("createScalarEvolutionAliasAnalysisPass"), 0,
+		_Public|_Static, _F(LLVM_createProfileLoaderPass),          KType_Pass, KType_LLVM, MN_("createProfileLoaderPass"), 0,
+		_Public|_Static, _F(LLVM_createProfileEstimatorPass),       KType_Pass, KType_LLVM, MN_("createProfileEstimatorPass"), 0,
+		_Public|_Static, _F(LLVM_createProfileVerifierPass),        KType_Pass, KType_LLVM, MN_("createProfileVerifierPass"), 0,
+		_Public|_Static, _F(LLVM_createPathProfileLoaderPass),      KType_Pass, KType_LLVM, MN_("createPathProfileLoaderPass"), 0,
+		_Public|_Static, _F(LLVM_createPathProfileVerifierPass),    KType_Pass, KType_LLVM, MN_("createPathProfileVerifierPass"), 0,
+		_Public|_Static, _F(LLVM_createLazyValueInfoPass),          KType_Pass, KType_LLVM, MN_("createLazyValueInfoPass"), 0,
+		_Public|_Static, _F(LLVM_createLoopDependenceAnalysisPass), KType_Pass, KType_LLVM, MN_("createLoopDependenceAnalysisPass"), 0,
+		_Public|_Static, _F(LLVM_createInstCountPass),              KType_Pass, KType_LLVM, MN_("createInstCountPass"), 0,
+		_Public|_Static, _F(LLVM_createDbgInfoPrinterPass),         KType_Pass, KType_LLVM, MN_("createDbgInfoPrinterPass"), 0,
+		_Public|_Static, _F(LLVM_createRegionInfoPass),             KType_Pass, KType_LLVM, MN_("createRegionInfoPass"), 0,
+		_Public|_Static, _F(LLVM_createModuleDebugInfoPrinterPass), KType_Pass, KType_LLVM, MN_("createModuleDebugInfoPrinterPass"), 0,
+		_Public|_Static, _F(LLVM_createMemDepPrinter),              KType_Pass, KType_LLVM, MN_("createMemDepPrinter"), 0,
+		_Public|_Static, _F(LLVM_createPostDomTree),                KType_Pass, KType_LLVM, MN_("createPostDomTree"), 0,
+		_Public|_Static, _F(LLVM_createRegionViewerPass),           KType_Pass, KType_LLVM, MN_("createRegionViewerPass"), 0,
+		_Public|_Static, _F(LLVM_createRegionOnlyViewerPass),       KType_Pass, KType_LLVM, MN_("createRegionOnlyViewerPass"), 0,
+		_Public|_Static, _F(LLVM_createRegionPrinterPass),          KType_Pass, KType_LLVM, MN_("createRegionPrinterPass"), 0,
+		_Public|_Static, _F(LLVM_createRegionOnlyPrinterPass),      KType_Pass, KType_LLVM, MN_("createRegionOnlyPrinterPass"), 0,
+		_Public|_Static, _F(LLVM_createLintPass),                   KType_Pass, KType_LLVM, MN_("createLintPass"), 0,
+		_Public|_Static, _F(LLVM_createStripSymbolsPass),           KType_Pass, KType_LLVM, MN_("createStripSymbolsPass"), 1, KType_boolean, FN_("onlyDebugInfo"),
+		_Public|_Static, _F(LLVM_createStripNonDebugSymbolsPass),   KType_Pass, KType_LLVM, MN_("createStripNonDebugSymbolsPass"), 0,
+		_Public|_Static, _F(LLVM_createStripDeadDebugInfoPass),     KType_Pass, KType_LLVM, MN_("createStripDeadDebugInfoPass"), 0,
+		_Public|_Static, _F(LLVM_createConstantMergePass),          KType_Pass, KType_LLVM, MN_("createConstantMergePass"), 0,
+		_Public|_Static, _F(LLVM_createGlobalOptimizerPass),        KType_Pass, KType_LLVM, MN_("createGlobalOptimizerPass"), 0,
+		_Public|_Static, _F(LLVM_createGlobalDCEPass),              KType_Pass, KType_LLVM, MN_("createGlobalDCEPass"), 0,
+		_Public|_Static, _F(LLVM_createFunctionInliningPass),       KType_Pass, KType_LLVM, MN_("createFunctionInliningPass"), 1, KType_int, FN_("threshold"),
+		_Public|_Static, _F(LLVM_createAlwaysInlinerPass),          KType_Pass, KType_LLVM, MN_("createAlwaysInlinerPass"), 0,
+		_Public|_Static, _F(LLVM_createPruneEHPass),                KType_Pass, KType_LLVM, MN_("createPruneEHPass"), 0,
+		_Public|_Static, _F(LLVM_createInternalizePass),            KType_Pass, KType_LLVM, MN_("createInternalizePass"), 1, KType_boolean, FN_("allButMain"),
+		_Public|_Static, _F(LLVM_createDeadArgEliminationPass),     KType_Pass, KType_LLVM, MN_("createDeadArgEliminationPass"), 0,
+		_Public|_Static, _F(LLVM_createArgumentPromotionPass),      KType_Pass, KType_LLVM, MN_("createArgumentPromotionPass"), 1, KType_int, FN_("maxElements"),
+		_Public|_Static, _F(LLVM_createIPConstantPropagationPass),  KType_Pass, KType_LLVM, MN_("createIPConstantPropagationPass"), 0,
+		_Public|_Static, _F(LLVM_createIPSCCPPass),                 KType_Pass, KType_LLVM, MN_("createIPSCCPPass"), 0,
+		_Public|_Static, _F(LLVM_createLoopExtractorPass),          KType_Pass, KType_LLVM, MN_("createLoopExtractorPass"), 0,
+		_Public|_Static, _F(LLVM_createSingleLoopExtractorPass),    KType_Pass, KType_LLVM, MN_("createSingleLoopExtractorPass"), 0,
+		_Public|_Static, _F(LLVM_createBlockExtractorPass),         KType_Pass, KType_LLVM, MN_("createBlockExtractorPass"), 0,
+		_Public|_Static, _F(LLVM_createStripDeadPrototypesPass),    KType_Pass, KType_LLVM, MN_("createStripDeadPrototypesPass"), 0,
+		_Public|_Static, _F(LLVM_createFunctionAttrsPass),          KType_Pass, KType_LLVM, MN_("createFunctionAttrsPass"), 0,
+		_Public|_Static, _F(LLVM_createMergeFunctionsPass),         KType_Pass, KType_LLVM, MN_("createMergeFunctionsPass"), 0,
+		_Public|_Static, _F(LLVM_createPartialInliningPass),        KType_Pass, KType_LLVM, MN_("createPartialInliningPass"), 0,
+		_Public|_Static, _F(LLVM_createConstantPropagationPass),    KType_Pass, KType_LLVM, MN_("createConstantPropagationPass"), 0,
+		_Public|_Static, _F(LLVM_createSCCPPass),                   KType_Pass, KType_LLVM, MN_("createSCCPPass"), 0,
+		_Public|_Static, _F(LLVM_createDeadInstEliminationPass),    KType_Pass, KType_LLVM, MN_("createDeadInstEliminationPass"), 0,
+		_Public|_Static, _F(LLVM_createDeadCodeEliminationPass),    KType_Pass, KType_LLVM, MN_("createDeadCodeEliminationPass"), 0,
+		_Public|_Static, _F(LLVM_createDeadStoreEliminationPass),   KType_Pass, KType_LLVM, MN_("createDeadStoreEliminationPass"), 0,
+		_Public|_Static, _F(LLVM_createAggressiveDCEPass),          KType_Pass, KType_LLVM, MN_("createAggressiveDCEPass"), 0,
+		_Public|_Static, _F(LLVM_createScalarReplAggregatesPass),   KType_Pass, KType_LLVM, MN_("createScalarReplAggregatesPass"), 1, KType_int, FN_("threshold"),
+		_Public|_Static, _F(LLVM_createIndVarSimplifyPass),         KType_Pass, KType_LLVM, MN_("createIndVarSimplifyPass"), 0,
+		_Public|_Static, _F(LLVM_createInstructionCombiningPass),   KType_Pass, KType_LLVM, MN_("createInstructionCombiningPass"), 0,
+		_Public|_Static, _F(LLVM_createLICMPass),                   KType_Pass, KType_LLVM, MN_("createLICMPass"), 0,
+		_Public|_Static, _F(LLVM_createLoopUnswitchPass),           KType_Pass, KType_LLVM, MN_("createLoopUnswitchPass"), 1, KType_boolean, FN_("optimizeForSize"),
+		_Public|_Static, _F(LLVM_createLoopInstSimplifyPass),       KType_Pass, KType_LLVM, MN_("createLoopInstSimplifyPass"), 0,
+		_Public|_Static, _F(LLVM_createLoopUnrollPass),             KType_Pass, KType_LLVM, MN_("createLoopUnrollPass"), 3, KType_int, FN_("threshold"),KType_int, FN_("count"),KType_int, FN_("allowPartial"),
+		_Public|_Static, _F(LLVM_createLoopRotatePass),             KType_Pass, KType_LLVM, MN_("createLoopRotatePass"), 0,
+		_Public|_Static, _F(LLVM_createLoopIdiomPass),              KType_Pass, KType_LLVM, MN_("createLoopIdiomPass"), 0,
+		_Public|_Static, _F(LLVM_createPromoteMemoryToRegisterPass), KType_Pass, KType_LLVM, MN_("createPromoteMemoryToRegisterPass"), 0,
+		_Public|_Static, _F(LLVM_createDemoteRegisterToMemoryPass),  KType_Pass, KType_LLVM, MN_("createDemoteRegisterToMemoryPass"), 0,
+		_Public|_Static, _F(LLVM_createReassociatePass),             KType_Pass, KType_LLVM, MN_("createReassociatePass"), 0,
+		_Public|_Static, _F(LLVM_createJumpThreadingPass),           KType_Pass, KType_LLVM, MN_("createJumpThreadingPass"), 0,
+		_Public|_Static, _F(LLVM_createCFGSimplificationPass),       KType_Pass, KType_LLVM, MN_("createCFGSimplificationPass"), 0,
+		_Public|_Static, _F(LLVM_createBreakCriticalEdgesPass),      KType_Pass, KType_LLVM, MN_("createBreakCriticalEdgesPass"), 0,
+		_Public|_Static, _F(LLVM_createLoopSimplifyPass),            KType_Pass, KType_LLVM, MN_("createLoopSimplifyPass"), 0,
+		_Public|_Static, _F(LLVM_createTailCallEliminationPass),     KType_Pass, KType_LLVM, MN_("createTailCallEliminationPass"), 0,
+		_Public|_Static, _F(LLVM_createLowerSwitchPass),             KType_Pass, KType_LLVM, MN_("createLowerSwitchPass"), 0,
+		_Public|_Static, _F(LLVM_createBlockPlacementPass),          KType_Pass, KType_LLVM, MN_("createBlockPlacementPass"), 0,
+		_Public|_Static, _F(LLVM_createLCSSAPass),                   KType_Pass, KType_LLVM, MN_("createLCSSAPass"), 0,
+		_Public|_Static, _F(LLVM_createEarlyCSEPass),                KType_Pass, KType_LLVM, MN_("createEarlyCSEPass"), 0,
+		_Public|_Static, _F(LLVM_createGVNPass),                     KType_Pass, KType_LLVM, MN_("createGVNPass"), 1, KType_boolean, FN_("noLoads"),
+		_Public|_Static, _F(LLVM_createMemCpyOptPass),               KType_Pass, KType_LLVM, MN_("createMemCpyOptPass"), 0,
+		_Public|_Static, _F(LLVM_createLoopDeletionPass),            KType_Pass, KType_LLVM, MN_("createLoopDeletionPass"), 0,
+		_Public|_Static, _F(LLVM_createSimplifyLibCallsPass),        KType_Pass, KType_LLVM, MN_("createSimplifyLibCallsPass"), 0,
+		_Public|_Static, _F(LLVM_createInstructionNamerPass),        KType_Pass, KType_LLVM, MN_("createInstructionNamerPass"), 0,
+		_Public|_Static, _F(LLVM_createSinkingPass),                 KType_Pass, KType_LLVM, MN_("createSinkingPass"), 0,
+		_Public|_Static, _F(LLVM_createLowerAtomicPass),             KType_Pass, KType_LLVM, MN_("createLowerAtomicPass"), 0,
+		_Public|_Static, _F(LLVM_createCorrelatedValuePropagationPass), KType_Pass, KType_LLVM, MN_("createCorrelatedValuePropagationPass"), 0,
 #if LLVM_VERSION >= 300
-		_Public|_Static, _F(LLVM_createObjCARCExpandPass),   TY_Pass, TY_LLVM, MN_("createObjCARCExpandPass"), 0,
-		_Public|_Static, _F(LLVM_createObjCARCContractPass), TY_Pass, TY_LLVM, MN_("createObjCARCContractPass"), 0,
-		_Public|_Static, _F(LLVM_createObjCARCOptPass),      TY_Pass, TY_LLVM, MN_("createObjCARCOptPass"), 0,
-		_Public|_Static, _F(LLVM_createLowerExpectIntrinsicPass), TY_Pass, TY_LLVM, MN_("createLowerExpectIntrinsicPass"), 0,
+		_Public|_Static, _F(LLVM_createObjCARCExpandPass),   KType_Pass, KType_LLVM, MN_("createObjCARCExpandPass"), 0,
+		_Public|_Static, _F(LLVM_createObjCARCContractPass), KType_Pass, KType_LLVM, MN_("createObjCARCContractPass"), 0,
+		_Public|_Static, _F(LLVM_createObjCARCOptPass),      KType_Pass, KType_LLVM, MN_("createObjCARCOptPass"), 0,
+		_Public|_Static, _F(LLVM_createLowerExpectIntrinsicPass), KType_Pass, KType_LLVM, MN_("createLowerExpectIntrinsicPass"), 0,
 #endif
 #if LLVM_VERSION >= 301
-		_Public|_Static, _F(LLVM_createBBVectorizePass),     TY_Pass, TY_LLVM, MN_("createBBVectorizePass"), 0,
+		_Public|_Static, _F(LLVM_createBBVectorizePass),     KType_Pass, KType_LLVM, MN_("createBBVectorizePass"), 0,
 #endif
-		_Public|_Static, _F(LLVM_createInstructionSimplifierPass),  TY_Pass, TY_LLVM, MN_("createInstructionSimplifierPass"), 0,
-		_Public|_Static, _F(LLVM_createUnifyFunctionExitNodesPass), TY_Pass, TY_LLVM, MN_("createUnifyFunctionExitNodesPass"), 0,
-		_Public|_Static, _F(LLVM_createTypeBasedAliasAnalysisPass), TY_Pass, TY_LLVM, MN_("createTypeBasedAliasAnalysisPass"), 0,
-		_Public|_Static, _F(LLVM_createBasicAliasAnalysisPass),     TY_Pass, TY_LLVM, MN_("createBasicAliasAnalysisPass"), 0,
-		_Public|_Static, _F(LLVM_createVerifierPass),               TY_Pass, TY_LLVM, MN_("createVerifierPass"), 0,
-		_Public|_Static, _F(Intrinsic_getType), TY_Type, TY_intrinsic, MN_("getType"), 2, TY_int, FN_("id"),TY_Array_Type, FN_("args"),
-		_Public|_Static, _F(Intrinsic_getDeclaration), TY_Function, TY_intrinsic, MN_("getDeclaration"), 3, TY_Module, FN_("m"),TY_int, FN_("id"),TY_Array_Type, FN_("args"),
-		_Public|_Static, _F(LLVM_parseBitcodeFile), TY_Value, TY_LLVM, MN_("parseBitcodeFile"), 1, TY_String, FN_("bcfile"),
+		_Public|_Static, _F(LLVM_createInstructionSimplifierPass),  KType_Pass, KType_LLVM, MN_("createInstructionSimplifierPass"), 0,
+		_Public|_Static, _F(LLVM_createUnifyFunctionExitNodesPass), KType_Pass, KType_LLVM, MN_("createUnifyFunctionExitNodesPass"), 0,
+		_Public|_Static, _F(LLVM_createTypeBasedAliasAnalysisPass), KType_Pass, KType_LLVM, MN_("createTypeBasedAliasAnalysisPass"), 0,
+		_Public|_Static, _F(LLVM_createBasicAliasAnalysisPass),     KType_Pass, KType_LLVM, MN_("createBasicAliasAnalysisPass"), 0,
+		_Public|_Static, _F(LLVM_createVerifierPass),               KType_Pass, KType_LLVM, MN_("createVerifierPass"), 0,
+		_Public|_Static, _F(Intrinsic_getType), KType_Type, KType_intrinsic, MN_("getType"), 2, KType_int, FN_("id"),KType_Array_Type, FN_("args"),
+		_Public|_Static, _F(Intrinsic_getDeclaration), KType_Function, KType_intrinsic, MN_("getDeclaration"), 3, KType_Module, FN_("m"),KType_int, FN_("id"),KType_Array_Type, FN_("args"),
+		_Public|_Static, _F(LLVM_parseBitcodeFile), KType_Value, KType_LLVM, MN_("parseBitcodeFile"), 1, KType_String, FN_("bcfile"),
 
-		_Public|_Static, _F(ConstantExpr_getAlignOf), TY_Constant, TY_ConstantExpr, MN_("getAlignOf"), 1,TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getSizeOf), TY_Constant, TY_ConstantExpr, MN_("getSizeOf"), 1,TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getOffsetOf), TY_Constant, TY_ConstantExpr, MN_("getOffsetOf"), 2,TY_StructType, FN_("sTy"), TY_int, FN_("fieldNo"),
-		_Public|_Static, _F(ConstantExpr_getOffsetOf), TY_Constant, TY_ConstantExpr, MN_("getOffsetOf"), 2,TY_Type, FN_("ty"), TY_Constant, FN_("fieldNo"),
-		_Public|_Static, _F(ConstantExpr_getNeg), TY_Constant, TY_ConstantExpr, MN_("getNeg"), 3,TY_Constant, FN_("c"), TY_boolean, FN_("hasNUW"), TY_boolean, FN_("hasNSW"),
-		_Public|_Static, _F(ConstantExpr_getFNeg), TY_Constant, TY_ConstantExpr, MN_("getFNeg"), 1,TY_Constant, FN_("c"),
-		_Public|_Static, _F(ConstantExpr_getNot), TY_Constant, TY_ConstantExpr, MN_("getNot"), 1,TY_Constant, FN_("c"),
-		_Public|_Static, _F(ConstantExpr_getAdd), TY_Constant, TY_ConstantExpr, MN_("getAdd"), 4,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"), TY_boolean, FN_("hasNUW"), TY_boolean, FN_("hasNSW"),
-		_Public|_Static, _F(ConstantExpr_getFAdd), TY_Constant, TY_ConstantExpr, MN_("getFAdd"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getSub), TY_Constant, TY_ConstantExpr, MN_("getSub"), 4,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"), TY_boolean, FN_("hasNUW"), TY_boolean, FN_("hasNSW"),
-		_Public|_Static, _F(ConstantExpr_getFSub), TY_Constant, TY_ConstantExpr, MN_("getFSub"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getMul), TY_Constant, TY_ConstantExpr, MN_("getMul"), 4,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"), TY_boolean, FN_("hasNUW"), TY_boolean, FN_("hasNSW"),
-		_Public|_Static, _F(ConstantExpr_getFMul), TY_Constant, TY_ConstantExpr, MN_("getFMul"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getUDiv), TY_Constant, TY_ConstantExpr, MN_("getUDiv"), 3,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"), TY_boolean, FN_("isExact"),
-		_Public|_Static, _F(ConstantExpr_getSDiv), TY_Constant, TY_ConstantExpr, MN_("getSDiv"), 3,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"), TY_boolean, FN_("isExact"),
-		_Public|_Static, _F(ConstantExpr_getFDiv), TY_Constant, TY_ConstantExpr, MN_("getFDiv"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getURem), TY_Constant, TY_ConstantExpr, MN_("getURem"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getSRem), TY_Constant, TY_ConstantExpr, MN_("getSRem"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getFRem), TY_Constant, TY_ConstantExpr, MN_("getFRem"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getAnd), TY_Constant, TY_ConstantExpr, MN_("getAnd"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getOr), TY_Constant, TY_ConstantExpr, MN_("getOr"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getXor), TY_Constant, TY_ConstantExpr, MN_("getXor"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getShl), TY_Constant, TY_ConstantExpr, MN_("getShl"), 4,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"), TY_boolean, FN_("hasNUW"), TY_boolean, FN_("hasNSW"),
-		_Public|_Static, _F(ConstantExpr_getLShr), TY_Constant, TY_ConstantExpr, MN_("getLShr"), 3,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"), TY_boolean, FN_("isExact"),
-		_Public|_Static, _F(ConstantExpr_getAShr), TY_Constant, TY_ConstantExpr, MN_("getAShr"), 3,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"), TY_boolean, FN_("isExact"),
-		_Public|_Static, _F(ConstantExpr_getTrunc), TY_Constant, TY_ConstantExpr, MN_("getTrunc"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getSExt), TY_Constant, TY_ConstantExpr, MN_("getSExt"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getZExt), TY_Constant, TY_ConstantExpr, MN_("getZExt"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getFPTrunc), TY_Constant, TY_ConstantExpr, MN_("getFPTrunc"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getFPExtend), TY_Constant, TY_ConstantExpr, MN_("getFPExtend"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getUIToFP), TY_Constant, TY_ConstantExpr, MN_("getUIToFP"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getSIToFP), TY_Constant, TY_ConstantExpr, MN_("getSIToFP"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getFPToUI), TY_Constant, TY_ConstantExpr, MN_("getFPToUI"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getFPToSI), TY_Constant, TY_ConstantExpr, MN_("getFPToSI"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getPtrToInt), TY_Constant, TY_ConstantExpr, MN_("getPtrToInt"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getIntToPtr), TY_Constant, TY_ConstantExpr, MN_("getIntToPtr"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getBitCast), TY_Constant, TY_ConstantExpr, MN_("getBitCast"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getNSWNeg), TY_Constant, TY_ConstantExpr, MN_("getNSWNeg"), 1,TY_Constant, FN_("c"),
-		_Public|_Static, _F(ConstantExpr_getNUWNeg), TY_Constant, TY_ConstantExpr, MN_("getNUWNeg"), 1,TY_Constant, FN_("c"),
-		_Public|_Static, _F(ConstantExpr_getNSWAdd), TY_Constant, TY_ConstantExpr, MN_("getNSWAdd"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getNUWAdd), TY_Constant, TY_ConstantExpr, MN_("getNUWAdd"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getNSWSub), TY_Constant, TY_ConstantExpr, MN_("getNSWSub"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getNUWSub), TY_Constant, TY_ConstantExpr, MN_("getNUWSub"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getNSWMul), TY_Constant, TY_ConstantExpr, MN_("getNSWMul"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getNUWMul), TY_Constant, TY_ConstantExpr, MN_("getNUWMul"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getNSWShl), TY_Constant, TY_ConstantExpr, MN_("getNSWShl"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getNUWShl), TY_Constant, TY_ConstantExpr, MN_("getNUWShl"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getExactSDiv), TY_Constant, TY_ConstantExpr, MN_("getExactSDiv"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getExactUDiv), TY_Constant, TY_ConstantExpr, MN_("getExactUDiv"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getExactAShr), TY_Constant, TY_ConstantExpr, MN_("getExactAShr"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getExactLShr), TY_Constant, TY_ConstantExpr, MN_("getExactLShr"), 2,TY_Constant, FN_("c1"), TY_Constant, FN_("c2"),
-		_Public|_Static, _F(ConstantExpr_getZExtOrBitCast), TY_Constant, TY_ConstantExpr, MN_("getZExtOrBitCast"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getSExtOrBitCast), TY_Constant, TY_ConstantExpr, MN_("getSExtOrBitCast"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getTruncOrBitCast), TY_Constant, TY_ConstantExpr, MN_("getTruncOrBitCast"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getPointerCast), TY_Constant, TY_ConstantExpr, MN_("getPointerCast"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getIntegerCast), TY_Constant, TY_ConstantExpr, MN_("getIntegerCast"), 3,TY_Constant, FN_("c"), TY_Type, FN_("ty"), TY_boolean, FN_("isSigned"),
-		_Public|_Static, _F(ConstantExpr_getFPCast), TY_Constant, TY_ConstantExpr, MN_("getFPCast"), 2,TY_Constant, FN_("c"), TY_Type, FN_("ty"),
-		_Public|_Static, _F(ConstantExpr_getSelect), TY_Constant, TY_ConstantExpr, MN_("getSelect"), 3,TY_Constant, FN_("c"), TY_Constant, FN_("v1"), TY_Constant, FN_("v2"),
-		_Public|_Static, _F(ConstantExpr_getElementPtr0), TY_Constant, TY_ConstantExpr, MN_("getElementPtr"), 3,TY_Constant, FN_("c"), TY_Constant, FN_("idx"), TY_boolean, FN_("InBounds"),
-		_Public|_Static, _F(ConstantExpr_getElementPtr), TY_Constant, TY_ConstantExpr, MN_("getElementPtr"), 3,TY_Constant, FN_("c"), TY_Array_Value, FN_("IdxList"), TY_boolean, FN_("InBounds"),
-		_Public|_Static, _F(ConstantExpr_getInBoundsGetElementPtr0), TY_Constant, TY_ConstantExpr, MN_("getInBoundsGetElementPtr0"), 2,TY_Constant, FN_("c"), TY_Constant, FN_("idx"),
-		_Public|_Static, _F(ConstantExpr_getInBoundsGetElementPtr), TY_Constant, TY_ConstantExpr, MN_("getInBoundsGetElementPtr"), 2,TY_Constant, FN_("c"), TY_Array_Value, FN_("idxList"),
-		_Public|_Static, _F(ConstantExpr_getExtractElement), TY_Constant, TY_ConstantExpr, MN_("getExtractElement"), 2,TY_Constant, FN_("vec"), TY_Constant, FN_("idx"),
-		_Public|_Static, _F(ConstantExpr_getInsertElement), TY_Constant, TY_ConstantExpr, MN_("getInsertElement"), 3,TY_Constant, FN_("vec"), TY_Constant, FN_("elt"), TY_Constant, FN_("idx"),
-		_Public|_Static, _F(ConstantExpr_getShuffleVector), TY_Constant, TY_ConstantExpr, MN_("getShuffleVector"), 3,TY_Constant, FN_("v1"), TY_Constant, FN_("v2"), TY_Constant, FN_("mask"),
-		_Public|_Static, _F(ConstantExpr_getExtractValue), TY_Constant, TY_ConstantExpr, MN_("getExtractValue"), 2,TY_Constant, FN_("Agg"), TY_Array_Int, FN_("idxs"),
-		_Public|_Static, _F(ConstantExpr_getInsertValue), TY_Constant, TY_ConstantExpr, MN_("getInsertValue"), 3,TY_Constant, FN_("Agg"), TY_Constant, FN_("val"), TY_Array_Int, FN_("idxs"),
-		_Public, _F(Type_opEQ), TY_boolean, TY_Type, MN_("=="), 1,TY_Type, FN_("t"),
+		_Public|_Static, _F(ConstantExpr_getAlignOf), KType_Constant, KType_ConstantExpr, MN_("getAlignOf"), 1,KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getSizeOf), KType_Constant, KType_ConstantExpr, MN_("getSizeOf"), 1,KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getOffsetOf), KType_Constant, KType_ConstantExpr, MN_("getOffsetOf"), 2,KType_StructType, FN_("sTy"), KType_int, FN_("fieldNo"),
+		_Public|_Static, _F(ConstantExpr_getOffsetOf), KType_Constant, KType_ConstantExpr, MN_("getOffsetOf"), 2,KType_Type, FN_("ty"), KType_Constant, FN_("fieldNo"),
+		_Public|_Static, _F(ConstantExpr_getNeg), KType_Constant, KType_ConstantExpr, MN_("getNeg"), 3,KType_Constant, FN_("c"), KType_boolean, FN_("hasNUW"), KType_boolean, FN_("hasNSW"),
+		_Public|_Static, _F(ConstantExpr_getFNeg), KType_Constant, KType_ConstantExpr, MN_("getFNeg"), 1,KType_Constant, FN_("c"),
+		_Public|_Static, _F(ConstantExpr_getNot), KType_Constant, KType_ConstantExpr, MN_("getNot"), 1,KType_Constant, FN_("c"),
+		_Public|_Static, _F(ConstantExpr_getAdd), KType_Constant, KType_ConstantExpr, MN_("getAdd"), 4,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"), KType_boolean, FN_("hasNUW"), KType_boolean, FN_("hasNSW"),
+		_Public|_Static, _F(ConstantExpr_getFAdd), KType_Constant, KType_ConstantExpr, MN_("getFAdd"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getSub), KType_Constant, KType_ConstantExpr, MN_("getSub"), 4,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"), KType_boolean, FN_("hasNUW"), KType_boolean, FN_("hasNSW"),
+		_Public|_Static, _F(ConstantExpr_getFSub), KType_Constant, KType_ConstantExpr, MN_("getFSub"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getMul), KType_Constant, KType_ConstantExpr, MN_("getMul"), 4,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"), KType_boolean, FN_("hasNUW"), KType_boolean, FN_("hasNSW"),
+		_Public|_Static, _F(ConstantExpr_getFMul), KType_Constant, KType_ConstantExpr, MN_("getFMul"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getUDiv), KType_Constant, KType_ConstantExpr, MN_("getUDiv"), 3,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"), KType_boolean, FN_("isExact"),
+		_Public|_Static, _F(ConstantExpr_getSDiv), KType_Constant, KType_ConstantExpr, MN_("getSDiv"), 3,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"), KType_boolean, FN_("isExact"),
+		_Public|_Static, _F(ConstantExpr_getFDiv), KType_Constant, KType_ConstantExpr, MN_("getFDiv"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getURem), KType_Constant, KType_ConstantExpr, MN_("getURem"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getSRem), KType_Constant, KType_ConstantExpr, MN_("getSRem"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getFRem), KType_Constant, KType_ConstantExpr, MN_("getFRem"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getAnd), KType_Constant, KType_ConstantExpr, MN_("getAnd"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getOr), KType_Constant, KType_ConstantExpr, MN_("getOr"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getXor), KType_Constant, KType_ConstantExpr, MN_("getXor"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getShl), KType_Constant, KType_ConstantExpr, MN_("getShl"), 4,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"), KType_boolean, FN_("hasNUW"), KType_boolean, FN_("hasNSW"),
+		_Public|_Static, _F(ConstantExpr_getLShr), KType_Constant, KType_ConstantExpr, MN_("getLShr"), 3,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"), KType_boolean, FN_("isExact"),
+		_Public|_Static, _F(ConstantExpr_getAShr), KType_Constant, KType_ConstantExpr, MN_("getAShr"), 3,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"), KType_boolean, FN_("isExact"),
+		_Public|_Static, _F(ConstantExpr_getTrunc), KType_Constant, KType_ConstantExpr, MN_("getTrunc"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getSExt), KType_Constant, KType_ConstantExpr, MN_("getSExt"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getZExt), KType_Constant, KType_ConstantExpr, MN_("getZExt"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getFPTrunc), KType_Constant, KType_ConstantExpr, MN_("getFPTrunc"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getFPExtend), KType_Constant, KType_ConstantExpr, MN_("getFPExtend"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getUIToFP), KType_Constant, KType_ConstantExpr, MN_("getUIToFP"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getSIToFP), KType_Constant, KType_ConstantExpr, MN_("getSIToFP"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getFPToUI), KType_Constant, KType_ConstantExpr, MN_("getFPToUI"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getFPToSI), KType_Constant, KType_ConstantExpr, MN_("getFPToSI"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getPtrToInt), KType_Constant, KType_ConstantExpr, MN_("getPtrToInt"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getIntToPtr), KType_Constant, KType_ConstantExpr, MN_("getIntToPtr"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getBitCast), KType_Constant, KType_ConstantExpr, MN_("getBitCast"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getNSWNeg), KType_Constant, KType_ConstantExpr, MN_("getNSWNeg"), 1,KType_Constant, FN_("c"),
+		_Public|_Static, _F(ConstantExpr_getNUWNeg), KType_Constant, KType_ConstantExpr, MN_("getNUWNeg"), 1,KType_Constant, FN_("c"),
+		_Public|_Static, _F(ConstantExpr_getNSWAdd), KType_Constant, KType_ConstantExpr, MN_("getNSWAdd"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getNUWAdd), KType_Constant, KType_ConstantExpr, MN_("getNUWAdd"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getNSWSub), KType_Constant, KType_ConstantExpr, MN_("getNSWSub"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getNUWSub), KType_Constant, KType_ConstantExpr, MN_("getNUWSub"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getNSWMul), KType_Constant, KType_ConstantExpr, MN_("getNSWMul"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getNUWMul), KType_Constant, KType_ConstantExpr, MN_("getNUWMul"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getNSWShl), KType_Constant, KType_ConstantExpr, MN_("getNSWShl"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getNUWShl), KType_Constant, KType_ConstantExpr, MN_("getNUWShl"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getExactSDiv), KType_Constant, KType_ConstantExpr, MN_("getExactSDiv"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getExactUDiv), KType_Constant, KType_ConstantExpr, MN_("getExactUDiv"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getExactAShr), KType_Constant, KType_ConstantExpr, MN_("getExactAShr"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getExactLShr), KType_Constant, KType_ConstantExpr, MN_("getExactLShr"), 2,KType_Constant, FN_("c1"), KType_Constant, FN_("c2"),
+		_Public|_Static, _F(ConstantExpr_getZExtOrBitCast), KType_Constant, KType_ConstantExpr, MN_("getZExtOrBitCast"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getSExtOrBitCast), KType_Constant, KType_ConstantExpr, MN_("getSExtOrBitCast"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getTruncOrBitCast), KType_Constant, KType_ConstantExpr, MN_("getTruncOrBitCast"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getPointerCast), KType_Constant, KType_ConstantExpr, MN_("getPointerCast"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getIntegerCast), KType_Constant, KType_ConstantExpr, MN_("getIntegerCast"), 3,KType_Constant, FN_("c"), KType_Type, FN_("ty"), KType_boolean, FN_("isSigned"),
+		_Public|_Static, _F(ConstantExpr_getFPCast), KType_Constant, KType_ConstantExpr, MN_("getFPCast"), 2,KType_Constant, FN_("c"), KType_Type, FN_("ty"),
+		_Public|_Static, _F(ConstantExpr_getSelect), KType_Constant, KType_ConstantExpr, MN_("getSelect"), 3,KType_Constant, FN_("c"), KType_Constant, FN_("v1"), KType_Constant, FN_("v2"),
+		_Public|_Static, _F(ConstantExpr_getElementPtr0), KType_Constant, KType_ConstantExpr, MN_("getElementPtr"), 3,KType_Constant, FN_("c"), KType_Constant, FN_("idx"), KType_boolean, FN_("InBounds"),
+		_Public|_Static, _F(ConstantExpr_getElementPtr), KType_Constant, KType_ConstantExpr, MN_("getElementPtr"), 3,KType_Constant, FN_("c"), KType_Array_Value, FN_("IdxList"), KType_boolean, FN_("InBounds"),
+		_Public|_Static, _F(ConstantExpr_getInBoundsGetElementPtr0), KType_Constant, KType_ConstantExpr, MN_("getInBoundsGetElementPtr0"), 2,KType_Constant, FN_("c"), KType_Constant, FN_("idx"),
+		_Public|_Static, _F(ConstantExpr_getInBoundsGetElementPtr), KType_Constant, KType_ConstantExpr, MN_("getInBoundsGetElementPtr"), 2,KType_Constant, FN_("c"), KType_Array_Value, FN_("idxList"),
+		_Public|_Static, _F(ConstantExpr_getExtractElement), KType_Constant, KType_ConstantExpr, MN_("getExtractElement"), 2,KType_Constant, FN_("vec"), KType_Constant, FN_("idx"),
+		_Public|_Static, _F(ConstantExpr_getInsertElement), KType_Constant, KType_ConstantExpr, MN_("getInsertElement"), 3,KType_Constant, FN_("vec"), KType_Constant, FN_("elt"), KType_Constant, FN_("idx"),
+		_Public|_Static, _F(ConstantExpr_getShuffleVector), KType_Constant, KType_ConstantExpr, MN_("getShuffleVector"), 3,KType_Constant, FN_("v1"), KType_Constant, FN_("v2"), KType_Constant, FN_("mask"),
+		_Public|_Static, _F(ConstantExpr_getExtractValue), KType_Constant, KType_ConstantExpr, MN_("getExtractValue"), 2,KType_Constant, FN_("Agg"), KType_Array_Int, FN_("idxs"),
+		_Public|_Static, _F(ConstantExpr_getInsertValue), KType_Constant, KType_ConstantExpr, MN_("getInsertValue"), 3,KType_Constant, FN_("Agg"), KType_Constant, FN_("val"), KType_Array_Int, FN_("idxs"),
+		_Public, _F(Type_opEQ), KType_boolean, KType_Type, MN_("=="), 1,KType_Type, FN_("t"),
 		//FIXME
-	//_Public|_Const|_Im|_Coercion, _F(Float_toInt), TY_int, TY_float, MN_to(TY_int), 0,
-		_Public|_Const|_Coercion|_Im, _F(Object_toValue), TY_Value, TY_Object, MN_to(TY_Value), 0,
-		_Public|_Const|_Coercion|_Im, _F(Object_toType),  TY_Type,  TY_Object, MN_to(TY_Type), 0,
-		_Public|_Const|_Coercion|_Im, _F(Object_toModule), TY_Module,  TY_Object, MN_to(TY_Module), 0,
-		_Public|_Const|_Coercion|_Im, _F(Object_toExecutionEngine),  TY_ExecutionEngine,  TY_Object, MN_to(TY_ExecutionEngine), 0,
-		_Public|_Const|_Coercion|_Im, _F(Object_asFunction), TY_Function, TY_Object, MN_to(TY_Function), 0,
-		_Public|_Const|_Coercion|_Im, _F(Object_toIRBuilder), TY_IRBuilder, TY_Object, MN_to(TY_IRBuilder), 0,
-		_Public|_Const|_Coercion|_Im, _F(Object_asFunctionType), TY_FunctionType, TY_Object, MN_to(TY_FunctionType), 0,
-		_Public|_Const|_Coercion|_Im, _F(Object_toLLVMBasicBlock), TY_BasicBlock, TY_Object, MN_to(TY_BasicBlock), 0,
+	//_Public|_Const|_Im|_Coercion, _F(Float_toInt), KType_int, KType_float, MethodName_To(KType_int), 0,
+		_Public|_Const|_Coercion|_Im, _F(Object_toValue), KType_Value, KType_Object, MethodName_To(KType_Value), 0,
+		_Public|_Const|_Coercion|_Im, _F(Object_toType),  KType_Type,  KType_Object, MethodName_To(KType_Type), 0,
+		_Public|_Const|_Coercion|_Im, _F(Object_toModule), KType_Module,  KType_Object, MethodName_To(KType_Module), 0,
+		_Public|_Const|_Coercion|_Im, _F(Object_toExecutionEngine),  KType_ExecutionEngine,  KType_Object, MethodName_To(KType_ExecutionEngine), 0,
+		_Public|_Const|_Coercion|_Im, _F(Object_asFunction), KType_Function, KType_Object, MethodName_To(KType_Function), 0,
+		_Public|_Const|_Coercion|_Im, _F(Object_toIRBuilder), KType_IRBuilder, KType_Object, MethodName_To(KType_IRBuilder), 0,
+		_Public|_Const|_Coercion|_Im, _F(Object_asFunctionType), KType_FunctionType, KType_Object, MethodName_To(KType_FunctionType), 0,
+		_Public|_Const|_Coercion|_Im, _F(Object_toLLVMBasicBlock), KType_BasicBlock, KType_Object, MethodName_To(KType_BasicBlock), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, methoddata, trace);

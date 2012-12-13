@@ -122,7 +122,7 @@ static kbool_t apache_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	mod->cApache        = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &apacheDef, 0);
 
 	KDEFINE_INT_CONST IntData[] = {
-#define DEFINE_KEYWORD(KW) {#KW, TY_int, KW}
+#define DEFINE_KEYWORD(KW) {#KW, KType_int, KW}
 		DEFINE_KEYWORD(OK),
 		DEFINE_KEYWORD(APLOG_EMERG),
 		DEFINE_KEYWORD(APLOG_ALERT),

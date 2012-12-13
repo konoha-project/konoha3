@@ -563,7 +563,7 @@ static void EmitNode(ByteCodeWriter *writer, INode *Node)
 					continue;
 				INode *Param = *x;
 
-				if(Param->Type == TY_Method) {
+				if(Param->Type == KType_Method) {
 					asm volatile("int3");
 				}
 				unsigned Reg;
@@ -681,7 +681,7 @@ static void CodeWriter_visitValue(Visitor *visitor, INode *Node, const char *Tag
 	DUMP_REGISTER_NODE(Node, writer);
 	switch(Node->Kind) {
 		CASE(IConstant) {
-			if(Node->Type == TY_Method) {
+			if(Node->Type == KType_Method) {
 				/*XXX(ide) Need to Load Method Constant ??? */
 				return;
 			}

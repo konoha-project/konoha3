@@ -34,12 +34,12 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
 	kNameSpace *ns = Stmt_ns(stmt);
-	kToken *symbolToken = SUGAR kStmt_GetToken(kctx, stmt, KW_SymbolPattern, NULL);
+	kToken *symbolToken = SUGAR kStmt_GetToken(kctx, stmt, Symbol_SymbolPattern, NULL);
 	ksymbol_t unboxKey = symbolToken->resolvedSymbol;
-	kbool_t result = SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, CT_INFER, TypeCheckPolicy_CONST);
+	kbool_t result = SUGAR kStmt_TypeCheckByName(kctx, stmt, Symbol_ExprPattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
 	if(result) {
-		kExpr *constExpr = SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL);
-		KonohaClass *constClass = CT_(constExpr->attrTypeId);
+		kExpr *constExpr = SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
+		KonohaClass *constClass = KClass_(constExpr->attrTypeId);
 		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
 		result = false;
@@ -72,7 +72,7 @@ static kbool_t const_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("const"), 0, "\"const\" $Symbol \"=\" $Expr", 0, 0, NULL, NULL, Statement_ConstDecl, NULL, NULL, },
-		{ KW_END, },
+		{ Symbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;

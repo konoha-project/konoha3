@@ -32,9 +32,9 @@ extern "C" {
 #endif
 
 #include<minikonoha/import/methoddecl.h>
-#define TP_name         TY_String,     FN_("name")
-#define TP_paramsize    TY_int,        FN_("paramsize")
-#define TP_source       TY_String,     FN_("source")
+#define TP_name         KType_String,     FN_("name")
+#define TP_paramsize    KType_int,        FN_("paramsize")
+#define TP_source       KType_String,     FN_("source")
 
 //## NameSpace NameSpace.GetNameSpace();
 static KMETHOD NameSpace_GetNameSpace(KonohaContext *kctx, KonohaStack *sfp)
@@ -72,16 +72,16 @@ static KMETHOD NameSpace_DefineMacro(KonohaContext *kctx, KonohaStack *sfp)
 static void namespace_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(NameSpace_GetNameSpace), TY_NameSpace, TY_NameSpace, MN_("GetNameSpace"), 0,
-		_Public|_Const|_Im, _F(NameSpace_GetParentNameSpace), TY_NameSpace, TY_NameSpace, MN_("GetParentNameSpace"), 0,
-		_Public, _F(NameSpace_DefineMacro2), TY_boolean, TY_NameSpace, MN_("DefineMacro"), 2, TP_name, TP_source,
-		_Public, _F(NameSpace_DefineMacro), TY_boolean, TY_NameSpace, MN_("DefineMacro"), 3, TP_name, TP_paramsize, TP_source,
+		_Public|_Const|_Im, _F(NameSpace_GetNameSpace), KType_NameSpace, KType_NameSpace, MN_("GetNameSpace"), 0,
+		_Public|_Const|_Im, _F(NameSpace_GetParentNameSpace), KType_NameSpace, KType_NameSpace, MN_("GetParentNameSpace"), 0,
+		_Public, _F(NameSpace_DefineMacro2), KType_boolean, KType_NameSpace, MN_("DefineMacro"), 2, TP_name, TP_source,
+		_Public, _F(NameSpace_DefineMacro), KType_boolean, KType_NameSpace, MN_("DefineMacro"), 3, TP_name, TP_paramsize, TP_source,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 //	KDEFINE_INT_CONST IntData[] = {
-//		{"INT_MAX", TY_int, KINT_MAX},
-//		{"INT_MIN", TY_int, KINT_MIN},
+//		{"INT_MAX", KType_int, KINT_MAX},
+//		{"INT_MIN", KType_int, KINT_MIN},
 //		{NULL},
 //	};
 //	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), false/*isOverride*/, trace);
@@ -94,7 +94,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
 	kstatus_t result = K_CONTINUE;
-	kToken *tk = SUGAR kStmt_GetToken(kctx, stmt, KW_BlockPattern, NULL);
+	kToken *tk = SUGAR kStmt_GetToken(kctx, stmt, Symbol_BlockPattern, NULL);
 	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		INIT_GCSTACK();
 		kNameSpace *ns = new_(NameSpace, Stmt_ns(stmt), _GcStack);
@@ -114,12 +114,12 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
 	kNameSpace *ns = Stmt_ns(stmt);
-	kToken *symbolToken = SUGAR kStmt_GetToken(kctx, stmt, KW_SymbolPattern, NULL);
+	kToken *symbolToken = SUGAR kStmt_GetToken(kctx, stmt, Symbol_SymbolPattern, NULL);
 	ksymbol_t unboxKey = symbolToken->resolvedSymbol;
-	kbool_t result = SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, CT_INFER, TypeCheckPolicy_CONST);
+	kbool_t result = SUGAR kStmt_TypeCheckByName(kctx, stmt, Symbol_ExprPattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
 	if(result) {
-		kExpr *constExpr = SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL);
-		KonohaClass *constClass = CT_(constExpr->attrTypeId);
+		kExpr *constExpr = SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
+		KonohaClass *constClass = KClass_(constExpr->attrTypeId);
 		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
 		result = false;
@@ -159,31 +159,31 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	int popIsBlockingErrorMessage = sugarContext->isBlockedErrorMessage;
 	sugarContext->isBlockedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->cons); i++) {
-		kExpr *typedExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, i, gma, CT_INFER, TypeCheckPolicy_ALLOWVOID);
+		kExpr *typedExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, i, gma, KClass_INFER, TypeCheckPolicy_ALLOWVOID);
 		if(typedExpr == K_NULLEXPR) {
 			isDefined = false;
 			break;
 		}
 	}
 	sugarContext->isBlockedErrorMessage = popIsBlockingErrorMessage;
-	KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, TY_boolean, isDefined));
+	KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_boolean, isDefined));
 }
 
 static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
 	int i;
 	for(i = beginIdx; i < endIdx; i++) {
-		if(i + 1 == endIdx || tokenList->TokenItems[i+1]->resolvedSyntaxInfo->keyword == KW_COMMA) {
+		if(i + 1 == endIdx || tokenList->TokenItems[i+1]->resolvedSyntaxInfo->keyword == Symbol_COMMA) {
 			kTokenVar *tk = tokenList->TokenVarItems[i];
-			if(tk->resolvedSyntaxInfo->keyword != KW_SymbolPattern) {  // defined
-				tk->resolvedSyntaxInfo = SYN_(ns, KW_TextPattern);  // switch to text pattern
+			if(tk->resolvedSyntaxInfo->keyword != Symbol_SymbolPattern) {  // defined
+				tk->resolvedSyntaxInfo = SYN_(ns, Symbol_TextPattern);  // switch to text pattern
 			}
 			i++;
 		}
 		while(i < endIdx) {
 			kTokenVar *tk = tokenList->TokenVarItems[i];
 			i++;
-			if(tk->resolvedSyntaxInfo->keyword == KW_COMMA) break;
+			if(tk->resolvedSyntaxInfo->keyword == Symbol_COMMA) break;
 		}
 	}
 }
@@ -209,7 +209,7 @@ static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTrac
 		{ SYM_("namespace"), 0, "\"namespace\" $Block", 0, 0, NULL, NULL, Statement_namespace, NULL, NULL, },
 		{ SYM_("const"), 0, "\"const\" $Symbol \"=\" $Expr", 0, 0, NULL, NULL, Statement_ConstDecl, NULL, NULL, },
 		{ SYM_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Expression_Defined, NULL, NULL, TypeCheck_Defined, },
-		{ KW_END, },
+		{ Symbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;

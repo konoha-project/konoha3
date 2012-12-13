@@ -76,7 +76,7 @@ static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 	a->ObjectItems = (kObject**)KCalloc_UNTRACE(a->bytemax, 1);
 	if(!kArray_Is(UnboxData, a)) {
 		size_t i;
-		kObject *null = KLIB Knull(kctx, CT_(kObject_p0(a)));
+		kObject *null = KLIB Knull(kctx, KClass_(kObject_p0(a)));
 		for(i = 0; i < asize; i++) {
 			KFieldSet(a, a->ObjectItems[i], null);
 		}
@@ -246,8 +246,8 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 //	kFunc  *f = sfp[1].asFunc;
 //	size_t asize = kArray_size(a);
 //	ktypeattr_t resolve_type = kMethod_GetReturnType(f->mtd);  // FIXME
-//	KonohaClass *CT_ArrayT0 = CT_p0(kctx, CT_Array, resolve_type);
-//	kArrayVar *returnValue = (kArrayVar *)KLIB new_kObject(kctx, _GcStack, CT_ArrayT0, asize);
+//	KonohaClass *KClass_ArrayT0 = KClass_p0(kctx, KClass_Array, resolve_type);
+//	kArrayVar *returnValue = (kArrayVar *)KLIB new_kObject(kctx, _GcStack, KClass_ArrayT0, asize);
 //
 //	size_t i;
 //	if(kArray_Is(UnboxData, a)) {
@@ -258,7 +258,7 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 //			lsfp[K_CALLDELTA+1].unboxValue = tmp;
 //			{
 //				KonohaStack *sfp = lsfp + K_CALLDELTA;
-//				KStackSetMethodAll(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
+//				KStackSetMethodAll(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, KClass_(resolve_type)));
 //				KStackCall(sfp);
 //			}
 //			END_UnusedStack();
@@ -273,7 +273,7 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 //			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
 //			{
 //				KonohaStack *sfp = lsfp + K_CALLDELTA;
-//				KStackSetMethodAll(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
+//				KStackSetMethodAll(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, KClass_(resolve_type)));
 //				KStackCall(sfp);
 //			}
 //			END_UnusedStack();
@@ -302,7 +302,7 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 //			lsfp[K_CALLDELTA+2].unboxValue = a->unboxItems[i];
 //			{
 //				KonohaStack *sfp = lsfp + K_CALLDELTA;
-//				KStackSetMethodAll(sfp, 0/*UL*/, f->mtd, 2, KLIB Knull(kctx, CT_(resolve_type)));
+//				KStackSetMethodAll(sfp, 0/*UL*/, f->mtd, 2, KLIB Knull(kctx, KClass_(resolve_type)));
 //				KStackCall(sfp);
 //			}
 //			tmp = lsfp[0].unboxValue;
@@ -312,8 +312,8 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 //	}
 //	else {
 //		INIT_GCSTACK();
-//		kObject *tmp = (kObject *) KLIB new_kObject(kctx, _GcStack, CT_(resolve_type), 0);
-//		kObject *nulobj = KLIB Knull(kctx, CT_(resolve_type));
+//		kObject *tmp = (kObject *) KLIB new_kObject(kctx, _GcStack, KClass_(resolve_type), 0);
+//		kObject *nulobj = KLIB Knull(kctx, KClass_(resolve_type));
 //		BEGIN_UnusedStack(lsfp, K_CALLDELTA + 2);
 //		for(i=0; i != asize; ++i) {
 //			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, nulobj);
@@ -471,7 +471,7 @@ static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
 	a->ObjectItems = (kObject**)KCalloc_UNTRACE(a->bytemax, 1);
 	if(!kArray_Is(UnboxData, a)) {
 		size_t i;
-		kObject *null = KLIB Knull(kctx, CT_(kObject_p0(a)));
+		kObject *null = KLIB Knull(kctx, KClass_(kObject_p0(a)));
 		for(i = 0; i < asize; i++) {
 			KFieldSet(a, a->ObjectItems[i], null);
 		}
@@ -511,43 +511,43 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 	KRequireKonohaCommonModule(trace);
 	KImportPackageSymbol(ns, "cstyle", "[]", trace);
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-		{"Array", VirtualType_KonohaClass, (uintptr_t)CT_(TY_Array)},
+		{"Array", VirtualType_KonohaClass, (uintptr_t)KClass_(KType_Array)},
 		{NULL},
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), false/*isOverride*/, trace);
 
-	KonohaClass *CT_ArrayT0 = CT_p0(kctx, CT_Array, TY_0);
-	ktypeattr_t TY_ArrayT0 = CT_ArrayT0->typeId;
+	KonohaClass *KClass_ArrayT0 = KClass_p0(kctx, KClass_Array, KType_0);
+	ktypeattr_t KType_ArrayT0 = KClass_ArrayT0->typeId;
 
-	kparamtype_t p[] = {{TY_0}};
-	ktypeattr_t TY_FuncMap = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_0 , 1, p))->typeId;
+	kparamtype_t p[] = {{KType_0}};
+	ktypeattr_t KType_FuncMap = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_0 , 1, p))->typeId;
 
-	kparamtype_t P_inject[] = {{TY_0},{TY_0}};
-	ktypeattr_t TY_FuncInject = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_0 , 2, P_inject))->typeId;
+	kparamtype_t P_inject[] = {{KType_0},{KType_0}};
+	ktypeattr_t KType_FuncInject = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_0 , 2, P_inject))->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im,    _F(Array_get), TY_0,   TY_Array, MN_("get"), 1, TY_int, FN_("index"),
-		_Public,        _F(Array_set), TY_void, TY_Array, MN_("set"), 2, TY_int, FN_("index"),  TY_0, FN_("value"),
-		_Public|_Im,    _F(Array_removeAt), TY_0,   TY_Array, MN_("removeAt"), 1, TY_int, FN_("index"),
-		_Public|_Const, _F(Array_getSize), TY_int, TY_Array, MN_("getSize"), 0,
-		_Public|_Const, _F(Array_getSize), TY_int, TY_Array, MN_("getlength"), 0,
-		_Public,        _F(Array_clear), TY_void, TY_Array, MN_("clear"), 0,
-		_Public,        _F(Array_Add1), TY_void, TY_Array, MN_("add"), 1, TY_0, FN_("value"),
-		_Public,        _F(Array_Push), TY_int, TY_Array, MN_("push"), 1, TY_0, FN_("value"),
-		_Public,        _F(Array_Pop), TY_0, TY_Array, MN_("pop"), 0,
-		_Public,        _F(Array_shift), TY_0, TY_Array, MN_("shift"), 0,
-		_Public,        _F(Array_unshift), TY_int, TY_Array, MN_("unshift"), 1, TY_0, FN_("value"),
-		_Public,        _F(Array_reverse), TY_Array, TY_Array, MN_("reverse"), 0,
-//		_Public|_Im,    _F(Array_map), TY_ArrayT0, TY_Array, MN_("map"), 1, TY_FuncMap, FN_("func"),
-//		_Public|_Im,    _F(Array_inject), TY_0, TY_Array, MN_("inject"), 1, TY_FuncInject, FN_("func"),
+		_Public|_Im,    _F(Array_get), KType_0,   KType_Array, MN_("get"), 1, KType_int, FN_("index"),
+		_Public,        _F(Array_set), KType_void, KType_Array, MN_("set"), 2, KType_int, FN_("index"),  KType_0, FN_("value"),
+		_Public|_Im,    _F(Array_removeAt), KType_0,   KType_Array, MN_("removeAt"), 1, KType_int, FN_("index"),
+		_Public|_Const, _F(Array_getSize), KType_int, KType_Array, MN_("getSize"), 0,
+		_Public|_Const, _F(Array_getSize), KType_int, KType_Array, MN_("getlength"), 0,
+		_Public,        _F(Array_clear), KType_void, KType_Array, MN_("clear"), 0,
+		_Public,        _F(Array_Add1), KType_void, KType_Array, MN_("add"), 1, KType_0, FN_("value"),
+		_Public,        _F(Array_Push), KType_int, KType_Array, MN_("push"), 1, KType_0, FN_("value"),
+		_Public,        _F(Array_Pop), KType_0, KType_Array, MN_("pop"), 0,
+		_Public,        _F(Array_shift), KType_0, KType_Array, MN_("shift"), 0,
+		_Public,        _F(Array_unshift), KType_int, KType_Array, MN_("unshift"), 1, KType_0, FN_("value"),
+		_Public,        _F(Array_reverse), KType_Array, KType_Array, MN_("reverse"), 0,
+//		_Public|_Im,    _F(Array_map), KType_ArrayT0, KType_Array, MN_("map"), 1, KType_FuncMap, FN_("func"),
+//		_Public|_Im,    _F(Array_inject), KType_0, KType_Array, MN_("inject"), 1, KType_FuncInject, FN_("func"),
 
-		_Public,        _F(Array_concat), TY_ArrayT0, TY_Array, MN_("concat"), 1, TY_ArrayT0, FN_("a1"),
-		_Public,        _F(Array_indexOf), TY_int, TY_Array, MN_("indexOf"), 1, TY_0, FN_("value"),
-		_Public,        _F(Array_lastIndexOf), TY_int, TY_Array, MN_("lastIndexOf"), 1, TY_0, FN_("value"),
-//		_Public,        _F(Array_toString), TY_String, TY_Array, MN_("toString"), 0,
-		_Public|_Im,    _F(Array_new), TY_void, TY_Array, MN_("new"), 1, TY_int, FN_("size"),
-		_Public,        _F(Array_newArray), TY_Array, TY_Array, MN_("newArray"), 1, TY_int, FN_("size"),
-		_Public|kMethod_Hidden, _F(Array_newList), TY_Array, TY_Array, MN_("[]"), 0,
+		_Public,        _F(Array_concat), KType_ArrayT0, KType_Array, MN_("concat"), 1, KType_ArrayT0, FN_("a1"),
+		_Public,        _F(Array_indexOf), KType_int, KType_Array, MN_("indexOf"), 1, KType_0, FN_("value"),
+		_Public,        _F(Array_lastIndexOf), KType_int, KType_Array, MN_("lastIndexOf"), 1, KType_0, FN_("value"),
+//		_Public,        _F(Array_toString), KType_String, KType_Array, MN_("toString"), 0,
+		_Public|_Im,    _F(Array_new), KType_void, KType_Array, MN_("new"), 1, KType_int, FN_("size"),
+		_Public,        _F(Array_newArray), KType_Array, KType_Array, MN_("newArray"), 1, KType_int, FN_("size"),
+		_Public|kMethod_Hidden, _F(Array_newList), KType_Array, KType_Array, MN_("[]"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -562,21 +562,21 @@ static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	// [0] currentToken, [1] NULL, [2] ....
 	size_t i;
-	KonohaClass *requestClass = CT_(reqty);
-	KonohaClass *paramType = (requestClass->baseTypeId == TY_Array) ? CT_(requestClass->p0) : CT_INFER;
+	KonohaClass *requestClass = KClass_(reqty);
+	KonohaClass *paramType = (requestClass->baseTypeId == KType_Array) ? KClass_(requestClass->p0) : KClass_INFER;
 	for(i = 2; i < kArray_size(expr->cons); i++) {
 		kExpr *typedExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, i, gma, paramType, 0);
 		if(typedExpr == K_NULLEXPR) {
 			KReturn(typedExpr);
 		}
-		if(paramType->typeId == TY_var) {
-			paramType = CT_(typedExpr->attrTypeId);
+		if(paramType->typeId == KType_var) {
+			paramType = KClass_(typedExpr->attrTypeId);
 		}
 	}
-	if(requestClass->baseTypeId != TY_Array) {
-		requestClass = (paramType->typeId == TY_var) ? CT_Array : CT_p0(kctx, CT_Array, paramType->typeId);
+	if(requestClass->baseTypeId != KType_Array) {
+		requestClass = (paramType->typeId == KType_var) ? KClass_Array : KClass_p0(kctx, KClass_Array, paramType->typeId);
 	}
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), CT_Array, MN_("[]"), -1, MethodMatch_NoOption);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), KClass_Array, MN_("[]"), -1, MethodMatch_NoOption);
 	DBG_ASSERT(mtd != NULL);
 	KFieldSet(expr, expr->cons->MethodItems[0], mtd);
 	KFieldSet(expr, expr->cons->ExprItems[1], SUGAR kExpr_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, kArray_size(expr->cons) - 2));
@@ -595,7 +595,7 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *currentToken = tokenList->TokenItems[operatorIdx];
 	if(beginIdx == operatorIdx) {
 		/* transform '[ Value1, Value2, ... ]' to '(Call Untyped new (Value1, Value2, ...))' */
-		DBG_ASSERT(currentToken->resolvedSyntaxInfo->keyword == KW_BracketGroup);
+		DBG_ASSERT(currentToken->resolvedSyntaxInfo->keyword == Symbol_BracketGroup);
 		kExpr *arrayExpr = SUGAR new_UntypedCallStyleExpr(kctx, currentToken->resolvedSyntaxInfo, 2, currentToken, K_NULL);
 		KReturn(SUGAR kStmt_AddExprParam(kctx, stmt, arrayExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), NULL));
 	}
@@ -609,7 +609,7 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 			size_t subTokenSize = kArray_size(currentToken->subTokenList);
 			if(subTokenSize == 0) {
 				/* transform 'new Type0 [ ]' => (Call Type0 new) */
-				kExpr_Setsyn(leftExpr, SYN_(ns, KW_ExprMethodCall));
+				kExpr_Setsyn(leftExpr, SYN_(ns, Symbol_ExprMethodCall));
 			} else {
 				/* transform 'new Type0 [ Type1 ] (...) => new 'Type0<Type1>' (...) */
 				KonohaClass *classT0 = NULL;
@@ -619,7 +619,7 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 					beginIdx = SUGAR TokenUtils_ParseTypePattern(kctx, ns, subTokenList, 0, kArray_size(subTokenList), &classT0);
 				}
 				beginIdx = (beginIdx == -1) ? 0 : beginIdx;
-				kExpr_Setsyn(leftExpr, SYN_(ns, KW_ExprMethodCall));
+				kExpr_Setsyn(leftExpr, SYN_(ns, Symbol_ExprMethodCall));
 				DBG_P("currentToken->subtoken:%d", kArray_size(subTokenList));
 				leftExpr = SUGAR kStmt_AddExprParam(kctx, stmt, leftExpr, subTokenList, beginIdx, kArray_size(subTokenList), "[");
 			}
@@ -627,9 +627,9 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 		else {
 			/* transform 'Value0 [ Value1 ]=> (Call Value0 get (Value1)) */
 			kTokenVar *tkN = /*G*/new_(TokenVar, 0, OnGcStack);
-			tkN->resolvedSymbol= MN_toGETTER(0);
+			tkN->resolvedSymbol= MethodName_ToGetter(0);
 			tkN->uline = currentToken->uline;
-			SugarSyntax *syn = SYN_(Stmt_ns(stmt), KW_ExprMethodCall);
+			SugarSyntax *syn = SYN_(Stmt_ns(stmt), Symbol_ExprMethodCall);
 			leftExpr  = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, tkN, leftExpr);
 			leftExpr = SUGAR kStmt_AddExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), "[");
 		}
@@ -640,8 +640,8 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t array_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KW_BracketGroup, SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, Expression_Bracket, NULL, NULL, TypeCheck_Bracket, },
-		{ KW_END, },
+		{ Symbol_BracketGroup, SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, Expression_Bracket, NULL, NULL, TypeCheck_Bracket, },
+		{ Symbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;

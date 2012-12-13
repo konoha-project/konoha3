@@ -6,7 +6,7 @@
 #ifndef LLVMTYPE_H
 #define LLVMTYPE_H
 
-enum STRUCT_TYPE_ID {
+enum STRUKClass_TYPE_ID {
 	ID_void,
 	ID_Ptrvoid,
 	ID_long,
@@ -39,10 +39,10 @@ enum STRUCT_TYPE_ID {
 struct TypeInfo {
 	const char *Name;
 	bool     IsFunction;
-	enum STRUCT_TYPE_ID ReturnTypeId;
+	enum STRUKClass_TYPE_ID ReturnTypeId;
 	unsigned ParamSize;
 	struct Param {
-		enum STRUCT_TYPE_ID TypeId;
+		enum STRUKClass_TYPE_ID TypeId;
 #ifdef PARAM_DEBUG
 		const char *name;
 #endif
@@ -128,7 +128,7 @@ static llvm::Type *LLVMTYPE_KonohaValuePtr = NULL;
 static llvm::Type *LLVMTYPE_MethodPtr = NULL;
 static llvm::Type *LLVMTYPE_MethodFunc = NULL;
 
-static llvm::Type *ToType(enum STRUCT_TYPE_ID ID)
+static llvm::Type *ToType(enum STRUKClass_TYPE_ID ID)
 {
 	switch(ID) {
 	case ID_void:    return llvm::Type::getVoidTy(LLVM_CONTEXT());
@@ -195,11 +195,11 @@ static void LLVMType_Init()
 static llvm::Type *convert_type(KonohaContext *kctx, ktypeattr_t type)
 {
 	switch (type) {
-		case TY_void:    return llvm::Type::getVoidTy(LLVM_CONTEXT());
-		case TY_boolean: return llvm::Type::getInt64Ty(LLVM_CONTEXT());
-		case TY_int:     return llvm::Type::getInt64Ty(LLVM_CONTEXT());
+		case KType_void:    return llvm::Type::getVoidTy(LLVM_CONTEXT());
+		case KType_boolean: return llvm::Type::getInt64Ty(LLVM_CONTEXT());
+		case KType_int:     return llvm::Type::getInt64Ty(LLVM_CONTEXT());
 	}
-	if(KDefinedKonohaCommonModule() && type == TY_float)
+	if(KDefinedKonohaCommonModule() && type == KType_float)
 		return llvm::Type::getDoubleTy(LLVM_CONTEXT());
 	return LLVMTYPE_ObjectPtr;
 }
@@ -209,7 +209,7 @@ static llvm::Type *convert_type(KonohaContext *kctx, KonohaClass *kclass)
 	return convert_type(kctx, kclass->typeId);
 }
 
-static inline llvm::Type *GetLLVMType(enum STRUCT_TYPE_ID Id)
+static inline llvm::Type *GetLLVMType(enum STRUKClass_TYPE_ID Id)
 {
 	return ToType(Id);
 }

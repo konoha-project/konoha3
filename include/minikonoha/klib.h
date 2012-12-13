@@ -75,20 +75,20 @@ static kinline kString* PackageId_s_(KonohaContext *kctx, kpackageId_t packageId
 	return kctx->share->packageIdList_OnGlobalConstList->stringItems[packageId];
 }
 
-#define CT_s(X)   CT_s_(kctx, X)
-#define CT_t(X)   kString_text(CT_s_(kctx, X))
-static kinline kString* CT_s_(KonohaContext *kctx, KonohaClass *ct)
+#define KClass_s(X)   KClass_s_(kctx, X)
+#define KClass_t(X)   kString_text(KClass_s_(kctx, X))
+static kinline kString* KClass_s_(KonohaContext *kctx, KonohaClass *ct)
 {
 	return kctx->klib->KonohaClass_shortName(kctx, ct);
 }
 
-#define TY_s(X)   TY_s_(kctx, X)
-#define TY_t(X)   kString_text(TY_s(TypeAttr_Unmask(X)))
-#define ATY_t(X)  TY_t(TypeAttr_Unmask(X))
-static kinline kString* TY_s_(KonohaContext *kctx, ktypeattr_t ty)
+#define KType_s(X)   KType_s_(kctx, X)
+#define KType_t(X)   kString_text(KType_s(TypeAttr_Unmask(X)))
+#define AKType_t(X)  KType_t(TypeAttr_Unmask(X))
+static kinline kString* KType_s_(KonohaContext *kctx, ktypeattr_t ty)
 {
 	DBG_ASSERT(ty < KARRAYSIZE(kctx->share->classTable.bytemax, intptr));
-	return CT_s_(kctx, CT_(ty));
+	return KClass_s_(kctx, KClass_(ty));
 }
 
 #define SYM_s(sym)   SYM_s_(kctx, sym)
@@ -140,10 +140,10 @@ static kinline uintptr_t longid(kushort_t packageDomain, kushort_t un)
 	return (hcode << (sizeof(kshort_t)*8)) | un;
 }
 
-static kinline KonohaClass *CT_p0(KonohaContext *kctx, KonohaClass *ct, ktypeattr_t ty)
+static kinline KonohaClass *KClass_p0(KonohaContext *kctx, KonohaClass *ct, ktypeattr_t ty)
 {
 	kparamtype_t p = {ty, 0};
-	return KLIB KonohaClass_Generics(kctx, ct, TY_void, 1, &p);
+	return KLIB KonohaClass_Generics(kctx, ct, KType_void, 1, &p);
 }
 
 #define uNULL   ((uintptr_t)NULL)

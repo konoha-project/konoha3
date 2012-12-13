@@ -6,14 +6,14 @@
 #define VMCOMMON_H
 
 enum TypeId {
-	TYPE_void = TY_void,
-	TYPE_boolean = TY_boolean,
-	TYPE_int = TY_int,
-	TYPE_String = TY_String,
-	TYPE_Function = TY_Func,
-	TYPE_Array = TY_Array,
-	TYPE_Method = TY_Method,
-	TYPE_Any = TY_0,
+	TYPE_void = KType_void,
+	TYPE_boolean = KType_boolean,
+	TYPE_int = KType_int,
+	TYPE_String = KType_String,
+	TYPE_Function = KType_Func,
+	TYPE_Array = KType_Array,
+	TYPE_Method = KType_Method,
+	TYPE_Any = KType_0,
 	TYPE_float
 };
 

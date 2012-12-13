@@ -261,9 +261,9 @@ static KMETHOD Cond_broadcast(KonohaContext *kctx, KonohaStack *sfp)
 #define _Static   kMethod_Static
 #define _F(F)   (intptr_t)(F)
 
-#define TY_Thread cThread->typeId
-#define TY_Mutex  cMutex->typeId
-#define TY_Cond   cCond->typeId
+#define KType_Thread cThread->typeId
+#define KType_Mutex  cMutex->typeId
+#define KType_Cond   cCond->typeId
 
 static kbool_t thread_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
@@ -292,26 +292,26 @@ static kbool_t thread_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	KonohaClass *cCond   = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCond, trace);
 
 	kparamtype_t P_Func[] = {{}};
-	int TY_FUNC = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_void, 0, P_Func))->typeId;
+	int KType_FUNC = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_void, 0, P_Func))->typeId;
 
 	int FN_func = FN_("func");
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static, _F(Thread_create), TY_Thread, TY_Thread, MN_("create"), 1, TY_FUNC, FN_func,
-		_Public, _F(Thread_join)   , TY_void, TY_Thread, MN_("join"), 0,
-		_Public, _F(Thread_exit)   , TY_void, TY_Thread, MN_("exit"), 0,
-		_Public, _F(Thread_cancel) , TY_void, TY_Thread, MN_("cancel"), 0,
-		_Public, _F(Thread_detach) , TY_void, TY_Thread, MN_("detach"), 0,
-		_Public|_Static, _F(Thread_self)   , TY_Thread , TY_Thread, MN_("self"), 0,
-		_Public, _F(Thread_equal)  , TY_boolean, TY_Thread, MN_("equal"), 1, TY_Thread, FN_x,
-		_Public, _F(Mutex_new)     , TY_Mutex, TY_Mutex, MN_("new"), 0,
-		_Public, _F(Mutex_lock)    , TY_void, TY_Mutex, MN_("lock"), 0,
-		_Public, _F(Mutex_trylock) , TY_boolean, TY_Mutex, MN_("trylock"), 0,
-		_Public, _F(Mutex_unlock)  , TY_void, TY_Mutex, MN_("unlock"), 0,
-		_Public, _F(Cond_new)      , TY_Cond, TY_Cond, MN_("new"), 0,
-		_Public, _F(Cond_wait)     , TY_void, TY_Cond, MN_("wait"), 1, TY_Mutex, FN_x,
-		_Public, _F(Cond_signal)   , TY_void, TY_Cond, MN_("signal"), 0,
-		_Public, _F(Cond_broadcast), TY_void, TY_Cond, MN_("broadcast"), 0,
+		_Public|_Static, _F(Thread_create), KType_Thread, KType_Thread, MN_("create"), 1, KType_FUNC, FN_func,
+		_Public, _F(Thread_join)   , KType_void, KType_Thread, MN_("join"), 0,
+		_Public, _F(Thread_exit)   , KType_void, KType_Thread, MN_("exit"), 0,
+		_Public, _F(Thread_cancel) , KType_void, KType_Thread, MN_("cancel"), 0,
+		_Public, _F(Thread_detach) , KType_void, KType_Thread, MN_("detach"), 0,
+		_Public|_Static, _F(Thread_self)   , KType_Thread , KType_Thread, MN_("self"), 0,
+		_Public, _F(Thread_equal)  , KType_boolean, KType_Thread, MN_("equal"), 1, KType_Thread, FN_x,
+		_Public, _F(Mutex_new)     , KType_Mutex, KType_Mutex, MN_("new"), 0,
+		_Public, _F(Mutex_lock)    , KType_void, KType_Mutex, MN_("lock"), 0,
+		_Public, _F(Mutex_trylock) , KType_boolean, KType_Mutex, MN_("trylock"), 0,
+		_Public, _F(Mutex_unlock)  , KType_void, KType_Mutex, MN_("unlock"), 0,
+		_Public, _F(Cond_new)      , KType_Cond, KType_Cond, MN_("new"), 0,
+		_Public, _F(Cond_wait)     , KType_void, KType_Cond, MN_("wait"), 1, KType_Mutex, FN_x,
+		_Public, _F(Cond_signal)   , KType_void, KType_Cond, MN_("signal"), 0,
+		_Public, _F(Cond_broadcast), KType_void, KType_Cond, MN_("broadcast"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

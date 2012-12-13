@@ -199,7 +199,7 @@ typedef struct JSONObject_iterator {
     JSONObject *obj;
 } JSONObject_iterator;
 
-#define JSON_OBJECT_EACH(O, ITR, KEY, VAL)\
+#define JSON_OBJEKClass_EACH(O, ITR, KEY, VAL)\
     if(!JSON_TYPE_CHECK(Object, O)) {} else\
     if(!(JSONObject_iterator_Init(&ITR, O))) {}\
     else\

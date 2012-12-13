@@ -80,8 +80,8 @@ static KMETHOD kSHA1_Final(KonohaContext *kctx, KonohaStack *sfp)
 #define _C kMethod_Const
 #define _S kMethod_Static
 #define _F(F)   (intptr_t)(F)
-#define TY_openssl  (ct0->typeId)
-#define TY_Log      (ct1->typeId)
+#define KType_openssl  (ct0->typeId)
+#define KType_Log      (ct1->typeId)
 
 static kbool_t openssl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
@@ -96,8 +96,8 @@ static kbool_t openssl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 			.init = RawPtr_Init,
 			.free = RawPtr_Free,
 	};
-#define TY_MD5  tbls[0]->typeId
-#define TY_SHA1 tbls[1]->typeId
+#define KType_MD5  tbls[0]->typeId
+#define KType_SHA1 tbls[1]->typeId
 	int i;
 	for (i = 0; i < 2; i++) {
 		Def.structname = names[i];
@@ -106,12 +106,12 @@ static kbool_t openssl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_P, _F(kMD5_Init),   TY_SHA1,   TY_MD5, MN_("new"), 0,
-		_P, _F(kMD5_Update), TY_int,   TY_MD5, MN_("update"), 1, TY_String, FN_x,
-		_P, _F(kMD5_Final),  TY_String, TY_MD5, MN_("final"), 0,
-		_P, _F(kSHA1_Init),   TY_SHA1,   TY_SHA1, MN_("new"), 0,
-		_P, _F(kSHA1_Update), TY_int,   TY_SHA1, MN_("update"), 1, TY_String, FN_x,
-		_P, _F(kSHA1_Final),  TY_String, TY_SHA1, MN_("final"), 0,
+		_P, _F(kMD5_Init),   KType_SHA1,   KType_MD5, MN_("new"), 0,
+		_P, _F(kMD5_Update), KType_int,   KType_MD5, MN_("update"), 1, KType_String, FN_x,
+		_P, _F(kMD5_Final),  KType_String, KType_MD5, MN_("final"), 0,
+		_P, _F(kSHA1_Init),   KType_SHA1,   KType_SHA1, MN_("new"), 0,
+		_P, _F(kSHA1_Update), KType_int,   KType_SHA1, MN_("update"), 1, KType_String, FN_x,
+		_P, _F(kSHA1_Final),  KType_String, KType_SHA1, MN_("final"), 0,
 
 		DEND,
 	};

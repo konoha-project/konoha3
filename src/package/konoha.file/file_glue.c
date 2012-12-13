@@ -454,27 +454,27 @@ static KMETHOD File_scriptPath(KonohaContext *kctx, KonohaStack *sfp)
 static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static|_Const, _F(File_scriptPath), TY_String, TY_File, MN_("scriptPath"), 1, TY_String, FN_("filename"),
-		_Public, _F(File_setWriterCharset), TY_void, TY_File, MN_("setWriterCharset"), 1, TY_String, FN_("charset"),
-		_Public, _F(File_setReaderCharset), TY_void, TY_File, MN_("setReaderCharset"), 1, TY_String, FN_("charset"),
+		_Public|_Static|_Const, _F(File_scriptPath), KType_String, KType_File, MN_("scriptPath"), 1, KType_String, FN_("filename"),
+		_Public, _F(File_setWriterCharset), KType_void, KType_File, MN_("setWriterCharset"), 1, KType_String, FN_("charset"),
+		_Public, _F(File_setReaderCharset), KType_void, KType_File, MN_("setReaderCharset"), 1, KType_String, FN_("charset"),
 
-		_Public, _F(File_new), TY_File, TY_File, MN_("new"), 2, TY_String, FN_("filename"), TY_String, FN_("mode"),
-		_Public, _F(File_close), TY_void, TY_File, MN_("close"), 0,
-		_Public, _F(File_getc), TY_int, TY_File, MN_("getc"), 0,
-		_Public, _F(File_putc), TY_void, TY_File, MN_("putc"), 1, TY_int, FN_("char"),
-		_Public, _F(File_readLine), TY_String, TY_File, MN_("readLine"), 0,
-		_Public, _F(File_print), TY_String, TY_File, MN_("print"), 1, TY_String | TypeAttr_Coercion, FN_("str"),
-		_Public, _F(File_println), TY_void, TY_File, MN_("println"), 1, TY_String | TypeAttr_Coercion, FN_("str"),
-		_Public, _F(File_println0), TY_void, TY_File, MN_("println"), 0,
-		_Public, _F(File_flush), TY_void, TY_File, MN_("flush"), 0,
+		_Public, _F(File_new), KType_File, KType_File, MN_("new"), 2, KType_String, FN_("filename"), KType_String, FN_("mode"),
+		_Public, _F(File_close), KType_void, KType_File, MN_("close"), 0,
+		_Public, _F(File_getc), KType_int, KType_File, MN_("getc"), 0,
+		_Public, _F(File_putc), KType_void, KType_File, MN_("putc"), 1, KType_int, FN_("char"),
+		_Public, _F(File_readLine), KType_String, KType_File, MN_("readLine"), 0,
+		_Public, _F(File_print), KType_String, KType_File, MN_("print"), 1, KType_String | TypeAttr_Coercion, FN_("str"),
+		_Public, _F(File_println), KType_void, KType_File, MN_("println"), 1, KType_String | TypeAttr_Coercion, FN_("str"),
+		_Public, _F(File_println0), KType_void, KType_File, MN_("println"), 0,
+		_Public, _F(File_flush), KType_void, KType_File, MN_("flush"), 0,
 
-		_Public|_Const|_Im, _F(FILE_isatty), TY_boolean, TY_File, MN_("isatty"), 0,
-		_Public|_Const|_Im, _F(FILE_getfileno), TY_int, TY_File, MN_("getfileno"), 0,
+		_Public|_Const|_Im, _F(FILE_isatty), KType_boolean, KType_File, MN_("isatty"), 0,
+		_Public|_Const|_Im, _F(FILE_getfileno), KType_int, KType_File, MN_("getfileno"), 0,
 
-		_Public, _F(File_read),   TY_int, TY_File, MN_("read"), 1, TY_Bytes, FN_("buf"),
-		_Public, _F(File_read3),  TY_int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
-		_Public, _F(File_Write),  TY_int, TY_File, MN_("write"), 1, TY_Bytes, FN_("buf"),
-		_Public, _F(File_Write3), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
+		_Public, _F(File_read),   KType_int, KType_File, MN_("read"), 1, KType_Bytes, FN_("buf"),
+		_Public, _F(File_read3),  KType_int, KType_File, MN_("read"), 3, KType_Bytes, FN_("buf"), KType_int, FN_("offset"), KType_int, FN_("len"),
+		_Public, _F(File_Write),  KType_int, KType_File, MN_("write"), 1, KType_Bytes, FN_("buf"),
+		_Public, _F(File_Write3), KType_int, KType_File, MN_("write"), 3, KType_Bytes, FN_("buf"), KType_int, FN_("offset"), KType_int, FN_("len"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -509,14 +509,14 @@ static void file_defineConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *tr
 	KFileStdOut = new_File(kctx, OnGlobalConstList, stdout, TEXTSIZE("/dev/stdout"), trace);
 	KFileStdErr = new_File(kctx, OnGlobalConstList, stderr, TEXTSIZE("/dev/stderr"), trace);
 	KDEFINE_FILE_CONST FileData[] = {
-		{"stdin", TY_File,  KFileStdIn},
-		{"stdout", TY_File, KFileStdOut},
-		{"stderr", TY_File, KFileStdErr},
+		{"stdin", KType_File,  KFileStdIn},
+		{"stdout", KType_File, KFileStdOut},
+		{"stderr", KType_File, KFileStdErr},
 		{NULL}, /* sentinel */
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(FileData), false/*isOverride*/, trace);
 	KDEFINE_INT_CONST IntData[] = {
-		{"EOF", TY_int,  EOF},
+		{"EOF", KType_int,  EOF},
 		{NULL}, /* sentinel */
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), false/*isOverride*/, trace);
@@ -527,7 +527,7 @@ static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 {
 	KRequireKonohaCommonModule(trace);
 	KRequirePackage("konoha.bytes", trace);
-	if(CT_File == NULL) {
+	if(KClass_File == NULL) {
 		KDEFINE_CLASS defFile = {
 			.structname = "File",
 			.typeId = TypeAttr_NewId,
@@ -538,7 +538,7 @@ static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 			.free  = kFile_Free,
 			.p     = kFile_p,
 		};
-		CT_File = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defFile, trace);
+		KClass_File = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defFile, trace);
 	}
 	file_defineMethod(kctx, ns, trace);
 	file_defineConst(kctx, ns, trace);
@@ -548,7 +548,7 @@ static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 static kbool_t file_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-		{"FILE", VirtualType_KonohaClass, (uintptr_t)CT_File},
+		{"FILE", VirtualType_KonohaClass, (uintptr_t)KClass_File},
 		{NULL},
 	};
 	KLIB kNameSpace_LoadConstData(kctx, exportNS, KonohaConst_(ClassData), false/*isOverride*/, trace);

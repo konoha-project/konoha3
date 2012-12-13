@@ -115,7 +115,7 @@ static int ParseNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer,
 static void kToken_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *t, size_t len)
 {
 	if(IS_NOTNULL(tk)) {
-		ksymbol_t kw = ksymbolA(t, len, SYM_NONAME);
+		ksymbol_t kw = ksymbolA(t, len, Symbol_Noname);
 		if(kw == Symbol_Unmask(kw)) {
 			KFieldSet(tk, tk->text, SYM_s(kw));
 		}
@@ -163,8 +163,8 @@ static int ParseAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeni
 	if(isalnum(tokenizer->source[tok_start+1])) {
 		int pos = ParseSymbol(kctx, tk, tokenizer, tok_start+1);
 		if(IS_NOTNULL(tk)) {  // pre-resolved
-			tk->resolvedSymbol = ksymbolA(kString_text(tk->text), kString_size(tk->text), SYM_NEWID) | MN_Annotation;
-			tk->resolvedSyntaxInfo = SYN_(tokenizer->ns, KW_SymbolPattern);
+			tk->resolvedSymbol = ksymbolA(kString_text(tk->text), kString_size(tk->text), Symbol_NewId) | SymbolAttr_Annotation;
+			tk->resolvedSyntaxInfo = SYN_(tokenizer->ns, Symbol_SymbolPattern);
 		}
 		return pos;
 	}
@@ -177,8 +177,8 @@ static int ParseAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeni
 //	if(isalnum(tokenizer->source[tok_start+1])) {  // tokenizer, tok_start is older style of tokneizer
 //		int pos = ParseSymbol(kctx, tk, tokenizer, tok_start+1);
 //		if(IS_NOTNULL(tk)) {  // pre-resolved
-//			tk->resolvedSymbol = ksymbolA(kString_text(tk->text), kString_size(tk->text), SYM_NEWID) | MN_Annotation;
-//			tk->resolvedSyntaxInfo = SYN_(tokenizer->ns, KW_SymbolPattern);
+//			tk->resolvedSymbol = ksymbolA(kString_text(tk->text), kString_size(tk->text), Symbol_NewId) | SymbolAttr_Annotation;
+//			tk->resolvedSyntaxInfo = SYN_(tokenizer->ns, Symbol_SymbolPattern);
 //		}
 //		KReturnUnboxValue(pos - tok_start);
 //	}
@@ -385,7 +385,7 @@ static int CallTokenFunc(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Tokenize
 	KUnsafeFieldSet(lsfp[1].asToken, tk);
 	lsfp[1].unboxValue = (uintptr_t)tokenizer;
 	KUnsafeFieldSet(lsfp[2].asString, preparedString);
-	CallSugarMethod(kctx, lsfp, fo, 2, KLIB Knull(kctx, CT_Int));
+	CallSugarMethod(kctx, lsfp, fo, 2, KLIB Knull(kctx, KClass_Int));
 	END_UnusedStack();
 	int pos = lsfp[K_RTNIDX].intValue + tok_start;
 	if(pos > tok_start && tokenizer->currentLine > 0) { // check new lines

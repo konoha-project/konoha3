@@ -98,6 +98,7 @@ static kbool_t KonohaRuntime_setModule(KonohaContext *kctx, int x, KonohaModule 
 	return true;
 }
 
+
 /* ------------------------------------------------------------------------ */
 /* [kcontext] */
 
@@ -114,7 +115,7 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 	if(kctx == NULL) {  // NULL means first one
 		KonohaLibVar *klib = (KonohaLibVar *)calloc(sizeof(KonohaLib) + sizeof(KonohaContextVar), 1);
 		klib_Init(klib);
-		klib->KonohaRuntime_setModule    = KonohaRuntime_setModule;
+		klib->KonohaRuntime_setModule  = KonohaRuntime_setModule;
 		klib->KonohaContext_Init = new_KonohaContext;
 		klib->KonohaContext_Free = KonohaContext_Free;
 		klib->ReftraceAll = ReftraceAll;

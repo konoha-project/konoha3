@@ -36,7 +36,7 @@ typedef struct {
 	ktypeattr_t typeId; kparamId_t signature;
 } kMethodInlineCache;
 
-#if defined(USE_DIRECT_THREADED_CODE)
+#if defined(USE_DIREKClass_THREADED_CODE)
 #define OP_(T)  NULL, 0, OPCODE_##T, 0
 #define KCODE_HEAD\
 	void *codeaddr;\
@@ -51,7 +51,7 @@ typedef struct {
 	kopcode_t opcode; \
 	kfileline_t line
 
-#endif/*USE_DIRECT_THREADED_CODE*/
+#endif/*USE_DIREKClass_THREADED_CODE*/
 
 typedef struct VirtualCode {
 	KCODE_HEAD;
@@ -135,12 +135,12 @@ struct kByteCodeVar {
 
 #define ctxcode          ((ctxcode_t *)kctx->modlocal[MOD_code])
 #define kmodcode         ((KModuleByteCode *)kctx->modshare[MOD_code])
-#define CT_BasicBlock    kmodcode->cBasicBlock
-#define TY_BasicBlock    kmodcode->cBasicBlock->typeId
-#define CT_ByteCode      kmodcode->cByteCode
+#define KClass_BasicBlock    kmodcode->cBasicBlock
+#define KType_BasicBlock    kmodcode->cBasicBlock->typeId
+#define KClass_ByteCode      kmodcode->cByteCode
 
-#define IS_BasicBlock(O)  (kObject_class(O) == CT_BasicBlock)
-#define IS_ByteCode(O)    (kObject_class(O) == CT_ByteCode)
+#define IS_BasicBlock(O)  (kObject_class(O) == KClass_BasicBlock)
+#define IS_ByteCode(O)    (kObject_class(O) == KClass_ByteCode)
 
 #define CODE_ENTER        kmodcode->PRECOMPILED_ENTER
 #define CODE_NCALL        kmodcode->PRECOMPILED_NCALL

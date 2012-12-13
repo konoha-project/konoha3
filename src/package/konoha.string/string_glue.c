@@ -199,7 +199,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 	}
 	expr = SUGAR kExpr_SetConstValue(kctx, expr, NULL, UPCAST(text));
 	kNameSpace *ns = Stmt_ns(stmt);
-	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, CT_String, MN_("+"), 1, MethodMatch_NoOption);
+	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_String, MN_("+"), 1, MethodMatch_NoOption);
 
 	expr = new_ConstValueExpr(kctx, NULL, UPCAST(TS_EMPTY));
 	while(true) {
@@ -237,9 +237,9 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 			if(start - str > 0) {
 				kExpr *first = new_ConstValueExpr(kctx, NULL,
 						UPCAST(KLIB new_kString(kctx, OnGcStack, str, (start - str), 0)));
-				expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_String, concat, 2, expr, first);
+				expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, KType_String, concat, 2, expr, first);
 			}
-			expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, CT_String, concat, 2, expr, newexpr);
+			expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, KClass_String, concat, 2, expr, newexpr);
 		}
 		TokenSeq_Pop(kctx, range);
 		KLIB KBuffer_Free(&wb);
@@ -247,9 +247,9 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 	}
 
 	if((start == NULL) || (start != NULL && end == NULL)) {
-		kExpr *rest = new_ConstValueExpr(kctx, CT_String,
+		kExpr *rest = new_ConstValueExpr(kctx, KClass_String,
 				UPCAST(KLIB new_kString(kctx, OnGcStack, str, strlen(str), 0)));
-		expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, CT_String, concat, 2, expr, rest);
+		expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, KClass_String, concat, 2, expr, rest);
 	}
 	KReturnWith(expr, RESET_GCSTACK());
 }
@@ -265,30 +265,30 @@ static kbool_t string_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	int FN_n = FN_("n");
 
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KW_TextPattern, 0,  NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_ExtendedTextLiteral, },
-		{ KW_END, },
+		{ Symbol_TextPattern, 0,  NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_ExtendedTextLiteral, },
+		{ Symbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 
 	KDEFINE_METHOD MethodData[] = {
-		_JS|_Public|_Const|_Im, _F(String_opLT),  TY_boolean, TY_String, MN_("<"),  1, TY_String, FN_s,
-		_JS|_Public|_Const|_Im, _F(String_opLTE),  TY_boolean, TY_String, MN_("<="),  1, TY_String, FN_s,
-		_JS|_Public|_Const|_Im, _F(String_opGT),  TY_boolean, TY_String, MN_(">"),  1, TY_String, FN_s,
-		_JS|_Public|_Const|_Im, _F(String_opGTE),  TY_boolean, TY_String, MN_(">="),  1, TY_String, FN_s,
-		_JS|_Public|_Const|_Im, _F(KString_length), TY_int, TY_String, MN_("getlength"), 0,
-		_JS|_Public|_Const|_Im, _F(String_get), TY_String, TY_String, MN_("charAt"), 1, TY_int, FN_n,
-		_JS|_Public|_Static|_Const|_Im, _F(String_fromCharCode), TY_String, TY_String, MN_("fromCharCode"), 1, TY_int, FN_n,
-		_JS|_Public|_Const|_Im|kMethod_Override, _F(String_get),        TY_String, TY_String, MN_("get"), 1, TY_int, FN_n,  /* [c] */
-		_JS|_Public|_Const|_Im, _F(KString_charAt), TY_int, TY_String, MN_("charCodeAt"), 1, TY_int, FN_n,
+		_JS|_Public|_Const|_Im, _F(String_opLT),  KType_boolean, KType_String, MN_("<"),  1, KType_String, FN_s,
+		_JS|_Public|_Const|_Im, _F(String_opLTE),  KType_boolean, KType_String, MN_("<="),  1, KType_String, FN_s,
+		_JS|_Public|_Const|_Im, _F(String_opGT),  KType_boolean, KType_String, MN_(">"),  1, KType_String, FN_s,
+		_JS|_Public|_Const|_Im, _F(String_opGTE),  KType_boolean, KType_String, MN_(">="),  1, KType_String, FN_s,
+		_JS|_Public|_Const|_Im, _F(KString_length), KType_int, KType_String, MN_("getlength"), 0,
+		_JS|_Public|_Const|_Im, _F(String_get), KType_String, KType_String, MN_("charAt"), 1, KType_int, FN_n,
+		_JS|_Public|_Static|_Const|_Im, _F(String_fromCharCode), KType_String, KType_String, MN_("fromCharCode"), 1, KType_int, FN_n,
+		_JS|_Public|_Const|_Im|kMethod_Override, _F(String_get),        KType_String, KType_String, MN_("get"), 1, KType_int, FN_n,  /* [c] */
+		_JS|_Public|_Const|_Im, _F(KString_charAt), KType_int, KType_String, MN_("charCodeAt"), 1, KType_int, FN_n,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 	// It is good to move these apis to other package such as java.string
 	LoadJavaAPI(kctx, ns, trace);
-	KSetClassFunc(ns->packageId, CT_String, unbox, String2_unbox, trace);
-	KSetClassFunc(ns->packageId, CT_String, free, String2_Free, trace);
-	KSetClassFunc(ns->packageId, CT_String, reftrace, String2_Reftrace, trace);
+	KSetClassFunc(ns->packageId, KClass_String, unbox, String2_unbox, trace);
+	KSetClassFunc(ns->packageId, KClass_String, free, String2_Free, trace);
+	KSetClassFunc(ns->packageId, KClass_String, reftrace, String2_Reftrace, trace);
 	KSetKLibFunc(ns->packageId, new_kString, new_kString, trace);
 	return true;
 }

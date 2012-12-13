@@ -178,7 +178,7 @@ static KMETHOD Map_keys(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
 	kMap *m = (kMap *)sfp[0].asObject;
-	KonohaClass *cArray = CT_p0(kctx, CT_Array, kObject_p0(m));
+	KonohaClass *cArray = KClass_p0(kctx, KClass_Array, kObject_p0(m));
 	kArray *a = (kArray *)(KLIB new_kObject(kctx, _GcStack, cArray, m->map->size));
 	KLIB KHashMap_DoEach(kctx, m->map, (void *)a, MapEntry_appendKey);
 	KReturnWith(a, RESET_GCSTACK());
@@ -197,11 +197,11 @@ static KMETHOD Map_new(KonohaContext *kctx, KonohaStack *sfp)
 #define _Im       kMethod_Immutable
 #define _F(F)     (intptr_t)(F)
 
-#define TY_Map cMap->typeId
+#define KType_Map cMap->typeId
 
 static kbool_t map_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	kparamtype_t cparam = {TY_Object};
+	kparamtype_t cparam = {KType_Object};
 	KDEFINE_CLASS defMap = {0};
 	SETSTRUCTNAME(defMap, Map);
 	defMap.cflag     = KClassFlag_Final;
@@ -213,14 +213,14 @@ static kbool_t map_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KonohaClass *cMap = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defMap, trace);
 	int FN_key = MN_("key");
-	int TY_Array0 = CT_p0(kctx, CT_Array, TY_0)->typeId;
+	int KType_Array0 = KClass_p0(kctx, KClass_Array, KType_0)->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Map_new), TY_Map, TY_Map, MN_("new"), 0,
-		_Public|_Im|_Const, _F(Map_has), TY_boolean, TY_Map, MN_("has"), 1, TY_String, FN_key,
-		_Public|_Im|_Const, _F(Map_get), TY_0, TY_Map, MN_("get"), 1, TY_String, FN_key,
-		_Public, _F(Map_set), TY_void, TY_Map, MN_("set"), 2, TY_String, FN_key, TY_0, FN_("value"),
-		_Public, _F(Map_remove), TY_void, TY_Map, MN_("remove"), 1, TY_String, FN_key,
-		_Public|_Im|_Const, _F(Map_keys), TY_Array0, TY_Map, MN_("keys"), 0,
+		_Public, _F(Map_new), KType_Map, KType_Map, MN_("new"), 0,
+		_Public|_Im|_Const, _F(Map_has), KType_boolean, KType_Map, MN_("has"), 1, KType_String, FN_key,
+		_Public|_Im|_Const, _F(Map_get), KType_0, KType_Map, MN_("get"), 1, KType_String, FN_key,
+		_Public, _F(Map_set), KType_void, KType_Map, MN_("set"), 2, KType_String, FN_key, KType_0, FN_("value"),
+		_Public, _F(Map_remove), KType_void, KType_Map, MN_("remove"), 1, KType_String, FN_key,
+		_Public|_Im|_Const, _F(Map_keys), KType_Array0, KType_Map, MN_("keys"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -241,7 +241,7 @@ static KMETHOD TypeCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t map_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KW_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_MapLiteral));
+	SUGAR kNameSpace_AddSugarFunc(kctx, ns, Symbol_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_MapLiteral));
 	return true;
 }
 

@@ -149,14 +149,14 @@ static kbool_t minikonoha_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTra
 
 	KonohaClass *cKonohaFactory = KLIB KonohaClass_define(kctx, ns->packageId, NULL, &defKonohaFactory, trace);
 	KonohaClass *cKonoha =  KLIB KonohaClass_define(kctx, ns->packageId, NULL, &defKonoha, trace);
-	int TY_KonohaFactory = cKonohaFactory->typeId, TY_Konoha = cKonoha->typeId;
+	int KType_KonohaFactory = cKonohaFactory->typeId, KType_Konoha = cKonoha->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		kMethod_Public, _F(KonohaFactory_new), TY_KonohaFactory, TY_KonohaFactory, MN_("new"), 0,
-		kMethod_Public, _F(KonohaFactory_loadModule), TY_boolean, TY_KonohaFactory, MN_("loadModule"), 1, TY_String, FN_("name"),
-		kMethod_Public, _F(KonohaFactory_create), TY_Konoha, TY_KonohaFactory, MN_("create"), 0,
-		kMethod_Public, _F(Konoha_loadScript), TY_boolean, TY_Konoha, MN_("loadScript"), 1, TY_String, FN_("filename"),
-		kMethod_Public, _F(Konoha_eval), TY_Konoha, TY_Konoha, MN_("eval"), 1, TY_String, FN_("script"),
+		kMethod_Public, _F(KonohaFactory_new), KType_KonohaFactory, KType_KonohaFactory, MN_("new"), 0,
+		kMethod_Public, _F(KonohaFactory_loadModule), KType_boolean, KType_KonohaFactory, MN_("loadModule"), 1, KType_String, FN_("name"),
+		kMethod_Public, _F(KonohaFactory_create), KType_Konoha, KType_KonohaFactory, MN_("create"), 0,
+		kMethod_Public, _F(Konoha_loadScript), KType_boolean, KType_Konoha, MN_("loadScript"), 1, KType_String, FN_("filename"),
+		kMethod_Public, _F(Konoha_eval), KType_Konoha, KType_Konoha, MN_("eval"), 1, KType_String, FN_("script"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

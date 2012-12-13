@@ -56,7 +56,7 @@ static kbool_t kMethod_CheckMethodKStackCall(KonohaContext *kctx, KonohaStack *s
 		if(ptype != paramClass->typeId) {
 			return false;
 		}
-		if(KClass_IsUnbox(paramClass)) {
+		if(KClass_Is(UnboxType, paramClass)) {
 			sfp[i].unboxValue = kObject_Unbox(sfp[i].asObject);
 		}
 	}
@@ -98,9 +98,9 @@ static kbool_t dynamic_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	defDynamic.structname = "dynamic";
 	defDynamic.cflag = KClassFlag_Final;
 	KonohaClass *cDynamic = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDynamic, trace);
-	int TY_Dynamic = cDynamic->typeId;
+	int KType_Dynamic = cDynamic->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im, _F(Dynamic_), TY_Object, TY_Dynamic, MN_(""), 0,
+		_Public|_Im, _F(Dynamic_), KType_Object, KType_Dynamic, MN_(""), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

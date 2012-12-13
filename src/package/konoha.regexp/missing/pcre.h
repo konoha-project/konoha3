@@ -141,7 +141,7 @@ compiling). */
 #define PCRE_NO_START_OPTIMIZE  0x04000000  /* Compile, exec, DFA exec */
 #define PCRE_NO_START_OPTIMISE  0x04000000  /* Synonym */
 #define PCRE_PARTIAL_HARD       0x08000000  /* Exec, DFA exec */
-#define PCRE_NOTEMPTY_ATSTART   0x10000000  /* Exec, DFA exec */
+#define PCRE_NOTEMPKType_ATSTART   0x10000000  /* Exec, DFA exec */
 #define PCRE_UCP                0x20000000  /* Compile, used in exec, DFA exec */
 
 /* Exec-time and get/set-time error codes */

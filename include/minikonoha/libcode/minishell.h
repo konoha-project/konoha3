@@ -98,15 +98,15 @@ static void DumpEval(KonohaContext *kctx, KGrowingBuffer *wb)
 {
 	KonohaStackRuntimeVar *base = kctx->stack;
 	ktypeattr_t ty = base->evalty;
-	if(ty != TY_void) {
+	if(ty != KType_void) {
 		KonohaStack *lsfp = base->stack + base->evalidx;
 		if(!KType_Is(UnboxType, ty)) {
 			ty = kObject_typeId(lsfp[0].asObject);
 		}
-		CT_(ty)->p(kctx, lsfp, 0, wb);
+		KClass_(ty)->p(kctx, lsfp, 0, wb);
 		fflush(stdout);
-		PLATAPI printf_i("  (%s) %s\n", TY_t(ty), KLIB KBuffer_Stringfy(kctx, wb,1));
-		base->evalty = TY_void;
+		PLATAPI printf_i("  (%s) %s\n", KType_t(ty), KLIB KBuffer_Stringfy(kctx, wb,1));
+		base->evalty = KType_void;
 	}
 }
 

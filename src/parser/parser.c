@@ -139,8 +139,8 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	defSymbol.structname = "Symbol";
 	defSymbol.typeId = TypeAttr_NewId;
 	defSymbol.cflag = CFLAG_int;
-	defSymbol.init = CT_(TY_int)->init;
-	defSymbol.unbox = CT_(TY_int)->unbox;
+	defSymbol.init = KClass_(KType_int)->init;
+	defSymbol.unbox = KClass_(KType_int)->unbox;
 	defSymbol.p = kSymbol_p;
 
 	KDEFINE_CLASS defToken = {0};
@@ -176,7 +176,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->cStmt  =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defStmt, 0);
 	mod->cBlock =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defBlock, 0);
 	mod->cGamma =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defGamma, 0);
-	mod->cTokenArray = CT_p0(kctx, CT_Array, mod->cToken->typeId);
+	mod->cTokenArray = KClass_p0(kctx, KClass_Array, mod->cToken->typeId);
 
 	KLIB Knull(kctx, mod->cToken);
 	KLIB Knull(kctx, mod->cExpr);
@@ -186,12 +186,12 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	SugarModule_Setup(kctx, &mod->h, 0);
 
 	KDEFINE_INT_CONST ClassData[] = {   // minikonoha defined class
-		{"void", VirtualType_KonohaClass, (uintptr_t)CT_void},
-		{"boolean", VirtualType_KonohaClass, (uintptr_t)CT_Boolean},
-		{"int",    VirtualType_KonohaClass, (uintptr_t)CT_Int},
-		{"String", VirtualType_KonohaClass, (uintptr_t)CT_String},
-		{"Func",   VirtualType_KonohaClass, (uintptr_t)CT_Func},
-		{"System", VirtualType_KonohaClass, (uintptr_t)CT_System},
+		{"void", VirtualType_KonohaClass, (uintptr_t)KClass_void},
+		{"boolean", VirtualType_KonohaClass, (uintptr_t)KClass_Boolean},
+		{"int",    VirtualType_KonohaClass, (uintptr_t)KClass_Int},
+		{"String", VirtualType_KonohaClass, (uintptr_t)KClass_String},
+		{"Func",   VirtualType_KonohaClass, (uintptr_t)KClass_Func},
+		{"System", VirtualType_KonohaClass, (uintptr_t)KClass_System},
 		{NULL},
 	};
 	kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(ClassData), true/*isOverride*/, 0);
@@ -329,13 +329,13 @@ void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 	KSetKLibFunc(0, kNameSpace_ImportPackageSymbol, kNameSpace_ImportPackageSymbol, NULL);
 	KSetKLibFunc(0, kNameSpace_GetConstNULL,        kNameSpace_GetConstNULL,        NULL);
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_ImportPackage), TY_void, TY_NameSpace, MN_("import"), 1, TY_String, FN_("package"),
-		_Public, _F(NameSpace_ImportPackageSymbol), TY_void, TY_NameSpace, MN_("import"), 2, TY_String, FN_("package"), TY_String, FN_("symbol"),
-		_Public, _F(NameSpace_hate), TY_boolean, TY_NameSpace, MN_("hate"), 1, TY_String, FN_("symbol"),
-		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("load"), 1, TY_String, FN_("filename"),
-		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("include"), 1, TY_String, FN_("filename"),
-		_Public, _F(NameSpace_useStaticFunc), TY_void, TY_NameSpace, MN_("useStaticFunc"), 1, TY_Object, FN_("class"),
-		_Public|_Coercion|_Const, _F(String_toSymbol), TY_Symbol, TY_String, MN_to(TY_Symbol), 0,
+		_Public, _F(NameSpace_ImportPackage), KType_void, KType_NameSpace, MN_("import"), 1, KType_String, FN_("package"),
+		_Public, _F(NameSpace_ImportPackageSymbol), KType_void, KType_NameSpace, MN_("import"), 2, KType_String, FN_("package"), KType_String, FN_("symbol"),
+		_Public, _F(NameSpace_hate), KType_boolean, KType_NameSpace, MN_("hate"), 1, KType_String, FN_("symbol"),
+		_Public, _F(NameSpace_loadScript), KType_void, KType_NameSpace, MN_("load"), 1, KType_String, FN_("filename"),
+		_Public, _F(NameSpace_loadScript), KType_void, KType_NameSpace, MN_("include"), 1, KType_String, FN_("filename"),
+		_Public, _F(NameSpace_useStaticFunc), KType_void, KType_NameSpace, MN_("useStaticFunc"), 1, KType_Object, FN_("class"),
+		_Public|_Coercion|_Const, _F(String_toSymbol), KType_Symbol, KType_String, MethodName_To(KType_Symbol), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, NULL);

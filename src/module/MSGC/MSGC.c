@@ -363,7 +363,7 @@ static void Kfree(KonohaContext *kctx, void *p, size_t s)
 	MSGC(i).freelist.list = (kGCObject *)o;\
 } while(0)
 
-#define OBJECT_REUSE(used,i) do {\
+#define OBJEKClass_REUSE(used,i) do {\
 	(used)->h.ct = NULL;\
 	(used)->h.magicflag = 0;\
 	FREELIST_PUSH(used,i);\
@@ -764,7 +764,7 @@ static size_t sweep0(GcContext *mng, void *p, int n, size_t sizeOfObject)
 				KLIB kObjectProto_Free(kctx, (kObjectVar *)o);
 				assert(kObject_class(o)->cstruct_size == sizeOfObject);
 				++collected;
-				OBJECT_REUSE(o, n);
+				OBJEKClass_REUSE(o, n);
 				MSGC(n).freelist.size += 1;
 			}
 		}

@@ -39,7 +39,7 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 	if(currentIdx + 1 < endIdx) {
 		kToken *nextToken = tokenList->TokenItems[currentIdx+1];
 		DBG_P("nextToken='%s'", kString_text(nextToken->text));
-//		if(nextToken->resolvedSyntaxInfo->keyword == KW_SymbolPattern) {
+//		if(nextToken->resolvedSyntaxInfo->keyword == Symbol_SymbolPattern) {
 //			KReturn(Expression_DollarSymbol(kctx, stmt, nextToken));
 //		}
 
@@ -48,20 +48,20 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 //	int nextIdx = SUGAR TokenUtils_ParseTypePattern(kctx, stmt, Stmt_ns(stmt), tokenList, beginIdx + 1, endIdx, &foundClass);
 //	if(nextIdx != -1 && nextIdx < kArray_size(tokenList)) {
 //		kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
-////		if(ct->typeId == TY_void) {
+////		if(ct->typeId == KType_void) {
 ////			KReturn(SUGAR kStmt_Message2(kctx, stmt, tk1, ErrTag, "undefined class: %s", kString_text(tk1->text)));
 ////		} else if(KClass_Is(Virtual, ct)) {
-////			SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "invalid application of 'dollar' to incomplete class %s", CT_t(ct));
+////			SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "invalid application of 'dollar' to incomplete class %s", KClass_t(ct));
 ////		}
-//		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {  // dollar C (...)
-//			SugarSyntax *syn = SYN_(Stmt_ns(stmt), KW_ExprMethodCall);
+//		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == Symbol_ParenthesisGroup) {  // dollar C (...)
+//			SugarSyntax *syn = SYN_(Stmt_ns(stmt), Symbol_ExprMethodCall);
 //			kExpr *expr = SUGAR dollar_UntypedCallStyleExpr(kctx, syn, 2, dollarToken, NewExpr(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
 //			dollarToken->resolvedSymbol = MN_dollar;
 //			KReturn(expr);
 //		}
-//		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KW_BracketGroup) {     // dollar int [100]
+//		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == Symbol_BracketGroup) {     // dollar int [100]
 //			SugarSyntax *syn = SYN_(Stmt_ns(stmt), SYM_("dollar"));
-//			KonohaClass *arrayClass = CT_p0(kctx, CT_Array, foundClass->typeId);
+//			KonohaClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
 //			dollarToken->resolvedSymbol = MN_("dollarArray");
 //			kExpr *expr = SUGAR dollar_UntypedCallStyleExpr(kctx, syn, 2, dollarToken, NewExpr(kctx, syn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));
 //			KReturn(expr);
@@ -76,7 +76,7 @@ static kbool_t dollar_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("$"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Expression_dollar, NULL, NULL, NULL, },
-		{ KW_END, },
+		{ Symbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;

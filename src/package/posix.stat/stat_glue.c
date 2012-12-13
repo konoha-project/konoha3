@@ -225,59 +225,59 @@ static KMETHOD Stat_getctime(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(stat->stat->st_ctime);
 }
 
-#ifdef HAVE_STRUCT_STAT_ST_RDEV
+#ifdef HAVE_STRUKClass_STAT_ST_RDEV
 //## int Stat.getrdev()
 static KMETHOD Stat_getrdev(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFileStatus *stat = (kFileStatus *)sfp[0].asObject;
 	KReturnUnboxValue(stat->stat->st_rdev);
 }
-#endif /* HAVE_STRUCT_STAT_ST_RDEV */
+#endif /* HAVE_STRUKClass_STAT_ST_RDEV */
 
-#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
+#ifdef HAVE_STRUKClass_STAT_ST_BLOCKS
 //## int Stat.getblocks()
 static KMETHOD Stat_getblocks(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFileStatus *stat = (kFileStatus *)sfp[0].asObject;
 	KReturnUnboxValue(stat->stat->st_blocks);
 }
-#endif /* HAVE_STRUCT_STAT_ST_BLOCKS */
+#endif /* HAVE_STRUKClass_STAT_ST_BLOCKS */
 
-#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
+#ifdef HAVE_STRUKClass_STAT_ST_BLKSIZE
 //## int Stat.getblksize()
 static KMETHOD Stat_getblksize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFileStatus *stat = (kFileStatus *)sfp[0].asObject;
 	KReturnUnboxValue(stat->stat->st_blksize);
 }
-#endif /* HAVE_STRUCT_STAT_ST_BLKSIZE */
+#endif /* HAVE_STRUKClass_STAT_ST_BLKSIZE */
 
-#ifdef HAVE_STRUCT_STAT_ST_FLAGS
+#ifdef HAVE_STRUKClass_STAT_ST_FLAGS
 //## int Stat.getflags()
 static KMETHOD Stat_getflags(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFileStatus *stat = (kFileStatus *)sfp[0].asObject;
 	KReturnUnboxValue(stat->stat->st_flags);
 }
-#endif /* HAVE_STRUCT_STAT_ST_FLAGS */
+#endif /* HAVE_STRUKClass_STAT_ST_FLAGS */
 
-#ifdef HAVE_STRUCT_STAT_ST_GEN
+#ifdef HAVE_STRUKClass_STAT_ST_GEN
 //## int Stat.getgen()
 static KMETHOD Stat_getgen(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFileStatus *stat = (kFileStatus *)sfp[0].asObject;
 	KReturnUnboxValue(stat->stat->st_gen);
 }
-#endif /* HAVE_STRUCT_STAT_ST_GEN */
+#endif /* HAVE_STRUKClass_STAT_ST_GEN */
 
-#ifdef HAVE_STRUCT_STAT_ST_BIRTHTIME
+#ifdef HAVE_STRUKClass_STAT_ST_BIRTHTIME
 //## int Stat.getbirthtime()
 static KMETHOD Stat_getbirthtime(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFileStatus *stat = (kFileStatus *)sfp[0].asObject;
 	KReturnUnboxValue(stat->stat->st_birthtime);
 }
-#endif /* HAVE_STRUCT_STAT_ST_BIRTHTIME */
+#endif /* HAVE_STRUKClass_STAT_ST_BIRTHTIME */
 
 
 #define _Public   kMethod_Public
@@ -299,39 +299,39 @@ static void stat_defineClassAndMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 	defStat.free  = kFileStatus_Free;
 	defStat.p     = kFileStatus_p;
 	KonohaClass *cStat = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defStat, trace);
-	int TY_Stat = cStat->typeId;
+	int KType_Stat = cStat->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static, _F(System_stat),  TY_Stat, TY_System, MN_("stat"), 1, TY_String, FN_("path"),
-		_Public|_Static, _F(System_lstat), TY_Stat, TY_System, MN_("lstat"), 1, TY_String, FN_("path"),
-		_Public|_Static, _F(System_fstat), TY_Stat, TY_System, MN_("fstat"), 1, TY_int, FN_("fd"),
-		_Public|_Const|_Im, _F(Stat_getdev), TY_int, TY_Stat, MN_("getdev"), 0,
-		_Public|_Const|_Im, _F(Stat_getino), TY_int, TY_Stat, MN_("getino"), 0,
-		_Public|_Const|_Im, _F(Stat_getmode), TY_int, TY_Stat, MN_("getmode"), 0,
-		_Public|_Const|_Im, _F(Stat_getnlink), TY_int, TY_Stat, MN_("getnlink"), 0,
-		_Public|_Const|_Im, _F(Stat_getuid), TY_int, TY_Stat, MN_("getuid"), 0,
-		_Public|_Const|_Im, _F(Stat_getgid), TY_int, TY_Stat, MN_("getgid"), 0,
-		_Public|_Const|_Im, _F(Stat_getsize), TY_int, TY_Stat, MN_("getsize"), 0,
-		_Public|_Const|_Im, _F(Stat_getatime), TY_int, TY_Stat, MN_("getatime"), 0,
-		_Public|_Const|_Im, _F(Stat_getmtime), TY_int, TY_Stat, MN_("getmtime"), 0,
-		_Public|_Const|_Im, _F(Stat_getctime), TY_int, TY_Stat, MN_("getctime"), 0,
-#ifdef HAVE_STRUCT_STAT_ST_RDEV
-		_Public|_Const|_Im, _F(Stat_getrdev), TY_int, TY_Stat, MN_("getrdev"), 0,
-#endif /* HAVE_STRUCT_STAT_ST_RDEV */
-#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
-		_Public|_Const|_Im, _F(Stat_getblocks), TY_int, TY_Stat, MN_("getblocks"), 0,
-#endif /* HAVE_STRUCT_STAT_ST_BLOCKS */
-#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
-		_Public|_Const|_Im, _F(Stat_getblksize), TY_int, TY_Stat, MN_("getblksize"), 0,
-#endif /* HAVE_STRUCT_STAT_ST_BLKSIZE */
-#ifdef HAVE_STRUCT_STAT_ST_FLAGS
-		_Public|_Const|_Im, _F(Stat_getflags), TY_int, TY_Stat, MN_("getflags"), 0,
-#endif /* HAVE_STRUCT_STAT_ST_FLAGS */
-#ifdef HAVE_STRUCT_STAT_ST_GEN
-		_Public|_Const|_Im, _F(Stat_getgen), TY_int, TY_Stat, MN_("getgen"), 0,
-#endif /* HAVE_STRUCT_STAT_ST_GEN */
-#ifdef HAVE_STRUCT_STAT_ST_BIRTHTIME
-		_Public|_Const|_Im, _F(Stat_getbirthtime), TY_int, TY_Stat, MN_("getbirthtime"), 0,
-#endif /* HAVE_STRUCT_STAT_ST_BIRTHTIME */
+		_Public|_Static, _F(System_stat),  KType_Stat, KType_System, MN_("stat"), 1, KType_String, FN_("path"),
+		_Public|_Static, _F(System_lstat), KType_Stat, KType_System, MN_("lstat"), 1, KType_String, FN_("path"),
+		_Public|_Static, _F(System_fstat), KType_Stat, KType_System, MN_("fstat"), 1, KType_int, FN_("fd"),
+		_Public|_Const|_Im, _F(Stat_getdev), KType_int, KType_Stat, MN_("getdev"), 0,
+		_Public|_Const|_Im, _F(Stat_getino), KType_int, KType_Stat, MN_("getino"), 0,
+		_Public|_Const|_Im, _F(Stat_getmode), KType_int, KType_Stat, MN_("getmode"), 0,
+		_Public|_Const|_Im, _F(Stat_getnlink), KType_int, KType_Stat, MN_("getnlink"), 0,
+		_Public|_Const|_Im, _F(Stat_getuid), KType_int, KType_Stat, MN_("getuid"), 0,
+		_Public|_Const|_Im, _F(Stat_getgid), KType_int, KType_Stat, MN_("getgid"), 0,
+		_Public|_Const|_Im, _F(Stat_getsize), KType_int, KType_Stat, MN_("getsize"), 0,
+		_Public|_Const|_Im, _F(Stat_getatime), KType_int, KType_Stat, MN_("getatime"), 0,
+		_Public|_Const|_Im, _F(Stat_getmtime), KType_int, KType_Stat, MN_("getmtime"), 0,
+		_Public|_Const|_Im, _F(Stat_getctime), KType_int, KType_Stat, MN_("getctime"), 0,
+#ifdef HAVE_STRUKClass_STAT_ST_RDEV
+		_Public|_Const|_Im, _F(Stat_getrdev), KType_int, KType_Stat, MN_("getrdev"), 0,
+#endif /* HAVE_STRUKClass_STAT_ST_RDEV */
+#ifdef HAVE_STRUKClass_STAT_ST_BLOCKS
+		_Public|_Const|_Im, _F(Stat_getblocks), KType_int, KType_Stat, MN_("getblocks"), 0,
+#endif /* HAVE_STRUKClass_STAT_ST_BLOCKS */
+#ifdef HAVE_STRUKClass_STAT_ST_BLKSIZE
+		_Public|_Const|_Im, _F(Stat_getblksize), KType_int, KType_Stat, MN_("getblksize"), 0,
+#endif /* HAVE_STRUKClass_STAT_ST_BLKSIZE */
+#ifdef HAVE_STRUKClass_STAT_ST_FLAGS
+		_Public|_Const|_Im, _F(Stat_getflags), KType_int, KType_Stat, MN_("getflags"), 0,
+#endif /* HAVE_STRUKClass_STAT_ST_FLAGS */
+#ifdef HAVE_STRUKClass_STAT_ST_GEN
+		_Public|_Const|_Im, _F(Stat_getgen), KType_int, KType_Stat, MN_("getgen"), 0,
+#endif /* HAVE_STRUKClass_STAT_ST_GEN */
+#ifdef HAVE_STRUKClass_STAT_ST_BIRTHTIME
+		_Public|_Const|_Im, _F(Stat_getbirthtime), KType_int, KType_Stat, MN_("getbirthtime"), 0,
+#endif /* HAVE_STRUKClass_STAT_ST_BIRTHTIME */
 
 		DEND,
 	};

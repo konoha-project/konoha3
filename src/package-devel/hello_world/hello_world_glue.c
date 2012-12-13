@@ -127,19 +127,19 @@ static kbool_t HelloWorld_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, i
 	KonohaClass *PersonClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defPerson, trace);
 
 	/* You can define methods with the following procedures. */
-	int TY_Person = PersonClass->typeId;
+	int KType_Person = PersonClass->typeId;
 	int FN_x = FN_("x");
 	int FN_y = FN_("y");
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Person_new), TY_Person, TY_Person, MN_("new"), 2, TY_String, FN_x, TY_int, FN_y,
-		_Public, _F(Person_say), TY_String, TY_Person, MN_("say"), 0,
+		_Public, _F(Person_new), KType_Person, KType_Person, MN_("new"), 2, KType_String, FN_x, KType_int, FN_y,
+		_Public, _F(Person_say), KType_String, KType_Person, MN_("say"), 0,
 		DEND, /* <= sentinel */
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 	/* You can define constant variable with the following procedures. */
 	KDEFINE_INT_CONST IntData[] = {
-		{"NARUTO_AGE", TY_int, 18},
+		{"NARUTO_AGE", KType_int, 18},
 		{} /* <= sentinel */
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), false/*isOverride*/, trace);

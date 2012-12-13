@@ -137,11 +137,11 @@ static void CommandLine_Define(KonohaContext *kctx, char *keyvalue, KTraceInfo *
 		char *namebuf = ALLOCA(char, len+1);
 		memcpy(namebuf, keyvalue, len); namebuf[len] = 0;
 //		DBG_P("name='%s'", namebuf);
-		ksymbol_t key = KLIB Ksymbol(kctx, namebuf, len, 0, SYM_NEWID);
+		ksymbol_t key = KLIB Ksymbol(kctx, namebuf, len, 0, Symbol_NewId);
 		uintptr_t unboxValue;
 		ktypeattr_t ty;
 		if(isdigit(p[1])) {
-			ty = TY_int;
+			ty = KType_int;
 			unboxValue = (uintptr_t)strtol(p+1, NULL, 0);
 		}
 		else {
@@ -185,14 +185,14 @@ static void CommandLine_Import(KonohaContext *kctx, char *packageName, KTraceInf
 static void CommandLine_SetARGV(KonohaContext *kctx, int argc, char** argv, KTraceInfo *trace)
 {
 	INIT_GCSTACK();
-	KonohaClass *CT_StringArray0 = CT_p0(kctx, CT_Array, TY_String);
-	kArray *a = (kArray*)KLIB new_kObject(kctx, _GcStack, CT_StringArray0, 0);
+	KonohaClass *KClass_StringArray0 = KClass_p0(kctx, KClass_Array, KType_String);
+	kArray *a = (kArray*)KLIB new_kObject(kctx, _GcStack, KClass_StringArray0, 0);
 	int i;
 	for(i = 0; i < argc; i++) {
 		KLIB kArray_Add(kctx, a, KLIB new_kString(kctx, _GcStack, argv[i], strlen(argv[i]), StringPolicy_TEXT));
 	}
-	KDEFINE_OBJECT_CONST ObjectData[] = {
-			{"SCRIPT_ARGV", CT_StringArray0->typeId, (kObject*)a},
+	KDEFINE_OBJEKClass_CONST ObjectData[] = {
+			{"SCRIPT_ARGV", KClass_StringArray0->typeId, (kObject*)a},
 			{}
 	};
 	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(ObjectData), true/*isOverride*/, trace);

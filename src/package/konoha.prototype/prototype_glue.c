@@ -40,14 +40,14 @@ static void kPrototype_p(KonohaContext *kctx, KonohaValue *values, int pos, KGro
 
 static void prototype_defineClass(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	if(CT_Prototype == NULL) {
+	if(KClass_Prototype == NULL) {
 		KDEFINE_CLASS defPrototype = {
 			.structname = "Prototype",
 			.typeId = TypeAttr_NewId,
-			.baseTypeId = TY_Object,
+			.baseTypeId = KType_Object,
 			.p = kPrototype_p,
 		};
-		CT_Prototype = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defPrototype, trace);
+		KClass_Prototype = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defPrototype, trace);
 	}
 }
 
@@ -55,27 +55,27 @@ static void prototype_defineClass(KonohaContext *kctx, kNameSpace *ns, int optio
 static KMETHOD Prototype_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaClass *targetClass = KGetReturnType(sfp);
-	DBG_P("requesting type=%s", CT_t(targetClass));
+	DBG_P("requesting type=%s", KClass_t(targetClass));
 	ksymbol_t symbol = sfp[1].intValue;
 	KKeyValue *kvs = KLIB kObjectProto_GetKeyValue(kctx, sfp[0].asObject, symbol);
 	if(kvs != NULL) {
-		KonohaClass *c = CT_(kvs->attrTypeId);
+		KonohaClass *c = KClass_(kvs->attrTypeId);
 		if(targetClass == c) {
-			if(KClass_IsUnbox(targetClass)) {
+			if(KClass_Is(UnboxType, targetClass)) {
 				KReturnUnboxValue(kvs->unboxValue);
 			}
 			else {
 				KReturnField(kvs->ObjectValue);
 			}
 		}
-		DBG_P("requesting type=%s <: %s ? %d", CT_t(c), CT_t(targetClass), c->isSubType(kctx, c, targetClass));
+		DBG_P("requesting type=%s <: %s ? %d", KClass_t(c), KClass_t(targetClass), c->isSubType(kctx, c, targetClass));
 		if(c->isSubType(kctx, c, targetClass)) {
 			if(KClass_Is(UnboxType, c)) {
 				if(KClass_Is(UnboxType, targetClass)) {
 					KReturnUnboxValue(kvs->unboxValue);
 				}
 				else {
-					DBG_P("boxing type=%s <: %s ? %d", CT_t(c), CT_t(targetClass), c->isSubType(kctx, c, targetClass));
+					DBG_P("boxing type=%s <: %s ? %d", KClass_t(c), KClass_t(targetClass), c->isSubType(kctx, c, targetClass));
 					KReturn(KLIB new_kObject(kctx, OnStack, c, kvs->unboxValue));
 				}
 			}
@@ -102,7 +102,7 @@ static KMETHOD Prototype_setObject(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Prototype_setInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t symbol = (ksymbol_t)sfp[1].intValue;
-	KLIB kObjectProto_SetUnboxValue(kctx, sfp[0].asObject, symbol, TY_int, sfp[2].unboxValue);
+	KLIB kObjectProto_SetUnboxValue(kctx, sfp[0].asObject, symbol, KType_int, sfp[2].unboxValue);
 }
 
 static void ThrowTypeError(KonohaContext *kctx, KonohaStack *sfp, int argc)
@@ -116,7 +116,7 @@ static void KStackDynamicTypeCheck(KonohaContext *kctx, KonohaStack *sfp, kMetho
 	kParam *pa = kMethod_GetParam(mtd);
 	for(i = 0; i < pa->psize; i++) {
 		KonohaClass *objectType = kObject_class(sfp[i+1].asObject);
-		KonohaClass *paramType = CT_(pa->paramtypeItems[i].attrTypeId);
+		KonohaClass *paramType = KClass_(pa->paramtypeItems[i].attrTypeId);
 		paramType = paramType->realtype(kctx, paramType, thisClass);
 		if(objectType == paramType || objectType->isSubType(kctx, objectType, paramType)) {
 			if(KClass_Is(UnboxType, paramType)) {
@@ -153,9 +153,9 @@ static KMETHOD Prototype_(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t symbol = KDynamicCallSymbol(sfp);
 	KKeyValue *kvs = KLIB kObjectProto_GetKeyValue(kctx, sfp[0].asObject, symbol);
 	if(kvs != NULL) {
-		KonohaClass *c = CT_(kvs->attrTypeId);
-		kParam *cparam = CT_cparam(c);
-		if(CT_isFunc(c) && cparam->psize <= KDynamicCallArgument(sfp)) {
+		KonohaClass *c = KClass_(kvs->attrTypeId);
+		kParam *cparam = KClass_cparam(c);
+		if(KClass_isFunc(c) && cparam->psize <= KDynamicCallArgument(sfp)) {
 			KonohaClass *thisClass = kObject_class(sfp[0].asObject), *returnType = KGetReturnType(sfp);
 			kFunc *fo = (kFunc*)kvs->FuncValue;
 			KStackSetFunc(sfp, fo);
@@ -172,9 +172,9 @@ static void prototype_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 {
 	int FN_key = FN_("key"), FN_value = FN_("value");
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im|_Const|kMethod_SmartReturn|_Final, _F(Prototype_get), TY_Object, TY_Prototype, MN_("get"), 1, TY_Symbol, FN_key,
-		_Public|_Final, _F(Prototype_setObject), TY_void, TY_Prototype, MN_("set"), 2, TY_Symbol, FN_key, TY_Object, FN_value,
-		_Public|_Final, _F(Prototype_setInt), TY_void, TY_Prototype, MN_("set"), 2, TY_Symbol, FN_key, TY_int, FN_value,
+		_Public|_Im|_Const|kMethod_SmartReturn|_Final, _F(Prototype_get), KType_Object, KType_Prototype, MN_("get"), 1, KType_Symbol, FN_key,
+		_Public|_Final, _F(Prototype_setObject), KType_void, KType_Prototype, MN_("set"), 2, KType_Symbol, FN_key, KType_Object, FN_value,
+		_Public|_Final, _F(Prototype_setInt), KType_void, KType_Prototype, MN_("set"), 2, KType_Symbol, FN_key, KType_int, FN_value,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

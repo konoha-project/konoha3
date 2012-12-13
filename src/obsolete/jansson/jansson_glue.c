@@ -34,9 +34,9 @@
 extern "C" {
 #endif
 
-#define TY_Json          cJson->typeId
-#define CT_JsonArray     CT_p0(kctx, CT_Array, TY_Json)
-#define CT_StringArray0   CT_p0(kctx, CT_Array, TY_String)
+#define KType_Json          cJson->typeId
+#define KClass_JsonArray     KClass_p0(kctx, KClass_Array, KType_Json)
+#define KClass_StringArray0   KClass_p0(kctx, KClass_Array, KType_String)
 
 typedef struct kJanssonVar kJson;
 struct kJanssonVar {
@@ -135,7 +135,7 @@ static KMETHOD Json_getArray(KonohaContext *kctx, KonohaStack *sfp)
 	if(!json_is_array(ja)) {
 		KReturn(KNULL(Array));
 	}
-	kArrayVar* a = (kArrayVar *)KLIB new_kObject(kctx, OnStack, CT_Array, 0);
+	kArrayVar* a = (kArrayVar *)KLIB new_kObject(kctx, OnStack, KClass_Array, 0);
 	a->ObjectItems= (kObject**)ja;
 	KReturn(a);
 }
@@ -318,7 +318,7 @@ static KMETHOD Json_setString(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_getKeys(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct kJanssonVar *)sfp[0].asObject)->obj;
-	kArray *a = (kArray *)KLIB new_kObject(kctx, OnStack, CT_StringArray0, 0);
+	kArray *a = (kArray *)KLIB new_kObject(kctx, OnStack, KClass_StringArray0, 0);
 	CHECK_JSON(obj, KReturn(KNULL(Array)));
 	const char* key;
 	void* iter = json_object_iter(obj);
@@ -424,35 +424,35 @@ static kbool_t jansson_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 		.p    = Jansson_p,
 	};
 	KonohaClass *cJson = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &JsonDef, trace);
-	ktypeattr_t TY_JsonArray = CT_JsonArray->typeId;
-	ktypeattr_t TY_StringArray0 = CT_StringArray0->typeId;
+	ktypeattr_t KType_JsonArray = KClass_JsonArray->typeId;
+	ktypeattr_t KType_StringArray0 = KClass_StringArray0->typeId;
 
 	int FN_k = FN_("key");
 	int FN_v = FN_("value");
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(Json_dump),      TY_String,    TY_Json, MN_("dump"),      0,
-		_Public|_Const|_Im, _F(Json_getJson),   TY_Json,      TY_Json, MN_("getJson"),   1, TY_String, FN_k,
-		_Public|_Const|_Im, _F(Json_getArray),  TY_JsonArray, TY_Json, MN_("getArray"),  1, TY_String, FN_k,
-		_Public|_Const|_Im, _F(Json_getBool),   TY_boolean,   TY_Json, MN_("getBool"),   1, TY_String, FN_k,
-		_Public|_Const|_Im, _F(Json_getFloat),  TY_float,     TY_Json, MN_("getFloat"),  1, TY_String, FN_k,
-		_Public|_Const|_Im, _F(Json_getInt),    TY_int,       TY_Json, MN_("getInt"),    1, TY_String, FN_k,
-		_Public|_Const|_Im, _F(Json_getString), TY_String,    TY_Json, MN_("getString"), 1, TY_String, FN_k,
-		_Public,            _F(Json_new),       TY_Json,      TY_Json, MN_("new"),       0,
-		_Public|_Static|_Const|_Im, _F(Json_Parse), TY_Json,  TY_Json, MN_("parse"),     1, TY_String, FN_v,
-		_Public,            _F(Json_setJson),   TY_void,      TY_Json, MN_("setJson"),   2, TY_String, FN_k, TY_Json, FN_v,
-		_Public,            _F(Json_setArray),  TY_void,      TY_Json, MN_("setArray"),  2, TY_String, FN_k, TY_JsonArray, FN_v,
-		_Public,            _F(Json_setBool),   TY_void,      TY_Json, MN_("setBool"),   2, TY_String, FN_k, TY_boolean, FN_v,
-		_Public,            _F(Json_setFloat),  TY_void,      TY_Json, MN_("setFloat"),  2, TY_String, FN_k, TY_float, FN_v,
-		_Public,            _F(Json_setInt),    TY_void,      TY_Json, MN_("setInt"),    2, TY_String, FN_k, TY_int, FN_v,
-		_Public,            _F(Json_setString), TY_void,      TY_Json, MN_("setString"), 2, TY_String, FN_k, TY_String, FN_v,
-		_Public|_Const|_Im, _F(Json_getKeys),   TY_StringArray0, TY_Json, MN_("getKeys"), 0,
+		_Public|_Const|_Im, _F(Json_dump),      KType_String,    KType_Json, MN_("dump"),      0,
+		_Public|_Const|_Im, _F(Json_getJson),   KType_Json,      KType_Json, MN_("getJson"),   1, KType_String, FN_k,
+		_Public|_Const|_Im, _F(Json_getArray),  KType_JsonArray, KType_Json, MN_("getArray"),  1, KType_String, FN_k,
+		_Public|_Const|_Im, _F(Json_getBool),   KType_boolean,   KType_Json, MN_("getBool"),   1, KType_String, FN_k,
+		_Public|_Const|_Im, _F(Json_getFloat),  KType_float,     KType_Json, MN_("getFloat"),  1, KType_String, FN_k,
+		_Public|_Const|_Im, _F(Json_getInt),    KType_int,       KType_Json, MN_("getInt"),    1, KType_String, FN_k,
+		_Public|_Const|_Im, _F(Json_getString), KType_String,    KType_Json, MN_("getString"), 1, KType_String, FN_k,
+		_Public,            _F(Json_new),       KType_Json,      KType_Json, MN_("new"),       0,
+		_Public|_Static|_Const|_Im, _F(Json_Parse), KType_Json,  KType_Json, MN_("parse"),     1, KType_String, FN_v,
+		_Public,            _F(Json_setJson),   KType_void,      KType_Json, MN_("setJson"),   2, KType_String, FN_k, KType_Json, FN_v,
+		_Public,            _F(Json_setArray),  KType_void,      KType_Json, MN_("setArray"),  2, KType_String, FN_k, KType_JsonArray, FN_v,
+		_Public,            _F(Json_setBool),   KType_void,      KType_Json, MN_("setBool"),   2, KType_String, FN_k, KType_boolean, FN_v,
+		_Public,            _F(Json_setFloat),  KType_void,      KType_Json, MN_("setFloat"),  2, KType_String, FN_k, KType_float, FN_v,
+		_Public,            _F(Json_setInt),    KType_void,      KType_Json, MN_("setInt"),    2, KType_String, FN_k, KType_int, FN_v,
+		_Public,            _F(Json_setString), KType_void,      KType_Json, MN_("setString"), 2, KType_String, FN_k, KType_String, FN_v,
+		_Public|_Const|_Im, _F(Json_getKeys),   KType_StringArray0, KType_Json, MN_("getKeys"), 0,
 
-		_Public|_Const|_Im, _F(Json_dump),      TY_String,    TY_JsonArray, MN_("dump"), 0,
-		_Public,            _F(JsonArray_newArray), TY_JsonArray,      TY_JsonArray, MN_("newArray"), 1, TY_int, FN_("size"),
-		_Public|_Const|_Im, _F(JsonArray_get),  TY_Json,      TY_JsonArray, MN_("get"),  1, TY_int, FN_("idx"),
-		_Public,            _F(JsonArray_Add),  TY_void,      TY_JsonArray, MN_("add"),  1, TY_Json, FN_v,
-		_Public|_Const|_Im, _F(JsonArray_getSize), TY_int,    TY_JsonArray, MN_("getSize"), 0,
+		_Public|_Const|_Im, _F(Json_dump),      KType_String,    KType_JsonArray, MN_("dump"), 0,
+		_Public,            _F(JsonArray_newArray), KType_JsonArray,      KType_JsonArray, MN_("newArray"), 1, KType_int, FN_("size"),
+		_Public|_Const|_Im, _F(JsonArray_get),  KType_Json,      KType_JsonArray, MN_("get"),  1, KType_int, FN_("idx"),
+		_Public,            _F(JsonArray_Add),  KType_void,      KType_JsonArray, MN_("add"),  1, KType_Json, FN_v,
+		_Public|_Const|_Im, _F(JsonArray_getSize), KType_int,    KType_JsonArray, MN_("getSize"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

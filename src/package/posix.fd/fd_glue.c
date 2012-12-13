@@ -278,29 +278,29 @@ static KMETHOD System_ttyname(KonohaContext *kctx, KonohaStack *sfp)
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-//#define CT_Stat         cStat
-//#define TY_Stat         cStat->typeId
-//#define CT_DIR          cDIR
-//#define TY_DIR          cDIR->typeId
-//#define CT_Dirent       cDirent
-//#define TY_Dirent       cDirent->typeId
+//#define KClass_Stat         cStat
+//#define KType_Stat         cStat->typeId
+//#define KClass_DIR          cDIR
+//#define KType_DIR          cDIR->typeId
+//#define KClass_Dirent       cDirent
+//#define KType_Dirent       cDirent->typeId
 
 static kbool_t fd_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static, _F(System_lseek),     TY_int,     TY_System, MN_("lseek"),     3, TY_int, FN_("fd"), TY_int, FN_("offset"), TY_int, FN_("whence"),
-		_Public|_Static, _F(System_ftruncate), TY_boolean, TY_System, MN_("ftruncate"), 2, TY_int, FN_("fd"), TY_int, FN_("length"),
-		_Public|_Static, _F(System_fchmod),    TY_boolean, TY_System, MN_("fchmod"),    2, TY_int, FN_("fd"), TY_int, FN_("length"),
-		_Public|_Static, _F(System_flock),     TY_boolean, TY_System, MN_("flock"),     2, TY_int, FN_("fd"), TY_int, FN_("operation"),
-		_Public|_Static, _F(System_sync),      TY_boolean, TY_System, MN_("sync"),      1, TY_int, FN_("fd"),
-		_Public|_Static, _F(System_fchown),    TY_boolean, TY_System, MN_("fchown"),    3, TY_int, FN_("pd"), TY_int, FN_("owner"),  TY_int, FN_("group"),
-		_Public|_Static, _F(System_fsync),     TY_boolean, TY_System, MN_("fsync"),     1, TY_int, FN_("fd"),
-		_Public|_Static|_Const|_Im, _F(System_getdtablesize), TY_int, TY_System, MN_("getdtablesize"), 0,
-		_Public|_Static|_Im, _F(System_open),      TY_int,     TY_System, MN_("open"),   2, TY_String, FN_("pathname"), TY_int, FN_("flags"),
-		_Public|_Static|_Im, _F(System_open_mode), TY_int,     TY_System, MN_("open"),   3, TY_String, FN_("pathname"), TY_int, FN_("flags"), TY_int, FN_("mode"),
-		_Public|_Static|_Im, _F(System_fchdir),    TY_boolean, TY_System, MN_("fchdir"), 1, TY_int,    FN_("fd"),
-		_Public|_Static|_Im, _F(System_isatty),    TY_boolean, TY_System, MN_("isatty"), 1, TY_int,    FN_("fd"),
-		_Public|_Static|_Im, _F(System_ttyname),   TY_String, TY_System, MN_("ttyname"), 1, TY_int,    FN_("fd"),
+		_Public|_Static, _F(System_lseek),     KType_int,     KType_System, MN_("lseek"),     3, KType_int, FN_("fd"), KType_int, FN_("offset"), KType_int, FN_("whence"),
+		_Public|_Static, _F(System_ftruncate), KType_boolean, KType_System, MN_("ftruncate"), 2, KType_int, FN_("fd"), KType_int, FN_("length"),
+		_Public|_Static, _F(System_fchmod),    KType_boolean, KType_System, MN_("fchmod"),    2, KType_int, FN_("fd"), KType_int, FN_("length"),
+		_Public|_Static, _F(System_flock),     KType_boolean, KType_System, MN_("flock"),     2, KType_int, FN_("fd"), KType_int, FN_("operation"),
+		_Public|_Static, _F(System_sync),      KType_boolean, KType_System, MN_("sync"),      1, KType_int, FN_("fd"),
+		_Public|_Static, _F(System_fchown),    KType_boolean, KType_System, MN_("fchown"),    3, KType_int, FN_("pd"), KType_int, FN_("owner"),  KType_int, FN_("group"),
+		_Public|_Static, _F(System_fsync),     KType_boolean, KType_System, MN_("fsync"),     1, KType_int, FN_("fd"),
+		_Public|_Static|_Const|_Im, _F(System_getdtablesize), KType_int, KType_System, MN_("getdtablesize"), 0,
+		_Public|_Static|_Im, _F(System_open),      KType_int,     KType_System, MN_("open"),   2, KType_String, FN_("pathname"), KType_int, FN_("flags"),
+		_Public|_Static|_Im, _F(System_open_mode), KType_int,     KType_System, MN_("open"),   3, KType_String, FN_("pathname"), KType_int, FN_("flags"), KType_int, FN_("mode"),
+		_Public|_Static|_Im, _F(System_fchdir),    KType_boolean, KType_System, MN_("fchdir"), 1, KType_int,    FN_("fd"),
+		_Public|_Static|_Im, _F(System_isatty),    KType_boolean, KType_System, MN_("isatty"), 1, KType_int,    FN_("fd"),
+		_Public|_Static|_Im, _F(System_ttyname),   KType_String, KType_System, MN_("ttyname"), 1, KType_int,    FN_("fd"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

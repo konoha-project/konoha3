@@ -122,7 +122,7 @@ static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
 static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	KonohaClass *cIterator = CT_p0(kctx, CT_Iterator, kObject_class(a)->p0);
+	KonohaClass *cIterator = KClass_p0(kctx, KClass_Iterator, kObject_class(a)->p0);
 	kIterator *itr = (kIterator *)KLIB new_kObject(kctx, OnStack, cIterator, 0);
 	KFieldSet(itr, itr->arrayList, a);
 	itr->hasNext = Array_hasNext;
@@ -149,7 +149,7 @@ static void String_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 
 static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kIterator *itr = (kIterator *)KLIB new_kObject(kctx, OnStack, CT_StringIterator, 0);
+	kIterator *itr = (kIterator *)KLIB new_kObject(kctx, OnStack, KClass_StringIterator, 0);
 	KFieldSet(itr, itr->source, sfp[0].asObject);
 	itr->hasNext = String_hasNext;
 	itr->setNextResult = String_setNextResult;
@@ -164,8 +164,8 @@ static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t iterator_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
-	if(CT_Iterator == NULL) {
-		kparamtype_t IteratorParam = {TY_Object};
+	if(KClass_Iterator == NULL) {
+		kparamtype_t IteratorParam = {KType_Object};
 		KDEFINE_CLASS defIterator = {0};
 		SETSTRUCTNAME(defIterator, Iterator);
 		defIterator.cflag  = CFLAG_Iterator;
@@ -173,16 +173,16 @@ static kbool_t iterator_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		defIterator.cparamsize  = 1;
 		defIterator.cParamItems = &IteratorParam;
 
-		CT_Iterator = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defIterator, trace);
-		CT_StringIterator = CT_p0(kctx, CT_Iterator, TY_String);
-		CT_GenericIterator = CT_p0(kctx, CT_Iterator, TY_0);
+		KClass_Iterator = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defIterator, trace);
+		KClass_StringIterator = KClass_p0(kctx, KClass_Iterator, KType_String);
+		KClass_GenericIterator = KClass_p0(kctx, KClass_Iterator, KType_0);
 	}
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Iterator_hasNext), TY_boolean, TY_Iterator, MN_("hasNext"), 0,
-		_Public, _F(Iterator_next), TY_0, TY_Iterator, MN_("next"), 0,
-		_Public, _F(Array_toIterator),  TY_GenericIterator, TY_Array, MN_("toIterator"), 0,
-		_Public, _F(String_toIterator), TY_StringIterator, TY_String, MN_("toIterator"), 0,
+		_Public, _F(Iterator_hasNext), KType_boolean, KType_Iterator, MN_("hasNext"), 0,
+		_Public, _F(Iterator_next), KType_0, KType_Iterator, MN_("next"), 0,
+		_Public, _F(Array_toIterator),  KType_GenericIterator, KType_Array, MN_("toIterator"), 0,
+		_Public, _F(String_toIterator), KType_StringIterator, KType_String, MN_("toIterator"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

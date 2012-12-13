@@ -226,7 +226,7 @@ static kFile *new_PipeFile(KonohaContext *kctx, kArray *gcstack, int fd, const c
 	if(fp == NULL) {
 		KTraceErrorPoint(trace, SystemFault, "fdopen", LogUint("fildes", fd), LogText("mode", mode), LogErrno);
 	}
-	struct kFileVar *file = (struct kFileVar *)KLIB new_kObject(kctx, gcstack, CT_File, (uintptr_t)fp);
+	struct kFileVar *file = (struct kFileVar *)KLIB new_kObject(kctx, gcstack, KClass_File, (uintptr_t)fp);
 	KFieldInit(file, file->PathInfoNULL, command);
 	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
 		if(mode[0] == 'r') {
@@ -707,59 +707,59 @@ static kbool_t subproc_InitSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 	};
 	KonohaClass *cSubproc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSubProc, trace);
 
-	kparamtype_t ps = {TY_String, FN_("str")};
-	KonohaClass *CT_StringArray2 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_String, 1, &ps);
-	ktypeattr_t TY_StringArray = CT_StringArray2->typeId, TY_SubProc = cSubproc->typeId;
+	kparamtype_t ps = {KType_String, FN_("str")};
+	KonohaClass *KClass_StringArray2 = KLIB KonohaClass_Generics(kctx, KClass_Array, KType_String, 1, &ps);
+	ktypeattr_t KType_StringArray = KClass_StringArray2->typeId, KType_SubProc = cSubproc->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public,     _F(SubProc_new),             TY_SubProc, TY_SubProc, MN_("new"), 1, TY_String, FN_("command"),
-		_Public,     _F(SubProc_setArgumentList), TY_void, TY_SubProc, MN_("setArgumentList"), 1, TY_StringArray, FN_("arguments"),
-		_Public,     _F(SubProc_setInputStream),  TY_void, TY_SubProc, MN_("setInputStream"), 1, TY_File, FN_("stream"),
-		_Public,     _F(SubProc_setOutputStream), TY_void, TY_SubProc, MN_("setOutputStream"), 1, TY_File, FN_("stream"),
-		_Public,     _F(SubProc_setErrorStream),  TY_void, TY_SubProc, MN_("setErrorStream"), 1, TY_File, FN_("stream"),
-		_Public|_Im, _F(SubProc_getInputStream),  TY_File, TY_SubProc, MN_("getInputStream"), 0,
-		_Public|_Im, _F(SubProc_getOutputStream), TY_File, TY_SubProc, MN_("getOutputStream"), 0,
-		_Public|_Im, _F(SubProc_getErrorStream),  TY_File, TY_SubProc, MN_("getErrorStream"), 0,
-		_Public,     _F(SubProc_pipe),            TY_void, TY_SubProc, MN_("pipe"), 2, TY_SubProc, FN_("next"), TY_boolean, FN_("error"),
-		_Public,     _F(SubProc_fg),              TY_int, TY_SubProc, MN_("fg"), 0,
-		_Public,     _F(SubProc_bg),              TY_void, TY_SubProc, MN_("bg"), 0,
-		_Public,     _F(SubProc_communicate),     TY_StringArray, TY_SubProc, MN_("communicate"), 1, TY_String, FN_("input"),
-		_Public|_Im, _F(SubProc_getPid),          TY_int, TY_SubProc, MN_("getPid"), 0,
-		_Public|_Im, _F(SubProc_getStatus),       TY_int, TY_SubProc, MN_("getStatus"), 0,
-		_Public|_Static|_Im, _F(SubProc_isCommand), TY_boolean, TY_SubProc, MN_("isCommand"), 1, TY_String, FN_("command"),
+		_Public,     _F(SubProc_new),             KType_SubProc, KType_SubProc, MN_("new"), 1, KType_String, FN_("command"),
+		_Public,     _F(SubProc_setArgumentList), KType_void, KType_SubProc, MN_("setArgumentList"), 1, KType_StringArray, FN_("arguments"),
+		_Public,     _F(SubProc_setInputStream),  KType_void, KType_SubProc, MN_("setInputStream"), 1, KType_File, FN_("stream"),
+		_Public,     _F(SubProc_setOutputStream), KType_void, KType_SubProc, MN_("setOutputStream"), 1, KType_File, FN_("stream"),
+		_Public,     _F(SubProc_setErrorStream),  KType_void, KType_SubProc, MN_("setErrorStream"), 1, KType_File, FN_("stream"),
+		_Public|_Im, _F(SubProc_getInputStream),  KType_File, KType_SubProc, MN_("getInputStream"), 0,
+		_Public|_Im, _F(SubProc_getOutputStream), KType_File, KType_SubProc, MN_("getOutputStream"), 0,
+		_Public|_Im, _F(SubProc_getErrorStream),  KType_File, KType_SubProc, MN_("getErrorStream"), 0,
+		_Public,     _F(SubProc_pipe),            KType_void, KType_SubProc, MN_("pipe"), 2, KType_SubProc, FN_("next"), KType_boolean, FN_("error"),
+		_Public,     _F(SubProc_fg),              KType_int, KType_SubProc, MN_("fg"), 0,
+		_Public,     _F(SubProc_bg),              KType_void, KType_SubProc, MN_("bg"), 0,
+		_Public,     _F(SubProc_communicate),     KType_StringArray, KType_SubProc, MN_("communicate"), 1, KType_String, FN_("input"),
+		_Public|_Im, _F(SubProc_getPid),          KType_int, KType_SubProc, MN_("getPid"), 0,
+		_Public|_Im, _F(SubProc_getStatus),       KType_int, KType_SubProc, MN_("getStatus"), 0,
+		_Public|_Static|_Im, _F(SubProc_isCommand), KType_boolean, KType_SubProc, MN_("isCommand"), 1, KType_String, FN_("command"),
 
-//		_Public|_Im, _F(Subproc_exec), TY_String, TY_Subproc, MN_("exec"), 1, TY_String, FN_("data"),
-//		_Public|_Im, _F(Subproc_communicate), TY_StringArray, TY_Subproc, MN_("communicate"), 1, TY_String, FN_("input"),
-//		_Public|_Im, _F(Subproc_poll), TY_int, TY_Subproc, MN_("poll"), 0,
-//		_Public|_Im, _F(Subproc_wait), TY_int, TY_Subproc, MN_("wait"), 0,
-//		_Public|_Im, _F(Subproc_sendSignal), TY_boolean, TY_Subproc, MN_("sendSignal"), 1 TY_int, FN_("signal"),
-//		_Public|_Im, _F(Subproc_terminate), TY_boolean, TY_Subproc, MN_("terminate"), 0,
-//		_Public|_Im, _F(Subproc_getPid), TY_int, TY_Subproc, MN_("getPid"), 0,
-//		_Public|_Im, _F(Subproc_enableShellmode), TY_boolean, TY_Subproc, MN_("enableShellmode"), 1, TY_boolean, FN_("isShellmode"),
-//		_Public|_Im, _F(Subproc_enablePipemodeIN), TY_boolean, TY_Subproc, MN_("enablePipemodeIN"), 1, TY_boolean, FN_("isPipemode"),
-//		_Public|_Im, _F(Subproc_enablePipemodeOUT), TY_boolean, TY_Subproc, MN_("enablePipemodeOUT"), 1, TY_boolean, FN_("isPipemode"),
-//		_Public|_Im, _F(Subproc_enablePipemodeERR), TY_boolean, TY_Subproc, MN_("enablePipemodeERR"), 1, TY_boolean, FN_("isPipemode"),
-//		_Public|_Im, _F(Subproc_enableStandardIN), TY_boolean, TY_Subproc, MN_("enableStandardIN"), 1, TY_boolean, FN_("isStandard"),
-//		_Public|_Im, _F(Subproc_enableStandardOUT), TY_boolean, TY_Subproc, MN_("enableStandardOUT"), 1, TY_boolean, FN_("isStandard"),
-//		_Public|_Im, _F(Subproc_enableStandardERR), TY_boolean, TY_Subproc, MN_("enableStandardERR"), 1, TY_boolean, FN_("isStandard"),
-//		_Public|_Im, _F(Subproc_isShellmode), TY_boolean, TY_Subproc, MN_("isShellmode"), 0,
-//		_Public|_Im, _F(Subproc_isPipemodeIN), TY_boolean, TY_Subproc, MN_("isPipemodeIN"), 0,
-//		_Public|_Im, _F(Subproc_isPipemodeOUT), TY_boolean, TY_Subproc, MN_("isPipemodeOUT"), 0,
-//		_Public|_Im, _F(Subproc_isPipemodeERR), TY_boolean, TY_Subproc, MN_("isPipemodeERR"), 0,
-//		_Public|_Im, _F(Subproc_isStandardIN), TY_boolean, TY_Subproc, MN_("isStandardIN"), 0,
-//		_Public|_Im, _F(Subproc_isStandardOUT), TY_boolean, TY_Subproc, MN_("isStandardOUT"), 0,
-//		_Public|_Im, _F(Subproc_isStandardERR), TY_boolean, TY_Subproc, MN_("isStandardERR"), 0,
-//		_Public|_Im, _F(Subproc_isERR2StdOUT), TY_boolean, TY_Subproc, MN_("isERR2StdOUT"), 0,
-//		_Public|_Static|_Im, _F(Subproc_call), TY_int, TY_Subproc, MN_("call"), 1, TY_String, FN_("args"),
-//		_Public|_Static|_Im, _F(Subproc_CheckOutput), TY_String, TY_Subproc, MN_("checkOutput"), 1, TY_String, FN_("data"),
-//		_Public|_Im, _F(Subproc_setCwd), TY_boolean, TY_Subproc, MN_("setCwd"), 1, TY_String, FN_("cwd"),
-//		_Public|_Im, _F(Subproc_setBufsize), TY_boolean, TY_Subproc, MN_("setBufsize"), 1, TY_int, FN_("bufsize"),
-//		_Public|_Im, _F(Subproc_setFileIN), TY_boolean, TY_Subproc, MN_("setFileIN"), 1, TY_FILE, FN_("file"),
-//		_Public|_Im, _F(Subproc_setFileOUT), TY_boolean, TY_Subproc, MN_("setFileOUT"), 1, TY_FILE, FN_("file"),
-//		_Public|_Im, _F(Subproc_setFileERR), TY_boolean, TY_Subproc, MN_("setFileERR"), 1, TY_FILE, FN_("file"),
-//		_Public|_Im, _F(Subproc_getTimeout), TY_int, TY_Subproc, MN_("getTimeout"), 0,
-//		_Public|_Im, _F(Subproc_getReturncode), TY_int, TY_Subproc, MN_("getReturncode"), 0,
-//		_Public|_Im, _F(Subproc_enableERR2StdOUT), TY_boolean, TY_Subproc, MN_("enableERR2StdOUT"), 1, TY_boolean, FN_("isStdout"),
+//		_Public|_Im, _F(Subproc_exec), KType_String, KType_Subproc, MN_("exec"), 1, KType_String, FN_("data"),
+//		_Public|_Im, _F(Subproc_communicate), KType_StringArray, KType_Subproc, MN_("communicate"), 1, KType_String, FN_("input"),
+//		_Public|_Im, _F(Subproc_poll), KType_int, KType_Subproc, MN_("poll"), 0,
+//		_Public|_Im, _F(Subproc_wait), KType_int, KType_Subproc, MN_("wait"), 0,
+//		_Public|_Im, _F(Subproc_sendSignal), KType_boolean, KType_Subproc, MN_("sendSignal"), 1 KType_int, FN_("signal"),
+//		_Public|_Im, _F(Subproc_terminate), KType_boolean, KType_Subproc, MN_("terminate"), 0,
+//		_Public|_Im, _F(Subproc_getPid), KType_int, KType_Subproc, MN_("getPid"), 0,
+//		_Public|_Im, _F(Subproc_enableShellmode), KType_boolean, KType_Subproc, MN_("enableShellmode"), 1, KType_boolean, FN_("isShellmode"),
+//		_Public|_Im, _F(Subproc_enablePipemodeIN), KType_boolean, KType_Subproc, MN_("enablePipemodeIN"), 1, KType_boolean, FN_("isPipemode"),
+//		_Public|_Im, _F(Subproc_enablePipemodeOUT), KType_boolean, KType_Subproc, MN_("enablePipemodeOUT"), 1, KType_boolean, FN_("isPipemode"),
+//		_Public|_Im, _F(Subproc_enablePipemodeERR), KType_boolean, KType_Subproc, MN_("enablePipemodeERR"), 1, KType_boolean, FN_("isPipemode"),
+//		_Public|_Im, _F(Subproc_enableStandardIN), KType_boolean, KType_Subproc, MN_("enableStandardIN"), 1, KType_boolean, FN_("isStandard"),
+//		_Public|_Im, _F(Subproc_enableStandardOUT), KType_boolean, KType_Subproc, MN_("enableStandardOUT"), 1, KType_boolean, FN_("isStandard"),
+//		_Public|_Im, _F(Subproc_enableStandardERR), KType_boolean, KType_Subproc, MN_("enableStandardERR"), 1, KType_boolean, FN_("isStandard"),
+//		_Public|_Im, _F(Subproc_isShellmode), KType_boolean, KType_Subproc, MN_("isShellmode"), 0,
+//		_Public|_Im, _F(Subproc_isPipemodeIN), KType_boolean, KType_Subproc, MN_("isPipemodeIN"), 0,
+//		_Public|_Im, _F(Subproc_isPipemodeOUT), KType_boolean, KType_Subproc, MN_("isPipemodeOUT"), 0,
+//		_Public|_Im, _F(Subproc_isPipemodeERR), KType_boolean, KType_Subproc, MN_("isPipemodeERR"), 0,
+//		_Public|_Im, _F(Subproc_isStandardIN), KType_boolean, KType_Subproc, MN_("isStandardIN"), 0,
+//		_Public|_Im, _F(Subproc_isStandardOUT), KType_boolean, KType_Subproc, MN_("isStandardOUT"), 0,
+//		_Public|_Im, _F(Subproc_isStandardERR), KType_boolean, KType_Subproc, MN_("isStandardERR"), 0,
+//		_Public|_Im, _F(Subproc_isERR2StdOUT), KType_boolean, KType_Subproc, MN_("isERR2StdOUT"), 0,
+//		_Public|_Static|_Im, _F(Subproc_call), KType_int, KType_Subproc, MN_("call"), 1, KType_String, FN_("args"),
+//		_Public|_Static|_Im, _F(Subproc_CheckOutput), KType_String, KType_Subproc, MN_("checkOutput"), 1, KType_String, FN_("data"),
+//		_Public|_Im, _F(Subproc_setCwd), KType_boolean, KType_Subproc, MN_("setCwd"), 1, KType_String, FN_("cwd"),
+//		_Public|_Im, _F(Subproc_setBufsize), KType_boolean, KType_Subproc, MN_("setBufsize"), 1, KType_int, FN_("bufsize"),
+//		_Public|_Im, _F(Subproc_setFileIN), KType_boolean, KType_Subproc, MN_("setFileIN"), 1, KType_FILE, FN_("file"),
+//		_Public|_Im, _F(Subproc_setFileOUT), KType_boolean, KType_Subproc, MN_("setFileOUT"), 1, KType_FILE, FN_("file"),
+//		_Public|_Im, _F(Subproc_setFileERR), KType_boolean, KType_Subproc, MN_("setFileERR"), 1, KType_FILE, FN_("file"),
+//		_Public|_Im, _F(Subproc_getTimeout), KType_int, KType_Subproc, MN_("getTimeout"), 0,
+//		_Public|_Im, _F(Subproc_getReturncode), KType_int, KType_Subproc, MN_("getReturncode"), 0,
+//		_Public|_Im, _F(Subproc_enableERR2StdOUT), KType_boolean, KType_Subproc, MN_("enableERR2StdOUT"), 1, KType_boolean, FN_("isStdout"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -769,9 +769,9 @@ static kbool_t subproc_InitSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 /* ------------------------------------------------------------------------ */
 /* [class defs] */
 
-//#define CT_Subproc         cSubproc
-#define TY_Subproc         cSubproc->typeId
-//#define IS_Subproc(O)      (kObject_class(O) == CT_Subproc)
+//#define KClass_Subproc         cSubproc
+#define KType_Subproc         cSubproc->typeId
+//#define IS_Subproc(O)      (kObject_class(O) == KClass_Subproc)
 
 /* ------------------------------------------------------------------------ */
 /* [global variables] */
@@ -1421,7 +1421,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 			killWait(sp->cpid);
 			//TODO: raise error
 		} else {
-			ret_a = (kArray *)KLIB new_kObject(kctx, GcUnsafe, CT_Array, 0);
+			ret_a = (kArray *)KLIB new_kObject(kctx, GcUnsafe, KClass_Array, 0);
 			if(sp->rmode == M_PIPE) {
 				if(!kPipeReadArray(kctx, ret_a, sp->rfp)) {
 					//TODO;  raise error
@@ -1465,10 +1465,10 @@ static KMETHOD Subproc_enableShellmode(KonohaContext *kctx, KonohaStack *sfp)
 //		kDictMap *env = (kDictMap *)sfp[1].asObject;
 //		int i;
 //		size_t msize = env->spi->size(ctx, env->mapptr);
-//		if( p->env != (kArray *)KNH_NULVAL(TY_Array) ) {
+//		if( p->env != (kArray *)KNH_NULVAL(KType_Array) ) {
 //			knh_Array_clear( ctx, p->env, 0 );
 //		}
-//		p->env = new_Array(ctx, TY_String, msize);
+//		p->env = new_Array(ctx, KType_String, msize);
 //		for (i = 0; i < msize; i++) {
 //			kString *key = (kString *)knh_DictMap_keyAt(env, i);
 //			kString *val = (kString *)knh_DictMap_valueAt(env, i);
@@ -1836,46 +1836,46 @@ static kbool_t subproc_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 
 	KonohaClass *cSubproc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSubproc, trace);
 
-	kparamtype_t ps = {TY_String, FN_("str")};
-	KonohaClass *CT_StringArray2 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_String, 1, &ps);
-	ktypeattr_t TY_StringArray = CT_StringArray2->typeId;
+	kparamtype_t ps = {KType_String, FN_("str")};
+	KonohaClass *KClass_StringArray2 = KLIB KonohaClass_Generics(kctx, KClass_Array, KType_String, 1, &ps);
+	ktypeattr_t KType_StringArray = KClass_StringArray2->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Subproc_new), TY_Subproc, TY_Subproc,MN_("new"), 2, TY_String, FN_("path"), TY_boolean, FN_("mode"),
-		_Public|_Im, _F(Subproc_fg), TY_int, TY_Subproc, MN_("fg"), 0,
-		_Public|_Im, _F(Subproc_bg), TY_boolean, TY_Subproc, MN_("bg"), 0,
-		_Public|_Im, _F(Subproc_exec), TY_String, TY_Subproc, MN_("exec"), 1, TY_String, FN_("data"),
-		_Public|_Im, _F(Subproc_communicate), TY_StringArray, TY_Subproc, MN_("communicate"), 1, TY_String, FN_("input"),
-//		_Public|_Im, _F(Subproc_poll), TY_int, TY_Subproc, MN_("poll"), 0,
-//		_Public|_Im, _F(Subproc_wait), TY_int, TY_Subproc, MN_("wait"), 0,
-//		_Public|_Im, _F(Subproc_sendSignal), TY_boolean, TY_Subproc, MN_("sendSignal"), 1 TY_int, FN_("signal"),
-//		_Public|_Im, _F(Subproc_terminate), TY_boolean, TY_Subproc, MN_("terminate"), 0,
-		_Public|_Im, _F(Subproc_getPid), TY_int, TY_Subproc, MN_("getPid"), 0,
-		_Public|_Im, _F(Subproc_enableShellmode), TY_boolean, TY_Subproc, MN_("enableShellmode"), 1, TY_boolean, FN_("isShellmode"),
-		_Public|_Im, _F(Subproc_enablePipemodeIN), TY_boolean, TY_Subproc, MN_("enablePipemodeIN"), 1, TY_boolean, FN_("isPipemode"),
-		_Public|_Im, _F(Subproc_enablePipemodeOUT), TY_boolean, TY_Subproc, MN_("enablePipemodeOUT"), 1, TY_boolean, FN_("isPipemode"),
-		_Public|_Im, _F(Subproc_enablePipemodeERR), TY_boolean, TY_Subproc, MN_("enablePipemodeERR"), 1, TY_boolean, FN_("isPipemode"),
-		_Public|_Im, _F(Subproc_enableStandardIN), TY_boolean, TY_Subproc, MN_("enableStandardIN"), 1, TY_boolean, FN_("isStandard"),
-		_Public|_Im, _F(Subproc_enableStandardOUT), TY_boolean, TY_Subproc, MN_("enableStandardOUT"), 1, TY_boolean, FN_("isStandard"),
-		_Public|_Im, _F(Subproc_enableStandardERR), TY_boolean, TY_Subproc, MN_("enableStandardERR"), 1, TY_boolean, FN_("isStandard"),
-		_Public|_Im, _F(Subproc_isShellmode), TY_boolean, TY_Subproc, MN_("isShellmode"), 0,
-		_Public|_Im, _F(Subproc_isPipemodeIN), TY_boolean, TY_Subproc, MN_("isPipemodeIN"), 0,
-		_Public|_Im, _F(Subproc_isPipemodeOUT), TY_boolean, TY_Subproc, MN_("isPipemodeOUT"), 0,
-		_Public|_Im, _F(Subproc_isPipemodeERR), TY_boolean, TY_Subproc, MN_("isPipemodeERR"), 0,
-		_Public|_Im, _F(Subproc_isStandardIN), TY_boolean, TY_Subproc, MN_("isStandardIN"), 0,
-		_Public|_Im, _F(Subproc_isStandardOUT), TY_boolean, TY_Subproc, MN_("isStandardOUT"), 0,
-		_Public|_Im, _F(Subproc_isStandardERR), TY_boolean, TY_Subproc, MN_("isStandardERR"), 0,
-		_Public|_Im, _F(Subproc_isERR2StdOUT), TY_boolean, TY_Subproc, MN_("isERR2StdOUT"), 0,
-//		_Public|_Static|_Im, _F(Subproc_call), TY_int, TY_Subproc, MN_("call"), 1, TY_String, FN_("args"),
-//		_Public|_Static|_Im, _F(Subproc_CheckOutput), TY_String, TY_Subproc, MN_("checkOutput"), 1, TY_String, FN_("data"),
-		_Public|_Im, _F(Subproc_setCwd), TY_boolean, TY_Subproc, MN_("setCwd"), 1, TY_String, FN_("cwd"),
-		_Public|_Im, _F(Subproc_setBufsize), TY_boolean, TY_Subproc, MN_("setBufsize"), 1, TY_int, FN_("bufsize"),
-		_Public|_Im, _F(Subproc_setFileIN), TY_boolean, TY_Subproc, MN_("setFileIN"), 1, TY_FILE, FN_("file"),
-		_Public|_Im, _F(Subproc_setFileOUT), TY_boolean, TY_Subproc, MN_("setFileOUT"), 1, TY_FILE, FN_("file"),
-		_Public|_Im, _F(Subproc_setFileERR), TY_boolean, TY_Subproc, MN_("setFileERR"), 1, TY_FILE, FN_("file"),
-		_Public|_Im, _F(Subproc_getTimeout), TY_int, TY_Subproc, MN_("getTimeout"), 0,
-		_Public|_Im, _F(Subproc_getReturncode), TY_int, TY_Subproc, MN_("getReturncode"), 0,
-		_Public|_Im, _F(Subproc_enableERR2StdOUT), TY_boolean, TY_Subproc, MN_("enableERR2StdOUT"), 1, TY_boolean, FN_("isStdout"),
+		_Public, _F(Subproc_new), KType_Subproc, KType_Subproc,MN_("new"), 2, KType_String, FN_("path"), KType_boolean, FN_("mode"),
+		_Public|_Im, _F(Subproc_fg), KType_int, KType_Subproc, MN_("fg"), 0,
+		_Public|_Im, _F(Subproc_bg), KType_boolean, KType_Subproc, MN_("bg"), 0,
+		_Public|_Im, _F(Subproc_exec), KType_String, KType_Subproc, MN_("exec"), 1, KType_String, FN_("data"),
+		_Public|_Im, _F(Subproc_communicate), KType_StringArray, KType_Subproc, MN_("communicate"), 1, KType_String, FN_("input"),
+//		_Public|_Im, _F(Subproc_poll), KType_int, KType_Subproc, MN_("poll"), 0,
+//		_Public|_Im, _F(Subproc_wait), KType_int, KType_Subproc, MN_("wait"), 0,
+//		_Public|_Im, _F(Subproc_sendSignal), KType_boolean, KType_Subproc, MN_("sendSignal"), 1 KType_int, FN_("signal"),
+//		_Public|_Im, _F(Subproc_terminate), KType_boolean, KType_Subproc, MN_("terminate"), 0,
+		_Public|_Im, _F(Subproc_getPid), KType_int, KType_Subproc, MN_("getPid"), 0,
+		_Public|_Im, _F(Subproc_enableShellmode), KType_boolean, KType_Subproc, MN_("enableShellmode"), 1, KType_boolean, FN_("isShellmode"),
+		_Public|_Im, _F(Subproc_enablePipemodeIN), KType_boolean, KType_Subproc, MN_("enablePipemodeIN"), 1, KType_boolean, FN_("isPipemode"),
+		_Public|_Im, _F(Subproc_enablePipemodeOUT), KType_boolean, KType_Subproc, MN_("enablePipemodeOUT"), 1, KType_boolean, FN_("isPipemode"),
+		_Public|_Im, _F(Subproc_enablePipemodeERR), KType_boolean, KType_Subproc, MN_("enablePipemodeERR"), 1, KType_boolean, FN_("isPipemode"),
+		_Public|_Im, _F(Subproc_enableStandardIN), KType_boolean, KType_Subproc, MN_("enableStandardIN"), 1, KType_boolean, FN_("isStandard"),
+		_Public|_Im, _F(Subproc_enableStandardOUT), KType_boolean, KType_Subproc, MN_("enableStandardOUT"), 1, KType_boolean, FN_("isStandard"),
+		_Public|_Im, _F(Subproc_enableStandardERR), KType_boolean, KType_Subproc, MN_("enableStandardERR"), 1, KType_boolean, FN_("isStandard"),
+		_Public|_Im, _F(Subproc_isShellmode), KType_boolean, KType_Subproc, MN_("isShellmode"), 0,
+		_Public|_Im, _F(Subproc_isPipemodeIN), KType_boolean, KType_Subproc, MN_("isPipemodeIN"), 0,
+		_Public|_Im, _F(Subproc_isPipemodeOUT), KType_boolean, KType_Subproc, MN_("isPipemodeOUT"), 0,
+		_Public|_Im, _F(Subproc_isPipemodeERR), KType_boolean, KType_Subproc, MN_("isPipemodeERR"), 0,
+		_Public|_Im, _F(Subproc_isStandardIN), KType_boolean, KType_Subproc, MN_("isStandardIN"), 0,
+		_Public|_Im, _F(Subproc_isStandardOUT), KType_boolean, KType_Subproc, MN_("isStandardOUT"), 0,
+		_Public|_Im, _F(Subproc_isStandardERR), KType_boolean, KType_Subproc, MN_("isStandardERR"), 0,
+		_Public|_Im, _F(Subproc_isERR2StdOUT), KType_boolean, KType_Subproc, MN_("isERR2StdOUT"), 0,
+//		_Public|_Static|_Im, _F(Subproc_call), KType_int, KType_Subproc, MN_("call"), 1, KType_String, FN_("args"),
+//		_Public|_Static|_Im, _F(Subproc_CheckOutput), KType_String, KType_Subproc, MN_("checkOutput"), 1, KType_String, FN_("data"),
+		_Public|_Im, _F(Subproc_setCwd), KType_boolean, KType_Subproc, MN_("setCwd"), 1, KType_String, FN_("cwd"),
+		_Public|_Im, _F(Subproc_setBufsize), KType_boolean, KType_Subproc, MN_("setBufsize"), 1, KType_int, FN_("bufsize"),
+		_Public|_Im, _F(Subproc_setFileIN), KType_boolean, KType_Subproc, MN_("setFileIN"), 1, KType_FILE, FN_("file"),
+		_Public|_Im, _F(Subproc_setFileOUT), KType_boolean, KType_Subproc, MN_("setFileOUT"), 1, KType_FILE, FN_("file"),
+		_Public|_Im, _F(Subproc_setFileERR), KType_boolean, KType_Subproc, MN_("setFileERR"), 1, KType_FILE, FN_("file"),
+		_Public|_Im, _F(Subproc_getTimeout), KType_int, KType_Subproc, MN_("getTimeout"), 0,
+		_Public|_Im, _F(Subproc_getReturncode), KType_int, KType_Subproc, MN_("getReturncode"), 0,
+		_Public|_Im, _F(Subproc_enableERR2StdOUT), KType_boolean, KType_Subproc, MN_("enableERR2StdOUT"), 1, KType_boolean, FN_("isStdout"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

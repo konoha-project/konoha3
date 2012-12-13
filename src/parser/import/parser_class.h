@@ -89,9 +89,9 @@ static const char *kToken_t(KonohaContext *kctx, kToken *tk)
 	else {
 		switch(tk->resolvedSymbol) {
 			case TokenType_CODE:
-			case KW_BraceGroup: return "{... }";
-			case KW_ParenthesisGroup: return "(... )";
-			case KW_BracketGroup: return "[... ]";
+			case Symbol_BraceGroup: return "{... }";
+			case Symbol_ParenthesisGroup: return "(... )";
+			case Symbol_BracketGroup: return "[... ]";
 		}
 		return "";
 	}
@@ -155,7 +155,7 @@ static void kExpr_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kExprVar *expr = (kExprVar *)o;
 	expr->build    = TEXPR_UNTYPED;
-	expr->attrTypeId       = TY_var;
+	expr->attrTypeId       = KType_var;
 	expr->index    = 0;
 	KFieldInit(expr, expr->termToken, K_NULLTOKEN);
 	expr->syn = (SugarSyntax *)conf;
@@ -193,7 +193,7 @@ static void kExpr_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingB
 		kExprTerm_p(kctx, (kObject *)expr->objectConstValue, values, pos+1, wb);
 	}
 	else if(expr->build == TEXPR_NEW) {
-		KLIB KBuffer_printf(kctx, wb, "new %s", TY_t(expr->attrTypeId));
+		KLIB KBuffer_printf(kctx, wb, "new %s", KType_t(expr->attrTypeId));
 	}
 	else if(expr->build == TEXPR_NULL) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("null"));
@@ -201,7 +201,7 @@ static void kExpr_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingB
 	else if(expr->build == TEXPR_NCONST) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("const "));
 		values[pos+1].unboxValue = expr->unboxConstValue;
-		CT_(expr->attrTypeId)->p(kctx, values, pos+1, wb);
+		KClass_(expr->attrTypeId)->p(kctx, values, pos+1, wb);
 	}
 	else if(expr->build == TEXPR_LOCAL) {
 		KLIB KBuffer_printf(kctx, wb, "local sfp[%d]", (int)expr->index);
@@ -231,8 +231,8 @@ static void kExpr_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingB
 		}
 	}
 	KLIB KBuffer_Write(kctx, wb, ")", 1);
-	if(expr->attrTypeId != TY_var) {
-		KLIB KBuffer_printf(kctx, wb, ":%s", TY_t(expr->attrTypeId));
+	if(expr->attrTypeId != KType_var) {
+		KLIB KBuffer_printf(kctx, wb, ":%s", KType_t(expr->attrTypeId));
 	}
 #endif
 }

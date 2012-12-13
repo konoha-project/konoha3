@@ -749,9 +749,9 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-#define TY_Curl     cCurl->typeId
+#define KType_Curl     cCurl->typeId
 
-#define KDefineConstInt(T)  #T, TY_int, T
+#define KDefineConstInt(T)  #T, KType_int, T
 
 static kbool_t curl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
@@ -768,15 +768,15 @@ static kbool_t curl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	KonohaClass *cCurl = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCurl, trace);
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Curl_new), TY_Curl, TY_Curl, MN_("new"), 0,
-		_Public, _F(Curl_setOptBoolean), TY_void, TY_Curl, MN_("setOpt"), 2, TY_int, FN_("option"), TY_boolean, FN_("data"),
-		_Public, _F(Curl_setOptInt),     TY_void, TY_Curl, MN_("setOpt"), 2, TY_int, FN_("option"), TY_int,     FN_("data"),
-		_Public, _F(Curl_setOptString),  TY_void, TY_Curl, MN_("setOpt"), 2, TY_int, FN_("option"), TY_String,  FN_("data"),
-		_Public, _F(Curl_setOptFile),    TY_void, TY_Curl, MN_("setOpt"), 2, TY_int, FN_("option"), TY_File,    FN_("data"),
-		_Public, _F(Curl_appendHeader), TY_void, TY_Curl, MN_("appendHeader"), 1, TY_String, FN_("header"),
-		_Public, _F(Curl_perform), TY_boolean, TY_Curl, MN_("perform"), 0,
-		_Public, _F(Curl_receiveString), TY_String, TY_Curl, MN_("receiveString"), 0,
-		_Public|_Im, _F(Curl_getInfo), TY_Object/*FIXME TY_Dynamic*/, TY_Curl, MN_("getInfo"), 1, TY_int, FN_("type"),
+		_Public, _F(Curl_new), KType_Curl, KType_Curl, MN_("new"), 0,
+		_Public, _F(Curl_setOptBoolean), KType_void, KType_Curl, MN_("setOpt"), 2, KType_int, FN_("option"), KType_boolean, FN_("data"),
+		_Public, _F(Curl_setOptInt),     KType_void, KType_Curl, MN_("setOpt"), 2, KType_int, FN_("option"), KType_int,     FN_("data"),
+		_Public, _F(Curl_setOptString),  KType_void, KType_Curl, MN_("setOpt"), 2, KType_int, FN_("option"), KType_String,  FN_("data"),
+		_Public, _F(Curl_setOptFile),    KType_void, KType_Curl, MN_("setOpt"), 2, KType_int, FN_("option"), KType_File,    FN_("data"),
+		_Public, _F(Curl_appendHeader), KType_void, KType_Curl, MN_("appendHeader"), 1, KType_String, FN_("header"),
+		_Public, _F(Curl_perform), KType_boolean, KType_Curl, MN_("perform"), 0,
+		_Public, _F(Curl_receiveString), KType_String, KType_Curl, MN_("receiveString"), 0,
+		_Public|_Im, _F(Curl_getInfo), KType_Object/*FIXME KType_Dynamic*/, KType_Curl, MN_("getInfo"), 1, KType_int, FN_("type"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

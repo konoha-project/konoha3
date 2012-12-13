@@ -4,10 +4,10 @@
 #ifndef APACHE_GLUE_H
 #define APACHE_GLUE_H
 #define kmodapache        ((KModuleApache *)kctx->modshare[MOD_APACHE])
-#define CT_Request        kmodapache->cRequest
-#define CT_AprTable       kmodapache->cAprTable
-#define CT_AprTableEntry  kmodapache->cAprTableEntry
-#define CT_Apache         kmodapache->cApache
+#define KClass_Request        kmodapache->cRequest
+#define KClass_AprTable       kmodapache->cAprTable
+#define KClass_AprTableEntry  kmodapache->cAprTableEntry
+#define KClass_Apache         kmodapache->cApache
 
 typedef struct kRequest {
 	KonohaObjectHeader h;

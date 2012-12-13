@@ -47,7 +47,7 @@ static void kMethod_WriteToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuf
 {
 	kParam *pa = kMethod_GetParam(mtd);
 	Method_WriteAttributeToBuffer(kctx, mtd, wb);
-	KLIB KBuffer_printf(kctx, wb, "%s %s.%s%s", ATY_t(pa->rtype), TY_t(mtd->typeId), MethodName_t(mtd->mn));
+	KLIB KBuffer_printf(kctx, wb, "%s %s.%s%s", AKType_t(pa->rtype), KType_t(mtd->typeId), MethodName_Fmt2(mtd->mn));
 	{
 		size_t i;
 		KLIB KBuffer_Write(kctx, wb, "(", 1);
@@ -61,7 +61,7 @@ static void kMethod_WriteToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuf
 			if(TypeAttr_Is(Coercion, pa->paramtypeItems[i].attrTypeId)) {
 				KLIB KBuffer_printf(kctx, wb, "@Coercion ");
 			}
-			KLIB KBuffer_printf(kctx, wb, "%s %s", ATY_t(pa->paramtypeItems[i].attrTypeId), SYM_t(pa->paramtypeItems[i].name));
+			KLIB KBuffer_printf(kctx, wb, "%s %s", AKType_t(pa->paramtypeItems[i].attrTypeId), SYM_t(pa->paramtypeItems[i].name));
 		}
 		KLIB KBuffer_Write(kctx, wb, ")", 1);
 	}
@@ -104,7 +104,7 @@ static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 	size_t start = kArray_size(list);
 	kNameSpace *ns = sfp[0].asNameSpace;
 	KonohaClass *ct = kObject_class(sfp[1].asObject);
-	DBG_P("*** man %s", TY_t(ct->typeId));
+	DBG_P("*** man %s", KType_t(ct->typeId));
 	while(ns != NULL) {
 		copyMethodList(kctx, ct->typeId, ns->methodList_OnList, list);
 		ns = ns->parentNULL;
@@ -122,7 +122,7 @@ static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t i_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_man), TY_void, TY_NameSpace, MN_("man"), 1, TY_Object, FN_("x"),
+		_Public, _F(NameSpace_man), KType_void, KType_NameSpace, MN_("man"), 1, KType_Object, FN_("x"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

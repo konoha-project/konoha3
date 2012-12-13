@@ -416,7 +416,7 @@ static void dictmap_api_dispose(Kprotomap_t *_m)
 	free((map_record_t *)m->base.records);
 }
 
-static const protomap_api_t DICT_API = {
+static const protomap_api_t DIKClass_API = {
 	dictmap_api_get,
 	dictmap_api_set,
 	dictmap_api_next,
@@ -427,7 +427,7 @@ static const protomap_api_t DICT_API = {
 
 static Kprotomap_t *dictmap_new()
 {
-	Kprotomap_t *m = protomap_create(&DICT_API);
+	Kprotomap_t *m = protomap_create(&DIKClass_API);
 	return dictmap_Init((dictmap_t *) m);
 }
 

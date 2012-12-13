@@ -229,27 +229,21 @@ typedef struct {
 #define TypeAttr_Coercion   KFLAG_H2    /* Variable, Field */
 
 #define TypeAttr_Is(P, t)   (((t) & TypeAttr_##P) == TypeAttr_##P)
-#define KType_IsUnbox(t)       FLAG_is(CT_(t)->cflag, KClassFlag_UnboxType)
 
-
-#define CT_(T)              (kctx->share->classTable.classItems[TypeAttr_Unmask(T)])
-#define CT_cparam(CT)       (kctx->share->paramdomList_OnGlobalConstList->ParamItems[(CT)->cparamdom])
-#define KClass_IsUnbox(C)       FLAG_is(C->cflag, KClassFlag_UnboxType)
-
-#define SYM_MAX            KFLAG_H3
+#define Symbol_MAX            KFLAG_H3
 #define Symbol_Attr(sym)      (sym  & (KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
 #define Symbol_Unmask(sym)    (sym & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3)))
 
-#define SYM_NONAME          ((ksymbol_t)-1)
-#define SYM_NEWID           ((ksymbol_t)-2)
-#define SYM_NEWRAW          ((ksymbol_t)-3)
-#define _NEWID              SYM_NEWID
-#define _NEWRAW             SYM_NEWRAW
+#define Symbol_Noname          ((ksymbol_t)-1)
+#define Symbol_NewId           ((ksymbol_t)-2)
+#define Symbol_NewRaw          ((ksymbol_t)-3)
+#define _NEWID                 Symbol_NewId
+#define _NEWRAW                Symbol_NewRaw
 
-#define MN_Annotation        (KFLAG_H1|KFLAG_H2)
-#define MN_isAnnotation(S)   ((S & KW_PATTERN) == MN_Annotation)
-#define KW_PATTERN           (KFLAG_H0|KFLAG_H1|KFLAG_H2)
-#define KW_isPATTERN(S)      ((S & KW_PATTERN) == KW_PATTERN)
+#define SymbolAttr_Annotation        (KFLAG_H1|KFLAG_H2)
+#define SymbolAttr_Pattern           (KFLAG_H0|KFLAG_H1|KFLAG_H2)
+#define Symbol_IsAnnotation(S)       ((S & SymbolAttr_Pattern) == SymbolAttr_Annotation)
+#define Symbol_IsPattern(S)          ((S & SymbolAttr_Pattern) == SymbolAttr_Pattern)
 
 /* MethodName
  * 110   to$(TypeId)
@@ -258,23 +252,23 @@ typedef struct {
  * 001   set${symbol}
  */
 
-#define MN_TYPEID     KFLAG_H0
-#define MN_TOCID      (KFLAG_H0|KFLAG_H1)
-#define MN_ASCID      (KFLAG_H0|KFLAG_H2)
-#define MN_GETTER     KFLAG_H1
-#define MN_SETTER     KFLAG_H2
+#define MethodNameAttr_Type       KFLAG_H0
+#define MethodNameAttr_Coercion   (KFLAG_H0|KFLAG_H1)
+#define MethodNameAttr_Upcast     (KFLAG_H0|KFLAG_H2)
+#define MethodNameAttr_Getter     KFLAG_H1
+#define MethodNameAttr_Setter     KFLAG_H2
 
-#define MN_UNMASK(mn)        (mn & (~(KFLAG_H1|KFLAG_H2)))
-#define MN_isGETTER(mn)      (Symbol_Attr(mn) == MN_GETTER)
-#define MN_toGETTER(mn)      ((MN_UNMASK(mn)) | MN_GETTER)
-#define MN_isSETTER(mn)      (Symbol_Attr(mn) == MN_SETTER)
-#define MN_toSETTER(mn)      ((MN_UNMASK(mn)) | MN_SETTER)
+#define MethodName_Unmask(mn)        (mn & (~(KFLAG_H1|KFLAG_H2)))
+#define MethodName_IsGetter(mn)      (Symbol_Attr(mn) == MethodNameAttr_Getter)
+#define MethodName_ToGetter(mn)      ((MethodName_Unmask(mn)) | MethodNameAttr_Getter)
+#define MethodName_IsSetter(mn)      (Symbol_Attr(mn) == MethodNameAttr_Setter)
+#define MethodName_ToSetter(mn)      ((MethodName_Unmask(mn)) | MethodNameAttr_Setter)
 
-#define MN_to(cid)           ((cid) | MN_TOCID)
-#define MN_isTOCID(mn)       ((Symbol_Unmask(mn)) == MN_TOCID)
-#define MN_as(cid)           ((cid) | MN_ASCID)
-#define MN_isASCID(mn)       ((Symbol_Unmask(mn)) == MN_ASCID)
-#define MethodName_t(mn)     SYM_PRE(mn), ((mn & MN_TYPEID) == MN_TYPEID ? TY_t(Symbol_Unmask(mn)) : SYM_t(Symbol_Unmask(mn)))
+#define MethodName_To(cid)            ((cid) | MethodNameAttr_Coercion)
+#define MethodName_IsCoercion(mn)     ((Symbol_Unmask(mn)) == MethodNameAttr_Coercion)
+#define MethodName_As(cid)            ((cid) | MethodNameAttr_Upcast)
+#define MethodName_IsUpcast(mn)       ((Symbol_Unmask(mn)) == MethodNameAttr_Upcast)
+#define MethodName_Fmt2(mn)           SYM_PRE(mn), ((mn & MethodNameAttr_Type) == MethodNameAttr_Type ? KType_t(Symbol_Unmask(mn)) : SYM_t(Symbol_Unmask(mn)))
 
 /* ------------------------------------------------------------------------ */
 /* platform */
@@ -450,7 +444,6 @@ typedef enum {
 } SafePoint;
 
 struct KObjectVisitor *visitor;
-
 
 /* ------------------------------------------------------------------------ */
 
@@ -1055,36 +1048,36 @@ struct KonohaClassField {
 
 /* ----------------------------------------------------------------------- */
 
-#define TY_void              ((ktypeattr_t)0)
-#define TY_var               ((ktypeattr_t)1)
-#define TY_Object            ((ktypeattr_t)2)
-#define TY_boolean           ((ktypeattr_t)3)
-#define TY_int               ((ktypeattr_t)4)
-#define TY_String            ((ktypeattr_t)5)
-#define TY_Array             ((ktypeattr_t)6)
-#define TY_Param             ((ktypeattr_t)7)
-#define TY_Method            ((ktypeattr_t)8)
-#define TY_Func              ((ktypeattr_t)9)
-#define TY_NameSpace         ((ktypeattr_t)10)
-#define TY_System            ((ktypeattr_t)11)
-#define TY_0                 ((ktypeattr_t)12)    /* Parameter Type*/
+#define KType_void              ((ktypeattr_t)0)
+#define KType_var               ((ktypeattr_t)1)
+#define KType_Object            ((ktypeattr_t)2)
+#define KType_boolean           ((ktypeattr_t)3)
+#define KType_int               ((ktypeattr_t)4)
+#define KType_String            ((ktypeattr_t)5)
+#define KType_Array             ((ktypeattr_t)6)
+#define KType_Param             ((ktypeattr_t)7)
+#define KType_Method            ((ktypeattr_t)8)
+#define KType_Func              ((ktypeattr_t)9)
+#define KType_NameSpace         ((ktypeattr_t)10)
+#define KType_System            ((ktypeattr_t)11)
+#define KType_0                 ((ktypeattr_t)12)    /* Parameter Type*/
 
-#define CT_void                 CT_(TY_void)
-#define CT_Object               CT_(TY_Object)
-#define CT_Boolean              CT_(TY_boolean)
-#define CT_Int                  CT_(TY_int)
-#define CT_String               CT_(TY_String)
-#define CT_Array                CT_(TY_Array)
-#define CT_Param                CT_(TY_Param)
-#define CT_Method               CT_(TY_Method)
-#define CT_Func                 CT_(TY_Func)
-#define CT_NameSpace            CT_(TY_NameSpace)
-#define CT_System               CT_(TY_System)
+#define KClass_void                 KClass_(KType_void)
+#define KClass_Object               KClass_(KType_Object)
+#define KClass_Boolean              KClass_(KType_boolean)
+#define KClass_Int                  KClass_(KType_int)
+#define KClass_String               KClass_(KType_String)
+#define KClass_Array                KClass_(KType_Array)
+#define KClass_Param                KClass_(KType_Param)
+#define KClass_Method               KClass_(KType_Method)
+#define KClass_Func                 KClass_(KType_Func)
+#define KClass_NameSpace            KClass_(KType_NameSpace)
+#define KClass_System               KClass_(KType_System)
 
-#define CT_StringArray          CT_Array
-#define kStringArray            kArray
-#define CT_MethodArray          CT_Array
-#define kMethodArray            kArray
+#define KClass_StringArray          KClass_Array
+#define kStringArray                kArray
+#define KClass_MethodArray          KClass_Array
+#define kMethodArray                kArray
 
 #define KClassFlag_TypeVar          ((kshortflag_t)(1<<0))
 #define KClassFlag_UnboxType        ((kshortflag_t)(1<<1))
@@ -1114,12 +1107,15 @@ struct KonohaClassField {
 #define CFLAG_System            KClassFlag_Nullable|KClassFlag_Singleton|KClassFlag_Final
 #define CFLAG_0                 KClassFlag_TypeVar|KClassFlag_UnboxType|KClassFlag_Singleton|KClassFlag_Final
 
+#define KClass_(T)                kctx->share->classTable.classItems[TypeAttr_Unmask(T)]
+#define KClass_cparam(CT)         kctx->share->paramdomList_OnGlobalConstList->ParamItems[(CT)->cparamdom]
 #define KClass_Is(P, C)           (KFlag_Is(kshortflag_t, (C)->cflag, KClassFlag_##P))
 #define KClass_Set(P, C, B)       KFlag_Set(kshortflag_t, (C)->cflag, KClassFlag_##P, B)
-#define KType_Is(P, T)            (KFlag_Is(kshortflag_t, (CT_(T))->cflag, KClassFlag_##P))
 
-#define KType_IsFunc(T)         (CT_(T)->baseTypeId == TY_Func)
-#define CT_isFunc(C)         ((C)->baseTypeId == TY_Func)
+#define KType_Is(P, T)            (KFlag_Is(kshortflag_t, (KClass_(T))->cflag, KClassFlag_##P))
+
+#define KType_IsFunc(T)         (KClass_(T)->baseTypeId == KType_Func)
+#define KClass_isFunc(C)         ((C)->baseTypeId == KType_Func)
 
 /* ------------------------------------------------------------------------ */
 /* Object */
@@ -1171,7 +1167,7 @@ struct kObjectVar {
 /* ------------------------------------------------------------------------ */
 /* Boolean */
 
-#define ABSTRACT_NUMBER \
+#define ABSTRAKClass_NUMBER \
 	union {\
 		uintptr_t  unboxValue;\
 		kbool_t    boolValue;\
@@ -1184,17 +1180,17 @@ typedef struct kNumberVar       kNumberVar;
 
 struct kNumberVar {
 	KonohaObjectHeader h;
-	ABSTRACT_NUMBER;
+	ABSTRAKClass_NUMBER;
 };
 
 struct kBooleanVar /* extends kNumber */ {
 	KonohaObjectHeader h;
-	ABSTRACT_NUMBER;
+	ABSTRAKClass_NUMBER;
 };
 
-#define IS_Boolean(o)              (kObject_typeId(o) == TY_boolean)
-#define IS_TRUE(o)                 (kObject_baseTypeId(o) == TY_boolean && kNumber_ToBool(o))
-#define IS_FALSE(o)                (kObject_baseTypeId(o) == TY_boolean && kNumber_ToBool(o) == 0)
+#define IS_Boolean(o)              (kObject_typeId(o) == KType_boolean)
+#define IS_TRUE(o)                 (kObject_baseTypeId(o) == KType_boolean && kNumber_ToBool(o))
+#define IS_FALSE(o)                (kObject_baseTypeId(o) == KType_boolean && kNumber_ToBool(o) == 0)
 #define new_Boolean(kctx, c)       ((c) ? K_TRUE : K_FALSE)
 #define kNumber_ToInt(o)                 (((kBoolean *)o)->intValue)
 #define kNumber_ToFloat(o)               (((kBoolean *)o)->floatValue)
@@ -1205,21 +1201,21 @@ struct kBooleanVar /* extends kNumber */ {
 
 struct kIntVar /* extends kNumber */ {
 	KonohaObjectHeader h;
-	ABSTRACT_NUMBER;
+	ABSTRAKClass_NUMBER;
 };
 
-#define IS_Int(o)              (kObject_typeId(o) == TY_int)
+#define IS_Int(o)              (kObject_typeId(o) == KType_int)
 
 /* ------------------------------------------------------------------------ */
 /* String */
 
 typedef enum {
-	VirtualType_Text                  =   TY_void,    /*special use for const char*/
-	VirtualType_KonohaClass           =   TY_var,     /*special use for KonohaClass*/
-	VirtualType_StaticMethod          =   TY_0        /*special use for Method*/
+	VirtualType_Text                  =   KType_void,    /*special use for const char*/
+	VirtualType_KonohaClass           =   KType_var,     /*special use for KonohaClass*/
+	VirtualType_StaticMethod          =   KType_0        /*special use for Method*/
 } VirtualType;
 
-#define IS_String(o)              (kObject_typeId(o) == TY_String)
+#define IS_String(o)              (kObject_typeId(o) == KType_String)
 
 #define kStringFlag_RopeReserved   kString_Loacl1  /* Don't change */
 #define kStringFlag_TextSgm        kObjectFlag_Local2  /* Don't change */
@@ -1263,7 +1259,7 @@ typedef enum {
 /* ------------------------------------------------------------------------ */
 //## class Array   Object;
 
-#define IS_Array(o)              (kObject_baseTypeId(o) == TY_Array)
+#define IS_Array(o)              (kObject_baseTypeId(o) == KType_Array)
 
 #define kArrayFlag_UnboxData     kObjectFlag_Local1
 #define kArray_Is(P, o)          (KFlag_Is(uintptr_t,(o)->h.magicflag, kArrayFlag_##P))
@@ -1296,7 +1292,7 @@ struct kArrayVar {
 /* ------------------------------------------------------------------------ */
 /* Param */
 
-#define IS_Param(o)              (kObject_baseTypeId(o) == TY_Param)
+#define IS_Param(o)              (kObject_baseTypeId(o) == KType_Param)
 
 typedef struct kparamtype_t {
 	ktypeattr_t    attrTypeId;
@@ -1312,7 +1308,7 @@ struct kParamVar {
 /* ------------------------------------------------------------------------ */
 /* Method */
 
-#define IS_Method(o)                 (kObject_baseTypeId(o) == TY_Method)
+#define IS_Method(o)                 (kObject_baseTypeId(o) == KType_Method)
 
 #ifdef USE_MethodFlagData
 static const char* MethodFlagData[] = {
@@ -1359,10 +1355,10 @@ static const char* MethodFlagData[] = {
 #define kMethod_Set(P, MTD, B)        KFlag_Set(uintptr_t, (MTD)->flag, kMethod_##P, B)
 
 #define kMethod_GetParam(mtd)        kctx->share->paramList_OnGlobalConstList->ParamItems[mtd->paramid]
-#define kMethod_GetReturnType(mtd)   CT_((kMethod_GetParam(mtd))->rtype)
-#define kMethod_IsReturnFunc(mtd)    (CT_((kMethod_GetParam(mtd))->rtype)->baseTypeId == TY_Func)
+#define kMethod_GetReturnType(mtd)   KClass_((kMethod_GetParam(mtd))->rtype)
+#define kMethod_IsReturnFunc(mtd)    (KClass_((kMethod_GetParam(mtd))->rtype)->baseTypeId == KType_Func)
 #define kMethod_ParamSize(mtd)       ((kMethod_GetParam(mtd))->psize)
-#define Method_t(mtd)                TY_t((mtd)->typeId),  MethodName_t((mtd)->mn)
+#define Method_t(mtd)                KType_t((mtd)->typeId),  MethodName_Fmt2((mtd)->mn)
 
 /* method data */
 #define DEND     (-1)
@@ -1383,7 +1379,7 @@ struct kMethodVar {
 		struct VirtualCodeAPI   **virtualCodeApi_plus1;
 	};
 	uintptr_t         flag;
-	ktypeattr_t           typeId;       kmethodn_t  mn;
+	ktypeattr_t       typeId;       kmethodn_t  mn;
 	kparamId_t        paramid;      kparamId_t paramdom;
 	kshort_t          delta;        kpackageId_t packageId;
 	kToken           *SourceToken;
@@ -1410,7 +1406,6 @@ typedef enum {
 	MethodMatch_CamelStyle = 1 << 1
 } MethodMatchOption;
 
-
 typedef kbool_t (*MethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, MethodMatch *m);
 
 #define K_CALLDELTA   4
@@ -1430,7 +1425,7 @@ typedef kbool_t (*MethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, MethodMatc
 /* ------------------------------------------------------------------------ */
 /* Func */
 
-#define IS_Func(o)              (kObject_baseTypeId(o) == TY_Func)
+#define IS_Func(o)              (kObject_baseTypeId(o) == KType_Func)
 
 struct kFuncVar {
 	KonohaObjectHeader h;
@@ -1438,11 +1433,10 @@ struct kFuncVar {
 	kObject *env;
 };
 
-
 /* ------------------------------------------------------------------------ */
 /* NameSpace */
 
-#define IS_NameSpace(O)  (kObject_class(O) == CT_NameSpace)
+#define IS_NameSpace(O)  (kObject_class(O) == KClass_NameSpace)
 #define kNameSpace_sizeConstTable(ns)    (ns->constTable.data.bytesize / sizeof(KKeyValue))
 
 struct kNameSpaceVar {
@@ -1475,12 +1469,10 @@ struct kNameSpaceVar {
 #define kNameSpace_ImplicitGlobalVariable            ((kshortflag_t)(1<<4))
 #define kNameSpace_ImplicitCoercion                  ((kshortflag_t)(1<<5))
 
-
-
 /* ------------------------------------------------------------------------ */
 /* System */
 
-#define IS_System(o)              (kObject_typeId(o) == TY_System)
+#define IS_System(o)              (kObject_typeId(o) == KType_System)
 
 typedef const struct _kSystem kSystem;
 
@@ -1490,8 +1482,6 @@ struct _kSystem {
 
 /* ------------------------------------------------------------------------ */
 /* T0 */
-
-
 
 /* ------------------------------------------------------------------------ */
 /* macros */
@@ -1665,7 +1655,6 @@ struct KonohaLibVar {
 	int                 (*kObjectProto_p)(KonohaContext *, KonohaStack *, int, KGrowingBuffer *, int count);
 	void                (*kObject_WriteToBuffer)(KonohaContext *, kObject *, int, KGrowingBuffer *, KonohaValue *, int);
 
-
 	kString*            (*new_kString)(KonohaContext*, kArray *gcstack, const char *, size_t, int);
 
 	void                (*kArray_Add)(KonohaContext*, kArray *, kAbstractObject *);
@@ -1746,10 +1735,10 @@ struct KonohaLibVar {
 #define MN_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 #define MN_box                    MN_("box")
 
-#define MN_new                    38  /* @see KW_return + 1*/
-#define KW_void                   39
+#define MN_new                    38  /* @see Symbol_return + 1*/
+#define Symbol_void                   39
 
-#define new_(C, A, STACK)                 (k##C *)(KLIB new_kObject(kctx, STACK, CT_##C, ((uintptr_t)A)))
+#define new_(C, A, STACK)                 (k##C *)(KLIB new_kObject(kctx, STACK, KClass_##C, ((uintptr_t)A)))
 #define GcUnsafe                          NULL
 #define OnStack                           NULL
 #define OnField                           NULL
@@ -1758,7 +1747,7 @@ struct KonohaLibVar {
 #define OnContextConstList                (kctx->stack->ContextConstList)
 #define OnGcStack                         (kctx->stack->gcstack_OnContextConstList)
 
-#define KNULL(C)                  (k##C *)KLIB Knull(kctx, CT_##C)
+#define KNULL(C)                  (k##C *)KLIB Knull(kctx, KClass_##C)
 
 #define kArray_size(A)            (((A)->bytesize)/sizeof(void *))
 #define kArray_SetSize(A, N)      ((kArrayVar *)A)->bytesize = ((N) * sizeof(void *))
@@ -1772,7 +1761,7 @@ typedef intptr_t  KDEFINE_METHOD;
 
 #define KonohaConst_(D)  ((const char **)D)
 
-#define KDefineConstInt(T) #T, TY_int, T
+#define KDefineConstInt(T) #T, KType_int, T
 
 typedef struct {
 	const char *key;
@@ -1796,7 +1785,7 @@ typedef struct {
 	const char *key;
 	uintptr_t ty;
 	kObject *value;
-} KDEFINE_OBJECT_CONST;
+} KDEFINE_OBJEKClass_CONST;
 
 
 
@@ -1812,16 +1801,16 @@ typedef struct {
 		void *func = C->T;\
 		((KonohaClassVar *)C)->T = F;\
 		if(TRACE && func != NULL) {\
-			KLIB ReportScriptMessage(kctx, TRACE, DebugTag, "overriding CLASS %s funcion " #T " in %s", CT_t(C), PackageId_t(PKGID)) ;\
+			KLIB ReportScriptMessage(kctx, TRACE, DebugTag, "overriding CLASS %s funcion " #T " in %s", KClass_t(C), PackageId_t(PKGID)) ;\
 		}\
 	}while(0)\
 
 /* [GarbageCollection] */
 
 #if defined(_MSC_VER)
-#define OBJECT_SET(var, val) var = (decltype(var))(val)
+#define OBJEKClass_SET(var, val) var = (decltype(var))(val)
 #else
-#define OBJECT_SET(var, val) var = (typeof(var))(val)
+#define OBJEKClass_SET(var, val) var = (typeof(var))(val)
 #endif /* defined(_MSC_VER) */
 
 #define INIT_GCSTACK()         kArray* _GcStack = kctx->stack->gcstack_OnContextConstList; size_t _gcstackpos = kArray_size(_GcStack)
@@ -1834,7 +1823,7 @@ typedef struct {
 #define GC_WRITE_BARRIER(kctx, PARENT, VAR, VAL)\
 	(PLATAPI UpdateObjectField((struct kObjectVar *)(PARENT), (struct kObjectVar *)(VAR), ((struct kObjectVar *)(VAL))))
 
-#define KUnsafeFieldInit(VAR, VAL) OBJECT_SET(VAR, VAL)
+#define KUnsafeFieldInit(VAR, VAL) OBJEKClass_SET(VAR, VAL)
 #define KUnsafeFieldSet( VAR, VAL) (VAR) = (VAL) /* for c-compiler type check */
 #define KStackSet(VAR, VAL)  (VAR) = (VAL)
 

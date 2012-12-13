@@ -520,12 +520,12 @@ static void path_defineDIR(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trac
 	defDIR.free  = kDir_Free;
 	defDIR.p     = kDir_p;
 	KonohaClass *cDIR = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDIR, trace);
-	int TY_DIR = cDIR->typeId;
+	int KType_DIR = cDIR->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static|_C, _F(System_opendir),   TY_DIR,    TY_System, MN_("opendir"),  1, TY_String, FN_("dirname"),
-		_Public,            _F(DIR_close),        TY_void,   TY_DIR,    MN_("close"), 0,
-		_Public|_Iter,      _F(DIR_readFileName), TY_String, TY_DIR,    MN_("readFileName"), 0,
-		_Public|_Iter,      _F(DIR_readPath),     TY_String, TY_DIR,    MN_("readPath"), 0,
+		_Public|_Static|_C, _F(System_opendir),   KType_DIR,    KType_System, MN_("opendir"),  1, KType_String, FN_("dirname"),
+		_Public,            _F(DIR_close),        KType_void,   KType_DIR,    MN_("close"), 0,
+		_Public|_Iter,      _F(DIR_readFileName), KType_String, KType_DIR,    MN_("readFileName"), 0,
+		_Public|_Iter,      _F(DIR_readPath),     KType_String, KType_DIR,    MN_("readPath"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -537,31 +537,31 @@ static kbool_t path_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 {
 	//	KRequireKonohaCommonModule(trace);
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static|_C, _F(System_getcwd),   TY_String,  TY_System, MN_("getcwd"), 0,
-		_Public|_Static|_C, _F(System_realpath), TY_String,  TY_System, MN_("realpath"),  1, TY_String, FN_("path"),
-		_Public|_Static|_C, _F(System_chdir),    TY_boolean, TY_System, MN_("chdir"),  1, TY_String, FN_("path"),
-		_Public|_Static|_C, _F(System_chroot),   TY_boolean, TY_System, MN_("chroot"), 1, TY_String, FN_("path"),
+		_Public|_Static|_C, _F(System_getcwd),   KType_String,  KType_System, MN_("getcwd"), 0,
+		_Public|_Static|_C, _F(System_realpath), KType_String,  KType_System, MN_("realpath"),  1, KType_String, FN_("path"),
+		_Public|_Static|_C, _F(System_chdir),    KType_boolean, KType_System, MN_("chdir"),  1, KType_String, FN_("path"),
+		_Public|_Static|_C, _F(System_chroot),   KType_boolean, KType_System, MN_("chroot"), 1, KType_String, FN_("path"),
 
-		_Public|_Static|_C, _F(System_umask),    TY_int,     TY_System, MN_("umask"),  1, TY_int,    FN_("mode"),
-		_Public|_Static|_C, _F(System_chmod),    TY_boolean, TY_System, MN_("chmod"),  2, TY_String, FN_("path"), TY_int, FN_("mode"),
-		_Public|_Static|_C, _F(System_access),   TY_boolean, TY_System, MN_("access"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
-		_Public|_Static|_C, _F(System_chown),    TY_boolean, TY_System, MN_("chown"),  3, TY_String, FN_("path"), TY_int, FN_("owner"), TY_int, FN_("group"),
-		_Public|_Static|_C, _F(System_lchown),   TY_boolean, TY_System, MN_("lchown"), 3, TY_String, FN_("path"), TY_int, FN_("owner"), TY_int, FN_("group"),
+		_Public|_Static|_C, _F(System_umask),    KType_int,     KType_System, MN_("umask"),  1, KType_int,    FN_("mode"),
+		_Public|_Static|_C, _F(System_chmod),    KType_boolean, KType_System, MN_("chmod"),  2, KType_String, FN_("path"), KType_int, FN_("mode"),
+		_Public|_Static|_C, _F(System_access),   KType_boolean, KType_System, MN_("access"), 2, KType_String, FN_("path"), KType_int, FN_("mode"),
+		_Public|_Static|_C, _F(System_chown),    KType_boolean, KType_System, MN_("chown"),  3, KType_String, FN_("path"), KType_int, FN_("owner"), KType_int, FN_("group"),
+		_Public|_Static|_C, _F(System_lchown),   KType_boolean, KType_System, MN_("lchown"), 3, KType_String, FN_("path"), KType_int, FN_("owner"), KType_int, FN_("group"),
 
-		_Public|_Static|_C, _F(System_link),     TY_boolean, TY_System, MN_("link"), 2, TY_String, FN_("oldpath"), TY_String, FN_("newpath"),
-		_Public|_Static|_C, _F(System_unlink),   TY_boolean, TY_System, MN_("unlink"), 1, TY_String, FN_("path"),
-		_Public|_Static|_C, _F(System_rename),   TY_boolean, TY_System, MN_("rename"), 2, TY_String, FN_("oldpath"), TY_String, FN_("newpath"),
-		_Public|_Static|_C, _F(System_symlink),  TY_boolean, TY_System, MN_("symlink"), 2, TY_String, FN_("oldpath"), TY_String, FN_("newpath"),
-		_Public|_Static|_C, _F(System_readlink), TY_String,  TY_System, MN_("readlink"), 1, TY_String, FN_("path"),
+		_Public|_Static|_C, _F(System_link),     KType_boolean, KType_System, MN_("link"), 2, KType_String, FN_("oldpath"), KType_String, FN_("newpath"),
+		_Public|_Static|_C, _F(System_unlink),   KType_boolean, KType_System, MN_("unlink"), 1, KType_String, FN_("path"),
+		_Public|_Static|_C, _F(System_rename),   KType_boolean, KType_System, MN_("rename"), 2, KType_String, FN_("oldpath"), KType_String, FN_("newpath"),
+		_Public|_Static|_C, _F(System_symlink),  KType_boolean, KType_System, MN_("symlink"), 2, KType_String, FN_("oldpath"), KType_String, FN_("newpath"),
+		_Public|_Static|_C, _F(System_readlink), KType_String,  KType_System, MN_("readlink"), 1, KType_String, FN_("path"),
 
 		// isdir() is not posix api
-		_Public|_Static,    _F(System_isDir),    TY_boolean, TY_System, MN_("isdir"),    1, TY_String, FN_("path"),
-		_Public|_Static|_C, _F(System_mkdir),    TY_boolean, TY_System, MN_("mkdir"),    2, TY_String, FN_("path"), TY_int, FN_("mode"),
-		_Public|_Static|_C, _F(System_rmdir),    TY_boolean, TY_System, MN_("rmdir"),    1, TY_String, FN_("path"),
-		_Public|_Static|_C, _F(System_truncate), TY_boolean, TY_System, MN_("truncate"), 2, TY_String, FN_("path"), TY_int, FN_("length"),
+		_Public|_Static,    _F(System_isDir),    KType_boolean, KType_System, MN_("isdir"),    1, KType_String, FN_("path"),
+		_Public|_Static|_C, _F(System_mkdir),    KType_boolean, KType_System, MN_("mkdir"),    2, KType_String, FN_("path"), KType_int, FN_("mode"),
+		_Public|_Static|_C, _F(System_rmdir),    KType_boolean, KType_System, MN_("rmdir"),    1, KType_String, FN_("path"),
+		_Public|_Static|_C, _F(System_truncate), KType_boolean, KType_System, MN_("truncate"), 2, KType_String, FN_("path"), KType_int, FN_("length"),
 
-//		_Public|_Static, _F(System_stat),  TY_Stat, TY_System, MN_("stat"), 1, TY_String, FN_("path"),
-//		_Public|_Static, _F(System_lstat), TY_Stat, TY_System, MN_("lstat"), 1, TY_String, FN_("path"),
+//		_Public|_Static, _F(System_stat),  KType_Stat, KType_System, MN_("stat"), 1, KType_String, FN_("path"),
+//		_Public|_Static, _F(System_lstat), KType_Stat, KType_System, MN_("lstat"), 1, KType_String, FN_("path"),
 
 		DEND,
 	};

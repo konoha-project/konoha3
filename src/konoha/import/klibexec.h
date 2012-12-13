@@ -492,7 +492,7 @@ static ksymbol_t KHashMap_getcode(KonohaContext *kctx, KHashMap *kmp, kArray *li
 		}
 		e = e->next;
 	}
-	if(def == SYM_NEWID) {
+	if(def == Symbol_NewId) {
 		uintptr_t sym = kArray_size(list);
 		kString *stringKey = KLIB new_kString(kctx, list, name, len, spol);
 		KHashMap_AddStringUnboxValue(kctx, kmp, hcode, stringKey, sym);
@@ -523,28 +523,28 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 {
 	ksymbol_t mask = 0;
 	int ch0 = name[0], ch1 = name[1];
-	if(def != SYM_NEWRAW) {
+	if(def != Symbol_NewRaw) {
 		if(ch1 == 'e' && name[2] == 't') {
 			if(ch0 == 'g' || ch0 == 'G') {
 				len -= 3; name += 3;
-				mask = MN_GETTER;
+				mask = MethodNameAttr_Getter;
 			}
 			else if(ch0 == 's' || ch0 == 'S') {
 				len -= 3; name += 3;
-				mask = MN_SETTER;
+				mask = MethodNameAttr_Setter;
 			}
 		}
 		else if(ch0 == '@') {
 			len -= 1; name += 1;
-			mask = MN_Annotation;
+			mask = SymbolAttr_Annotation;
 		}
 		else if(ch0 == '$') {
 			len -= 1; name += 1;
-			mask = KW_PATTERN; // Pattern
+			mask = SymbolAttr_Pattern; // Pattern
 		}
 	}
 	else {
-		def = SYM_NEWID;
+		def = Symbol_NewId;
 	}
 	uintptr_t hcode = strhash(name, len);
 	KLock(kctx->share->symbolMutex);
@@ -746,7 +746,7 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 	if(w->count > 0) {
 		KLIB KBuffer_Write(kctx, w->wb, ", ", 2);
 	}
-	KLIB KBuffer_printf(kctx, w->wb, "%s%s: (%s)", PSYM_t(key), ATY_t(d->attrTypeId));
+	KLIB KBuffer_printf(kctx, w->wb, "%s%s: (%s)", PSYM_t(key), AKType_t(d->attrTypeId));
 	if(TypeAttr_Is(Boxed, d->attrTypeId)) {
 		KUnsafeFieldSet(w->values[w->pos].asObject, d->ObjectValue);
 	}
@@ -773,10 +773,10 @@ static void DumpObject(KonohaContext *kctx, kObject *o, const char *file, const 
 	kObject_class(o)->p(kctx, lsfp, 0, &wb);
 	const char *msg = KLIB KBuffer_Stringfy(kctx, &wb, 1);
 	if(file == NULL) {
-		PLATAPI printf_i("(%s)%s\n", CT_t(kObject_class(o)), msg);
+		PLATAPI printf_i("(%s)%s\n", KClass_t(kObject_class(o)), msg);
 	}
 	else {
-		PLATAPI ReportDebugMessage(file, func, line, "(%s)%s", CT_t(kObject_class(o)), msg);
+		PLATAPI ReportDebugMessage(file, func, line, "(%s)%s", KClass_t(kObject_class(o)), msg);
 	}
 	KLIB KBuffer_Free(&wb);
 }
