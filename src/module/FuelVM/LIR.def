@@ -49,15 +49,15 @@ def Or(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
 	DISPATCH_NEXT(PC);
 
 def New(Dst:VMRegister, Type:TypeId) ::
-	Reg[Dst].obj = CreateObject(Type);
+	Reg[Dst].obj = CreateObject(kctx, Type);
 	DISPATCH_NEXT(PC);
 
-def Call(Dst:VMRegister, ParamSize:uchar, ReturnType:uchar, Mtd:kMethodPtr) ::
-	Reg[Dst] = CallMethod(kctx, Mtd, ParamSize, ReturnType);
+def Call(Dst:VMRegister, ParamSize:uchar, ReturnType:uchar, Mtd:kMethodPtr, uline:uintptr_t) ::
+	Reg[Dst] = CallMethod(kctx, Mtd, ParamSize, ReturnType, uline);
 	DISPATCH_NEXT(PC);
 
-def VCall(Dst:VMRegister, ParamSize:uint, CacheInfo:Cache) ::
-	Reg[Dst] = CallMethodWithCache(kctx, Mtd, ParamSize, CacheInfo);
+def VCall(Dst:VMRegister, ParamSize:uint, CacheInfo:Cache, uline:uintptr_t) ::
+	Reg[Dst] = CallMethodWithCache(kctx, Mtd, ParamSize, CacheInfo, uline);
 	DISPATCH_NEXT(PC);
 
 def PushI(Src:VMRegister) ::
@@ -95,8 +95,8 @@ def Jump(Block:Address) ::
 	PC = (ByteCode *)Block;
 	DISPATCH_JUMPTO(Block);
 
-def Throw(Src:VMRegister) ::
-	Raise(Reg[Src], Stack);
+def Throw(Src:VMRegister, uline:uintptr_t) ::
+	Raise(kctx, Stack, (kString *) Reg[Src].obj, uline);
 
 def Try(Catch:Address, Finaly:Address) ::
 	Try_(Catch, Finaly, Stack);
@@ -106,31 +106,32 @@ def Yield(Src:VMRegister) ::
 	DISPATCH_NEXT(PC);
 
 def Not(Dst:VMRegister, Src:VMRegister) ::
-	CompileTimeAssert((TypeOf(Src) == int) || (TypeOf(Src) == float));
+	CompileTimeAssert((TypeOf(Src) == int));
 	Reg[Dst].ival = !(Reg[Src].ival);
 	DISPATCH_NEXT(PC);
 
+def Neg(Dst:VMRegister, Src:VMRegister) ::
+	CompileTimeAssert((TypeOf(Src) == int));
+	Reg[Dst].ival = -Reg[Src].ival;
+	DISPATCH_NEXT(PC);
+
 def Add(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
-	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int) ||
-			(TypeOf(LHS) == float || TypeOf(RHS) == float));
+	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));
 	Reg[Dst].ival = Reg[LHS].ival + Reg[RHS].ival;
 	DISPATCH_NEXT(PC);
 
 def Sub(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
-	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int) ||
-			(TypeOf(LHS) == float || TypeOf(RHS) == float));
+	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));
 	Reg[Dst].ival = Reg[LHS].ival - Reg[RHS].ival;
 	DISPATCH_NEXT(PC);
 
 def Mul(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
-	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int) ||
-			(TypeOf(LHS) == float || TypeOf(RHS) == float));
+	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));
 	Reg[Dst].ival = Reg[LHS].ival * Reg[RHS].ival;
 	DISPATCH_NEXT(PC);
 
 def Div(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
-	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int) ||
-			(TypeOf(LHS) == float || TypeOf(RHS) == float));
+	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));
 	Reg[Dst].ival = Reg[LHS].ival / Reg[RHS].ival;
 	DISPATCH_NEXT(PC);
 
@@ -185,6 +186,57 @@ def Lt(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
 	DISPATCH_NEXT(PC);
 
 def Le(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].ival <= Reg[RHS].ival);
+	DISPATCH_NEXT(PC);
+
+def FNeg(Dst:VMRegister, Src:VMRegister) ::
+	CompileTimeAssert((TypeOf(Src) == float));
+	Reg[Dst].fval = -Reg[Src].fval;
+	DISPATCH_NEXT(PC);
+
+def FAdd(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert((TypeOf(LHS) == float && TypeOf(RHS) == float));
+			(TypeOf(LHS) == float || TypeOf(RHS) == float));
+	Reg[Dst].fval = Reg[LHS].fval + Reg[RHS].fval;
+	DISPATCH_NEXT(PC);
+
+def FSub(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert((TypeOf(LHS) == float && TypeOf(RHS) == float));
+			(TypeOf(LHS) == float || TypeOf(RHS) == float));
+	Reg[Dst].fval = Reg[LHS].fval - Reg[RHS].fval;
+	DISPATCH_NEXT(PC);
+
+def FMul(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert((TypeOf(LHS) == float && TypeOf(RHS) == float));
+	Reg[Dst].fval = Reg[LHS].fval * Reg[RHS].fval;
+	DISPATCH_NEXT(PC);
+
+def FDiv(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert(TypeOf(LHS) == float || TypeOf(RHS) == float);
+	Reg[Dst].fval = Reg[LHS].fval / Reg[RHS].fval;
+	DISPATCH_NEXT(PC);
+
+def FEq(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].fval == Reg[RHS].fval);
+	DISPATCH_NEXT(PC);
+
+def FNq(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].fval != Reg[RHS].fval);
+	DISPATCH_NEXT(PC);
+
+def FGt(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].fval >  Reg[RHS].fval);
+	DISPATCH_NEXT(PC);
+
+def FGe(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].fval >= Reg[RHS].fval);
+	DISPATCH_NEXT(PC);
+
+def FLt(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].fval <  Reg[RHS].fval);
+	DISPATCH_NEXT(PC);
+
+def FLe(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
 	Reg[Dst].bval = (Reg[LHS].ival <= Reg[RHS].ival);
 	DISPATCH_NEXT(PC);
 

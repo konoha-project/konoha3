@@ -20,7 +20,14 @@ typedef void *IArray;
 typedef void *Address;
 typedef kMethod *kMethodPtr;
 
-typedef union LIRHeader {
+//#define DEBUG_BYTECODE 1
+
+#ifdef DEBUG_BYTECODE
+typedef struct LIRHeader
+#else
+typedef union LIRHeader
+#endif
+{
 	unsigned opcode;
 	void *codeaddr;
 } LIRHeader;
@@ -53,6 +60,8 @@ extern void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 
 extern void FuelVM_GenerateLLVMIR(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option);
 extern void RecompileMethod(KonohaContext *kctx, kMethod *mtd);
+
+#define FUELVM_REGISTER_SIZE 128
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -20,9 +20,10 @@ typedef struct BitMap {
 static inline void BitMap_resize(BitMap *map, unsigned newSize)
 {
 	assert(newSize >= BITS);
-	while(newSize > 0) {
+	int size = (1 << LOG2(newSize)) / BITS;
+	while(size > 0) {
 		ARRAY_add(uintptr_t, &map->map, 0);
-		newSize -= BITS;
+		size--;
 	}
 }
 

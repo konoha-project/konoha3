@@ -98,6 +98,7 @@ static IField *newIField(FuelIRBuilder *builder, enum ScopeOp Op, enum TypeId Ty
 	Node->Op = Op;
 	Node->Id = Index;
 	Node->Hash = 0;
+	Node->NumOfUpdate = 0;
 	Node->base.Type = Type;
 	return (Node);
 }
@@ -120,9 +121,10 @@ static void disposeICond(INode *Node)
 	}
 }
 
-static INew *newINew(FuelIRBuilder *builder, INode *Type)
+static INew *newINew(FuelIRBuilder *builder, enum TypeId Type)
 {
 	INew *Node = CREATE_NODE(INew);
+	Node->base.Type = Type;
 	return (Node);
 }
 
@@ -135,10 +137,11 @@ static void disposeINew(INode *Node)
 	}
 }
 
-static ICall *newICall(FuelIRBuilder *builder, enum CallOp Op)
+static ICall *newICall(FuelIRBuilder *builder, enum CallOp Op, uintptr_t uline)
 {
 	ICall *Node = CREATE_NODE(ICall);
 	Node->Op = Op;
+	Node->uline = uline;
 	ARRAY_init(INodePtr, &Node->Params, 2);
 	return (Node);
 }
@@ -172,6 +175,7 @@ static IUpdate *newIUpdate(FuelIRBuilder *builder, IField *LHS, INode *RHS)
 	IUpdate *Node = CREATE_NODE(IUpdate);
 	Node->LHS = LHS;
 	Node->RHS = RHS;
+	LHS->NumOfUpdate += 1;
 	return (Node);
 }
 
@@ -234,9 +238,11 @@ static IJump *newIJump(FuelIRBuilder *builder, Block *Block)
 
 #define disposeIJump disposeINodeImpl
 
-static IThrow *newIThrow(FuelIRBuilder *builder, INode *Val)
+static IThrow *newIThrow(FuelIRBuilder *builder, INode *Val, uintptr_t uline)
 {
 	IThrow *Node = CREATE_NODE(IThrow);
+	Node->Val = Val;
+	Node->uline = uline;
 	return (Node);
 }
 
@@ -312,6 +318,7 @@ static INode *newINode(struct FuelIRBuilder *builder, enum IRType Kind)
 	INode *Node = (INode *) IRBuilder_AllocNode(builder, sizeof(INodeImpl));
 	Node->Kind = Kind;
 	Node->Id   = builder->LastNodeId++;
+	Node->Marked = 0;
 	INode_setRange(Node, INTPTR_MIN, INTPTR_MAX);
 	return (Node);
 }
@@ -355,6 +362,7 @@ static const struct IRBuilderAPI API = {
 
 static void Block_add(Block *BB, INode *Stmt)
 {
+	//assert(Block_HasTerminatorInst(BB) == false);
 	ARRAY_add(INodePtr, &BB->insts, Stmt);
 }
 

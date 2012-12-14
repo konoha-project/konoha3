@@ -23,7 +23,7 @@ static inline const char *Opcode2String(ByteCode *code)
 #define CONCAT2(x, y) x##y
 
 #define FMT_VMRegister "%s:%d"
-#define FMT_Address    "%s:%p"
+#define FMT_Address    "%s:%d"
 #define FMT_uint       "%s:%d"
 #define FMT_ushort     "%s:%d"
 #define FMT_uchar      "%s:%d"
@@ -33,10 +33,11 @@ static inline const char *Opcode2String(ByteCode *code)
 #define FMT_Cache      "%s:%p"
 #define FMT_IArray     "%s:%p"
 #define FMT_TestFunc   "%s:%p"
+#define FMT_uintptr_t  "%s:%ld"
 
 #define CONV_DEFAULT(OPCODE, F)    (((OP##OPCODE *)(code))->F)
 #define CONV_VMRegister(OPCODE, F) "Reg", CONV_DEFAULT(OPCODE,F)
-#define CONV_Address(OPCODE, F)    "Addr", CONV_DEFAULT(OPCODE,F)
+#define CONV_Address(OPCODE, F)    "Addr", ((int)((ByteCode *)(((OP##OPCODE *)(code))->F)-base))
 #define CONV_uint(OPCODE, F)       "uint", CONV_DEFAULT(OPCODE,F)
 #define CONV_ushort(OPCODE, F)     "ushort", CONV_DEFAULT(OPCODE,F)
 #define CONV_uchar(OPCODE, F)      "uchar",  CONV_DEFAULT(OPCODE,F)
@@ -46,6 +47,7 @@ static inline const char *Opcode2String(ByteCode *code)
 #define CONV_IArray(OPCODE, F)     "IAry", CONV_DEFAULT(OPCODE,F)
 #define CONV_TestFunc(OPCODE, F)   "TestF", CONV_DEFAULT(OPCODE,F)
 #define CONV_SValue(OPCODE, F)     "SVal", (((OP##OPCODE *)(code))->F.bits)
+#define CONV_uintptr_t(OPCODE, F)  "uline", (((OP##OPCODE *)(code))->F)
 
 #define DUMP(OPCODE, T, F) CONCAT(CONV_, T)(OPCODE, F)
 
@@ -72,8 +74,15 @@ static inline const char *Opcode2String(ByteCode *code)
 			index, Opcode2String(code),\
 			DUMP(OPCODE, T0, A0), DUMP(OPCODE, T1, A1), DUMP(OPCODE, T2, A2), DUMP(OPCODE, T3, A3))
 
+#define OP_5(OPCODE, T0, A0, T1, A1, T2, A2, T3, A3, T4, A4) \
+	fprintf(stderr, "%2d: %s "\
+			CONCAT(FMT_, T0) " " CONCAT(FMT_, T1) " " CONCAT(FMT_, T2) " " CONCAT(FMT_, T3) " "\
+			CONCAT(FMT_, T4) "\n",\
+			index, Opcode2String(code),\
+			DUMP(OPCODE, T0, A0), DUMP(OPCODE, T1, A1), DUMP(OPCODE, T2, A2),\
+			DUMP(OPCODE, T3, A3), DUMP(OPCODE, T4, A4))
 
-static void dump(ByteCode *code, unsigned index)
+static void dump(ByteCode *base, ByteCode *code, unsigned index)
 {
 	OPCODE opcode = GetOpcode(code);
 	switch(opcode) {
@@ -90,7 +99,7 @@ void ByteCode_Dump(ByteCode *code)
 	ByteCode *pc  = code;
 	ByteCode *end = pc + ((OPThreadedCode *) code)->CodeSize;
 	while(pc < end) {
-		dump(pc, pc - code);
+		dump(code, pc, pc - code);
 		pc++;
 	}
 }
@@ -113,20 +122,21 @@ static kObject *CreateFunction(SValue *Stack, IArray StackLayout)
 	return 0;
 }
 
-static SValue CallMethodWithCache(KonohaContext *kctx, unsigned ParamSize, void *Cache)
+static SValue CallMethodWithCache(KonohaContext *kctx, unsigned ParamSize, void *Cache, kfileline_t uline)
 {
 	SValue Val = {};
 	assert(0 && "TODO");
 	return Val;
 }
 
-static SValue CallMethod(KonohaContext *kctx, kMethod *Mtd, uchar ParamSize, uchar IsUnboxed)
+static SValue CallMethod(KonohaContext *kctx, kMethod *Mtd, uchar ParamSize, uchar IsUnboxed, kfileline_t uline)
 {
 	SValue Val = {};
 	KonohaStack *stack_top = kctx->esp - ParamSize;
 	KonohaStack *sfp = stack_top + K_CALLDELTA;
 	((KonohaContextVar *)kctx)->esp = sfp + ParamSize;
-	sfp[K_MTDIDX].calledMethod = Mtd;;
+	sfp[K_MTDIDX].calledMethod = Mtd;
+	sfp[K_RTNIDX].calledFileLine = uline;
 	Mtd->invokeMethodFunc(kctx, sfp);
 	if(IsUnboxed)
 		Val.ival = sfp[K_RTNIDX].intValue;
@@ -150,15 +160,21 @@ static void PushBoxedValue(KonohaContext *kctx, SValue Val)
 	((KonohaContextVar *)kctx)->esp = kctx->esp + 1;
 }
 
+static void RaiseError(KonohaContext *kctx, KonohaStack *sfp, kString *ErrorInfo, kfileline_t uline)
+{
+	sfp[K_RTNIDX].calledFileLine = uline;
+	KLIB KonohaRuntime_raise(kctx, EXPT_("RuntimeScript"), SoftwareFault, ErrorInfo, sfp);
+}
+
 #define CompileTimeAssert(...)
-#define Raise(Reg, Stack)  (void)Reg; (void)Stack; assert(0 && "TODO")
 #define Yield(Reg, Stack)  (void)Reg; (void)Stack; assert(0 && "TODO")
 #define Try_(Catch, Finaly, Stack) (void)Catch; (void)Stack; (void)Finaly; assert(0 && "TODO")
 
-static kObject *CreateObject(TypeId Type)
+static kObject *CreateObject(KonohaContext *kctx, TypeId Type)
 {
-	assert(0 && "TODO");
-	return 0;
+	KonohaClass *ct = CT_(Type);
+	kObject *obj = KLIB new_kObject(kctx, 0, ct, 0);
+	return obj;
 }
 
 static void AppendCache(TestFunc Func, SValue Val, void *Cache)
@@ -167,7 +183,7 @@ static void AppendCache(TestFunc Func, SValue Val, void *Cache)
 }
 
 #define LABELPTR(X) &&L_##X,
-#define CASE(X)       L_##X: /*OPEXEC_##X(PC);*//*dump(PC, 0);*/
+#define CASE(X)       L_##X: /*OPEXEC_##X(PC);*//*dump(code, PC, PC - code);*/
 #define DISPATCH_BEGIN(CODE) goto *JUMP_TABLE[GetOpcode(CODE)]
 #define DISPATCH_END()
 #define DISPATCH_JUMPTO(PC)  goto *(((LIRHeader *)(PC))->codeaddr)
@@ -176,7 +192,7 @@ static void AppendCache(TestFunc Func, SValue Val, void *Cache)
 void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 {
 	register ByteCode *PC = code;
-	SValue Reg[16];
+	SValue Reg[FUELVM_REGISTER_SIZE];
 	static void *JUMP_TABLE[] = {
 		BYTECODE_LIST(LABELPTR)
 	};
@@ -259,7 +275,7 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 	CASE(New)          {
 		VMRegister Dst = ((OPNew *)PC)->Dst;
 		TypeId Type = ((OPNew *)PC)->Type;
-		Reg[Dst].obj = CreateObject(Type);
+		Reg[Dst].obj = CreateObject(kctx, Type);
 		DISPATCH_NEXT(PC);
 	}
 	CASE(Call)         {
@@ -267,14 +283,16 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 		uchar ParamSize = ((OPCall *)PC)->ParamSize;
 		uchar ReturnType = ((OPCall *)PC)->ReturnType;
 		kMethodPtr Mtd = ((OPCall *)PC)->Mtd;
-		Reg[Dst] = CallMethod(kctx, Mtd, ParamSize, ReturnType);
+		uintptr_t uline = ((OPCall *)PC)->uline;
+		Reg[Dst] = CallMethod(kctx, Mtd, ParamSize, ReturnType, uline);
 		DISPATCH_NEXT(PC);
 	}
 	CASE(VCall)        {
 		VMRegister Dst = ((OPVCall *)PC)->Dst;
 		uint ParamSize = ((OPCall *)PC)->ParamSize;
 		Cache CacheInfo = ((OPVCall *)PC)->CacheInfo;
-		Reg[Dst] = CallMethodWithCache(kctx, ParamSize, CacheInfo);
+		uintptr_t uline = ((OPVCall *)PC)->uline;
+		Reg[Dst] = CallMethodWithCache(kctx, ParamSize, CacheInfo, uline);
 		DISPATCH_NEXT(PC);
 	}
 	CASE(PushI)         {
@@ -330,7 +348,8 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 	}
 	CASE(Throw)        {
 		VMRegister Src = ((OPThrow *)PC)->Src;
-		Raise(Reg[Src], /*$*/Stack);
+		uintptr_t uline = ((OPThrow *)PC)->uline;
+		RaiseError(kctx, Stack, (kString *) Reg[Src].obj, uline);
 	}
 	CASE(Try)          {
 		Address Catch = ((OPTry *)PC)->Catch;
@@ -349,135 +368,239 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 		Reg[Dst].ival = !(Reg[Src].ival);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Add)          {
-		VMRegister Dst = ((OPXor *)PC)->Dst;
-		VMRegister LHS = ((OPXor *)PC)->LHS;
-		VMRegister RHS = ((OPXor *)PC)->RHS;
-		CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
+	CASE(Neg)          {
+		VMRegister Dst = ((OPNeg *)PC)->Dst;
+		VMRegister Src = ((OPNeg *)PC)->Src;
+		CompileTimeAssert((TypeOf(Src) == int) || (TypeOf(Src) == float));
+		Reg[Dst].ival = -Reg[Src].ival;
+		DISPATCH_NEXT(PC);
+	}
+	CASE(Add) {
+		VMRegister Dst = ((OPAdd *)PC)->Dst;
+		VMRegister LHS = ((OPAdd *)PC)->LHS;
+		VMRegister RHS = ((OPAdd *)PC)->RHS;
+		CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));
 		Reg[Dst].ival = Reg[LHS].ival + Reg[RHS].ival;
 		DISPATCH_NEXT(PC);
-
 	}
-	CASE(Sub)          {
-		VMRegister Dst = ((OPXor *)PC)->Dst;
-		VMRegister LHS = ((OPXor *)PC)->LHS;
-		VMRegister RHS = ((OPXor *)PC)->RHS;
-		CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
+
+	CASE(Sub) {
+		VMRegister Dst = ((OPSub *)PC)->Dst;
+		VMRegister LHS = ((OPSub *)PC)->LHS;
+		VMRegister RHS = ((OPSub *)PC)->RHS;
+		CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));
 		Reg[Dst].ival = Reg[LHS].ival - Reg[RHS].ival;
 		DISPATCH_NEXT(PC);
-
 	}
-	CASE(Mul)          {
-		VMRegister Dst = ((OPXor *)PC)->Dst;
-		VMRegister LHS = ((OPXor *)PC)->LHS;
-		VMRegister RHS = ((OPXor *)PC)->RHS;
-		CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
+
+	CASE(Mul) {
+		VMRegister Dst = ((OPMul *)PC)->Dst;
+		VMRegister LHS = ((OPMul *)PC)->LHS;
+		VMRegister RHS = ((OPMul *)PC)->RHS;
+		CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));
 		Reg[Dst].ival = Reg[LHS].ival * Reg[RHS].ival;
 		DISPATCH_NEXT(PC);
-
 	}
-	CASE(Div)          {
-		VMRegister Dst = ((OPXor *)PC)->Dst;
-		VMRegister LHS = ((OPXor *)PC)->LHS;
-		VMRegister RHS = ((OPXor *)PC)->RHS;
-		CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
+
+	CASE(Div) {
+		VMRegister Dst = ((OPDiv *)PC)->Dst;
+		VMRegister LHS = ((OPDiv *)PC)->LHS;
+		VMRegister RHS = ((OPDiv *)PC)->RHS;
+		CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));
 		Reg[Dst].ival = Reg[LHS].ival / Reg[RHS].ival;
 		DISPATCH_NEXT(PC);
-
 	}
-	CASE(Mod)          {
-		VMRegister Dst = ((OPXor *)PC)->Dst;
-		VMRegister LHS = ((OPXor *)PC)->LHS;
-		VMRegister RHS = ((OPXor *)PC)->RHS;
+
+	CASE(Mod) {
+		VMRegister Dst = ((OPMod *)PC)->Dst;
+		VMRegister LHS = ((OPMod *)PC)->LHS;
+		VMRegister RHS = ((OPMod *)PC)->RHS;
 		CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
 		Reg[Dst].ival = Reg[LHS].ival % Reg[RHS].ival;
 		DISPATCH_NEXT(PC);
-
 	}
-	CASE(LShift)       {
-		VMRegister Dst = ((OPXor *)PC)->Dst;
-		VMRegister LHS = ((OPXor *)PC)->LHS;
-		VMRegister RHS = ((OPXor *)PC)->RHS;
+
+	CASE(LShift) {
+		VMRegister Dst = ((OPLShift *)PC)->Dst;
+		VMRegister LHS = ((OPLShift *)PC)->LHS;
+		VMRegister RHS = ((OPLShift *)PC)->RHS;
 		CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
 		Reg[Dst].ival = Reg[LHS].ival << Reg[RHS].ival;
 		DISPATCH_NEXT(PC);
-
 	}
-	CASE(RShift)       {
-		VMRegister Dst = ((OPXor *)PC)->Dst;
-		VMRegister LHS = ((OPXor *)PC)->LHS;
-		VMRegister RHS = ((OPXor *)PC)->RHS;
+
+	CASE(RShift) {
+		VMRegister Dst = ((OPRShift *)PC)->Dst;
+		VMRegister LHS = ((OPRShift *)PC)->LHS;
+		VMRegister RHS = ((OPRShift *)PC)->RHS;
 		CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
 		Reg[Dst].ival = Reg[LHS].ival >> Reg[RHS].ival;
 		DISPATCH_NEXT(PC);
-
 	}
-	CASE(LAnd)         {
-		VMRegister Dst = ((OPXor *)PC)->Dst;
-		VMRegister LHS = ((OPXor *)PC)->LHS;
-		VMRegister RHS = ((OPXor *)PC)->RHS;
+
+	CASE(LAnd) {
+		VMRegister Dst = ((OPLAnd *)PC)->Dst;
+		VMRegister LHS = ((OPLAnd *)PC)->LHS;
+		VMRegister RHS = ((OPLAnd *)PC)->RHS;
 		CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
 		Reg[Dst].ival = Reg[LHS].ival & Reg[RHS].ival;
 		DISPATCH_NEXT(PC);
-
 	}
-	CASE(LOr)          {
-		VMRegister Dst = ((OPXor *)PC)->Dst;
-		VMRegister LHS = ((OPXor *)PC)->LHS;
-		VMRegister RHS = ((OPXor *)PC)->RHS;
+
+	CASE(LOr) {
+		VMRegister Dst = ((OPLOr *)PC)->Dst;
+		VMRegister LHS = ((OPLOr *)PC)->LHS;
+		VMRegister RHS = ((OPLOr *)PC)->RHS;
 		CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
 		Reg[Dst].ival = Reg[LHS].ival | Reg[RHS].ival;
 		DISPATCH_NEXT(PC);
-
 	}
-	CASE(Xor)          {
+
+	CASE(Xor) {
 		VMRegister Dst = ((OPXor *)PC)->Dst;
 		VMRegister LHS = ((OPXor *)PC)->LHS;
 		VMRegister RHS = ((OPXor *)PC)->RHS;
 		CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
 		Reg[Dst].ival = Reg[LHS].ival ^ Reg[RHS].ival;
 		DISPATCH_NEXT(PC);
+	}
 
-	}
-	CASE(Eq)           {
-		VMRegister Dst = ((OPLt *)PC)->Dst;
-		VMRegister LHS = ((OPLt *)PC)->LHS;
-		VMRegister RHS = ((OPLt *)PC)->RHS;
-		Reg[Dst].bval = (Reg[LHS].ival ==  Reg[RHS].ival);
+	CASE(Eq) {
+		VMRegister Dst = ((OPEq *)PC)->Dst;
+		VMRegister LHS = ((OPEq *)PC)->LHS;
+		VMRegister RHS = ((OPEq *)PC)->RHS;
+		Reg[Dst].bval = (Reg[LHS].ival == Reg[RHS].ival);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Nq)           {
-		VMRegister Dst = ((OPLt *)PC)->Dst;
-		VMRegister LHS = ((OPLt *)PC)->LHS;
-		VMRegister RHS = ((OPLt *)PC)->RHS;
-		Reg[Dst].bval = (Reg[LHS].ival !=  Reg[RHS].ival);
+
+	CASE(Nq) {
+		VMRegister Dst = ((OPNq *)PC)->Dst;
+		VMRegister LHS = ((OPNq *)PC)->LHS;
+		VMRegister RHS = ((OPNq *)PC)->RHS;
+		Reg[Dst].bval = (Reg[LHS].ival != Reg[RHS].ival);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Gt)           {
-		VMRegister Dst = ((OPLt *)PC)->Dst;
-		VMRegister LHS = ((OPLt *)PC)->LHS;
-		VMRegister RHS = ((OPLt *)PC)->RHS;
+
+	CASE(Gt) {
+		VMRegister Dst = ((OPGt *)PC)->Dst;
+		VMRegister LHS = ((OPGt *)PC)->LHS;
+		VMRegister RHS = ((OPGt *)PC)->RHS;
 		Reg[Dst].bval = (Reg[LHS].ival >  Reg[RHS].ival);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Ge)           {
-		VMRegister Dst = ((OPLt *)PC)->Dst;
-		VMRegister LHS = ((OPLt *)PC)->LHS;
-		VMRegister RHS = ((OPLt *)PC)->RHS;
-		Reg[Dst].bval = (Reg[LHS].ival >=  Reg[RHS].ival);
+
+	CASE(Ge) {
+		VMRegister Dst = ((OPGe *)PC)->Dst;
+		VMRegister LHS = ((OPGe *)PC)->LHS;
+		VMRegister RHS = ((OPGe *)PC)->RHS;
+		Reg[Dst].bval = (Reg[LHS].ival >= Reg[RHS].ival);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Lt)           {
+
+	CASE(Lt) {
 		VMRegister Dst = ((OPLt *)PC)->Dst;
 		VMRegister LHS = ((OPLt *)PC)->LHS;
 		VMRegister RHS = ((OPLt *)PC)->RHS;
 		Reg[Dst].bval = (Reg[LHS].ival <  Reg[RHS].ival);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Le)           {
+
+	CASE(Le) {
 		VMRegister Dst = ((OPLe *)PC)->Dst;
 		VMRegister LHS = ((OPLe *)PC)->LHS;
 		VMRegister RHS = ((OPLe *)PC)->RHS;
+		Reg[Dst].bval = (Reg[LHS].ival <= Reg[RHS].ival);
+		DISPATCH_NEXT(PC);
+	}
+
+	CASE(FNeg) {
+		VMRegister Dst = ((OPFNeg *)PC)->Dst;
+		VMRegister Src = ((OPFNeg *)PC)->Src;
+		CompileTimeAssert((TypeOf(Src) == float));
+		Reg[Dst].fval = -Reg[Src].fval;
+		DISPATCH_NEXT(PC);
+	}
+
+	CASE(FAdd) {
+		VMRegister Dst = ((OPFAdd *)PC)->Dst;
+		VMRegister LHS = ((OPFAdd *)PC)->LHS;
+		VMRegister RHS = ((OPFAdd *)PC)->RHS;
+		CompileTimeAssert((TypeOf(LHS) == float && TypeOf(RHS) == float));
+		Reg[Dst].fval = Reg[LHS].fval + Reg[RHS].fval;
+		DISPATCH_NEXT(PC);
+	}
+
+	CASE(FSub) {
+		VMRegister Dst = ((OPFSub *)PC)->Dst;
+		VMRegister LHS = ((OPFSub *)PC)->LHS;
+		VMRegister RHS = ((OPFSub *)PC)->RHS;
+		CompileTimeAssert((TypeOf(LHS) == float && TypeOf(RHS) == float) ||
+				(TypeOf(LHS) == float || TypeOf(RHS) == float));
+		Reg[Dst].fval = Reg[LHS].fval - Reg[RHS].fval;
+		DISPATCH_NEXT(PC);
+	}
+
+	CASE(FMul) {
+		VMRegister Dst = ((OPFMul *)PC)->Dst;
+		VMRegister LHS = ((OPFMul *)PC)->LHS;
+		VMRegister RHS = ((OPFMul *)PC)->RHS;
+		CompileTimeAssert((TypeOf(LHS) == float && TypeOf(RHS) == float));
+		Reg[Dst].fval = Reg[LHS].fval * Reg[RHS].fval;
+		DISPATCH_NEXT(PC);
+	}
+
+	CASE(FDiv) {
+		VMRegister Dst = ((OPFDiv *)PC)->Dst;
+		VMRegister LHS = ((OPFDiv *)PC)->LHS;
+		VMRegister RHS = ((OPFDiv *)PC)->RHS;
+		CompileTimeAssert((TypeOf(LHS) == float && TypeOf(RHS) == float));
+		Reg[Dst].fval = Reg[LHS].fval / Reg[RHS].fval;
+		DISPATCH_NEXT(PC);
+	}
+
+	CASE(FEq) {
+		VMRegister Dst = ((OPFEq *)PC)->Dst;
+		VMRegister LHS = ((OPFEq *)PC)->LHS;
+		VMRegister RHS = ((OPFEq *)PC)->RHS;
+		Reg[Dst].bval = (Reg[LHS].fval == Reg[RHS].fval);
+		DISPATCH_NEXT(PC);
+	}
+
+	CASE(FNq) {
+		VMRegister Dst = ((OPFNq *)PC)->Dst;
+		VMRegister LHS = ((OPFNq *)PC)->LHS;
+		VMRegister RHS = ((OPFNq *)PC)->RHS;
+		Reg[Dst].bval = (Reg[LHS].fval != Reg[RHS].fval);
+		DISPATCH_NEXT(PC);
+	}
+
+	CASE(FGt) {
+		VMRegister Dst = ((OPFGt *)PC)->Dst;
+		VMRegister LHS = ((OPFGt *)PC)->LHS;
+		VMRegister RHS = ((OPFGt *)PC)->RHS;
+		Reg[Dst].bval = (Reg[LHS].fval >  Reg[RHS].fval);
+		DISPATCH_NEXT(PC);
+	}
+
+	CASE(FGe) {
+		VMRegister Dst = ((OPFGe *)PC)->Dst;
+		VMRegister LHS = ((OPFGe *)PC)->LHS;
+		VMRegister RHS = ((OPFGe *)PC)->RHS;
+		Reg[Dst].bval = (Reg[LHS].fval >= Reg[RHS].fval);
+		DISPATCH_NEXT(PC);
+	}
+
+	CASE(FLt) {
+		VMRegister Dst = ((OPFLt *)PC)->Dst;
+		VMRegister LHS = ((OPFLt *)PC)->LHS;
+		VMRegister RHS = ((OPFLt *)PC)->RHS;
+		Reg[Dst].bval = (Reg[LHS].fval <  Reg[RHS].fval);
+		DISPATCH_NEXT(PC);
+	}
+	CASE(FLe) {
+		VMRegister Dst = ((OPFLe *)PC)->Dst;
+		VMRegister LHS = ((OPFLe *)PC)->LHS;
+		VMRegister RHS = ((OPFLe *)PC)->RHS;
 		Reg[Dst].bval = (Reg[LHS].ival <= Reg[RHS].ival);
 		DISPATCH_NEXT(PC);
 	}

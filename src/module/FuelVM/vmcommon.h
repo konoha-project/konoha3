@@ -13,13 +13,14 @@ enum TypeId {
 	TYPE_Function = KType_Func,
 	TYPE_Array = KType_Array,
 	TYPE_Method = KType_Method,
+	TYPE_NameSpace = KType_NameSpace,
 	TYPE_Any = KType_0,
 	TYPE_float
 };
 
 typedef union SValue {
 	int64_t     ival;
-	double      dval;
+	double      fval;
 	bool        bval;
 	void       *ptr;
 	const char *str;

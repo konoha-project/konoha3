@@ -26,11 +26,12 @@ import("konoha.regexp");
 import("konoha.new");
 import("konoha.string");
 import("konoha.foreach");
-import("konoha.ns");  // konoha.const is obsolete
+import("konoha.ns");
 import("konoha.array");
 import("konoha.file");
 import("konoha.class");
 import("cstyle");
+import("konoha.field", ".");
 
 String readFile(String path) {
     FILE file = new FILE(path, "r");

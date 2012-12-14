@@ -37,6 +37,7 @@ static unsigned Register_Allocate(RegisterAllocator *RegAlloc, unsigned Id)
 	BitMap_set(&RegAlloc->AllocatedVariable, Id);
 	Reg = BitMap_findAndSetNextUnsetBit(&RegAlloc->AllocatedRegister);
 	ARRAY_safe_set(uintptr_t, &RegAlloc->RegTable, Id, Reg);
+	assert(Reg < FUELVM_REGISTER_SIZE);
 	return Reg;
 }
 
