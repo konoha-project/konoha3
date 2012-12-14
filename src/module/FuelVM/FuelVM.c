@@ -172,7 +172,7 @@ static void RaiseError(KonohaContext *kctx, KonohaStack *sfp, kString *ErrorInfo
 
 static kObject *CreateObject(KonohaContext *kctx, TypeId Type)
 {
-	KonohaClass *ct = CT_(Type);
+	KonohaClass *ct = KClass_(Type);
 	kObject *obj = KLIB new_kObject(kctx, 0, ct, 0);
 	return obj;
 }

@@ -812,12 +812,7 @@ static void CodeWriter_visitValue(Visitor *visitor, INode *Node, const char *Tag
 	DUMP_REGISTER_NODE(Node, writer);
 	switch(Node->Kind) {
 		CASE(IConstant) {
-<<<<<<< HEAD
 			if(Node->Type == KType_Method) {
-=======
-			if(Node->Type == TY_Method) {
-				asm volatile("int3");
->>>>>>> fix bug
 				/*XXX(ide) Need to Load Method Constant ??? */
 				return;
 			}

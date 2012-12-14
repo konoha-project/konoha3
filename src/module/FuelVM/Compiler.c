@@ -29,15 +29,15 @@
 #include "codegen.h"
 #include "FuelVM.h"
 
-#define FloatIsDefined(kctx) (KDefinedKonohaCommonModule() && CT_Float != NULL)
+#define FloatIsDefined(kctx) (KDefinedKonohaCommonModule() && KClass_Float != NULL)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-static enum TypeId ConvertToTypeId(KonohaContext *kctx, kattrtype_t type)
+static enum TypeId ConvertToTypeId(KonohaContext *kctx, ktypeattr_t type)
 {
-	if(FloatIsDefined(kctx) && type == TY_float)
+	if(FloatIsDefined(kctx) && type == KType_float)
 		return TYPE_float;
 	return type;
 }
@@ -136,7 +136,7 @@ static INode *FuelVM_getExpression(KBuilder *builder)
 #define MN_opLSFT MN_("<<")
 #define MN_opRSFT MN_(">>")
 
-static enum BinaryOp MethodName_Fmt2oBinaryOperator(KonohaContext *kctx, kmethodn_t mn)
+static enum BinaryOp MethodName_toBinaryOperator(KonohaContext *kctx, kmethodn_t mn)
 {
 	if(mn == MN_opADD ) return Add;
 	if(mn == MN_opSUB ) return Sub;
@@ -157,7 +157,7 @@ static enum BinaryOp MethodName_Fmt2oBinaryOperator(KonohaContext *kctx, kmethod
 	return BinaryOp_NotFound;
 }
 
-static enum UnaryOp MethodName_Fmt2oUnaryOperator(KonohaContext *kctx, kmethodn_t mn)
+static enum UnaryOp MethodName_toUnaryOperator(KonohaContext *kctx, kmethodn_t mn)
 {
 	if(mn == MN_opSUB) return Neg;
 	if(mn == MN_opNOT) return Not;
@@ -186,7 +186,7 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 		if(params->psize == 0) { /* UnaryOperator */
 			if(retTy == KType_int) {
 				/* int int.opSUB() */
-				enum UnaryOp Op = MethodName_Fmt2oUnaryOperator(kctx, mn);
+				enum UnaryOp Op = MethodName_toUnaryOperator(kctx, mn);
 				INode *Param = FetchINode(kctx, builder, stmt, expr, 1, KType_int);
 				return CreateUnaryInst(BLD(builder), Op, Param);
 			}
@@ -195,43 +195,43 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 			ktypeattr_t ptype = params->paramtypeItems[0].attrTypeId;
 			if(retTy == KType_boolean && ptype == KType_int) {
 				/* boolean int.(opEQ|opNE|opGT|opGE|opLT|opLE) (int x) */
-				enum BinaryOp Op = MethodName_Fmt2oBinaryOperator(kctx, mn);
+				enum BinaryOp Op = MethodName_toBinaryOperator(kctx, mn);
 				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, KType_int);
 				INode *RHS = FetchINode(kctx, builder, stmt, expr, 2, KType_int);
 				return CreateBinaryInst(BLD(builder), Op, LHS, RHS);
 			}
 			else if(retTy == KType_int && ptype == KType_int) {
 				/* int int.(opADD|opSUB|opMUL|opDIV|opMOD|opLSHIFT|opRSHIFT|opAND|opOR|opXOR) (int x) */
-				enum BinaryOp Op = MethodName_Fmt2oBinaryOperator(kctx, mn);
+				enum BinaryOp Op = MethodName_toBinaryOperator(kctx, mn);
 				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, KType_int);
 				INode *RHS = FetchINode(kctx, builder, stmt, expr, 2, KType_int);
 				return CreateBinaryInst(BLD(builder), Op, LHS, RHS);
 			}
 		}
 	}
-	else if(FloatIsDefined() && thisTy == TY_float) {
+	else if(FloatIsDefined() && thisTy == KType_float) {
 		if(params->psize == 0) { /* UnaryOperator */
-			if(retTy == TY_float) {
+			if(retTy == KType_float) {
 				/* int int.opSUB() */
 				enum UnaryOp Op = MethodName_toUnaryOperator(kctx, mn);
-				INode *Param = FetchINode(kctx, builder, stmt, expr, 1, TY_float);
+				INode *Param = FetchINode(kctx, builder, stmt, expr, 1, KType_float);
 				return CreateUnaryInst(BLD(builder), Op, Param);
 			}
 		}
 		else if(params->psize == 1) { /* BinaryOperator */
-			kattrtype_t ptype = params->paramtypeItems[0].attrTypeId;
-			if(retTy == TY_boolean && ptype == TY_float) {
+			ktypeattr_t ptype = params->paramtypeItems[0].attrTypeId;
+			if(retTy == KType_boolean && ptype == KType_float) {
 				/* boolean float.(opEQ|opNE|opGT|opGE|opLT|opLE) (float x) */
 				enum BinaryOp Op = MethodName_toBinaryOperator(kctx, mn);
-				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, TY_float);
-				INode *RHS = FetchINode(kctx, builder, stmt, expr, 2, TY_float);
+				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, KType_float);
+				INode *RHS = FetchINode(kctx, builder, stmt, expr, 2, KType_float);
 				return CreateBinaryInst(BLD(builder), Op, LHS, RHS);
 			}
-			else if(retTy == TY_float && ptype == TY_float) {
+			else if(retTy == KType_float && ptype == KType_float) {
 				/* float float.(opADD|opSUB|opMUL|opDIV) (float x) */
 				enum BinaryOp Op = MethodName_toBinaryOperator(kctx, mn);
-				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, TY_float);
-				INode *RHS = FetchINode(kctx, builder, stmt, expr, 2, TY_float);
+				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, KType_float);
+				INode *RHS = FetchINode(kctx, builder, stmt, expr, 2, KType_float);
 				return CreateBinaryInst(BLD(builder), Op, LHS, RHS);
 			}
 		}
