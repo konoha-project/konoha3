@@ -811,6 +811,51 @@ static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp
 	return result;
 }
 
+// System Script
+//uintptr_t (*ApplyUnboxValueFunc)(KonohaContext *kctx, const char *name, ...);
+//kObject*  (*ApplyObjectFunc)(KonohaContext *kctx, const char *name, ...);
+
+static void PushParam(KonohaContext *kctx, KonohaStack *sfp, const char *fmt, va_list ap)
+{
+	switch(fmt[0]) {
+	case 'u': case 'i': case 'd':
+		sfp[0].unboxValue = (uintptr_t)va_arg(ap, uintptr_t);
+		break;
+	case 'O':
+		KUnsafeFieldSet(sfp[0].asObject, (kObject*)va_arg(ap, kObject*));
+		break;
+	}
+}
+
+static uintptr_t ApplySystemFunc(KonohaContext *kctx, uintptr_t defval, const char *name, const char *param, ...)
+{
+	ksymbol_t mn = KLIB Ksymbol(kctx, name, strlen(name), StringPolicy_TEXT, Symbol_NewId);
+	int i, psize = param == NULL ? 0 : strlen(param) / 2;
+	kNameSpace *ns = KNULL(NameSpace);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, kObject_class(ns), mn, psize, MethodMatch_NoOption);
+	if(mtd != NULL) {
+		KonohaClass *returnType = kMethod_GetReturnType(mtd);
+		BEGIN_UnusedStack(lsfp);
+		KUnsafeFieldSet(lsfp[0].asNameSpace, ns);
+		for(i = 0; i < psize; i++) {
+			va_list ap;
+			va_start(ap, param);
+			PushParam(kctx, lsfp + i + 1, param + (i * 2) + 1, ap);
+			va_end(ap);
+		}
+		KStackSetMethodAll(lsfp, KLIB Knull(kctx, returnType), 0, mtd, psize);
+		KStackCall(lsfp);
+		END_UnusedStack();
+		if(KClass_Is(UnboxType, returnType)) {
+			return lsfp[K_RTNIDX].unboxValue;
+		}
+		else {
+			return (uintptr_t)lsfp[K_RTNIDX].asObject;
+		}
+	}
+	return defval;
+}
+
 static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, int fault, kString *optionalErrorInfo, KonohaStack *top)
 {
 	KonohaStackRuntimeVar *runtime = kctx->stack;
@@ -915,6 +960,8 @@ static void klib_Init(KonohaLibVar *l)
 	l->KpackageId    = KpackageId;
 	l->Ksymbol       = Ksymbol;
 	l->KonohaRuntime_tryCallMethod = KonohaRuntime_tryCallMethod;
+	l->ApplySystemFunc             = ApplySystemFunc;
+
 	l->KonohaRuntime_raise         = KonohaRuntime_raise;
 	l->ReportScriptMessage        = TRACE_ReportScriptMessage; /* perror.h */
 	l->CheckSafePoint              = CheckSafePoint;

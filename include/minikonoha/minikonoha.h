@@ -1695,6 +1695,8 @@ struct KonohaLibVar {
 	// runtime support
 	void                (*CheckSafePoint)(KonohaContext *kctx, KonohaStack *sfp, kfileline_t uline);
 	kbool_t             (*KonohaRuntime_tryCallMethod)(KonohaContext *, KonohaStack *);
+	uintptr_t           (*ApplySystemFunc)(KonohaContext *, uintptr_t defval, const char *name, const char *param, ...);
+
 	void                (*KonohaRuntime_raise)(KonohaContext*, int symbol, int fault, kString *Nullable, KonohaStack *);
 	void                (*ReportScriptMessage)(KonohaContext *, KTraceInfo *, kinfotag_t, const char *fmt, ...);
 	int                 (*DiagnosisFaultType)(KonohaContext *kctx, int fault, KTraceInfo *);

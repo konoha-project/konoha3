@@ -886,6 +886,7 @@ static kunused int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 
 static kunused void diagnosis(void)
 {
+
 }
 
 // --------------------------------------------------------------------------
