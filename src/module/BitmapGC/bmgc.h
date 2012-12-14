@@ -1343,21 +1343,21 @@ static SubHeap *findSubHeapBySize(HeapManager *mng, size_t n)
 }
 
 #if GCDEBUG
-static bool DBG_CHECK_OBJEKClass_IN_SEGMENT(kObject *o, Segment *seg)
+static bool DBG_CHECK_OBJECT_IN_SEGMENT(kObject *o, Segment *seg)
 {
 	kObject *s = (kObject *) seg->managed_heap;
 	kObject *e = (kObject *) seg->managed_heap_end;
 	return (s < o && o < e);
 }
 
-static bool DBG_CHECK_OBJEKClass_IN_HEAP(kObject *o, SubHeap *h)
+static bool DBG_CHECK_OBJECT_IN_HEAP(kObject *o, SubHeap *h)
 {
 	Segment *seg = h->p.seg;
-	return (DBG_CHECK_OBJEKClass_IN_SEGMENT(o, seg));
+	return (DBG_CHECK_OBJECT_IN_SEGMENT(o, seg));
 }
 #else
-#define DBG_CHECK_OBJEKClass_IN_SEGMENT(o, seg) true
-#define DBG_CHECK_OBJEKClass_IN_HEAP(o, h) true
+#define DBG_CHECK_OBJECT_IN_SEGMENT(o, seg) true
+#define DBG_CHECK_OBJECT_IN_HEAP(o, h) true
 #endif
 
 static void deferred_sweep(HeapManager *mng, kObject *o)
@@ -1416,7 +1416,7 @@ static kObject *bm_malloc_internal(HeapManager *mng, size_t n)
 		assert(0);
 	}
 	L_finaly:;
-	DBG_ASSERT(DBG_CHECK_OBJEKClass_IN_HEAP(temp, h));
+	DBG_ASSERT(DBG_CHECK_OBJECT_IN_HEAP(temp, h));
 #if GCDEBUG
 	global_gc_stat.total_object++;
 	global_gc_stat.object_count[h->heap_klass]++;
@@ -1617,7 +1617,7 @@ static void bmgc_gc_Init(HeapManager *mng, enum gc_mode mode)
 	}
 }
 
-#define OBJEKClass_LOAD_BLOCK_INFO(o, seg, index, klass) do {\
+#define OBJECT_LOAD_BLOCK_INFO(o, seg, index, klass) do {\
 	uintptr_t addr, offset;\
 	addr   = ((uintptr_t)o) & ~(SEGMENT_SIZE - 1UL);\
 	offset = ((uintptr_t)o) &  (SEGMENT_SIZE - 1UL);\
@@ -1653,12 +1653,12 @@ static void mark_object(HeapManager *mng, kObject *o)
 	Segment *seg;
 	int index, klass;
 	uintptr_t bpidx, bpmask;
-	OBJEKClass_LOAD_BLOCK_INFO(o, seg, index, klass);
+	OBJECT_LOAD_BLOCK_INFO(o, seg, index, klass);
 	BITPTR_INIT_(bpidx, bpmask, index);
 	bitmap_t *bm  = SEG_TRACE_BITMAP_N(seg, 0, bpidx);
 	prefetch_(SEG_TRACE_BITMAP_N(seg, 1, 0), 1, 1);
 
-	DBG_ASSERT(DBG_CHECK_OBJEKClass_IN_SEGMENT(o, seg));
+	DBG_ASSERT(DBG_CHECK_OBJECT_IN_SEGMENT(o, seg));
 	DBG_ASSERT(DBG_CHECK_BITMAP(seg, bm));
 	if(!BM_TEST(*bm, bpmask)) {
 		BM_SET(*bm, bpmask);
@@ -1673,7 +1673,7 @@ static void mark_mstack(HeapManager *mng, kObject *o, MarkStack *mstack)
 	Segment *seg;
 	int index, klass;
 	uintptr_t bpidx, bpmask;
-	OBJEKClass_LOAD_BLOCK_INFO(o, seg, index, klass);
+	OBJECT_LOAD_BLOCK_INFO(o, seg, index, klass);
 	BITPTR_INIT_(bpidx, bpmask, index);
 #ifdef USE_CONCURRENT_GC
 	bitmap_t *bm  = SEG_TRACE_BITMAP_N(seg, 0, bpidx);
@@ -1683,7 +1683,7 @@ static void mark_mstack(HeapManager *mng, kObject *o, MarkStack *mstack)
 	prefetch_(SEG_BITMAP_N(seg, 1, 0), 1, 1);
 #endif
 
-	DBG_ASSERT(DBG_CHECK_OBJEKClass_IN_SEGMENT(o, seg));
+	DBG_ASSERT(DBG_CHECK_OBJECT_IN_SEGMENT(o, seg));
 	DBG_ASSERT(DBG_CHECK_BITMAP(seg, bm));
 	if(!BM_TEST(*bm, bpmask)) {
 		BM_SET(*bm, bpmask);
@@ -1744,7 +1744,7 @@ static void RememberSet_Add(kObject *o)
 	Segment *seg;
 	int index, klass;
 	uintptr_t bpidx, bpmask;
-	OBJEKClass_LOAD_BLOCK_INFO(o, seg, index, klass);
+	OBJECT_LOAD_BLOCK_INFO(o, seg, index, klass);
 	BITPTR_INIT_(bpidx, bpmask, index);
 	bitmap_t *bm  = SEG_TRACE_BITMAP_N(seg, 0, bpidx);
 	bitmap_set(map+(offset/BITS), offset%BITS, !BM_TEST(*bm, bpmask));
@@ -2088,7 +2088,7 @@ static inline void bmgc_Object_Free(KonohaContext *kctx, kObject *o)
 #ifdef GCSTAT
 		Segment *seg;
 		uintptr_t klass, index;
-		OBJEKClass_LOAD_BLOCK_INFO(o, seg, index, klass);
+		OBJECT_LOAD_BLOCK_INFO(o, seg, index, klass);
 		global_gc_stat.collected[seg->heap_klass] += 1;
 #endif
 	}
@@ -2102,7 +2102,7 @@ static inline void bmgc_Object_Free(KonohaContext *kctx, kObject *o)
 //	}
 //}
 
-#define OBJEKClass_INIT(o) do {\
+#define OBJECT_INIT(o) do {\
 	o->h.magicflag = 0;\
 	o->h.ct = NULL;\
 	o->fieldObjectItems[0] = NULL;\
@@ -2112,7 +2112,7 @@ static kObjectVar *KallocObject(KonohaContext *kctx, size_t size, KTraceInfo *tr
 {
 	HeapManager *mng = (HeapManager *)kctx->gcContext;
 	kObjectVar *o = (kObjectVar *)bm_malloc_internal(mng, size);
-	OBJEKClass_INIT(o);
+	OBJECT_INIT(o);
 #if GCDEBUG
 	OLDTRACE_SWITCH_TO_KTrace(LOGPOL_DEBUG,
 			LogText("@", "new"),
@@ -2136,7 +2136,7 @@ static kbool_t KisObject(KonohaContext *kctx, void *ptr)
 		if(s < o && o < e) {
 			Segment *seg;
 			uintptr_t klass, index;
-			OBJEKClass_LOAD_BLOCK_INFO(o, seg, index, klass);
+			OBJECT_LOAD_BLOCK_INFO(o, seg, index, klass);
 			DBG_ASSERT((uintptr_t) o % PowerOf2(klass) == 0);
 			uintptr_t bpidx, bpmask;
 			BITPTR_INIT_(bpidx, bpmask, index);

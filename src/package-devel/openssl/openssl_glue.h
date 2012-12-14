@@ -159,7 +159,7 @@ DEF_TYPE(ssl_cipher_st);
 DEF_TYPE(ssl_session_st);
 DEF_TYPE(stack_st);
 DEF_TYPE(store_st);
-DEF_TYPE(STORE_OBJEKClass_st);
+DEF_TYPE(STORE_OBJECT_st);
 DEF_TYPE(openssl_item_st);
 DEF_TYPE(STORE_attr_info_st);
 DEF_ENUM(STORE_attribs);

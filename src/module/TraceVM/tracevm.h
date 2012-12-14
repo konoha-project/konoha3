@@ -36,7 +36,7 @@ typedef struct {
 	ktypeattr_t typeId; kparamId_t signature;
 } kMethodInlineCache;
 
-#if defined(USE_DIREKClass_THREADED_CODE)
+#if defined(USE_DIRECT_THREADED_CODE)
 #define OP_(T)  NULL, 0, OPCODE_##T, 0
 #define KCODE_HEAD\
 	void *codeaddr;\
@@ -51,7 +51,7 @@ typedef struct {
 	kopcode_t opcode; \
 	kfileline_t line
 
-#endif/*USE_DIREKClass_THREADED_CODE*/
+#endif/*USE_DIRECT_THREADED_CODE*/
 
 typedef struct VirtualCode {
 	KCODE_HEAD;

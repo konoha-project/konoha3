@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#define USE_DIREKClass_THREADED_CODE
+#define USE_DIRECT_THREADED_CODE
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/klib.h>
@@ -195,7 +195,7 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 	return pc;
 }
 
-#ifdef USE_DIREKClass_THREADED_CODE
+#ifdef USE_DIRECT_THREADED_CODE
 #define NEXT_OP   (pc->codeaddr)
 #define JUMP      *(NEXT_OP)
 #ifdef K_USING_VMASMDISPATCH
@@ -213,7 +213,7 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 #define OPEXEC(T)  L_##T : { OPEXEC_##T(); pc++; goto *(pc->codeaddr); }
 
 
-#else/*USE_DIREKClass_THREADED_CODE*/
+#else/*USE_DIRECT_THREADED_CODE*/
 #define OPJUMP      NULL
 #define NEXT_OP     L_HEAD
 #define GOTO_NEXT() goto NEXT_OP
@@ -224,11 +224,11 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 
 #define OPEXEC(T)  case OPCODE_##T : { OPEXEC_##T(); pc++; GOTO_NEXT(); }
 
-#endif/*USE_DIREKClass_THREADED_CODE*/
+#endif/*USE_DIRECT_THREADED_CODE*/
 
 static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaStack *sfp0, struct VirtualCode *pc)
 {
-#ifdef USE_DIREKClass_THREADED_CODE
+#ifdef USE_DIRECT_THREADED_CODE
 	static void *OPJUMP[] = {
 		OPDEFINE(OPLABEL)
 	};
@@ -424,7 +424,7 @@ static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
 	return BasicBlock_id(kctx, bb);
 }
 
-#if defined(USE_DIREKClass_THREADED_CODE)
+#if defined(USE_DIRECT_THREADED_CODE)
 #define ASM(T, ...) do {\
 	OP##T op_ = {OP_(T), ## __VA_ARGS__};\
 	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
@@ -438,7 +438,7 @@ static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
 	KBuilder_Asm(kctx, builder, &tmp_.op, sizeof(OP##T));\
 } while(0)
 
-#endif/*USE_DIREKClass_THREADED_CODE*/
+#endif/*USE_DIRECT_THREADED_CODE*/
 
 #define NC_(sfpidx)       (((sfpidx) * 2) + 1)
 #define OC_(sfpidx)       ((sfpidx) * 2)
@@ -918,7 +918,7 @@ static struct VirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *bui
 
 static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr, size_t codesize)
 {
-#ifdef USE_DIREKClass_THREADED_CODE
+#ifdef USE_DIRECT_THREADED_CODE
 	size_t i, n = codesize / sizeof(VirtualCode);
 	for(i = 0; i < n; i++) {
 		pc->codeaddr = codeaddr[pc->opcode];

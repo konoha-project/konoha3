@@ -22,7 +22,7 @@
 // * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ***************************************************************************/
 //
-//#define USE_DIREKClass_THREADED_CODE
+//#define USE_DIRECT_THREADED_CODE
 //
 //#include <iconv.h>
 //#include <errno.h>
@@ -99,7 +99,7 @@
 //
 //static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr)
 //{
-//#ifdef USE_DIREKClass_THREADED_CODE
+//#ifdef USE_DIRECT_THREADED_CODE
 //	while(1) {
 //		pc->codeaddr = codeaddr[pc->opcode];
 //		if(pc->opcode == OPCODE_RET || pc->opcode == OPCODE_EXIT) break;
@@ -153,7 +153,7 @@
 //	// TODO
 //}
 //
-//#ifdef USE_DIREKClass_THREADED_CODE
+//#ifdef USE_DIRECT_THREADED_CODE
 //#define CASE(x)  L_##x :
 //#define NEXT_OP   (pc->codeaddr)
 //#define JUMP      *(NEXT_OP)
@@ -170,7 +170,7 @@
 //#define DISPATCH_START(pc) goto *OPJUMP[pc->opcode]
 //#define DISPATCH_END(pc)
 //#define GOTO_PC(pc)        GOTO_NEXT()
-//#else/*USE_DIREKClass_THREADED_CODE*/
+//#else/*USE_DIRECT_THREADED_CODE*/
 //#define OPJUMP      NULL
 //#define CASE(x)     case OPCODE_##x :
 //#define NEXT_OP     L_HEAD
@@ -180,11 +180,11 @@
 //#define DISPATCH_START(pc) L_HEAD:;switch(pc->opcode) {
 //#define DISPATCH_END(pc)   } /*KNH_DIE("unknown opcode=%d", (int)pc->opcode)*/;
 //#define GOTO_PC(pc)         GOTO_NEXT()
-//#endif/*USE_DIREKClass_THREADED_CODE*/
+//#endif/*USE_DIRECT_THREADED_CODE*/
 //
 //static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaStack *sfp0, struct VirtualCode *pc)
 //{
-//#ifdef USE_DIREKClass_THREADED_CODE
+//#ifdef USE_DIRECT_THREADED_CODE
 //	static void *OPJUMP[] = {
 //		&&L_NOP, &&L_THCODE, &&L_ENTER, &&L_EXIT,
 //		&&L_NSET, &&L_NMOV, &&L_NMOVx, &&L_XNMOV,

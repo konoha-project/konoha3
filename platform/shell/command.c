@@ -191,7 +191,7 @@ static void CommandLine_SetARGV(KonohaContext *kctx, int argc, char** argv, KTra
 	for(i = 0; i < argc; i++) {
 		KLIB kArray_Add(kctx, a, KLIB new_kString(kctx, _GcStack, argv[i], strlen(argv[i]), StringPolicy_TEXT));
 	}
-	KDEFINE_OBJEKClass_CONST ObjectData[] = {
+	KDEFINE_OBJECT_CONST ObjectData[] = {
 			{"SCRIPT_ARGV", KClass_StringArray0->typeId, (kObject*)a},
 			{}
 	};

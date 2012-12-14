@@ -1167,7 +1167,7 @@ struct kObjectVar {
 /* ------------------------------------------------------------------------ */
 /* Boolean */
 
-#define ABSTRAKClass_NUMBER \
+#define ABSTRACT_NUMBER \
 	union {\
 		uintptr_t  unboxValue;\
 		kbool_t    boolValue;\
@@ -1180,12 +1180,12 @@ typedef struct kNumberVar       kNumberVar;
 
 struct kNumberVar {
 	KonohaObjectHeader h;
-	ABSTRAKClass_NUMBER;
+	ABSTRACT_NUMBER;
 };
 
 struct kBooleanVar /* extends kNumber */ {
 	KonohaObjectHeader h;
-	ABSTRAKClass_NUMBER;
+	ABSTRACT_NUMBER;
 };
 
 #define IS_Boolean(o)              (kObject_typeId(o) == KType_boolean)
@@ -1201,7 +1201,7 @@ struct kBooleanVar /* extends kNumber */ {
 
 struct kIntVar /* extends kNumber */ {
 	KonohaObjectHeader h;
-	ABSTRAKClass_NUMBER;
+	ABSTRACT_NUMBER;
 };
 
 #define IS_Int(o)              (kObject_typeId(o) == KType_int)
@@ -1785,7 +1785,7 @@ typedef struct {
 	const char *key;
 	uintptr_t ty;
 	kObject *value;
-} KDEFINE_OBJEKClass_CONST;
+} KDEFINE_OBJECT_CONST;
 
 
 
@@ -1808,9 +1808,9 @@ typedef struct {
 /* [GarbageCollection] */
 
 #if defined(_MSC_VER)
-#define OBJEKClass_SET(var, val) var = (decltype(var))(val)
+#define OBJECT_SET(var, val) var = (decltype(var))(val)
 #else
-#define OBJEKClass_SET(var, val) var = (typeof(var))(val)
+#define OBJECT_SET(var, val) var = (typeof(var))(val)
 #endif /* defined(_MSC_VER) */
 
 #define INIT_GCSTACK()         kArray* _GcStack = kctx->stack->gcstack_OnContextConstList; size_t _gcstackpos = kArray_size(_GcStack)
@@ -1823,7 +1823,7 @@ typedef struct {
 #define GC_WRITE_BARRIER(kctx, PARENT, VAR, VAL)\
 	(PLATAPI UpdateObjectField((struct kObjectVar *)(PARENT), (struct kObjectVar *)(VAR), ((struct kObjectVar *)(VAL))))
 
-#define KUnsafeFieldInit(VAR, VAL) OBJEKClass_SET(VAR, VAL)
+#define KUnsafeFieldInit(VAR, VAL) OBJECT_SET(VAR, VAL)
 #define KUnsafeFieldSet( VAR, VAL) (VAR) = (VAL) /* for c-compiler type check */
 #define KStackSet(VAR, VAL)  (VAR) = (VAL)
 
