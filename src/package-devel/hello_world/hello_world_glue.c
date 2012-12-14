@@ -24,6 +24,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/import/methoddecl.h>
 #include <stdio.h>
 
 #ifdef __cplusplus
@@ -103,15 +104,6 @@ static KMETHOD Person_say(KonohaContext *kctx, KonohaStack *sfp)
 	sprintf(buf, "hello , %s!", text);
 	KReturn(KLIB new_kString(kctx, OnStack, buf, strlen(buf), StringPolicy_TEXT));
 }
-
-/* You can attach the following annotations to each methods. */
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Im       kMethod_Immutable
-#define _Coercion kMethod_Coercion
-#define _Static   kMethod_Static
-
-#define _F(F)     (intptr_t)(F)
 
 static kbool_t HelloWorld_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {

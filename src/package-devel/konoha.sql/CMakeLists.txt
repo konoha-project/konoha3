@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.6)
-find_library(HAVE_LIBMYSQL NAMES mysqlclient)
 find_library(HAVE_LIBSQLITE NAMES sqlite3)
 
 find_program(MYSQL_CONFIG NAMES mysql_config)
@@ -7,12 +6,13 @@ find_program(PG_CONFIG NAMES pg_config)
 
 if(MYSQL_CONFIG OR HAVE_LIBSQLITE OR PG_CONFIG)
 	if(MYSQL_CONFIG)
-	execute_process(
-		COMMAND ${MYSQL_CONFIG} --include
-		OUTPUT_VARIABLE MYSQL_INCLUDE_DIR
-		OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
-	string(REPLACE "-I" "" HAVE_MYSQL ${MYSQL_INCLUDE_DIR})
+		find_library(HAVE_LIBMYSQL NAMES mysqlclient)
+		execute_process(
+			COMMAND ${MYSQL_CONFIG} --include
+			OUTPUT_VARIABLE MYSQL_INCLUDE_DIR
+			OUTPUT_STRIP_TRAILING_WHITESPACE
+		)
+		string(REPLACE "-I" "" HAVE_MYSQL ${MYSQL_INCLUDE_DIR})
 		if(HAVE_MYSQL AND HAVE_LIBMYSQL)
 			set(PACKAGE_EXTRA_LIBRARY ${HAVE_LIBMYSQL})
 			set(PACKAGE_SCRIPT_CODE sql_glue.k)
