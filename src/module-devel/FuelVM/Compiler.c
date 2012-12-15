@@ -519,18 +519,7 @@ static void FuelVM_VisitAndExpr(KonohaContext *kctx, KBuilder *builder, kStmt *s
 
 static void FuelVM_VisitOrExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
-//<<<<<<< HEAD
-//	kExpr *LHS = kExpr_At(expr, 1);
-//	kExpr *RHS = kExpr_At(expr, 2);
-//	INode *Node = CreateCond(BLD(builder), LogicalOr);
-//	SUGAR VisitExpr(kctx, builder, stmt, LHS);
-//	CondInst_addParam((ICond *) Node, FuelVM_getExpression(builder));
-//	SUGAR VisitExpr(kctx, builder, stmt, RHS);
-//	CondInst_addParam((ICond *) Node, FuelVM_getExpression(builder));
-//	builder->Value = Node;
-//=======
 	CreateICond(kctx, builder, stmt, expr, LogicalOr);
-//>>>>>>> bb1f81538cc69abdd542a1c8821794cbad7548c8
 }
 
 static void FuelVM_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
