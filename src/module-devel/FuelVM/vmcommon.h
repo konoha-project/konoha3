@@ -1,12 +1,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "../../../include/minikonoha/minikonoha.h"
+#include "../../../include/minikonoha/konoha_common.h"
 
 #ifndef VMCOMMON_H
 #define VMCOMMON_H
 
 enum TypeId {
 	TYPE_void = KType_void,
+	TYPE_Object = KType_Object,
 	TYPE_boolean = KType_boolean,
 	TYPE_int = KType_int,
 	TYPE_String = KType_String,
@@ -28,11 +30,6 @@ typedef union SValue {
 	kObject    *obj;
 } SValue;
 
-typedef struct LObject {
-	void *Header;
-	SValue fields[4];
-} LObject;
-
 static inline bool IsUnBoxedType(enum TypeId Type)
 {
 	switch(Type) {
@@ -45,6 +42,15 @@ static inline bool IsUnBoxedType(enum TypeId Type)
 		default:
 			return false;
 	}
+}
+
+#define FloatIsDefined(kctx) (KDefinedKonohaCommonModule() && KClass_Float != NULL)
+
+static inline enum TypeId ConvertToTypeId(KonohaContext *kctx, ktypeattr_t type)
+{
+	if(FloatIsDefined(kctx) && type == KType_float)
+		return TYPE_float;
+	return type;
 }
 
 #endif /* end of include guard */

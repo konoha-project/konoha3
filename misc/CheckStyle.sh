@@ -1,7 +1,7 @@
 #!/bin/sh
 
 SOURCE=
-for DIR in src include package module
+for DIR in src include
 do
 	SOURCE="${SOURCE} `find ${DIR}/ -iname "*.c"` `find ${DIR}/ -iname "*.h"`"
 done

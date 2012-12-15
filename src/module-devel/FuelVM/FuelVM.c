@@ -170,10 +170,10 @@ static void RaiseError(KonohaContext *kctx, KonohaStack *sfp, kString *ErrorInfo
 #define Yield(Reg, Stack)  (void)Reg; (void)Stack; assert(0 && "TODO")
 #define Try_(Catch, Finaly, Stack) (void)Catch; (void)Stack; (void)Finaly; assert(0 && "TODO")
 
-static kObject *CreateObject(KonohaContext *kctx, TypeId Type)
+static kObject *CreateInstance(KonohaContext *kctx, uintptr_t Conf, TypeId Type)
 {
 	KClass *ct = KClass_(Type);
-	kObject *obj = KLIB new_kObject(kctx, 0, ct, 0);
+	kObject *obj = KLIB new_kObject(kctx, 0, ct, Conf);
 	return obj;
 }
 
@@ -232,53 +232,54 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 		Reg[Dst].obj = Stack[SrcIdx].asObject;
 		DISPATCH_NEXT(PC);
 	}
-	CASE(LoadLocal)    {
+	CASE(LoadLocal) {
 		VMRegister Dst = ((OPLoadLocal *)PC)->Dst;
 		VMRegister Src = ((OPLoadLocal *)PC)->Src;
 		Reg[Dst] = Reg[Src];
 		DISPATCH_NEXT(PC);
 	}
-	CASE(LoadField)    {
+	CASE(LoadField) {
 		VMRegister Dst = ((OPLoadField *)PC)->Dst;
 		VMRegister Src = ((OPLoadField *)PC)->Src;
 		uint FieldIdx = ((OPLoadField *)PC)->FieldIdx;
 		Reg[Dst].bits = Reg[Src].obj->fieldUnboxItems[FieldIdx];
 		DISPATCH_NEXT(PC);
 	}
-	CASE(StoreLocal)   {
+	CASE(StoreLocal) {
 		VMRegister Dst = ((OPStoreLocal *)PC)->Dst;
 		VMRegister Src = ((OPStoreLocal *)PC)->Src;
 		Reg[Dst] = Reg[Src];
 		DISPATCH_NEXT(PC);
 	}
-	CASE(StoreField)   {
+	CASE(StoreField) {
 		VMRegister Dst = ((OPStoreField *)PC)->Dst;
 		uint FieldIdx = ((OPStoreField *)PC)->FieldIdx;
 		VMRegister Src = ((OPStoreField *)PC)->Src;
-		((kObjectVar*)Reg[Dst].obj)->fieldUnboxItems[FieldIdx] = Reg[Src].bits;
+		((kObjectVar *)Reg[Dst].obj)->fieldUnboxItems[FieldIdx] = Reg[Src].bits;
 		DISPATCH_NEXT(PC);
 	}
-	CASE(And)          {
+	CASE(And) {
 		VMRegister Dst = ((OPAnd *)PC)->Dst;
 		VMRegister LHS = ((OPAnd *)PC)->LHS;
 		VMRegister RHS = ((OPAnd *)PC)->RHS;
 		Reg[Dst].bval = Reg[LHS].bval && Reg[RHS].bval;
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Or)           {
+	CASE(Or) {
 		VMRegister Dst = ((OPOr *)PC)->Dst;
 		VMRegister LHS = ((OPOr *)PC)->LHS;
 		VMRegister RHS = ((OPOr *)PC)->RHS;
 		Reg[Dst].bval = Reg[LHS].bval || Reg[RHS].bval;
 		DISPATCH_NEXT(PC);
 	}
-	CASE(New)          {
+	CASE(New) {
 		VMRegister Dst = ((OPNew *)PC)->Dst;
+		uintptr_t Param = ((OPNew *)PC)->Param;
 		TypeId Type = ((OPNew *)PC)->Type;
-		Reg[Dst].obj = CreateObject(kctx, Type);
+		Reg[Dst].obj = CreateInstance(kctx, Param, Type);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Call)         {
+	CASE(Call) {
 		VMRegister Dst = ((OPCall *)PC)->Dst;
 		uchar ParamSize = ((OPCall *)PC)->ParamSize;
 		uchar ReturnType = ((OPCall *)PC)->ReturnType;
@@ -287,7 +288,7 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 		Reg[Dst] = CallMethod(kctx, Mtd, ParamSize, ReturnType, uline);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(VCall)        {
+	CASE(VCall) {
 		VMRegister Dst = ((OPVCall *)PC)->Dst;
 		uint ParamSize = ((OPCall *)PC)->ParamSize;
 		Cache CacheInfo = ((OPVCall *)PC)->CacheInfo;
@@ -295,80 +296,89 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 		Reg[Dst] = CallMethodWithCache(kctx, ParamSize, CacheInfo, uline);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(PushI)         {
+	CASE(PushI) {
 		VMRegister Src = ((OPPushI *)PC)->Src;
 		PushUnboxedValue(kctx, Reg[Src]);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(PushO)         {
+	CASE(PushO) {
 		VMRegister Src = ((OPPushO *)PC)->Src;
 		PushBoxedValue(kctx, Reg[Src]);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Func)         {
+	CASE(Func) {
 		VMRegister Dst = ((OPFunc *)PC)->Dst;
 		IArray StackLayout = ((OPFunc *)PC)->StackLayout;
 		Reg[Dst].obj = CreateFunction(Reg, StackLayout);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Test)         {
+	CASE(Test) {
 		VMRegister Src = ((OPTest *)PC)->Src;
 		TestFunc Func = ((OPTest *)PC)->Func;
 		Cache CacheInfo = ((OPTest *)PC)->CacheInfo;
 		AppendCache(Func, Reg[Src], CacheInfo);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(ReturnI)       {
+	CASE(ReturnI) {
 		VMRegister Src = ((OPReturnI *)PC)->Src;
 		Stack[K_RTNIDX].intValue = Reg[Src].ival;
 		return;
 	}
-	CASE(ReturnO)       {
+	CASE(ReturnO) {
 		VMRegister Src = ((OPReturnI *)PC)->Src;
 		Stack[K_RTNIDX].asObject = Reg[Src].obj;
 		return;
 	}
-	CASE(ReturnVoid)   {
+	CASE(ReturnVoid) {
 		return;
 	}
-	CASE(CondBr)       {
-		VMRegister Src = ((OPCondBr *)PC)->Src;
-		Address Block = ((OPCondBr *)PC)->Block;
+	CASE(CondBrTrue) {
+		VMRegister Src = ((OPCondBrTrue *)PC)->Src;
+		Address Block = ((OPCondBrTrue *)PC)->Block;
 		if(Reg[Src].bval) {
 			PC = (ByteCode *)Block;
 			DISPATCH_JUMPTO(PC);
 		} else {}
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Jump)         {
+	CASE(CondBrFalse) {
+		VMRegister Src = ((OPCondBrFalse *)PC)->Src;
+		Address Block = ((OPCondBrFalse *)PC)->Block;
+		if(!Reg[Src].bval) {
+			PC = (ByteCode *)Block;
+			DISPATCH_JUMPTO(PC);
+		} else {}
+		DISPATCH_NEXT(PC);
+	}
+	CASE(Jump) {
 		Address Block = ((OPJump *)PC)->Block;
 		PC = (ByteCode *)Block;
 		DISPATCH_JUMPTO(Block);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Throw)        {
+	CASE(Throw) {
 		VMRegister Src = ((OPThrow *)PC)->Src;
 		uintptr_t uline = ((OPThrow *)PC)->uline;
 		RaiseError(kctx, Stack, (kString *) Reg[Src].obj, uline);
 	}
-	CASE(Try)          {
+	CASE(Try) {
 		Address Catch = ((OPTry *)PC)->Catch;
 		Address Finaly = ((OPTry *)PC)->Finaly;
 		Try_(Catch, Finaly, /*$*/Stack);
 	}
-	CASE(Yield)        {
+	CASE(Yield) {
 		VMRegister Src = ((OPYield *)PC)->Src;
 		Yield(Reg[Src], /*$*/Stack);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Not)          {
+	CASE(Not) {
 		VMRegister Dst = ((OPNot *)PC)->Dst;
 		VMRegister Src = ((OPNot *)PC)->Src;
 		CompileTimeAssert((TypeOf(Src) == int) || (TypeOf(Src) == float));
 		Reg[Dst].ival = !(Reg[Src].ival);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Neg)          {
+	CASE(Neg) {
 		VMRegister Dst = ((OPNeg *)PC)->Dst;
 		VMRegister Src = ((OPNeg *)PC)->Src;
 		CompileTimeAssert((TypeOf(Src) == int) || (TypeOf(Src) == float));
@@ -604,7 +614,7 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 		Reg[Dst].bval = (Reg[LHS].ival <= Reg[RHS].ival);
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Nop)          {
+	CASE(Nop) {
 		DISPATCH_NEXT(PC);
 	}
 #endif

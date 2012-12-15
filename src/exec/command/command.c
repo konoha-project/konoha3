@@ -65,7 +65,7 @@ static int getopt_long(int argc, char * const *argv, const char *optstring, cons
 		if(arg[0] == '-' && arg[1] == '-') {
 			const struct option *opt = longopts;
 			arg += 2;
-			while (opt->name) {
+			while(opt->name) {
 				char *end = strchr(arg, '=');
 				if(end == 0 && opt->has_arg == no_argument) {
 					if(strcmp(arg, opt->name) == 0)
@@ -85,7 +85,7 @@ static int getopt_long(int argc, char * const *argv, const char *optstring, cons
 		else if(arg[0] == '-') {
 			arg += 1;
 			const char *c = optstring;
-			while (*c != 0) {
+			while(*c != 0) {
 				if(*c == arg[0]) {
 					if(*(c+1) == ':' && arg[1] == '=') {
 						optarg = arg+2;
@@ -177,7 +177,7 @@ static void CommandLine_Import(KonohaContext *kctx, char *packageName, KTraceInf
 //		local = "/.minikonoha/script";
 //	}
 //	snprintf(buf, sizeof(buf), "%s%s/%s.k", path, local, startup_script);
-//	if(!Konoha_LoadScript((KonohaContext*)kctx, (const char*)buf)) {
+//	if(!Konoha_LoadScript((KonohaContext *)kctx, (const char *)buf)) {
 //		KExit(EXIT_FAILURE);
 //	}
 //}
@@ -186,13 +186,13 @@ static void CommandLine_SetARGV(KonohaContext *kctx, int argc, char** argv, KTra
 {
 	INIT_GCSTACK();
 	KClass *KClass_StringArray0 = KClass_p0(kctx, KClass_Array, KType_String);
-	kArray *a = (kArray*)KLIB new_kObject(kctx, _GcStack, KClass_StringArray0, 0);
+	kArray *a = (kArray *)KLIB new_kObject(kctx, _GcStack, KClass_StringArray0, 0);
 	int i;
 	for(i = 0; i < argc; i++) {
 		KLIB kArray_Add(kctx, a, KLIB new_kString(kctx, _GcStack, argv[i], strlen(argv[i]), StringPolicy_TEXT));
 	}
 	KDEFINE_OBJECT_CONST ObjectData[] = {
-			{"SCRIPT_ARGV", KClass_StringArray0->typeId, (kObject*)a},
+			{"SCRIPT_ARGV", KClass_StringArray0->typeId, (kObject *)a},
 			{}
 	};
 	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(ObjectData), true/*isOverride*/, trace);
@@ -220,7 +220,7 @@ static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv
 	int scriptidx = 0;
 	KBaseTrace(trace);
 
-	while (1) {
+	while(1) {
 		int option_index = 0;
 		int c = getopt_long (argc, argv, "icqD:I:M:S:f:", long_options2, &option_index);
 		if(c == -1) break; /* Detect the end of the options. */
@@ -271,7 +271,7 @@ static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv
 			break;
 
 		default:
-			((KonohaFactory*)kctx->platApi)->exitStatus = EXIT_FAILURE;
+			((KonohaFactory *)kctx->platApi)->exitStatus = EXIT_FAILURE;
 			return;
 		}
 	}

@@ -45,7 +45,7 @@ static KMETHOD NameSpace_GetNameSpace(KonohaContext *kctx, KonohaStack *sfp)
 //## NameSpace NameSpace.GetParentNameSpace();
 static KMETHOD NameSpace_GetParentNameSpace(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kNameSpace *ns = (kNameSpace*)sfp[0].asNameSpace;
+	kNameSpace *ns = (kNameSpace *)sfp[0].asNameSpace;
 	if(ns->parentNULL != NULL) {
 		ns = ns->parentNULL;
 	}

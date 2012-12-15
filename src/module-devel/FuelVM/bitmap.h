@@ -65,13 +65,13 @@ static inline unsigned BitMap_findNextUnsetBit(BitMap *map)
 	uintptr_t *x;
 	FOR_EACH_ARRAY_(map->map, x, i) {
 		if(*x != UINTPTR_MAX) {
-			/*FIXME(ide) scan for the first unset bit. */
+			/* scan for the first unset bit */
 			unsigned offset = (*x != 0) ? (__builtin_ctzll(~(*x))) : 0;
 			return i * BITS + offset;
 		}
 	}
 	unsigned oldSize = ARRAY_size(map->map);
-	BitMap_resize(map, oldSize * 2);
+	ARRAY_add(uintptr_t, &map->map, 0);
 	return oldSize * BITS;
 }
 

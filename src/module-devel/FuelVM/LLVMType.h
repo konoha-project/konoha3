@@ -107,7 +107,7 @@ struct TypeInfo {
 
 static llvm::Type *getLongTy()
 {
-	if(sizeof(void*) == 4)
+	if(sizeof(void *) == 4)
 		return llvm::Type::getInt32Ty(LLVM_CONTEXT());
 	else
 		return llvm::Type::getInt64Ty(LLVM_CONTEXT());
@@ -115,7 +115,7 @@ static llvm::Type *getLongTy()
 
 static llvm::Type *getShortTy()
 {
-	if(sizeof(void*) == 4)
+	if(sizeof(void *) == 4)
 		return llvm::Type::getInt16Ty(LLVM_CONTEXT());
 	else
 		return llvm::Type::getInt32Ty(LLVM_CONTEXT());
@@ -161,7 +161,7 @@ static llvm::Type *CreateType(const struct TypeInfo &Info)
 		llvm::Type *Ty = ToType(Info.Params[i].TypeId);
 		Fields.push_back(Ty);
 	}
-	if (Info.IsFunction) {
+	if(Info.IsFunction) {
 		llvm::Type *RetTy = ToType(Info.ReturnTypeId);
 		llvm::FunctionType *FnTy = llvm::FunctionType::get(RetTy, Fields, false);
 		return llvm::PointerType::get(FnTy, 0);

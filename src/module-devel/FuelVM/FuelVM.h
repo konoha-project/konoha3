@@ -12,7 +12,6 @@ typedef unsigned short ushort;
 typedef unsigned int   uint;
 typedef int  VMRegister;
 typedef enum TypeId TypeId;
-typedef SValue (*Method)(void *Context, SValue *Args);
 typedef void *Cache;
 typedef void *Stack;
 typedef void *TestFunc;
@@ -61,7 +60,7 @@ extern void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 extern void FuelVM_GenerateLLVMIR(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option);
 extern void RecompileMethod(KonohaContext *kctx, kMethod *mtd);
 
-#define FUELVM_REGISTER_SIZE 128
+#define FUELVM_REGISTER_SIZE 512/*FIXME Implement clever register allocation algorithm */
 
 #ifdef __cplusplus
 } /* extern "C" */

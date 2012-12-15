@@ -1246,7 +1246,7 @@ typedef enum {
 	StringPolicy_NOCOPY   =     (1<<3),
 	StringPolicy_NOPOOL   =     (1<<4),   /* UNUSED in the future */
 	StringPolicy_SystemInfo =   (1<<5),   /* UNUSED */
-	StringPolicy_FreeKBuffer =  (1<<6),   /* KBuffer_Stringfy */
+	StringPolicy_FreeKBuffer =  (1<<6)    /* KBuffer_Stringfy */
 } StringPolicy;
 
 typedef enum { NonZero, EnsureZero } StringfyPolicy;

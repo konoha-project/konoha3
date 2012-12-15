@@ -831,7 +831,7 @@ static void PushParam(KonohaContext *kctx, KonohaStack *sfp, const char *fmt, va
 		sfp[0].unboxValue = (uintptr_t)va_arg(ap, uintptr_t);
 		break;
 	case 'O':
-		KUnsafeFieldSet(sfp[0].asObject, (kObject*)va_arg(ap, kObject*));
+		KUnsafeFieldSet(sfp[0].asObject, (kObject *)va_arg(ap, kObject *));
 		break;
 	}
 }

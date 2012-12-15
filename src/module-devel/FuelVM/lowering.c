@@ -145,6 +145,42 @@ static void IRBuilder_SimplifyCFG(FuelIRBuilder *builder)
 	}
 }
 
+static void IRBuilder_RemoveInstructionAfterBranchInst(FuelIRBuilder *builder)
+{
+	BlockPtr *x, *e;
+	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+		INodePtr *Inst;
+		INodePtr *LastInst = (ARRAY_last((*x)->insts));
+		unsigned i;
+		FOR_EACH_ARRAY_((*x)->insts, Inst, i) {
+			if(IsBranchInst(*Inst) && Inst != LastInst) {
+				ARRAY_size((*x)->insts) =  i + 1;
+			}
+		}
+	}
+}
+
+static void IRBuilder_FlattenICond(FuelIRBuilder *builder)
+{
+	BlockPtr *x, *e;
+	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+		INodePtr *Inst;
+		INodePtr *LastInst = (ARRAY_last((*x)->insts));
+		unsigned i;
+		FOR_EACH_ARRAY_((*x)->insts, Inst, i) {
+			ICond *Cond;
+			if((Cond = CHECK_KIND(*Inst, ICond)) != 0) {
+				IBranch *Branch;
+				if((Branch = CHECK_KIND(*LastInst, IBranch)) != 0) {
+					if(Cond == (ICond *) Branch->Cond)
+						CondInst_SetBranchInst(Cond, Branch);
+				}
+			}
+		}
+	}
+}
+
+
 static void CopyIfBlockHasSingleInst(Block *BB, INode *LastInst, Block *Block)
 {
 	if(ARRAY_size(Block->insts) == 1) {
@@ -228,95 +264,105 @@ static void TraceNode1(INode *Node)
 		case IR_TYPE_IArgument:
 		case IR_TYPE_ILabel:
 			break;
-		CASE(IField) {
-			return;
-		}
-		CASE(ICond) {
-			ICond *Inst = (ICond *) Node;
-			INode_SetMarked(Node);
-			INodePtr *x, *e;
-			FOR_EACH_ARRAY(Inst->Insts, x, e) {
-				INode_SetMarked(*x);
+			CASE(IField) {
+				IField *Inst = (IField *) Node;
+				switch(Inst->Op) {
+					case GlobalScope:
+					case EnvScope:
+					case FieldScope:
+						INode_SetMarked(Node);
+						INode_SetMarked(Inst->Node);
+						break;
+					case LocalScope:
+						break;
+				}
+				break;
 			}
-			break;
-		}
-		CASE(INew) {
-			INode_SetMarked(Node);
-			break;
-		}
-		CASE(ICall) {
-			ICall *Inst = (ICall *) Node;
-			INode_SetMarked(Node);
-			INodePtr *x;
-			unsigned i = 0;
-			FOR_EACH_ARRAY_(Inst->Params, x, i) {
-				if(i != 0) {
+			CASE(ICond) {
+				ICond *Inst = (ICond *) Node;
+				INodePtr *x, *e;
+				FOR_EACH_ARRAY(Inst->Insts, x, e) {
 					INode_SetMarked(*x);
 				}
+				break;
 			}
-			break;
-		}
-		CASE(IFunction) {
-			IFunction *Inst = (IFunction *) Node;
-			INodePtr *x, *e;
-			FOR_EACH_ARRAY(Inst->Env, x, e) {
-				INode_SetMarked(*x);
+			CASE(INew) {
+				INode_SetMarked(Node);
+				break;
 			}
-			break;
-		}
-		CASE(IUpdate) {
-			/* IUpdate Inst is Marked at TraceNode2() */
-			break;
-		}
-		CASE(IBranch) {
-			INode_SetMarked(Node);
-			INode_SetMarked(((IBranch *) Node)->Cond);
-			break;
-		}
-		CASE(ITest) {
-			INode_SetMarked(Node);
-			INode_SetMarked((INode *)((ITest *) Node)->Value);
-			assert(0 && "TODO");
-			break;
-		}
-		CASE(IReturn) {
-			IReturn *Inst = (IReturn *) Node;
-			INode_SetMarked(Node);
-			if(Inst->Inst) {
-				INode_SetMarked(Inst->Inst);
+			CASE(ICall) {
+				ICall *Inst = (ICall *) Node;
+				INode_SetMarked(Node);
+				INodePtr *x;
+				unsigned i = 0;
+				FOR_EACH_ARRAY_(Inst->Params, x, i) {
+					if(i != 0) {
+						INode_SetMarked(*x);
+					}
+				}
+				break;
 			}
-			break;
-		}
-		CASE(IJump) {
-			INode_SetMarked(Node);
-			break;
-		}
-		CASE(IThrow) {
-			IThrow *Inst = (IThrow *) Node;
-			INode_SetMarked(Node);
-			INode_SetMarked((INode *) Inst->Val);
-			break;
-		}
-		CASE(ITry) {
-			INode_SetMarked(Node);
-			assert(0 && "TODO");
-			break;
-		}
-		CASE(IYield) {
-			INode_SetMarked(Node);
-			INode_SetMarked(((IYield *) Node)->Value);
-			break;
-		}
-		CASE(IUnary) {
-			INode_SetMarked(((IUnary *) Node)->Node);
-			break;
-		}
-		CASE(IBinary) {
-			IBinary *Inst  = (IBinary *) Node;
-			INode_SetMarked(Inst->LHS);
-			INode_SetMarked(Inst->RHS);
-			break;
-		}
+			CASE(IFunction) {
+				IFunction *Inst = (IFunction *) Node;
+				INodePtr *x, *e;
+				FOR_EACH_ARRAY(Inst->Env, x, e) {
+					INode_SetMarked(*x);
+				}
+				break;
+			}
+			CASE(IUpdate) {
+				/* IUpdate Inst is Marked at TraceNode2() */
+				break;
+			}
+			CASE(IBranch) {
+				INode_SetMarked(Node);
+				INode_SetMarked(((IBranch *) Node)->Cond);
+				break;
+			}
+			CASE(ITest) {
+				INode_SetMarked(Node);
+				INode_SetMarked((INode *)((ITest *) Node)->Value);
+				assert(0 && "TODO");
+				break;
+			}
+			CASE(IReturn) {
+				IReturn *Inst = (IReturn *) Node;
+				INode_SetMarked(Node);
+				if(Inst->Inst) {
+					INode_SetMarked(Inst->Inst);
+				}
+				break;
+			}
+			CASE(IJump) {
+				INode_SetMarked(Node);
+				break;
+			}
+			CASE(IThrow) {
+				IThrow *Inst = (IThrow *) Node;
+				INode_SetMarked(Node);
+				INode_SetMarked((INode *) Inst->Val);
+				break;
+			}
+			CASE(ITry) {
+				INode_SetMarked(Node);
+				assert(0 && "TODO");
+				break;
+			}
+			CASE(IYield) {
+				INode_SetMarked(Node);
+				INode_SetMarked(((IYield *) Node)->Value);
+				break;
+			}
+			CASE(IUnary) {
+				INode_SetMarked(((IUnary *) Node)->Node);
+				break;
+			}
+			CASE(IBinary) {
+				IBinary *Inst  = (IBinary *) Node;
+				INode_SetMarked(Inst->LHS);
+				INode_SetMarked(Inst->RHS);
+				break;
+			}
 		default:
 			assert(0 && "unreachable");
 #undef CASE
@@ -336,10 +382,11 @@ static void TraceNode2(INode *Node)
 	switch(LHS->Op) {
 		case GlobalScope:
 		case EnvScope:
-		case FieldScope:
 			assert(0 && "TODO");
+			break;
+		case FieldScope:
 		case LocalScope:
-			if(INode_IsMarked((INode*)LHS)) {
+			if(INode_IsMarked((INode *)LHS)) {
 				INode_SetMarked(Node);
 				INode_SetMarked(Inst->RHS);
 			}
@@ -398,16 +445,17 @@ static const char *Type2String(enum TypeId Type)
 {
 	switch(Type) {
 #define CASE(X) case TYPE_##X: return #X
-	CASE(void);
-	CASE(boolean);
-	CASE(int);
-	CASE(float);
-	CASE(String);
-	CASE(Function);
-	CASE(Array);
-	CASE(Method);
-	CASE(NameSpace);
-	CASE(Any);
+		CASE(void);
+		CASE(boolean);
+		CASE(int);
+		CASE(float);
+		CASE(Object);
+		CASE(String);
+		CASE(Function);
+		CASE(Array);
+		CASE(Method);
+		CASE(NameSpace);
+		CASE(Any);
 #undef CASE
 	}
 #ifdef DEBUG_TYPE_ID
@@ -487,7 +535,13 @@ static void Dump_visitList(Visitor *visitor, INode *Inst, const char *Tag, unsig
 static void Dump_visitValue(Visitor *visitor, INode *Node, const char *Tag, SValue Val)
 {
 	printHeader((FuelIRBuilder *)visitor->Context, Node, Tag);
-	debug("Type:%s, 0x%llx]\n", Type2String(Node->Type), Val.bits);
+	IField *Inst;
+	if((Inst = CHECK_KIND(Node, IField)) != 0 && Inst->Op != LocalScope) {
+		printNode(Inst->Node);
+		debug(", Type:%s, %d]\n", Type2String(Node->Type), Inst->FieldIndex);
+	} else {
+		debug("Type:%s, 0x%llx]\n", Type2String(Node->Type), Val.bits);
+	}
 }
 #endif
 
@@ -569,8 +623,8 @@ static void EmitUnaryInst(ByteCodeWriter *writer, enum UnaryOp Op, unsigned Dst,
 #define CASE(X) case X: EMIT_LIR(writer, X, Dst, Src); break
 		CASE(Not); CASE(Neg);
 		default:
-			assert(0 && "unreachable");
-			break;
+		assert(0 && "unreachable");
+		break;
 #undef CASE
 	}
 }
@@ -602,18 +656,29 @@ static void EmitBinaryInst(ByteCodeWriter *writer, enum BinaryOp Op, enum TypeId
 	assert(0 && "unreachable");
 }
 
+static inline bool IsLocalOrField(INode *Node)
+{
+	IField *Inst;
+	if((Inst = CHECK_KIND(Node, IField)) != 0) {
+		return (Inst->Op == LocalScope || Inst->Op == FieldScope);
+	}
+	return false;
+}
+
 static void DeallocateWithoutLocalVar(ByteCodeWriter *writer)
 {
 	Block *cur = writer->Current;
 	INodePtr *x, *e;
 	FOR_EACH_ARRAY(cur->insts, x, e) {
 		INode *Node = *x;
-		IUpdate *Inst;
-		if((Inst = CHECK_KIND(Node, IUpdate)) != 0) {
-			if(Inst->LHS->Op == LocalScope)
-				continue;
+		ICond *Inst;
+		if(CHECK_KIND(Node, IUpdate) != 0) {
+			continue;
 		}
-		if(IsLocalVariable(Node))
+		if((Inst = CHECK_KIND(Node, ICond)) != 0 && Inst->Branch != 0) {
+			continue;
+		}
+		if(IsLocalOrField(Node))
 			continue;
 		if(IsBranchInst(Node))
 			continue;
@@ -659,6 +724,36 @@ static void DumpRegister(ByteCodeWriter *writer)
 }
 #endif
 
+static void EmitCondBranch(ByteCodeWriter *writer, IBranch *Inst, ICond *Cond, int IsTopDecl)
+{
+	INodePtr *x, *e;
+	Block *ThenBB, *ElseBB;
+	unsigned Src;
+
+	if(Cond->Op == LogicalOr) {
+		ThenBB = Inst->ThenBB; ElseBB = Inst->ElseBB;
+	} else {
+		ThenBB = Inst->ElseBB; ElseBB = Inst->ThenBB;
+	}
+
+	FOR_EACH_ARRAY(Cond->Insts, x, e) {
+		if(CHECK_KIND(*x, ICond) != 0) {
+			EmitCondBranch(writer, Inst, (ICond *) *x, 0);
+			continue;
+		}
+		assert(Register_FindById(&writer->RegAllocator, NODE_ID(*x), &Src) == true);
+		if(Cond->Op == LogicalOr) {
+			EMIT_LIR(writer, CondBrTrue, Src, ThenBB);
+		} else {
+			EMIT_LIR(writer, CondBrFalse, Src, ThenBB);
+		}
+	}
+
+	if(IsTopDecl == true) {
+		EMIT_LIR(writer, Jump, ElseBB);
+	}
+}
+
 #define CASE(KIND) case IR_TYPE_##KIND:
 static void EmitNode(ByteCodeWriter *writer, INode *Node)
 {
@@ -666,21 +761,35 @@ static void EmitNode(ByteCodeWriter *writer, INode *Node)
 	switch(Node->Kind) {
 		CASE(ICond) {
 			ICond *Inst = (ICond *) Node;
-			INodePtr *x, *e;
-			assert(0 && "TODO");
-			FOR_EACH_ARRAY(Inst->Insts, x, e) {
+			if(Inst->Branch == NULL) {
+				INodePtr *x;
+				unsigned i, LHS, RHS;
+				unsigned Dst = RegAllocate(writer, NODE_ID(Inst));
+				INodePtr *Inst0 = ARRAY_n(Inst->Insts, 0);
+				assert(Register_FindById(&writer->RegAllocator, NODE_ID(*Inst0), &LHS) == true);
+				FOR_EACH_ARRAY_(Inst->Insts, x, i) {
+					if(i == 0)
+						continue;
+					assert(Register_FindById(&writer->RegAllocator, NODE_ID(*x), &RHS) == true);
+					if(Inst->Op == LogicalOr) {
+						EMIT_LIR(writer, Or, Dst, LHS, RHS);
+					} else {
+						EMIT_LIR(writer, And, Dst, LHS, RHS);
+					}
+					LHS = Dst;
+				}
 			}
 			break;
 		}
 		CASE(INew) {
 			INew *Inst = (INew *) Node;
 			unsigned Dst = RegAllocate(writer, NODE_ID(Inst));
-			EMIT_LIR(writer, New, Dst, Inst->base.Type);
+			EMIT_LIR(writer, New, Dst, Inst->Conf, Inst->base.Type);
 			break;
 		}
 		CASE(ICall) {
 			ICall *Inst = (ICall *) Node;
-			INode **MtdPtr = (ARRAY_n(Inst->Params, 0));
+			INode **MtdPtr = ARRAY_n(Inst->Params, 0);
 			IConstant *Mtd = (IConstant *) *MtdPtr;
 			*MtdPtr = 0;
 			INodePtr *x, *e;
@@ -717,9 +826,14 @@ static void EmitNode(ByteCodeWriter *writer, INode *Node)
 			switch(LHS->Op) {
 				case GlobalScope:
 				case EnvScope:
-				case FieldScope:
 					assert(0 && "TODO");
 					break;
+				case FieldScope: {
+					INode *obj = LHS->Node;
+					Dst = Register_FindByIdOrAllocate(&writer->RegAllocator, NODE_ID(obj));
+					EMIT_LIR(writer, StoreField, Dst, LHS->FieldIndex, Src);
+					break;
+				}
 				case LocalScope: {
 					Dst = Register_FindByIdOrAllocate(&writer->RegAllocator, NODE_ID(LHS));
 					EMIT_LIR(writer, StoreLocal, Dst, Src);
@@ -730,11 +844,17 @@ static void EmitNode(ByteCodeWriter *writer, INode *Node)
 		}
 		CASE(IBranch) {
 			IBranch *Inst = (IBranch *) Node;
-			unsigned Src;
-			assert(Register_FindById(&writer->RegAllocator, NODE_ID(Inst->Cond), &Src) == true);
+			ICond *Cond;
+			unsigned Src = REGISTER_UNDEFINED;
+			if((Cond = CHECK_KIND(Inst->Cond, ICond)) != 0) {
+				assert(Cond->Branch != 0);
+				EmitCondBranch(writer, Inst, Cond, true);
+			} else {
+				assert(Register_FindById(&writer->RegAllocator, NODE_ID(Inst->Cond), &Src) == true);
+				EMIT_LIR(writer, CondBrTrue, Src, Inst->ThenBB);
+				EMIT_LIR(writer, Jump, Inst->ElseBB);
+			}
 			DeallocateWithoutLocalVar(writer);
-			EMIT_LIR(writer, CondBr, Src, Inst->ThenBB);
-			EMIT_LIR(writer, Jump, Inst->ElseBB);
 			break;
 		}
 		CASE(ITest) {
@@ -797,7 +917,7 @@ static void EmitNode(ByteCodeWriter *writer, INode *Node)
 			break;
 		}
 		default:
-			assert(0 && "unreachable");
+		assert(0 && "unreachable");
 	}
 }
 
@@ -810,18 +930,19 @@ static void CodeWriter_visitValue(Visitor *visitor, INode *Node, const char *Tag
 {
 	ByteCodeWriter *writer = (ByteCodeWriter *) visitor;
 	DUMP_REGISTER_NODE(Node, writer);
+	RegisterAllocator *Allocator = &writer->RegAllocator;
 	switch(Node->Kind) {
 		CASE(IConstant) {
 			if(Node->Type == KType_Method) {
 				/*XXX(ide) Need to Load Method Constant ??? */
 				return;
 			}
-			unsigned Dst = Register_FindByIdOrAllocate(&writer->RegAllocator, NODE_ID(Node));
+			unsigned Dst = Register_FindByIdOrAllocate(Allocator, NODE_ID(Node));
 			EMIT_LIR(writer, LoadConstant, Dst, Val);
 			return;
 		}
 		CASE(IArgument) {
-			unsigned Dst = Register_FindByIdOrAllocate(&writer->RegAllocator, NODE_ID(Node));
+			unsigned Dst = Register_FindByIdOrAllocate(Allocator, NODE_ID(Node));
 			if(IsUnBoxedType(Node->Type)) {
 				EMIT_LIR(writer, LoadArgumentI, Dst, Val.ival);
 			} else {
@@ -834,10 +955,27 @@ static void CodeWriter_visitValue(Visitor *visitor, INode *Node, const char *Tag
 			break;
 		}
 		CASE(IField) {
-			return;
+			IField *Inst = (IField *) Node;
+			switch(Inst->Op) {
+				case GlobalScope:
+				case EnvScope:
+					assert(0 && "TODO");
+					break;
+				case FieldScope: {
+					/* TODO */
+					//unsigned Src = REGISTER_UNDEFINED;
+					//assert(Register_FindById(Allocator, NODE_ID(Inst->Node), &Src) == true);
+					//unsigned Dst = Register_FindByIdOrAllocate(Allocator, NODE_ID(Node));
+					//EMIT_LIR(writer, LoadField, Dst, Src, Inst->FieldIndex);
+					return;
+				}
+				case LocalScope:
+					break;
+			}
+			break;
 		}
 		default:
-			assert(0 && "unreachable");
+		assert(0 && "unreachable");
 	}
 }
 #undef CASE
@@ -854,8 +992,9 @@ static void ByteCode_Link(ARRAY(BlockPtr) *blocks, ByteCode *code)
 	ByteCode *pc = code, *end = code + ((OPThreadedCode *) code)->CodeSize;
 	while(pc < end) {
 		switch(GetOpcode(pc)) {
-			case OPCODE_CondBr: {
-				OPCondBr *Inst  = (OPCondBr *) pc;
+			case OPCODE_CondBrTrue:
+			case OPCODE_CondBrFalse: {
+				OPCondBrTrue *Inst  = (OPCondBrTrue *) pc;
 				unsigned offset = INode_getRangeEnd(ToINode((Block *)Inst->Block));
 				Inst->Block = (void *) (code + offset);
 				break;
@@ -895,10 +1034,10 @@ static struct KVirtualCodeAPI fuelvm_api = {
 static ByteCode *IRBuilder_Lowering(FuelIRBuilder *builder)
 {
 	ByteCodeWriter writer = {{
-			0,
-			visitElement,
-			CodeWriter_visitList,
-			CodeWriter_visitValue},
+		0,
+		visitElement,
+		CodeWriter_visitList,
+		CodeWriter_visitValue},
 	};
 	ARRAY(ByteCode) Code;
 	ARRAY_init(ByteCode, &Code, 4);
@@ -945,28 +1084,35 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 }
 #endif
 
-#define OPTIMIZE 0
+static bool IRBuilder_Optimize(FuelIRBuilder *builder, Block *BB, bool Flag)
+{
+	IRBuilder_RemoveIndirectJumpBlock(builder, BB, Flag); Flag = !Flag;
+	IRBuilder_LinkBlocks(builder, BB, Flag); Flag = !Flag;
+	unsigned i;
+	for(i = 0; i < 2; i++) {
+		IRBuilder_SimplifyStdCall(builder);
+	}
+	IRBuilder_RemoveTrivialCondBranch(builder);
+	IRBuilder_LinkBlocks(builder, BB, Flag); Flag = !Flag;
+	for(i = 0; i < 2; i++) {
+		IRBuilder_SimplifyCFG(builder);
+		IRBuilder_LinkBlocks(builder, BB, Flag); Flag = !Flag;
+	}
+	return Flag;
+}
+
 ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option)
 {
 	Block *BB = Mtd->EntryBlock;
 	bool Flag = true;
 	ARRAY_init(BlockPtr, &builder->Blocks, 1);
-#if OPTIMIZE
-	IRBuilder_RemoveIndirectJumpBlock(builder, BB, Flag); Flag = !Flag;
-#endif
-	IRBuilder_LinkBlocks(builder, BB, Flag); Flag = !Flag;
+	IRBuilder_RemoveInstructionAfterBranchInst(builder);
 
-#if OPTIMIZE
-	unsigned i;
-	for(i = 0; i < 1; i++) {
-		IRBuilder_SimplifyStdCall(builder);
-	}
-	IRBuilder_RemoveTrivialCondBranch(builder);
-	IRBuilder_LinkBlocks(builder, BB, Flag); Flag = !Flag;
-	IRBuilder_SimplifyCFG(builder);
-	IRBuilder_LinkBlocks(builder, BB, Flag); Flag = !Flag;
+	Flag = IRBuilder_Optimize(builder, BB, Flag);
+	IRBuilder_FlattenICond(builder);
+	Flag = IRBuilder_Optimize(builder, BB, Flag);
+
 	IRBuilder_RemoveRedundantConstants(builder);
-#endif
 	IRBuilder_RemoveUnusedVariable(builder);
 	IRBuilder_DumpFunction(builder);
 	ByteCode *code = NULL;

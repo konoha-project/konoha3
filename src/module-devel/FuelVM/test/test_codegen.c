@@ -15,7 +15,7 @@ static SValue System_Print(void *Context, SValue *Args)
 static void f()
 {
     FuelIRBuilder builderbuf = {}, *builder = &builderbuf;
-    IRBuilder_Init(builder);
+    IRBuilder_Init(builder, 0);
     /*
      * void func() {
      *   boolean cond = true;

@@ -157,7 +157,7 @@ static KMETHOD Prototype_(KonohaContext *kctx, KonohaStack *sfp)
 		kParam *cparam = KClass_cparam(c);
 		if(KClass_isFunc(c) && cparam->psize <= KDynamicCallArgument(sfp)) {
 			KClass *thisClass = kObject_class(sfp[0].asObject), *returnType = KGetReturnType(sfp);
-			kFunc *fo = (kFunc*)kvs->FuncValue;
+			kFunc *fo = (kFunc *)kvs->FuncValue;
 			KStackSetFunc(sfp, fo);
 			KStackDynamicTypeCheck(kctx, sfp, fo->method, thisClass);
 			KStackCall(sfp);

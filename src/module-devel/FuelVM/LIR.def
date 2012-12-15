@@ -48,8 +48,8 @@ def Or(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
 	Reg[Dst].bval = Reg[LHS].bval || Reg[RHS].bval;
 	DISPATCH_NEXT(PC);
 
-def New(Dst:VMRegister, Type:TypeId) ::
-	Reg[Dst].obj = CreateObject(kctx, Type);
+def New(Dst:VMRegister, Param:uintptr_t, Type:TypeId) ::
+	Reg[Dst].obj = CreateObject(kctx, Param, Type);
 	DISPATCH_NEXT(PC);
 
 def Call(Dst:VMRegister, ParamSize:uchar, ReturnType:uchar, Mtd:kMethodPtr, uline:uintptr_t) ::
@@ -87,8 +87,12 @@ def ReturnO(Src:VMRegister) ::
 def ReturnVoid() ::
 	return Val;
 
-def CondBr(Src:VMRegister, Block:Address) ::
+def CondBrTrue(Src:VMRegister, Block:Address) ::
 	if(Reg[Src].bval) { PC = (ByteCode *)Block; DISPATCH_JUMPTO(Block); } else {}
+	DISPATCH_NEXT(PC);
+
+def CondBrFalse(Src:VMRegister, Block:Address) ::
+	if(!Reg[Src].bval) { PC = (ByteCode *)Block; DISPATCH_JUMPTO(Block); } else {}
 	DISPATCH_NEXT(PC);
 
 def Jump(Block:Address) ::
