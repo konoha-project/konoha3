@@ -377,7 +377,7 @@ static const char* FormatPackagePath(char *buf, size_t bufsiz, const char *packa
 	return NULL;
 }
 
-static KonohaPackageHandler *LoadPackageHandler(const char *packageName)
+static KPackageHandler *LoadPackageHandler(const char *packageName)
 {
 	char pathbuf[256];
 	FormatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);

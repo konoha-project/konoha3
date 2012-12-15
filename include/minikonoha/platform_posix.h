@@ -144,7 +144,7 @@ static const char* FormatPackagePath(KonohaContext *kctx, char *buf, size_t bufs
 	return HasFile(buf) ? (const char *)buf : NULL;
 }
 
-static KonohaPackageHandler *LoadPackageHandler(KonohaContext *kctx, const char *packageName)
+static KPackageHandler *LoadPackageHandler(KonohaContext *kctx, const char *packageName)
 {
 	char pathbuf[256];
 	FormatPackagePath(kctx, pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);

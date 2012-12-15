@@ -7,12 +7,12 @@
  * Add to /path/to/httpd.conf
  *
  * FIXME: Current version of mod_konoha are not able
- *        to set KonohaPackageDir.
+ *        to set KPackageDir.
  * If you want to specify package dir for konoha,
- * use 'KonohaPackageDir'.
+ * use 'KPackageDir'.
  *   LoadModule konoha_module modules/mod_konoha.so
  *   AddHandler konoha-script .k
- *   KonohaPackageDir /path/to/konoha/package
+ *   KPackageDir /path/to/konoha/package
  *
  * Then after restarting Apache via
  *   $ apachectl restart
@@ -60,7 +60,7 @@ static const char *apache_FormatPackagePath(KonohaContext *kctx, char *buf, size
 	return FormatPackagePath(kctx, buf, bufsiz, packageName, ext);
 }
 
-static KonohaPackageHandler *apache_LoadPackageHandler(KonohaContext *kctx, const char *packageName)
+static KPackageHandler *apache_LoadPackageHandler(KonohaContext *kctx, const char *packageName)
 {
 	char pathbuf[256];
 	apache_FormatPackagePath(kctx, pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
@@ -340,7 +340,7 @@ static const char *set_package_dir(cmd_parms *cmd, void *vp, const char *arg)
 
 /* konoha commands */
 static const command_rec konoha_cmds[] = {
-	AP_INIT_TAKE1("KonohaPackageDir",
+	AP_INIT_TAKE1("KPackageDir",
 			set_package_dir,
 			NULL,
 			OR_ALL,

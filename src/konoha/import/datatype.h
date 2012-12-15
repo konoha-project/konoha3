@@ -1107,7 +1107,7 @@ static void KonohaRuntime_FreeClassTable(KonohaContext *kctx)
 
 static void packageMap_Free(KonohaContext *kctx, void *p)
 {
-	KFree(p, sizeof(KonohaPackage));
+	KFree(p, sizeof(KPackage));
 }
 
 static void KonohaRuntime_Free(KonohaContext *kctx, KonohaContextVar *ctx)

@@ -292,9 +292,9 @@ typedef enum {
 
 typedef kbool_t (*ModuleLoadFunc)(KonohaFactory *, ModuleType);
 
-#define KDEFINE_PACKAGE KonohaPackageHandler
-typedef struct KonohaPackageHandlerVar KonohaPackageHandler;
-typedef KonohaPackageHandler* (*PackageLoadFunc)(void);
+#define KDEFINE_PACKAGE KPackageHandler
+typedef struct KPackageHandlerVar KPackageHandler;
+typedef KPackageHandler* (*PackageLoadFunc)(void);
 
 #define ICONV_NULL ((uintptr_t)-1)
 
@@ -533,7 +533,7 @@ struct KonohaFactory {
 
 	// file load
 	const char* (*FormatPackagePath)(KonohaContext *, char *buf, size_t bufsiz, const char *packageName, const char *ext);
-	KonohaPackageHandler* (*LoadPackageHandler)(KonohaContext *, const char *packageName);
+	KPackageHandler* (*LoadPackageHandler)(KonohaContext *, const char *packageName);
 	void (*BEFORE_LoadScript)(KonohaContext *, const char *filename);
 	int (*loadScript)(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *));
 	void (*AFTER_LoadScript)(KonohaContext *, const char *filename);
@@ -1550,7 +1550,7 @@ struct _kSystem {
 	VAR.libname = N; VAR.libversion = V;\
 } while(0)
 
-struct KonohaPackageHandlerVar {
+struct KPackageHandlerVar {
 	long  konoha_Checksum;
 	const char *name;
 	const char *version;
@@ -1560,12 +1560,12 @@ struct KonohaPackageHandlerVar {
 	kbool_t (*ExportNameSpace)    (KonohaContext *kctx, kNameSpace *, kNameSpace *, int, KTraceInfo *);
 };
 
-typedef struct KonohaPackageVar KonohaPackage;
+typedef struct KPackageVar KPackage;
 
-struct KonohaPackageVar {
+struct KPackageVar {
 	kpackageId_t                 packageId;
-	kNameSpace                  *packageNS_onGlobalConstList;
-	KonohaPackageHandler        *packageHandler;
+	kNameSpace                  *packageNS /* onGlobalConstList*/;
+	KPackageHandler        *packageHandler;
 	kfileline_t                  kickout_script;
 };
 
@@ -1676,7 +1676,7 @@ struct KonohaLibVar {
 
 	void                (*kNameSpace_FreeSugarExtension)(KonohaContext *, kNameSpaceVar *);
 
-	KonohaPackage*      (*kNameSpace_RequirePackage)(KonohaContext*, const char *, KTraceInfo *);
+	KPackage*      (*kNameSpace_RequirePackage)(KonohaContext*, const char *, KTraceInfo *);
 	kbool_t             (*kNameSpace_ImportPackage)(KonohaContext*, kNameSpace*, const char *, KTraceInfo *);
 	kbool_t             (*kNameSpace_ImportPackageSymbol)(KonohaContext *, kNameSpace *, const char *, ksymbol_t keyword, KTraceInfo *);
 
