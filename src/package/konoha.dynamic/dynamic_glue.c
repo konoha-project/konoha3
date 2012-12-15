@@ -100,7 +100,7 @@ static kbool_t dynamic_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	KClass *cDynamic = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDynamic, trace);
 	int KType_Dynamic = cDynamic->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im, _F(Dynamic_), KType_Object, KType_Dynamic, KMethodName_(""), 0,
+		_Public|_Im, _F(Dynamic_), KType_Object, KType_Dynamic, KKMethodName_(""), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

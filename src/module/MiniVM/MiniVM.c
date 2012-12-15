@@ -114,7 +114,7 @@ static void DumpOpArgument(KonohaContext *kctx, KBuffer *wb, KVirtualCodeType ty
 		kObject *o = c->o[i];
 		if(IS_Method(o)) {
 			kMethod *mtd = (kMethod *)o;
-			KLIB KBuffer_printf(kctx, wb, " %s.%s%s", KType_text(mtd->typeId), MethodName_Fmt2(mtd->mn));
+			KLIB KBuffer_printf(kctx, wb, " %s.%s%s", KType_text(mtd->typeId), KMethodName_Fmt2(mtd->mn));
 		}
 		else {
 			KLIB KBuffer_printf(kctx, wb, " (%s)", KClass_text(kObject_class(o)));

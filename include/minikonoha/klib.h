@@ -78,7 +78,7 @@ static kinline kString* KClass_GetName(KonohaContext *kctx, KClass *ct)
 	return kctx->klib->KClass_shortName(kctx, ct);
 }
 
-#define KType_text(X)   kString_text(KType_GetString(kctx,TypeAttr_Unmask(X)))
+#define KType_text(X)   kString_text(KType_GetString(kctx,KTypeAttr_Unmask(X)))
 static kinline kString* KType_GetString(KonohaContext *kctx, ktypeattr_t ty)
 {
 	DBG_ASSERT(ty < KARRAYSIZE(kctx->share->classTable.bytemax, intptr));

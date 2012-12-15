@@ -298,7 +298,7 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 		if(requestClass == NULL) {
 			requestClass = (paramType->typeId == KType_var) ? KClass_Array : KClass_p0(kctx, KClass_Array, paramType->typeId);
 		}
-		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), KClass_Array, KMethodName_("{}"), -1, KMethodMatch_NoOption);
+		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), KClass_Array, KKMethodName_("{}"), -1, KMethodMatch_NoOption);
 		DBG_ASSERT(mtd != NULL);
 		KFieldSet(arrayExpr, arrayExpr->cons->MethodItems[0], mtd);
 		KFieldSet(arrayExpr, arrayExpr->cons->ExprItems[1], SUGAR kExpr_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, kArray_size(arrayExpr->cons) - 2));
@@ -310,7 +310,7 @@ static kbool_t cstyle_defineArrayLiteral(KonohaContext *kctx, kNameSpace *ns, KT
 {
 	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_ArrayLiteral));
 	KDEFINE_METHOD MethodData[] = {
-		_Public|kMethod_Hidden, _F(Array_newList), KType_Array, KType_Array, KMethodName_("{}"), 0,
+		_Public|kMethod_Hidden, _F(Array_newList), KType_Array, KType_Array, KKMethodName_("{}"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -394,7 +394,7 @@ static KMETHOD Expression_Indexer(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		/* transform 'Value0 [ Value1 ]=> (Call Value0 get (Value1)) */
 		kTokenVar *tkN = new_(TokenVar, 0, OnGcStack);
-		tkN->resolvedSymbol= MethodName_ToGetter(0);
+		tkN->resolvedSymbol= KMethodName_ToGetter(0);
 		tkN->uline = currentToken->uline;
 		KSyntax *syn = SYN_(Stmt_ns(stmt), KSymbol_ExprMethodCall);
 		leftExpr  = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, tkN, leftExpr);
@@ -470,13 +470,13 @@ static kbool_t int_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 {
 	int FN_x = KFieldName_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(Int_opPlus), KType_int, KType_int, KMethodName_("+"), 0,
-		_Public|_Const|_Im, _F(Int_opCompl), KType_int, KType_int, KMethodName_("~"), 0,
-		_Public|_Const|_Im, _F(Int_opLSHIFT), KType_int, KType_int, KMethodName_("<<"), 1, KType_int, FN_x,
-		_Public|_Const|_Im, _F(Int_opRSHIFT), KType_int, KType_int, KMethodName_(">>"), 1, KType_int, FN_x,
-		_Public|_Const|_Im, _F(Int_opAND), KType_int, KType_int, KMethodName_("&"), 1, KType_int, FN_x,
-		_Public|_Const|_Im, _F(Int_opOR ), KType_int, KType_int, KMethodName_("|"), 1, KType_int, FN_x,
-		_Public|_Const|_Im, _F(Int_opXOR), KType_int, KType_int, KMethodName_("^"), 1, KType_int, FN_x,
+		_Public|_Const|_Im, _F(Int_opPlus), KType_int, KType_int, KKMethodName_("+"), 0,
+		_Public|_Const|_Im, _F(Int_opCompl), KType_int, KType_int, KKMethodName_("~"), 0,
+		_Public|_Const|_Im, _F(Int_opLSHIFT), KType_int, KType_int, KKMethodName_("<<"), 1, KType_int, FN_x,
+		_Public|_Const|_Im, _F(Int_opRSHIFT), KType_int, KType_int, KKMethodName_(">>"), 1, KType_int, FN_x,
+		_Public|_Const|_Im, _F(Int_opAND), KType_int, KType_int, KKMethodName_("&"), 1, KType_int, FN_x,
+		_Public|_Const|_Im, _F(Int_opOR ), KType_int, KType_int, KKMethodName_("|"), 1, KType_int, FN_x,
+		_Public|_Const|_Im, _F(Int_opXOR), KType_int, KType_int, KKMethodName_("^"), 1, KType_int, FN_x,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -755,8 +755,8 @@ static KMETHOD Object_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t null_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im|_Final|_Const, _F(Object_isNull),   KType_boolean, KType_Object, KMethodName_("isNull"), 0,
-		_Public|_Im|_Final|_Const, _F(Object_isNotNull), KType_boolean, KType_Object, KMethodName_("isNotNull"), 0,
+		_Public|_Im|_Final|_Const, _F(Object_isNull),   KType_boolean, KType_Object, KKMethodName_("isNull"), 0,
+		_Public|_Im|_Final|_Const, _F(Object_isNotNull), KType_boolean, KType_Object, KKMethodName_("isNotNull"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

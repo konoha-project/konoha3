@@ -72,13 +72,13 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 					KClass *realType = KClass_p0(kctx, foundClass, classT0->typeId);
 					KSyntax *syn;// = (realType->baseTypeId != KType_Array) ? SYN_(ns, KSymbol_ExprMethodCall) : newsyn;
 					syn = newsyn;
-					newToken->resolvedSymbol = (realType->baseTypeId != KType_Array) ? MN_new : KMethodName_("newArray");
+					newToken->resolvedSymbol = (realType->baseTypeId != KType_Array) ? MN_new : KKMethodName_("newArray");
 					expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, newToken,
 							NewExpr(kctx, syn, tokenList->TokenVarItems[beginIdx+1], realType->typeId));
 				} else {
 					/* new Type1[] => Array<Type1>.newList */
 					KClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
-					newToken->resolvedSymbol = KMethodName_("newArray");
+					newToken->resolvedSymbol = KKMethodName_("newArray");
 					expr = SUGAR new_UntypedCallStyleExpr(kctx, newsyn, 2, newToken,
 							NewExpr(kctx, newsyn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));
 				}

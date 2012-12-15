@@ -470,7 +470,7 @@ static kbool_t kExpr_IsGetter(kExpr *expr)
 	if(expr->build == TEXPR_CALL) {  // check getter and transform to setter
 		kMethod *mtd = expr->cons->MethodItems[0];
 		DBG_ASSERT(IS_Method(mtd));
-		if(MethodName_IsGetter(mtd->mn)) return true;
+		if(KMethodName_IsGetter(mtd->mn)) return true;
 	}
 	return false;
 }
@@ -478,7 +478,7 @@ static kbool_t kExpr_IsGetter(kExpr *expr)
 static kExpr* kStmtExpr_ToSetter(KonohaContext *kctx, kStmt *stmt, kExprVar *expr, kGamma *gma, kExpr *rightHandExpr, KClass *reqClass)
 {
 	kMethod *mtd = expr->cons->MethodItems[0];
-	DBG_ASSERT(MethodName_IsGetter(mtd->mn));
+	DBG_ASSERT(KMethodName_IsGetter(mtd->mn));
 	kNameSpace *ns = Stmt_ns(stmt);  // leftHandExpr = rightHandExpr
 	KClass *c = KClass_(mtd->typeId);
 	kParam *pa = kMethod_GetParam(mtd);
@@ -489,11 +489,11 @@ static kExpr* kStmtExpr_ToSetter(KonohaContext *kctx, kStmt *stmt, kExprVar *exp
 	}
 	p[pa->psize].attrTypeId = expr->attrTypeId;
 	kparamId_t paramdom = KLIB Kparamdom(kctx, psize, p);
-	kMethod *foundMethod = kNameSpace_GetMethodBySignatureNULL(kctx, ns, c, MethodName_ToSetter(mtd->mn), paramdom, psize, p);
+	kMethod *foundMethod = kNameSpace_GetMethodBySignatureNULL(kctx, ns, c, KMethodName_ToSetter(mtd->mn), paramdom, psize, p);
 	if(foundMethod == NULL) {
 		p[pa->psize].attrTypeId = pa->rtype;   /* transform "T1 A.get(T2)" to "void A.set(T2, T1)" */
 		paramdom = KLIB Kparamdom(kctx, psize, p);
-		foundMethod = kNameSpace_GetMethodBySignatureNULL(kctx, ns, c, MethodName_ToSetter(mtd->mn), paramdom, psize, p);
+		foundMethod = kNameSpace_GetMethodBySignatureNULL(kctx, ns, c, KMethodName_ToSetter(mtd->mn), paramdom, psize, p);
 	}
 	if(foundMethod != NULL) {
 		KFieldSet(expr->cons, expr->cons->MethodItems[0], foundMethod);
@@ -511,7 +511,7 @@ static KMETHOD TypeCheck_Assign(KonohaContext *kctx, KonohaStack *sfp)
 	kExpr *returnExpr = K_NULLEXPR;
 	if(rightHandExpr != K_NULLEXPR && leftHandExpr != K_NULLEXPR) {
 		if(leftHandExpr->build == TEXPR_LOCAL || leftHandExpr->build == TEXPR_FIELD || leftHandExpr->build == TEXPR_STACKTOP) {
-			if(TypeAttr_Is(ReadOnly, leftHandExpr->attrTypeId)) {
+			if(KTypeAttr_Is(ReadOnly, leftHandExpr->attrTypeId)) {
 				returnExpr = SUGAR kStmt_Message2(kctx, stmt, (kToken *)expr, ErrTag, "read only: %s", KToken_t(leftHandExpr->termToken));
 			}
 			else {
@@ -649,7 +649,7 @@ static kExpr* kStmt_TypeCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExp
 	if(symbol != KSymbol_Noname) {
 		KKeyValue *kv = kNameSpace_GetConstNULL(kctx, ns, symbol);
 		if(kv != NULL) {
-			if(TypeAttr_Is(Boxed, kv->attrTypeId)) {
+			if(KTypeAttr_Is(Boxed, kv->attrTypeId)) {
 				SUGAR kExpr_SetConstValue(kctx, expr, NULL, kv->ObjectValue);
 			}
 			else {
@@ -680,7 +680,7 @@ static KClass* ResolveTypeVariable(KonohaContext *kctx, KClass *varType, KClass 
 static int TypeCheckPolicy_(ktypeattr_t attrtype)
 {
 	int pol = 0;
-	if(TypeAttr_Is(Coercion, attrtype)) {
+	if(KTypeAttr_Is(Coercion, attrtype)) {
 		pol = pol | TypeCheckPolicy_COERCION;
 	}
 	return pol;
@@ -873,7 +873,7 @@ static kMethod* kExpr_LookupFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kE
 	}
 	{
 		KKeyValue* kvs = kNameSpace_GetConstNULL(kctx, ns, funcName);
-		if(kvs != NULL && TypeAttr_Unmask(kvs->attrTypeId) == VirtualType_StaticMethod) {
+		if(kvs != NULL && KTypeAttr_Unmask(kvs->attrTypeId) == VirtualType_StaticMethod) {
 			KClass *c = KClass_((ktypeattr_t)kvs->unboxValue);
 			ksymbol_t alias = (ksymbol_t)(kvs->unboxValue >> (sizeof(ktypeattr_t) * 8));
 			kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, c, alias, paramsize, KMethodMatch_NoOption);
@@ -947,7 +947,7 @@ static kExpr *kExpr_TypeCheckFuncParams(KonohaContext *kctx, kStmt *stmt, kExprV
 			return texpr;
 		}
 	}
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), KClass_Func, KMethodName_("invoke"), -1, KMethodMatch_NoOption);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), KClass_Func, KKMethodName_("invoke"), -1, KMethodMatch_NoOption);
 	DBG_ASSERT(mtd != NULL);
 	KFieldSet(expr->cons, expr->cons->ExprItems[1], expr->cons->ExprItems[0]);
 	return TypeMethodCallExpr(kctx, expr, mtd, KClass_(thisClass->p0));
@@ -1075,8 +1075,8 @@ static kbool_t kStmt_DeclType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kty
 			// this is neccesarry to avoid 'int a = a + 1;';
 			return false;
 		}
-		if(TypeAttr_Unmask(attrTypeId) == KType_var) {
-			ktypeattr_t attr = TypeAttr_Attr(attrTypeId);
+		if(KTypeAttr_Unmask(attrTypeId) == KType_var) {
+			ktypeattr_t attr = KTypeAttr_Attr(attrTypeId);
 			kToken *termToken = kExpr_at(declExpr, 1)->termToken;
 			attrTypeId = kExpr_at(declExpr, 2)->attrTypeId | attr;
 			kStmtToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", KSymbol_Fmt2(termToken->resolvedSymbol), KType_text(attrTypeId));
@@ -1125,7 +1125,7 @@ static KMETHOD KMethodFunc_LazyCompilation(KonohaContext *kctx, KonohaStack *sfp
 	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 	kString *text = mtd->SourceToken->text;
 	kfileline_t uline = mtd->SourceToken->uline;
-	DBG_P("<<lazy compilation>>: %s.%s%s", KType_text(mtd->typeId), MethodName_Fmt2(mtd->mn));
+	DBG_P("<<lazy compilation>>: %s.%s%s", KType_text(mtd->typeId), KMethodName_Fmt2(mtd->mn));
 	kMethod_Compile(kctx, mtd, NULL, mtd->LazyCompileNameSpace, text, uline, DefaultCompileOption/*HatedLazyCompile*/);
 	((KonohaContextVar *)kctx)->esp = esp;
 	mtd->invokeKMethodFunc(kctx, sfp); // call again;
@@ -1250,7 +1250,7 @@ static ksymbol_t kStmt_GetMethodSymbol(KonohaContext *kctx, kStmt *stmt, kNameSp
 static KMETHOD Statement_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
-	static KonohaFlagSymbolData MethodDeclFlag[] = {
+	static KFlagSymbolData MethodDeclFlag[] = {
 		{kMethod_Public}, {kMethod_Const}, {kMethod_Static},
 		{kMethod_Virtual}, {kMethod_Final}, {kMethod_Override},
 		{kMethod_Restricted},

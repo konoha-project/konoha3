@@ -92,7 +92,7 @@ static kbool_t openssl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	KClass *tbls[2];
 	static KDEFINE_CLASS Def = {
 			.structname = "",
-			.typeId = TypeAttr_NewId,
+			.typeId = KTypeAttr_NewId,
 			.init = RawPtr_Init,
 			.free = RawPtr_Free,
 	};
@@ -106,12 +106,12 @@ static kbool_t openssl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 
 	int FN_x = KFieldName_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_P, _F(kMD5_Init),   KType_SHA1,   KType_MD5, KMethodName_("new"), 0,
-		_P, _F(kMD5_Update), KType_int,   KType_MD5, KMethodName_("update"), 1, KType_String, FN_x,
-		_P, _F(kMD5_Final),  KType_String, KType_MD5, KMethodName_("final"), 0,
-		_P, _F(kSHA1_Init),   KType_SHA1,   KType_SHA1, KMethodName_("new"), 0,
-		_P, _F(kSHA1_Update), KType_int,   KType_SHA1, KMethodName_("update"), 1, KType_String, FN_x,
-		_P, _F(kSHA1_Final),  KType_String, KType_SHA1, KMethodName_("final"), 0,
+		_P, _F(kMD5_Init),   KType_SHA1,   KType_MD5, KKMethodName_("new"), 0,
+		_P, _F(kMD5_Update), KType_int,   KType_MD5, KKMethodName_("update"), 1, KType_String, FN_x,
+		_P, _F(kMD5_Final),  KType_String, KType_MD5, KKMethodName_("final"), 0,
+		_P, _F(kSHA1_Init),   KType_SHA1,   KType_SHA1, KKMethodName_("new"), 0,
+		_P, _F(kSHA1_Update), KType_int,   KType_SHA1, KKMethodName_("update"), 1, KType_String, FN_x,
+		_P, _F(kSHA1_Final),  KType_String, KType_SHA1, KKMethodName_("final"), 0,
 
 		DEND,
 	};

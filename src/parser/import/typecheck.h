@@ -132,7 +132,7 @@ static kExpr *kExpr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGa
 {
 	kExpr *texpr = expr;
 	if(kStmt_isERR(stmt)) texpr = K_NULLEXPR;
-	if(TypeAttr_Unmask(expr->attrTypeId) == KType_var && expr != K_NULLEXPR) {
+	if(KTypeAttr_Unmask(expr->attrTypeId) == KType_var && expr != K_NULLEXPR) {
 		if(!IS_Expr(expr)) {
 			expr = new_ConstValueExpr(kctx, NULL, UPCAST(expr));
 		}

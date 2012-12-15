@@ -148,7 +148,7 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 	KSyntaxVar *syn = (KSyntaxVar *) SYN_(ns, KSymbol_ExprMethodCall);
 	kTokenVar *callToken = new_(TokenVar, 0, OnGcStack);
 	kExpr *callExpr = new_ConstValueExpr(kctx, KClass_String, UPCAST(cmd));
-	callToken->resolvedSymbol = KMethodName_("call");
+	callToken->resolvedSymbol = KKMethodName_("call");
 	const char cname[] = "Subproc";
 	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3, callToken,
 			new_UnboxConstValueExpr(kctx, KLIB kNameSpace_GetClassByFullName(kctx, ns, cname, strlen(cname), NULL)->typeId, 0), callExpr);

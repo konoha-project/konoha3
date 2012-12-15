@@ -212,45 +212,45 @@ static kbool_t math_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	static KDEFINE_CLASS MathDef = {0};
 	MathDef.cflag = KClassFlag_Singleton|KClassFlag_Final;
 	MathDef.structname = "Math"; /*structname*/
-	MathDef.typeId = TypeAttr_NewId; /*cid*/
+	MathDef.typeId = KTypeAttr_NewId; /*cid*/
 
 	KClass *cMath = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MathDef, trace);
 	int FN_x = KFieldName_("x");
 	int FN_y = KFieldName_("y");
 	KDEFINE_METHOD MethodData[] = {
-			_Public|_Const|_Static, _F(Math_abs), KType_int, KType_Math, KMethodName_("abs"), 1, KType_int, FN_x,
-			_Public|_Const|_Static, _F(Math_fabs), KType_float, KType_Math, KMethodName_("fabs"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_pow), KType_float, KType_Math, KMethodName_("pow"), 2, KType_float, FN_x, KType_float, FN_y,
-			_Public|_Const|_Static, _F(Math_ldexp), KType_float, KType_Math, KMethodName_("ldexp"), 2, KType_float, FN_x, KType_int, FN_y,
-			_Public|_Const|_Static, _F(Math_modf), KType_float, KType_Math, KMethodName_("modf"), 2, KType_float, FN_x, KType_float, FN_y,
-			_Public|_Const|_Static, _F(Math_frexp), KType_float, KType_Math, KMethodName_("frexp"), 2, KType_float, FN_x, KType_int, FN_y,
-			_Public|_Const|_Static, _F(Math_fmod), KType_float, KType_Math, KMethodName_("fmod"), 2, KType_float, FN_x, KType_float, FN_y,
-			_Public|_Const|_Static, _F(Math_ceil), KType_float, KType_Math, KMethodName_("ceil"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_abs), KType_int, KType_Math, KKMethodName_("abs"), 1, KType_int, FN_x,
+			_Public|_Const|_Static, _F(Math_fabs), KType_float, KType_Math, KKMethodName_("fabs"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_pow), KType_float, KType_Math, KKMethodName_("pow"), 2, KType_float, FN_x, KType_float, FN_y,
+			_Public|_Const|_Static, _F(Math_ldexp), KType_float, KType_Math, KKMethodName_("ldexp"), 2, KType_float, FN_x, KType_int, FN_y,
+			_Public|_Const|_Static, _F(Math_modf), KType_float, KType_Math, KKMethodName_("modf"), 2, KType_float, FN_x, KType_float, FN_y,
+			_Public|_Const|_Static, _F(Math_frexp), KType_float, KType_Math, KKMethodName_("frexp"), 2, KType_float, FN_x, KType_int, FN_y,
+			_Public|_Const|_Static, _F(Math_fmod), KType_float, KType_Math, KKMethodName_("fmod"), 2, KType_float, FN_x, KType_float, FN_y,
+			_Public|_Const|_Static, _F(Math_ceil), KType_float, KType_Math, KKMethodName_("ceil"), 1, KType_float, FN_x,
 #ifdef K_USING_WIN32_
-			_Public, _F(Math_round), KType_float, KType_Math, KMethodName_("round"), 1, KType_float, FN_x,
-			_Public, _F(Math_nearByInt), KType_float, KType_Math, KMethodName_("nearByInt"), 1, KType_float, FN_x,
+			_Public, _F(Math_round), KType_float, KType_Math, KKMethodName_("round"), 1, KType_float, FN_x,
+			_Public, _F(Math_nearByInt), KType_float, KType_Math, KKMethodName_("nearByInt"), 1, KType_float, FN_x,
 #endif
-			_Public|_Const|_Static, _F(Math_floor), KType_float, KType_Math, KMethodName_("floor"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_sqrt), KType_float, KType_Math, KMethodName_("sqrt"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_exp), KType_float, KType_Math, KMethodName_("exp"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_log10), KType_float, KType_Math, KMethodName_("log10"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_log), KType_float, KType_Math, KMethodName_("log"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_sin), KType_float, KType_Math, KMethodName_("sin"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_cos), KType_float, KType_Math, KMethodName_("cos"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_tan), KType_float, KType_Math, KMethodName_("tan"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_asin), KType_float, KType_Math, KMethodName_("asin"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_acos), KType_float, KType_Math, KMethodName_("acos"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_atan), KType_float, KType_Math, KMethodName_("atan"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_atan2), KType_float, KType_Math, KMethodName_("atan2"), 2, KType_float, FN_x, KType_float, FN_y,
-			_Public|_Const|_Static, _F(Math_sinh), KType_float, KType_Math, KMethodName_("sinh"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_cosh), KType_float, KType_Math, KMethodName_("cosh"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_tanh), KType_float, KType_Math, KMethodName_("tanh"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_floor), KType_float, KType_Math, KKMethodName_("floor"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_sqrt), KType_float, KType_Math, KKMethodName_("sqrt"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_exp), KType_float, KType_Math, KKMethodName_("exp"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_log10), KType_float, KType_Math, KKMethodName_("log10"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_log), KType_float, KType_Math, KKMethodName_("log"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_sin), KType_float, KType_Math, KKMethodName_("sin"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_cos), KType_float, KType_Math, KKMethodName_("cos"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_tan), KType_float, KType_Math, KKMethodName_("tan"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_asin), KType_float, KType_Math, KKMethodName_("asin"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_acos), KType_float, KType_Math, KKMethodName_("acos"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_atan), KType_float, KType_Math, KKMethodName_("atan"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_atan2), KType_float, KType_Math, KKMethodName_("atan2"), 2, KType_float, FN_x, KType_float, FN_y,
+			_Public|_Const|_Static, _F(Math_sinh), KType_float, KType_Math, KKMethodName_("sinh"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_cosh), KType_float, KType_Math, KKMethodName_("cosh"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_tanh), KType_float, KType_Math, KKMethodName_("tanh"), 1, KType_float, FN_x,
 #if defined(K_USING_WIN32_)
-			_Public|_Const|_Static, _F(Math_asinh), KType_float, KType_Math, KMethodName_("asinh"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_acosh), KType_float, KType_Math, KMethodName_("acosh"), 1, KType_float, FN_x,
-			_Public|_Const|_Static, _F(Math_atanh), KType_float, KType_Math, KMethodName_("atanh"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_asinh), KType_float, KType_Math, KKMethodName_("asinh"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_acosh), KType_float, KType_Math, KKMethodName_("acosh"), 1, KType_float, FN_x,
+			_Public|_Const|_Static, _F(Math_atanh), KType_float, KType_Math, KKMethodName_("atanh"), 1, KType_float, FN_x,
 #endif
-			_Public, _F(Math_random), KType_float, KType_Math, KMethodName_("random"), 0,
+			_Public, _F(Math_random), KType_float, KType_Math, KKMethodName_("random"), 0,
 			DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

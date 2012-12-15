@@ -314,7 +314,7 @@ KLIBDECL void KDict_Reftrace(KonohaContext *kctx, KDict *dict, KObjectVisitor *v
 {
 	size_t i, size = KDict_size(dict);
 	for(i = 0; i < size; i++) {
-		if(TypeAttr_Is(Boxed, dict->data.keyValueItems[i].attrTypeId)) {
+		if(KTypeAttr_Is(Boxed, dict->data.keyValueItems[i].attrTypeId)) {
 			KRefTrace(dict->data.keyValueItems[i].ObjectValue);
 		}
 	}
@@ -536,11 +536,11 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 		if(ch1 == 'e' && name[2] == 't') {
 			if(ch0 == 'g' || ch0 == 'G') {
 				len -= 3; name += 3;
-				mask = MethodNameAttr_Getter;
+				mask = KMethodNameAttr_Getter;
 			}
 			else if(ch0 == 's' || ch0 == 'S') {
 				len -= 3; name += 3;
-				mask = MethodNameAttr_Setter;
+				mask = KMethodNameAttr_Setter;
 			}
 		}
 		else if(ch0 == '@') {
@@ -625,7 +625,7 @@ static kObject* kObjectProto_GetObject(KonohaContext *kctx, kAbstractObject *o, 
 static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *ao, ksymbol_t key, ktypeattr_t ty, kAbstractObject *val)
 {
 	kObjectVar *o = (kObjectVar *)ao;
-	KKeyValue kvs = {key, ty | TypeAttr_Boxed, {(uintptr_t)val}};
+	KKeyValue kvs = {key, ty | KTypeAttr_Boxed, {(uintptr_t)val}};
 	if(KGetProtoMap(o) == NULL) {
 		KSetProtoMap(o, new_KProtoMap(kctx));
 	}
@@ -684,7 +684,7 @@ static void kObjectProto_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisito
 		protomap_iterator itr = {0};
 		KKeyValue *d;
 		while((d = protomap_next((Kprotomap_t *)o->h.prototypePtr, &itr)) != NULL) {
-			if(TypeAttr_Is(Boxed, d->attrTypeId)) {
+			if(KTypeAttr_Is(Boxed, d->attrTypeId)) {
 				KRefTrace(d->ObjectValue);
 			}
 		}
@@ -708,7 +708,7 @@ static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *o, ksym
 {
 	kObjectVar *v = (kObjectVar *)o;
 	if(ty == 0) ty = kObject_class(v)->typeId;
-	protomap_set((Kprotomap_t **)&v->h.prototypePtr, key, ty | TypeAttr_Boxed, (void *)val);
+	protomap_set((Kprotomap_t **)&v->h.prototypePtr, key, ty | KTypeAttr_Boxed, (void *)val);
 	PLATAPI WriteBarrier(kctx, v);
 }
 
@@ -756,7 +756,7 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 		KLIB KBuffer_Write(kctx, w->wb, ", ", 2);
 	}
 	KLIB KBuffer_printf(kctx, w->wb, "%s%s: (%s)", KSymbol_Fmt2(key), KType_text(d->attrTypeId));
-	if(TypeAttr_Is(Boxed, d->attrTypeId)) {
+	if(KTypeAttr_Is(Boxed, d->attrTypeId)) {
 		KUnsafeFieldSet(w->values[w->pos].asObject, d->ObjectValue);
 	}
 	else {

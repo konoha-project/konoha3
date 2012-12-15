@@ -451,27 +451,27 @@ static KMETHOD File_scriptPath(KonohaContext *kctx, KonohaStack *sfp)
 static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static|_Const, _F(File_scriptPath), KType_String, KType_File, KMethodName_("scriptPath"), 1, KType_String, KFieldName_("filename"),
-		_Public, _F(File_setWriterCharset), KType_void, KType_File, KMethodName_("setWriterCharset"), 1, KType_String, KFieldName_("charset"),
-		_Public, _F(File_setReaderCharset), KType_void, KType_File, KMethodName_("setReaderCharset"), 1, KType_String, KFieldName_("charset"),
+		_Public|_Static|_Const, _F(File_scriptPath), KType_String, KType_File, KKMethodName_("scriptPath"), 1, KType_String, KFieldName_("filename"),
+		_Public, _F(File_setWriterCharset), KType_void, KType_File, KKMethodName_("setWriterCharset"), 1, KType_String, KFieldName_("charset"),
+		_Public, _F(File_setReaderCharset), KType_void, KType_File, KKMethodName_("setReaderCharset"), 1, KType_String, KFieldName_("charset"),
 
-		_Public, _F(File_new), KType_File, KType_File, KMethodName_("new"), 2, KType_String, KFieldName_("filename"), KType_String, KFieldName_("mode"),
-		_Public, _F(File_close), KType_void, KType_File, KMethodName_("close"), 0,
-		_Public, _F(File_getc), KType_int, KType_File, KMethodName_("getc"), 0,
-		_Public, _F(File_putc), KType_void, KType_File, KMethodName_("putc"), 1, KType_int, KFieldName_("char"),
-		_Public, _F(File_readLine), KType_String, KType_File, KMethodName_("readLine"), 0,
-		_Public, _F(File_print), KType_String, KType_File, KMethodName_("print"), 1, KType_String | TypeAttr_Coercion, KFieldName_("str"),
-		_Public, _F(File_println), KType_void, KType_File, KMethodName_("println"), 1, KType_String | TypeAttr_Coercion, KFieldName_("str"),
-		_Public, _F(File_println0), KType_void, KType_File, KMethodName_("println"), 0,
-		_Public, _F(File_flush), KType_void, KType_File, KMethodName_("flush"), 0,
+		_Public, _F(File_new), KType_File, KType_File, KKMethodName_("new"), 2, KType_String, KFieldName_("filename"), KType_String, KFieldName_("mode"),
+		_Public, _F(File_close), KType_void, KType_File, KKMethodName_("close"), 0,
+		_Public, _F(File_getc), KType_int, KType_File, KKMethodName_("getc"), 0,
+		_Public, _F(File_putc), KType_void, KType_File, KKMethodName_("putc"), 1, KType_int, KFieldName_("char"),
+		_Public, _F(File_readLine), KType_String, KType_File, KKMethodName_("readLine"), 0,
+		_Public, _F(File_print), KType_String, KType_File, KKMethodName_("print"), 1, KType_String | KTypeAttr_Coercion, KFieldName_("str"),
+		_Public, _F(File_println), KType_void, KType_File, KKMethodName_("println"), 1, KType_String | KTypeAttr_Coercion, KFieldName_("str"),
+		_Public, _F(File_println0), KType_void, KType_File, KKMethodName_("println"), 0,
+		_Public, _F(File_flush), KType_void, KType_File, KKMethodName_("flush"), 0,
 
-		_Public|_Const|_Im, _F(FILE_isatty), KType_boolean, KType_File, KMethodName_("isatty"), 0,
-		_Public|_Const|_Im, _F(FILE_getfileno), KType_int, KType_File, KMethodName_("getfileno"), 0,
+		_Public|_Const|_Im, _F(FILE_isatty), KType_boolean, KType_File, KKMethodName_("isatty"), 0,
+		_Public|_Const|_Im, _F(FILE_getfileno), KType_int, KType_File, KKMethodName_("getfileno"), 0,
 
-		_Public, _F(File_read),   KType_int, KType_File, KMethodName_("read"), 1, KType_Bytes, KFieldName_("buf"),
-		_Public, _F(File_read3),  KType_int, KType_File, KMethodName_("read"), 3, KType_Bytes, KFieldName_("buf"), KType_int, KFieldName_("offset"), KType_int, KFieldName_("len"),
-		_Public, _F(File_Write),  KType_int, KType_File, KMethodName_("write"), 1, KType_Bytes, KFieldName_("buf"),
-		_Public, _F(File_Write3), KType_int, KType_File, KMethodName_("write"), 3, KType_Bytes, KFieldName_("buf"), KType_int, KFieldName_("offset"), KType_int, KFieldName_("len"),
+		_Public, _F(File_read),   KType_int, KType_File, KKMethodName_("read"), 1, KType_Bytes, KFieldName_("buf"),
+		_Public, _F(File_read3),  KType_int, KType_File, KKMethodName_("read"), 3, KType_Bytes, KFieldName_("buf"), KType_int, KFieldName_("offset"), KType_int, KFieldName_("len"),
+		_Public, _F(File_Write),  KType_int, KType_File, KKMethodName_("write"), 1, KType_Bytes, KFieldName_("buf"),
+		_Public, _F(File_Write3), KType_int, KType_File, KKMethodName_("write"), 3, KType_Bytes, KFieldName_("buf"), KType_int, KFieldName_("offset"), KType_int, KFieldName_("len"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -527,7 +527,7 @@ static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	if(KClass_File == NULL) {
 		KDEFINE_CLASS defFile = {
 			.structname = "File",
-			.typeId = TypeAttr_NewId,
+			.typeId = KTypeAttr_NewId,
 			.cstruct_size = sizeof(kFile),
 			.cflag = KClassFlag_Final,
 			.init  = kFile_Init,

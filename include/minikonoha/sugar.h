@@ -608,7 +608,7 @@ typedef struct {
 	void        (*kStmt_AddParsedObject)(KonohaContext *, kStmt *, ksymbol_t, kObject *o);
 	int         (*kNameSpace_FindEndOfStatement)(KonohaContext *, kNameSpace *, kArray *, int, int);
 
-	uintptr_t   (*kStmt_ParseFlag)(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag);
+	uintptr_t   (*kStmt_ParseFlag)(KonohaContext *kctx, kStmt *stmt, KFlagSymbolData *flagData, uintptr_t flag);
 	kToken*     (*kStmt_GetToken)(KonohaContext *, kStmt *, ksymbol_t kw, kToken *def);
 	kExpr*      (*kStmt_GetExpr)(KonohaContext *, kStmt *, ksymbol_t kw, kExpr *def);
 	const char* (*kStmt_GetText)(KonohaContext *, kStmt *, ksymbol_t kw, const char *def);

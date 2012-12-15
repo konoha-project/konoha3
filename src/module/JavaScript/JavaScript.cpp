@@ -106,23 +106,23 @@ static kMethod* CallExpr_getMethod(kExpr *expr)
 	return expr->cons->MethodItems[0];
 }
 
-#define MN_opNOT  KMethodName_("!")
-#define MN_opADD  KMethodName_("+")
-#define MN_opSUB  KMethodName_("-")
-#define MN_opMUL  KMethodName_("*")
-#define MN_opDIV  KMethodName_("/")
-#define MN_opMOD  KMethodName_("%")
-#define MN_opEQ   KMethodName_("==")
-#define MN_opNEQ  KMethodName_("!=")
-#define MN_opLT   KMethodName_("<")
-#define MN_opLTE  KMethodName_("<=")
-#define MN_opGT   KMethodName_(">")
-#define MN_opGTE  KMethodName_(">=")
-#define MN_opLAND KMethodName_("&")
-#define MN_opLOR  KMethodName_("|")
-#define MN_opLXOR KMethodName_("^")
-#define MN_opLSFT KMethodName_("<<")
-#define MN_opRSFT KMethodName_(">>")
+#define MN_opNOT  KKMethodName_("!")
+#define MN_opADD  KKMethodName_("+")
+#define MN_opSUB  KKMethodName_("-")
+#define MN_opMUL  KKMethodName_("*")
+#define MN_opDIV  KKMethodName_("/")
+#define MN_opMOD  KKMethodName_("%")
+#define MN_opEQ   KKMethodName_("==")
+#define MN_opNEQ  KKMethodName_("!=")
+#define MN_opLT   KKMethodName_("<")
+#define MN_opLTE  KKMethodName_("<=")
+#define MN_opGT   KKMethodName_(">")
+#define MN_opGTE  KKMethodName_(">=")
+#define MN_opLAND KKMethodName_("&")
+#define MN_opLOR  KKMethodName_("|")
+#define MN_opLXOR KKMethodName_("^")
+#define MN_opLSFT KKMethodName_("<<")
+#define MN_opRSFT KKMethodName_(">>")
 
 enum kSymbolPrefix{
 	kSymbolPrefix_NONE,
@@ -186,7 +186,7 @@ static void JSBuilder_VisitExpr(KonohaContext *kctx, KBuilder *builder, kStmt *s
 	JSBuilder_EmitString(kctx, builder, suffix, "", "");
 }
 
-static int MethodName_isBinaryOperator(KonohaContext *kctx, kmethodn_t mn)
+static int KMethodName_isBinaryOperator(KonohaContext *kctx, kmethodn_t mn)
 {
 	if(mn == MN_opADD ) return 1;
 	if(mn == MN_opSUB ) return 1;
@@ -207,7 +207,7 @@ static int MethodName_isBinaryOperator(KonohaContext *kctx, kmethodn_t mn)
 	return 0;
 }
 
-static int MethodName_isUnaryOperator(KonohaContext *kctx, kmethodn_t mn)
+static int KMethodName_isUnaryOperator(KonohaContext *kctx, kmethodn_t mn)
 {
 	if(mn == MN_opSUB) return 1;
 	if(mn == MN_opNOT) return 1;
@@ -397,7 +397,7 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 	kbool_t isGlobal = (KClass_(receiver->attrTypeId) == globalObjectClass || receiver->attrTypeId == KType_NameSpace);
 	const char *methodName = KSymbol_text(mtd->mn);
 	if(receiver->attrTypeId == KType_NameSpace) {
-		if(mtd->mn == KMethodName_("import")) {
+		if(mtd->mn == KKMethodName_("import")) {
 			kString *packageNameString = (kString *)kExpr_at(expr, 2)->objectConstValue;
 			kNameSpace *ns = (kNameSpace *)receiver->objectConstValue;
 			JSBuilder_importPackage(kctx, ns, packageNameString, expr->termToken->uline);
@@ -464,12 +464,12 @@ static void JSBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStm
 	kMethod *mtd = CallExpr_getMethod(expr);
 	kbool_t isArray = false;
 
-	if(kArray_size(expr->cons) == 2 && MethodName_isUnaryOperator(kctx, mtd->mn)) {
-		JSBuilder_EmitString(kctx, builder, MethodName_Fmt2(mtd->mn), "(");
+	if(kArray_size(expr->cons) == 2 && KMethodName_isUnaryOperator(kctx, mtd->mn)) {
+		JSBuilder_EmitString(kctx, builder, KMethodName_Fmt2(mtd->mn), "(");
 		SUGAR VisitExpr(kctx, builder, stmt, kExpr_at(expr, 1));
 		JSBuilder_EmitString(kctx, builder, ")", "", "");
 	}
-	else if(MethodName_isBinaryOperator(kctx, mtd->mn)) {
+	else if(KMethodName_isBinaryOperator(kctx, mtd->mn)) {
 		JSBuilder_VisitExprParams(kctx, builder, stmt, expr, 1, KSymbol_text(mtd->mn),"(", ")");
 	}
 	else{
@@ -576,15 +576,15 @@ static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, k
 	kParam *params = kMethod_GetParam(mtd);
 	unsigned i;
 	if(mtd->typeId == KType_NameSpace) {
-		KLIB KBuffer_printf(kctx, &wb, "var %s%s = function(", MethodName_Fmt2(mtd->mn));
+		KLIB KBuffer_printf(kctx, &wb, "var %s%s = function(", KMethodName_Fmt2(mtd->mn));
 	}else if(strcmp(KSymbol_text(mtd->mn), "new") == 0) {
 		KLIB KBuffer_printf(kctx, &wb, "function %s(", KClass_text(kclass));
 	}else{
 		compileAllDefinedMethods(kctx);
 		if(kMethod_Is(Static, mtd)) {
-			KLIB KBuffer_printf(kctx, &wb, "%s.%s%s = function(", KClass_text(KClass_(mtd->typeId)), MethodName_Fmt2(mtd->mn));
+			KLIB KBuffer_printf(kctx, &wb, "%s.%s%s = function(", KClass_text(KClass_(mtd->typeId)), KMethodName_Fmt2(mtd->mn));
 		}else{
-			KLIB KBuffer_printf(kctx, &wb, "%s.prototype.%s%s = function(", KClass_text(KClass_(mtd->typeId)), MethodName_Fmt2(mtd->mn));
+			KLIB KBuffer_printf(kctx, &wb, "%s.prototype.%s%s = function(", KClass_text(KClass_(mtd->typeId)), KMethodName_Fmt2(mtd->mn));
 		}
 	}
 	for(i = 0; i < params->psize; ++i) {

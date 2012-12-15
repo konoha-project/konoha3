@@ -48,7 +48,7 @@ static KMETHOD NameSpace_AllowImplicitField(KonohaContext *kctx, KonohaStack *sf
 static void class_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Ignored, _F(NameSpace_AllowImplicitField), KType_void, KType_NameSpace, KMethodName_("AllowImplicitField"), 1, KType_boolean, KFieldName_("allow"),
+		_Public|_Const|_Ignored, _F(NameSpace_AllowImplicitField), KType_void, KType_NameSpace, KKMethodName_("AllowImplicitField"), 1, KType_boolean, KFieldName_("allow"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -120,7 +120,7 @@ static void ObjectField_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor
 	KClassField *fieldItems = c->fieldItems;
 	size_t i, fieldsize = c->fieldsize;
 	for (i = 0; i < fieldsize; i++) {
-		if(TypeAttr_Is(Boxed, fieldItems[i].attrTypeId)) {
+		if(KTypeAttr_Is(Boxed, fieldItems[i].attrTypeId)) {
 			KRefTraceNullable(o->fieldObjectItems[i]);   // FIXME:
 		}
 	}
@@ -128,7 +128,7 @@ static void ObjectField_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor
 
 static kshortflag_t kStmt_ParseClassFlag(KonohaContext *kctx, kStmt *stmt, kshortflag_t cflag)
 {
-	static KonohaFlagSymbolData ClassDeclFlag[] = {
+	static KFlagSymbolData ClassDeclFlag[] = {
 		{KClassFlag_Private}, {KClassFlag_Singleton}, {KClassFlag_Immutable},
 		{KClassFlag_Prototype}, {KClassFlag_Interface},
 	};
@@ -146,7 +146,7 @@ static KClassVar* kNameSpace_DefineClassName(KonohaContext *kctx, kNameSpace *ns
 {
 	KDEFINE_CLASS defNewClass = {0};
 	defNewClass.cflag         = cflag | KClassFlag_Nullable;
-	defNewClass.typeId       = TypeAttr_NewId;
+	defNewClass.typeId       = KTypeAttr_NewId;
 	defNewClass.baseTypeId   = KType_Object;
 	defNewClass.superTypeId  = KType_Object; //superClass->typeId;
 	defNewClass.init = Object_InitToMakeDefaultValueAsNull; // dummy for first generation of DefaultValueAsNull

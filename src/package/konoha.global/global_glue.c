@@ -47,7 +47,7 @@ struct _kGlobalObject {
 static	kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_AllowImplicitGlobalVariable_), KType_void, KType_NameSpace, KMethodName_("AllowImplicitGlobalVariable"), 1, KType_boolean, KFieldName_("enabled"),
+		_Public, _F(NameSpace_AllowImplicitGlobalVariable_), KType_void, KType_NameSpace, KKMethodName_("AllowImplicitGlobalVariable"), 1, KType_boolean, KFieldName_("enabled"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -93,7 +93,7 @@ static kbool_t kNameSpace_InitGlobalObject(KonohaContext *kctx, kNameSpace *ns, 
 	if(ns->globalObjectNULL_OnList == NULL) {
 		KDEFINE_CLASS defGlobalObject = {0};
 		defGlobalObject.structname = "GlobalObject";
-		defGlobalObject.typeId = TypeAttr_NewId;
+		defGlobalObject.typeId = KTypeAttr_NewId;
 		defGlobalObject.cflag = KClassFlag_Singleton|KClassFlag_Final;
 		defGlobalObject.cstruct_size = sizeof(kGlobalObject);
 		KClass *cGlobalObject = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defGlobalObject, trace);

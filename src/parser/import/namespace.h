@@ -305,7 +305,7 @@ static KKeyValue* kNameSpace_GetLocalConstNULL(KonohaContext *kctx, kNameSpace *
 	KKeyValue *kvs = KLIB KDict_GetNULL(kctx, &(ns->constTable), queryKey);
 	if(kvs != NULL && kvs->attrTypeId == VirtualType_Text) {
 		const char *textData = (const char *)kvs->unboxValue;
-		kvs->attrTypeId = KType_String | TypeAttr_Boxed;
+		kvs->attrTypeId = KType_String | KTypeAttr_Boxed;
 		kvs->StringValue = KLIB new_kString(kctx, ns->NameSpaceConstList, textData, strlen(textData), StringPolicy_TEXT);
 		KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs->StringValue);
 	}
@@ -326,7 +326,7 @@ static kbool_t kNameSpace_MergeConstData(KonohaContext *kctx, kNameSpaceVar *ns,
 {
 	size_t i;
 	for(i = 0; i < nitems; i++) {
-		if(TypeAttr_Is(Boxed, kvs[i].attrTypeId)) {
+		if(KTypeAttr_Is(Boxed, kvs[i].attrTypeId)) {
 			KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs[i].ObjectValue);
 		}
 	}
@@ -342,7 +342,7 @@ static void SetKeyValue(KonohaContext *kctx, KKeyValue *kv, ksymbol_t key, ktype
 		kv->attrTypeId = ty;
 	}
 	else {
-		kv->attrTypeId = ty | TypeAttr_Boxed;
+		kv->attrTypeId = ty | KTypeAttr_Boxed;
 	}
 }
 
@@ -351,7 +351,7 @@ static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksym
 	KKeyValue kvs;
 	SetKeyValue(kctx, &kvs, key, ty, unboxValue);
 	KLIB KDict_Set(kctx, &(ns->constTable), &kvs);
-	if(TypeAttr_Is(Boxed, kvs.attrTypeId)) {
+	if(KTypeAttr_Is(Boxed, kvs.attrTypeId)) {
 		KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs.ObjectValue);
 	}
 	return true;
@@ -366,7 +366,7 @@ static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, con
 		SetKeyValue(kctx, &kvs, ksymbolSPOL(d[0], strlen(d[0]), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID), (ktypeattr_t)(uintptr_t)d[1], (uintptr_t)d[2]);
 		KLIB KBuffer_Write(kctx, &wb, (const char *)(&kvs), sizeof(KKeyValue));
 		d += 3;
-		if(TypeAttr_Is(Boxed, kvs.attrTypeId)) {
+		if(KTypeAttr_Is(Boxed, kvs.attrTypeId)) {
 			KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs.ObjectValue);
 		}
 	}
@@ -393,7 +393,7 @@ static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, con
 //		}
 //	}
 //	KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, uname);
-//	if(kvs != NULL && TypeAttr_Unmask(kvs->attrTypeId) == VirtualType_KClass) {
+//	if(kvs != NULL && KTypeAttr_Unmask(kvs->attrTypeId) == VirtualType_KClass) {
 //		return (KClass *)kvs->unboxValue;
 //	}
 //	return (ct != NULL) ? ct : defaultClass;
@@ -415,7 +415,7 @@ static KClass *kNameSpace_GetClassByFullName(KonohaContext *kctx, kNameSpace *ns
 	}
 	if(packageId != KSymbol_Noname) {
 		KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, un);
-		if(kvs != NULL && TypeAttr_Unmask(kvs->attrTypeId) == VirtualType_KClass) {
+		if(kvs != NULL && KTypeAttr_Unmask(kvs->attrTypeId) == VirtualType_KClass) {
 			return (KClass *)kvs->unboxValue;
 		}
 	}
@@ -566,7 +566,7 @@ static kbool_t KClass_Isa(KonohaContext *kctx, KClass *ct, KClass *t)
 static kMethod *kNameSpace_GetCoercionMethodNULL(KonohaContext *kctx, kNameSpace *ns, KClass *c, KClass *toClass)
 {
 	KMethodMatch m = {};
-	m.mn = MethodName_To(toClass->typeId);
+	m.mn = KMethodName_To(toClass->typeId);
 	m.paramsize = 0;
 	kMethod *mtd = kNameSpace_MatchMethodNULL(kctx, ns, c, KMethodMatch_Param0, &m);
 	DBG_P("finding cast %s => %s: %p", KClass_text(c), KClass_text(toClass), mtd);
@@ -592,7 +592,7 @@ static kbool_t KMethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, KMethod
 						continue;
 					}
 					kMethod *castMethod = kNameSpace_GetCoercionMethodNULL(kctx, m->ns, mtype, ptype);
-					if(castMethod != NULL && (kMethod_Is(Coercion, castMethod) || TypeAttr_Is(Coercion, param->paramtypeItems[i].attrTypeId))) {
+					if(castMethod != NULL && (kMethod_Is(Coercion, castMethod) || KTypeAttr_Is(Coercion, param->paramtypeItems[i].attrTypeId))) {
 						continue;
 					}
 					return false;
@@ -658,14 +658,14 @@ static kMethod *kNameSpace_GetGetterMethodNULL(KonohaContext *kctx, kNameSpace *
 {
 	if(symbol != KSymbol_Noname) {
 		KMethodMatch m = {};
-		m.mn = MethodName_ToGetter(symbol);
+		m.mn = KMethodName_ToGetter(symbol);
 		m.paramsize = 0;
 		kMethod *mtd = kNameSpace_MatchMethodNULL(kctx, ns, c, KMethodMatch_Param0, &m);
 		if(mtd == NULL) {
 			ksymbol_t anotherSymbols[ANOTHER_NAME_MAXSIZ];
 			size_t i, foundNames = FindAnotherSymbol(kctx, symbol, anotherSymbols);
 			for(i = 0; i < foundNames; i++) {
-				m.mn = MethodName_ToGetter(anotherSymbols[i]);
+				m.mn = KMethodName_ToGetter(anotherSymbols[i]);
 				mtd = kNameSpace_MatchMethodNULL(kctx, ns, c, KMethodMatch_Param0, &m);
 				if(mtd != NULL) break;
 			}
@@ -679,7 +679,7 @@ static kMethod *kNameSpace_GetSetterMethodNULL(KonohaContext *kctx, kNameSpace *
 {
 	if(symbol != KSymbol_Noname) {
 		KMethodMatch m = {};
-		m.mn = MethodName_ToSetter(symbol);
+		m.mn = KMethodName_ToSetter(symbol);
 		m.paramsize = 1;
 		KMethodMatchFunc func;
 		if(type == KType_var) {
@@ -695,7 +695,7 @@ static kMethod *kNameSpace_GetSetterMethodNULL(KonohaContext *kctx, kNameSpace *
 			ksymbol_t anotherSymbols[ANOTHER_NAME_MAXSIZ];
 			size_t i, foundNames = FindAnotherSymbol(kctx, symbol, anotherSymbols);
 			for(i = 0; i < foundNames; i++) {
-				m.mn = MethodName_ToSetter(anotherSymbols[i]);
+				m.mn = KMethodName_ToSetter(anotherSymbols[i]);
 				mtd = kNameSpace_MatchMethodNULL(kctx, ns, c, func, &m);
 				if(mtd != NULL) break;
 			}
@@ -969,7 +969,7 @@ static kbool_t kNameSpace_ImportSymbol(KonohaContext *kctx, kNameSpace *ns, kNam
 		KKeyValue *kvs = kNameSpace_GetLocalConstNULL(kctx, packageNS, keyword);
 		if(kvs != NULL) {
 			if(kNameSpace_MergeConstData(kctx, (kNameSpaceVar *)ns, kvs, 1, false/*isOverride*/, trace)) {
-				if(TypeAttr_Unmask(kvs->attrTypeId) == VirtualType_KClass) {
+				if(KTypeAttr_Unmask(kvs->attrTypeId) == VirtualType_KClass) {
 					size_t i;
 					ktypeattr_t typeId = ((KClass *)kvs->unboxValue)->typeId;
 					for(i = 0; i < kArray_size(packageNS->methodList_OnList); i++) {

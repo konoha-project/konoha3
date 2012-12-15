@@ -399,7 +399,7 @@ static kStmtVar* new_kStmt(KonohaContext *kctx, kArray *gcstack, KSyntax *syn, .
 	return stmt;
 }
 
-static uintptr_t kStmt_ParseFlag(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag)
+static uintptr_t kStmt_ParseFlag(KonohaContext *kctx, kStmt *stmt, KFlagSymbolData *flagData, uintptr_t flag)
 {
 	while(flagData->flag != 0) {
 		kObject *op = kStmt_GetObjectNULL(kctx, stmt, flagData->symbol);

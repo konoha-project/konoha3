@@ -466,7 +466,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 {
 	KDEFINE_CLASS defvirConnectAuthPtr = {
 		.structname = "virConnectAuthPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirConnectAuthPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -477,7 +477,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirConnectCloseFunc = {
 		.structname = "virConnectCloseFunc",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirConnectCloseFunc),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -488,7 +488,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirConnectDomainEventCallback = {
 		.structname = "virConnectDomainEventCallback",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirConnectDomainEventCallback),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -499,7 +499,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirConnectDomainEventGenericCallback = {
 		.structname = "virConnectDomainEventGenericCallback",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirConnectDomainEventGenericCallback),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -510,7 +510,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirConnectPtr = {
 		.structname = "virConnectPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirConnectPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -521,7 +521,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirDomainBlockInfoPtr = {
 		.structname = "virDomainBlockInfoPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirDomainBlockInfoPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -532,7 +532,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirDomainBlockJobInfoPtr = {
 		.structname = "virDomainBlockJobInfoPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirDomainBlockJobInfoPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -543,7 +543,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirDomainBlockStatsPtr = {
 		.structname = "virDomainBlockStatsPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirDomainBlockStatsPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -554,7 +554,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirDomainControlInfoPtr = {
 		.structname = "virDomainControlInfoPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirDomainControlInfoPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -565,7 +565,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirDomainDiskErrorPtr = {
 		.structname = "virDomainDiskErrorPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirDomainDiskErrorPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -576,7 +576,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirDomainInfoPtr = {
 		.structname = "virDomainInfoPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirDomainInfoPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -587,7 +587,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirDomainInterfaceStatsPtr = {
 		.structname = "virDomainInterfaceStatsPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirDomainInterfaceStatsPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -598,7 +598,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirDomainJobInfoPtr = {
 		.structname = "virDomainJobInfoPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirDomainJobInfoPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -609,7 +609,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirDomainMemoryStatPtr = {
 		.structname = "virDomainMemoryStatPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirDomainMemoryStatPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -620,7 +620,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirDomainPtr = {
 		.structname = "virDomainPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirDomainPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -631,7 +631,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirDomainPtrPtrPtr = {
 		.structname = "virDomainPtrPtrPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirDomainPtrPtrPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -642,7 +642,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirDomainSnapshotPtr = {
 		.structname = "virDomainSnapshotPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirDomainSnapshotPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -653,7 +653,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirDomainSnapshotPtrPtrPtr = {
 		.structname = "virDomainSnapshotPtrPtrPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirDomainSnapshotPtrPtrPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -664,7 +664,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirEventAddHandleFunc = {
 		.structname = "virEventAddHandleFunc",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirEventAddHandleFunc),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -675,7 +675,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirEventAddTimeoutFunc = {
 		.structname = "virEventAddTimeoutFunc",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirEventAddTimeoutFunc),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -686,7 +686,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirEventHandleCallback = {
 		.structname = "virEventHandleCallback",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirEventHandleCallback),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -697,7 +697,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirEventRemoveHandleFunc = {
 		.structname = "virEventRemoveHandleFunc",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirEventRemoveHandleFunc),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -708,7 +708,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirEventRemoveTimeoutFunc = {
 		.structname = "virEventRemoveTimeoutFunc",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirEventRemoveTimeoutFunc),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -719,7 +719,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirEventTimeoutCallback = {
 		.structname = "virEventTimeoutCallback",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirEventTimeoutCallback),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -730,7 +730,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirEventUpdateHandleFunc = {
 		.structname = "virEventUpdateHandleFunc",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirEventUpdateHandleFunc),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -741,7 +741,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirEventUpdateTimeoutFunc = {
 		.structname = "virEventUpdateTimeoutFunc",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirEventUpdateTimeoutFunc),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -752,7 +752,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirFreeCallback = {
 		.structname = "virFreeCallback",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirFreeCallback),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -763,7 +763,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirInterfacePtr = {
 		.structname = "virInterfacePtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirInterfacePtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -774,7 +774,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirInterfacePtrPtrPtr = {
 		.structname = "virInterfacePtrPtrPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirInterfacePtrPtrPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -785,7 +785,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirNWFilterPtr = {
 		.structname = "virNWFilterPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirNWFilterPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -796,7 +796,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirNWFilterPtrPtrPtr = {
 		.structname = "virNWFilterPtrPtrPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirNWFilterPtrPtrPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -807,7 +807,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirNetworkPtr = {
 		.structname = "virNetworkPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirNetworkPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -818,7 +818,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirNetworkPtrPtrPtr = {
 		.structname = "virNetworkPtrPtrPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirNetworkPtrPtrPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -829,7 +829,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirNodeCPUStatsPtr = {
 		.structname = "virNodeCPUStatsPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirNodeCPUStatsPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -840,7 +840,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirNodeDevicePtr = {
 		.structname = "virNodeDevicePtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirNodeDevicePtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -851,7 +851,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirNodeDevicePtrPtrPtr = {
 		.structname = "virNodeDevicePtrPtrPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirNodeDevicePtrPtrPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -862,7 +862,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirNodeInfoPtr = {
 		.structname = "virNodeInfoPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirNodeInfoPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -873,7 +873,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirNodeMemoryStatsPtr = {
 		.structname = "virNodeMemoryStatsPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirNodeMemoryStatsPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -884,7 +884,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirSecretPtr = {
 		.structname = "virSecretPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirSecretPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -895,7 +895,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirSecretPtrPtrPtr = {
 		.structname = "virSecretPtrPtrPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirSecretPtrPtrPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -906,7 +906,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirSecurityLabelPtr = {
 		.structname = "virSecurityLabelPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirSecurityLabelPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -917,7 +917,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirSecurityLabelPtrPtr = {
 		.structname = "virSecurityLabelPtrPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirSecurityLabelPtrPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -928,7 +928,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirSecurityModelPtr = {
 		.structname = "virSecurityModelPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirSecurityModelPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -939,7 +939,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirStoragePoolInfoPtr = {
 		.structname = "virStoragePoolInfoPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirStoragePoolInfoPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -950,7 +950,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirStoragePoolPtr = {
 		.structname = "virStoragePoolPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirStoragePoolPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -961,7 +961,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirStoragePoolPtrPtrPtr = {
 		.structname = "virStoragePoolPtrPtrPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirStoragePoolPtrPtrPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -972,7 +972,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirStorageVolInfoPtr = {
 		.structname = "virStorageVolInfoPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirStorageVolInfoPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -983,7 +983,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirStorageVolPtr = {
 		.structname = "virStorageVolPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirStorageVolPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -994,7 +994,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirStorageVolPtrPtrPtr = {
 		.structname = "virStorageVolPtrPtrPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirStorageVolPtrPtrPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -1005,7 +1005,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirStreamEventCallback = {
 		.structname = "virStreamEventCallback",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirStreamEventCallback),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -1016,7 +1016,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirStreamPtr = {
 		.structname = "virStreamPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirStreamPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -1027,7 +1027,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirStreamSinkFunc = {
 		.structname = "virStreamSinkFunc",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirStreamSinkFunc),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -1038,7 +1038,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirStreamSourceFunc = {
 		.structname = "virStreamSourceFunc",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirStreamSourceFunc),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -1049,7 +1049,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirTypedParameterPtr = {
 		.structname = "virTypedParameterPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirTypedParameterPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
@@ -1060,7 +1060,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KDEFINE_CLASS defvirVcpuInfoPtr = {
 		.structname = "virVcpuInfoPtr",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.cstruct_size = sizeof(kvirVcpuInfoPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,

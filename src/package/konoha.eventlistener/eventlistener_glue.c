@@ -563,11 +563,11 @@ static kbool_t eventlistener_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns
 
 	KDEFINE_CLASS defHttpEventListener = {
 		.structname = "HttpEventListener",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 	};
 	KDEFINE_CLASS defSignalEventListener = {
 		.structname = "SignalEventListener",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 	};
 	KClass *cHttpEventListener = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defHttpEventListener, trace);
 	KClass *cSignalEventListener = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSignalEventListener, trace);
@@ -578,16 +578,16 @@ static kbool_t eventlistener_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns
 
 	KDEFINE_METHOD MethodData[] = {
 		/* event gen */
-		_Public|_Static, _F(HttpEventListener_start), KType_void, KType_HttpEventListener, KMethodName_("start"), 2, KType_String, KFieldName_("host"), KType_int, KFieldName_("port"),
-		_Public|_Static, _F(SignalEventListener_start), KType_void, KType_SignalEventListener, KMethodName_("start"), 0,
+		_Public|_Static, _F(HttpEventListener_start), KType_void, KType_HttpEventListener, KKMethodName_("start"), 2, KType_String, KFieldName_("host"), KType_int, KFieldName_("port"),
+		_Public|_Static, _F(SignalEventListener_start), KType_void, KType_SignalEventListener, KKMethodName_("start"), 0,
 		/* event */
-		_Public|_Const|_Im, _F(Event_getProperty), KType_String,    KType_Event, KMethodName_("getProperty"), 1, KType_String, KFieldName_("key"),
-		_Public|_Const|_Im, _F(Event_getInt),      KType_int,       KType_Event, KMethodName_("getInt"),    1, KType_String, KFieldName_("key"),
+		_Public|_Const|_Im, _F(Event_getProperty), KType_String,    KType_Event, KKMethodName_("getProperty"), 1, KType_String, KFieldName_("key"),
+		_Public|_Const|_Im, _F(Event_getInt),      KType_int,       KType_Event, KKMethodName_("getInt"),    1, KType_String, KFieldName_("key"),
 
 		/* dispatch */
-		_Public|_Static, _F(System_setSafepoint), KType_void, KType_System, KMethodName_("setSafepoint"), 0,
-		_Public|_Static, _F(System_setEventInvokeFunc), KType_void, KType_System, KMethodName_("setEventInvokeFunc"), 1, KType_Func, KFieldName_("f"),
-		_Public|_Static, _F(System_setEnqFunc), KType_void, KType_System, KMethodName_("setEnqFunc"), 1, KType_EnqFunc, KFieldName_("f"),
+		_Public|_Static, _F(System_setSafepoint), KType_void, KType_System, KKMethodName_("setSafepoint"), 0,
+		_Public|_Static, _F(System_setEventInvokeFunc), KType_void, KType_System, KKMethodName_("setEventInvokeFunc"), 1, KType_Func, KFieldName_("f"),
+		_Public|_Static, _F(System_setEnqFunc), KType_void, KType_System, KKMethodName_("setEnqFunc"), 1, KType_EnqFunc, KFieldName_("f"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

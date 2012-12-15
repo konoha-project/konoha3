@@ -547,25 +547,25 @@ static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 	g_comm_world->comm = MPI_COMM_WORLD;
 	static KDEFINE_CLASS MPIDef = {
 		.structname = "MPI",
-		.typeId = TypeAttr_NewId
+		.typeId = KTypeAttr_NewId
 	};
 	static KDEFINE_CLASS MPICommDef = {
 		.structname = "MPIComm",
-		.typeId = TypeAttr_NewId
+		.typeId = KTypeAttr_NewId
 	};
 	static KDEFINE_CLASS MPIRequestDef = {
 		.structname = "MPIRequest",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.free = MPIRequest_ptr_Free
 	};
 	static KDEFINE_CLASS MPIDataDef = {
 		.structname = "MPIData",
-		.typeId = TypeAttr_NewId,
+		.typeId = KTypeAttr_NewId,
 		.free = MPIData_ptr_Free
 	};
 	//static KDEFINE_CLASS MPIOpDef = {
 	//	.structname = "MPIOp",
-	//	.typeId = TypeAttr_NewId
+	//	.typeId = KTypeAttr_NewId
 	//};
 	KClass *KClass_MPI = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPIDef, trace);
 	KClass *KClass_MPIComm = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPICommDef, trace);
@@ -579,59 +579,59 @@ static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 #define KType_MPIOp       KType_int //(KClass_MPIOp->typeId) // TODO
 	KDEFINE_METHOD MethodData[] = {
 		/* class MPI */
-		_Public|_Static, _F(MPI_getWtime), KType_float, KType_MPI, KMethodName_("getWtime"), 0,
+		_Public|_Static, _F(MPI_getWtime), KType_float, KType_MPI, KKMethodName_("getWtime"), 0,
 
 		/* class MPIComm */
-		_Public|_Static, _F(MPIComm_getWorld), KType_MPIComm, KType_MPIComm, KMethodName_("getWorld"), 0,
-		_Public, _F(MPIComm_getRank), KType_int, KType_MPIComm, KMethodName_("getRank"), 0,
-		_Public, _F(MPIComm_getSize), KType_int, KType_MPIComm, KMethodName_("getSize"), 0,
-		_Public, _F(MPIComm_barrier), KType_int, KType_MPIComm, KMethodName_("barrier"), 0,
-		_Public, _F(MPIComm_send), KType_boolean, KType_MPIComm, KMethodName_("send"), 4,
+		_Public|_Static, _F(MPIComm_getWorld), KType_MPIComm, KType_MPIComm, KKMethodName_("getWorld"), 0,
+		_Public, _F(MPIComm_getRank), KType_int, KType_MPIComm, KKMethodName_("getRank"), 0,
+		_Public, _F(MPIComm_getSize), KType_int, KType_MPIComm, KKMethodName_("getSize"), 0,
+		_Public, _F(MPIComm_barrier), KType_int, KType_MPIComm, KKMethodName_("barrier"), 0,
+		_Public, _F(MPIComm_send), KType_boolean, KType_MPIComm, KKMethodName_("send"), 4,
 			KType_MPIData, KFieldName_("buf"), KType_int, KFieldName_("count"), KType_int, KFieldName_("dest"), KType_int, KFieldName_("tag"),
-		_Public, _F(MPIComm_recv), KType_boolean, KType_MPIComm, KMethodName_("recv"), 4,
+		_Public, _F(MPIComm_recv), KType_boolean, KType_MPIComm, KKMethodName_("recv"), 4,
 			KType_MPIData, KFieldName_("buf"), KType_int, KFieldName_("count"), KType_int, KFieldName_("src"), KType_int, KFieldName_("tag"),
-		_Public, _F(MPIComm_iSend), KType_MPIRequest, KType_MPIComm, KMethodName_("iSend"), 4,
+		_Public, _F(MPIComm_iSend), KType_MPIRequest, KType_MPIComm, KKMethodName_("iSend"), 4,
 			KType_MPIData, KFieldName_("buf"), KType_int, KFieldName_("count"), KType_int, KFieldName_("dest"), KType_int, KFieldName_("tag"),
-		_Public, _F(MPIComm_iRecv), KType_MPIRequest, KType_MPIComm, KMethodName_("iRecv"), 4,
+		_Public, _F(MPIComm_iRecv), KType_MPIRequest, KType_MPIComm, KKMethodName_("iRecv"), 4,
 			KType_MPIData, KFieldName_("buf"), KType_int, KFieldName_("count"), KType_int, KFieldName_("src"), KType_int, KFieldName_("tag"),
-		_Public, _F(MPIComm_bcast), KType_boolean, KType_MPIComm, KMethodName_("bcast"), 3,
+		_Public, _F(MPIComm_bcast), KType_boolean, KType_MPIComm, KKMethodName_("bcast"), 3,
 			KType_MPIData, KFieldName_("sdata"), KType_int, KFieldName_("count"), KType_int, KFieldName_("root"),
-		_Public, _F(MPIComm_scatter), KType_boolean, KType_MPIComm, KMethodName_("scatter"), 5,
+		_Public, _F(MPIComm_scatter), KType_boolean, KType_MPIComm, KKMethodName_("scatter"), 5,
 			KType_MPIData, KFieldName_("sdata"), KType_int, KFieldName_("scount"), KType_MPIData, KFieldName_("rdata"), KType_int, KFieldName_("rcount"), KType_int, KFieldName_("root"),
-		_Public, _F(MPIComm_gather), KType_boolean, KType_MPIComm, KMethodName_("gather"), 5,
+		_Public, _F(MPIComm_gather), KType_boolean, KType_MPIComm, KKMethodName_("gather"), 5,
 			KType_MPIData, KFieldName_("sdata"), KType_int, KFieldName_("scount"), KType_MPIData, KFieldName_("rdata"), KType_int, KFieldName_("rcount"), KType_int, KFieldName_("root"),
-		_Public, _F(MPIComm_allGather), KType_boolean, KType_MPIComm, KMethodName_("allGather"), 4,
+		_Public, _F(MPIComm_allGather), KType_boolean, KType_MPIComm, KKMethodName_("allGather"), 4,
 			KType_MPIData, KFieldName_("sdata"), KType_int, KFieldName_("scount"), KType_MPIData, KFieldName_("rdata"), KType_int, KFieldName_("rcount"),
-		_Public, _F(MPIComm_allToAll), KType_boolean, KType_MPIComm, KMethodName_("allToAll"), 4,
+		_Public, _F(MPIComm_allToAll), KType_boolean, KType_MPIComm, KKMethodName_("allToAll"), 4,
 			KType_MPIData, KFieldName_("sdata"), KType_int, KFieldName_("scount"), KType_MPIData, KFieldName_("rdata"), KType_int, KFieldName_("rcount"),
-		_Public, _F(MPIComm_reduce), KType_boolean, KType_MPIComm, KMethodName_("reduce"), 5,
+		_Public, _F(MPIComm_reduce), KType_boolean, KType_MPIComm, KKMethodName_("reduce"), 5,
 			KType_MPIData, KFieldName_("sdata"), KType_MPIData, KFieldName_("rdata"), KType_int, KFieldName_("rcount"), KType_MPIOp, KFieldName_("op"), KType_int, KFieldName_("root"),
-		_Public, _F(MPIComm_allReduce), KType_boolean, KType_MPIComm, KMethodName_("allReduce"), 4,
+		_Public, _F(MPIComm_allReduce), KType_boolean, KType_MPIComm, KKMethodName_("allReduce"), 4,
 			KType_MPIData, KFieldName_("sdata"), KType_MPIData, KFieldName_("rdata"), KType_int, KFieldName_("rcount"), KType_MPIOp, KFieldName_("op"),
-		_Public, _F(MPIComm_scan), KType_boolean, KType_MPIComm, KMethodName_("scan"), 4,
+		_Public, _F(MPIComm_scan), KType_boolean, KType_MPIComm, KKMethodName_("scan"), 4,
 			KType_MPIData, KFieldName_("sdata"), KType_MPIData, KFieldName_("rdata"), KType_int, KFieldName_("rcount"), KType_MPIOp, KFieldName_("op"),
 
 		/* class MPIRequest */
-		_Public, _F(MPIRequest_wait), KType_boolean, KType_MPIRequest, KMethodName_("wait"), 0,
-		_Public, _F(MPIRequest_test), KType_boolean, KType_MPIRequest, KMethodName_("test"), 0,
-		_Public, _F(MPIRequest_cancel), KType_boolean, KType_MPIRequest, KMethodName_("cancel"), 0,
+		_Public, _F(MPIRequest_wait), KType_boolean, KType_MPIRequest, KKMethodName_("wait"), 0,
+		_Public, _F(MPIRequest_test), KType_boolean, KType_MPIRequest, KKMethodName_("test"), 0,
+		_Public, _F(MPIRequest_cancel), KType_boolean, KType_MPIRequest, KKMethodName_("cancel"), 0,
 
 		/* class MPIData */
-		//_Public|_Static, _F(MPIData_fromBytes), KType_MPIData, KType_MPIData, KMethodName_("fromBytes"), 1, KType_Bytes, KFieldName_("b"),
-		//_Public|_Static, _F(MPIData_fromIntArray), KType_MPIData, KType_MPIData, KMethodName_("fromIntArray"), 1, KType_Array, KFieldName_("b"),
-		//_Public|_Static, _F(MPIData_fromFloatArray), KType_MPIData, KType_MPIData, KMethodName_("fromFloatArray"), 1, KType_Array, KFieldName_("b"),
-		_Public|_Static, _F(MPIData_newFloatArray), KType_MPIData, KType_MPIData, KMethodName_("newFloatArray"), 1, KType_int, KFieldName_("n"),
-		_Public|_Static, _F(MPIData_newIntArray), KType_MPIData, KType_MPIData, KMethodName_("newIntArray"), 1, KType_int, KFieldName_("n"),
-		_Public, _F(MPIData_toBytes), KType_Bytes, KType_MPIData, KMethodName_("toBytes"), 0,
-		//_Public, _F(MPIData_toIntArray), KType_Array, KType_MPIData, KMethodName_("toIntArray"), 0,
-		//_Public, _F(MPIData_toFloatArray), KType_Array, KType_MPIData, KMethodName_("toFloatArray"), 0,
-		_Public, _F(MPIData_getf), KType_float, KType_MPIData, KMethodName_("getf"), 1, KType_int, KFieldName_("n"),
-		_Public, _F(MPIData_setf), KType_void, KType_MPIData, KMethodName_("setf"), 2, KType_int, KFieldName_("n"), KType_float, KFieldName_("v"),
-		_Public, _F(MPIData_geti), KType_int, KType_MPIData, KMethodName_("geti"), 1, KType_int, KFieldName_("n"),
-		_Public, _F(MPIData_seti), KType_void, KType_MPIData, KMethodName_("seti"), 2, KType_int, KFieldName_("n"), KType_int, KFieldName_("v"),
-		_Public, _F(MPIData_setOffset), KType_void, KType_MPIData, KMethodName_("setOffset"), 1, KType_int, KFieldName_("offset"),
-		_Public, _F(MPIData_getOffset), KType_int, KType_MPIData, KMethodName_("getOffset"), 0,
-		_Public, _F(MPIData_getSize), KType_int, KType_MPIData, KMethodName_("getSize"), 0, 
+		//_Public|_Static, _F(MPIData_fromBytes), KType_MPIData, KType_MPIData, KKMethodName_("fromBytes"), 1, KType_Bytes, KFieldName_("b"),
+		//_Public|_Static, _F(MPIData_fromIntArray), KType_MPIData, KType_MPIData, KKMethodName_("fromIntArray"), 1, KType_Array, KFieldName_("b"),
+		//_Public|_Static, _F(MPIData_fromFloatArray), KType_MPIData, KType_MPIData, KKMethodName_("fromFloatArray"), 1, KType_Array, KFieldName_("b"),
+		_Public|_Static, _F(MPIData_newFloatArray), KType_MPIData, KType_MPIData, KKMethodName_("newFloatArray"), 1, KType_int, KFieldName_("n"),
+		_Public|_Static, _F(MPIData_newIntArray), KType_MPIData, KType_MPIData, KKMethodName_("newIntArray"), 1, KType_int, KFieldName_("n"),
+		_Public, _F(MPIData_toBytes), KType_Bytes, KType_MPIData, KKMethodName_("toBytes"), 0,
+		//_Public, _F(MPIData_toIntArray), KType_Array, KType_MPIData, KKMethodName_("toIntArray"), 0,
+		//_Public, _F(MPIData_toFloatArray), KType_Array, KType_MPIData, KKMethodName_("toFloatArray"), 0,
+		_Public, _F(MPIData_getf), KType_float, KType_MPIData, KKMethodName_("getf"), 1, KType_int, KFieldName_("n"),
+		_Public, _F(MPIData_setf), KType_void, KType_MPIData, KKMethodName_("setf"), 2, KType_int, KFieldName_("n"), KType_float, KFieldName_("v"),
+		_Public, _F(MPIData_geti), KType_int, KType_MPIData, KKMethodName_("geti"), 1, KType_int, KFieldName_("n"),
+		_Public, _F(MPIData_seti), KType_void, KType_MPIData, KKMethodName_("seti"), 2, KType_int, KFieldName_("n"), KType_int, KFieldName_("v"),
+		_Public, _F(MPIData_setOffset), KType_void, KType_MPIData, KKMethodName_("setOffset"), 1, KType_int, KFieldName_("offset"),
+		_Public, _F(MPIData_getOffset), KType_int, KType_MPIData, KKMethodName_("getOffset"), 0,
+		_Public, _F(MPIData_getSize), KType_int, KType_MPIData, KKMethodName_("getSize"), 0, 
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

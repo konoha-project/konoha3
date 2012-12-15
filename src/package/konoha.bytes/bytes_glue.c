@@ -260,19 +260,19 @@ static kbool_t bytes_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 	int FN_c     = KFieldName_("c");
 	int FN_size  = KFieldName_("size");
 	KDEFINE_METHOD MethodData[] = {
-		_Public,     _F(Bytes_new),     KType_Bytes,  KType_Bytes, KMethodName_("new"),     1, KType_int, FN_size,
-		_Public|_Im, _F(Bytes_getSize), KType_int,    KType_Bytes, KMethodName_("getSize"), 0,
-		_Public|_Im, _F(Bytes_get),     KType_int,    KType_Bytes, KMethodName_("get"),     1, KType_int, FN_index,
-		_Public,     _F(Bytes_set),     KType_void,   KType_Bytes, KMethodName_("set"),     2, KType_int, FN_index, KType_int, FN_c,
-		_Public,     _F(Bytes_setAll),  KType_void,   KType_Bytes, KMethodName_("setAll"),  1, KType_int, FN_c,
-		_Public|_Im|_Coercion, _F(String_toBytes), KType_Bytes, KType_String, MethodName_To(KType_Bytes),   0,
-		//_Public|_Im|_Coercion, _F(Bytes_toString), KType_String, KType_Bytes,  MethodName_To(KType_String),  0,
-		//_Public|_Const, _F(Bytes_encodeTo),   KType_Bytes,  KType_Bytes,  KMethodName_("encodeTo"),    1, KType_String, FN_encoding,
-		//_Public|_Const, _F(Bytes_decodeFrom),   KType_String, KType_Bytes,  KMethodName_("decodeFrom"),    1, KType_String, FN_encoding,
-		_Public, _F(String_new_fromBytes_withDefaultDecode),      KType_String, KType_String, KMethodName_("new"), 1, KType_Bytes, KFieldName_("ba"),
-		_Public, _F(String_new_fromBytes_withSpecifiedDecode),    KType_String, KType_String, KMethodName_("new"), 2, KType_Bytes, KFieldName_("ba"), KType_String, KFieldName_("charset"),
-		_Public, _F(String_new_fromSubBytes_withDefaultDecode),   KType_String, KType_String, KMethodName_("new"), 3, KType_Bytes, KFieldName_("ba"), KType_int,    KFieldName_("offset"), KType_int, KFieldName_("length"),
-		_Public, _F(String_new_fromSubBytes_withSpecifiedDecode), KType_String, KType_String, KMethodName_("new"), 4, KType_Bytes, KFieldName_("ba"), KType_int,    KFieldName_("offset"), KType_int, KFieldName_("length"), KType_String, KFieldName_("charset"),
+		_Public,     _F(Bytes_new),     KType_Bytes,  KType_Bytes, KKMethodName_("new"),     1, KType_int, FN_size,
+		_Public|_Im, _F(Bytes_getSize), KType_int,    KType_Bytes, KKMethodName_("getSize"), 0,
+		_Public|_Im, _F(Bytes_get),     KType_int,    KType_Bytes, KKMethodName_("get"),     1, KType_int, FN_index,
+		_Public,     _F(Bytes_set),     KType_void,   KType_Bytes, KKMethodName_("set"),     2, KType_int, FN_index, KType_int, FN_c,
+		_Public,     _F(Bytes_setAll),  KType_void,   KType_Bytes, KKMethodName_("setAll"),  1, KType_int, FN_c,
+		_Public|_Im|_Coercion, _F(String_toBytes), KType_Bytes, KType_String, KMethodName_To(KType_Bytes),   0,
+		//_Public|_Im|_Coercion, _F(Bytes_toString), KType_String, KType_Bytes,  KMethodName_To(KType_String),  0,
+		//_Public|_Const, _F(Bytes_encodeTo),   KType_Bytes,  KType_Bytes,  KKMethodName_("encodeTo"),    1, KType_String, FN_encoding,
+		//_Public|_Const, _F(Bytes_decodeFrom),   KType_String, KType_Bytes,  KKMethodName_("decodeFrom"),    1, KType_String, FN_encoding,
+		_Public, _F(String_new_fromBytes_withDefaultDecode),      KType_String, KType_String, KKMethodName_("new"), 1, KType_Bytes, KFieldName_("ba"),
+		_Public, _F(String_new_fromBytes_withSpecifiedDecode),    KType_String, KType_String, KKMethodName_("new"), 2, KType_Bytes, KFieldName_("ba"), KType_String, KFieldName_("charset"),
+		_Public, _F(String_new_fromSubBytes_withDefaultDecode),   KType_String, KType_String, KKMethodName_("new"), 3, KType_Bytes, KFieldName_("ba"), KType_int,    KFieldName_("offset"), KType_int, KFieldName_("length"),
+		_Public, _F(String_new_fromSubBytes_withSpecifiedDecode), KType_String, KType_String, KKMethodName_("new"), 4, KType_Bytes, KFieldName_("ba"), KType_int,    KFieldName_("offset"), KType_int, KFieldName_("length"), KType_String, KFieldName_("charset"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

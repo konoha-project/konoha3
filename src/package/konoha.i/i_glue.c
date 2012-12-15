@@ -47,7 +47,7 @@ static void kMethod_WriteToBuffer(KonohaContext *kctx, kMethod *mtd, KBuffer *wb
 {
 	kParam *pa = kMethod_GetParam(mtd);
 	Method_WriteAttributeToBuffer(kctx, mtd, wb);
-	KLIB KBuffer_printf(kctx, wb, "%s %s.%s%s", KType_text(pa->rtype), KType_text(mtd->typeId), MethodName_Fmt2(mtd->mn));
+	KLIB KBuffer_printf(kctx, wb, "%s %s.%s%s", KType_text(pa->rtype), KType_text(mtd->typeId), KMethodName_Fmt2(mtd->mn));
 	{
 		size_t i;
 		KLIB KBuffer_Write(kctx, wb, "(", 1);
@@ -55,10 +55,10 @@ static void kMethod_WriteToBuffer(KonohaContext *kctx, kMethod *mtd, KBuffer *wb
 			if(i > 0) {
 				KLIB KBuffer_Write(kctx, wb, ", ", 2);
 			}
-			if(TypeAttr_Is(ReadOnly, pa->paramtypeItems[i].attrTypeId)) {
+			if(KTypeAttr_Is(ReadOnly, pa->paramtypeItems[i].attrTypeId)) {
 				KLIB KBuffer_printf(kctx, wb, "@ReadOnly ");
 			}
-			if(TypeAttr_Is(Coercion, pa->paramtypeItems[i].attrTypeId)) {
+			if(KTypeAttr_Is(Coercion, pa->paramtypeItems[i].attrTypeId)) {
 				KLIB KBuffer_printf(kctx, wb, "@Coercion ");
 			}
 			KLIB KBuffer_printf(kctx, wb, "%s %s", KType_text(pa->paramtypeItems[i].attrTypeId), KSymbol_text(pa->paramtypeItems[i].name));
@@ -122,7 +122,7 @@ static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t i_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_man), KType_void, KType_NameSpace, KMethodName_("man"), 1, KType_Object, KFieldName_("x"),
+		_Public, _F(NameSpace_man), KType_void, KType_NameSpace, KKMethodName_("man"), 1, KType_Object, KFieldName_("x"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

@@ -216,19 +216,19 @@ typedef kushort_t       kparamId_t;
 typedef struct {
 	uintptr_t flag;
 	ksymbol_t symbol;
-} KonohaFlagSymbolData;
+} KFlagSymbolData;
 
 /* ktypeattr_t */
-#define TypeAttr_NewId          ((ktypeattr_t)-1)
+#define KTypeAttr_NewId          ((ktypeattr_t)-1)
 
-#define TypeAttr_Attr(t)        ((t)  & (KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
-#define TypeAttr_Unmask(t)      ((t)  & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3)))
+#define KTypeAttr_Attr(t)        ((t)  & (KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
+#define KTypeAttr_Unmask(t)      ((t)  & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3)))
 
-#define TypeAttr_Boxed      KFLAG_H0    /* KeyValueStore, Field */
-#define TypeAttr_ReadOnly   KFLAG_H1    /* Variable, Field */
-#define TypeAttr_Coercion   KFLAG_H2    /* Variable, Field */
+#define KTypeAttr_Boxed      KFLAG_H0    /* KeyValueStore, Field */
+#define KTypeAttr_ReadOnly   KFLAG_H1    /* Variable, Field */
+#define KTypeAttr_Coercion   KFLAG_H2    /* Variable, Field */
 
-#define TypeAttr_Is(P, t)   (((t) & TypeAttr_##P) == TypeAttr_##P)
+#define KTypeAttr_Is(P, t)   (((t) & KTypeAttr_##P) == KTypeAttr_##P)
 
 #define KSymbol_MAX            KFLAG_H3
 #define KSymbol_Attr(sym)      (sym  & (KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
@@ -240,10 +240,10 @@ typedef struct {
 #define _NEWID                 KSymbol_NewId
 #define _NEWRAW                KSymbol_NewRaw
 
-#define SymbolAttr_Annotation        (KFLAG_H1|KFLAG_H2)
-#define SymbolAttr_Pattern           (KFLAG_H0|KFLAG_H1|KFLAG_H2)
-#define KSymbol_IsAnnotation(S)       ((S & SymbolAttr_Pattern) == SymbolAttr_Annotation)
-#define KSymbol_IsPattern(S)          ((S & SymbolAttr_Pattern) == SymbolAttr_Pattern)
+#define KSymbolAttr_Annotation        (KFLAG_H1|KFLAG_H2)
+#define KSymbolAttr_Pattern           (KFLAG_H0|KFLAG_H1|KFLAG_H2)
+#define KSymbol_IsAnnotation(S)       ((S & KSymbolAttr_Pattern) == KSymbolAttr_Annotation)
+#define KSymbol_IsPattern(S)          ((S & KSymbolAttr_Pattern) == KSymbolAttr_Pattern)
 
 /* MethodName
  * 110   to$(TypeId)
@@ -252,23 +252,23 @@ typedef struct {
  * 001   set${symbol}
  */
 
-#define MethodNameAttr_Type       KFLAG_H0
-#define MethodNameAttr_Coercion   (KFLAG_H0|KFLAG_H1)
-#define MethodNameAttr_Upcast     (KFLAG_H0|KFLAG_H2)
-#define MethodNameAttr_Getter     KFLAG_H1
-#define MethodNameAttr_Setter     KFLAG_H2
+#define KMethodNameAttr_Type       KFLAG_H0
+#define KMethodNameAttr_Coercion   (KFLAG_H0|KFLAG_H1)
+#define KMethodNameAttr_Upcast     (KFLAG_H0|KFLAG_H2)
+#define KMethodNameAttr_Getter     KFLAG_H1
+#define KMethodNameAttr_Setter     KFLAG_H2
 
-#define MethodName_Unmask(mn)        (mn & (~(KFLAG_H1|KFLAG_H2)))
-#define MethodName_IsGetter(mn)      (KSymbol_Attr(mn) == MethodNameAttr_Getter)
-#define MethodName_ToGetter(mn)      ((MethodName_Unmask(mn)) | MethodNameAttr_Getter)
-#define MethodName_IsSetter(mn)      (KSymbol_Attr(mn) == MethodNameAttr_Setter)
-#define MethodName_ToSetter(mn)      ((MethodName_Unmask(mn)) | MethodNameAttr_Setter)
+#define KMethodName_Unmask(mn)        (mn & (~(KFLAG_H1|KFLAG_H2)))
+#define KMethodName_IsGetter(mn)      (KSymbol_Attr(mn) == KMethodNameAttr_Getter)
+#define KMethodName_ToGetter(mn)      ((KMethodName_Unmask(mn)) | KMethodNameAttr_Getter)
+#define KMethodName_IsSetter(mn)      (KSymbol_Attr(mn) == KMethodNameAttr_Setter)
+#define KMethodName_ToSetter(mn)      ((KMethodName_Unmask(mn)) | KMethodNameAttr_Setter)
 
-#define MethodName_To(cid)            ((cid) | MethodNameAttr_Coercion)
-#define MethodName_IsCoercion(mn)     ((KSymbol_Unmask(mn)) == MethodNameAttr_Coercion)
-#define MethodName_As(cid)            ((cid) | MethodNameAttr_Upcast)
-#define MethodName_IsUpcast(mn)       ((KSymbol_Unmask(mn)) == MethodNameAttr_Upcast)
-#define MethodName_Fmt2(mn)           KSymbol_prefixText(mn), ((mn & MethodNameAttr_Type) == MethodNameAttr_Type ? KType_text(KSymbol_Unmask(mn)) : KSymbol_text(KSymbol_Unmask(mn)))
+#define KMethodName_To(cid)            ((cid) | KMethodNameAttr_Coercion)
+#define KMethodName_IsCoercion(mn)     ((KSymbol_Unmask(mn)) == KMethodNameAttr_Coercion)
+#define KMethodName_As(cid)            ((cid) | KMethodNameAttr_Upcast)
+#define KMethodName_IsUpcast(mn)       ((KSymbol_Unmask(mn)) == KMethodNameAttr_Upcast)
+#define KMethodName_Fmt2(mn)           KSymbol_prefixText(mn), ((mn & KMethodNameAttr_Type) == KMethodNameAttr_Type ? KType_text(KSymbol_Unmask(mn)) : KSymbol_text(KSymbol_Unmask(mn)))
 
 /* ------------------------------------------------------------------------ */
 /* platform */
@@ -995,22 +995,22 @@ typedef struct KDEFINE_CLASS {
 
 #define STRUCTNAME(C) \
 	.structname = #C,\
-	.typeId = TypeAttr_NewId,\
+	.typeId = KTypeAttr_NewId,\
 	.cstruct_size = sizeof(k##C)
 
 #define UNBOXNAME(C) \
 	.structname = #C,\
-	.typeId = TypeAttr_NewId
+	.typeId = KTypeAttr_NewId
 
 #define SETSTRUCTNAME(VAR, C) do{\
 		VAR.structname = #C;\
-		VAR.typeId = TypeAttr_NewId;\
+		VAR.typeId = KTypeAttr_NewId;\
 		VAR.cstruct_size = sizeof(k##C);\
 	}while(0)
 
 #define SETUNBOXNAME(VAR, C) do{\
 		VAR.structname = #C;\
-		VAR.typeId = TypeAttr_NewId;\
+		VAR.typeId = KTypeAttr_NewId;\
 	}while(0)
 
 //KClassVar;
@@ -1105,7 +1105,7 @@ struct KClassField {
 #define KClassFlag_System            KClassFlag_Nullable|KClassFlag_Singleton|KClassFlag_Final
 #define KClassFlag_0                 KClassFlag_TypeVar|KClassFlag_UnboxType|KClassFlag_Singleton|KClassFlag_Final
 
-#define KClass_(T)                kctx->share->classTable.classItems[TypeAttr_Unmask(T)]
+#define KClass_(T)                kctx->share->classTable.classItems[KTypeAttr_Unmask(T)]
 #define KClass_cparam(CT)         kctx->share->paramdomList->ParamItems[(CT)->cparamdom]
 #define KClass_Is(P, C)           (KFlag_Is(kshortflag_t, (C)->cflag, KClassFlag_##P))
 #define KClass_Set(P, C, B)       KFlag_Set(kshortflag_t, (C)->cflag, KClassFlag_##P, B)
@@ -1357,7 +1357,7 @@ static const char* MethodFlagData[] = {
 #define kMethod_GetReturnType(mtd)   KClass_((kMethod_GetParam(mtd))->rtype)
 #define kMethod_IsReturnFunc(mtd)    (KClass_((kMethod_GetParam(mtd))->rtype)->baseTypeId == KType_Func)
 #define kMethod_ParamSize(mtd)       ((kMethod_GetParam(mtd))->psize)
-#define kMethod_Fmt3(mtd)            KType_text((mtd)->typeId),  MethodName_Fmt2((mtd)->mn)
+#define kMethod_Fmt3(mtd)            KType_text((mtd)->typeId),  KMethodName_Fmt2((mtd)->mn)
 
 /* method data */
 #define DEND     (-1)
@@ -1734,8 +1734,8 @@ struct KonohaLibVar {
 #define KSymbol_(T)                        KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 #define KException_(T)                     KLIB Ksymbol(kctx, (T "Exception"), (sizeof(T "Exception")-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 #define KFieldName_(T)                     KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
-#define KMethodName_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
-#define MN_box                             KMethodName_("box")
+#define KKMethodName_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
+#define MN_box                             KKMethodName_("box")
 
 #define MN_new                    38  /* @see KSymbol_return + 1*/
 #define KSymbol_void              39

@@ -51,7 +51,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 	KSyntaxVar *syn = (KSyntaxVar *) SYN_(ns, KSymbol_ExprMethodCall);
 	kExpr *expr;
 	kTokenVar *tkImport = /*G*/new_(TokenVar, 0, OnGcStack);
-	tkImport->resolvedSymbol = KMethodName_("import");
+	tkImport->resolvedSymbol = KKMethodName_("import");
 	if(IS_Token(tokenList)) {
 		kTokenArray *list = ((kToken *) tokenList)->subTokenList;
 		if(IS_String(list)) {

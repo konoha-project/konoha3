@@ -429,7 +429,7 @@ static const char *ConstructMethodName(KonohaContext *kctx, kMethod *mtd, const 
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KLIB KBuffer_printf(kctx, &wb, "%s_%s%s%s",
-			KClass_text(kclass), MethodName_Fmt2(mtd->mn), suffix);
+			KClass_text(kclass), KMethodName_Fmt2(mtd->mn), suffix);
 	return KLIB KBuffer_text(kctx, &wb, EnsureZero);
 }
 

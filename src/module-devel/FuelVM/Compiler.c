@@ -118,25 +118,25 @@ static INode *FuelVM_getExpression(KBuilder *builder)
 	return Expr;
 }
 
-#define MN_opNOT  KMethodName_("!")
-#define MN_opADD  KMethodName_("+")
-#define MN_opSUB  KMethodName_("-")
-#define MN_opMUL  KMethodName_("*")
-#define MN_opDIV  KMethodName_("/")
-#define MN_opMOD  KMethodName_("%")
-#define MN_opEQ   KMethodName_("==")
-#define MN_opNEQ  KMethodName_("!=")
-#define MN_opLT   KMethodName_("<")
-#define MN_opLTE  KMethodName_("<=")
-#define MN_opGT   KMethodName_(">")
-#define MN_opGTE  KMethodName_(">=")
-#define MN_opLAND KMethodName_("&")
-#define MN_opLOR  KMethodName_("|")
-#define MN_opLXOR KMethodName_("^")
-#define MN_opLSFT KMethodName_("<<")
-#define MN_opRSFT KMethodName_(">>")
+#define MN_opNOT  KKMethodName_("!")
+#define MN_opADD  KKMethodName_("+")
+#define MN_opSUB  KKMethodName_("-")
+#define MN_opMUL  KKMethodName_("*")
+#define MN_opDIV  KKMethodName_("/")
+#define MN_opMOD  KKMethodName_("%")
+#define MN_opEQ   KKMethodName_("==")
+#define MN_opNEQ  KKMethodName_("!=")
+#define MN_opLT   KKMethodName_("<")
+#define MN_opLTE  KKMethodName_("<=")
+#define MN_opGT   KKMethodName_(">")
+#define MN_opGTE  KKMethodName_(">=")
+#define MN_opLAND KKMethodName_("&")
+#define MN_opLOR  KKMethodName_("|")
+#define MN_opLXOR KKMethodName_("^")
+#define MN_opLSFT KKMethodName_("<<")
+#define MN_opRSFT KKMethodName_(">>")
 
-static enum BinaryOp MethodName_toBinaryOperator(KonohaContext *kctx, kmethodn_t mn)
+static enum BinaryOp KMethodName_toBinaryOperator(KonohaContext *kctx, kmethodn_t mn)
 {
 	if(mn == MN_opADD ) return Add;
 	if(mn == MN_opSUB ) return Sub;
@@ -157,7 +157,7 @@ static enum BinaryOp MethodName_toBinaryOperator(KonohaContext *kctx, kmethodn_t
 	return BinaryOp_NotFound;
 }
 
-static enum UnaryOp MethodName_toUnaryOperator(KonohaContext *kctx, kmethodn_t mn)
+static enum UnaryOp KMethodName_toUnaryOperator(KonohaContext *kctx, kmethodn_t mn)
 {
 	if(mn == MN_opSUB) return Neg;
 	if(mn == MN_opNOT) return Not;
@@ -186,7 +186,7 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 		if(params->psize == 0) { /* UnaryOperator */
 			if(retTy == KType_int) {
 				/* int int.opSUB() */
-				enum UnaryOp Op = MethodName_toUnaryOperator(kctx, mn);
+				enum UnaryOp Op = KMethodName_toUnaryOperator(kctx, mn);
 				INode *Param = FetchINode(kctx, builder, stmt, expr, 1, KType_int);
 				return CreateUnaryInst(BLD(builder), Op, Param);
 			}
@@ -195,14 +195,14 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 			ktypeattr_t ptype = params->paramtypeItems[0].attrTypeId;
 			if(retTy == KType_boolean && ptype == KType_int) {
 				/* boolean int.(opEQ|opNE|opGT|opGE|opLT|opLE) (int x) */
-				enum BinaryOp Op = MethodName_toBinaryOperator(kctx, mn);
+				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
 				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, KType_int);
 				INode *RHS = FetchINode(kctx, builder, stmt, expr, 2, KType_int);
 				return CreateBinaryInst(BLD(builder), Op, LHS, RHS);
 			}
 			else if(retTy == KType_int && ptype == KType_int) {
 				/* int int.(opADD|opSUB|opMUL|opDIV|opMOD|opLSHIFT|opRSHIFT|opAND|opOR|opXOR) (int x) */
-				enum BinaryOp Op = MethodName_toBinaryOperator(kctx, mn);
+				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
 				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, KType_int);
 				INode *RHS = FetchINode(kctx, builder, stmt, expr, 2, KType_int);
 				return CreateBinaryInst(BLD(builder), Op, LHS, RHS);
@@ -213,7 +213,7 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 		if(params->psize == 0) { /* UnaryOperator */
 			if(retTy == KType_float) {
 				/* int int.opSUB() */
-				enum UnaryOp Op = MethodName_toUnaryOperator(kctx, mn);
+				enum UnaryOp Op = KMethodName_toUnaryOperator(kctx, mn);
 				INode *Param = FetchINode(kctx, builder, stmt, expr, 1, KType_float);
 				return CreateUnaryInst(BLD(builder), Op, Param);
 			}
@@ -222,14 +222,14 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 			ktypeattr_t ptype = params->paramtypeItems[0].attrTypeId;
 			if(retTy == KType_boolean && ptype == KType_float) {
 				/* boolean float.(opEQ|opNE|opGT|opGE|opLT|opLE) (float x) */
-				enum BinaryOp Op = MethodName_toBinaryOperator(kctx, mn);
+				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
 				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, KType_float);
 				INode *RHS = FetchINode(kctx, builder, stmt, expr, 2, KType_float);
 				return CreateBinaryInst(BLD(builder), Op, LHS, RHS);
 			}
 			else if(retTy == KType_float && ptype == KType_float) {
 				/* float float.(opADD|opSUB|opMUL|opDIV) (float x) */
-				enum BinaryOp Op = MethodName_toBinaryOperator(kctx, mn);
+				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
 				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, KType_float);
 				INode *RHS = FetchINode(kctx, builder, stmt, expr, 2, KType_float);
 				return CreateBinaryInst(BLD(builder), Op, LHS, RHS);
@@ -656,7 +656,7 @@ typedef void (*GenCodeFunc)(KonohaContext*, kMethod*, kBlock *, int options);
 
 void RecompileMethod(KonohaContext *kctx, kMethod *mtd)
 {
-	DBG_P("[Recompile]: %s.%s%s", KType_text(mtd->typeId), MethodName_Fmt2(mtd->mn));
+	DBG_P("[Recompile]: %s.%s%s", KType_text(mtd->typeId), KMethodName_Fmt2(mtd->mn));
 	KonohaLibVar *l = (KonohaLibVar *) kctx->klib;
 	GenCodeFunc OldFunc = l->kMethod_GenCode;
 #ifdef FUELVM_USE_LLVM
