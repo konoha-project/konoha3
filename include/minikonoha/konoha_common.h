@@ -92,7 +92,7 @@ static inline void KonohaCommonModule_Init(KonohaContext *kctx, KTraceInfo *trac
 
 typedef const struct kPrototypeVar kPrototype;
 struct kPrototypeVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 //	kfloat_t floatValue;
 };
 
@@ -106,14 +106,14 @@ struct kPrototypeVar {
 
 typedef const struct kFloatVar kFloat;
 struct kFloatVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	kfloat_t floatValue;
 };
 
 /* ------- */
 /* Iterator */
 
-#define CFLAG_Iterator         KClassFlag_Final
+#define KClassFlag_Iterator         KClassFlag_Final
 #define KClass_Iterator            KGetKonohaCommonModule()->cIterator
 #define KType_Iterator            KGetKonohaCommonModule()->cIterator->typeId
 #define KClass_StringIterator      KGetKonohaCommonModule()->cStringIterator
@@ -125,7 +125,7 @@ struct kFloatVar {
 
 typedef struct kIteratorVar kIterator;
 struct kIteratorVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	kbool_t (*hasNext)(KonohaContext *kctx, KonohaStack *);
 	void    (*setNextResult)(KonohaContext *kctx, KonohaStack *);
 	size_t current_pos;
@@ -156,7 +156,7 @@ struct kIteratorVar {
 typedef struct kFileVar kFile;
 
 struct kFileVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 #ifdef USE_FILE
 	FILE *fp;
 #else

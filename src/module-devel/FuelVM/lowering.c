@@ -876,19 +876,19 @@ static void ByteCode_Link(ARRAY(BlockPtr) *blocks, ByteCode *code)
 	}
 }
 
-static void ByteCode_free(KonohaContext *kctx, struct VirtualCode *vcode)
+static void ByteCode_free(KonohaContext *kctx, struct KVirtualCode *vcode)
 {
 	ByteCode *code = ((ByteCode *) vcode)-1;
 	free(code);
 }
 
-static void ByteCode_write(KonohaContext *kctx, KBuffer *wb, struct VirtualCode *vcode)
+static void ByteCode_write(KonohaContext *kctx, KBuffer *wb, struct KVirtualCode *vcode)
 {
 	ByteCode *code = (ByteCode *) vcode;
 	ByteCode_Dump(code);
 }
 
-static struct VirtualCodeAPI fuelvm_api = {
+static struct KVirtualCodeAPI fuelvm_api = {
 	ByteCode_free, ByteCode_write
 };
 
@@ -930,7 +930,7 @@ static ByteCode *IRBuilder_Lowering(FuelIRBuilder *builder)
 	/* Direct Threading */
 	FuelVM_Exec(0, 0, pc);
 
-	struct VirtualCodeAPI **api = (struct VirtualCodeAPI **) (pc+1);
+	struct KVirtualCodeAPI **api = (struct KVirtualCodeAPI **) (pc+1);
 	api[-1] = &fuelvm_api;
 
 	Code.list = 0;

@@ -48,7 +48,7 @@ extern "C" {
 
 typedef const struct _kSockAddr kSockAddr;
 struct _kSockAddr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	struct sockaddr_in *sockaddr_in;
 };
 

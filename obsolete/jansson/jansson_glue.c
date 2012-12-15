@@ -40,7 +40,7 @@ extern "C" {
 
 typedef struct kJanssonVar kJson;
 struct kJanssonVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	json_t *obj;
 };
 

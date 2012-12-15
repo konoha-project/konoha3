@@ -13,11 +13,11 @@ enum STRUKClass_TYPE_ID {
 	ID_short,
 	ID_int,
 	ID_PtrKonohaContextVar,
-	ID_KonohaObjectHeader,
+	ID_kObjectHeader,
 	ID_PtrkObjectVar,
 	ID_PtrPtrkObjectVar,
 	ID_PtrKonohaValueVar,
-	ID_PtrMethodFunc,
+	ID_PtrKMethodFunc,
 	ID_PtrkMethodVar,
 	ID_MAX,
 	ID_uint = ID_int,
@@ -30,7 +30,7 @@ enum STRUKClass_TYPE_ID {
 	ID_PtrKRuntimeContextVar = ID_Ptrvoid,
 	ID_PtrPtrKRuntimeModule = ID_Ptrvoid,
 	ID_PtrPtrKContextModule = ID_Ptrvoid,
-	ID_PtrVirtualCode = ID_Ptrvoid,
+	ID_PtrKVirtualCode = ID_Ptrvoid,
 	ID_PtrkTokenVar = ID_Ptrvoid,
 	ID_PtrkNameSpaceVar = ID_Ptrvoid,
 	ID_ERROR = -1
@@ -126,7 +126,7 @@ static llvm::Type *LLVMTYPE_ObjectHeader = NULL;
 static llvm::Type *LLVMTYPE_ObjectPtr = NULL;
 static llvm::Type *LLVMTYPE_KonohaValuePtr = NULL;
 static llvm::Type *LLVMTYPE_MethodPtr = NULL;
-static llvm::Type *LLVMTYPE_MethodFunc = NULL;
+static llvm::Type *LLVMTYPE_KMethodFunc = NULL;
 
 static llvm::Type *ToType(enum STRUKClass_TYPE_ID ID)
 {
@@ -137,7 +137,7 @@ static llvm::Type *ToType(enum STRUKClass_TYPE_ID ID)
 	case ID_short:   return getShortTy();
 	case ID_int:     return llvm::Type::getInt32Ty(LLVM_CONTEXT());
 	case ID_PtrKonohaContextVar: return LLVMTYPE_ContextPtr;
-	case ID_KonohaObjectHeader:  return LLVMTYPE_ObjectHeader;
+	case ID_kObjectHeader:  return LLVMTYPE_ObjectHeader;
 	case ID_PtrkObjectVar:       return LLVMTYPE_ObjectPtr;
 	case ID_PtrPtrkObjectVar:
 		if(LLVMTYPE_ObjectPtr)
@@ -145,7 +145,7 @@ static llvm::Type *ToType(enum STRUKClass_TYPE_ID ID)
 		else
 			return llvm::PointerType::get(getLongTy(), 0);
 	case ID_PtrKonohaValueVar: return LLVMTYPE_KonohaValuePtr;
-	case ID_PtrMethodFunc:     return LLVMTYPE_MethodFunc;
+	case ID_PtrKMethodFunc:     return LLVMTYPE_KMethodFunc;
 	case ID_PtrkMethodVar:     return LLVMTYPE_MethodPtr;
 	default:
 		return getLongTy();
@@ -175,7 +175,7 @@ static llvm::Type *CreateType(const struct TypeInfo &Info)
 
 static void LLVMType_Init()
 {
-	LLVMTYPE_ObjectHeader = CreateType(KonohaObjectHeaderType);
+	LLVMTYPE_ObjectHeader = CreateType(kObjectHeaderType);
 
 	llvm::Type *ObjectTy = CreateType(kObjectVarType);
 	LLVMTYPE_ObjectPtr = llvm::PointerType::get(ObjectTy, 0);
@@ -186,7 +186,7 @@ static void LLVMType_Init()
 	llvm::Type *ContextTy = CreateType(KonohaContextVarType);
 	LLVMTYPE_ContextPtr = llvm::PointerType::get(ContextTy, 0);
 
-	LLVMTYPE_MethodFunc = CreateType(MethodFuncType);
+	LLVMTYPE_KMethodFunc = CreateType(KMethodFuncType);
 
 	llvm::Type *MethodTy = CreateType(kMethodVarType);
 	LLVMTYPE_MethodPtr = llvm::PointerType::get(MethodTy, 0);

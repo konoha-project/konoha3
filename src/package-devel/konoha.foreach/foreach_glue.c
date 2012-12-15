@@ -122,7 +122,7 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 		DBG_P("typeToken=%p, varToken=%p", TypeToken, VariableToken);
 		kExpr *IteratorExpr = SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, NULL);
 		if(!KType_IsIterator(IteratorExpr->attrTypeId)) {
-			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_(IteratorExpr->attrTypeId), MethodName_To(KType_Iterator), 0, MethodMatch_NoOption);
+			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_(IteratorExpr->attrTypeId), MethodName_To(KType_Iterator), 0, KMethodMatch_NoOption);
 			if(mtd == NULL) {
 				kStmtExpr_Message(kctx, stmt, IteratorExpr, ErrTag, "expected Iterator expression after in");
 				KReturnUnboxValue(false);

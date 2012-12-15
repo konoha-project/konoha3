@@ -612,16 +612,16 @@ struct KonohaFactory {
 
 	// CodeGenerator
 	KModuleInfo  *CodeGeneratorInfo;
-	void*       (*GetCodeGenerateMethodFunc)(void);
+	void*       (*GetCodeGenerateKMethodFunc)(void);
 	void*       (*GenerateCode)(KonohaContext *kctx, kMethod *mtd, kBlock *bk, int options);
 
 	// VirtualMachine
 	KModuleInfo            *VirtualMachineInfo;
-	kbool_t               (*IsSupportedVirtualCode)(int opcode);
-//	struct VirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct VirtualCode *pc);
+	kbool_t               (*IsSupportedKVirtualCode)(int opcode);
+//	struct KVirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
 //	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
-//	void *                (*GetVirtualMachineMethodFunc)(void);
-	struct VirtualCode*   (*GetDefaultBootCode)(void);
+//	void *                (*GetVirtualMachineKMethodFunc)(void);
+	struct KVirtualCode*   (*GetDefaultBootCode)(void);
 	struct KBuilderAPI2*  (*GetDefaultBuilderAPI)(void);
 
 	/* JSON_API */
@@ -801,7 +801,7 @@ struct KonohaContextVar {
 	PlatformApi                      *platApi;
 	KonohaLib                        *klib;
 	KRuntime                         *share;
-	KRuntimeContextVar                 *stack;
+	KRuntimeContextVar               *stack;
 	KRuntimeModule                  **modshare;
 	KContextModule                  **modlocal;
 	void                             *gcContext; // defined in each module
@@ -908,7 +908,7 @@ struct KContextModule {
 	kfloat_t    floatValue; \
 	struct KonohaValueVar *previousStack;\
 	intptr_t    shift0;  \
-	struct VirtualCode  *pc; \
+	struct KVirtualCode  *pc; \
 	kMethod     *calledMethod;\
 	kNameSpace  *calledNameSpace;\
 	uintptr_t    calledFileLine
@@ -1089,21 +1089,21 @@ struct KClassField {
 #define KClassFlag_Interface        ((kshortflag_t)(1<<9))
 #define KClassFlag_Prototype        ((kshortflag_t)(1<<10))
 
-#define CFLAG_SUPERMASK         KClassFlag_Prototype|KClassFlag_Singleton
+#define KClassFlag_SUPERMASK         KClassFlag_Prototype|KClassFlag_Singleton
 
-#define CFLAG_void              KClassFlag_TypeVar|KClassFlag_UnboxType|KClassFlag_Singleton|KClassFlag_Final
-#define CFLAG_var               KClassFlag_TypeVar|KClassFlag_UnboxType|KClassFlag_Singleton|KClassFlag_Final
-#define CFLAG_Object            KClassFlag_Nullable
-#define CFLAG_boolean           KClassFlag_Nullable|KClassFlag_Immutable|KClassFlag_UnboxType|KClassFlag_Final
-#define CFLAG_int               KClassFlag_Nullable|KClassFlag_Immutable|KClassFlag_UnboxType|KClassFlag_Final
-#define CFLAG_String            KClassFlag_Nullable|KClassFlag_Immutable|KClassFlag_Final
-#define CFLAG_Array             KClassFlag_Nullable|KClassFlag_Final
-#define CFLAG_Param             KClassFlag_Nullable|KClassFlag_Final
-#define CFLAG_Method            KClassFlag_Nullable|KClassFlag_Final
-#define CFLAG_Func              KClassFlag_Nullable|KClassFlag_Final
-#define CFLAG_NameSpace         KClassFlag_Nullable|KClassFlag_Final
-#define CFLAG_System            KClassFlag_Nullable|KClassFlag_Singleton|KClassFlag_Final
-#define CFLAG_0                 KClassFlag_TypeVar|KClassFlag_UnboxType|KClassFlag_Singleton|KClassFlag_Final
+#define KClassFlag_void              KClassFlag_TypeVar|KClassFlag_UnboxType|KClassFlag_Singleton|KClassFlag_Final
+#define KClassFlag_var               KClassFlag_TypeVar|KClassFlag_UnboxType|KClassFlag_Singleton|KClassFlag_Final
+#define KClassFlag_Object            KClassFlag_Nullable
+#define KClassFlag_boolean           KClassFlag_Nullable|KClassFlag_Immutable|KClassFlag_UnboxType|KClassFlag_Final
+#define KClassFlag_int               KClassFlag_Nullable|KClassFlag_Immutable|KClassFlag_UnboxType|KClassFlag_Final
+#define KClassFlag_String            KClassFlag_Nullable|KClassFlag_Immutable|KClassFlag_Final
+#define KClassFlag_Array             KClassFlag_Nullable|KClassFlag_Final
+#define KClassFlag_Param             KClassFlag_Nullable|KClassFlag_Final
+#define KClassFlag_Method            KClassFlag_Nullable|KClassFlag_Final
+#define KClassFlag_Func              KClassFlag_Nullable|KClassFlag_Final
+#define KClassFlag_NameSpace         KClassFlag_Nullable|KClassFlag_Final
+#define KClassFlag_System            KClassFlag_Nullable|KClassFlag_Singleton|KClassFlag_Final
+#define KClassFlag_0                 KClassFlag_TypeVar|KClassFlag_UnboxType|KClassFlag_Singleton|KClassFlag_Final
 
 #define KClass_(T)                kctx->share->classTable.classItems[TypeAttr_Unmask(T)]
 #define KClass_cparam(CT)         kctx->share->paramdomList->ParamItems[(CT)->cparamdom]
@@ -1142,14 +1142,14 @@ struct KClassField {
 #define IS_NULL(o)                 ((((o)->h.magicflag) & kObjectFlag_NullObject) == kObjectFlag_NullObject)
 #define IS_NOTNULL(o)              ((((o)->h.magicflag) & kObjectFlag_NullObject) != kObjectFlag_NullObject)
 
-typedef struct KonohaObjectHeader {
+typedef struct kObjectHeader {
 	kmagicflag_t magicflag;
 	KClass *ct;
 	KProtoMap *prototypePtr;
-} KonohaObjectHeader;
+} kObjectHeader;
 
 struct kObjectVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	union {
 		kObject  *fieldObjectItems[5];
 		uintptr_t fieldUnboxItems[5];
@@ -1177,12 +1177,12 @@ typedef const struct kNumberVar kNumber;
 typedef struct kNumberVar       kNumberVar;
 
 struct kNumberVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	ABSTRACT_NUMBER;
 };
 
 struct kBooleanVar /* extends kNumber */ {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	ABSTRACT_NUMBER;
 };
 
@@ -1198,7 +1198,7 @@ struct kBooleanVar /* extends kNumber */ {
 /* Int */
 
 struct kIntVar /* extends kNumber */ {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	ABSTRACT_NUMBER;
 };
 
@@ -1229,12 +1229,12 @@ typedef enum {
 
 typedef const struct kBytesVar kBytes;
 struct kBytesVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	COMMON_BYTEARRAY;
 };
 
 struct kStringVar /* extends _Bytes */ {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	COMMON_BYTEARRAY;
 	const char inline_text[SIZEOF_INLINETEXT];
 };
@@ -1251,9 +1251,7 @@ typedef enum {
 
 typedef enum { NonZero, EnsureZero } StringfyPolicy;
 
-#define K_NULLTEXT          "null"
-#define new_T(t)            (KLIB new_kString(kctx, t, knh_strlen(t), StringPolicy_TEXT|StringPolicy_ASCII|StringPolicy_POOL))
-#define new_S(T, L)         (KLIB new_kString(kctx, T, L, StringPolicy_ASCII|StringPolicy_POOL))
+#define K_NULLTEXT                "null"
 #define kString_text(s)           ((const char *) (kObject_class(s)->unbox(kctx, (kObject *)s)))
 #define kString_size(s)           ((s)->bytesize)
 
@@ -1267,7 +1265,7 @@ typedef enum { NonZero, EnsureZero } StringfyPolicy;
 #define kArray_Set(P, o, b)      KFlag_Set(uintptr_t,(o)->h.magicflag, kArrayFlag_##P,b)
 
 struct kArrayVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	size_t bytesize;
 	union {
 		uintptr_t              *unboxItems;
@@ -1301,7 +1299,7 @@ typedef struct kparamtype_t {
 } kparamtype_t;
 
 struct kParamVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	ktypeattr_t rtype; kushort_t psize;
 	kparamtype_t paramtypeItems[3];
 };
@@ -1359,25 +1357,25 @@ static const char* MethodFlagData[] = {
 #define kMethod_GetReturnType(mtd)   KClass_((kMethod_GetParam(mtd))->rtype)
 #define kMethod_IsReturnFunc(mtd)    (KClass_((kMethod_GetParam(mtd))->rtype)->baseTypeId == KType_Func)
 #define kMethod_ParamSize(mtd)       ((kMethod_GetParam(mtd))->psize)
-#define Method_t(mtd)                KType_text((mtd)->typeId),  MethodName_Fmt2((mtd)->mn)
+#define kMethod_Fmt3(mtd)            KType_text((mtd)->typeId),  MethodName_Fmt2((mtd)->mn)
 
 /* method data */
 #define DEND     (-1)
 
 #define KMETHOD    void  /*CC_FASTCALL_*/
-typedef KMETHOD   (*MethodFunc)(KonohaContext*, KonohaStack *);
+typedef KMETHOD   (*KMethodFunc)(KonohaContext*, KonohaStack *);
 
-struct VirtualCodeAPI {
-	void (*FreeVirtualCode)(KonohaContext *kctx, struct VirtualCode *);
-	void (*WriteVirtualCode)(KonohaContext *kctx, KBuffer *, struct VirtualCode *);
+struct KVirtualCodeAPI {
+	void (*FreeVirtualCode)(KonohaContext *kctx, struct KVirtualCode *);
+	void (*WriteVirtualCode)(KonohaContext *kctx, KBuffer *, struct KVirtualCode *);
 };
 
 struct kMethodVar {
-	KonohaObjectHeader     h;
-	MethodFunc              invokeMethodFunc;
+	kObjectHeader     h;
+	KMethodFunc              invokeKMethodFunc;
 	union {
-		struct VirtualCode     *vcode_start;
-		struct VirtualCodeAPI   **virtualCodeApi_plus1;
+		struct KVirtualCode     *vcode_start;
+		struct KVirtualCodeAPI   **virtualCodeApi_plus1;
 	};
 	uintptr_t         flag;
 	ktypeattr_t       typeId;       kmethodn_t  mn;
@@ -1391,7 +1389,7 @@ struct kMethodVar {
 	uintptr_t         serialNumber;
 };
 
-typedef struct MethodMatch {
+typedef struct KMethodMatch {
 	kNameSpace   *ns;
 	ksymbol_t     mn;
 	kushort_t     paramsize;
@@ -1400,14 +1398,14 @@ typedef struct MethodMatch {
 	kbool_t       isBreak;
 	kMethod      *foundMethodNULL;
 	kArray       *foundMethodListNULL;
-} MethodMatch;
+} KMethodMatch;
 
 typedef enum {
-	MethodMatch_NoOption   = 1,
-	MethodMatch_CamelStyle = 1 << 1
-} MethodMatchOption;
+	KMethodMatch_NoOption   = 1,
+	KMethodMatch_CamelStyle = 1 << 1
+} KMethodMatchOption;
 
-typedef kbool_t (*MethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, MethodMatch *m);
+typedef kbool_t (*KMethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, KMethodMatch *m);
 
 #define K_CALLDELTA   4
 #define K_RTNIDX    (-4)
@@ -1429,7 +1427,7 @@ typedef kbool_t (*MethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, MethodMatc
 #define IS_Func(o)              (kObject_baseTypeId(o) == KType_Func)
 
 struct kFuncVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	kMethod *method;
 	kObject *env;
 };
@@ -1441,7 +1439,7 @@ struct kFuncVar {
 #define kNameSpace_sizeConstTable(ns)    (ns->constTable.data.bytesize / sizeof(KKeyValue))
 
 struct kNameSpaceVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	kpackageId_t packageId;  	       kshortflag_t syntaxOption;
 	kArray                            *NameSpaceConstList;
 	kNameSpace                        *parentNULL;
@@ -1478,7 +1476,7 @@ struct kNameSpaceVar {
 typedef const struct _kSystem kSystem;
 
 struct _kSystem {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 };
 
 /* ------------------------------------------------------------------------ */
@@ -1522,13 +1520,13 @@ struct _kSystem {
 #define KStackCall(SFP) { \
 		SFP[K_SHIFTIDX].previousStack = kctx->stack->topStack;\
 		kctx->stack->topStack = SFP;\
-		(SFP[K_MTDIDX].calledMethod)->invokeMethodFunc(kctx, SFP);\
+		(SFP[K_MTDIDX].calledMethod)->invokeKMethodFunc(kctx, SFP);\
 		kctx->stack->topStack = SFP[K_SHIFTIDX].previousStack;\
 	} \
 
 #define KStackCallAgain(SFP, MTD) { \
 		SFP[K_MTDIDX].calledMethod = MTD;\
-		(MTD)->invokeMethodFunc(kctx, SFP);\
+		(MTD)->invokeKMethodFunc(kctx, SFP);\
 	} \
 
 
@@ -1628,8 +1626,8 @@ struct KonohaLibVar {
 	kpackageId_t        (*KpackageId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
 	ksymbol_t           (*Ksymbol)(KonohaContext*, const char*, size_t, int spol, ksymbol_t def);
 
-	KonohaContextVar*   (*KonohaContext_Init)(KonohaContext *rootContext, const PlatformApi *api);
-	void                (*KonohaContext_Free)(KonohaContext *rootContext, KonohaContextVar *ctx);
+	KonohaContextVar*   (*KonohaContext_Init)(KonohaContext *, const PlatformApi *api);
+	void                (*KonohaContext_Free)(KonohaContext *, KonohaContextVar *ctx);
 	void                (*ReftraceAll)(KonohaContext *kctx, KObjectVisitor *);
 
 	KonohaContext*      (*KonohaFactory_CreateKonoha)(KonohaFactory *factory);
@@ -1664,9 +1662,9 @@ struct KonohaLibVar {
 	void                (*kArray_Clear)(KonohaContext*, kArray *, size_t);
 
 	kparamId_t          (*Kparamdom)(KonohaContext*, kushort_t, const kparamtype_t *);
-	kMethodVar*         (*new_kMethod)(KonohaContext*, kArray *gcstack, uintptr_t, ktypeattr_t, kmethodn_t, MethodFunc);
+	kMethodVar*         (*new_kMethod)(KonohaContext*, kArray *gcstack, uintptr_t, ktypeattr_t, kmethodn_t, KMethodFunc);
 	kParam*             (*kMethod_SetParam)(KonohaContext*, kMethod *, ktypeattr_t, kushort_t, const kparamtype_t *);
-	void                (*kMethod_SetFunc)(KonohaContext*, kMethod*, MethodFunc);
+	void                (*kMethod_SetFunc)(KonohaContext*, kMethod*, KMethodFunc);
 	void                (*kMethod_GenCode)(KonohaContext*, kMethod*, kBlock *, int options);
 	intptr_t            (*kMethod_indexOfField)(kMethod *);
 
@@ -1689,7 +1687,7 @@ struct KonohaLibVar {
 	kMethod*            (*kNameSpace_GetGetterMethodNULL)(KonohaContext*, kNameSpace *, KClass*, ksymbol_t mn);
 	kMethod*            (*kNameSpace_GetSetterMethodNULL)(KonohaContext*, kNameSpace *, KClass*, ksymbol_t mn, ktypeattr_t);
 	kMethod*            (*kNameSpace_GetCoercionMethodNULL)(KonohaContext*, kNameSpace *, KClass *, KClass *);
-	kMethod*            (*kNameSpace_GetMethodByParamSizeNULL)(KonohaContext*, kNameSpace *, KClass *, kmethodn_t mn, int paramsize, MethodMatchOption option);
+	kMethod*            (*kNameSpace_GetMethodByParamSizeNULL)(KonohaContext*, kNameSpace *, KClass *, kmethodn_t mn, int paramsize, KMethodMatchOption option);
 	kMethod*            (*kNameSpace_GetMethodBySignatureNULL)(KonohaContext*, kNameSpace *, KClass *, kmethodn_t mn, int paramdom, int paramsize, kparamtype_t *);
 	kMethod*            (*kMethod_DoLazyCompilation)(KonohaContext *kctx, kMethod *mtd, kparamtype_t *, int options);
 //	void                (*kNameSpace_compileAllDefinedMethods)(KonohaContext *kctx);

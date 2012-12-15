@@ -197,7 +197,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 	}
 	expr = (kExprVar *) SUGAR kExpr_SetConstValue(kctx, expr, NULL, UPCAST(text));
 	kNameSpace *ns = Stmt_ns(stmt);
-	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_String, MN_("+"), 1, MethodMatch_NoOption);
+	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_String, MN_("+"), 1, KMethodMatch_NoOption);
 
 	expr = (kExprVar *) new_ConstValueExpr(kctx, NULL, UPCAST(TS_EMPTY));
 	while(true) {

@@ -246,7 +246,7 @@ static kString* new_kString(KonohaContext *kctx, kArray *gcstack, const char *te
 
 // Array
 struct _kAbstractArray {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	KGrowingArray a;
 };
 
@@ -461,7 +461,7 @@ static uintptr_t methodSerialNumber = 0;
 static void kMethod_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kMethodVar *mtd = (kMethodVar *)o;
-	bzero(&mtd->invokeMethodFunc, sizeof(kMethod) - sizeof(KonohaObjectHeader));
+	bzero(&mtd->invokeKMethodFunc, sizeof(kMethod) - sizeof(kObjectHeader));
 	KFieldInit(mtd, mtd->SourceToken, (struct kToken *)K_NULL);
 	KFieldInit(mtd, mtd->LazyCompileNameSpace, K_NULL);
 	mtd->serialNumber = methodSerialNumber++;
@@ -484,7 +484,7 @@ static void kMethod_Free(KonohaContext *kctx, kObject *o)
 }
 
 #define KClass_MethodVar KClass_Method
-static kMethodVar* new_kMethod(KonohaContext *kctx, kArray *gcstack, uintptr_t flag, ktypeattr_t cid, kmethodn_t mn, MethodFunc func)
+static kMethodVar* new_kMethod(KonohaContext *kctx, kArray *gcstack, uintptr_t flag, ktypeattr_t cid, kmethodn_t mn, KMethodFunc func)
 {
 	kMethodVar* mtd = new_(MethodVar, NULL, gcstack);
 	mtd->flag       = flag;
@@ -516,7 +516,7 @@ static intptr_t STUB_Method_indexOfField(kMethod *mtd)
 static void kNameSpace_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kNameSpaceVar *ns = (kNameSpaceVar *)o;
-	bzero(&ns->parentNULL, sizeof(kNameSpace) - sizeof(KonohaObjectHeader));
+	bzero(&ns->parentNULL, sizeof(kNameSpace) - sizeof(kObjectHeader));
 	KFieldInit(ns, ns->NameSpaceConstList, new_(Array, 0, OnField));
 	ns->syntaxOption = kNameSpace_DefaultSyntaxOption;
 	if(conf != NULL) {
@@ -712,7 +712,7 @@ static KClassVar* new_KClass(KonohaContext *kctx, KClass *bct, KDEFINE_CLASS *s,
 static KClass *KClass_extendedBody(KonohaContext *kctx, KClass *ct, size_t head, size_t body)
 {
 	KClass *bct = ct;
-	while(ct->cstruct_size < sizeof(KonohaObjectHeader) + head + body) {
+	while(ct->cstruct_size < sizeof(kObjectHeader) + head + body) {
 		if(ct->searchSimilarClassNULL == NULL) {
 			KClassVar *newct = new_KClass(kctx, bct, NULL, NOPLINE);
 			newct->cflag |= KClassFlag_Private;
@@ -866,24 +866,24 @@ static KClass *KClass_define(KonohaContext *kctx, kpackageId_t packageId, kStrin
 #define UnboxTypeName(C) \
 	.structname = #C,\
 	.typeId = KType_##C,\
-	.cflag  = CFLAG_##C\
+	.cflag  = KClassFlag_##C\
 
 #define TYNAME(C) \
 	.structname = #C,\
 	.typeId = KType_##C,\
-	.cflag = CFLAG_##C,\
+	.cflag = KClassFlag_##C,\
 	.cstruct_size = sizeof(k##C)\
 
 #define SetUnboxTypeName(VAR, C) do{\
 		VAR.structname = #C;\
 		VAR.typeId = KType_##C;\
-		VAR.cflag  = CFLAG_##C;\
+		VAR.cflag  = KClassFlag_##C;\
 	}while(0)\
 
 #define SETTYNAME(VAR, C) do{\
 		VAR.structname = #C;\
 		VAR.typeId = KType_##C;\
-		VAR.cflag = CFLAG_##C;\
+		VAR.cflag = KClassFlag_##C;\
 		VAR.cstruct_size = sizeof(k##C);\
 	}while(0)\
 

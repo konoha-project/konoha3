@@ -120,7 +120,7 @@ static RawEvent dequeueRawEventFromLocalQueue(LocalQueue *queue)
 /* ------------------------------------------------------------------------ */
 // Event class
 typedef struct {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	json_t *j;
 } kEvent;
 

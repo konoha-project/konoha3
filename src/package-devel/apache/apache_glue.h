@@ -10,22 +10,22 @@
 #define KClass_Apache         kmodapache->cApache
 
 typedef struct kRequest {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	request_rec *r;
 } kRequest;
 
 typedef struct kAprTable {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	apr_table_t *tbl;
 } kAprTable;
 
 typedef struct kAprTableEntry {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	apr_table_entry_t *entry;
 } kAprTableEntry;
 
 typedef struct kApache {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 } kApache;
 
 typedef struct {

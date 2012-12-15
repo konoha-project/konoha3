@@ -31,7 +31,7 @@ extern "C"{
 
 typedef const struct _kDynamic kDynamic;
 struct _kDynamic {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 };
 
 //static void Dynamic_Init(KonohaContext *kctx, kObject *o, void *conf)
@@ -73,7 +73,7 @@ static KMETHOD Dynamic_(KonohaContext *kctx, KonohaStack *sfp)
 //	kString  *symbolString = kctx->esp[-1].asString;
 	kNameSpace *ns = sfp[K_NSIDX].asNameSpace;
 	DBG_ASSERT(IS_NameSpace(ns));
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, kObject_class(obj), symbol, argc, MethodMatch_CamelStyle);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, kObject_class(obj), symbol, argc, KMethodMatch_CamelStyle);
 	if(mtd != NULL) {
 		if(kMethod_CheckMethodKStackCall(kctx, sfp, mtd, argc)) {
 			KStackSetArgc(sfp, argc);

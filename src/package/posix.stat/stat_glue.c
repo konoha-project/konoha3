@@ -52,7 +52,7 @@ extern "C"{
 
 typedef struct kFileStatusVar kFileStatus;
 struct kFileStatusVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	struct stat *stat;
 };
 

@@ -47,7 +47,7 @@ typedef const struct QueryDriverVar {
 } QueryDriver;
 
 typedef struct kConnection {
-	KonohaObjectHeader  h;
+	kObjectHeader  h;
 	DBHandler   *db;
 	QueryDriver *driver;
 } kConnection;
@@ -64,7 +64,7 @@ typedef struct KColumn {
 } KColumn;
 
 typedef struct kResultSet {
-	KonohaObjectHeader  h;
+	kObjectHeader  h;
 	kConnection  *connectionNULL;
 	KCursor      *qcur;
 	KColumn      *column;

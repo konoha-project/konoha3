@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 typedef struct Person {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	kString *name;
 	kint_t   age;
 } kPerson;

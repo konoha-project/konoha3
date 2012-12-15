@@ -45,7 +45,7 @@ static KMETHOD Object_to(KonohaContext *kctx, KonohaStack *sfp)
 //		DBG_P("AFTER >>>>>>>>>>> %lld\n", sfp[0].unboxValue);
 		if(mtd != NULL && sfp[K_MTDIDX].calledMethod != mtd /* to avoid infinite loop */) {
 			sfp[K_MTDIDX].calledMethod = mtd;
-			mtd->invokeMethodFunc(kctx, sfp);
+			mtd->invokeKMethodFunc(kctx, sfp);
 			return;
 		}
 	}
@@ -70,7 +70,7 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 //		DBG_P("AFTER >>>>>>>>>>> %lld\n", sfp[0].unboxValue);
 		if(mtd != NULL && sfp[K_MTDIDX].calledMethod != mtd /* to avoid infinite loop */) {
 			sfp[K_MTDIDX].calledMethod = mtd;
-			mtd->invokeMethodFunc(kctx, sfp);
+			mtd->invokeKMethodFunc(kctx, sfp);
 			return;
 		}
 	}

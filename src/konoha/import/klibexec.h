@@ -841,7 +841,7 @@ static uintptr_t ApplySystemFunc(KonohaContext *kctx, uintptr_t defval, const ch
 	ksymbol_t mn = KLIB Ksymbol(kctx, name, strlen(name), StringPolicy_TEXT, KSymbol_NewId);
 	int i, psize = param == NULL ? 0 : strlen(param) / 2;
 	kNameSpace *ns = KNULL(NameSpace);
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, kObject_class(ns), mn, psize, MethodMatch_NoOption);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, kObject_class(ns), mn, psize, KMethodMatch_NoOption);
 	if(mtd != NULL) {
 		KClass *returnType = kMethod_GetReturnType(mtd);
 		BEGIN_UnusedStack(lsfp);

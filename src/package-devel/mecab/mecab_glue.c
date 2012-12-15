@@ -31,17 +31,17 @@ extern "C" {
 #endif
 
 struct _kTagger {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	mecab_t *mecab;
 } kTagger;
 
 struct _kDictionary {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	mecab_dictionary_info_t *d;
 } kDictionary;
 
 struct _kMecabNode {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	const mecab_node_t *node;
 } kMecabNode;
 

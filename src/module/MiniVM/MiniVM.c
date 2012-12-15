@@ -70,10 +70,10 @@ typedef struct {
 	const char *name;
 	kshortflag_t   flag;
 	kushort_t argsize;
-	VirtualCodeType arg1;
-	VirtualCodeType arg2;
-	VirtualCodeType arg3;
-	VirtualCodeType arg4;
+	KVirtualCodeType arg1;
+	KVirtualCodeType arg2;
+	KVirtualCodeType arg3;
+	KVirtualCodeType arg4;
 } DEFINE_OPSPEC;
 
 #define OPSPEC(T)   {#T, 0, VPARAM_##T},
@@ -81,12 +81,12 @@ static const DEFINE_OPSPEC OPDATA[] = {
 	OPDEFINE(OPSPEC)
 };
 
-static void DumpOpArgument(KonohaContext *kctx, KBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *vcode_start)
+static void DumpOpArgument(KonohaContext *kctx, KBuffer *wb, KVirtualCodeType type, KVirtualCode *c, size_t i, KVirtualCode *vcode_start)
 {
 	switch(type) {
 	case VMT_VOID: break;
 	case VMT_ADDR:
-		KLIB KBuffer_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - vcode_start));
+		KLIB KBuffer_printf(kctx, wb, " L%d", (int)((KVirtualCode *)c->p[i] - vcode_start));
 		break;
 	case VMT_UL: {
 		kfileline_t uline = (kfileline_t)c->data[i];
@@ -127,7 +127,7 @@ static void DumpOpArgument(KonohaContext *kctx, KBuffer *wb, VirtualCodeType typ
 	}/*switch*/
 }
 
-static void WriteVirtualCode1(KonohaContext *kctx, KBuffer *wb, VirtualCode *c, VirtualCode *vcode_start)
+static void WriteVirtualCode1(KonohaContext *kctx, KBuffer *wb, KVirtualCode *c, KVirtualCode *vcode_start)
 {
 	KLIB KBuffer_printf(kctx, wb, "[L%d:%d] %s(%d)", (int)(c - vcode_start), c->line, OPDATA[c->opcode].name, (int)c->opcode);
 	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg1, c, 0, vcode_start);
@@ -137,16 +137,16 @@ static void WriteVirtualCode1(KonohaContext *kctx, KBuffer *wb, VirtualCode *c, 
 	KLIB KBuffer_printf(kctx, wb, "\n");
 }
 
-static void WriteVirtualCode(KonohaContext *kctx, KBuffer *wb, VirtualCode *c)
+static void WriteVirtualCode(KonohaContext *kctx, KBuffer *wb, KVirtualCode *c)
 {
 	OPTHCODE *opTHCODE = (OPTHCODE *)(c-1);
-	size_t i, n = (opTHCODE->codesize / sizeof(VirtualCode)) - 1;
+	size_t i, n = (opTHCODE->codesize / sizeof(KVirtualCode)) - 1;
 	for(i = 0; i < n; i++) {
 		WriteVirtualCode1(kctx, wb, c+i, c);
 	}
 }
 
-static void DumpVirtualCode(KonohaContext *kctx, VirtualCode *c)
+static void DumpKVirtualCode(KonohaContext *kctx, KVirtualCode *c)
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
@@ -170,9 +170,9 @@ static void kNameSpace_LookupMethodWithInlineCache(KonohaContext *kctx, KonohaSt
 	sfp[K_MTDIDX].calledMethod = mtd;
 }
 
-static VirtualCode* KonohaVirtualMachine_Run(KonohaContext *, KonohaStack *, VirtualCode *);
+static KVirtualCode* KonohaVirtualMachine_Run(KonohaContext *, KonohaStack *, KVirtualCode *);
 
-static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStack *sfp, VirtualCode *pc)
+static KVirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStack *sfp, KVirtualCode *pc)
 {
 	int jmpresult;
 	INIT_GCSTACK();
@@ -226,7 +226,7 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 
 #endif/*USE_DIRECT_THREADED_CODE*/
 
-static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaStack *sfp0, struct VirtualCode *pc)
+static struct KVirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaStack *sfp0, struct KVirtualCode *pc)
 {
 #ifdef USE_DIRECT_THREADED_CODE
 	static void *OPJUMP[] = {
@@ -320,7 +320,7 @@ static inline size_t newsize2(size_t max)
 	return ((max - sizeof(BasicBlock)) * 2) + sizeof(BasicBlock);
 }
 
-static bblock_t BasicBlock_Add(KonohaContext *kctx, bblock_t blockId, kfileline_t uline, VirtualCode *op, size_t size, size_t padding_size)
+static bblock_t BasicBlock_Add(KonohaContext *kctx, bblock_t blockId, kfileline_t uline, KVirtualCode *op, size_t size, size_t padding_size)
 {
 	BasicBlock *bb = BasicBlock_FindById(kctx, blockId);
 	DBG_ASSERT(bb->newid == -1);
@@ -348,7 +348,7 @@ static void BasicBlock_WriteBuffer(KonohaContext *kctx, bblock_t blockId, KBuffe
 		bb->codeoffset = CodeOffset(wb);
 		if(bb->nextid == bb->branchid  && bb->nextid != -1) {
 			bb->branchid = -1;
-			len -= sizeof(VirtualCode); // remove unnecesarry jump ..
+			len -= sizeof(KVirtualCode); // remove unnecesarry jump ..
 		}
 		if(len > 0) {
 			bblock_t id = BasicBlock_id(kctx, bb);
@@ -356,8 +356,8 @@ static void BasicBlock_WriteBuffer(KonohaContext *kctx, bblock_t blockId, KBuffe
 			memcpy(buf, ((char *)bb) + sizeof(BasicBlock), len);
 			KLIB KBuffer_Write(kctx, wb, buf, len);
 			bb = BasicBlock_FindById(kctx, id);  // recheck
-			bb->lastoffset = CodeOffset(wb) - sizeof(VirtualCode);
-			DBG_ASSERT(bb->codeoffset + ((len / sizeof(VirtualCode)) - 1) * sizeof(VirtualCode) == bb->lastoffset);
+			bb->lastoffset = CodeOffset(wb) - sizeof(KVirtualCode);
+			DBG_ASSERT(bb->codeoffset + ((len / sizeof(KVirtualCode)) - 1) * sizeof(KVirtualCode) == bb->lastoffset);
 		}
 		else {
 			DBG_ASSERT(bb->branchid == -1);
@@ -378,7 +378,7 @@ static void BasicBlock_WriteBuffer(KonohaContext *kctx, bblock_t blockId, KBuffe
 
 static int BasicBlock_size(BasicBlock *bb)
 {
-	return (bb->size - sizeof(BasicBlock)) / sizeof(VirtualCode);
+	return (bb->size - sizeof(BasicBlock)) / sizeof(KVirtualCode);
 }
 
 static BasicBlock *BasicBlock_leapJump(KonohaContext *kctx, BasicBlock *bb)
@@ -404,7 +404,7 @@ static void BasicBlock_setJumpAddr(KonohaContext *kctx, BasicBlock *bb, char *vc
 			BasicBlock *bbJ = BasicBlock_leapJump(kctx, BasicBlock_FindById(kctx, bb->branchid));
 			OPJMP *j = (OPJMP *)(vcode + bb->lastoffset);
 			DBG_ASSERT(j->opcode == OPCODE_JMP || j->opcode == OPCODE_JMPF);
-			j->jumppc = (VirtualCode *)(vcode + bbJ->codeoffset);
+			j->jumppc = (KVirtualCode *)(vcode + bbJ->codeoffset);
 			bbJ = BasicBlock_FindById(kctx, bb->branchid);
 			if(!BasicBlock_isVisited(bbJ)) {
 				BasicBlock_setVisited(bbJ);
@@ -420,21 +420,21 @@ static void BasicBlock_setJumpAddr(KonohaContext *kctx, BasicBlock *bb, char *vc
 
 static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
 {
-	BasicBlock *bb = new_BasicBlock(kctx, sizeof(VirtualCode) * 2 + sizeof(BasicBlock), -1);
+	BasicBlock *bb = new_BasicBlock(kctx, sizeof(KVirtualCode) * 2 + sizeof(BasicBlock), -1);
 	return BasicBlock_id(kctx, bb);
 }
 
 #if defined(USE_DIRECT_THREADED_CODE)
 #define ASM(T, ...) do {\
 	OP##T op_ = {OP_(T), ## __VA_ARGS__};\
-	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+	union { KVirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	KBuilder_Asm(kctx, builder, &tmp_.op, sizeof(OP##T));\
 } while(0)
 
 #else
 #define ASM(T, ...) do {\
 	OP##T op_ = {OP_(T), ## __VA_ARGS__};\
-	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+	union { KVirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	KBuilder_Asm(kctx, builder, &tmp_.op, sizeof(OP##T));\
 } while(0)
 
@@ -446,9 +446,9 @@ static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
 #define SFP_(sfpidx)   ((sfpidx) * 2)
 
 
-static void KBuilder_Asm(KonohaContext *kctx, KBuilder *builder, VirtualCode *op, size_t opsize)
+static void KBuilder_Asm(KonohaContext *kctx, KBuilder *builder, KVirtualCode *op, size_t opsize)
 {
-	builder->bbMainId = BasicBlock_Add(kctx, builder->bbMainId, builder->common.uline, op, opsize, sizeof(VirtualCode));
+	builder->bbMainId = BasicBlock_Add(kctx, builder->bbMainId, builder->common.uline, op, opsize, sizeof(KVirtualCode));
 }
 
 static void kStmt_setLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label, bblock_t labelId)
@@ -876,7 +876,7 @@ static void KBuilder_VisitStackTopExpr(KonohaContext *kctx, KBuilder *builder, k
 
 // end of Visitor
 
-static void FreeVirtualCode(KonohaContext *kctx, struct VirtualCode *vcode)
+static void FreeVirtualCode(KonohaContext *kctx, struct KVirtualCode *vcode)
 {
 	OPTHCODE * opTHCODE = (OPTHCODE *)(vcode - 1);
 	if(opTHCODE->opcode == OPCODE_THCODE && opTHCODE->codesize > 0) {
@@ -884,20 +884,20 @@ static void FreeVirtualCode(KonohaContext *kctx, struct VirtualCode *vcode)
 	}
 }
 
-static struct VirtualCodeAPI vapi = {
+static struct KVirtualCodeAPI vapi = {
 		FreeVirtualCode, WriteVirtualCode
 };
 
-static struct VirtualCode *MakeThreadedCode(KonohaContext *kctx, KBuilder *builder, VirtualCode *vcode, size_t codesize)
+static struct KVirtualCode *MakeThreadedCode(KonohaContext *kctx, KBuilder *builder, KVirtualCode *vcode, size_t codesize)
 {
 	OPTHCODE *opTHCODE = (OPTHCODE *)vcode;
 	opTHCODE->codesize = codesize;
-	struct VirtualCodeAPI** p = (struct VirtualCodeAPI **)builder->common.api->RunVirtualMachine(kctx, kctx->esp + 1, vcode);
+	struct KVirtualCodeAPI** p = (struct KVirtualCodeAPI **)builder->common.api->RunVirtualMachine(kctx, kctx->esp + 1, vcode);
 	p[-1] = &vapi;
-	return (VirtualCode *)p;
+	return (KVirtualCode *)p;
 }
 
-static struct VirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *builder, bblock_t beginId, bblock_t returnId)
+static struct KVirtualCode *CompileKVirtualCode(KonohaContext *kctx, KBuilder *builder, bblock_t beginId, bblock_t returnId)
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
@@ -907,19 +907,19 @@ static struct VirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *bui
 	size_t codesize = KBuffer_bytesize(&wb);
 	DBG_P(">>>>>> codesize=%d", codesize);
 	DBG_ASSERT(codesize != 0);
-	VirtualCode *vcode = (VirtualCode *)KCalloc_UNTRACE(codesize, 1);
+	KVirtualCode *vcode = (KVirtualCode *)KCalloc_UNTRACE(codesize, 1);
 	memcpy((void *)vcode, KLIB KBuffer_text(kctx, &wb, NonZero), codesize);
 	BasicBlock_setJumpAddr(kctx, BasicBlock_FindById(kctx, beginId), (char *)vcode);
 	KLIB KBuffer_Free(&wb);
 	vcode = MakeThreadedCode(kctx, builder, vcode, codesize);
-	DumpVirtualCode(kctx, vcode);
+	DumpKVirtualCode(kctx, vcode);
 	return vcode;
 }
 
-static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr, size_t codesize)
+static void _THCODE(KonohaContext *kctx, KVirtualCode *pc, void **codeaddr, size_t codesize)
 {
 #ifdef USE_DIRECT_THREADED_CODE
-	size_t i, n = codesize / sizeof(VirtualCode);
+	size_t i, n = codesize / sizeof(KVirtualCode);
 	for(i = 0; i < n; i++) {
 		pc->codeaddr = codeaddr[pc->opcode];
 		pc++;
@@ -927,7 +927,7 @@ static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr, size_
 #endif
 }
 
-static struct VirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
+static struct KVirtualCode* MiniVM_GenerateKVirtualCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
@@ -956,7 +956,7 @@ static struct VirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMeth
 		ASM(NMOV, OC_(K_RTNIDX), OC_(0), KClass_(mtd->typeId));   // FIXME: Type 'This' must be resolved
 	}
 	ASM(RET);
-	VirtualCode *vcode = CompileVirtualCode(kctx, builder, builder->bbBeginId, builder->bbReturnId);
+	KVirtualCode *vcode = CompileKVirtualCode(kctx, builder, builder->bbBeginId, builder->bbReturnId);
 	RESET_GCSTACK();
 	KLIB KBuffer_Free(&wb);
 	return vcode;
@@ -964,14 +964,14 @@ static struct VirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMeth
 
 // -------------------------------------------------------------------------
 
-static struct VirtualCode  *BOOTCODE_ENTER = NULL;
-static struct VirtualCode  *BOOTCODE_NCALL = NULL;
+static struct KVirtualCode  *BOOTCODE_ENTER = NULL;
+static struct KVirtualCode  *BOOTCODE_NCALL = NULL;
 
 static void SetUpBootCode(void)
 {
 	if(BOOTCODE_ENTER == NULL) {
-		static struct VirtualCode InitCode[6] = {};
-		struct OPTHCODE thcode = {OP_(THCODE), 4 * sizeof(VirtualCode), _THCODE};
+		static struct KVirtualCode InitCode[6] = {};
+		struct OPTHCODE thcode = {OP_(THCODE), 4 * sizeof(KVirtualCode), _THCODE};
 		struct OPNCALL ncall = {OP_(NCALL)};
 		struct OPENTER enter = {OP_(ENTER)};
 		struct OPEXIT  exit  = {OP_(EXIT)};
@@ -979,33 +979,33 @@ static void SetUpBootCode(void)
 		memcpy(InitCode+1, &ncall,  sizeof(OPNCALL));
 		memcpy(InitCode+2, &enter,  sizeof(OPENTER));
 		memcpy(InitCode+3, &exit,   sizeof(OPEXIT));
-		VirtualCode *pc = KonohaVirtualMachine_Run(NULL, NULL, InitCode);
+		KVirtualCode *pc = KonohaVirtualMachine_Run(NULL, NULL, InitCode);
 		BOOTCODE_NCALL = pc;
 		BOOTCODE_ENTER = pc+1;
-//		struct VirtualCodeAPI **vapi = pc;  // check NULL
+//		struct KVirtualCodeAPI **vapi = pc;  // check NULL
 //		DBG_ASSERT(vapi[-1] == NULL);
 //		vapi = pc + 1;
 //		DBG_ASSERT(vapi[-1] == NULL);
 	}
 }
 
-static kbool_t IsSupportedVirtualCode(int opcode)
+static kbool_t IsSupportedKVirtualCode(int opcode)
 {
 	return (((size_t)opcode) < OPCODE_MAX);
 }
 
-static KMETHOD MethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD KMethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
 	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].calledMethod));
 	KonohaVirtualMachine_Run(kctx, sfp, BOOTCODE_ENTER);
 }
 
-static MethodFunc MiniVM_GenerateMethodFunc(KonohaContext *kctx, VirtualCode *vcode)
+static KMethodFunc MiniVM_GenerateKMethodFunc(KonohaContext *kctx, KVirtualCode *vcode)
 {
-	return MethodFunc_RunVirtualMachine;
+	return KMethodFunc_RunVirtualMachine;
 }
 
-static struct VirtualCode* GetDefaultBootCode(void)
+static struct KVirtualCode* GetDefaultBootCode(void)
 {
 	return BOOTCODE_NCALL;
 }
@@ -1016,8 +1016,8 @@ static void InitStaticBuilderApi(struct KBuilderAPI2 *builderApi)
 #define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME = KBuilder_Visit##NAME;
 	VISITOR_LIST(DEFINE_BUILDER_API);
 #undef DEFINE_BUILDER_API
-	builderApi->GenerateVirtualCode = MiniVM_GenerateVirtualCode;
-	builderApi->GenerateMethodFunc = MiniVM_GenerateMethodFunc;
+	builderApi->GenerateKVirtualCode = MiniVM_GenerateKVirtualCode;
+	builderApi->GenerateKMethodFunc = MiniVM_GenerateKMethodFunc;
 	builderApi->RunVirtualMachine   = KonohaVirtualMachine_Run;
 }
 
@@ -1039,7 +1039,7 @@ kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
 	};
 	SetUpBootCode();
 	factory->VirtualMachineInfo            = &ModuleInfo;
-	factory->IsSupportedVirtualCode        = IsSupportedVirtualCode;
+	factory->IsSupportedKVirtualCode        = IsSupportedKVirtualCode;
 	factory->GetDefaultBootCode            = GetDefaultBootCode;
 	factory->GetDefaultBuilderAPI          = GetDefaultBuilderAPI;
 	return true;

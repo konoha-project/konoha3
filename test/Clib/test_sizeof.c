@@ -28,7 +28,7 @@
 int main(int argc, const char *argv[])
 {
     assert(sizeof(kObject) <= 64);
-    assert(sizeof(MethodFunc) == sizeof(void*));
+    assert(sizeof(KMethodFunc) == sizeof(void*));
     assert(sizeof(float) <= sizeof(void*));
     assert(sizeof(kint_t) == sizeof(kfloat_t));
     assert(sizeof(kint_t) == sizeof(void*));

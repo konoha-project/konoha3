@@ -673,7 +673,7 @@ static void desugar_defineStmtMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 //	ksymbol_t methodName = (ksymbol_t)sfp[3].intValue;
 //	kExpr *firstExpr     = sfp[4].asExpr;
 //	kExpr *secondExpr    = sfp[5].asExpr;
-//	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), cid, methodName, 2, MethodMatch_CamelStyle);
+//	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), cid, methodName, 2, KMethodMatch_CamelStyle);
 //	if(method == NULL) {
 //		KReturn(KNULL(Expr));
 //	}

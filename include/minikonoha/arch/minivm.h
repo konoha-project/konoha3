@@ -28,7 +28,7 @@
 /* minivm arch */
 
 typedef intptr_t   kreg_t;
-typedef void (*ThreadCodeFunc)(KonohaContext *kctx, struct VirtualCode *, void**, size_t size);
+typedef void (*ThreadCodeFunc)(KonohaContext *kctx, struct KVirtualCode *, void**, size_t size);
 typedef void (*TraceFunc)(KonohaContext *kctx, KonohaStack *sfp, KTraceInfo *trace);
 
 typedef struct {
@@ -56,7 +56,7 @@ typedef struct {
 
 #define OPARGSIZE 4
 
-typedef struct VirtualCode {
+typedef struct KVirtualCode {
 	KCODE_HEAD;
 	union {
 		intptr_t data[OPARGSIZE];
@@ -65,7 +65,7 @@ typedef struct VirtualCode {
 		KClass *ct[OPARGSIZE];
 		char *u[OPARGSIZE];
 	};
-} VirtualCode;
+} KVirtualCode;
 
 typedef enum {
 	VMT_VOID,
@@ -79,7 +79,7 @@ typedef enum {
 	VMT_F,        /*function*/
 	VMT_Object,
 	VMT_HCACHE,
-} VirtualCodeType;
+} KVirtualCodeType;
 
 #define PC_NEXT(pc)   pc+1
 
@@ -144,7 +144,7 @@ typedef struct OPNCALL {
 
 #ifndef OPEXEC_NCALL
 #define OPEXEC_NCALL() do {\
-	(rbp[K_MTDIDX2].calledMethod)->invokeMethodFunc(kctx, (KonohaStack *)(rbp));\
+	(rbp[K_MTDIDX2].calledMethod)->invokeKMethodFunc(kctx, (KonohaStack *)(rbp));\
 	OPEXEC_RET();\
 } while(0)
 #endif
@@ -284,7 +284,7 @@ typedef struct OPCALL {
 	sfp_[K_PCIDX].pc = PC_NEXT(pc);\
 	sfp_[K_MTDIDX].calledMethod = mtd_;\
 	((KonohaContextVar *)kctx)->esp = (KonohaStack *)(rbp + op->espshift);\
-	(mtd_)->invokeMethodFunc(kctx, sfp_); \
+	(mtd_)->invokeKMethodFunc(kctx, sfp_); \
 } while(0)
 #endif
 
@@ -296,7 +296,7 @@ typedef struct OPRET {
 
 #ifndef OPEXEC_RET
 #define OPEXEC_RET() do {\
-	VirtualCode *vpc = rbp[K_PCIDX2].pc;\
+	KVirtualCode *vpc = rbp[K_PCIDX2].pc;\
 	rbp = (krbp_t *)rbp[K_SHIFTIDX2].previousStack;\
 	pc = vpc; \
 	GOTO_PC(pc);\
@@ -323,7 +323,7 @@ typedef struct OPBNOT {
 #define VPARAM_JMP       1, VMT_ADDR
 typedef struct OPJMP {
 	KCODE_HEAD;
-	VirtualCode  *jumppc;
+	KVirtualCode  *jumppc;
 } OPJMP;
 
 #ifndef OPEXEC_JMP
@@ -338,7 +338,7 @@ typedef struct OPJMP {
 #define VPARAM_JMPF      2, VMT_ADDR, VMT_R
 typedef struct OPJMPF {
 	KCODE_HEAD;
-	VirtualCode  *jumppc;
+	KVirtualCode  *jumppc;
 	kreg_t a;
 } OPJMPF;
 
@@ -356,7 +356,7 @@ typedef struct OPJMPF {
 #define VPARAM_TRYJMP      1, VMT_ADDR
 typedef struct OPTRYJMP {
 	KCODE_HEAD;
-	VirtualCode  *jumppc;
+	KVirtualCode  *jumppc;
 } OPTRYJMP;
 
 #ifndef OPEXEC_TRYJMP

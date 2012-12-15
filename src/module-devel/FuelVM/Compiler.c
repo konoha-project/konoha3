@@ -589,7 +589,7 @@ static void SetUpArguments(KonohaContext *kctx, FuelIRBuilder *builder, kMethod 
 	}
 }
 
-static struct VirtualCode *FuelVM_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
+static struct KVirtualCode *FuelVM_GenerateKVirtualCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
 {
 	kNameSpace *ns = block->BlockNameSpace;
 	KBuilder builderbuf = {}, *builder = &builderbuf;
@@ -612,12 +612,12 @@ static struct VirtualCode *FuelVM_GenerateVirtualCode(KonohaContext *kctx, kMeth
 	union ByteCode *code = IRBuilder_Compile(BLD(builder), &Mtd, option);
 	IRBuilder_Exit(&Builder);
 	KFieldSet(mtd, ((kMethodVar *)mtd)->CompiledBlock, block);
-	return (struct VirtualCode *) code;
+	return (struct KVirtualCode *) code;
 }
 
 // -------------------------------------------------------------------------
 
-static struct VirtualCode *FuelVM_Run(KonohaContext *kctx, struct KonohaValueVar *sfp, struct VirtualCode *pc)
+static struct KVirtualCode *FuelVM_Run(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc)
 {
 	NotSupportedAPI();
 	return NULL;
@@ -634,7 +634,7 @@ static KMETHOD FuelVM_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 #ifdef ENABLE_FULL_JIT
 	if(mtd->mn != 0) {
 		RecompileMethod(kctx, mtd);
-		mtd->invokeMethodFunc(kctx, sfp);
+		mtd->invokeKMethodFunc(kctx, sfp);
 		return;
 	}
 #endif
@@ -642,12 +642,12 @@ static KMETHOD FuelVM_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 	FuelVM_Exec(kctx, sfp, code);
 }
 
-static MethodFunc FuelVM_GenerateMethodFunc(KonohaContext *kctx, struct VirtualCode *vcode)
+static KMethodFunc FuelVM_GenerateKMethodFunc(KonohaContext *kctx, struct KVirtualCode *vcode)
 {
 	return FuelVM_RunVirtualMachine;
 }
 
-static struct VirtualCode* GetDefaultBootCode(void)
+static struct KVirtualCode* GetDefaultBootCode(void)
 {
 	return NULL;
 }
@@ -672,8 +672,8 @@ static void InitStaticBuilderApi(struct KBuilderAPI2 *builderApi)
 #define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME = FuelVM_Visit##NAME;
 	VISITOR_LIST(DEFINE_BUILDER_API);
 #undef DEFINE_BUILDER_API
-	builderApi->GenerateVirtualCode = FuelVM_GenerateVirtualCode;
-	builderApi->GenerateMethodFunc  = FuelVM_GenerateMethodFunc;
+	builderApi->GenerateKVirtualCode = FuelVM_GenerateKVirtualCode;
+	builderApi->GenerateKMethodFunc  = FuelVM_GenerateKMethodFunc;
 	builderApi->RunVirtualMachine   = FuelVM_Run;
 }
 

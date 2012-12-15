@@ -34,7 +34,7 @@ extern "C"{
 #define kMap struct kMapVar
 
 struct kMapVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	KHashMap *map;
 };
 

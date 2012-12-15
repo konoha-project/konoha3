@@ -35,7 +35,7 @@ extern "C" {
 typedef struct kCurlVar kCurl;
 
 struct kCurlVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	CURL *curl;
 	kString *URLInfoNULL;
 	struct curl_slist *headers;

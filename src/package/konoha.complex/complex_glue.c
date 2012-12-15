@@ -34,7 +34,7 @@ extern "C" {
 #endif
 
 typedef struct Complex {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	double _Complex z;
 } kComplex;
 

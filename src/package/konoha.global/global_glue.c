@@ -41,7 +41,7 @@ static KMETHOD NameSpace_AllowImplicitGlobalVariable_(KonohaContext *kctx, Konoh
 
 typedef const struct _kGlobalObject kGlobalObject;
 struct _kGlobalObject {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 };
 
 static	kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)

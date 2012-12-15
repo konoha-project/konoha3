@@ -58,7 +58,7 @@ extern "C" {
 
 #define StringBase_length(s) ((s)->length)
 typedef struct kStringBase {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	size_t length;
 } kStringBase;
 
@@ -367,7 +367,7 @@ static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t LoadRopeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	int FN_s = FN_("s");
-	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_String, MN_("+"), 1, MethodMatch_NoOption);
+	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_String, MN_("+"), 1, KMethodMatch_NoOption);
 	if(concat != NULL) {
 		KLIB kMethod_SetFunc(kctx, concat, Rope_opADD);
 	} else {

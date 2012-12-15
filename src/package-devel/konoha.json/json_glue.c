@@ -38,7 +38,7 @@ struct JsonBuf {
 };
 
 struct kJsonVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	struct JsonBuf jsonbuf;
 };
 

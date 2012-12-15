@@ -367,7 +367,7 @@ static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
 
 typedef struct kDirVar kDir;
 struct kDirVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	DIR *dirp;
 	kString *PathInfoNULL;
 	uintptr_t readerIconv;

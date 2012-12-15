@@ -721,7 +721,7 @@ static kbool_t ijit_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	KUnsafeFieldInit(base->constPool, new_(Array, 0));
 
 	typedef struct kPointer {
-		KonohaObjectHeader h;
+		kObjectHeader h;
 	} kPointer;
 	static KDEFINE_CLASS PointerDef = {
 		STRUCTNAME(Pointer)

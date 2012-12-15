@@ -255,7 +255,7 @@ static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		KDEFINE_CLASS defFloat = {0};
 		SETUNBOXNAME(defFloat, float);
 		defFloat.cstruct_size = sizeof(kFloat);
-		defFloat.cflag = CFLAG_int;
+		defFloat.cflag = KClassFlag_int;
 		defFloat.init = Float_Init;
 		defFloat.p     = Float_p;
 		KClass_Float = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defFloat, trace);

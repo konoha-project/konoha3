@@ -104,7 +104,7 @@ static void Object_InitToMakeDefaultValueAsNull(KonohaContext *kctx, kObject *o,
 {
 	kObjectVar *of = (kObjectVar *)o;
 	KClass *c = kObject_class(o);
-	bzero(of->fieldObjectItems, c->cstruct_size - sizeof(KonohaObjectHeader));
+	bzero(of->fieldObjectItems, c->cstruct_size - sizeof(kObjectHeader));
 }
 
 static void ObjectField_Init(KonohaContext *kctx, kObject *o, void *conf)
@@ -164,7 +164,7 @@ static KClassVar* kNameSpace_DefineClassName(KonohaContext *kctx, kNameSpace *ns
 static void KClass_InitField(KonohaContext *kctx, KClassVar *definedClass, KClass *superClass, size_t fieldInitSize)
 {
 	size_t fieldsize = superClass->fieldsize + fieldInitSize;
-	definedClass->cstruct_size = size64((fieldsize * sizeof(kObject *)) + sizeof(KonohaObjectHeader));
+	definedClass->cstruct_size = size64((fieldsize * sizeof(kObject *)) + sizeof(kObjectHeader));
 	DBG_P("superClass->fieldsize=%d, definedFieldSize=%d, cstruct_size=%d", superClass->fieldsize, fieldInitSize, definedClass->cstruct_size);
 	if(fieldsize > 0) {
 		definedClass->fieldItems = (KClassField *)KCalloc_UNTRACE(fieldsize, sizeof(KClassField));
@@ -320,7 +320,7 @@ static void kBlock_AddMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *to
 
 static inline size_t initFieldSizeOfVirtualClass(KClass *superClass)
 {
-	return size64(sizeof(KonohaObjectHeader) + (superClass->fieldsize + 4) * sizeof(kObject *)) / sizeof(kObject *);
+	return size64(sizeof(kObjectHeader) + (superClass->fieldsize + 4) * sizeof(kObject *)) / sizeof(kObject *);
 }
 
 static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)

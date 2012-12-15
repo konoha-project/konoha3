@@ -38,7 +38,7 @@ extern "C" {
 kMPIComm *g_comm_world;
 
 typedef struct {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	void *rawptr;
 } kRawPtr;
 

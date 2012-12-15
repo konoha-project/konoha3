@@ -138,7 +138,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KDEFINE_CLASS defSymbol = {0};
 	defSymbol.structname = "Symbol";
 	defSymbol.typeId = TypeAttr_NewId;
-	defSymbol.cflag = CFLAG_int;
+	defSymbol.cflag = KClassFlag_int;
 	defSymbol.init = KClass_(KType_int)->init;
 	defSymbol.unbox = KClass_(KType_int)->unbox;
 	defSymbol.p = kKSymbol_p;

@@ -698,7 +698,7 @@ static void JSBuilder_Free(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 	KLIB KBuffer_Free(&jsBuilder->jsCodeBuffer);
 }
 
-static struct VirtualCode* V8_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
+static struct KVirtualCode* V8_GenerateKVirtualCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
 {
 	INIT_GCSTACK();
 	JSBuilder builderbuf = {}, *builder = &builderbuf;
@@ -718,16 +718,16 @@ static struct VirtualCode* V8_GenerateVirtualCode(KonohaContext *kctx, kMethod *
 	return NULL;
 }
 
-static KMETHOD MethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD KMethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
 }
 
-static MethodFunc V8_GenerateMethodFunc(KonohaContext *kctx, VirtualCode *vcode)
+static KMethodFunc V8_GenerateKMethodFunc(KonohaContext *kctx, KVirtualCode *vcode)
 {
-	return MethodFunc_RunVirtualMachine;
+	return KMethodFunc_RunVirtualMachine;
 }
 
-static struct VirtualCode* GetDefaultBootCode(void)
+static struct KVirtualCode* GetDefaultBootCode(void)
 {
 	return NULL;
 }
@@ -738,8 +738,8 @@ static void InitStaticBuilderApi(struct KBuilderAPI2 *builderApi)
 #define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME = JSBuilder_Visit##NAME;
 	VISITOR_LIST(DEFINE_BUILDER_API);
 #undef DEFINE_BUILDER_API
-	builderApi->GenerateVirtualCode = V8_GenerateVirtualCode;
-	builderApi->GenerateMethodFunc  = V8_GenerateMethodFunc;
+	builderApi->GenerateKVirtualCode = V8_GenerateKVirtualCode;
+	builderApi->GenerateKMethodFunc  = V8_GenerateKMethodFunc;
 	//builderApi->RunVirtualMachine   = KonohaVirtualMachine_Run;
 }
 
@@ -759,7 +759,7 @@ kbool_t LoadJavaScriptModule(KonohaFactory *factory, ModuleType type)
 		"JavaScript", K_VERSION, 0, "JavaScript",
 	};
 	factory->VirtualMachineInfo            = &ModuleInfo;
-	//factory->IsSupportedVirtualCode        = IsSupportedVirtualCode;
+	//factory->IsSupportedKVirtualCode        = IsSupportedKVirtualCode;
 	factory->GetDefaultBootCode            = GetDefaultBootCode;
 	factory->GetDefaultBuilderAPI          = GetDefaultBuilderAPI;
 #ifdef HAVE_LIBV8

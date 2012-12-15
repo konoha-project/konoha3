@@ -88,7 +88,7 @@ typedef const struct kDateVar kDate;
 #endif
 
 struct kDateVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	struct timeval tv;
 };
 

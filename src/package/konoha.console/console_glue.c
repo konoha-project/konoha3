@@ -28,7 +28,7 @@
 
 typedef struct kConsoleVar kConsole;
 struct kConsoleVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 };
 
 /* ------------------------------------------------------------------------ */

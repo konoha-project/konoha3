@@ -42,10 +42,10 @@
 //	const char *name;
 //	kshortflag_t   flag;
 //	kushort_t argsize;
-//	VirtualCodeType arg1;
-//	VirtualCodeType arg2;
-//	VirtualCodeType arg3;
-//	VirtualCodeType arg4;
+//	KVirtualCodeType arg1;
+//	KVirtualCodeType arg2;
+//	KVirtualCodeType arg3;
+//	KVirtualCodeType arg4;
 //} DEFINE_OPSPEC;
 //
 //#define OPSPEC_(T)  #T, 0, VPARAM_##T
@@ -75,12 +75,12 @@
 //	{OPSPEC_(TRACE)},
 //};
 //
-////static void DumpOpArgument(KonohaContext *kctx, KBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *vcode_start)
+////static void DumpOpArgument(KonohaContext *kctx, KBuffer *wb, KVirtualCodeType type, KVirtualCode *c, size_t i, KVirtualCode *vcode_start)
 ////{
 ////	switch(type) {
 ////	case VMT_VOID: break;
 ////	case VMT_ADDR:
-////		KLIB KBuffer_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - vcode_start));
+////		KLIB KBuffer_printf(kctx, wb, " L%d", (int)((KVirtualCode *)c->p[i] - vcode_start));
 ////		break;
 ////	case VMT_R:
 ////		KLIB KBuffer_printf(kctx, wb, " sfp[%d,r=%d]", (int)c->data[i]/2, (int)c->data[i]);
@@ -97,7 +97,7 @@
 ///* ------------------------------------------------------------------------ */
 ///* VirtualMacine */
 //
-//static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr)
+//static void _THCODE(KonohaContext *kctx, KVirtualCode *pc, void **codeaddr)
 //{
 //#ifdef USE_DIRECT_THREADED_CODE
 //	while(1) {
@@ -120,9 +120,9 @@
 //	sfp[K_MTDIDX].calledMethod = mtd;
 //}
 //
-//static VirtualCode* KonohaVirtualMachine_Run(KonohaContext *, KonohaStack *, VirtualCode *);
+//static KVirtualCode* KonohaVirtualMachine_Run(KonohaContext *, KonohaStack *, KVirtualCode *);
 //
-//static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStack *sfp, VirtualCode *pc)
+//static KVirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStack *sfp, KVirtualCode *pc)
 //{
 //	int jmpresult;
 //	INIT_GCSTACK();
@@ -182,7 +182,7 @@
 //#define GOTO_PC(pc)         GOTO_NEXT()
 //#endif/*USE_DIRECT_THREADED_CODE*/
 //
-//static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaStack *sfp0, struct VirtualCode *pc)
+//static struct KVirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaStack *sfp0, struct KVirtualCode *pc)
 //{
 //#ifdef USE_DIRECT_THREADED_CODE
 //	static void *OPJUMP[] = {
@@ -318,44 +318,44 @@
 //
 //// -------------------------------------------------------------------------
 //
-//static struct VirtualCode  *BOOTCODE_ENTER = NULL;
-//static struct VirtualCode  *BOOTCODE_NCALL = NULL;
+//static struct KVirtualCode  *BOOTCODE_ENTER = NULL;
+//static struct KVirtualCode  *BOOTCODE_NCALL = NULL;
 //
 //static void SetUpBootCode(void)
 //{
 //	if(BOOTCODE_ENTER == NULL) {
-//		static struct VirtualCode InitCode[6] = {};
+//		static struct KVirtualCode InitCode[6] = {};
 //		struct OPTHCODE thcode = {OP_(THCODE), _THCODE};
 //		struct OPNCALL ncall = {OP_(NCALL)};
 //		struct OPENTER enter = {OP_(ENTER)};
 //		struct OPEXIT  exit  = {OP_(EXIT)};
-//		memcpy(InitCode,   &thcode, sizeof(VirtualCode));
-//		memcpy(InitCode+1, &ncall,  sizeof(VirtualCode));
-//		memcpy(InitCode+2, &enter,  sizeof(VirtualCode));
-//		memcpy(InitCode+3, &exit,   sizeof(VirtualCode));
-//		VirtualCode *pc = KonohaVirtualMachine_Run(NULL, NULL, InitCode);
+//		memcpy(InitCode,   &thcode, sizeof(KVirtualCode));
+//		memcpy(InitCode+1, &ncall,  sizeof(KVirtualCode));
+//		memcpy(InitCode+2, &enter,  sizeof(KVirtualCode));
+//		memcpy(InitCode+3, &exit,   sizeof(KVirtualCode));
+//		KVirtualCode *pc = KonohaVirtualMachine_Run(NULL, NULL, InitCode);
 //		BOOTCODE_NCALL = pc;
 //		BOOTCODE_ENTER = pc+1;
 //	}
 //}
 //
-//static kbool_t IsSupportedVirtualCode(int opcode)
+//static kbool_t IsSupportedKVirtualCode(int opcode)
 //{
 //	return (((size_t)opcode) < OPCODE_MAX);
 //}
 //
-//static KMETHOD MethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
+//static KMETHOD KMethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].calledMethod));
 //	KonohaVirtualMachine_Run(kctx, sfp, BOOTCODE_ENTER);
 //}
 //
-////static void *GetVirtualMachineMethodFunc(void)
+////static void *GetVirtualMachineKMethodFunc(void)
 ////{
-////	return (void *) MethodFunc_RunVirtualMachine;
+////	return (void *) KMethodFunc_RunVirtualMachine;
 ////}
 //
-//static struct VirtualCode* GetDefaultBootCode(void)
+//static struct KVirtualCode* GetDefaultBootCode(void)
 //{
 //	return BOOTCODE_NCALL;
 //}
@@ -399,7 +399,7 @@
 //#endif
 //}
 //
-//static void TraceVMGiveOutCoverageLog(KonohaContext *kctx, VirtualCode *pc)
+//static void TraceVMGiveOutCoverageLog(KonohaContext *kctx, KVirtualCode *pc)
 //{
 //	kfileline_t uline = 0;
 //	while(true) {
@@ -448,10 +448,10 @@
 //	};
 //	SetUpBootCode();
 //	factory->VirtualMachineInfo            = &ModuleInfo;
-//	factory->IsSupportedVirtualCode        = IsSupportedVirtualCode;
+//	factory->IsSupportedKVirtualCode        = IsSupportedKVirtualCode;
 ////	factory->RunVirtualMachine             = KonohaVirtualMachine_Run;
 ////	factory->DeleteVirtualMachine          = TraceVMDeleteVirtualMachine;
-////	factory->GetVirtualMachineMethodFunc   = GetVirtualMachineMethodFunc;
+////	factory->GetVirtualMachineKMethodFunc   = GetVirtualMachineKMethodFunc;
 //	factory->GetDefaultBootCode = GetDefaultBootCode;
 //	return true;
 //}

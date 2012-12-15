@@ -189,7 +189,7 @@ static void CreateCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::
 	IRBuilder<> *builder = writer->builder;
 	kMethod *method = (kMethod *) Mtd->Value.ptr;
 	Value *MtdPtr  = CreateConstant(builder, method);
-	Value *FuncPtr = builder->CreateStructGEP(MtdPtr, kMethodVar_invokeMethodFunc);
+	Value *FuncPtr = builder->CreateStructGEP(MtdPtr, kMethodVar_invokeKMethodFunc);
 
 	Value *Vctx = GetContext(writer);
 	Value *Vsfp = GetStackTop(writer);
@@ -547,10 +547,10 @@ void FuelVM_GenerateLLVMIR(KonohaContext *kctx, kMethod *mtd, kBlock *block, int
 {
 	fprintf(stderr, "START LLVM IR GENERATION..\n");
 	kNameSpace *ns = block->BlockNameSpace;
-	struct VirtualCode *vcode = ns->builderApi->GenerateVirtualCode(kctx, mtd, block, option);
-	union { struct VirtualCode *ptr; MethodFunc func; } V;
+	struct KVirtualCode *vcode = ns->builderApi->GenerateKVirtualCode(kctx, mtd, block, option);
+	union { struct KVirtualCode *ptr; KMethodFunc func; } V;
 	V.ptr = vcode;
-	((kMethodVar *)mtd)->invokeMethodFunc = V.func;
+	((kMethodVar *)mtd)->invokeKMethodFunc = V.func;
 	((kMethodVar *)mtd)->vcode_start = 0;
 }
 

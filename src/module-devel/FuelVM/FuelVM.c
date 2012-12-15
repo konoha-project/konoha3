@@ -137,7 +137,7 @@ static SValue CallMethod(KonohaContext *kctx, kMethod *Mtd, uchar ParamSize, uch
 	((KonohaContextVar *)kctx)->esp = sfp + ParamSize;
 	sfp[K_MTDIDX].calledMethod = Mtd;
 	sfp[K_RTNIDX].calledFileLine = uline;
-	Mtd->invokeMethodFunc(kctx, sfp);
+	Mtd->invokeKMethodFunc(kctx, sfp);
 	if(IsUnboxed)
 		Val.ival = sfp[K_RTNIDX].intValue;
 	else

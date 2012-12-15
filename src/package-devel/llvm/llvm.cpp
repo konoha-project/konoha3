@@ -112,7 +112,7 @@
 #include <stdio.h>
 
 struct kRawPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	void *rawptr;
 };
 
@@ -2504,7 +2504,7 @@ static KMETHOD kMethod_setFunction(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = (kMethod*) sfp[0].asObject;
 	kObject *po = sfp[1].asObject;
-	union anyptr { void *p; MethodFunc f;} ptr;
+	union anyptr { void *p; KMethodFunc f;} ptr;
 	ptr.p = konoha::object_cast<void*>(po);
 	KLIB kMethod_SetFunc(kctx, mtd, ptr.f);
 	KReturnVoid();

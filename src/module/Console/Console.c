@@ -130,7 +130,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 		kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 		kfileline_t uline = sfp[K_RTNIDX].calledFileLine;
 		const char *file = PLATAPI shortFilePath(KFileLine_textFileName (uline));
-		PLATAPI printf_i(" [%ld] (%s:%d) %s.%s%s(", (sfp - kctx->stack->stack), file, (kushort_t)uline, Method_t(mtd));
+		PLATAPI printf_i(" [%ld] (%s:%d) %s.%s%s(", (sfp - kctx->stack->stack), file, (kushort_t)uline, kMethod_Fmt3(mtd));
 		KClass *cThis = KClass_(mtd->typeId);
 		if(!KClass_Is(UnboxType, cThis)) {
 			cThis = kObject_class(sfp[0].asObject);

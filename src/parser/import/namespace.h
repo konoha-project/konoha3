@@ -243,12 +243,12 @@ static KSyntaxVar *kNameSpace_SetTokenFunc(KonohaContext *kctx, kNameSpace *ns, 
 	return syn;
 }
 
-static void KSyntax_setMethodFunc(KonohaContext *kctx, kNameSpace *ns, KSyntaxVar *syn, MethodFunc definedMethodFunc, size_t index, MethodFunc *previousDefinedFuncRef, kFunc **cachedFuncRef)
+static void KSyntax_setKMethodFunc(KonohaContext *kctx, kNameSpace *ns, KSyntaxVar *syn, KMethodFunc definedKMethodFunc, size_t index, KMethodFunc *previousDefinedFuncRef, kFunc **cachedFuncRef)
 {
-	if(definedMethodFunc != NULL) {
-		if(definedMethodFunc != previousDefinedFuncRef[0]) {
-			previousDefinedFuncRef[0] = definedMethodFunc;
-			cachedFuncRef[0] = new_SugarFunc(ns, definedMethodFunc);
+	if(definedKMethodFunc != NULL) {
+		if(definedKMethodFunc != previousDefinedFuncRef[0]) {
+			previousDefinedFuncRef[0] = definedKMethodFunc;
+			cachedFuncRef[0] = new_SugarFunc(ns, definedKMethodFunc);
 		}
 		KFieldInit(ns, syn->sugarFuncTable[index], cachedFuncRef[0]);
 	}
@@ -256,7 +256,7 @@ static void KSyntax_setMethodFunc(KonohaContext *kctx, kNameSpace *ns, KSyntaxVa
 
 static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef, KTraceInfo *trace)
 {
-	MethodFunc pPatternMatch = NULL, pExpression = NULL, pStatement = NULL, pTypeCheck = NULL;
+	KMethodFunc pPatternMatch = NULL, pExpression = NULL, pStatement = NULL, pTypeCheck = NULL;
 	kFunc *mPatternMatch = NULL, *mExpression = NULL, *mStatement = NULL, *mTypeCheck = NULL;
 	while(syndef->keyword != KSymbol_END) {
 		KSyntaxVar* syn = (KSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, syndef->keyword, 1/*isnew*/);
@@ -273,11 +273,11 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 			syn->syntaxPatternListNULL_OnList = new_(TokenArray, 0, ns->NameSpaceConstList);
 			kNameSpace_ParseSyntaxPattern(kctx, ns, syndef->rule, 0, syn->syntaxPatternListNULL_OnList);
 		}
-		KSyntax_setMethodFunc(kctx, ns, syn, syndef->PatternMatch,   SugarFunc_PatternMatch,   &pPatternMatch, &mPatternMatch);
-		KSyntax_setMethodFunc(kctx, ns, syn, syndef->Expression,      SugarFunc_Expression,      &pExpression, &mExpression);
-		KSyntax_setMethodFunc(kctx, ns, syn, syndef->TopLevelStatement, SugarFunc_TopLevelStatement, &pStatement, &mStatement);
-		KSyntax_setMethodFunc(kctx, ns, syn, syndef->Statement,    SugarFunc_Statement,    &pStatement, &mStatement);
-		KSyntax_setMethodFunc(kctx, ns, syn, syndef->TypeCheck,    SugarFunc_TypeCheck,    &pTypeCheck, &mTypeCheck);
+		KSyntax_setKMethodFunc(kctx, ns, syn, syndef->PatternMatch,   SugarFunc_PatternMatch,   &pPatternMatch, &mPatternMatch);
+		KSyntax_setKMethodFunc(kctx, ns, syn, syndef->Expression,      SugarFunc_Expression,      &pExpression, &mExpression);
+		KSyntax_setKMethodFunc(kctx, ns, syn, syndef->TopLevelStatement, SugarFunc_TopLevelStatement, &pStatement, &mStatement);
+		KSyntax_setKMethodFunc(kctx, ns, syn, syndef->Statement,    SugarFunc_Statement,    &pStatement, &mStatement);
+		KSyntax_setKMethodFunc(kctx, ns, syn, syndef->TypeCheck,    SugarFunc_TypeCheck,    &pTypeCheck, &mTypeCheck);
 		// set default function
 		if(syn->parentSyntaxNULL == NULL && syn->sugarFuncTable[SugarFunc_Expression] == NULL) {
 			if(syn->precedence_op2 > 0 || syn->precedence_op1 > 0) {
@@ -448,7 +448,7 @@ static int comprMethod(const void *a, const void *b)
 	return aid < bid ? -1 : 1;
 }
 
-static void kMethodList_MatchMethod(KonohaContext *kctx, kArray *methodList, const size_t *sorted, ktypeattr_t typeId, MethodMatchFunc MatchMethod, MethodMatch *option)
+static void kMethodList_MatchMethod(KonohaContext *kctx, kArray *methodList, const size_t *sorted, ktypeattr_t typeId, KMethodMatchFunc MatchMethod, KMethodMatch *option)
 {
 	long i, min = 0, max = sorted[0];
 	long optkey = ((long)typeId << (sizeof(kshort_t)*8)) | option->mn;
@@ -495,7 +495,7 @@ static void kMethodList_MatchMethod(KonohaContext *kctx, kArray *methodList, con
 	}
 }
 
-static kMethod* kNameSpace_MatchMethodNULL(KonohaContext *kctx, kNameSpace *startNameSpace, KClass *ct, MethodMatchFunc MatchMethod, MethodMatch *option)
+static kMethod* kNameSpace_MatchMethodNULL(KonohaContext *kctx, kNameSpace *startNameSpace, KClass *ct, KMethodMatchFunc MatchMethod, KMethodMatch *option)
 {
 	while(ct != NULL) {
 		kNameSpace *ns = startNameSpace;
@@ -515,7 +515,7 @@ static kMethod* kNameSpace_MatchMethodNULL(KonohaContext *kctx, kNameSpace *star
 	return option->foundMethodNULL;
 }
 
-static kbool_t MethodMatch_Func(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
+static kbool_t KMethodMatch_Func(KonohaContext *kctx, kMethod *mtd, KMethodMatch *m)
 {
 	if(m->foundMethodNULL != NULL) {
 		if(m->foundMethodNULL->serialNumber > mtd->serialNumber) return false;
@@ -526,7 +526,7 @@ static kbool_t MethodMatch_Func(KonohaContext *kctx, kMethod *mtd, MethodMatch *
 }
 
 
-static kbool_t MethodMatch_ParamSize(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
+static kbool_t KMethodMatch_ParamSize(KonohaContext *kctx, kMethod *mtd, KMethodMatch *m)
 {
 	kParam *param = kMethod_GetParam(mtd);
 	if(param->psize == m->paramsize) {
@@ -540,7 +540,7 @@ static kbool_t MethodMatch_ParamSize(KonohaContext *kctx, kMethod *mtd, MethodMa
 	return false;
 }
 
-static kbool_t MethodMatch_Param0(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
+static kbool_t KMethodMatch_Param0(KonohaContext *kctx, kMethod *mtd, KMethodMatch *m)
 {
 	kParam *param = kMethod_GetParam(mtd);
 	if(param->psize == 0) {
@@ -551,7 +551,7 @@ static kbool_t MethodMatch_Param0(KonohaContext *kctx, kMethod *mtd, MethodMatch
 	return false;
 }
 
-static kbool_t MethodMatch_ParamNoCheck(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
+static kbool_t KMethodMatch_ParamNoCheck(KonohaContext *kctx, kMethod *mtd, KMethodMatch *m)
 {
 	m->foundMethodNULL = mtd;
 	m->isBreak = true;
@@ -565,15 +565,15 @@ static kbool_t KClass_Isa(KonohaContext *kctx, KClass *ct, KClass *t)
 
 static kMethod *kNameSpace_GetCoercionMethodNULL(KonohaContext *kctx, kNameSpace *ns, KClass *c, KClass *toClass)
 {
-	MethodMatch m = {};
+	KMethodMatch m = {};
 	m.mn = MethodName_To(toClass->typeId);
 	m.paramsize = 0;
-	kMethod *mtd = kNameSpace_MatchMethodNULL(kctx, ns, c, MethodMatch_Param0, &m);
+	kMethod *mtd = kNameSpace_MatchMethodNULL(kctx, ns, c, KMethodMatch_Param0, &m);
 	DBG_P("finding cast %s => %s: %p", KClass_text(c), KClass_text(toClass), mtd);
 	return mtd;
 }
 
-static kbool_t MethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
+static kbool_t KMethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, KMethodMatch *m)
 {
 	if(mtd->paramdom == m->paramdom) {
 		m->isBreak = true;
@@ -607,16 +607,16 @@ static kbool_t MethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, MethodMa
 
 static kMethod *kNameSpace_GetNameSpaceFuncNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t symbol, KClass *reqClass)
 {
-	MethodMatch m = {};
+	KMethodMatch m = {};
 	m.mn = symbol;
 	if(reqClass->baseTypeId == KType_Func) {
 		m.paramdom = reqClass->cparamdom;
-		kNameSpace_MatchMethodNULL(kctx, ns, kObject_class(ns), MethodMatch_Signature, &m);
+		kNameSpace_MatchMethodNULL(kctx, ns, kObject_class(ns), KMethodMatch_Signature, &m);
 		if(m.foundMethodNULL != NULL) {
 			return m.foundMethodNULL;
 		}
 	}
-	return kNameSpace_MatchMethodNULL(kctx, ns, kObject_class(ns), MethodMatch_Func, &m);
+	return kNameSpace_MatchMethodNULL(kctx, ns, kObject_class(ns), KMethodMatch_Func, &m);
 }
 
 static size_t CheckAnotherSymbol(KonohaContext *kctx, ksymbol_t *resolved, size_t foundNames, char *buffer, size_t len)
@@ -657,16 +657,16 @@ static size_t FindAnotherSymbol(KonohaContext *kctx, ksymbol_t symbol, ksymbol_t
 static kMethod *kNameSpace_GetGetterMethodNULL(KonohaContext *kctx, kNameSpace *ns, KClass *c, ksymbol_t symbol)
 {
 	if(symbol != KSymbol_Noname) {
-		MethodMatch m = {};
+		KMethodMatch m = {};
 		m.mn = MethodName_ToGetter(symbol);
 		m.paramsize = 0;
-		kMethod *mtd = kNameSpace_MatchMethodNULL(kctx, ns, c, MethodMatch_Param0, &m);
+		kMethod *mtd = kNameSpace_MatchMethodNULL(kctx, ns, c, KMethodMatch_Param0, &m);
 		if(mtd == NULL) {
 			ksymbol_t anotherSymbols[ANOTHER_NAME_MAXSIZ];
 			size_t i, foundNames = FindAnotherSymbol(kctx, symbol, anotherSymbols);
 			for(i = 0; i < foundNames; i++) {
 				m.mn = MethodName_ToGetter(anotherSymbols[i]);
-				mtd = kNameSpace_MatchMethodNULL(kctx, ns, c, MethodMatch_Param0, &m);
+				mtd = kNameSpace_MatchMethodNULL(kctx, ns, c, KMethodMatch_Param0, &m);
 				if(mtd != NULL) break;
 			}
 		}
@@ -678,17 +678,17 @@ static kMethod *kNameSpace_GetGetterMethodNULL(KonohaContext *kctx, kNameSpace *
 static kMethod *kNameSpace_GetSetterMethodNULL(KonohaContext *kctx, kNameSpace *ns, KClass *c, ksymbol_t symbol, ktypeattr_t type)
 {
 	if(symbol != KSymbol_Noname) {
-		MethodMatch m = {};
+		KMethodMatch m = {};
 		m.mn = MethodName_ToSetter(symbol);
 		m.paramsize = 1;
-		MethodMatchFunc func;
+		KMethodMatchFunc func;
 		if(type == KType_var) {
-			func = MethodMatch_ParamSize;
+			func = KMethodMatch_ParamSize;
 		}
 		else {
 			kparamtype_t p = {type};
 			m.paramdom = KLIB Kparamdom(kctx, 1, &p);
-			func = MethodMatch_Signature;
+			func = KMethodMatch_Signature;
 		}
 		kMethod *mtd = kNameSpace_MatchMethodNULL(kctx, ns, c, func, &m);
 		if(mtd == NULL) {
@@ -705,15 +705,15 @@ static kMethod *kNameSpace_GetSetterMethodNULL(KonohaContext *kctx, kNameSpace *
 	return NULL;
 }
 
-static kMethod *kNameSpace_GetMethodByParamSizeNULL(KonohaContext *kctx, kNameSpace *ns, KClass *c, ksymbol_t symbol, int paramsize, MethodMatchOption option)
+static kMethod *kNameSpace_GetMethodByParamSizeNULL(KonohaContext *kctx, kNameSpace *ns, KClass *c, ksymbol_t symbol, int paramsize, KMethodMatchOption option)
 {
-	MethodMatch m = {};
+	KMethodMatch m = {};
 	m.mn = symbol;
 	m.paramsize = paramsize;
-	MethodMatchFunc func = paramsize == 0 ? MethodMatch_Param0 : MethodMatch_ParamSize;
-	if(paramsize == -1) func = MethodMatch_ParamNoCheck;
+	KMethodMatchFunc func = paramsize == 0 ? KMethodMatch_Param0 : KMethodMatch_ParamSize;
+	if(paramsize == -1) func = KMethodMatch_ParamNoCheck;
 	kMethod *mtd = kNameSpace_MatchMethodNULL(kctx, ns, c, func, &m);
-	if(mtd == NULL && KFlag_Is(int, option, MethodMatch_CamelStyle)) {
+	if(mtd == NULL && KFlag_Is(int, option, KMethodMatch_CamelStyle)) {
 		ksymbol_t attr = KSymbol_Attr(symbol);
 		ksymbol_t anotherSymbols[ANOTHER_NAME_MAXSIZ];
 		size_t i, foundNames = FindAnotherSymbol(kctx, KSymbol_Unmask(symbol), anotherSymbols);
@@ -728,23 +728,23 @@ static kMethod *kNameSpace_GetMethodByParamSizeNULL(KonohaContext *kctx, kNameSp
 
 static kMethod *kNameSpace_GetMethodToCheckOverloadNULL(KonohaContext *kctx, kNameSpace *ns, KClass *c, ksymbol_t symbol, int paramsize)
 {
-	MethodMatch m = {};
+	KMethodMatch m = {};
 	m.mn = symbol;
 	m.paramsize = paramsize;
-	MethodMatchFunc func = paramsize == 0 ? MethodMatch_Param0 : MethodMatch_ParamSize;
-	if(paramsize == -1) func = MethodMatch_ParamNoCheck;
+	KMethodMatchFunc func = paramsize == 0 ? KMethodMatch_Param0 : KMethodMatch_ParamSize;
+	if(paramsize == -1) func = KMethodMatch_ParamNoCheck;
 	return kNameSpace_MatchMethodNULL(kctx, ns, c, func, &m);
 }
 
 static kMethod *kNameSpace_GetMethodBySignatureNULL(KonohaContext *kctx, kNameSpace *ns, KClass *c, ksymbol_t symbol, int paramdom, int paramsize, kparamtype_t *param)
 {
-	MethodMatch m = {};
+	KMethodMatch m = {};
 	m.ns = ns;
 	m.mn = symbol;
 	m.paramdom = paramdom;
 	m.paramsize = paramsize;
 	m.param = param;
-	return kNameSpace_MatchMethodNULL(kctx, ns, c, MethodMatch_Signature, &m);
+	return kNameSpace_MatchMethodNULL(kctx, ns, c, KMethodMatch_Signature, &m);
 }
 
 // ---------------------------------------------------------------------------
@@ -762,7 +762,7 @@ static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethod
 	KClass *ct = KClass_(mtd->typeId);
 	if(mtd->packageId == 0) {
 		((kMethodVar *)mtd)->packageId = ns->packageId;
-		TRACE_ReportScriptMessage(kctx, trace, DebugTag, "@%s loading method %s.%s%s", KPackage_text(ns->packageId), Method_t(mtd));
+		TRACE_ReportScriptMessage(kctx, trace, DebugTag, "@%s loading method %s.%s%s", KPackage_text(ns->packageId), kMethod_Fmt3(mtd));
 	}
 	if(KClass_Is(Final, ct)) {
 		kMethod_Set(Final, mtd, true);
@@ -771,21 +771,21 @@ static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethod
 	if(foundMethod != NULL) {  // same signature
 		if(foundMethod->typeId == mtd->typeId) {
 			if(kMethod_Is(Override, mtd)) {
-				TRACE_ReportScriptMessage(kctx, trace, DebugTag, "@%s overriding method %s.%s%s on %s", KPackage_text(ns->packageId), Method_t(mtd), KPackage_text(foundMethod->packageId));
+				TRACE_ReportScriptMessage(kctx, trace, DebugTag, "@%s overriding method %s.%s%s on %s", KPackage_text(ns->packageId), kMethod_Fmt3(mtd), KPackage_text(foundMethod->packageId));
 				kMethod_ReplaceWith(kctx, (kMethodVar *)foundMethod, mtd);
 			}
 			else {
-				TRACE_ReportScriptMessage(kctx, trace, ErrTag, "duplicated method: %s.%s%s on %s", Method_t(foundMethod), KPackage_text(foundMethod->packageId));
+				TRACE_ReportScriptMessage(kctx, trace, ErrTag, "duplicated method: %s.%s%s on %s", kMethod_Fmt3(foundMethod), KPackage_text(foundMethod->packageId));
 			}
 			return false;
 		}
 		else {
 			if(!kMethod_Is(Final, foundMethod)) {
-				TRACE_ReportScriptMessage(kctx, trace, DebugTag, "@%s overriding method %s.%s%s on %s.%s%s", KPackage_text(ns->packageId), Method_t(mtd), Method_t(foundMethod));
+				TRACE_ReportScriptMessage(kctx, trace, DebugTag, "@%s overriding method %s.%s%s on %s.%s%s", KPackage_text(ns->packageId), kMethod_Fmt3(mtd), kMethod_Fmt3(foundMethod));
 				kMethod_Set(Virtual, ((kMethodVar *)foundMethod), true);
 			}
 			else {
-				TRACE_ReportScriptMessage(kctx, trace, ErrTag, "final method: %s.%s%s", Method_t(foundMethod));
+				TRACE_ReportScriptMessage(kctx, trace, ErrTag, "final method: %s.%s%s", kMethod_Fmt3(foundMethod));
 				return false;
 			}
 		}
@@ -818,7 +818,7 @@ static void kNameSpace_LoadMethodData(KonohaContext *kctx, kNameSpace *ns, intpt
 	INIT_GCSTACK();
 	while(d[0] != -1) {
 		uintptr_t flag = (uintptr_t)d[0];
-		MethodFunc f = (MethodFunc)d[1];
+		KMethodFunc f = (KMethodFunc)d[1];
 		ktypeattr_t rtype = (ktypeattr_t)d[2];
 		ktypeattr_t cid  = (ktypeattr_t)d[3];
 		kmethodn_t mn = (kmethodn_t)d[4];

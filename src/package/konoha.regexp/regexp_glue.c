@@ -91,7 +91,7 @@ typedef struct {
 
 typedef struct kRegExpVar kRegExp;
 struct kRegExpVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	kregexp_t *reg;
 	int eflags;      // regexp flag
 	kString *pattern;

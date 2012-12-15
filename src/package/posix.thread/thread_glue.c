@@ -34,7 +34,7 @@ extern "C" {
 
 /* ------------------------------------------------------------------------ */
 typedef struct {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	KonohaContext *kctx;
 	KonohaContext *rootCtx;
 	pthread_t thread;
@@ -43,12 +43,12 @@ typedef struct {
 } kThread;
 
 typedef struct {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	pthread_mutex_t mutex;
 } kMutex;
 
 typedef struct {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	pthread_cond_t cond;
 } kCond;
 

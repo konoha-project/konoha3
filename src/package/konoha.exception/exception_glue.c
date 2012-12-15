@@ -35,7 +35,7 @@
 //typedef struct kExceptionVar kExceptionVar;
 //
 //struct kExceptionVar {
-//	KonohaObjectHeader h;
+//	kObjectHeader h;
 //	kshortflag_t flag;   kfault_t faultId;
 //	kfileline_t  uline;
 //	kString     *message;
@@ -44,7 +44,7 @@
 //
 //// Module
 //
-//#define CFLAG_Exception                            KClassFlag_Final
+//#define KClassFlag_Exception                            KClassFlag_Final
 //
 //#define KonohaContext_getExceptionModule(kctx)           ((KonohaExceptionModule *)kctx->modshare[MOD_exception])
 //#define KonohaContext_getExceptionContext(kctx)          ((KonohaExceptionContext *)kctx->modlocal[MOD_exception])
@@ -74,7 +74,7 @@
 //	kfileline_t uline = sfp[K_RTNIDX].calledFileLine;
 //	if(uline > 0) {
 //		const char *file = KFileLine_textFileName (uline);
-//		KLIB KBuffer_printf(kctx, &wb, "(%s:%d) %s.%s%s" , PLATAPI shortFilePath(file), (kushort_t)uline, Method_t(mtd));
+//		KLIB KBuffer_printf(kctx, &wb, "(%s:%d) %s.%s%s" , PLATAPI shortFilePath(file), (kushort_t)uline, kMethod_Fmt3(mtd));
 //	}
 ////	int i = 0, psize = kMethod_ParamSize(mtd);
 ////	kParam *pa = kMethod_GetParam(mtd);
@@ -215,7 +215,7 @@
 //	KLIB KRuntime_setModule(kctx, MOD_exception, &mod->h, trace);
 //	KDEFINE_CLASS defException = {
 //		STRUCTNAME(Exception),
-//		.cflag = CFLAG_Exception,
+//		.cflag = KClassFlag_Exception,
 //		.init  = Exception_Init,
 //		.reftrace = Exception_Reftrace,
 //		.p     = Exception_p,

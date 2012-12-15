@@ -32,12 +32,12 @@ extern "C" {
 #endif
 
 typedef struct _kMpz {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	mpz_t mpz; // mpz_t is pointer; you don't need put '*'.
 } kMpz;
 
 typedef struct _kMpf {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	mpf_t mpf; // mpf_t is pointer
 } kMpf;
 

@@ -98,7 +98,7 @@ typedef struct {
 typedef struct kSubprocVar kSubproc;
 
 struct kSubprocVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	kshortflag_t   flag;
 	//	kbool_t shell;                     // shell mode [true/false]
 	//	kbool_t closefds;                  // closefds   [true/false]
@@ -139,7 +139,7 @@ struct kSubprocVar {
 typedef struct kSubProcVar kSubProc;
 
 struct kSubProcVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	kshortflag_t   flag;
 	kString *Command;
 	kArray  *ArgumentList;

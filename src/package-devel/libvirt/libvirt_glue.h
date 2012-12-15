@@ -66,7 +66,7 @@ typedef kuint_t unsigned_int;
 #define PACKAGE_TOSTRING(NAME) "" # NAME
 
 typedef struct kvirCommonPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	void *p;
 }kvirCommonPtr;
 
@@ -81,366 +81,366 @@ static void virt_common_ptr_Free(KonohaContext *kctx, kObject *o) {
 };
 
 typedef struct kvirConnectAuthPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virConnectAuthPtr p;
 }kvirConnectAuthPtr;
 static int KType_virConnectAuthPtr;
 
 typedef struct kvirConnectCloseFunc {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virConnectCloseFunc p;
 }kvirConnectCloseFunc;
 static int KType_virConnectCloseFunc;
 
 typedef struct kvirConnectDomainEventCallback {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virConnectDomainEventCallback p;
 }kvirConnectDomainEventCallback;
 static int KType_virConnectDomainEventCallback;
 
 typedef struct kvirConnectDomainEventGenericCallback {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virConnectDomainEventGenericCallback p;
 }kvirConnectDomainEventGenericCallback;
 static int KType_virConnectDomainEventGenericCallback;
 
 typedef struct kvirConnectPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virConnectPtr p;
 }kvirConnectPtr;
 static int KType_virConnectPtr;
 
 typedef struct kvirDomainBlockInfoPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virDomainBlockInfoPtr p;
 }kvirDomainBlockInfoPtr;
 static int KType_virDomainBlockInfoPtr;
 
 typedef struct kvirDomainBlockJobInfoPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virDomainBlockJobInfoPtr p;
 }kvirDomainBlockJobInfoPtr;
 static int KType_virDomainBlockJobInfoPtr;
 
 typedef struct kvirDomainBlockStatsPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virDomainBlockStatsPtr p;
 }kvirDomainBlockStatsPtr;
 static int KType_virDomainBlockStatsPtr;
 
 typedef struct kvirDomainControlInfoPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virDomainControlInfoPtr p;
 }kvirDomainControlInfoPtr;
 static int KType_virDomainControlInfoPtr;
 
 typedef struct kvirDomainDiskErrorPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virDomainDiskErrorPtr p;
 }kvirDomainDiskErrorPtr;
 static int KType_virDomainDiskErrorPtr;
 
 typedef struct kvirDomainInfoPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virDomainInfoPtr p;
 }kvirDomainInfoPtr;
 static int KType_virDomainInfoPtr;
 
 typedef struct kvirDomainInterfaceStatsPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virDomainInterfaceStatsPtr p;
 }kvirDomainInterfaceStatsPtr;
 static int KType_virDomainInterfaceStatsPtr;
 
 typedef struct kvirDomainJobInfoPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virDomainJobInfoPtr p;
 }kvirDomainJobInfoPtr;
 static int KType_virDomainJobInfoPtr;
 
 typedef struct kvirDomainMemoryStatPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virDomainMemoryStatPtr p;
 }kvirDomainMemoryStatPtr;
 static int KType_virDomainMemoryStatPtr;
 
 typedef struct kvirDomainPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virDomainPtr p;
 }kvirDomainPtr;
 static int KType_virDomainPtr;
 
 typedef struct virDomainPtrPtr *virDomainPtrPtrPtr;
 typedef struct kvirDomainPtrPtrPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virDomainPtrPtrPtr p;
 }kvirDomainPtrPtrPtr;
 static int KType_virDomainPtrPtrPtr;
 
 typedef struct kvirDomainSnapshotPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virDomainSnapshotPtr p;
 }kvirDomainSnapshotPtr;
 static int KType_virDomainSnapshotPtr;
 
 typedef struct virDomainSnapshotPtrPtr *virDomainSnapshotPtrPtrPtr;
 typedef struct kvirDomainSnapshotPtrPtrPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virDomainSnapshotPtrPtrPtr p;
 }kvirDomainSnapshotPtrPtrPtr;
 static int KType_virDomainSnapshotPtrPtrPtr;
 
 typedef struct kvirEventAddHandleFunc {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virEventAddHandleFunc p;
 }kvirEventAddHandleFunc;
 static int KType_virEventAddHandleFunc;
 
 typedef struct kvirEventAddTimeoutFunc {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virEventAddTimeoutFunc p;
 }kvirEventAddTimeoutFunc;
 static int KType_virEventAddTimeoutFunc;
 
 typedef struct kvirEventHandleCallback {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virEventHandleCallback p;
 }kvirEventHandleCallback;
 static int KType_virEventHandleCallback;
 
 typedef struct kvirEventRemoveHandleFunc {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virEventRemoveHandleFunc p;
 }kvirEventRemoveHandleFunc;
 static int KType_virEventRemoveHandleFunc;
 
 typedef struct kvirEventRemoveTimeoutFunc {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virEventRemoveTimeoutFunc p;
 }kvirEventRemoveTimeoutFunc;
 static int KType_virEventRemoveTimeoutFunc;
 
 typedef struct kvirEventTimeoutCallback {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virEventTimeoutCallback p;
 }kvirEventTimeoutCallback;
 static int KType_virEventTimeoutCallback;
 
 typedef struct kvirEventUpdateHandleFunc {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virEventUpdateHandleFunc p;
 }kvirEventUpdateHandleFunc;
 static int KType_virEventUpdateHandleFunc;
 
 typedef struct kvirEventUpdateTimeoutFunc {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virEventUpdateTimeoutFunc p;
 }kvirEventUpdateTimeoutFunc;
 static int KType_virEventUpdateTimeoutFunc;
 
 typedef struct kvirFreeCallback {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virFreeCallback p;
 }kvirFreeCallback;
 static int KType_virFreeCallback;
 
 typedef struct kvirInterfacePtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virInterfacePtr p;
 }kvirInterfacePtr;
 static int KType_virInterfacePtr;
 
 typedef struct virInterfacePtrPtr *virInterfacePtrPtrPtr;
 typedef struct kvirInterfacePtrPtrPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virInterfacePtrPtrPtr p;
 }kvirInterfacePtrPtrPtr;
 static int KType_virInterfacePtrPtrPtr;
 
 typedef struct kvirNWFilterPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virNWFilterPtr p;
 }kvirNWFilterPtr;
 static int KType_virNWFilterPtr;
 
 typedef struct virNWFilterPtrPtr *virNWFilterPtrPtrPtr;
 typedef struct kvirNWFilterPtrPtrPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virNWFilterPtrPtrPtr p;
 }kvirNWFilterPtrPtrPtr;
 static int KType_virNWFilterPtrPtrPtr;
 
 typedef struct kvirNetworkPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virNetworkPtr p;
 }kvirNetworkPtr;
 static int KType_virNetworkPtr;
 
 typedef struct virNetworkPtrPtr *virNetworkPtrPtrPtr;
 typedef struct kvirNetworkPtrPtrPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virNetworkPtrPtrPtr p;
 }kvirNetworkPtrPtrPtr;
 static int KType_virNetworkPtrPtrPtr;
 
 typedef struct kvirNodeCPUStatsPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virNodeCPUStatsPtr p;
 }kvirNodeCPUStatsPtr;
 static int KType_virNodeCPUStatsPtr;
 
 typedef struct kvirNodeDevicePtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virNodeDevicePtr p;
 }kvirNodeDevicePtr;
 static int KType_virNodeDevicePtr;
 
 typedef struct virNodeDevicePtrPtr *virNodeDevicePtrPtrPtr;
 typedef struct kvirNodeDevicePtrPtrPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virNodeDevicePtrPtrPtr p;
 }kvirNodeDevicePtrPtrPtr;
 static int KType_virNodeDevicePtrPtrPtr;
 
 typedef struct kvirNodeInfoPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virNodeInfoPtr p;
 }kvirNodeInfoPtr;
 static int KType_virNodeInfoPtr;
 
 typedef struct kvirNodeMemoryStatsPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virNodeMemoryStatsPtr p;
 }kvirNodeMemoryStatsPtr;
 static int KType_virNodeMemoryStatsPtr;
 
 typedef struct kvirSecretPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virSecretPtr p;
 }kvirSecretPtr;
 static int KType_virSecretPtr;
 
 typedef struct virSecretPtrPtr *virSecretPtrPtrPtr;
 typedef struct kvirSecretPtrPtrPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virSecretPtrPtrPtr p;
 }kvirSecretPtrPtrPtr;
 static int KType_virSecretPtrPtrPtr;
 
 typedef struct kvirSecurityLabelPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virSecurityLabelPtr p;
 }kvirSecurityLabelPtr;
 static int KType_virSecurityLabelPtr;
 
 typedef struct virSecurityLabelPtr *virSecurityLabelPtrPtr;
 typedef struct kvirSecurityLabelPtrPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virSecurityLabelPtrPtr p;
 }kvirSecurityLabelPtrPtr;
 static int KType_virSecurityLabelPtrPtr;
 
 typedef struct kvirSecurityModelPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virSecurityModelPtr p;
 }kvirSecurityModelPtr;
 static int KType_virSecurityModelPtr;
 
 typedef struct kvirStoragePoolInfoPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virStoragePoolInfoPtr p;
 }kvirStoragePoolInfoPtr;
 static int KType_virStoragePoolInfoPtr;
 
 typedef struct kvirStoragePoolPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virStoragePoolPtr p;
 }kvirStoragePoolPtr;
 static int KType_virStoragePoolPtr;
 
 typedef struct virStoragePoolPtrPtr *virStoragePoolPtrPtrPtr;
 typedef struct kvirStoragePoolPtrPtrPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virStoragePoolPtrPtrPtr p;
 }kvirStoragePoolPtrPtrPtr;
 static int KType_virStoragePoolPtrPtrPtr;
 
 typedef struct kvirStorageVolInfoPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virStorageVolInfoPtr p;
 }kvirStorageVolInfoPtr;
 static int KType_virStorageVolInfoPtr;
 
 typedef struct kvirStorageVolPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virStorageVolPtr p;
 }kvirStorageVolPtr;
 static int KType_virStorageVolPtr;
 
 typedef struct virStorageVolPtrPtr *virStorageVolPtrPtrPtr;
 typedef struct kvirStorageVolPtrPtrPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virStorageVolPtrPtrPtr p;
 }kvirStorageVolPtrPtrPtr;
 static int KType_virStorageVolPtrPtrPtr;
 
 typedef struct kvirStreamEventCallback {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virStreamEventCallback p;
 }kvirStreamEventCallback;
 static int KType_virStreamEventCallback;
 
 typedef struct kvirStreamPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virStreamPtr p;
 }kvirStreamPtr;
 static int KType_virStreamPtr;
 
 typedef struct kvirStreamSinkFunc {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virStreamSinkFunc p;
 }kvirStreamSinkFunc;
 static int KType_virStreamSinkFunc;
 
 typedef struct kvirStreamSourceFunc {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virStreamSourceFunc p;
 }kvirStreamSourceFunc;
 static int KType_virStreamSourceFunc;
 
 typedef struct kvirTypedParameterPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virTypedParameterPtr p;
 }kvirTypedParameterPtr;
 static int KType_virTypedParameterPtr;
 
 typedef struct kvirVcpuInfoPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	virVcpuInfoPtr p;
 }kvirVcpuInfoPtr;
 static int KType_virVcpuInfoPtr;
 
 
 //typedef struct kvirDomainPtr {
-//	KonohaObjectHeader h;
+//	kObjectHeader h;
 //	virDomainPtr p;
 //}kvirDomainPtr;
 //static int KType_virDomainPtr;
 //
 //typedef struct kvirTypedParameterPtr {
-//	KonohaObjectHeader h;
+//	kObjectHeader h;
 //	virTypedParameterPtr p;
 //}kvirTypedParameterPtr;
 //static int KType_virTypedParameterPtr;
 //
 //typedef struct kvirConnectPtr {
-//	KonohaObjectHeader h;
+//	kObjectHeader h;
 //	virConnectPtr p;
 //}kvirConnectPtr;
 //static int KType_virConnectPtr;
 //
 //typedef struct kvirConnectAuthPtr {
-//	KonohaObjectHeader h;
+//	kObjectHeader h;
 //	virConnectAuthPtr p;
 //}kvirConnectAuthPtr;
 //static int KType_virConnectAuthPtr;
@@ -449,13 +449,13 @@ typedef kStringVar kCharPtr;
 static int KType_charPtr = KType_String;
 
 typedef struct kIntPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	intPtr p;
 }kIntPtr;
 static int KType_intPtr;
 
 typedef struct kUnsigned_longPtr {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	unsigned_long_Ptr p;
 }kUnsigned_longPtr;
 static int KType_unsigned_long_Ptr;

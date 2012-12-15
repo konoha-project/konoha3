@@ -329,11 +329,11 @@ typedef struct KDEFINE_SYNTAX {
 	const char *rule;
 	int precedence_op2;
 	int precedence_op1;
-	MethodFunc PatternMatch;
-	MethodFunc Expression;
-	MethodFunc TopLevelStatement;
-	MethodFunc Statement;
-	MethodFunc TypeCheck;
+	KMethodFunc PatternMatch;
+	KMethodFunc Expression;
+	KMethodFunc TopLevelStatement;
+	KMethodFunc Statement;
+	KMethodFunc TypeCheck;
 } KDEFINE_SYNTAX;
 
 #define new_SugarFunc(ns, F)     new_(Func, KLIB new_kMethod(kctx, (ns)->NameSpaceConstList, 0, 0, 0, F), (ns)->NameSpaceConstList)
@@ -344,7 +344,7 @@ typedef struct KDEFINE_SYNTAX {
 
 /* Token */
 struct kTokenVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	union {
 		kString *text;
 		kArray  *subTokenList;
@@ -459,7 +459,7 @@ typedef enum {
 typedef kshort_t    kexpr_t;
 
 struct kExprVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	KSyntax *syn;
 	union {
 		kToken  *termToken;     // Term
@@ -478,7 +478,7 @@ struct kExprVar {
 #define kStmt_isERR(STMT)       ((STMT)->build == TSTMT_ERR)
 
 struct kStmtVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	kfileline_t        uline;
 	KSyntax       *syn;
 	kBlock            *parentBlockNULL;
@@ -504,7 +504,7 @@ struct kStmtVar {
 #define kStmt_Set(P, O, B)   KFlag_Set(uintptr_t,((kStmtVar *)O)->h.magicflag, kStmtFlag_##P, B)
 
 struct kBlockVar {
-	KonohaObjectHeader   h;
+	kObjectHeader   h;
 	kNameSpace          *BlockNameSpace;
 	kStmt               *parentStmtNULL;
 	kArray              *StmtList;
@@ -538,7 +538,7 @@ typedef struct  {
 } GammaAllocaData;
 
 struct kGammaVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	GammaAllocaData *genv;
 };
 
@@ -746,9 +746,9 @@ struct KBuilderCommon {
 
 struct KBuilderAPI2 {
 	const char *target;
-	struct VirtualCode*   (*GenerateVirtualCode)(KonohaContext *, kMethod *mtd, kBlock *block, int option);
-	MethodFunc            (*GenerateMethodFunc)(KonohaContext *, struct VirtualCode *);
-	struct VirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct VirtualCode *pc);
+	struct KVirtualCode*   (*GenerateKVirtualCode)(KonohaContext *, kMethod *mtd, kBlock *block, int option);
+	KMethodFunc            (*GenerateKMethodFunc)(KonohaContext *, struct KVirtualCode *);
+	struct KVirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
 
 	VisitStmtFunc visitErrStmt;
 	VisitStmtFunc visitExprStmt;

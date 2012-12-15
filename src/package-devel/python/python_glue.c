@@ -35,7 +35,7 @@ extern "C"{
 
 typedef const struct kPyObjectVar kPyObject;
 struct kPyObjectVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	PyObject *self;  // don't set NULL
 };
 

@@ -94,21 +94,21 @@ static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, in
 {
 	DBG_P("START CODE GENERATION..");
 	kNameSpace *ns = block->BlockNameSpace;
-	struct VirtualCode *vcode = ns->builderApi->GenerateVirtualCode(kctx, mtd, block, option);
-	MethodFunc func = ns->builderApi->GenerateMethodFunc(kctx, vcode);
-	((kMethodVar *)mtd)->invokeMethodFunc = func;
+	struct KVirtualCode *vcode = ns->builderApi->GenerateKVirtualCode(kctx, mtd, block, option);
+	KMethodFunc func = ns->builderApi->GenerateKMethodFunc(kctx, vcode);
+	((kMethodVar *)mtd)->invokeKMethodFunc = func;
 	((kMethodVar *)mtd)->vcode_start = vcode;
 }
 
-static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD KMethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KReturnUnboxValue(0);
 }
 
-static void kMethod_SetFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
+static void kMethod_SetFunc(KonohaContext *kctx, kMethod *mtd, KMethodFunc func)
 {
-	func = (func != NULL) ? func : MethodFunc_invokeAbstractMethod;
-	((kMethodVar *)mtd)->invokeMethodFunc = func;
+	func = (func != NULL) ? func : KMethodFunc_invokeAbstractMethod;
+	((kMethodVar *)mtd)->invokeKMethodFunc = func;
 	((kMethodVar *)mtd)->vcode_start = PLATAPI GetDefaultBootCode();
 }
 

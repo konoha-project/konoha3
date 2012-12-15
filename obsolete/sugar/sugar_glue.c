@@ -62,7 +62,7 @@ static KClass *defineSymbolClass(KonohaContext *kctx, kNameSpace *ns, KTraceInfo
 {
 	static KDEFINE_CLASS defSymbol = {0};
 	defSymbol.structname = "Symbol";
-	defSymbol.cflag = CFLAG_int;
+	defSymbol.cflag = KClassFlag_int;
 	defSymbol.init = KClass_(KType_int)->init;
 	defSymbol.unbox = KClass_(KType_int)->unbox;
 	defSymbol.p = kKSymbol_p;
@@ -304,7 +304,7 @@ static KClass *loadcidClass(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *tra
 {
 	static KDEFINE_CLASS defcid = {0};
 	defcid.structname = "cid";
-	defcid.cflag = CFLAG_int;
+	defcid.cflag = KClassFlag_int;
 	defcid.init = KClass_(KType_int)->init;
 	defcid.unbox = KClass_(KType_int)->unbox;
 	defcid.p = kcid_p;
@@ -698,7 +698,7 @@ static KMETHOD Stmt_newTypedCallExpr1(KonohaContext *kctx, KonohaStack *sfp)
 	KClass *ct      = KClass_(sfp[2].intValue);/*FIXME typeId => KClass */
 	ksymbol_t methodName = (ksymbol_t)sfp[3].intValue;
 	kExpr *firstExpr     = sfp[4].asExpr;
-	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), ct, methodName, 1, MethodMatch_CamelStyle);
+	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), ct, methodName, 1, KMethodMatch_CamelStyle);
 	if(method == NULL) {
 		KReturn(KNULL(Expr));
 	}
@@ -714,7 +714,7 @@ static KMETHOD Stmt_newTypedCallExpr2(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t methodName = (ksymbol_t)sfp[3].intValue;
 	kExpr *firstExpr     = sfp[4].asExpr;
 	kExpr *secondExpr    = sfp[5].asExpr;
-	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), ct, methodName, 2, MethodMatch_CamelStyle);
+	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), ct, methodName, 2, KMethodMatch_CamelStyle);
 	if(method == NULL) {
 		KReturn(KNULL(Expr));
 	}

@@ -78,7 +78,7 @@ static inline void  do_bzero(void *ptr, size_t size);
 /* [MSGC Deta Structure] */
 
 typedef struct kGCObject0 {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	struct kGCObject0 *ref;
 	void *ref2_unused;
 	void *ref3_unused;
@@ -87,7 +87,7 @@ typedef struct kGCObject0 {
 } kGCObject0;
 
 typedef struct kGCObject1 {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	struct kGCObject1 *ref;
 	void *ref2_unused;
 	void *ref3_unused;
@@ -97,7 +97,7 @@ typedef struct kGCObject1 {
 } kGCObject1;
 
 typedef struct kGCObject2 {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	struct kGCObject2 *ref;
 	void *ref2_unused;
 	void *ref3_unused;

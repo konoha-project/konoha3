@@ -168,7 +168,7 @@ static kbool_t iterator_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		kparamtype_t IteratorParam = {KType_Object};
 		KDEFINE_CLASS defIterator = {0};
 		SETSTRUCTNAME(defIterator, Iterator);
-		defIterator.cflag  = CFLAG_Iterator;
+		defIterator.cflag  = KClassFlag_Iterator;
 		defIterator.init   = Iterator_Init;
 		defIterator.cparamsize  = 1;
 		defIterator.cParamItems = &IteratorParam;

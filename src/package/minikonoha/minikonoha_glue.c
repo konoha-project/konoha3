@@ -35,13 +35,13 @@ extern "C"{
 typedef struct kKonohaFactoryVar kKonohaFactory;
 
 struct kKonohaFactoryVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	KonohaFactory *factory;
 };
 
 typedef struct kKonohaVar kKonoha;
 struct kKonohaVar {
-	KonohaObjectHeader h;
+	kObjectHeader h;
 	KonohaContext *konoha;
 };
 

@@ -121,7 +121,7 @@ static kExpr *kStmtExpr_ToBox(KonohaContext *kctx, kStmt *stmt, kExpr *texpr, kG
 {
 	KClass *c = KClass_(texpr->attrTypeId);
 	if(c->typeId != KType_boolean) c = KClass_Int;
-	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, kStmt_ns(stmt), c, MN_box, 0, MethodMatch_CamelStyle);
+	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, kStmt_ns(stmt), c, MN_box, 0, KMethodMatch_CamelStyle);
 	DBG_ASSERT(mtd != NULL);
 	//return new_TypedCallExpr(kctx, stmt, gma, reqClass, mtd, 1, texpr);
 	kExprVar *expr = new_UntypedCallStyleExpr(kctx, SYN_(Stmt_ns(stmt), KSymbol_ExprMethodCall), 2, mtd, texpr);
