@@ -58,11 +58,6 @@ extern "C" {
 #include <errno.h>
 #include <fcntl.h>
 
-#ifdef HAVE_ICONV_H
-#include <iconv.h>
-#endif /* HAVE_ICONV_H */
-
-
 #define kunused __attribute__((unused))
 
 #include <minikonoha/klib.h>
@@ -166,118 +161,6 @@ static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)  { }
 // -------------------------------------------------------------------------
 /* I18N */
 
-#ifdef HAVE_ICONV_H
-
-static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset, const char *sourceCharset, KTraceInfo *trace)
-{
-	uintptr_t ic = (uintptr_t)iconv_open(targetCharset, sourceCharset);
-	if(ic == ICONV_NULL) {
-		KTraceApi(trace, UserFault|SoftwareFault, "iconv_open",
-				  LogText("tocode", targetCharset), LogText("fromcode", sourceCharset), LogErrno
-			);
-	}
-	return (uintptr_t)ic;
-}
-
-static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, ICONV_INBUF_CONST char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
-{
-	DBG_ASSERT(ic != ICONV_NULL);
-	size_t iconv_ret = iconv((iconv_t)ic, inbuf, inBytesLeft, outbuf, outBytesLeft);
-	if(iconv_ret == ((size_t)-1)) {
-		if(errno == E2BIG) {   // input is too big.
-			isTooBigSourceRef[0] = true;
-			return iconv_ret;
-		}
-		KTraceApi(trace, UserFault, "iconv", LogErrno);
-	}
-	isTooBigSourceRef[0] = false;
-	return iconv_ret;
-}
-
-static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, ICONV_INBUF_CONST char **inbuf, size_t *inBytesLeft, char **outbuf, size_t *outBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
-{
-	DBG_ASSERT(ic != ICONV_NULL);
-	size_t iconv_ret = iconv((iconv_t)ic, inbuf, inBytesLeft, outbuf, outBytesLeft);
-	if(iconv_ret == ((size_t)-1)) {
-		if(errno == E2BIG) {   // input is too big.
-			isTooBigSourceRef[0] = true;
-			return iconv_ret;
-		}
-		KTraceApi(trace, UserFault, "iconv", LogErrno);
-	}
-	isTooBigSourceRef[0] = false;
-	return iconv_ret;
-}
-
-static int I18N_iconv_close(KonohaContext *kctx, uintptr_t ic)
-{
-	return iconv_close((iconv_t)ic);
-}
-
-static kbool_t I18N_isSystemCharsetUTF8(KonohaContext *kctx)
-{
-	const char *t = PLATAPI systemCharset;
-	return (t[0] == 'U' && t[5] == 0 && t[4] == '8' && t[3] == '-' && t[2] == 'F'); // "UTF-8"
-}
-
-static uintptr_t I18N_iconvSystemCharsetToUTF8(KonohaContext *kctx, KTraceInfo *trace)
-{
-	return PLATAPI iconv_open_i(kctx, "UTF-8", PLATAPI systemCharset, trace);
-}
-
-static uintptr_t I18N_iconvUTF8ToSystemCharset(KonohaContext *kctx, KTraceInfo *trace)
-{
-	return PLATAPI iconv_open_i(kctx, PLATAPI systemCharset, "UTF-8", trace);
-}
-
-static const char* I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
-{
-	size_t newsize;
-	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
-		uintptr_t ic = PLATAPI iconvUTF8ToSystemCharset(kctx, trace);
-		int isTooBig;
-		ICONV_INBUF_CONST char *presentPtrFrom = (ICONV_INBUF_CONST char *)path;	// too dirty?
-		ICONV_INBUF_CONST char ** inbuf = &presentPtrFrom;
-		char ** outbuf = &buf;
-		size_t inBytesLeft = pathsize, outBytesLeft = bufsiz - 1;
-		PLATAPI iconv_i_memcpyStyle(kctx, ic, outbuf, &outBytesLeft, inbuf, &inBytesLeft, &isTooBig, trace);
-		newsize = (bufsiz - 1) - outBytesLeft;
-	}
-	else {
-		DBG_ASSERT(bufsiz > pathsize);
-		memcpy(buf, path, pathsize);
-		newsize = pathsize;
-	}
-	buf[newsize] = 0;
-	return (const char *)buf;  // stub (in case of no conversion)
-}
-
-static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
-{
-	size_t newsize;
-	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
-		DBG_P(">>>>>>>>>>>>>>>>>>>> path = '%s', pathsize=%d", path, pathsize);
-		uintptr_t ic = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
-		int isTooBig;
-		ICONV_INBUF_CONST char *presentPtrFrom = (ICONV_INBUF_CONST char *)path;	// too dirty?
-		ICONV_INBUF_CONST char ** inbuf = &presentPtrFrom;
-		char ** outbuf = &buf;
-		size_t inBytesLeft = pathsize, outBytesLeft = bufsiz - 1;
-		PLATAPI iconv_i_memcpyStyle(kctx, ic, outbuf, &outBytesLeft, inbuf, &inBytesLeft, &isTooBig, trace);
-		newsize = (bufsiz - 1) - outBytesLeft;
-		DBG_P(">>>>>>>>>>>>>>>>>>>> buf = '%s', newsize=%d", buf, newsize);
-	}
-	else {
-		DBG_ASSERT(bufsiz > pathsize);
-		memcpy(buf, path, pathsize);
-		newsize = pathsize;
-	}
-	buf[newsize] = 0;
-	return (const char *)buf;  // stub (in case of no conversion)
-}
-
-#else/*HAVE_ICONV_H*/
-
 static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset, const char *sourceCharset, KTraceInfo *trace)
 {
 	return ICONV_NULL;
@@ -322,8 +205,6 @@ static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t 
 {
 	return path;  // stub (in case of no conversion)
 }
-
-#endif/*HAVE_ICONV_H*/
 
 static void loadI18N(KonohaFactory *plat, const char *defaultCharSet)
 {
@@ -1041,70 +922,6 @@ static void exit_i(int status, const char *file, int line)
 }
 
 // --------------------------------------------------------------------------
-
-//static kunused PlatformApi *KonohaUtils_getDefaultPlatformApi(void)
-//{
-//	static KonohaFactory plat = {};
-//	plat.name            = "shell";
-//	plat.stacksize       = K_PAGESIZE * 4;
-//	plat.getenv_i        =  (const char *(*)(const char *))getenv;
-//	plat.malloc_i        = malloc;
-//	plat.free_i          = free;
-//	plat.setjmp_i        = ksetjmp;
-//	plat.longjmp_i       = klongjmp;
-//	loadI18N(&plat, "UTF-8");
-//
-//	plat.printf_i        = printf;
-//	plat.vprintf_i       = vprintf;
-//	plat.snprintf_i      = snprintf;  // avoid to use Xsnprintf
-//	plat.vsnprintf_i     = vsnprintf; // retreating..
-//	plat.qsort_i         = qsort;
-//	plat.exit_i          = exit_i;
-//
-//	// pthread / mutex / cond
-//	plat.pthread_create_i        = kpthread_create;
-//	plat.pthread_join_i          = kpthread_join;
-//	plat.pthread_mutex_init_i    = kpthread_mutex_init;
-//	plat.pthread_mutex_init_recursive = kpthread_mutex_init_recursive;
-//	plat.pthread_mutex_lock_i    = kpthread_mutex_lock;
-//	plat.pthread_mutex_unlock_i  = kpthread_mutex_unlock;
-//	plat.pthread_mutex_trylock_i = kpthread_mutex_trylock;
-//	plat.pthread_mutex_destroy_i = kpthread_mutex_destroy;
-//	plat.pthread_cond_init_i     = kpthread_cond_init;
-//	plat.pthread_cond_wait_i     = kpthread_cond_wait;
-//	plat.pthread_cond_signal_i   = kpthread_cond_signal;
-//	plat.pthread_cond_broadcast_i= kpthread_cond_broadcast;
-//	plat.pthread_cond_destroy_i  = kpthread_cond_destroy;
-//
-//	plat.LoadPlatformModule   = LoadPlatformModule;
-//	plat.FormatPackagePath   = FormatPackagePath;
-//	plat.LoadPackageHandler  = LoadPackageHandler;
-//	plat.BEFORE_LoadScript   = BEFORE_LoadScript;
-//	plat.AFTER_LoadScript    = AFTER_LoadScript;
-//
-//	plat.shortFilePath       = shortFilePath;
-//	plat.formatTransparentPath = formatTransparentPath;
-//	plat.loadScript          = loadScript;
-//	plat.ReportDebugMessage         = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
-//
-//	// timer
-//	plat.getTimeMilliSecond  = getTimeMilliSecond;
-//
-//	// readline
-//	PlatformApi_loadReadline(&plat);
-//
-//	// logger
-//	plat.syslog_i            = syslog;
-//	plat.vsyslog_i           = vsyslog;
-//	plat.TraceDataLog        = TraceDataLog;
-//	plat.DiagnosisErrorCode  = DEOS_DiagnosisErrorCode;
-//
-//	plat.ReportUserMessage      = UI_ReportUserMessage;
-//	plat.ReportCompilerMessage  = UI_ReportCompilerMessage;
-//	plat.ReportCaughtException  = UI_ReportCaughtException;
-//	return (PlatformApi *)(&plat);
-//}
-
 static kunused void PosixFactory(KonohaFactory *factory)
 {
 	factory->name            = "shell";
