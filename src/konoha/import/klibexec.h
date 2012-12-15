@@ -963,7 +963,7 @@ static void klib_Init(KonohaLibVar *l)
 	l->ApplySystemFunc             = ApplySystemFunc;
 
 	l->KonohaRuntime_raise         = KonohaRuntime_raise;
-	l->ReportScriptMessage        = TRACE_ReportScriptMessage; /* perror.h */
+	l->ReportScriptMessage         = TRACE_ReportScriptMessage; /* perror.h */
 	l->CheckSafePoint              = CheckSafePoint;
 	l->DiagnosisFaultType          = DiagnosisFaultType;
 }

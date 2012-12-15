@@ -207,8 +207,8 @@ SET_CXX_PROPERTY_IF_MSVC(minikonoha ${RUNTIME} ${PARSER} ${VM})
 target_link_libraries(minikonoha ${ExtraLibs})
 set(ExtraLibs ${ExtraLibs} minikonoha)
 
-add_executable(minikonoha_bin platform/shell/command.c)
-SET_CXX_PROPERTY_IF_MSVC(minikonoha_bin platform/shell/command.c)
+add_executable(minikonoha_bin src/exec/command/command.c)
+SET_CXX_PROPERTY_IF_MSVC(minikonoha_bin src/exec/command/command.c)
 target_link_libraries(minikonoha_bin ${ExtraLibs})
 set_target_properties(minikonoha_bin PROPERTIES OUTPUT_NAME minikonoha)
 
@@ -292,14 +292,14 @@ foreach(f ${test_files})
 		"KONOHA_HOME=${PARENT_BINARY_DIR}")
 endforeach(f ${test_files})
 
-add_subdirectory(platform/dse)
-add_subdirectory(platform/apache)
-add_subdirectory(platform/logger-shell)
+#add_subdirectory(platform/dse)
+add_subdirectory(src/exec/apache)
+#add_subdirectory(platform/logger-shell)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cpack.cmake)
 
 # for konoha command
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/platform/shell/konoha.sh.cmake
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/exec/command/konoha.sh.cmake
 		${CMAKE_CURRENT_BINARY_DIR}/konoha.sh)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/konoha.sh
