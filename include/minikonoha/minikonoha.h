@@ -783,17 +783,16 @@ struct KHashMap {
 typedef const struct KClassVar     KClass;
 typedef struct KClassVar           KClassVar;
 typedef struct KClassField         KClassField;
-typedef struct KClassField         KClassFieldVar;
 
-typedef const struct KRuntimeVar           KRuntime;
-typedef struct KRuntimeVar                 KRuntimeVar;
+typedef const struct KRuntimeVar             KRuntime;
+typedef struct KRuntimeVar                   KRuntimeVar;
 typedef const struct KRuntimeContextVar      KRuntimeContext;
 typedef struct KRuntimeContextVar            KRuntimeContextVar;
-typedef struct KonohaValueVar                   KonohaStack;
-typedef struct KonohaValueVar                   KonohaValue;
+typedef struct KonohaValueVar                KonohaStack;
+typedef struct KonohaValueVar                KonohaValue;
 
 typedef struct KRuntimeModule        KRuntimeModule;
-typedef struct KContextModule KContextModule;
+typedef struct KContextModule        KContextModule;
 struct KObjectVisitor;
 
 struct KonohaContextVar {
