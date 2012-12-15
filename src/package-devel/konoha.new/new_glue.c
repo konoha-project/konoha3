@@ -31,7 +31,7 @@ extern "C"{
 
 // --------------------------------------------------------------------------
 
-static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktypeattr_t ty)
+static kExpr* NewExpr(KonohaContext *kctx, KSyntax *syn, kToken *tk, ktypeattr_t ty)
 {
 	kExprVar *expr = new_(ExprVar, syn, OnGcStack);
 	KFieldSet(expr, expr->termToken, tk);
@@ -53,12 +53,12 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 		if((size_t)nextIdx < kArray_size(tokenList)) {
 			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
 			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // new C (...)
-				SugarSyntax *syn = SYN_(ns, KSymbol_ExprMethodCall);
+				KSyntax *syn = SYN_(ns, KSymbol_ExprMethodCall);
 				kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
 				newToken->resolvedSymbol = MN_new;
 				KReturn(expr);
 			}
-			SugarSyntax *newsyn = SYN_(ns, SYM_("new"));
+			KSyntax *newsyn = SYN_(ns, SYM_("new"));
 			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup) {     // new int [100]
 				kArray *subTokenList = nextTokenAfterClassName->subTokenList;
 				KonohaClass *classT0 = NULL;
@@ -70,7 +70,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 				if(hasGenerics != -1) {
 					/* new Type1[Type2[]] => Type1<Type2>.new Or Type1<Type2>.newList */
 					KonohaClass *realType = KClass_p0(kctx, foundClass, classT0->typeId);
-					SugarSyntax *syn;// = (realType->baseTypeId != KType_Array) ? SYN_(ns, KSymbol_ExprMethodCall) : newsyn;
+					KSyntax *syn;// = (realType->baseTypeId != KType_Array) ? SYN_(ns, KSymbol_ExprMethodCall) : newsyn;
 					syn = newsyn;
 					newToken->resolvedSymbol = (realType->baseTypeId != KType_Array) ? MN_new : MN_("newArray");
 					expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, newToken,

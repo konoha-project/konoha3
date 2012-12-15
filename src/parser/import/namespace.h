@@ -84,13 +84,13 @@ static void kNameSpace_SetTokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns, i
 #define kToken_isFirstPattern(tk)   (KSymbol_IsPattern(tk->resolvedSymbol) && tk->stmtEntryKey != KSymbol_ExprPattern)
 static void kNameSpace_ParseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t uline, kArray *ruleList);
 
-static SugarSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, SugarSyntax *parentSyntax, ksymbol_t keyword)
+static KSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, KSyntax *parentSyntax, ksymbol_t keyword)
 {
 	if(ns->syntaxMapNN == NULL) {
 		((kNameSpaceVar *)ns)->syntaxMapNN = KLIB KHashMap_Init(kctx, 0);
 	}
 	KHashMapEntry *e = KLIB KHashMap_newEntry(kctx, ns->syntaxMapNN, (uintptr_t)keyword);
-	SugarSyntaxVar *syn = (SugarSyntaxVar *)KCalloc_UNTRACE(sizeof(SugarSyntax), 1);
+	KSyntaxVar *syn = (KSyntaxVar *)KCalloc_UNTRACE(sizeof(KSyntax), 1);
 	e->unboxValue = (uintptr_t)syn;
 	syn->parentSyntaxNULL = parentSyntax;
 	syn->keyword          = keyword;
@@ -105,7 +105,7 @@ static SugarSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, Su
 	return syn;
 }
 
-static kFunc** SugarSyntax_funcTable(KonohaContext *kctx, SugarSyntax *syn, int index, int *sizeRef)
+static kFunc** KSyntax_funcTable(KonohaContext *kctx, KSyntax *syn, int index, int *sizeRef)
 {
 	kFunc *fo = syn->sugarFuncTable[index];
 	if(fo == NULL) {
@@ -120,9 +120,9 @@ static kFunc** SugarSyntax_funcTable(KonohaContext *kctx, SugarSyntax *syn, int 
 	return (kFunc**)&(syn->sugarFuncTable[index]);
 }
 
-static kbool_t kNameSpace_ImportSyntax(KonohaContext *kctx, kNameSpace *ns, SugarSyntax *target, KTraceInfo *trace)
+static kbool_t kNameSpace_ImportSyntax(KonohaContext *kctx, kNameSpace *ns, KSyntax *target, KTraceInfo *trace)
 {
-	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, target->keyword, true/*isNew*/);
+	KSyntaxVar *syn = (KSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, target->keyword, true/*isNew*/);
 	//DBG_P("<<<< packageId=%s,%s >>>>", KPackage_text(syn->lastLoadedPackageId), KPackage_text(target->lastLoadedPackageId));
 	if(syn->lastLoadedPackageId != target->lastLoadedPackageId) {
 		int index;
@@ -141,14 +141,14 @@ static kbool_t kNameSpace_ImportSyntax(KonohaContext *kctx, kNameSpace *ns, Suga
 		}
 		for(index = 0; index < SugarFunc_SIZE; index++) {
 			int j, size;
-			kFunc **FuncItems = SugarSyntax_funcTable(kctx, target, index, &size);
+			kFunc **FuncItems = KSyntax_funcTable(kctx, target, index, &size);
 			for(j = 0; j < size; j++) {
 				kNameSpace_AddFuncList(kctx, ns, syn->sugarFuncListTable, index, FuncItems[j]);
 			}
 		}
 		if(target->tokenKonohaChar != 0) {
 			int j, size;
-			kFunc **FuncItems = SugarSyntax_funcTable(kctx, target, SugarFunc_TokenFunc, &size);
+			kFunc **FuncItems = KSyntax_funcTable(kctx, target, SugarFunc_TokenFunc, &size);
 			for(j = 0; j < size; j++) {
 				kNameSpace_SetTokenFuncMatrix(kctx, ns, target->tokenKonohaChar, FuncItems[j]);
 			}
@@ -167,7 +167,7 @@ struct ImportSyntaxArgument {
 static void ImportEachSyntax(KonohaContext *kctx, KHashMapEntry *e, void *thunk)
 {
 	struct ImportSyntaxArgument *argd = (struct ImportSyntaxArgument *)thunk;
-	kNameSpace_ImportSyntax(kctx, argd->ns, (SugarSyntax *)e->unboxValue, argd->trace);
+	kNameSpace_ImportSyntax(kctx, argd->ns, (KSyntax *)e->unboxValue, argd->trace);
 }
 
 static kbool_t kNameSpace_ImportSyntaxAll(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, KTraceInfo *trace)
@@ -179,7 +179,7 @@ static kbool_t kNameSpace_ImportSyntaxAll(KonohaContext *kctx, kNameSpace *ns, k
 	return true;
 }
 
-static SugarSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int isNew)
+static KSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int isNew)
 {
 	kNameSpace *currentNameSpace = ns;
 	uintptr_t hcode = keyword;
@@ -189,9 +189,9 @@ static SugarSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns, ks
 			while(e != NULL) {
 				if(e->hcode == hcode) {
 					if(isNew && ns != currentNameSpace) {
-						return kNameSpace_newSyntax(kctx, ns, (SugarSyntax *)e->unboxValue, keyword);
+						return kNameSpace_newSyntax(kctx, ns, (KSyntax *)e->unboxValue, keyword);
 					}
-					return (SugarSyntax *)e->unboxValue;
+					return (KSyntax *)e->unboxValue;
 				}
 				e = e->next;
 			}
@@ -208,11 +208,11 @@ static kbool_t kNameSpace_RemoveSyntax(KonohaContext *kctx, kNameSpace *ns, ksym
 		KHashMapEntry *e = KLIB KHashMap_get(kctx, ns->syntaxMapNN, hcode);
 		while(e != NULL) {
 			if(e->hcode == hcode) {
-				SugarSyntaxVar *syn = (SugarSyntaxVar *)e->unboxValue;
+				KSyntaxVar *syn = (KSyntaxVar *)e->unboxValue;
 				KLIB ReportScriptMessage(kctx, trace, InfoTag, "@%s removing syntax %s%s", KPackage_text(syn->lastLoadedPackageId), KSymbol_Fmt2(syn->keyword));
 				KLIB KHashMap_Remove(ns->syntaxMapNN, e);
-				bzero(syn, sizeof(SugarSyntax));
-				KFree(syn, sizeof(SugarSyntax));
+				bzero(syn, sizeof(KSyntax));
+				KFree(syn, sizeof(KSyntax));
 				return true;
 			}
 			e = e->next;
@@ -221,9 +221,9 @@ static kbool_t kNameSpace_RemoveSyntax(KonohaContext *kctx, kNameSpace *ns, ksym
 	return false;
 }
 
-static SugarSyntaxVar *kNameSpace_AddSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *funcObject)
+static KSyntaxVar *kNameSpace_AddSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *funcObject)
 {
-	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, keyword, 1/*new*/);
+	KSyntaxVar *syn = (KSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, keyword, 1/*new*/);
 	DBG_ASSERT(idx < SugarFunc_SIZE);
 	kNameSpace_AddFuncList(kctx, ns, syn->sugarFuncListTable, idx, funcObject);
 	KLIB kMethod_DoLazyCompilation(kctx, (funcObject)->method, NULL, HatedLazyCompile);
@@ -231,9 +231,9 @@ static SugarSyntaxVar *kNameSpace_AddSugarFunc(KonohaContext *kctx, kNameSpace *
 	return syn;
 }
 
-static SugarSyntaxVar *kNameSpace_SetTokenFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int konohaChar, kFunc *fo)
+static KSyntaxVar *kNameSpace_SetTokenFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int konohaChar, kFunc *fo)
 {
-	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, keyword, 1/*new*/);
+	KSyntaxVar *syn = (KSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, keyword, 1/*new*/);
 	kArray **list = (kArray**)kNameSpace_tokenFuncMatrix(kctx, ns);
 	kNameSpace_AddFuncList(kctx, ns, list, konohaChar, fo);
 	KLIB kMethod_DoLazyCompilation(kctx, (fo)->method, NULL, HatedLazyCompile);
@@ -243,7 +243,7 @@ static SugarSyntaxVar *kNameSpace_SetTokenFunc(KonohaContext *kctx, kNameSpace *
 	return syn;
 }
 
-static void SugarSyntax_setMethodFunc(KonohaContext *kctx, kNameSpace *ns, SugarSyntaxVar *syn, MethodFunc definedMethodFunc, size_t index, MethodFunc *previousDefinedFuncRef, kFunc **cachedFuncRef)
+static void KSyntax_setMethodFunc(KonohaContext *kctx, kNameSpace *ns, KSyntaxVar *syn, MethodFunc definedMethodFunc, size_t index, MethodFunc *previousDefinedFuncRef, kFunc **cachedFuncRef)
 {
 	if(definedMethodFunc != NULL) {
 		if(definedMethodFunc != previousDefinedFuncRef[0]) {
@@ -259,7 +259,7 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 	MethodFunc pPatternMatch = NULL, pExpression = NULL, pStatement = NULL, pTypeCheck = NULL;
 	kFunc *mPatternMatch = NULL, *mExpression = NULL, *mStatement = NULL, *mTypeCheck = NULL;
 	while(syndef->keyword != KSymbol_END) {
-		SugarSyntaxVar* syn = (SugarSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, syndef->keyword, 1/*isnew*/);
+		KSyntaxVar* syn = (KSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, syndef->keyword, 1/*isnew*/);
 		DBG_ASSERT(syn != NULL);
 		syn->lastLoadedPackageId = ns->packageId;
 		syn->flag  |= ((kshortflag_t)syndef->flag);
@@ -273,11 +273,11 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 			syn->syntaxPatternListNULL_OnList = new_(TokenArray, 0, ns->NameSpaceConstList);
 			kNameSpace_ParseSyntaxPattern(kctx, ns, syndef->rule, 0, syn->syntaxPatternListNULL_OnList);
 		}
-		SugarSyntax_setMethodFunc(kctx, ns, syn, syndef->PatternMatch,   SugarFunc_PatternMatch,   &pPatternMatch, &mPatternMatch);
-		SugarSyntax_setMethodFunc(kctx, ns, syn, syndef->Expression,      SugarFunc_Expression,      &pExpression, &mExpression);
-		SugarSyntax_setMethodFunc(kctx, ns, syn, syndef->TopLevelStatement, SugarFunc_TopLevelStatement, &pStatement, &mStatement);
-		SugarSyntax_setMethodFunc(kctx, ns, syn, syndef->Statement,    SugarFunc_Statement,    &pStatement, &mStatement);
-		SugarSyntax_setMethodFunc(kctx, ns, syn, syndef->TypeCheck,    SugarFunc_TypeCheck,    &pTypeCheck, &mTypeCheck);
+		KSyntax_setMethodFunc(kctx, ns, syn, syndef->PatternMatch,   SugarFunc_PatternMatch,   &pPatternMatch, &mPatternMatch);
+		KSyntax_setMethodFunc(kctx, ns, syn, syndef->Expression,      SugarFunc_Expression,      &pExpression, &mExpression);
+		KSyntax_setMethodFunc(kctx, ns, syn, syndef->TopLevelStatement, SugarFunc_TopLevelStatement, &pStatement, &mStatement);
+		KSyntax_setMethodFunc(kctx, ns, syn, syndef->Statement,    SugarFunc_Statement,    &pStatement, &mStatement);
+		KSyntax_setMethodFunc(kctx, ns, syn, syndef->TypeCheck,    SugarFunc_TypeCheck,    &pTypeCheck, &mTypeCheck);
 		// set default function
 		if(syn->parentSyntaxNULL == NULL && syn->sugarFuncTable[SugarFunc_Expression] == NULL) {
 			if(syn->precedence_op2 > 0 || syn->precedence_op1 > 0) {
@@ -961,7 +961,7 @@ static KonohaPackage *GetPackageNULL(KonohaContext *kctx, kpackageId_t packageId
 
 static kbool_t kNameSpace_ImportSymbol(KonohaContext *kctx, kNameSpace *ns, kNameSpace *packageNS, ksymbol_t keyword, KTraceInfo *trace)
 {
-	SugarSyntax *syn = SYN_(packageNS, keyword);
+	KSyntax *syn = SYN_(packageNS, keyword);
 	if(syn != NULL) {
 		return kNameSpace_ImportSyntax(kctx, ns, syn, trace);
 	}

@@ -629,7 +629,7 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 			kTokenVar *tkN = /*G*/new_(TokenVar, 0, OnGcStack);
 			tkN->resolvedSymbol= MethodName_ToGetter(0);
 			tkN->uline = currentToken->uline;
-			SugarSyntax *syn = SYN_(Stmt_ns(stmt), KSymbol_ExprMethodCall);
+			KSyntax *syn = SYN_(Stmt_ns(stmt), KSymbol_ExprMethodCall);
 			leftExpr  = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, tkN, leftExpr);
 			leftExpr = SUGAR kStmt_AddExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), "[");
 		}

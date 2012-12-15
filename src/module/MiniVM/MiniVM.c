@@ -664,7 +664,7 @@ static kbool_t KBuilder_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kS
 
 static kbool_t KBuilder_VisitJumpStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
-	SugarSyntax *syn = stmt->syn;
+	KSyntax *syn = stmt->syn;
 	kStmt *jump = kStmt_GetStmt(kctx, stmt, syn->keyword);
 	DBG_ASSERT(jump != NULL && IS_Stmt(jump));
 	bblock_t lbJUMP = kStmt_GetLabelBlock(kctx, jump, syn->keyword);

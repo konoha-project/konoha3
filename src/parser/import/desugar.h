@@ -327,7 +327,7 @@ static KMETHOD Expression_DOLLAR(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktypeattr_t ty)
+static kExpr* NewExpr(KonohaContext *kctx, KSyntax *syn, kToken *tk, ktypeattr_t ty)
 {
 	kExprVar *expr = new_(ExprVar, syn, OnGcStack);
 	KFieldSet(expr, expr->termToken, tk);
@@ -353,7 +353,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 		if((size_t)nextIdx < kArray_size(tokenList)) {
 			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
 			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // new C (...)
-				SugarSyntax *syn = SYN_(ns, KSymbol_ExprMethodCall);
+				KSyntax *syn = SYN_(ns, KSymbol_ExprMethodCall);
 				kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
 				newToken->resolvedSymbol = MN_new;
 				KReturn(expr);
@@ -1179,8 +1179,8 @@ static kParam *kStmt_newMethodParamNULL(KonohaContext *kctx, kStmt *stmt, kGamma
 {
 	kParam *pa = (kParam *)kStmt_GetObjectNULL(kctx, stmt, KSymbol_ParamPattern);
 	if(pa == NULL || !IS_Param(pa)) {
-		SugarSyntax *syn = SYN_(Stmt_ns(stmt), KSymbol_ParamPattern);
-		if(!SugarSyntax_TypeCheckStmt(kctx, syn, stmt, gma)) {
+		KSyntax *syn = SYN_(Stmt_ns(stmt), KSymbol_ParamPattern);
+		if(!KSyntax_TypeCheckStmt(kctx, syn, stmt, gma)) {
 			return NULL;
 		}
 	}

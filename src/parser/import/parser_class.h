@@ -30,7 +30,7 @@
 
 static void syntaxMap_Free(KonohaContext *kctx, void *p)
 {
-	KFree(p, sizeof(SugarSyntax));
+	KFree(p, sizeof(KSyntax));
 }
 
 static void kNameSpace_FreeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns)
@@ -158,7 +158,7 @@ static void kExpr_Init(KonohaContext *kctx, kObject *o, void *conf)
 	expr->attrTypeId       = KType_var;
 	expr->index    = 0;
 	KFieldInit(expr, expr->termToken, K_NULLTOKEN);
-	expr->syn = (SugarSyntax *)conf;
+	expr->syn = (KSyntax *)conf;
 }
 
 static void kExpr_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
@@ -261,7 +261,7 @@ static kExprVar* kExpr_AddSeveral(KonohaContext *kctx, kExprVar *expr, int n, va
 	return expr;
 }
 
-static kExprVar* new_UntypedCallStyleExpr(KonohaContext *kctx, SugarSyntax *syn, int n, ...)
+static kExprVar* new_UntypedCallStyleExpr(KonohaContext *kctx, KSyntax *syn, int n, ...)
 {
 	va_list ap;
 	va_start(ap, n);
@@ -382,7 +382,7 @@ static void kStmt_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 	KLIB KBuffer_Write(kctx, wb, "}", 1);
 }
 
-static kStmtVar* new_kStmt(KonohaContext *kctx, kArray *gcstack, SugarSyntax *syn, ...)
+static kStmtVar* new_kStmt(KonohaContext *kctx, kArray *gcstack, KSyntax *syn, ...)
 {
 	kStmtVar *stmt = new_(StmtVar, 0, gcstack);
 	stmt->syn = syn;

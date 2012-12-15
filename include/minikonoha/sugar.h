@@ -231,7 +231,7 @@ struct Tokenizer {
 
 // Expr Expression(Stmt stmt, Token[] tokenList, int s, int c, int e)
 #define VAR_Expression(STMT, TLS, S, C, E)\
-		SugarSyntax *syn = (SugarSyntax *)sfp[0].unboxValue;\
+		KSyntax *syn = (KSyntax *)sfp[0].unboxValue;\
 		kStmt *STMT = (kStmt *)sfp[1].asObject;\
 		kArray *TLS = (kArray *)sfp[2].asObject;\
 		int S = (int)sfp[3].intValue;\
@@ -254,8 +254,8 @@ struct Tokenizer {
 		VAR_TRACE; (void)STMT; (void)EXPR; (void)GMA; (void)TY
 
 
-typedef const struct SugarSyntaxVar   SugarSyntax;
-typedef struct SugarSyntaxVar         SugarSyntaxVar;
+typedef const struct KSyntaxVar   KSyntax;
+typedef struct KSyntaxVar         KSyntaxVar;
 
 typedef enum {
 	SugarFunc_TokenFunc         = 0,
@@ -280,9 +280,9 @@ typedef enum {
 #define SYN_Is(P, o)       (KFlag_Is(uintptr_t,(o)->flag, SYNFLAG_##P))
 #define SYN_Set(P,o,B)     KFlag_Set(uintptr_t,(o)->flag, SYNFLAG_##P, B)
 
-struct SugarSyntaxVar {
+struct KSyntaxVar {
 	ksymbol_t  keyword;               kshortflag_t  flag;
-	const struct SugarSyntaxVar      *parentSyntaxNULL;
+	const struct KSyntaxVar      *parentSyntaxNULL;
 	kArray                           *syntaxPatternListNULL_OnList;
 	union {
 		kFunc                        *sugarFuncTable[SugarFunc_SIZE];
@@ -351,7 +351,7 @@ struct kTokenVar {
 		kExpr   *parsedExpr;
 	};
 	kfileline_t     uline;
-	SugarSyntax    *resolvedSyntaxInfo;
+	KSyntax    *resolvedSyntaxInfo;
 	union {
 		ksymbol_t   unresolvedTokenType; // (resolvedSyntaxInfo == NULL)
 		ksymbol_t   resolvedSymbol;      // symbol (resolvedSyntaxInfo != NULL)
@@ -390,7 +390,7 @@ struct TokenSeqSource {
 struct TokenSeqTarget {
 	int RemovingIndent;
 	int ExpandingBraceGroup;
-	SugarSyntax *syntaxSymbolPattern;
+	KSyntax *syntaxSymbolPattern;
 };
 
 typedef struct TokenSeq {
@@ -460,7 +460,7 @@ typedef kshort_t    kexpr_t;
 
 struct kExprVar {
 	KonohaObjectHeader h;
-	SugarSyntax *syn;
+	KSyntax *syn;
 	union {
 		kToken  *termToken;     // Term
 		kArray*  cons;          // Cons
@@ -480,7 +480,7 @@ struct kExprVar {
 struct kStmtVar {
 	KonohaObjectHeader h;
 	kfileline_t        uline;
-	SugarSyntax       *syn;
+	KSyntax       *syn;
 	kBlock            *parentBlockNULL;
 	kushort_t          build;
 };
@@ -590,11 +590,11 @@ typedef struct {
 	KonohaClass *cGamma;
 	KonohaClass *cTokenArray;
 
-	SugarSyntax*    (*kNameSpace_GetSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
+	KSyntax*    (*kNameSpace_GetSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
 	void            (*kNameSpace_DefineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *, KTraceInfo *);
 	kbool_t         (*kArray_AddSyntaxRule)(KonohaContext *, kArray *ruleList, TokenSeq *sourceRange);
-	SugarSyntaxVar* (*kNameSpace_SetTokenFunc)(KonohaContext *, kNameSpace *, ksymbol_t, int ch, kFunc *);
-	SugarSyntaxVar* (*kNameSpace_AddSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
+	KSyntaxVar* (*kNameSpace_SetTokenFunc)(KonohaContext *, kNameSpace *, ksymbol_t, int ch, kFunc *);
+	KSyntaxVar* (*kNameSpace_AddSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 	kbool_t         (*kNameSpace_SetMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *, int optionMacro);
 
 	void        (*TokenSeq_Tokenize)(KonohaContext *, TokenSeq *, const char *, kfileline_t);
@@ -615,12 +615,12 @@ typedef struct {
 	kBlock*     (*kStmt_GetBlock)(KonohaContext *, kStmt *, kNameSpace *, ksymbol_t kw, kBlock *def);
 
 	kBlock*      (*new_kBlock)(KonohaContext *, kStmt *, MacroSet *, TokenSeq *);
-	kStmtVar*    (*new_kStmt)(KonohaContext *kctx, kArray *gcstack, SugarSyntax *syn, ...);
+	kStmtVar*    (*new_kStmt)(KonohaContext *kctx, kArray *gcstack, KSyntax *syn, ...);
 	void         (*kBlock_InsertAfter)(KonohaContext *, kBlock *, kStmtNULL *target, kStmt *);
 
 	kExpr*       (*new_TermExpr)(KonohaContext *, kToken *tk);
-	kExprVar*       (*new_UntypedCallStyleExpr)(KonohaContext *, SugarSyntax *syn, int n, ...);
-	kExpr*       (*kStmt_ParseOperatorExpr)(KonohaContext *, kStmt *, SugarSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
+	kExprVar*       (*new_UntypedCallStyleExpr)(KonohaContext *, KSyntax *syn, int n, ...);
+	kExpr*       (*kStmt_ParseOperatorExpr)(KonohaContext *, kStmt *, KSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
 	kExpr*       (*kStmt_ParseExpr)(KonohaContext *, kStmt *, kArray *tokenList, int s, int e, const char *hintBeforeText);
 	kExpr*       (*kStmt_AddExprParam)(KonohaContext *, kStmt *, kExpr *, kArray *tokenList, int, int, const char *hintBeforeText);
 	kExpr*       (*kStmt_RightJoinExpr)(KonohaContext *, kStmt *, kExpr *, kArray *, int, int);
@@ -709,7 +709,7 @@ typedef enum {
 
 //#define KSymbol_(T)                               _e->keyword(kctx, T, sizeof(T)-1, KSymbol_Noname)
 #define SYN_(KS, KW)                         SUGAR kNameSpace_GetSyntax(kctx, KS, KW, 0)
-#define NEWSYN_(KS, KW)                      (SugarSyntaxVar *)(SUGAR kNameSpace_GetSyntax(kctx, KS, KW, 1))
+#define NEWSYN_(KS, KW)                      (KSyntaxVar *)(SUGAR kNameSpace_GetSyntax(kctx, KS, KW, 1))
 
 #endif/*SUGAR_EXPORTS*/
 
@@ -814,7 +814,7 @@ static inline kNameSpace *kStmt_ns(kStmt *stmt)
 
 #define kStmt_setsyn(STMT, S)  Stmt_setsyn(kctx, STMT, S)
 #define kStmt_done(kctx, STMT) Stmt_setsyn(kctx, STMT, NULL)
-static inline void Stmt_setsyn(KonohaContext *kctx, kStmt *stmt, SugarSyntax *syn)
+static inline void Stmt_setsyn(KonohaContext *kctx, kStmt *stmt, KSyntax *syn)
 {
 	//if(syn == NULL && stmt->syn != NULL) {
 	//	DBG_P("DONE: STMT='%s'", KSymbol_Fmt2(syn->keyword));
@@ -840,7 +840,7 @@ static inline kbool_t kExpr_isSymbolTerm(kExpr *expr)
 	return (Expr_isTerm(expr) && (expr->termToken->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern));
 }
 
-static inline void kExpr_Setsyn(kExpr *expr, SugarSyntax *syn)
+static inline void kExpr_Setsyn(kExpr *expr, KSyntax *syn)
 {
 	((kExprVar *)expr)->syn = syn;
 }

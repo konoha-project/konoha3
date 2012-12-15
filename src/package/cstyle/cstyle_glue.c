@@ -206,7 +206,7 @@ static KMETHOD PatternMatch_IncExpr(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	if(start < end) {
 		kToken *opToken = tokenList->TokenItems[i];
-		SugarSyntax *opSyntax = opToken->resolvedSyntaxInfo;
+		KSyntax *opSyntax = opToken->resolvedSyntaxInfo;
 		TokenSeq macro = {Stmt_ns(stmt), tokenList};
 		TokenSeq_Push(kctx, macro);
 		MacroSet macroParam[] = {
@@ -396,7 +396,7 @@ static KMETHOD Expression_Indexer(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *tkN = new_(TokenVar, 0, OnGcStack);
 		tkN->resolvedSymbol= MethodName_ToGetter(0);
 		tkN->uline = currentToken->uline;
-		SugarSyntax *syn = SYN_(Stmt_ns(stmt), KSymbol_ExprMethodCall);
+		KSyntax *syn = SYN_(Stmt_ns(stmt), KSymbol_ExprMethodCall);
 		leftExpr  = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, tkN, leftExpr);
 		leftExpr = SUGAR kStmt_AddExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), "[");
 		KReturn(SUGAR kStmt_RightJoinExpr(kctx, stmt, leftExpr, tokenList, operatorIdx + 1, endIdx));
@@ -668,7 +668,7 @@ static kbool_t int_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_NumberPattern, KonohaChar_Digit, new_SugarFunc(ns, TokenFunc_ExtendedIntLiteral));
 
-	SugarSyntaxVar *syn = (SugarSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, SYM_("+"), 0);
+	KSyntaxVar *syn = (KSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, SYM_("+"), 0);
 	if(syn != NULL) {
 		syn->precedence_op1  = Precedence_CStylePREUNARY;
 	}
@@ -682,7 +682,7 @@ static KMETHOD Expression_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	kToken *opToken = tokenList->TokenItems[operatorIdx];
-	SugarSyntax *opSyntax = opToken->resolvedSyntaxInfo;
+	KSyntax *opSyntax = opToken->resolvedSyntaxInfo;
 	if(opSyntax->macroParamSize == 2) {
 		TokenSeq macro = {Stmt_ns(stmt), tokenList};
 		TokenSeq_Push(kctx, macro);

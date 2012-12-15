@@ -31,7 +31,7 @@ extern "C"{
 
 #define makeStringConstValue(kctx, text) new_ConstValueExpr(kctx, KClass_String, UPCAST(text))
 
-static kExpr *CreateImportCall(KonohaContext *kctx, SugarSyntaxVar *syn, kToken *tkImport, kNameSpace *ns, kString *pkgname)
+static kExpr *CreateImportCall(KonohaContext *kctx, KSyntaxVar *syn, kToken *tkImport, kNameSpace *ns, kString *pkgname)
 {
 	kExpr *ePKG = makeStringConstValue(kctx, pkgname);
 	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3,
@@ -48,7 +48,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 		KReturnUnboxValue(false);
 	}
 	kNameSpace *ns = Stmt_ns(stmt);
-	SugarSyntaxVar *syn = (SugarSyntaxVar *) SYN_(ns, KSymbol_ExprMethodCall);
+	KSyntaxVar *syn = (KSyntaxVar *) SYN_(ns, KSymbol_ExprMethodCall);
 	kExpr *expr;
 	kTokenVar *tkImport = /*G*/new_(TokenVar, 0, OnGcStack);
 	tkImport->resolvedSymbol = MN_("import");

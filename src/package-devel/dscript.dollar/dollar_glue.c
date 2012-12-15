@@ -54,13 +54,13 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 ////			SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "invalid application of 'dollar' to incomplete class %s", KClass_text(ct));
 ////		}
 //		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // dollar C (...)
-//			SugarSyntax *syn = SYN_(Stmt_ns(stmt), KSymbol_ExprMethodCall);
+//			KSyntax *syn = SYN_(Stmt_ns(stmt), KSymbol_ExprMethodCall);
 //			kExpr *expr = SUGAR dollar_UntypedCallStyleExpr(kctx, syn, 2, dollarToken, NewExpr(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
 //			dollarToken->resolvedSymbol = MN_dollar;
 //			KReturn(expr);
 //		}
 //		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup) {     // dollar int [100]
-//			SugarSyntax *syn = SYN_(Stmt_ns(stmt), SYM_("dollar"));
+//			KSyntax *syn = SYN_(Stmt_ns(stmt), SYM_("dollar"));
 //			KonohaClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
 //			dollarToken->resolvedSymbol = MN_("dollarArray");
 //			kExpr *expr = SUGAR dollar_UntypedCallStyleExpr(kctx, syn, 2, dollarToken, NewExpr(kctx, syn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));

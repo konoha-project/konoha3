@@ -33,7 +33,7 @@ extern "C" {
 
 /* ------------------------------------------------------------------------ */
 
-static kExpr *CallExpressionFunc(KonohaContext *kctx, SugarSyntax *syn, kFunc *fo, int *countRef, kStmt *stmt, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx)
+static kExpr *CallExpressionFunc(KonohaContext *kctx, KSyntax *syn, kFunc *fo, int *countRef, kStmt *stmt, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx)
 {
 	BEGIN_UnusedStack(lsfp);
 	lsfp[0].unboxValue = (uintptr_t)syn;
@@ -50,13 +50,13 @@ static kExpr *CallExpressionFunc(KonohaContext *kctx, SugarSyntax *syn, kFunc *f
 	return lsfp[K_RTNIDX].asExpr;
 }
 
-static kExpr *kStmt_ParseOperatorExpr(KonohaContext *kctx, kStmt *stmt, SugarSyntax *exprSyntax, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx)
+static kExpr *kStmt_ParseOperatorExpr(KonohaContext *kctx, kStmt *stmt, KSyntax *exprSyntax, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx)
 {
 	int callCount = 0;
-	SugarSyntax *currentSyntax = exprSyntax;
+	KSyntax *currentSyntax = exprSyntax;
 	while(true) {
 		int index, size;
-		kFunc **funcItems = SugarSyntax_funcTable(kctx, currentSyntax, SugarFunc_Expression, &size);
+		kFunc **funcItems = KSyntax_funcTable(kctx, currentSyntax, SugarFunc_Expression, &size);
 		for(index = size - 1; index >= 0; index--) {
 			DBG_ASSERT(IS_Func(funcItems[index]));
 			kExpr *texpr = CallExpressionFunc(kctx, exprSyntax, funcItems[index], &callCount, stmt, tokenList, beginIdx, operatorIdx, endIdx);
@@ -77,7 +77,7 @@ static int kStmt_FindOperator(KonohaContext *kctx, kStmt *stmt, kArray *tokenLis
 	int idx = beginIdx, i, precedence = 0;
 	for(i = beginIdx; i < endIdx; i++) {
 		kToken *tk = tokenList->TokenItems[i];
-		SugarSyntax *syn = tk->resolvedSyntaxInfo;
+		KSyntax *syn = tk->resolvedSyntaxInfo;
 		if(isPrePosition) {
 			if(syn->precedence_op1 > 0) {
 				if(precedence < syn->precedence_op1) {
@@ -106,7 +106,7 @@ static kExpr* kStmt_ParseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenLis
 	if(!kStmt_isERR(stmt)) {
 		if(beginIdx < endIdx) {
 			int idx = kStmt_FindOperator(kctx, stmt, tokenList, beginIdx, endIdx);
-			SugarSyntax *syn = tokenList->TokenItems[idx]->resolvedSyntaxInfo;
+			KSyntax *syn = tokenList->TokenItems[idx]->resolvedSyntaxInfo;
 			return kStmt_ParseOperatorExpr(kctx, stmt, syn, tokenList, beginIdx, idx, endIdx);
 		}
 		else {
@@ -345,7 +345,7 @@ static void TokenSeq_ApplyMacroGroup(KonohaContext *kctx, TokenSeq *tokens, kArr
 
 static kbool_t kNameSpace_SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data, int optionMacro)
 {
-	SugarSyntaxVar *syn = (SugarSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, keyword, /*new*/true);
+	KSyntaxVar *syn = (KSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, keyword, /*new*/true);
 	if(syn->macroDataNULL_OnList == NULL) {
 		TokenSeq source = {ns, GetSugarContext(kctx)->preparedTokenList};
 		TokenSeq_Push(kctx, source);
@@ -418,7 +418,7 @@ static kToken* new_CommaToken(KonohaContext *kctx, kArray *gcstack)
 	return tk;
 }
 
-static int TokenSeq_ApplyMacroSyntax(KonohaContext *kctx, TokenSeq *tokens, SugarSyntax *syn, MacroSet *macroParam, TokenSeq *source, int currentIdx)
+static int TokenSeq_ApplyMacroSyntax(KonohaContext *kctx, TokenSeq *tokens, KSyntax *syn, MacroSet *macroParam, TokenSeq *source, int currentIdx)
 {
 	TokenSeq dummy = {tokens->ns, kctx->stack->gcstack_OnContextConstList};
 	TokenSeq_Push(kctx, dummy);
@@ -510,7 +510,7 @@ static int TokenSeq_Preprocess(KonohaContext *kctx, TokenSeq *tokens, MacroSet *
 				if(macroParam != NULL && TokenSeq_ExpandMacro(kctx, tokens, symbol, macroParam)) {
 					continue;
 				}
-				SugarSyntax *syn = SYN_(source->ns, symbol);
+				KSyntax *syn = SYN_(source->ns, symbol);
 				if(syn != NULL && FLAG_is(syn->flag, SYNFLAG_Macro)) {
 					if(syn->macroParamSize == 0) {
 						TokenSeq_ApplyMacro(kctx, tokens, syn->macroDataNULL_OnList, 0, kArray_size(syn->macroDataNULL_OnList), 0, NULL);
@@ -565,13 +565,13 @@ static int CallPatternMatchFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 	return (int)lsfp[K_RTNIDX].intValue;
 }
 
-static int SugarSyntax_MatchPattern(KonohaContext *kctx, SugarSyntax *syn, kToken *patternToken, kStmt *stmt, int name, kArray *tokenList, int beginIdx, int endIdx)
+static int KSyntax_MatchPattern(KonohaContext *kctx, KSyntax *syn, kToken *patternToken, kStmt *stmt, int name, kArray *tokenList, int beginIdx, int endIdx)
 {
 	int callCount = 0;
 	if(syn != NULL) {
 		while(true) {
 			int index, size;
-			kFunc **funcItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_PatternMatch, &size);
+			kFunc **funcItems = KSyntax_funcTable(kctx, syn, SugarFunc_PatternMatch, &size);
 			for(index = size - 1; index >= 0; index--) {
 				int next = CallPatternMatchFunc(kctx, funcItems[index], &callCount, stmt, name, tokenList, beginIdx, endIdx);
 				if(kStmt_isERR(stmt)) return -1;
@@ -611,8 +611,8 @@ static int kStmt_MatchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeq *
 			kToken *tk = tokens->tokenList->TokenItems[tokenIdx];
 			errRuleRef[1] = tk;
 			if(KSymbol_IsPattern(ruleToken->resolvedSymbol)) {
-				SugarSyntax *syn = SYN_(ns, ruleToken->resolvedSymbol);
-				int next = SugarSyntax_MatchPattern(kctx, syn, ruleToken, stmt, ruleToken->stmtEntryKey, tokens->tokenList, tokenIdx, tokens->endIdx);
+				KSyntax *syn = SYN_(ns, ruleToken->resolvedSymbol);
+				int next = KSyntax_MatchPattern(kctx, syn, ruleToken, stmt, ruleToken->stmtEntryKey, tokens->tokenList, tokenIdx, tokens->endIdx);
 				if(next < 0) {
 					if(!kToken_is(MatchPreviousPattern, ruleToken)) {
 						errRuleRef[0] = ruleToken;
@@ -672,12 +672,12 @@ static int kStmt_MatchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeq *
 	return tokenIdx;
 }
 
-static SugarSyntax* kStmt_GuessStatementSyntax(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx)
+static KSyntax* kStmt_GuessStatementSyntax(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx)
 {
 	kToken *tk = tokenList->TokenItems[beginIdx];
-	SugarSyntax *syn = tk->resolvedSyntaxInfo;
+	KSyntax *syn = tk->resolvedSyntaxInfo;
 	kNameSpace *ns = Stmt_ns(stmt);
-	//DBG_P(">>>>>>>>>>>>>>>>>>> finding SugarSyntax=%s%s syn->syntaxPatternListNULL=%p", KSymbol_Fmt2(syn->keyword), syn->syntaxPatternListNULL_OnList);
+	//DBG_P(">>>>>>>>>>>>>>>>>>> finding KSyntax=%s%s syn->syntaxPatternListNULL=%p", KSymbol_Fmt2(syn->keyword), syn->syntaxPatternListNULL_OnList);
 	if(syn->syntaxPatternListNULL_OnList == NULL) {
 		kNameSpace *currentNameSpace = ns;
 		while(currentNameSpace != NULL) {
@@ -687,7 +687,7 @@ static SugarSyntax* kStmt_GuessStatementSyntax(KonohaContext *kctx, kStmt *stmt,
 				for(i = kArray_size(stmtPatternList) - 1; i >=0; i--) {
 					kToken *patternToken = stmtPatternList->TokenItems[i];
 					//DBG_P(">>>>>>>>>> searching patternToken=%s%s", KSymbol_Fmt2(patternToken->resolvedSymbol));
-					if(SugarSyntax_MatchPattern(kctx, patternToken->resolvedSyntaxInfo, patternToken, stmt, 0, tokenList, beginIdx, endIdx) != -1) {
+					if(KSyntax_MatchPattern(kctx, patternToken->resolvedSyntaxInfo, patternToken, stmt, 0, tokenList, beginIdx, endIdx) != -1) {
 						return SYN_(ns, patternToken->stmtEntryKey);
 					}
 				}
@@ -740,12 +740,12 @@ static int TokenSeq_SelectSyntaxPattern(KonohaContext *kctx, TokenSeq *patterns,
 
 static int kStmt_ParseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int indent, kArray *tokenList, int beginIdx, int endIdx)
 {
-	SugarSyntax *stmtSyntax = kStmt_GuessStatementSyntax(kctx, stmt, tokenList, beginIdx, endIdx);
+	KSyntax *stmtSyntax = kStmt_GuessStatementSyntax(kctx, stmt, tokenList, beginIdx, endIdx);
 	((kStmtVar *)stmt)->syn = stmtSyntax;
-	//DBG_P(">>>>>>>>>>>>>>>>>>> Found SugarSyntax=%s%s", KWSTMT_t(stmtSyntax->keyword));
+	//DBG_P(">>>>>>>>>>>>>>>>>>> Found KSyntax=%s%s", KWSTMT_t(stmtSyntax->keyword));
 	kToken *errRule[2] = {};
 	kNameSpace *ns = Stmt_ns(stmt);
-	SugarSyntax *currentSyntax = stmtSyntax;
+	KSyntax *currentSyntax = stmtSyntax;
 	while(currentSyntax != NULL) {
 		if(currentSyntax->syntaxPatternListNULL_OnList != NULL) {
 			int patternEndIdx = kArray_size(currentSyntax->syntaxPatternListNULL_OnList);

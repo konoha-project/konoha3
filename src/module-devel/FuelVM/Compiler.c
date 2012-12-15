@@ -347,7 +347,7 @@ static bool FuelVM_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt *
 
 static bool FuelVM_VisitJumpStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
-	SugarSyntax *syn = stmt->syn;
+	KSyntax *syn = stmt->syn;
 	kStmt *jump = kStmt_GetStmt(kctx, stmt, syn->keyword);
 	DBG_ASSERT(jump != NULL && IS_Stmt(jump));
 	Block *target = kStmt_GetTargetBlock(kctx, jump, syn->keyword);

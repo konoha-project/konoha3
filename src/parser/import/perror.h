@@ -96,7 +96,7 @@ static void kToken_ToError(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglev
 	}
 }
 
-static SugarSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t kw, int isnew);
+static KSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t kw, int isnew);
 
 static void kStmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {

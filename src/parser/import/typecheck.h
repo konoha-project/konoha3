@@ -49,11 +49,11 @@ static kExpr *CallTypeCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, KonohaClass* reqtc)
 {
 	int callCount = 0;
-	SugarSyntax *syn = expr->syn;
+	KSyntax *syn = expr->syn;
 	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, KSymbol_Fmt2(syn->keyword));
 	while(true) {
 		int index, size;
-		kFunc **FuncItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_TypeCheck, &size);
+		kFunc **FuncItems = KSyntax_funcTable(kctx, syn, SugarFunc_TypeCheck, &size);
 		for(index = size - 1; index >= 0; index--) {
 			kExpr *texpr = CallTypeCheckFunc(kctx, FuncItems[index], &callCount, stmt, expr, gma, reqtc->typeId);
 			if(kStmt_isERR(stmt)) return K_NULLEXPR;
@@ -214,13 +214,13 @@ static kbool_t CallStatementFunc(KonohaContext *kctx, kFunc *fo, int *countRef, 
 	return lsfp[K_RTNIDX].boolValue;
 }
 
-static kbool_t SugarSyntax_TypeCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, kGamma *gma)
+static kbool_t KSyntax_TypeCheckStmt(KonohaContext *kctx, KSyntax *syn, kStmt *stmt, kGamma *gma)
 {
 	int SugarFunc_index = Gamma_isTopLevel(gma) ? SugarFunc_TopLevelStatement : SugarFunc_Statement;
 	int callCount = 0;
 	while(true) {
 		int index, size;
-		kFunc **FuncItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_index, &size);
+		kFunc **FuncItems = KSyntax_funcTable(kctx, syn, SugarFunc_index, &size);
 		for(index = size - 1; index >= 0; index--) {
 			CallStatementFunc(kctx, FuncItems[index], &callCount, stmt, gma);
 			if(Stmt_isDone(stmt)) return true;
@@ -251,7 +251,7 @@ static kbool_t kBlock_TypeCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 		kStmt *stmt = (kStmt *)bk->StmtList->ObjectItems[i];
 		if(Stmt_isDone(stmt)) continue;
 		KDump(stmt);
-		if(kStmt_isERR(stmt) || !SugarSyntax_TypeCheckStmt(kctx, stmt->syn, stmt, gma)) {
+		if(kStmt_isERR(stmt) || !KSyntax_TypeCheckStmt(kctx, stmt->syn, stmt, gma)) {
 			DBG_ASSERT(kStmt_isERR(stmt));
 			Gamma_setERROR(gma, 1);
 			result = false;
