@@ -124,9 +124,7 @@ static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 			}
 		}
 	}
-	kString *cmd = KLIB new_kString(kctx, GcUnsafe, KLIB KBuffer_text(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
-	KLIB KBuffer_Free(&wb);
-	return cmd;
+	return KLIB KBuffer_Stringfy(kctx, &wb, OnGcStack, StringPolicy_FreeKBuffer);
 }
 
 static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)

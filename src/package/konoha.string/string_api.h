@@ -263,10 +263,7 @@ static kString* String_replaceFirst(KonohaContext *kctx, kString *self, kString 
 	KLIB KBuffer_Write(kctx, &wb, text, pos - text);
 	KLIB KBuffer_Write(kctx, &wb, kString_text(newText), kString_size(newText));
 	KLIB KBuffer_Write(kctx, &wb, pos + oldLen, end - pos - oldLen);
-	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_text(kctx, &wb, 0),
-			KBuffer_bytesize(&wb), StringPolicy_maskASCII(self));
-	KLIB KBuffer_Free(&wb);
-	return ret;
+	return KLIB KBuffer_Stringfy(kctx, &wb, OnGcStack, StringPolicy_FreeKBuffer | StringPolicy_maskASCII(self));
 }
 
 static kString* String_replace(KonohaContext *kctx, kString *self, const char *oldText, size_t oldLen, const char *newText, size_t newLen)
@@ -287,10 +284,7 @@ static kString* String_replace(KonohaContext *kctx, kString *self, const char *o
 		text = pos + oldLen;
 	}
 	KLIB KBuffer_Write(kctx, &wb, text, end - text);
-	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_text(kctx, &wb, 0),
-			KBuffer_bytesize(&wb), StringPolicy_maskASCII(self));
-	KLIB KBuffer_Free(&wb);
-	return ret;
+	return KLIB KBuffer_Stringfy(kctx, &wb, OnGcStack, StringPolicy_FreeKBuffer | StringPolicy_maskASCII(self));
 }
 
 static kString* String_replaceChar(KonohaContext *kctx, kString *self, char oldChar, char newChar)
@@ -339,10 +333,7 @@ static kString* String_toupper(KonohaContext *kctx, kString *self, const char *t
 		*buf++ = ('a' <= ch && ch <= 'z') ? toupper(ch) : ch;
 	}
 	KLIB KBuffer_Write(kctx, &wb, base, len);
-	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_text(kctx, &wb, 0),
-			KBuffer_bytesize(&wb), StringPolicy_maskASCII(self));
-	KLIB KBuffer_Free(&wb);
-	return ret;
+	return KLIB KBuffer_Stringfy(kctx, &wb, OnGcStack, StringPolicy_FreeKBuffer | StringPolicy_maskASCII(self));
 }
 
 
@@ -358,10 +349,7 @@ static kString* String_tolower(KonohaContext *kctx, kString *self, const char *t
 		*buf++ = ('A' <= ch && ch <= 'Z') ? tolower(ch) : ch;
 	}
 	KLIB KBuffer_Write(kctx, &wb, base, len);
-	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_text(kctx, &wb, 0),
-			KBuffer_bytesize(&wb), StringPolicy_maskASCII(self));
-	KLIB KBuffer_Free(&wb);
-	return ret;
+	return KLIB KBuffer_Stringfy(kctx, &wb, OnGcStack, StringPolicy_FreeKBuffer | StringPolicy_maskASCII(self));
 }
 
 static kString *String_toUpperCase(KonohaContext *kctx, kString *self, kString *locale)

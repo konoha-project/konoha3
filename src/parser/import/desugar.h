@@ -398,9 +398,7 @@ static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, si
 		}
 		text++;
 	}
-	kString *s = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_text(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
-	KLIB KBuffer_Free(&wb);
-	return s;
+	return KLIB KBuffer_Stringfy(kctx, &wb, OnGcStack, StringPolicy_FreeKBuffer);
 }
 
 static KMETHOD TypeCheck_TextLiteral(KonohaContext *kctx, KonohaStack *sfp)

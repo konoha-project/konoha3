@@ -693,11 +693,7 @@ static KMETHOD Curl_receiveString(KonohaContext *kctx, KonohaStack *sfp)
 		int fault = diagnosisCurlFaultType(kctx, res, (kcurl->URLInfoNULL == NULL) ? 0 : kString_GuessUserFault(kcurl->URLInfoNULL));
 		KTraceErrorPoint(trace, fault, "curl_easy_perform", LogURL(kcurl), LogCurlStrError(res));
 	}
-
-	KReturnWith(
-		KLIB new_kString(rbuf.kctx, OnStack, KLIB KBuffer_text(rbuf.kctx, &rbuf.wb, 0), KBuffer_bytesize(&rbuf.wb), 0),
-		KLIB KBuffer_Free(&rbuf.wb)
-	);
+	KReturn(KLIB KBuffer_Stringfy(rbuf.kctx, &rbuf.wb, OnStack, StringPolicy_FreeKBuffer));
 }
 
 ////## dynamic Curl.getInfo(int type);

@@ -151,7 +151,7 @@ KLIBDECL void KBuffer_Free(KGrowingBuffer *wb)
 
 KLIBDECL kString* KBuffer_Stringfy(KonohaContext *kctx, KGrowingBuffer *wb, kArray *gcstack, int policy)
 {
-	kString *s = KLIB new_kString(kctx, gcstack, KBuffer_text(kctx, wb, 0), KBuffer_bytesize(wb), policy);
+	kString *s = KLIB new_kString(kctx, gcstack, KBuffer_text(kctx, wb, NonZero), KBuffer_bytesize(wb), policy);
 	if(KFlag_Is(int, policy, StringPolicy_FreeKBuffer)) {
 		KBuffer_Free(wb);
 	}
@@ -780,7 +780,7 @@ static void DumpObject(KonohaContext *kctx, kObject *o, const char *file, const 
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KUnsafeFieldSet(lsfp[0].asObject, o);
 	kObject_class(o)->p(kctx, lsfp, 0, &wb);
-	const char *msg = KLIB KBuffer_text(kctx, &wb, 1);
+	const char *msg = KLIB KBuffer_text(kctx, &wb, EnsureZero);
 	if(file == NULL) {
 		PLATAPI printf_i("(%s)%s\n", KClass_t(kObject_class(o)), msg);
 	}

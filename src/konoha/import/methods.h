@@ -77,9 +77,7 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kObject_class(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
-	kString* returnValue = KLIB new_kString(kctx, OnStack, KLIB KBuffer_text(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
-	KLIB KBuffer_Free(&wb);
-	KReturn(returnValue);
+	KReturn(KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer));
 }
 
 //## @Const method Object Boolean.box();

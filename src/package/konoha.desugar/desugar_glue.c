@@ -136,7 +136,7 @@ static KMETHOD Token_toString(KonohaContext *kctx, KonohaStack *sfp)
 		KGrowingBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KBuffer_WriteToken(kctx, &wb, tk);
-		KReturnWith(KLIB new_kString(kctx, OnStack, KLIB KBuffer_text(kctx, &wb, 1), KBuffer_bytesize(&wb), 0), KLIB KBuffer_Free(&wb));
+		KReturn(KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer));
 	}
 }
 

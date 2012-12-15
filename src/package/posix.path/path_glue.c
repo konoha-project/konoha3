@@ -455,10 +455,7 @@ static KMETHOD DIR_readFileName(KonohaContext *kctx, KonohaStack *sfp)
 				KGrowingBuffer wb;
 				KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 				KLIB KBuffer_iconv(kctx, &wb, dir->readerIconv, d_name, strlen(d_name), trace);
-				KReturnWith(
-					KLIB new_kString(kctx, OnStack, KLIB KBuffer_text(kctx, &wb, 0), KBuffer_bytesize(&wb), StringPolicy_SystemInfo),
-					KLIB KBuffer_Free(&wb)
-				);
+				KReturn(KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer));
 			}
 		}
 		if(ret == -1) {
@@ -489,10 +486,7 @@ static KMETHOD DIR_readPath(KonohaContext *kctx, KonohaStack *sfp)
 			else {
 				KLIB KBuffer_iconv(kctx, &wb, dir->readerIconv, d_name, strlen(d_name), trace);
 			}
-			KReturnWith(
-				KLIB new_kString(kctx, OnStack, KLIB KBuffer_text(kctx, &wb, 0), KBuffer_bytesize(&wb), StringPolicy_SystemInfo),
-				KLIB KBuffer_Free(&wb)
-			);
+			KReturn(KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer));
 		}
 		if(ret == -1) {
 			KTraceErrorPoint(trace, SystemFault, "readdir", LogErrno);

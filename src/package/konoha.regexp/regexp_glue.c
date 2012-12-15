@@ -458,11 +458,6 @@ static KMETHOD RegExp_exec(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-static kString *KBuffer_newString(KonohaContext *kctx, kArray *gcstack, KGrowingBuffer *wb)
-{
-	return KLIB new_kString(kctx, gcstack, KLIB KBuffer_text(kctx, wb, false), KBuffer_bytesize(wb), 0);
-}
-
 //## @Const method String String.replace(RegExp searchvalue, String newvalue);
 static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -503,8 +498,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		} while(isGlobalOption);
 		KLIB KBuffer_Write(kctx, &wb, str, strlen(str)); // write out remaining string
-		s = KBuffer_newString(kctx, OnStack, &wb); // close cwb
-		KLIB KBuffer_Free(&wb);
+		s = KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer);
 	}
 	KReturn(s);
 }

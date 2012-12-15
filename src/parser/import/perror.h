@@ -31,7 +31,7 @@ extern "C" {
 /* ------------------------------------------------------------------------ */
 /* [perror] */
 
-static int isPrintMessage(KonohaContext *kctx, SugarContext *sugarContext, kinfotag_t taglevel)
+static int IsPrintableMessage(KonohaContext *kctx, SugarContext *sugarContext, kinfotag_t taglevel)
 {
 	if(sugarContext->isBlockedErrorMessage) return false;
 	if(verbose_sugar) return true;
@@ -52,17 +52,16 @@ static kString* new_StringMessage(KonohaContext *kctx, kArray *gcstack, KGrowing
 		KLIB KBuffer_printf(kctx, wb, "%s(%s:%d) " , msg, PLATAPI shortFilePath(file), (kushort_t)uline);
 	}
 	else {
-		KLIB KBuffer_printf(kctx, wb, "%s" , msg);
+		KLIB KBuffer_printf(kctx, wb, "%s " , msg);
 	}
 	KLIB KBuffer_vprintf(kctx, wb, fmt, ap);
-	msg = KLIB KBuffer_text(kctx, wb, 0);
-	return KLIB new_kString(kctx, gcstack, msg, KBuffer_bytesize(wb), 0);
+	return KLIB KBuffer_Stringfy(kctx, wb, gcstack, StringPolicy_ASCII|StringPolicy_FreeKBuffer);
 }
 
 static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
 {
 	SugarContext *sugarContext = GetSugarContext(kctx);
-	if(isPrintMessage(kctx, sugarContext, taglevel)) {
+	if(IsPrintableMessage(kctx, sugarContext, taglevel)) {
 		KGrowingBuffer wb;
 		KLIB KBuffer_Init(&sugarContext->errorMessageBuffer, &wb);
 		kString *emsg = new_StringMessage(kctx, sugarContext->errorMessageList, &wb, taglevel, uline, fmt, ap);
@@ -70,20 +69,19 @@ static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t tagle
 		if(taglevel <= ErrTag) {
 			sugarContext->errorMessageCount++;
 		}
-		KLIB KBuffer_Free(&wb);
 		return emsg;
 	}
 	return NULL;
 }
 
-static kString* SugarContext_Message(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, ...)
-{
-	va_list ap;
-	va_start(ap, fmt);
-	kString *errmsg = SugarContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
-	va_end(ap);
-	return errmsg;
-}
+//static kString* SugarContext_Message(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, ...)
+//{
+//	va_list ap;
+//	va_start(ap, fmt);
+//	kString *errmsg = SugarContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
+//	va_end(ap);
+//	return errmsg;
+//}
 
 static void kToken_ToError(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglevel, const char *fmt, ...)
 {

@@ -1027,7 +1027,7 @@ struct KonohaClassVar {
 	kmagicflag_t magicflag;
 	size_t     cstruct_size;
 	KonohaClassField         *fieldItems;
-	kushort_t  fieldsize;         kushort_t fieldAllocSize;
+	kushort_t  fieldsize;     kushort_t fieldAllocSize;
 	const char               *DBG_NAME;
 	ksymbol_t   classNameSymbol;  kushort_t   optvalue;
 	size_t      sortedMethodList;
@@ -1250,6 +1250,8 @@ typedef enum {
 	StringPolicy_SystemInfo =   (1<<5),   /* UNUSED */
 	StringPolicy_FreeKBuffer =  (1<<6),   /* KBuffer_Stringfy */
 } StringPolicy;
+
+typedef enum { NonZero, EnsureZero } StringfyPolicy;
 
 #define K_NULLTEXT          "null"
 #define new_T(t)            (KLIB new_kString(kctx, t, knh_strlen(t), StringPolicy_TEXT|StringPolicy_ASCII|StringPolicy_POOL))

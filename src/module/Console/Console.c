@@ -137,7 +137,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 		}
 		if(!kMethod_Is(Static, mtd)) {
 			KBuffer_WriteValue(kctx, &wb, cThis, sfp);
-			PLATAPI printf_i("this=(%s) %s, ", KClass_t(cThis), KLIB KBuffer_text(kctx, &wb, 1));
+			PLATAPI printf_i("this=(%s) %s, ", KClass_t(cThis), KLIB KBuffer_text(kctx, &wb, EnsureZero));
 			KLIB KBuffer_Free(&wb);
 		}
 		unsigned i;
@@ -149,7 +149,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 			KonohaClass *c = KClass_(param->paramtypeItems[i].attrTypeId);
 			c = c->realtype(kctx, c, cThis);
 			KBuffer_WriteValue(kctx, &wb, c, sfp + i + 1);
-			PLATAPI printf_i("%s=(%s) %s", Symbol_text(Symbol_Unmask(param->paramtypeItems[i].name)), KClass_t(c), KLIB KBuffer_text(kctx, &wb, 1));
+			PLATAPI printf_i("%s=(%s) %s", Symbol_text(Symbol_Unmask(param->paramtypeItems[i].name)), KClass_t(c), KLIB KBuffer_text(kctx, &wb, EnsureZero));
 			KLIB KBuffer_Free(&wb);
 		}
 		PLATAPI printf_i(")\n");

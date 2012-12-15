@@ -84,7 +84,7 @@ static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kMethod_WriteToBuffer(kctx, mtd, &wb);
-	PLATAPI printf_i("%s\n", KLIB KBuffer_text(kctx, &wb, 1));
+	PLATAPI printf_i("%s\n", KLIB KBuffer_text(kctx, &wb, EnsureZero));
 	KLIB KBuffer_Free(&wb);
 	return;
 }

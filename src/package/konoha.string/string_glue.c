@@ -164,9 +164,7 @@ static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, si
 		}
 		text++;
 	}
-	kString *s = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_text(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
-	KLIB KBuffer_Free(&wb);
-	return s;
+	return KLIB KBuffer_Stringfy(kctx, &wb, OnGcStack, StringPolicy_FreeKBuffer);
 }
 
 static kString *remove_escapes(KonohaContext *kctx, kToken *tk)
@@ -224,7 +222,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 
 		TokenSeq range = {ns, GetSugarContext(kctx)->preparedTokenList};
 		TokenSeq_Push(kctx, range);
-		const char *buf = KLIB KBuffer_text(kctx, &wb, 1);
+		const char *buf = KLIB KBuffer_text(kctx, &wb, EnsureZero);
 		SUGAR TokenSeq_Tokenize(kctx, &range, buf, 0);
 
 		{

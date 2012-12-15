@@ -310,7 +310,7 @@ static void JSBuilder_EmitKonohaValue(KonohaContext *kctx, KBuilder *builder, Ko
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	ct->p(kctx, sfp, 0, &wb);
-	char *str = (char *)KLIB KBuffer_text(kctx, &wb, 0);
+	char *str = (char *)KLIB KBuffer_text(kctx, &wb, NonZero);
 	JSBuilder_EmitString(kctx, builder, str, "", "");
 	KLIB KBuffer_Free(&wb);
 }
@@ -594,7 +594,7 @@ static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, k
 		KLIB KBuffer_printf(kctx, &wb, "%s", Symbol_text(params->paramtypeItems[i].name));
 	}
 	KLIB KBuffer_printf(kctx, &wb, ")");
-	JSBuilder_EmitString(kctx, builder, KLIB KBuffer_text(kctx, &wb, 1), "", "");
+	JSBuilder_EmitString(kctx, builder, KLIB KBuffer_text(kctx, &wb, EnsureZero), "", "");
 	KLIB KBuffer_Free(&wb);
 }
 
@@ -678,7 +678,7 @@ static void JSBuilder_Free(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 			JSBuilder_EmitClassFooter(kctx, builder, kclass);
 		}
 	}
-	const char* jsSrc = KLIB KBuffer_text(kctx, &jsBuilder->jsCodeBuffer, 1);
+	const char* jsSrc = KLIB KBuffer_text(kctx, &jsBuilder->jsCodeBuffer, EnsureZero);
 #ifdef HAVE_LIBV8
 	kbool_t isCompileOnly = KonohaContext_Is(CompileOnly, kctx);
 #else
