@@ -98,7 +98,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		INIT_GCSTACK();
 		kNameSpace *ns = new_(NameSpace, Stmt_ns(stmt), _GcStack);
-		kArray *a = GetSugarContext(kctx)->preparedTokenList;
+		kArray *a = KGetParserContext(kctx)->preparedTokenList;
 		KTokenSeq range = {ns, a, kArray_size(a), kArray_size(a)};
 		SUGAR KTokenSeq_Tokenize(kctx, &range, kString_text(tk->text), tk->uline);
 		result = SUGAR KTokenSeq_Eval(kctx, &range, NULL/*trace*/);
@@ -155,7 +155,7 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	size_t i;
 	kbool_t isDefined = true;
-	SugarContext *sugarContext = GetSugarContext(kctx);
+	KParserContext *sugarContext = KGetParserContext(kctx);
 	int popIsBlockingErrorMessage = sugarContext->isBlockedErrorMessage;
 	sugarContext->isBlockedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->cons); i++) {

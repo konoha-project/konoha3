@@ -783,7 +783,7 @@ static KMETHOD Stmt_newBlock(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStmt    *stmt = sfp[0].asStmt;
 	kString *macro = sfp[1].asString;
-	KTokenSeq source = {Stmt_ns(stmt), GetSugarContext(kctx)->preparedTokenList/*TODO: set appropriate tokenList to KTokenSeq*/};
+	KTokenSeq source = {Stmt_ns(stmt), KGetParserContext(kctx)->preparedTokenList/*TODO: set appropriate tokenList to KTokenSeq*/};
 	KTokenSeq_Push(kctx, source);
 	SUGAR KTokenSeq_Tokenize(kctx, &source, kString_text(macro), 0);
 	kBlock *bk = SUGAR new_kBlock(kctx, stmt, NULL, &source);

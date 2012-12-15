@@ -192,7 +192,7 @@ static kBlock* kStmt_ParseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 	kToken *blockToken = (kToken *)kStmt_GetObject(kctx, stmt, KSymbol_BlockPattern, NULL);
 	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KSymbol_BlockPattern) {
 		const char *cname = kString_text(tokenClassName->text);
-		KTokenSeq range = {Stmt_ns(stmt), GetSugarContext(kctx)->preparedTokenList};
+		KTokenSeq range = {Stmt_ns(stmt), KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, range);
 		SUGAR KTokenSeq_Tokenize(kctx, &range,  kString_text(blockToken->text), blockToken->uline);
 		{

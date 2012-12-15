@@ -36,7 +36,7 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	size_t i;
 	kbool_t isDefined = true;
-	SugarContext *sugarContext = GetSugarContext(kctx);
+	KParserContext *sugarContext = KGetParserContext(kctx);
 	int popIsBlockingErrorMessage = sugarContext->isBlockedErrorMessage;
 	sugarContext->isBlockedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->cons); i++) {

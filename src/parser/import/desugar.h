@@ -1059,7 +1059,7 @@ static kStmt* TypeDeclLocalVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gm
 	return newstmt;
 }
 
-static kbool_t kStmt_DeclType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktypeattr_t attrTypeId, kExpr *declExpr, kObject *thunk, TypeDeclFunc TypeDecl, kStmt **lastStmtRef)
+static kbool_t kStmt_DeclType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktypeattr_t attrTypeId, kExpr *declExpr, kObject *thunk, KTypeDeclFunc TypeDecl, kStmt **lastStmtRef)
 {
 	kStmt *newstmt = NULL;
 	if(TypeDecl == NULL) TypeDecl = TypeDeclLocalVariable;
@@ -1138,7 +1138,7 @@ static void kMethod_SetLazyCompilation(KonohaContext *kctx, kMethodVar *mtd, kSt
 		KFieldSet(mtd, mtd->SourceToken, tcode);
 		KFieldSet(mtd, mtd->LazyCompileNameSpace, ns);
 		KLIB kMethod_SetFunc(kctx, mtd, KMethodFunc_LazyCompilation);
-		KLIB kArray_Add(kctx, GetSugarContext(kctx)->definedMethodList, mtd);
+		KLIB kArray_Add(kctx, KGetParserContext(kctx)->definedMethodList, mtd);
 	}
 }
 

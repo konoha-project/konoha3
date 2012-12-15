@@ -53,10 +53,10 @@ int verbose_sugar = 0;
 static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline, KTraceInfo *trace)
 {
 	kstatus_t result;
-	kmodsugar->h.setupModuleContext(kctx, (KRuntimeModule *)kmodsugar, 0/*lazy*/);
+	KPARSERM->h.setupModuleContext(kctx, (KRuntimeModule *)KPARSERM, 0/*lazy*/);
 	INIT_GCSTACK();
 	{
-		KTokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
+		KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, tokens);
 		KTokenSeq_Tokenize(kctx, &tokens, script, uline);
 		result = KTokenSeq_Eval(kctx, &tokens, trace);
@@ -67,11 +67,11 @@ static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char
 }
 
 /* ------------------------------------------------------------------------ */
-/* [GetSugarContext(kctx)] */
+/* [KGetParserContext(kctx)] */
 
-static void SugarContext_Reftrace(KonohaContext *kctx, struct KContextModule *baseh, KObjectVisitor *visitor)
+static void KParserContext_Reftrace(KonohaContext *kctx, struct KContextModule *baseh, KObjectVisitor *visitor)
 {
-//	SugarContext *base = (SugarContext *)baseh;
+//	KParserContext *base = (KParserContext *)baseh;
 //	BEGIN_REFTRACE(4);
 //	KRefTrace(base->preparedTokenList);
 //	KRefTrace(base->errorMessageList);
@@ -80,19 +80,19 @@ static void SugarContext_Reftrace(KonohaContext *kctx, struct KContextModule *ba
 //	END_REFTRACE();
 }
 
-static void SugarContext_Free(KonohaContext *kctx, struct KContextModule *baseh)
+static void KParserContext_Free(KonohaContext *kctx, struct KContextModule *baseh)
 {
-	SugarContext *base = (SugarContext *)baseh;
+	KParserContext *base = (KParserContext *)baseh;
 	KLIB KArray_Free(kctx, &base->errorMessageBuffer);
-	KFree(base, sizeof(SugarContext));
+	KFree(base, sizeof(KParserContext));
 }
 
 static void SugarModule_Setup(KonohaContext *kctx, struct KRuntimeModule *def, int newctx)
 {
 	if(!newctx && kctx->modlocal[MOD_sugar] == NULL) {
-		SugarContext *base = (SugarContext *)KCalloc_UNTRACE(sizeof(SugarContext), 1);
-		base->h.reftrace = SugarContext_Reftrace;
-		base->h.free     = SugarContext_Free;
+		KParserContext *base = (KParserContext *)KCalloc_UNTRACE(sizeof(KParserContext), 1);
+		base->h.reftrace = KParserContext_Reftrace;
+		base->h.free     = KParserContext_Free;
 
 		base->errorMessageCount = 0;
 		base->preparedTokenList = new_(TokenArray, K_PAGESIZE/sizeof(void *), OnContextConstList);
@@ -110,9 +110,9 @@ kbool_t Konoha_Eval(KonohaContext* kctx, const char *script, kfileline_t uline);
 
 void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	KModuleSugar *mod = (KModuleSugar *)KCalloc_UNTRACE(sizeof(KModuleSugar), 1);
+	KParserModule *mod = (KParserModule *)KCalloc_UNTRACE(sizeof(KParserModule), 1);
 	mod->h.name     = "sugar";
-	mod->h.allocSize = sizeof(KModuleSugar);
+	mod->h.allocSize = sizeof(KParserModule);
 	mod->h.setupModuleContext    = SugarModule_Setup;
 	KLIB KRuntime_setModule(kctx, MOD_sugar, (KRuntimeModule *)mod, 0);
 
@@ -379,8 +379,8 @@ static void KonohaContext_ExitCStack(KonohaContext *kctx)
 
 static kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, KTraceInfo *trace)
 {
-	if(GetSugarContext(kctx) == NULL) {
-		kmodsugar->h.setupModuleContext(kctx, (KRuntimeModule *)kmodsugar, 0/*lazy*/);
+	if(KGetParserContext(kctx) == NULL) {
+		KPARSERM->h.setupModuleContext(kctx, (KRuntimeModule *)KPARSERM, 0/*lazy*/);
 	}
 	INIT_GCSTACK();
 	kpackageId_t packageId = KLIB KpackageId(kctx, "main", sizeof("main")-1, 0, _NEWID);
@@ -406,7 +406,7 @@ kbool_t Konoha_Eval(KonohaContext* kctx, const char *script, kfileline_t uline)
 	if(verbose_sugar) {
 		DUMP_P("\n>>>----\n'%s'\n------\n", script);
 	}
-	kmodsugar->h.setupModuleContext(kctx, (KRuntimeModule *)kmodsugar, 0/*lazy*/);
+	KPARSERM->h.setupModuleContext(kctx, (KRuntimeModule *)KPARSERM, 0/*lazy*/);
 	kbool_t res = (kNameSpace_Eval(kctx, KNULL(NameSpace), script, uline, NULL/*trace*/) == K_CONTINUE);    // FIXME
 	KEndKonohaContext();
 	return res;

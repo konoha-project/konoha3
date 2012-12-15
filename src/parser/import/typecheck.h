@@ -300,7 +300,7 @@ static kBlock* kMethod_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *n
 		script = kString_text(mtd->SourceToken->text);
 		uline = mtd->SourceToken->uline;
 	}
-	KTokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList, 0};
+	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList, 0};
 	KTokenSeq_Push(kctx, tokens);
 	KTokenSeq_Tokenize(kctx, &tokens, script, uline);
 	kBlock *bk = new_kBlock(kctx, NULL/*parentStmt*/, NULL/*macro*/, &tokens);
@@ -329,7 +329,7 @@ static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t 
 	if(callparamNULL != NULL) {
 		//DynamicComplie();
 	}
-	kGamma *gma = GetSugarContext(kctx)->preparedGamma;
+	kGamma *gma = KGetParserContext(kctx)->preparedGamma;
 	kBlock *bk = kMethod_newBlock(kctx, mtd, ns, text, uline);
 	KGammaAllocaData newgma = {0};
 	KGammaStackDecl lvarItems[32 + param->psize];
@@ -402,7 +402,7 @@ static kstatus_t kMethod_RunEval(KonohaContext *kctx, kMethod *mtd, ktypeattr_t 
 
 static kstatus_t kBlock_EvalAtTopLevel(KonohaContext *kctx, kBlock *bk, kMethod *mtd, KTraceInfo *trace)
 {
-	kGamma *gma = GetSugarContext(kctx)->preparedGamma;
+	kGamma *gma = KGetParserContext(kctx)->preparedGamma;
 	KGammaStackDecl lvarItems[32] = {};
 	KGammaAllocaData newgma = {0};
 	newgma.flag = kGamma_TopLevel;

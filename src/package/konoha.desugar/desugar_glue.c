@@ -155,7 +155,7 @@ static KMETHOD NameSpace_Preprocess(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
 	kArray *a = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
-	KTokenSeq source = {sfp[0].asNameSpace, GetSugarContext(kctx)->preparedTokenList};
+	KTokenSeq source = {sfp[0].asNameSpace, KGetParserContext(kctx)->preparedTokenList};
 	KTokenSeq_Push(kctx, source);
 	SUGAR KTokenSeq_Tokenize(kctx, &source, kString_text(sfp[1].asString), 0);
 	KTokenSeq tokens = {source.ns, a, 0};
@@ -354,7 +354,7 @@ int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, in
 //static KMETHOD NameSpace_TestPatternMatch(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	INIT_GCSTACK();
-//	KTokenSeq source = {sfp[0].asNameSpace, GetSugarContext(kctx)->preparedTokenList};
+//	KTokenSeq source = {sfp[0].asNameSpace, KGetParserContext(kctx)->preparedTokenList};
 //	KTokenSeq_Push(kctx, source);
 //	SUGAR KTokenSeq_Tokenize(kctx, &source, kString_text(sfp[2].asString), 0);
 //	KTokenSeq tokens = {source.ns, source.tokenList, source.endIdx};

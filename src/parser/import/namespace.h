@@ -878,12 +878,12 @@ static kbool_t kNameSpace_LoadScript(KonohaContext *kctx, kNameSpace *ns, const 
 		return false;
 	}
 	if(KonohaContext_Is(CompileOnly, kctx)) {
-		size_t i, size = kArray_size(GetSugarContext(kctx)->definedMethodList);
+		size_t i, size = kArray_size(KGetParserContext(kctx)->definedMethodList);
 		for (i = 0; i < size; ++i) {
-			kMethod *mtd = GetSugarContext(kctx)->definedMethodList->MethodItems[i];
+			kMethod *mtd = KGetParserContext(kctx)->definedMethodList->MethodItems[i];
 			KLIB kMethod_DoLazyCompilation(kctx, mtd, NULL, DefaultCompileOption);
 		}
-		KLIB kArray_Clear(kctx, GetSugarContext(kctx)->definedMethodList, 0);
+		KLIB kArray_Clear(kctx, KGetParserContext(kctx)->definedMethodList, 0);
 	}
 	return true;
 }

@@ -544,23 +544,23 @@ struct kGammaVar {
 
 /* ------------------------------------------------------------------------ */
 
-#define GetSugarContext(kctx)    ((SugarContext *)kctx->modlocal[MOD_sugar])
-#define kmodsugar       ((KModuleSugar *)kctx->modshare[MOD_sugar])
-#define KClass_Symbol       kmodsugar->cSymbol
-#define KClass_Token        kmodsugar->cToken
-#define KClass_Expr         kmodsugar->cExpr
-#define KClass_Stmt         kmodsugar->cStmt
-#define KClass_Block        kmodsugar->cBlock
-#define KClass_Gamma        kmodsugar->cGamma
+#define KGetParserContext(kctx)    ((KParserContext *)kctx->modlocal[MOD_sugar])
+#define KPARSERM       ((KParserModule *)kctx->modshare[MOD_sugar])
+#define KClass_Symbol       KPARSERM->cSymbol
+#define KClass_Token        KPARSERM->cToken
+#define KClass_Expr         KPARSERM->cExpr
+#define KClass_Stmt         KPARSERM->cStmt
+#define KClass_Block        KPARSERM->cBlock
+#define KClass_Gamma        KPARSERM->cGamma
 
-#define KClass_SymbolVar        kmodsugar->cSymbol
-#define KClass_TokenVar        kmodsugar->cToken
-#define KClass_ExprVar         kmodsugar->cExpr
-#define KClass_StmtVar         kmodsugar->cStmt
-#define KClass_BlockVar        kmodsugar->cBlock
-#define KClass_GammaVar        kmodsugar->cGamma
+#define KClass_SymbolVar       KPARSERM->cSymbol
+#define KClass_TokenVar        KPARSERM->cToken
+#define KClass_ExprVar         KPARSERM->cExpr
+#define KClass_StmtVar         KPARSERM->cStmt
+#define KClass_BlockVar        KPARSERM->cBlock
+#define KClass_GammaVar        KPARSERM->cGamma
 
-#define KClass_TokenArray           kmodsugar->cTokenArray
+#define KClass_TokenArray           KPARSERM->cTokenArray
 #define kTokenArray             kArray
 #define KClass_ExprArray            KClass_Array
 #define kExprArray              kArray
@@ -577,7 +577,7 @@ struct kGammaVar {
 #define K_NULLEXPR   (kExpr *)((KClass_Expr)->defaultNullValue)
 #define K_NULLBLOCK  (kBlock *)((KClass_Block)->defaultNullValue)
 
-typedef kStmt* (*TypeDeclFunc)(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktypeattr_t ty, kExpr *termExpr, kExpr *vexpr, kObject *thunk);
+typedef kStmt* (*KTypeDeclFunc)(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktypeattr_t ty, kExpr *termExpr, kExpr *vexpr, kObject *thunk);
 struct KBuilder;
 
 typedef struct {
@@ -635,7 +635,7 @@ typedef struct {
 	kExpr*      (*kStmt_TypeCheckExprAt)(KonohaContext *, kStmt *, kExpr *, size_t, kGamma *, KClass *, int);
 	kExpr *     (*kStmtkExpr_TypeCheckCallParam)(KonohaContext *, kStmt *, kExprVar *, kMethod *, kGamma *, KClass *);
 	int         (*kGamma_AddLocalVariable)(KonohaContext *, kGamma *, ktypeattr_t, ksymbol_t);
-	kbool_t     (*kStmt_DeclType)(KonohaContext *, kStmt *, kGamma *, ktypeattr_t, kExpr *, kObject *, TypeDeclFunc, kStmt **);
+	kbool_t     (*kStmt_DeclType)(KonohaContext *, kStmt *, kGamma *, ktypeattr_t, kExpr *, kObject *, KTypeDeclFunc, kStmt **);
 	kExpr*      (*kStmt_TypeCheckVariableNULL)(KonohaContext *, kStmt *, kExprVar *, kGamma *, KClass *);
 
 	void       (*kToken_ToError)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
@@ -650,18 +650,18 @@ typedef struct {
 	void (*dumpExpr)(KonohaContext *kctx, int n, int nest, kExpr *expr);
 	void (*dumpStmt)(KonohaContext *kctx, kStmt *stmt);
 
-} KModuleSugar;
+} KParserModule;
 
 typedef struct {
-	KContextModule h;
+	KContextModule     h;
 	kArray            *preparedTokenList;
-	KGrowingArray errorMessageBuffer;
+	KGrowingArray      errorMessageBuffer;
 	kArray            *errorMessageList;
 	int                errorMessageCount;
 	kbool_t            isBlockedErrorMessage;
 	kGamma            *preparedGamma;
 	kArray            *definedMethodList;
-} SugarContext;
+} KParserContext;
 
 #define KClass_INFER    KClass_(KType_var)
 
@@ -685,20 +685,20 @@ typedef enum {
 //static kExpr* kExpr_SetUnboxConstValue(KonohaContext *kctx, kExprVar *expr, ktypeattr_t ty, uintptr_t unboxValue);
 //static kExpr* kExpr_SetVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, kexpr_t build, ktypeattr_t ty, intptr_t index);
 
-#define KType_Symbol                          kmodsugar->cSymbol->typeId
-#define KType_Token                           kmodsugar->cToken->typeId
-#define KType_Stmt                            kmodsugar->cStmt->typeId
-#define KType_Block                           kmodsugar->cBlock->typeId
-#define KType_Expr                            kmodsugar->cExpr->typeId
-#define KType_Gamma                           kmodsugar->cGamma->typeId
-#define KType_TokenArray                      kmodsugar->cTokenArray->typeId
+#define KType_Symbol                          KPARSERM->cSymbol->typeId
+#define KType_Token                           KPARSERM->cToken->typeId
+#define KType_Stmt                            KPARSERM->cStmt->typeId
+#define KType_Block                           KPARSERM->cBlock->typeId
+#define KType_Expr                            KPARSERM->cExpr->typeId
+#define KType_Gamma                           KPARSERM->cGamma->typeId
+#define KType_TokenArray                      KPARSERM->cTokenArray->typeId
 
 #define KSyntax_(KS, KW)                       kNameSpace_GetSyntax(kctx, KS, KW, 0)
 
 
 #else/*SUGAR_EXPORTS*/
 
-#define SUGAR        ((const KModuleSugar *)kmodsugar)->
+#define SUGAR        ((const KParserModule *)KPARSERM)->
 #define KType_Symbol                            SUGAR cSymbol->typeId
 #define KType_Token                             SUGAR cToken->typeId
 #define KType_Stmt                              SUGAR cStmt->typeId
@@ -720,10 +720,10 @@ typedef enum {
 #define KdumpExpr(CTX, EXPR)
 #else
 #define KDump(O)                         KLIB DumpObject(kctx, (kObject *)O, __FILE__, __FUNCTION__, __LINE__)
-#define KdumpToken(ctx, tk)              ((const KModuleSugar *)kmodsugar)->dumpToken(ctx, tk, 0)
-#define KdumpTokenArray(CTX, TLS, S, E)  DBG_P("@"); ((const KModuleSugar *)kmodsugar)->dumpTokenArray(CTX, 1, TLS, S, E)
-#define KdumpKTokenSeq(CTX, MSG, R)     DBG_P(MSG); ((const KModuleSugar *)kmodsugar)->dumpTokenArray(CTX, 1, R->tokenList, R->beginIdx, R->endIdx)
-#define KdumpExpr(CTX, EXPR)             ((const KModuleSugar *)kmodsugar)->dumpExpr(CTX, 0, 0, EXPR)
+#define KdumpToken(ctx, tk)              ((const KParserModule *)KPARSERM)->dumpToken(ctx, tk, 0)
+#define KdumpTokenArray(CTX, TLS, S, E)  DBG_P("@"); ((const KParserModule *)KPARSERM)->dumpTokenArray(CTX, 1, TLS, S, E)
+#define KdumpKTokenSeq(CTX, MSG, R)     DBG_P(MSG); ((const KParserModule *)KPARSERM)->dumpTokenArray(CTX, 1, R->tokenList, R->beginIdx, R->endIdx)
+#define KdumpExpr(CTX, EXPR)             ((const KParserModule *)KPARSERM)->dumpExpr(CTX, 0, 0, EXPR)
 #endif
 
 /* ------------------------------------------------------------------------ */
@@ -732,8 +732,8 @@ typedef enum {
 struct KBuilder;
 typedef struct KBuilder KBuilder;
 
-typedef kbool_t (*VisitStmtFunc)(KonohaContext *kctx, KBuilder *builder, kStmt *stmt);
-typedef void (*VisitExprFunc)(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr);
+typedef kbool_t (*KStmtVisitFunc)(KonohaContext *kctx, KBuilder *builder, kStmt *stmt);
+typedef void (*KExprVisitFunc)(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr);
 
 struct KBuilderCommon {
 	struct KBuilderAPI2* api;
@@ -750,27 +750,27 @@ struct KBuilderAPI2 {
 	KMethodFunc            (*GenerateKMethodFunc)(KonohaContext *, struct KVirtualCode *);
 	struct KVirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
 
-	VisitStmtFunc visitErrStmt;
-	VisitStmtFunc visitExprStmt;
-	VisitStmtFunc visitBlockStmt;
-	VisitStmtFunc visitReturnStmt;
-	VisitStmtFunc visitIfStmt;
-	VisitStmtFunc visitLoopStmt;
-	VisitStmtFunc visitJumpStmt;
-	VisitStmtFunc visitTryStmt;
-	VisitStmtFunc visitUndefinedStmt;
-	VisitExprFunc visitConstExpr;
-	VisitExprFunc visitNConstExpr;
-	VisitExprFunc visitNewExpr;
-	VisitExprFunc visitNullExpr;
-	VisitExprFunc visitLocalExpr;
-	VisitExprFunc visitBlockExpr;
-	VisitExprFunc visitFieldExpr;
-	VisitExprFunc visitCallExpr;
-	VisitExprFunc visitAndExpr;
-	VisitExprFunc visitOrExpr;
-	VisitExprFunc visitLetExpr;
-	VisitExprFunc visitStackTopExpr;
+	KStmtVisitFunc visitErrStmt;
+	KStmtVisitFunc visitExprStmt;
+	KStmtVisitFunc visitBlockStmt;
+	KStmtVisitFunc visitReturnStmt;
+	KStmtVisitFunc visitIfStmt;
+	KStmtVisitFunc visitLoopStmt;
+	KStmtVisitFunc visitJumpStmt;
+	KStmtVisitFunc visitTryStmt;
+	KStmtVisitFunc visitUndefinedStmt;
+	KExprVisitFunc visitConstExpr;
+	KExprVisitFunc visitNConstExpr;
+	KExprVisitFunc visitNewExpr;
+	KExprVisitFunc visitNullExpr;
+	KExprVisitFunc visitLocalExpr;
+	KExprVisitFunc visitBlockExpr;
+	KExprVisitFunc visitFieldExpr;
+	KExprVisitFunc visitCallExpr;
+	KExprVisitFunc visitAndExpr;
+	KExprVisitFunc visitOrExpr;
+	KExprVisitFunc visitLetExpr;
+	KExprVisitFunc visitStackTopExpr;
 	size_t allocSize;
 };
 
@@ -803,7 +803,7 @@ struct KBuilderAPI2 {
 static inline void kToken_SetTypeId(KonohaContext *kctx, kToken *tk, kNameSpace *ns, ktypeattr_t type)
 {
 	((kTokenVar *)tk)->resolvedTypeId = type;
-	((kTokenVar *)tk)->resolvedSyntaxInfo = kmodsugar->kNameSpace_GetSyntax(kctx, ns, KSymbol_TypePattern, 0);
+	((kTokenVar *)tk)->resolvedSyntaxInfo = KPARSERM->kNameSpace_GetSyntax(kctx, ns, KSymbol_TypePattern, 0);
 }
 
 #define Stmt_ns(STMT)   kStmt_ns(STMT)

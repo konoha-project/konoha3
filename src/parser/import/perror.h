@@ -31,7 +31,7 @@ extern "C" {
 /* ------------------------------------------------------------------------ */
 /* [perror] */
 
-static int IsPrintableMessage(KonohaContext *kctx, SugarContext *sugarContext, kinfotag_t taglevel)
+static int IsPrintableMessage(KonohaContext *kctx, KParserContext *sugarContext, kinfotag_t taglevel)
 {
 	if(sugarContext->isBlockedErrorMessage) return false;
 	if(verbose_sugar) return true;
@@ -58,9 +58,9 @@ static kString* new_StringMessage(KonohaContext *kctx, kArray *gcstack, KBuffer 
 	return KLIB KBuffer_Stringfy(kctx, wb, gcstack, StringPolicy_ASCII|StringPolicy_FreeKBuffer);
 }
 
-static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
+static kString* KParserContext_vprintMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
 {
-	SugarContext *sugarContext = GetSugarContext(kctx);
+	KParserContext *sugarContext = KGetParserContext(kctx);
 	if(IsPrintableMessage(kctx, sugarContext, taglevel)) {
 		KBuffer wb;
 		KLIB KBuffer_Init(&sugarContext->errorMessageBuffer, &wb);
@@ -74,11 +74,11 @@ static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t tagle
 	return NULL;
 }
 
-//static kString* SugarContext_Message(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, ...)
+//static kString* KParserContext_Message(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, ...)
 //{
 //	va_list ap;
 //	va_start(ap, fmt);
-//	kString *errmsg = SugarContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
+//	kString *errmsg = KParserContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
 //	va_end(ap);
 //	return errmsg;
 //}
@@ -87,7 +87,7 @@ static void kToken_ToError(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglev
 {
 	va_list ap;
 	va_start(ap, fmt);
-	kString *errmsg = SugarContext_vprintMessage(kctx, taglevel, tk->uline, fmt, ap);
+	kString *errmsg = KParserContext_vprintMessage(kctx, taglevel, tk->uline, fmt, ap);
 	va_end(ap);
 	if(errmsg != NULL) {
 		KFieldSet(tk, tk->text, errmsg);
@@ -143,7 +143,7 @@ static kExpr* kStmt_Message2(KonohaContext *kctx, kStmt *stmt, kToken *tk, kinfo
 			uline = kExpr_uline(kctx, (kExpr *)tk, uline);
 		}
 	}
-	kString *errmsg = SugarContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
+	kString *errmsg = KParserContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
 	if(taglevel <= ErrTag && !kStmt_IsERR(stmt)) {
 		kStmt_toERR(kctx, stmt, errmsg);
 	}
@@ -161,7 +161,7 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 	if(trace != NULL && IS_Stmt(trace->baseStack[1].asStmt)) {  // Static Compiler Message
 		kStmt *stmt = trace->baseStack[1].asStmt;
 		kfileline_t uline = stmt->uline;
-		kString *emsg = SugarContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
+		kString *emsg = KParserContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
 		va_end(ap);
 		if(taglevel <= ErrTag && !kStmt_IsERR(stmt)) {
 			kStmt_toERR(kctx, stmt, emsg);

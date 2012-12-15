@@ -220,13 +220,13 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 		KLIB KBuffer_Write(kctx, &wb, start+2, end-(start+2));
 		KLIB KBuffer_Write(kctx, &wb, ")", 1);
 
-		KTokenSeq range = {ns, GetSugarContext(kctx)->preparedTokenList};
+		KTokenSeq range = {ns, KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, range);
 		const char *buf = KLIB KBuffer_text(kctx, &wb, EnsureZero);
 		SUGAR KTokenSeq_Tokenize(kctx, &range, buf, 0);
 
 		{
-			KTokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
+			KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList};
 			KTokenSeq_Push(kctx, tokens);
 			SUGAR KTokenSeq_Preprocess(kctx, &tokens, NULL, &range, range.beginIdx);
 			kExpr *newexpr = SUGAR kStmt_ParseExpr(kctx, stmt, tokens.tokenList, tokens.beginIdx, tokens.endIdx, NULL);

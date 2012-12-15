@@ -281,7 +281,7 @@ static kTokenVar* kToken_ExpandGroupMacro(KonohaContext *kctx, kTokenVar *tk, kN
 	KTokenSeq source = {ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
 	if(source.endIdx > 0) {
 		int isChanged = true;
-		KTokenSeq group = {ns, GetSugarContext(kctx)->preparedTokenList};
+		KTokenSeq group = {ns, KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, group);
 		KTokenSeq_Preprocess(kctx, &group, macroParam, &source, source.beginIdx);
 		if(group.endIdx - group.beginIdx == source.endIdx) {
@@ -347,7 +347,7 @@ static kbool_t kNameSpace_SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksym
 {
 	KSyntaxVar *syn = (KSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, keyword, /*new*/true);
 	if(syn->macroDataNULL == NULL) {
-		KTokenSeq source = {ns, GetSugarContext(kctx)->preparedTokenList};
+		KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, source);
 		KTokenSeq_Tokenize(kctx, &source, data, 0);
 		KTokenSeq tokens = {source.ns, source.tokenList, source.endIdx};
@@ -389,7 +389,7 @@ static int KTokenSeq_AddGroup(KonohaContext *kctx, KTokenSeq *tokens, KMacroSet 
 
 static kTokenVar* kToken_ToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, KMacroSet *macroSet)
 {
-	KTokenSeq source = {ns, GetSugarContext(kctx)->preparedTokenList};
+	KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
 	KTokenSeq_Push(kctx, source);
 	KdumpToken(kctx, tk);
 	KTokenSeq_Tokenize(kctx, &source, kString_text(tk->text), tk->uline);
@@ -990,7 +990,7 @@ static kbool_t kArray_AddSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 
 static void kNameSpace_ParseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, const char *ruleSource, kfileline_t uline, kArray *patternList)
 {
-	KTokenSeq source = {ns, GetSugarContext(kctx)->preparedTokenList};
+	KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
 	KTokenSeq_Push(kctx, source);
 	KTokenSeq_Tokenize(kctx, &source, ruleSource, uline);
 	KTokenSeq patterns = {ns, source.tokenList, source.endIdx};
