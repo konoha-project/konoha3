@@ -255,7 +255,7 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 		VMRegister Dst = ((OPStoreField *)PC)->Dst;
 		uint FieldIdx = ((OPStoreField *)PC)->FieldIdx;
 		VMRegister Src = ((OPStoreField *)PC)->Src;
-		((kObjectVar*)Reg[Dst].obj)->fieldUnboxItems[FieldIdx] = Reg[Src].bits;
+		((kObjectVar *)Reg[Dst].obj)->fieldUnboxItems[FieldIdx] = Reg[Src].bits;
 		DISPATCH_NEXT(PC);
 	}
 	CASE(And) {

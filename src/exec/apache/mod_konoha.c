@@ -189,7 +189,7 @@ static KMETHOD AprTable_set(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD AprTable_getElts(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTable *self = (kAprTable *) sfp[0].asObject;
-	kArray *arr = (kArray*)KLIB new_kObject(kctx, OnStack, KClass_Array, 0);
+	kArray *arr = (kArray *)KLIB new_kObject(kctx, OnStack, KClass_Array, 0);
 	const apr_array_header_t *apr_arr = apr_table_elts(self->tbl);
 	const apr_table_entry_t *entries = (apr_table_entry_t *)apr_arr->elts;
 	int i=0;

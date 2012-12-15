@@ -305,7 +305,7 @@ static KMETHOD Block_TypeCheckAll(KonohaContext *kctx, KonohaStack *sfp)
 //## Array[Stmt] Block.GetStmtList();
 static KMETHOD Block_GetStmtList(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturn(sfp[0].asBlock->StmtList);	
+	KReturn(sfp[0].asBlock->StmtList);
 }
 
 //## Stmt Block.GetParentStmt();
@@ -313,7 +313,7 @@ static KMETHOD Block_GetParentStmt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KReturn(sfp[0].asBlock->parentStmtNULL);
 }
-	
+
 #define TP_gma       KType_Gamma, KFieldName_("gma")
 #define KType_StmtArray (KClass_p0(kctx, KClass_Array, KType_Stmt)->typeId)
 
@@ -580,7 +580,7 @@ static KMETHOD Stmt_getObject(KonohaContext *kctx, KonohaStack *sfp)
 //## Block Stmt.getParentBlock();
 static KMETHOD Stmt_getParentBlock(KonohaContext *kctx, KonohaStack *sfp)
 {	
-	kStmt *stmt   = sfp[0].asStmt;	
+	kStmt *stmt   = sfp[0].asStmt;
 	KReturn(stmt->parentBlockNULL);
 }
 
@@ -603,7 +603,7 @@ static kStmt* kStmt_LookupStmtNULL(KonohaContext *kctx, kStmt *stmt, ksymbol_t k
 //## Stmt.LookupStmt(keyword key)
 static KMETHOD Stmt_LookupStmt(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kStmt *stmt = sfp[0].asStmt;	
+	kStmt *stmt = sfp[0].asStmt;
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
 	kStmt *ret = kStmt_LookupStmtNULL(kctx, stmt, keyword);
 	KReturn(ret ? ret : K_NULL);

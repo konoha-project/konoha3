@@ -386,7 +386,7 @@ static void TraceNode2(INode *Node)
 			break;
 		case FieldScope:
 		case LocalScope:
-			if(INode_IsMarked((INode*)LHS)) {
+			if(INode_IsMarked((INode *)LHS)) {
 				INode_SetMarked(Node);
 				INode_SetMarked(Inst->RHS);
 			}
