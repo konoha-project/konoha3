@@ -154,7 +154,7 @@ static map_status_t hashmap_api_set(kmap_t *_m, JSONString *key, uint64_t val)
     return hashmap_set(m, &r);
 }
 
-static void hashmap_api_remove(kmap_t *_m, JSONString *key)
+static void hashmap_api_Remove(kmap_t *_m, JSONString *key)
 {
     hashmap_t *m = (hashmap_t *) _m;
     unsigned hash = JSONString_hashCode(key);
@@ -185,7 +185,7 @@ const kmap_api_t HASH_API = {
     hashmap_api_get,
     hashmap_api_set,
     hashmap_api_next,
-    hashmap_api_remove,
+    hashmap_api_Remove,
     hashmap_api_Init,
     hashmap_api_dispose
 };
@@ -276,7 +276,7 @@ static map_status_t dictmap_api_set(kmap_t *_m, JSONString *key, uint64_t val)
     return dictmap_set(m, &r);
 }
 
-static void dictmap_api_remove(kmap_t *_m, JSONString *key)
+static void dictmap_api_Remove(kmap_t *_m, JSONString *key)
 {
     dictmap_t *m = (dictmap_t *)_m;
     unsigned hash = JSONString_hashCode(key);
@@ -327,7 +327,7 @@ const kmap_api_t DIKClass_API = {
     dictmap_api_get,
     dictmap_api_set,
     dictmap_api_next,
-    dictmap_api_remove,
+    dictmap_api_Remove,
     dictmap_api_Init,
     dictmap_api_dispose
 };

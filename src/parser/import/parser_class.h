@@ -165,7 +165,7 @@ static void kExpr_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visi
 {
 	kExpr *expr = (kExpr *)o;
 	KRefTrace(expr->termToken);
-	if(Expr_hasObjectConstValue(expr)) {
+	if(kExpr_HasObjectConstValue(expr)) {
 		KRefTrace(expr->objectConstValue);
 	}
 }
@@ -217,7 +217,7 @@ static void kExpr_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 	else if(expr->build == TEXPR_STACKTOP) {
 		KLIB KBuffer_printf(kctx, wb, "stack %d", expr->index);
 	}
-	else if(Expr_isTerm(expr)) {
+	else if(kExpr_IsTerm(expr)) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("term "));
 		kExprTerm_p(kctx, (kObject *)expr->termToken, values, pos+1, wb);
 	}
@@ -241,7 +241,7 @@ static kExpr* new_TermExpr(KonohaContext *kctx, kToken *tk)
 {
 	kExprVar *expr = new_(ExprVar, tk->resolvedSyntaxInfo, OnGcStack);
 	KFieldSet(expr, expr->termToken, tk);
-	Expr_setTerm(expr, 1);
+	kExpr_SetTerm(expr, 1);
 	return (kExpr *)expr;
 }
 
@@ -322,7 +322,7 @@ static kExpr* SUGAR kExpr_SetConstValue(KonohaContext *kctx, kExprVar *expr, KCl
 	else {
 		expr->build = TEXPR_CONST;
 		KFieldInit(expr, expr->objectConstValue, o);
-		Expr_setObjectConstValue(expr, 1);
+		kExpr_SetObjectConstValue(expr, 1);
 	}
 	return (kExpr *)expr;
 }
@@ -392,7 +392,7 @@ static kStmtVar* new_kStmt(KonohaContext *kctx, kArray *gcstack, KSyntax *syn, .
 	while(kw != 0) {
 		kObject *v = va_arg(ap, kObject *);
 		if(v == NULL) break;
-		kStmt_setObject(kctx, stmt, kw, v);
+		kStmt_SetObject(kctx, stmt, kw, v);
 		kw = (ksymbol_t) va_arg(ap, int);
 	}
 	va_end(ap);
@@ -433,7 +433,7 @@ static const char* kStmt_GetText(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw,
 {
 	kExpr *expr = (kExpr *)kStmt_GetObjectNULL(kctx, stmt, kw);
 	if(expr != NULL) {
-		if(IS_Expr(expr) && Expr_isTerm(expr)) {
+		if(IS_Expr(expr) && kExpr_IsTerm(expr)) {
 			return kString_text(expr->termToken->text);
 		}
 		else if(IS_Token(expr)) {

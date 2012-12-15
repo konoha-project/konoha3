@@ -56,11 +56,11 @@ static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char
 	kmodsugar->h.setupModuleContext(kctx, (KRuntimeModule *)kmodsugar, 0/*lazy*/);
 	INIT_GCSTACK();
 	{
-		TokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
-		TokenSeq_Push(kctx, tokens);
-		TokenSeq_Tokenize(kctx, &tokens, script, uline);
-		result = TokenSeq_Eval(kctx, &tokens, trace);
-		TokenSeq_Pop(kctx, tokens);
+		KTokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
+		KTokenSeq_Push(kctx, tokens);
+		KTokenSeq_Tokenize(kctx, &tokens, script, uline);
+		result = KTokenSeq_Eval(kctx, &tokens, trace);
+		KTokenSeq_Pop(kctx, tokens);
 	}
 	RESET_GCSTACK();
 	return result;
@@ -197,11 +197,11 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(ClassData), true/*isOverride*/, 0);
 
 	mod->kNameSpace_SetTokenFunc       = kNameSpace_SetTokenFunc;
-	mod->TokenSeq_Tokenize        = TokenSeq_Tokenize;
-	mod->TokenSeq_ApplyMacro      = TokenSeq_ApplyMacro;
+	mod->KTokenSeq_Tokenize        = KTokenSeq_Tokenize;
+	mod->KTokenSeq_ApplyMacro      = KTokenSeq_ApplyMacro;
 	mod->kNameSpace_SetMacroData       = kNameSpace_SetMacroData;
-	mod->TokenSeq_Preprocess        = TokenSeq_Preprocess;
-	mod->TokenSeq_Eval            = TokenSeq_Eval;
+	mod->KTokenSeq_Preprocess        = KTokenSeq_Preprocess;
+	mod->KTokenSeq_Eval            = KTokenSeq_Eval;
 	mod->TokenUtils_ParseTypePattern     = TokenUtils_ParseTypePattern;
 	mod->kToken_ToBraceGroup = kToken_ToBraceGroup;
 	mod->kStmt_AddParsedObject      = kStmt_AddParsedObject;

@@ -85,7 +85,7 @@ struct map_api {
 	map_record_t *(*_get)(Kprotomap_t *m, unsigned hash);
 	map_status_t  (*_set)(Kprotomap_t *m, unsigned hash, unsigned type, void *val, Kprotomap_t **map);
 	map_record_t *(*_next)(Kprotomap_t *m, protomap_iterator *itr);
-	void (*_remove)(Kprotomap_t *m, unsigned hash);
+	void (*_Remove)(Kprotomap_t *m, unsigned hash);
 	void (*_Init)(Kprotomap_t *m, unsigned init);
 	void (*_dispose)(Kprotomap_t *m);
 };
@@ -108,9 +108,9 @@ static inline map_status_t protomap_set(Kprotomap_t **m, unsigned hash, unsigned
 	return (*m)->h.base.api->_set(*m, hash, type, val, m);
 }
 
-static inline void protomap_remove(Kprotomap_t *m, unsigned hash)
+static inline void protomap_Remove(Kprotomap_t *m, unsigned hash)
 {
-	return m->h.base.api->_remove(m, hash);
+	return m->h.base.api->_Remove(m, hash);
 }
 
 static inline KKeyValue *protomap_next(Kprotomap_t *m, protomap_iterator *itr)
@@ -255,7 +255,7 @@ static map_status_t hashmap_api_set(Kprotomap_t *_m, unsigned hash, unsigned typ
 	return hashmap_set(m, &r);
 }
 
-static void hashmap_api_remove(Kprotomap_t *_m, unsigned hash)
+static void hashmap_api_Remove(Kprotomap_t *_m, unsigned hash)
 {
 	hashmap_t *m = (hashmap_t *) _m;
 	map_record_t *r = hashmap_get(m, hash);
@@ -285,7 +285,7 @@ static const protomap_api_t HASH_API = {
 	hashmap_api_get,
 	hashmap_api_set,
 	hashmap_api_next,
-	hashmap_api_remove,
+	hashmap_api_Remove,
 	hashmap_api_Init,
 	hashmap_api_dispose
 };
@@ -380,7 +380,7 @@ static map_status_t dictmap_api_set(Kprotomap_t *_m, unsigned hash, unsigned typ
 	return dictmap_set(m, &r);
 }
 
-static void dictmap_api_remove(Kprotomap_t *_m, unsigned hash)
+static void dictmap_api_Remove(Kprotomap_t *_m, unsigned hash)
 {
 	dictmap_t *m = (dictmap_t *)_m;
 	map_record_t *r = dictmap_get(m, hash);
@@ -420,7 +420,7 @@ static const protomap_api_t DIKClass_API = {
 	dictmap_api_get,
 	dictmap_api_set,
 	dictmap_api_next,
-	dictmap_api_remove,
+	dictmap_api_Remove,
 	dictmap_api_Init,
 	dictmap_api_dispose
 };
@@ -449,7 +449,7 @@ static map_status_t nullmap_api_set(Kprotomap_t *_m, unsigned hash, unsigned typ
 	return dictmap_api_set(*ptr, hash, type, val, ptr);
 }
 
-static void nullmap_api_remove(Kprotomap_t *_m, unsigned hash)
+static void nullmap_api_Remove(Kprotomap_t *_m, unsigned hash)
 {
 	(void)_m; (void)hash;
 }
@@ -475,7 +475,7 @@ static const protomap_api_t NULL_API = {
 	nullmap_api_get,
 	nullmap_api_set,
 	nullmap_api_next,
-	nullmap_api_remove,
+	nullmap_api_Remove,
 	nullmap_api_Init,
 	nullmap_api_dispose
 };

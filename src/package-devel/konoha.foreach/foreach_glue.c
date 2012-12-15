@@ -40,19 +40,19 @@ extern "C" {
 static kToken* new_TypeToken(KonohaContext *kctx, kNameSpace *ns, ktypeattr_t typeId)
 {
 	kToken *TypeToken = new_(Token, 0, OnGcStack);
-	kToken_setTypeId(kctx, TypeToken, ns, typeId);
+	kToken_SetTypeId(kctx, TypeToken, ns, typeId);
 	return TypeToken;
 }
 
 static kToken* new_ParsedExprToken(KonohaContext *kctx, kNameSpace *ns, kExpr *expr)
 {
 	kTokenVar *ParsedExprToken = new_(TokenVar, 0, OnGcStack);
-	ParsedExprToken->resolvedSyntaxInfo = SYN_(ns, KSymbol_ExprPattern);
+	ParsedExprToken->resolvedSyntaxInfo = KSyntax_(ns, KSymbol_ExprPattern);
 	KFieldSet(ParsedExprToken, ParsedExprToken->parsedExpr, expr);
 	return (kToken *)ParsedExprToken;
 }
 
-static void MacroSet_setTokenAt(KonohaContext *kctx, MacroSet *macroSet, int index, kArray *tokenList, const char *symbol, ...)
+static void KMacroSet_setTokenAt(KonohaContext *kctx, KMacroSet *macroSet, int index, kArray *tokenList, const char *symbol, ...)
 {
 	DBG_ASSERT(macroSet[index].tokenList == NULL);
 	macroSet[index].symbol = KLIB Ksymbol(kctx, symbol, strlen(symbol), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID);
@@ -77,25 +77,25 @@ static void MacroSet_setTokenAt(KonohaContext *kctx, MacroSet *macroSet, int ind
 static kBlock *new_MacroBlock(KonohaContext *kctx, kStmt *stmt, kToken *IteratorTypeToken, kToken *IteratorExprToken, kToken *TypeToken, kToken *VariableToken)
 {
 	kNameSpace *ns = Stmt_ns(stmt);
-	TokenSeq source = {ns, GetSugarContext(kctx)->preparedTokenList};
-	TokenSeq_Push(kctx, source);
+	KTokenSeq source = {ns, GetSugarContext(kctx)->preparedTokenList};
+	KTokenSeq_Push(kctx, source);
 	/* FIXME(imasahiro)
 	 * we need to implement template as Block
 	 * "T _ = E; if(_.hasNext()) { N = _.next(); }"
 	 *                           ^^^^^^^^^^^^^^^^^
 	 */
-	SUGAR TokenSeq_Tokenize(kctx, &source, "T _ = E; if(_.hasNext()) N = _.next();", 0);
-	MacroSet macroSet[4] = {{0, NULL, 0, 0}};
-	MacroSet_setTokenAt(kctx, macroSet, 0, source.tokenList, "T", IteratorTypeToken, NULL);
-	MacroSet_setTokenAt(kctx, macroSet, 1, source.tokenList, "E", IteratorExprToken, NULL);
+	SUGAR KTokenSeq_Tokenize(kctx, &source, "T _ = E; if(_.hasNext()) N = _.next();", 0);
+	KMacroSet macroSet[4] = {{0, NULL, 0, 0}};
+	KMacroSet_setTokenAt(kctx, macroSet, 0, source.tokenList, "T", IteratorTypeToken, NULL);
+	KMacroSet_setTokenAt(kctx, macroSet, 1, source.tokenList, "E", IteratorExprToken, NULL);
 	if(TypeToken == NULL) {
-		MacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", VariableToken, NULL);
+		KMacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", VariableToken, NULL);
 	}
 	else {
-		MacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", TypeToken, VariableToken, NULL);
+		KMacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", TypeToken, VariableToken, NULL);
 	}
 	kBlock *bk = SUGAR new_kBlock(kctx, stmt, macroSet, &source);
-	TokenSeq_Pop(kctx, source);
+	KTokenSeq_Pop(kctx, source);
 	return bk;
 }
 
@@ -128,7 +128,7 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 				KReturnUnboxValue(false);
 			}
 			IteratorExpr = SUGAR new_TypedCallExpr(kctx, stmt, gma, KClass_INFER, mtd, 1, IteratorExpr);
-			kStmt_setObject(kctx, stmt, KSymbol_ExprPattern, IteratorExpr);
+			kStmt_SetObject(kctx, stmt, KSymbol_ExprPattern, IteratorExpr);
 		}
 		kBlock *block = new_MacroBlock(kctx, stmt, new_TypeToken(kctx, ns, KClass_(IteratorExpr->attrTypeId)), new_ParsedExprToken(kctx, ns, IteratorExpr), TypeToken, VariableToken);
 		kStmt *IfStmt = block->StmtList->StmtItems[1]; // @see macro;
@@ -138,7 +138,7 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 		isOkay = SUGAR kBlock_TypeCheckAll(kctx, block, gma);
 		if(isOkay) {
 			kStmt_typed(IfStmt, LOOP);
-			kStmt_setObject(kctx, stmt, KSymbol_BlockPattern, block);
+			kStmt_SetObject(kctx, stmt, KSymbol_BlockPattern, block);
 			kStmt_typed(stmt, BLOCK);
 		}
 	}

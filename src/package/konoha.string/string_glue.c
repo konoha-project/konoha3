@@ -170,7 +170,7 @@ static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, si
 static kString *remove_escapes(KonohaContext *kctx, kToken *tk)
 {
 	kString *text = tk->text;
-	if(kToken_is(RequiredReformat, tk)) {
+	if(kToken_Is(RequiredReformat, tk)) {
 		const char *escape = strchr(kString_text(text), '\\');
 		DBG_ASSERT(escape != NULL);
 		text = kToken_ResolveEscapeSequence(kctx, tk, escape - kString_text(text));
@@ -220,17 +220,17 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 		KLIB KBuffer_Write(kctx, &wb, start+2, end-(start+2));
 		KLIB KBuffer_Write(kctx, &wb, ")", 1);
 
-		TokenSeq range = {ns, GetSugarContext(kctx)->preparedTokenList};
-		TokenSeq_Push(kctx, range);
+		KTokenSeq range = {ns, GetSugarContext(kctx)->preparedTokenList};
+		KTokenSeq_Push(kctx, range);
 		const char *buf = KLIB KBuffer_text(kctx, &wb, EnsureZero);
-		SUGAR TokenSeq_Tokenize(kctx, &range, buf, 0);
+		SUGAR KTokenSeq_Tokenize(kctx, &range, buf, 0);
 
 		{
-			TokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
-			TokenSeq_Push(kctx, tokens);
-			SUGAR TokenSeq_Preprocess(kctx, &tokens, NULL, &range, range.beginIdx);
+			KTokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
+			KTokenSeq_Push(kctx, tokens);
+			SUGAR KTokenSeq_Preprocess(kctx, &tokens, NULL, &range, range.beginIdx);
 			kExpr *newexpr = SUGAR kStmt_ParseExpr(kctx, stmt, tokens.tokenList, tokens.beginIdx, tokens.endIdx, NULL);
-			TokenSeq_Pop(kctx, tokens);
+			KTokenSeq_Pop(kctx, tokens);
 
 			if(start - str > 0) {
 				kExpr *first = new_ConstValueExpr(kctx, NULL,
@@ -239,7 +239,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 			}
 			expr = (kExprVar *) SUGAR new_TypedCallExpr(kctx, stmt, gma, KClass_String, concat, 2, expr, newexpr);
 		}
-		TokenSeq_Pop(kctx, range);
+		KTokenSeq_Pop(kctx, range);
 		KLIB KBuffer_Free(&wb);
 		str = end + 1;
 	}

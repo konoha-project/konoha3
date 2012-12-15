@@ -99,9 +99,9 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 		INIT_GCSTACK();
 		kNameSpace *ns = new_(NameSpace, Stmt_ns(stmt), _GcStack);
 		kArray *a = GetSugarContext(kctx)->preparedTokenList;
-		TokenSeq range = {ns, a, kArray_size(a), kArray_size(a)};
-		SUGAR TokenSeq_Tokenize(kctx, &range, kString_text(tk->text), tk->uline);
-		result = SUGAR TokenSeq_Eval(kctx, &range, NULL/*trace*/);
+		KTokenSeq range = {ns, a, kArray_size(a), kArray_size(a)};
+		SUGAR KTokenSeq_Tokenize(kctx, &range, kString_text(tk->text), tk->uline);
+		result = SUGAR KTokenSeq_Eval(kctx, &range, NULL/*trace*/);
 		RESET_GCSTACK();
 		kStmt_done(kctx, stmt);
 	}
@@ -176,7 +176,7 @@ static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 		if(i + 1 == endIdx || tokenList->TokenItems[i+1]->resolvedSyntaxInfo->keyword == KSymbol_COMMA) {
 			kTokenVar *tk = tokenList->TokenVarItems[i];
 			if(tk->resolvedSyntaxInfo->keyword != KSymbol_SymbolPattern) {  // defined
-				tk->resolvedSyntaxInfo = SYN_(ns, KSymbol_TextPattern);  // switch to text pattern
+				tk->resolvedSyntaxInfo = KSyntax_(ns, KSymbol_TextPattern);  // switch to text pattern
 			}
 			i++;
 		}

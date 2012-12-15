@@ -32,7 +32,7 @@ static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 	if(verbose_sugar) {
 		if(n < 0) n = (short)tk->uline;
 		if(tk->resolvedSyntaxInfo == NULL) {
-			if(kToken_isIndent(tk)) {
+			if(kToken_IsIndent(tk)) {
 				DUMP_P("Token[%d] '%s' TokenType=%s%s indent=%d\n", n, KToken_t(tk), KSymbol_Fmt2(tk->unresolvedTokenType), tk->indent);
 			}
 			else {
@@ -109,7 +109,7 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 		if(expr == K_NULLEXPR) {
 			DUMP_P("[%d] NullObject", n);
 		}
-		else if(Expr_isTerm(expr)) {
+		else if(kExpr_IsTerm(expr)) {
 			DUMP_P("[%d] TermToken: ", n);
 			dumpToken(kctx, expr->termToken, -1);
 		}

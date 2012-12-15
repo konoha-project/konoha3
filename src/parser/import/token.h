@@ -112,7 +112,7 @@ static int ParseNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer,
 	return pos - 1;  // next
 }
 
-static void kToken_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *t, size_t len)
+static void kToken_SetSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *t, size_t len)
 {
 	if(IS_NOTNULL(tk)) {
 		ksymbol_t kw = KAsciiSymbol(t, len, KSymbol_Noname);
@@ -137,21 +137,21 @@ static int ParseSymbol(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer,
 		if(ch == '_' || isalnum(ch)) continue; // nothing
 		break;
 	}
-	kToken_setSymbolText(kctx, tk, ts + tok_start, (pos-1)-tok_start);
+	kToken_SetSymbolText(kctx, tk, ts + tok_start, (pos-1)-tok_start);
 	return pos - 1;  // next
 }
 
 static int ParseSingleOperator(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
-	kToken_setSymbolText(kctx, tk,  tokenizer->source + tok_start, 1);
+	kToken_SetSymbolText(kctx, tk,  tokenizer->source + tok_start, 1);
 	return tok_start+1;
 }
 
 static int ParseSemiColon(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
-	kToken_setSymbolText(kctx, tk,  tokenizer->source + tok_start, 1);
+	kToken_SetSymbolText(kctx, tk,  tokenizer->source + tok_start, 1);
 	if(IS_NOTNULL(tk)) {
-		kToken_set(StatementSeparator, tk, true);
+		kToken_Set(StatementSeparator, tk, true);
 	}
 	return tok_start+1;
 }
@@ -164,7 +164,7 @@ static int ParseAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeni
 		int pos = ParseSymbol(kctx, tk, tokenizer, tok_start+1);
 		if(IS_NOTNULL(tk)) {  // pre-resolved
 			tk->resolvedSymbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId) | KSymbolAttr_Annotation;
-			tk->resolvedSyntaxInfo = SYN_(tokenizer->ns, KSymbol_SymbolPattern);
+			tk->resolvedSyntaxInfo = KSyntax_(tokenizer->ns, KSymbol_SymbolPattern);
 		}
 		return pos;
 	}
@@ -178,7 +178,7 @@ static int ParseAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeni
 //		int pos = ParseSymbol(kctx, tk, tokenizer, tok_start+1);
 //		if(IS_NOTNULL(tk)) {  // pre-resolved
 //			tk->resolvedSymbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId) | SymbolAttr_Annotation;
-//			tk->resolvedSyntaxInfo = SYN_(tokenizer->ns, KSymbol_SymbolPattern);
+//			tk->resolvedSyntaxInfo = KSyntax_(tokenizer->ns, KSymbol_SymbolPattern);
 //		}
 //		KReturnUnboxValue(pos - tok_start);
 //	}
@@ -199,7 +199,7 @@ static int ParseOperator(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenize
 		}
 		break;
 	}
-	kToken_setSymbolText(kctx, tk, tokenizer->source + tok_start, (pos-1)-tok_start);
+	kToken_SetSymbolText(kctx, tk, tokenizer->source + tok_start, (pos-1)-tok_start);
 	return pos-1;
 }
 
@@ -281,7 +281,7 @@ static int ParseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, Tokenizer *
 		}
 	}
 	if(hasBQ && IS_NOTNULL(tk)) {
-		kToken_set(RequiredReformat, tk, true);
+		kToken_Set(RequiredReformat, tk, true);
 	}
 	if(ch == '"') {
 		if(IS_NOTNULL(tk)) {
@@ -304,7 +304,7 @@ static int ParseWhiteSpace(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeni
 	if(size > 0) {
 		kTokenVar *tk = tokenizer->tokenList->TokenVarItems[size-1];
 		if(tk->uline == tokenizer->currentLine && tk->unresolvedTokenType != TokenType_INDENT) {
-			kToken_set(BeforeWhiteSpace, tk, true);
+			kToken_Set(BeforeWhiteSpace, tk, true);
 		}
 	}
 	return tok_start+1;
@@ -499,7 +499,7 @@ static kFunc **kNameSpace_tokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns)
 	return funcMatrix + KCHAR_MAX;
 }
 
-static void TokenSeq_Tokenize(KonohaContext *kctx, TokenSeq *tokens, const char *source, kfileline_t uline)
+static void KTokenSeq_Tokenize(KonohaContext *kctx, KTokenSeq *tokens, const char *source, kfileline_t uline)
 {
 	INIT_GCSTACK();
 	Tokenizer tenv = {};
@@ -513,7 +513,7 @@ static void TokenSeq_Tokenize(KonohaContext *kctx, TokenSeq *tokens, const char 
 	tenv.FuncItems  = kNameSpace_tokenFuncMatrix(kctx, tokens->ns);
 	tenv.preparedString = KLIB new_kString(kctx, _GcStack, tenv.source, tenv.sourceLength, StringPolicy_ASCII|StringPolicy_TEXT|StringPolicy_NOPOOL);
 	Tokenizer_Tokenize(kctx, &tenv);
-	TokenSeq_End(kctx, tokens);
+	KTokenSeq_End(kctx, tokens);
 	RESET_GCSTACK();
 }
 

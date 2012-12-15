@@ -81,7 +81,7 @@ static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gm
 		kExpr *recvExpr =  new_ConstValueExpr(kctx, NULL, scr);
 		kExpr *setterExpr = SUGAR new_TypedCallExpr(kctx, stmt, gma, KType_void, mtd,  2, recvExpr, valueExpr);
 		kStmt *newstmt = new_(Stmt, stmt->uline, OnGcStack);
-		kStmt_setsyn(newstmt, SYN_(ns, KSymbol_ExprPattern));
+		kStmt_Setsyn(newstmt, KSyntax_(ns, KSymbol_ExprPattern));
 		KLIB kObjectProto_SetObject(kctx, newstmt, KSymbol_ExprPattern, KType_Expr, setterExpr);
 		return newstmt;
 	}

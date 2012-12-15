@@ -57,7 +57,7 @@ static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 		if(i + 1 == endIdx || tokenList->TokenItems[i+1]->resolvedSyntaxInfo->keyword == KSymbol_COMMA) {
 			kTokenVar *tk = tokenList->TokenVarItems[i];
 			if(tk->resolvedSyntaxInfo->keyword != KSymbol_SymbolPattern) {  // defined
-				tk->resolvedSyntaxInfo = SYN_(ns, KSymbol_TextPattern);  // switch to text pattern
+				tk->resolvedSyntaxInfo = KSyntax_(ns, KSymbol_TextPattern);  // switch to text pattern
 			}
 			i++;
 		}

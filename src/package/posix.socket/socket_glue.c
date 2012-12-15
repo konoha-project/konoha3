@@ -115,7 +115,7 @@ static void fromFd(KonohaContext *kctx, fd_set* s, kArray *a )
 		size_t indx;
 		for(indx = 0; indx < kArray_size(a); indx++ ) {
 			if(!FD_ISSET(WORD2INT(a->kintItems[indx]), s) ) {
-//				kArray_remove(a, indx);
+//				kArray_Remove(a, indx);
 			}
 		}
 	}

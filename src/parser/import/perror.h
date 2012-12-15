@@ -101,7 +101,7 @@ static KSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymb
 static void kStmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {
 	if(errmsg != NULL) { // not in case of isBlockedErrorMessage
-		((kStmtVar *)stmt)->syn   = SYN_(Stmt_ns(stmt), KSymbol_ERR);
+		((kStmtVar *)stmt)->syn   = KSyntax_(Stmt_ns(stmt), KSymbol_ERR);
 		((kStmtVar *)stmt)->build = TSTMT_ERR;
 		KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_ERR, KType_String, errmsg);
 	}
@@ -144,7 +144,7 @@ static kExpr* kStmt_Message2(KonohaContext *kctx, kStmt *stmt, kToken *tk, kinfo
 		}
 	}
 	kString *errmsg = SugarContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
-	if(taglevel <= ErrTag && !kStmt_isERR(stmt)) {
+	if(taglevel <= ErrTag && !kStmt_IsERR(stmt)) {
 		kStmt_toERR(kctx, stmt, errmsg);
 	}
 	va_end(ap);
@@ -163,7 +163,7 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 		kfileline_t uline = stmt->uline;
 		kString *emsg = SugarContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
 		va_end(ap);
-		if(taglevel <= ErrTag && !kStmt_isERR(stmt)) {
+		if(taglevel <= ErrTag && !kStmt_IsERR(stmt)) {
 			kStmt_toERR(kctx, stmt, emsg);
 		}
 	}

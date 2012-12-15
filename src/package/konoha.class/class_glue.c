@@ -192,11 +192,11 @@ static kBlock* kStmt_ParseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 	kToken *blockToken = (kToken *)kStmt_GetObject(kctx, stmt, KSymbol_BlockPattern, NULL);
 	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KSymbol_BlockPattern) {
 		const char *cname = kString_text(tokenClassName->text);
-		TokenSeq range = {Stmt_ns(stmt), GetSugarContext(kctx)->preparedTokenList};
-		TokenSeq_Push(kctx, range);
-		SUGAR TokenSeq_Tokenize(kctx, &range,  kString_text(blockToken->text), blockToken->uline);
+		KTokenSeq range = {Stmt_ns(stmt), GetSugarContext(kctx)->preparedTokenList};
+		KTokenSeq_Push(kctx, range);
+		SUGAR KTokenSeq_Tokenize(kctx, &range,  kString_text(blockToken->text), blockToken->uline);
 		{
-			TokenSeq sourceRange = {range.ns, range.tokenList, range.endIdx};
+			KTokenSeq sourceRange = {range.ns, range.tokenList, range.endIdx};
 			kToken *prevToken = blockToken;
 			int i;
 			for(i = range.beginIdx; i < range.endIdx; i++) {
@@ -208,11 +208,11 @@ static kBlock* kStmt_ParseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 				KLIB kArray_Add(kctx, sourceRange.tokenList, tk);
 				prevToken = tk;
 			}
-			TokenSeq_End(kctx, (&sourceRange));
+			KTokenSeq_End(kctx, (&sourceRange));
 			bk = SUGAR new_kBlock(kctx, stmt/*parent*/, NULL, &sourceRange);
 			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_BlockPattern, KType_Block, bk);
 		}
-		TokenSeq_Pop(kctx, range);
+		KTokenSeq_Pop(kctx, range);
 	}
 	return bk;
 }
@@ -229,7 +229,7 @@ static size_t kBlock_countFieldSize(KonohaContext *kctx, kBlock *bk)
 				if(expr->syn->keyword == KSymbol_COMMA) {
 					c += (kArray_size(expr->cons) - 1);
 				}
-				else if(expr->syn->keyword == KSymbol_LET || Expr_isTerm(expr)) {
+				else if(expr->syn->keyword == KSymbol_LET || kExpr_IsTerm(expr)) {
 					c++;
 				}
 			}
@@ -240,15 +240,15 @@ static size_t kBlock_countFieldSize(KonohaContext *kctx, kBlock *bk)
 
 static kbool_t kStmt_AddClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma, KClassVar *definedClass, ktypeattr_t ty, kExpr *expr)
 {
-	if(Expr_isTerm(expr)) {  // String name
+	if(kExpr_IsTerm(expr)) {  // String name
 		kString *name = expr->termToken->text;
 		ksymbol_t symbol = KAsciiSymbol(kString_text(name), kString_size(name), KSymbol_NewId);
 		KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 		return true;
 	}
 	else if(expr->syn->keyword == KSymbol_LET) {  // String name = "naruto";
-		kExpr *lexpr = kExpr_at(expr, 1);
-		if(Expr_isTerm(lexpr)) {
+		kExpr *lexpr = kExpr_At(expr, 1);
+		if(kExpr_IsTerm(lexpr)) {
 			kString *name = lexpr->termToken->text;
 			ksymbol_t symbol = KAsciiSymbol(kString_text(name), kString_size(name), KSymbol_NewId);
 			kExpr *vexpr =  SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, KClass_(ty), 0);
@@ -273,7 +273,7 @@ static kbool_t kStmt_AddClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma
 	} else if(expr->syn->keyword == KSymbol_COMMA) {   // String (firstName = naruto, lastName)
 		size_t i;
 		for(i = 1; i < kArray_size(expr->cons); i++) {
-			if(!kStmt_AddClassField(kctx, stmt, gma, definedClass, ty, kExpr_at(expr, i))) return false;
+			if(!kStmt_AddClassField(kctx, stmt, gma, definedClass, ty, kExpr_At(expr, i))) return false;
 		}
 		return true;
 	}
@@ -368,7 +368,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		KClass_Set(Virtual, definedClass, false);
 	}
-	kToken_setTypeId(kctx, tokenClassName, ns, definedClass->typeId);
+	kToken_SetTypeId(kctx, tokenClassName, ns, definedClass->typeId);
 	kBlock_AddMethodDeclStmt(kctx, bk, tokenClassName, stmt);
 	kStmt_done(kctx, stmt);
 	KReturnUnboxValue(true);

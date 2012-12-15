@@ -48,7 +48,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 		KReturnUnboxValue(false);
 	}
 	kNameSpace *ns = Stmt_ns(stmt);
-	KSyntaxVar *syn = (KSyntaxVar *) SYN_(ns, KSymbol_ExprMethodCall);
+	KSyntaxVar *syn = (KSyntaxVar *) KSyntax_(ns, KSymbol_ExprMethodCall);
 	kExpr *expr;
 	kTokenVar *tkImport = /*G*/new_(TokenVar, 0, OnGcStack);
 	tkImport->resolvedSymbol = KKMethodName_("import");

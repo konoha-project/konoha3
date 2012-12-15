@@ -54,7 +54,7 @@ static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktypeatt
 static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
-	kExprVar *leftHandExpr = (kExprVar *)kExpr_at(expr, 1);
+	kExprVar *leftHandExpr = (kExprVar *)kExpr_At(expr, 1);
 	if(kExpr_isSymbolTerm(leftHandExpr)) {
 		kExpr *texpr = SUGAR kStmt_TypeCheckVariableNULL(kctx, stmt, leftHandExpr, gma, KClass_INFER);
 		if(texpr == NULL) {

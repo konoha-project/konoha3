@@ -81,7 +81,7 @@ static inline void ARRAY_##T##_add(ARRAY(T) *a, ValueType v) {\
     }\
     ARRAY_##T##_set(a, a->size++, v);\
 }\
-static inline void ARRAY_##T##_removeAt(ARRAY(T) *a, int idx) {\
+static inline void ARRAY_##T##_RemoveAt(ARRAY(T) *a, int idx) {\
     memmove(a->list+idx, a->list+idx+1, sizeof(T) * (a->size - idx - 1));\
     a->size -= 1;\
 }
@@ -109,7 +109,7 @@ DEF_ARRAY_OP__(T, T)
 #define ARRAY_get(T, a, idx)    ARRAY_##T##_get(a, idx)
 #define ARRAY_set(T, a, idx, v) ARRAY_##T##_set(a, idx, v)
 #define ARRAY_add(T, a, v)      ARRAY_##T##_add(a, v)
-#define ARRAY_removeAt(T, a, n) ARRAY_##T##_removeAt(a, n)
+#define ARRAY_RemoveAt(T, a, n) ARRAY_##T##_RemoveAt(a, n)
 #define ARRAY_dispose(T, a)     ARRAY_##T##_dispose(a)
 #define ARRAY_init(T, a, s)     ARRAY_init_##T (a, s)
 #define ARRAY_ensureSize(T, a, size) ARRAY_##T##_ensureSize(a, size)

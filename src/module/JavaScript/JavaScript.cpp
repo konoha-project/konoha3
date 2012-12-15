@@ -224,7 +224,7 @@ static kbool_t JSBuilder_VisitExprStmt(KonohaContext *kctx, KBuilder *builder, k
 {
 	kExpr *expr = Stmt_getFirstExpr(kctx, stmt);
 	if(expr->build == TEXPR_LET) {
-		if(kExpr_at(expr, 1)->build == TEXPR_FIELD){
+		if(kExpr_At(expr, 1)->build == TEXPR_FIELD){
 			JSBuilder_EmitString(kctx, builder, "this.", "", "");
 		}else{
 			JSBuilder_EmitString(kctx, builder, "var ", "", "");
@@ -381,7 +381,7 @@ static void JSBuilder_VisitExprParams(KonohaContext *kctx, KBuilder *builder, kS
 		JSBuilder_EmitString(kctx, builder, leftBracket, "", "");
 	}
 	for(i = beginIndex; i < n;) {
-		SUGAR VisitExpr(kctx, builder, stmt, kExpr_at(expr, i));
+		SUGAR VisitExpr(kctx, builder, stmt, kExpr_At(expr, i));
 		if(++i < n) {
 			JSBuilder_EmitString(kctx, builder, delimiter, "", "");
 		}
@@ -398,7 +398,7 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 	const char *methodName = KSymbol_text(mtd->mn);
 	if(receiver->attrTypeId == KType_NameSpace) {
 		if(mtd->mn == KKMethodName_("import")) {
-			kString *packageNameString = (kString *)kExpr_at(expr, 2)->objectConstValue;
+			kString *packageNameString = (kString *)kExpr_At(expr, 2)->objectConstValue;
 			kNameSpace *ns = (kNameSpace *)receiver->objectConstValue;
 			JSBuilder_importPackage(kctx, ns, packageNameString, expr->termToken->uline);
 			JSBuilder_EmitString(kctx, builder, "//", "", "");
@@ -424,7 +424,7 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 		switch(KSymbol_prefixText_ID(mtd->mn)) {
 		case kSymbolPrefix_GET:
 			if(kArray_size(expr->cons) > 2) {
-				JSBuilder_VisitExpr(kctx, builder, stmt, kExpr_at(expr, 2), "[", "]");
+				JSBuilder_VisitExpr(kctx, builder, stmt, kExpr_At(expr, 2), "[", "]");
 			}
 			else{
 				if(!isGlobal) {
@@ -435,7 +435,7 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 			break;
 		case kSymbolPrefix_SET:
 			if(kArray_size(expr->cons) > 3) {
-				JSBuilder_VisitExpr(kctx, builder, stmt, kExpr_at(expr, 2), "[", "]");
+				JSBuilder_VisitExpr(kctx, builder, stmt, kExpr_At(expr, 2), "[", "]");
 			}else{
 				if(isGlobal) {
 					JSBuilder_EmitString(kctx, builder, "var ", "", "");
@@ -466,14 +466,14 @@ static void JSBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStm
 
 	if(kArray_size(expr->cons) == 2 && KMethodName_isUnaryOperator(kctx, mtd->mn)) {
 		JSBuilder_EmitString(kctx, builder, KMethodName_Fmt2(mtd->mn), "(");
-		SUGAR VisitExpr(kctx, builder, stmt, kExpr_at(expr, 1));
+		SUGAR VisitExpr(kctx, builder, stmt, kExpr_At(expr, 1));
 		JSBuilder_EmitString(kctx, builder, ")", "", "");
 	}
 	else if(KMethodName_isBinaryOperator(kctx, mtd->mn)) {
 		JSBuilder_VisitExprParams(kctx, builder, stmt, expr, 1, KSymbol_text(mtd->mn),"(", ")");
 	}
 	else{
-		kExpr *receiver = kExpr_at(expr, 1);
+		kExpr *receiver = kExpr_At(expr, 1);
 		/*if(mtd == jsBuilder->visitingMethod) {
 			JSBuilder_EmitString(kctx, builder, "arguments.callee", "", "");
 		}
@@ -489,9 +489,9 @@ static void JSBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStm
 			break;
 		case kSymbolPrefix_SET:
 			if(kArray_size(expr->cons) > 3) {
-				SUGAR VisitExpr(kctx, builder, stmt, kExpr_at(expr, 3));
+				SUGAR VisitExpr(kctx, builder, stmt, kExpr_At(expr, 3));
 			}else{
-				SUGAR VisitExpr(kctx, builder, stmt, kExpr_at(expr, 2));
+				SUGAR VisitExpr(kctx, builder, stmt, kExpr_At(expr, 2));
 			}
 			break;
 		default:

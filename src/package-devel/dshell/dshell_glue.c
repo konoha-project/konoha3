@@ -104,7 +104,7 @@ static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 			else if(token->resolvedSymbol == KSymbol_("$")) {
 				// TODO: parse dollar token ($token)
 				size_t start = i;
-				while(i < kArray_size(tokenList) && !kToken_is(BeforeWhiteSpace, tokenList->TokenItems[i])) {
+				while(i < kArray_size(tokenList) && !kToken_Is(BeforeWhiteSpace, tokenList->TokenItems[i])) {
 					++i;
 				}
 				const char *dollarstr = expandDollarToken(kctx, tokenList, start, i-1);
@@ -119,7 +119,7 @@ static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 			else {
 				KLIB KBuffer_Write(kctx, &wb, kString_text(token->text), kString_size(token->text));
 			}
-			if(kToken_is(BeforeWhiteSpace, token)) {
+			if(kToken_Is(BeforeWhiteSpace, token)) {
 				KLIB KBuffer_Write(kctx, &wb, " ", 1);
 			}
 		}
@@ -145,7 +145,7 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 	//TODO: generate eval("cmd") syntax
 
 	kNameSpace *ns = Stmt_ns(stmt);
-	KSyntaxVar *syn = (KSyntaxVar *) SYN_(ns, KSymbol_ExprMethodCall);
+	KSyntaxVar *syn = (KSyntaxVar *) KSyntax_(ns, KSymbol_ExprMethodCall);
 	kTokenVar *callToken = new_(TokenVar, 0, OnGcStack);
 	kExpr *callExpr = new_ConstValueExpr(kctx, KClass_String, UPCAST(cmd));
 	callToken->resolvedSymbol = KKMethodName_("call");

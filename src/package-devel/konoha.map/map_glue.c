@@ -157,7 +157,7 @@ static KMETHOD Map_set(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## method void Map.remove(String key);
-static KMETHOD Map_remove(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Map_Remove(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMap *m = (kMap *)sfp[0].asObject;
 	KHashMapEntry *e = kMap_getEntry(kctx, m, sfp[1].asString, false/*new_if_NULL*/);
@@ -219,7 +219,7 @@ static kbool_t map_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		_Public|_Im|_Const, _F(Map_has), KType_boolean, KType_Map, KKMethodName_("has"), 1, KType_String, FN_key,
 		_Public|_Im|_Const, _F(Map_get), KType_0, KType_Map, KKMethodName_("get"), 1, KType_String, FN_key,
 		_Public, _F(Map_set), KType_void, KType_Map, KKMethodName_("set"), 2, KType_String, FN_key, KType_0, KFieldName_("value"),
-		_Public, _F(Map_remove), KType_void, KType_Map, KKMethodName_("remove"), 1, KType_String, FN_key,
+		_Public, _F(Map_Remove), KType_void, KType_Map, KKMethodName_("remove"), 1, KType_String, FN_key,
 		_Public|_Im|_Const, _F(Map_keys), KType_Array0, KType_Map, KKMethodName_("keys"), 0,
 		DEND,
 	};
@@ -233,7 +233,7 @@ static KMETHOD TypeCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *termToken = expr->termToken;
-	if(Expr_isTerm(expr) && IS_Token(termToken)) {
+	if(kExpr_IsTerm(expr) && IS_Token(termToken)) {
 		DBG_P("termToken='%s'", kString_text(termToken->text));
 
 	}

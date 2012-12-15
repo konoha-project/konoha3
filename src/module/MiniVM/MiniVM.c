@@ -451,7 +451,7 @@ static void KBuilder_Asm(KonohaContext *kctx, KBuilder *builder, KVirtualCode *o
 	builder->bbMainId = BasicBlock_Add(kctx, builder->bbMainId, builder->common.uline, op, opsize, sizeof(KVirtualCode));
 }
 
-static void kStmt_setLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label, bblock_t labelId)
+static void kStmt_SetLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label, bblock_t labelId)
 {
 	KLIB kObjectProto_SetUnboxValue(kctx, stmt, label, KType_int, labelId);
 }
@@ -635,8 +635,8 @@ static kbool_t KBuilder_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kS
 	bblock_t lbCONTINUE = new_BasicBlockLABEL(kctx);
 	bblock_t lbENTRY    = new_BasicBlockLABEL(kctx);
 	bblock_t lbBREAK    = new_BasicBlockLABEL(kctx);
-	kStmt_setLabelBlock(kctx, stmt, KSymbol_("continue"), lbCONTINUE);
-	kStmt_setLabelBlock(kctx, stmt, KSymbol_("break"),    lbBREAK);
+	kStmt_SetLabelBlock(kctx, stmt, KSymbol_("continue"), lbCONTINUE);
+	kStmt_SetLabelBlock(kctx, stmt, KSymbol_("break"),    lbBREAK);
 	if(kStmt_Is(RedoLoop, stmt)) {
 		ASM_JMP(kctx, builder, lbENTRY);
 	}
@@ -696,7 +696,7 @@ static void KBuilder_VisitConstExpr(KonohaContext *kctx, KBuilder *builder, kStm
 	int a = builder->common.a;
 	kObject *v = expr->objectConstValue;
 	DBG_ASSERT(!KType_Is(UnboxType, expr->attrTypeId));
-	DBG_ASSERT(Expr_hasObjectConstValue(expr));
+	DBG_ASSERT(kExpr_HasObjectConstValue(expr));
 	v = KBuilder_AddConstPool(kctx, builder, v);
 	ASM(NSET, OC_(a), (uintptr_t)v, KClass_(expr->attrTypeId));
 }
@@ -766,7 +766,7 @@ static void KBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 	int thisidx = espidx + K_CALLDELTA;
 	int argc = CallExpr_getArgCount(expr);
 	for (i = s; i < argc + 2; i++) {
-		kExpr *exprN = kExpr_at(expr, i);
+		kExpr *exprN = kExpr_At(expr, i);
 		DBG_ASSERT(IS_Expr(exprN));
 		builder->common.a = builder->common.espidx = thisidx + i - 1;
 		SUGAR VisitExpr(kctx, builder, stmt, exprN);
@@ -801,8 +801,8 @@ static void KBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 static void KBuilder_VisitAndExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
 	bblock_t lbFINAL  = new_BasicBlockLABEL(kctx);
-	KBuilder_asmJMPIF(kctx, builder, stmt, kExpr_at(expr, 1), 0/*FALSE*/, lbFINAL);
-	SUGAR VisitExpr(kctx, builder, stmt, kExpr_at(expr, 2));
+	KBuilder_asmJMPIF(kctx, builder, stmt, kExpr_At(expr, 1), 0/*FALSE*/, lbFINAL);
+	SUGAR VisitExpr(kctx, builder, stmt, kExpr_At(expr, 2));
 	ASM_LABEL(kctx, builder, lbFINAL);
 }
 
@@ -810,11 +810,11 @@ static void KBuilder_VisitOrExpr(KonohaContext *kctx, KBuilder *builder, kStmt *
 {
 	bblock_t lbFALSE = new_BasicBlockLABEL(kctx);
 	bblock_t lbFINAL  = new_BasicBlockLABEL(kctx);
-	KBuilder_asmJMPIF(kctx, builder, stmt, kExpr_at(expr, 1), 0/*FALSE*/, lbFALSE);
+	KBuilder_asmJMPIF(kctx, builder, stmt, kExpr_At(expr, 1), 0/*FALSE*/, lbFALSE);
 	ASM_JMP(kctx, builder, lbFINAL);
 
 	ASM_LABEL(kctx, builder, lbFALSE); // false
-	SUGAR VisitExpr(kctx, builder, stmt, kExpr_at(expr, 2));
+	SUGAR VisitExpr(kctx, builder, stmt, kExpr_At(expr, 2));
 	ASM_LABEL(kctx, builder, lbFINAL);
 }
 
@@ -829,8 +829,8 @@ static void KBuilder_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 	 * expr->cons = [NULL, lhs, rhs]
 	 **/
 
-	kExpr *leftHandExpr = kExpr_at(expr, 1);
-	kExpr *rightHandExpr = kExpr_at(expr, 2);
+	kExpr *leftHandExpr = kExpr_At(expr, 1);
+	kExpr *rightHandExpr = kExpr_At(expr, 2);
 	//DBG_P("LET (%s) a=%d, shift=%d, espidx=%d", KType_text(expr->attrTypeId), a, shift, espidx);
 	if(leftHandExpr->build == TEXPR_LOCAL) {
 		builder->common.a = leftHandExpr->index;
