@@ -48,7 +48,7 @@ static kString* new_StringMessage(KonohaContext *kctx, kArray *gcstack, KBuffer 
 {
 	const char *msg = TAG_t(taglevel);
 	if(uline > 0) {
-		const char *file = FileId_t(uline);
+		const char *file = KFileLine_textFileName (uline);
 		KLIB KBuffer_printf(kctx, wb, "%s(%s:%d) " , msg, PLATAPI shortFilePath(file), (kushort_t)uline);
 	}
 	else {
@@ -101,9 +101,9 @@ static SugarSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns0, k
 static void kStmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {
 	if(errmsg != NULL) { // not in case of isBlockedErrorMessage
-		((kStmtVar *)stmt)->syn   = SYN_(Stmt_ns(stmt), Symbol_ERR);
+		((kStmtVar *)stmt)->syn   = SYN_(Stmt_ns(stmt), KSymbol_ERR);
 		((kStmtVar *)stmt)->build = TSTMT_ERR;
-		KLIB kObjectProto_SetObject(kctx, stmt, Symbol_ERR, KType_String, errmsg);
+		KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_ERR, KType_String, errmsg);
 	}
 }
 

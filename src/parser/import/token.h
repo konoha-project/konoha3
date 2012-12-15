@@ -115,9 +115,9 @@ static int ParseNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer,
 static void kToken_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *t, size_t len)
 {
 	if(IS_NOTNULL(tk)) {
-		ksymbol_t kw = ksymbolA(t, len, Symbol_Noname);
-		if(kw == Symbol_Unmask(kw)) {
-			KFieldSet(tk, tk->text, Symbol_GetString(kctx, kw));
+		ksymbol_t kw = ksymbolA(t, len, KSymbol_Noname);
+		if(kw == KSymbol_Unmask(kw)) {
+			KFieldSet(tk, tk->text, KSymbol_GetString(kctx, kw));
 		}
 		else {
 			KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, t, len, StringPolicy_ASCII));
@@ -163,8 +163,8 @@ static int ParseAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeni
 	if(isalnum(tokenizer->source[tok_start+1])) {
 		int pos = ParseSymbol(kctx, tk, tokenizer, tok_start+1);
 		if(IS_NOTNULL(tk)) {  // pre-resolved
-			tk->resolvedSymbol = ksymbolA(kString_text(tk->text), kString_size(tk->text), Symbol_NewId) | SymbolAttr_Annotation;
-			tk->resolvedSyntaxInfo = SYN_(tokenizer->ns, Symbol_SymbolPattern);
+			tk->resolvedSymbol = ksymbolA(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId) | SymbolAttr_Annotation;
+			tk->resolvedSyntaxInfo = SYN_(tokenizer->ns, KSymbol_SymbolPattern);
 		}
 		return pos;
 	}
@@ -177,8 +177,8 @@ static int ParseAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeni
 //	if(isalnum(tokenizer->source[tok_start+1])) {  // tokenizer, tok_start is older style of tokneizer
 //		int pos = ParseSymbol(kctx, tk, tokenizer, tok_start+1);
 //		if(IS_NOTNULL(tk)) {  // pre-resolved
-//			tk->resolvedSymbol = ksymbolA(kString_text(tk->text), kString_size(tk->text), Symbol_NewId) | SymbolAttr_Annotation;
-//			tk->resolvedSyntaxInfo = SYN_(tokenizer->ns, Symbol_SymbolPattern);
+//			tk->resolvedSymbol = ksymbolA(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId) | SymbolAttr_Annotation;
+//			tk->resolvedSyntaxInfo = SYN_(tokenizer->ns, KSymbol_SymbolPattern);
 //		}
 //		KReturnUnboxValue(pos - tok_start);
 //	}

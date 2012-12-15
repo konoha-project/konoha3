@@ -90,7 +90,7 @@ static void DumpOpArgument(KonohaContext *kctx, KBuffer *wb, VirtualCodeType typ
 		break;
 	case VMT_UL: {
 		kfileline_t uline = (kfileline_t)c->data[i];
-		KLIB KBuffer_printf(kctx, wb, " (%s:%d)", PLATAPI shortFilePath(FileId_t(uline)), (kshort_t)uline);
+		KLIB KBuffer_printf(kctx, wb, " (%s:%d)", PLATAPI shortFilePath(KFileLine_textFileName (uline)), (kshort_t)uline);
 		break;
 	}
 	case VMT_R: {
@@ -107,17 +107,17 @@ static void DumpOpArgument(KonohaContext *kctx, KBuffer *wb, VirtualCodeType typ
 		KLIB KBuffer_printf(kctx, wb, " i%ld", (long)c->data[i]); break;
 	case VMT_C:
 	case VMT_TY:
-		KLIB KBuffer_printf(kctx, wb, "(%s)", KClass_t(c->ct[i])); break;
+		KLIB KBuffer_printf(kctx, wb, "(%s)", KClass_text(c->ct[i])); break;
 	case VMT_F:
 		KLIB KBuffer_printf(kctx, wb, " function(%p)", c->p[i]); break;
 	case VMT_Object: {
 		kObject *o = c->o[i];
 		if(IS_Method(o)) {
 			kMethod *mtd = (kMethod *)o;
-			KLIB KBuffer_printf(kctx, wb, " %s.%s%s", KType_t(mtd->typeId), MethodName_Fmt2(mtd->mn));
+			KLIB KBuffer_printf(kctx, wb, " %s.%s%s", KType_text(mtd->typeId), MethodName_Fmt2(mtd->mn));
 		}
 		else {
-			KLIB KBuffer_printf(kctx, wb, " (%s)", KClass_t(kObject_class(o)));
+			KLIB KBuffer_printf(kctx, wb, " (%s)", KClass_text(kObject_class(o)));
 			KLIB kObject_WriteToBuffer(kctx, o, 0, wb, NULL, 0);
 		}
 		break;
@@ -536,17 +536,17 @@ static void KBuilder_AsmNMOV(KonohaContext *kctx, KBuilder *builder, int a, Kono
 
 static kBlock* Stmt_getFirstBlock(KonohaContext *kctx, kStmt *stmt)
 {
-	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, Symbol_BlockPattern, K_NULLBLOCK);
+	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_BlockPattern, K_NULLBLOCK);
 }
 
 static kBlock* Stmt_getElseBlock(KonohaContext *kctx, kStmt *stmt)
 {
-	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, Symbol_else, K_NULLBLOCK);
+	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_else, K_NULLBLOCK);
 }
 
 static kExpr* Stmt_getFirstExpr(KonohaContext *kctx, kStmt *stmt)
 {
-	return SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
+	return SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, NULL);
 }
 
 static kStmt *kStmt_GetStmt(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw)
@@ -566,7 +566,7 @@ static int CallExpr_getArgCount(kExpr *expr)
 
 static kString* Stmt_getErrorMessage(KonohaContext *kctx, kStmt *stmt)
 {
-	kString* msg = (kString *)kStmt_GetObjectNULL(kctx, stmt, Symbol_ERR);
+	kString* msg = (kString *)kStmt_GetObjectNULL(kctx, stmt, KSymbol_ERR);
 	DBG_ASSERT(IS_String(msg));
 	return msg;
 }
@@ -595,7 +595,7 @@ static kbool_t KBuilder_VisitBlockStmt(KonohaContext *kctx, KBuilder *builder, k
 
 static kbool_t KBuilder_VisitReturnStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
-	kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
+	kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, NULL);
 	if(expr != NULL && IS_Expr(expr) && expr->attrTypeId != KType_void) {
 		int a = builder->common.a;
 		builder->common.a = K_RTNIDX;
@@ -687,7 +687,7 @@ static kbool_t KBuilder_VisitTryStmt(KonohaContext *kctx, KBuilder *builder, kSt
 
 static kbool_t KBuilder_VisitUndefinedStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
-	DBG_P("undefined asm syntax kw='%s'", Symbol_text(stmt->syn->keyword));
+	DBG_P("undefined asm syntax kw='%s'", KSymbol_text(stmt->syn->keyword));
 	return true;
 }
 
@@ -831,7 +831,7 @@ static void KBuilder_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 
 	kExpr *leftHandExpr = kExpr_at(expr, 1);
 	kExpr *rightHandExpr = kExpr_at(expr, 2);
-	//DBG_P("LET (%s) a=%d, shift=%d, espidx=%d", KType_t(expr->attrTypeId), a, shift, espidx);
+	//DBG_P("LET (%s) a=%d, shift=%d, espidx=%d", KType_text(expr->attrTypeId), a, shift, espidx);
 	if(leftHandExpr->build == TEXPR_LOCAL) {
 		builder->common.a = leftHandExpr->index;
 		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);

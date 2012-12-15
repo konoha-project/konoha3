@@ -35,69 +35,69 @@
 extern "C" {
 #endif
 
-#define Symbol_END              ((ksymbol_t)-1)
-#define Symbol_ERR              (((ksymbol_t)0)|0) /**/
-#define Symbol_ExprPattern      (((ksymbol_t)1)|SymbolAttr_Pattern) /*$Expr*/
-#define Symbol_SymbolPattern    (((ksymbol_t)2)|SymbolAttr_Pattern) /*$Symbol*/
-#define Symbol_TextPattern      (((ksymbol_t)3)|SymbolAttr_Pattern) /*$Text*/
-#define Symbol_NumberPattern    (((ksymbol_t)4)|SymbolAttr_Pattern) /*$Number*/
-#define Symbol_TypePattern      (((ksymbol_t)5)|SymbolAttr_Pattern) /*$Type*/
+#define KSymbol_END              ((ksymbol_t)-1)
+#define KSymbol_ERR              (((ksymbol_t)0)|0) /**/
+#define KSymbol_ExprPattern      (((ksymbol_t)1)|SymbolAttr_Pattern) /*$Expr*/
+#define KSymbol_SymbolPattern    (((ksymbol_t)2)|SymbolAttr_Pattern) /*$Symbol*/
+#define KSymbol_TextPattern      (((ksymbol_t)3)|SymbolAttr_Pattern) /*$Text*/
+#define KSymbol_NumberPattern    (((ksymbol_t)4)|SymbolAttr_Pattern) /*$Number*/
+#define KSymbol_TypePattern      (((ksymbol_t)5)|SymbolAttr_Pattern) /*$Type*/
 
-#define Symbol_ParenthesisGroup (((ksymbol_t)6)) /*()*/
-#define Symbol_BracketGroup     (((ksymbol_t)7)) /*[]*/
-#define Symbol_BraceGroup       (((ksymbol_t)8)) /*{}*/
-#define Symbol_TypeCastGroup    (((ksymbol_t)6)|SymbolAttr_Pattern)    /*$()*/
-#define Symbol_TypeParamGroup   (((ksymbol_t)7)|SymbolAttr_Pattern)    /*$[]*/
-#define Symbol_OptionalGroup    (((ksymbol_t)7)|Symbol_ATMARK)     /*@[]*/
-#define Symbol_BlockPattern     (((ksymbol_t)9)|SymbolAttr_Pattern)    /*$Block*/
-#define Symbol_ParamPattern     (((ksymbol_t)10)|SymbolAttr_Pattern)   /*$Param*/
-#define Symbol_TypeDeclPattern  (((ksymbol_t)11)|SymbolAttr_Pattern)   /*$TypeDecl*/
-#define Symbol_MethodDeclPattern  (((ksymbol_t)12)|SymbolAttr_Pattern) /*$MethodDecl*/
-#define Symbol_TokenPattern     (((ksymbol_t)13)|SymbolAttr_Pattern)   /*$Token*/
+#define KSymbol_ParenthesisGroup (((ksymbol_t)6)) /*()*/
+#define KSymbol_BracketGroup     (((ksymbol_t)7)) /*[]*/
+#define KSymbol_BraceGroup       (((ksymbol_t)8)) /*{}*/
+#define KSymbol_TypeCastGroup    (((ksymbol_t)6)|SymbolAttr_Pattern)    /*$()*/
+#define KSymbol_TypeParamGroup   (((ksymbol_t)7)|SymbolAttr_Pattern)    /*$[]*/
+#define KSymbol_OptionalGroup    (((ksymbol_t)7)|KSymbol_ATMARK)     /*@[]*/
+#define KSymbol_BlockPattern     (((ksymbol_t)9)|SymbolAttr_Pattern)    /*$Block*/
+#define KSymbol_ParamPattern     (((ksymbol_t)10)|SymbolAttr_Pattern)   /*$Param*/
+#define KSymbol_TypeDeclPattern  (((ksymbol_t)11)|SymbolAttr_Pattern)   /*$TypeDecl*/
+#define KSymbol_MethodDeclPattern  (((ksymbol_t)12)|SymbolAttr_Pattern) /*$MethodDecl*/
+#define KSymbol_TokenPattern     (((ksymbol_t)13)|SymbolAttr_Pattern)   /*$Token*/
 
-#define Symbol_ExprOperator        Symbol_ParamPattern
-#define Symbol_ExprTerm            Symbol_SymbolPattern
-#define Symbol_ExprMethodCall      Symbol_ParamPattern
+#define KSymbol_ExprOperator        KSymbol_ParamPattern
+#define KSymbol_ExprTerm            KSymbol_SymbolPattern
+#define KSymbol_ExprMethodCall      KSymbol_ParamPattern
 
-#define Symbol_DOT     14
-#define Symbol_DIV     (1+Symbol_DOT)
-#define Symbol_MOD     (2+Symbol_DOT)
-#define Symbol_MUL     (3+Symbol_DOT)
-#define Symbol_ADD     (4+Symbol_DOT)
-#define Symbol_SUB     (5+Symbol_DOT)
-#define Symbol_LT      (6+Symbol_DOT)
-#define Symbol_LTE     (7+Symbol_DOT)
-#define Symbol_GT      (8+Symbol_DOT)
-#define Symbol_GTE     (9+Symbol_DOT)
-#define Symbol_EQ      (10+Symbol_DOT)
-#define Symbol_NEQ     (11+Symbol_DOT)
-#define Symbol_AND     (12+Symbol_DOT)
-#define Symbol_OR      (13+Symbol_DOT)
-#define Symbol_NOT     (14+Symbol_DOT)
-#define Symbol_LET     (15+Symbol_DOT)
-#define Symbol_COMMA   (16+Symbol_DOT)
-#define Symbol_DOLLAR  SymbolAttr_Pattern
-#define Symbol_ATMARK  SymbolAttr_Annotation
-#define Symbol_COLON   (17+Symbol_DOT)
-#define Symbol_SEMICOLON (18+Symbol_DOT)
+#define KSymbol_DOT     14
+#define KSymbol_DIV     (1+KSymbol_DOT)
+#define KSymbol_MOD     (2+KSymbol_DOT)
+#define KSymbol_MUL     (3+KSymbol_DOT)
+#define KSymbol_ADD     (4+KSymbol_DOT)
+#define KSymbol_SUB     (5+KSymbol_DOT)
+#define KSymbol_LT      (6+KSymbol_DOT)
+#define KSymbol_LTE     (7+KSymbol_DOT)
+#define KSymbol_GT      (8+KSymbol_DOT)
+#define KSymbol_GTE     (9+KSymbol_DOT)
+#define KSymbol_EQ      (10+KSymbol_DOT)
+#define KSymbol_NEQ     (11+KSymbol_DOT)
+#define KSymbol_AND     (12+KSymbol_DOT)
+#define KSymbol_OR      (13+KSymbol_DOT)
+#define KSymbol_NOT     (14+KSymbol_DOT)
+#define KSymbol_LET     (15+KSymbol_DOT)
+#define KSymbol_COMMA   (16+KSymbol_DOT)
+#define KSymbol_DOLLAR  SymbolAttr_Pattern
+#define KSymbol_ATMARK  SymbolAttr_Annotation
+#define KSymbol_COLON   (17+KSymbol_DOT)
+#define KSymbol_SEMICOLON (18+KSymbol_DOT)
 
-#define Symbol_true      33
-#define Symbol_false     (1+Symbol_true)
-#define Symbol_if        (2+Symbol_true)
-#define Symbol_else      (3+Symbol_true)
-#define Symbol_return    (4+Symbol_true)
+#define KSymbol_true      33
+#define KSymbol_false     (1+KSymbol_true)
+#define KSymbol_if        (2+KSymbol_true)
+#define KSymbol_else      (3+KSymbol_true)
+#define KSymbol_return    (4+KSymbol_true)
 
 typedef enum {
 	TokenType_INDENT = 1,
-	TokenType_SYMBOL = Symbol_SymbolPattern,
-	TokenType_TEXT   = Symbol_TextPattern,
-	TokenType_INT    = Symbol_NumberPattern,
-	TokenType_CODE   = Symbol_BlockPattern,
-	TokenType_ERR    = Symbol_TokenPattern
+	TokenType_SYMBOL = KSymbol_SymbolPattern,
+	TokenType_TEXT   = KSymbol_TextPattern,
+	TokenType_INT    = KSymbol_NumberPattern,
+	TokenType_CODE   = KSymbol_BlockPattern,
+	TokenType_ERR    = KSymbol_TokenPattern
 } kTokenType;
 
 // reserved
-//#define MN_new       (8+Symbol_void)
+//#define MN_new       (8+KSymbol_void)
 #define FN_this      FN_("this")
 
 /* KonohaChar */
@@ -355,7 +355,7 @@ struct kTokenVar {
 	union {
 		ksymbol_t   unresolvedTokenType; // (resolvedSyntaxInfo == NULL)
 		ksymbol_t   resolvedSymbol;      // symbol (resolvedSyntaxInfo != NULL)
-		ktypeattr_t resolvedTypeId;      // typeid if Symbol_TypePattern
+		ktypeattr_t resolvedTypeId;      // typeid if KSymbol_TypePattern
 	};
 	union {
 		kushort_t   indent;               // indent when kw == TokenType_INDENT
@@ -417,7 +417,7 @@ typedef struct TokenSeq {
 
 #define TokenSeq_End(kctx, tokens)   tokens->endIdx = kArray_size(tokens->tokenList)
 
-#define Token_isVirtualTypeLiteral(TK)     ((TK)->resolvedSyntaxInfo->keyword == Symbol_TypePattern)
+#define Token_isVirtualTypeLiteral(TK)     ((TK)->resolvedSyntaxInfo->keyword == KSymbol_TypePattern)
 #define Token_typeLiteral(TK)              (TK)->resolvedTypeId
 
 typedef enum {
@@ -707,7 +707,7 @@ typedef enum {
 #define KType_Gamma                             SUGAR cGamma->typeId
 #define KType_TokenArray                        SUGAR cTokenArray->typeId
 
-//#define Symbol_(T)                               _e->keyword(kctx, T, sizeof(T)-1, Symbol_Noname)
+//#define KSymbol_(T)                               _e->keyword(kctx, T, sizeof(T)-1, KSymbol_Noname)
 #define SYN_(KS, KW)                         SUGAR kNameSpace_GetSyntax(kctx, KS, KW, 0)
 #define NEWSYN_(KS, KW)                      (SugarSyntaxVar *)(SUGAR kNameSpace_GetSyntax(kctx, KS, KW, 1))
 
@@ -803,7 +803,7 @@ struct KBuilderAPI2 {
 static inline void kToken_setTypeId(KonohaContext *kctx, kToken *tk, kNameSpace *ns, ktypeattr_t type)
 {
 	((kTokenVar *)tk)->resolvedTypeId = type;
-	((kTokenVar *)tk)->resolvedSyntaxInfo = kmodsugar->kNameSpace_GetSyntax(kctx, ns, Symbol_TypePattern, 0);
+	((kTokenVar *)tk)->resolvedSyntaxInfo = kmodsugar->kNameSpace_GetSyntax(kctx, ns, KSymbol_TypePattern, 0);
 }
 
 #define Stmt_ns(STMT)   kStmt_ns(STMT)
@@ -817,7 +817,7 @@ static inline kNameSpace *kStmt_ns(kStmt *stmt)
 static inline void Stmt_setsyn(KonohaContext *kctx, kStmt *stmt, SugarSyntax *syn)
 {
 	//if(syn == NULL && stmt->syn != NULL) {
-	//	DBG_P("DONE: STMT='%s'", Symbol_fmt2(syn->keyword));
+	//	DBG_P("DONE: STMT='%s'", KSymbol_Fmt2(syn->keyword));
 	//}
 	((kStmtVar *)stmt)->syn = syn;
 	(void)kctx;
@@ -837,7 +837,7 @@ static inline void Stmt_typed(kStmt *stmt, int build)
 
 static inline kbool_t kExpr_isSymbolTerm(kExpr *expr)
 {
-	return (Expr_isTerm(expr) && (expr->termToken->resolvedSyntaxInfo->keyword == Symbol_SymbolPattern));
+	return (Expr_isTerm(expr) && (expr->termToken->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern));
 }
 
 static inline void kExpr_Setsyn(kExpr *expr, SugarSyntax *syn)

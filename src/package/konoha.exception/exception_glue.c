@@ -73,7 +73,7 @@
 //	KLIB KBuffer_Init(&kctx->stack->cwb, &wb);
 //	kfileline_t uline = sfp[K_RTNIDX].calledFileLine;
 //	if(uline > 0) {
-//		const char *file = FileId_t(uline);
+//		const char *file = KFileLine_textFileName (uline);
 //		KLIB KBuffer_printf(kctx, &wb, "(%s:%d) %s.%s%s" , PLATAPI shortFilePath(file), (kushort_t)uline, Method_t(mtd));
 //	}
 ////	int i = 0, psize = kMethod_ParamSize(mtd);
@@ -264,7 +264,7 @@
 //	DBG_P("try statement .. \n");
 //	int ret = false;
 //	kBlock *tryBlock, *catchBlock, *finallyBlock;
-//	tryBlock     = SUGAR kStmt_GetBlock(kctx, stmt, NULL, Symbol_BlockPattern, K_NULLBLOCK);
+//	tryBlock     = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_BlockPattern, K_NULLBLOCK);
 //	ret = SUGAR kBlock_TypeCheckAll(kctx, tryBlock,   gma);
 //	if(ret == false) {
 //		KReturnUnboxValue(ret);
@@ -293,15 +293,15 @@
 //	int ret = false;
 //
 //	// check "catch(...)"
-//	//ret = SUGAR kStmt_TypeCheckByName(kctx, stmt, Symbol_ExprPattern, gma, KClass_Exception, 0);
+//	//ret = SUGAR kStmt_TypeCheckByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_Exception, 0);
 //
-//	kBlock *catchBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, Symbol_BlockPattern, K_NULLBLOCK);
+//	kBlock *catchBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_BlockPattern, K_NULLBLOCK);
 //	kStmt *parentStmt = Stmt_LookupTryOrCatchStmtNULL(kctx, stmt);
 //
 //	if(catchBlock != K_NULLBLOCK && parentStmt != NULL) {
 //		ret = SUGAR kBlock_TypeCheckAll(kctx, catchBlock, gma);
-//		kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, K_NULLEXPR);
-//		KLIB kObjectProto_SetObject(kctx, parentStmt, Symbol_ExprPattern, KType_Exception, expr);
+//		kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, K_NULLEXPR);
+//		KLIB kObjectProto_SetObject(kctx, parentStmt, KSymbol_ExprPattern, KType_Exception, expr);
 //		KLIB kObjectProto_SetObject(kctx, parentStmt, SYM_("catch"), KType_Block, stmt);
 //		kStmt_done(kctx, stmt);
 //	} else {
@@ -316,7 +316,7 @@
 //	VAR_Statement(stmt, gma);
 //	DBG_P("finally statement .. \n");
 //	int ret = false;
-//	kBlock *finallyBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, Symbol_BlockPattern, K_NULLBLOCK);
+//	kBlock *finallyBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_BlockPattern, K_NULLBLOCK);
 //
 //	if(finallyBlock != K_NULLBLOCK) {
 //		kStmt *tryStmt = Stmt_LookupTryOrCatchStmtNULL(kctx, stmt);
@@ -336,7 +336,7 @@
 //		{ .keyword = SYM_("try"), Statement_(try), .rule = "\"try\" $Block [ \"catch\" \"(\" $Type $Symbol \")\" catch: $Block ] [ \"finally\" finally: $Block ]",},
 //		{ .keyword = SYM_("catch"), Statement_(catch), .rule = "\"catch\" \"(\" $Type $Symbol \")\" $Block",},
 //		{ .keyword = SYM_("finally"), Statement_(finally), .rule = "\"finally\" $Block ",},
-//		{ .keyword = Symbol_END, },
+//		{ .keyword = KSymbol_END, },
 //	};
 //	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 //	return true;

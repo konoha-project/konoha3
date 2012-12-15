@@ -33,20 +33,20 @@ static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 		if(n < 0) n = (short)tk->uline;
 		if(tk->resolvedSyntaxInfo == NULL) {
 			if(kToken_isIndent(tk)) {
-				DUMP_P("Token[%d] '%s' TokenType=%s%s indent=%d\n", n, KToken_t(tk), Symbol_fmt2(tk->unresolvedTokenType), tk->indent);
+				DUMP_P("Token[%d] '%s' TokenType=%s%s indent=%d\n", n, KToken_t(tk), KSymbol_Fmt2(tk->unresolvedTokenType), tk->indent);
 			}
 			else {
-				DUMP_P("Token[%d] '%s' TokenType=``%s%s''\n", n, KToken_t(tk), Symbol_fmt2(tk->unresolvedTokenType));
+				DUMP_P("Token[%d] '%s' TokenType=``%s%s''\n", n, KToken_t(tk), KSymbol_Fmt2(tk->unresolvedTokenType));
 			}
 		}
 //		else if(Token_isRule(tk)) {
-//			DUMP_P("RuleToken(%d) '%s' resolvedSymbol=%s%s classNameSymbol=%s%s\n", n, KToken_t(tk), Symbol_fmt2(tk->resolvedSymbol), Symbol_fmt2(tk->indent));
+//			DUMP_P("RuleToken(%d) '%s' resolvedSymbol=%s%s classNameSymbol=%s%s\n", n, KToken_t(tk), KSymbol_Fmt2(tk->resolvedSymbol), KSymbol_Fmt2(tk->indent));
 //		}
-		else if(tk->resolvedSyntaxInfo->keyword == Symbol_TypePattern) {
-			DUMP_P("Token(%d) '%s' type=%s\n", n, KToken_t(tk), KType_t(tk->resolvedTypeId));
+		else if(tk->resolvedSyntaxInfo->keyword == KSymbol_TypePattern) {
+			DUMP_P("Token(%d) '%s' type=%s\n", n, KToken_t(tk), KType_text(tk->resolvedTypeId));
 		}
 		else {
-			DUMP_P("Token(%d) '%s' syntax=%s%s, symbol=``%s%s''\n", n, KToken_t(tk), Symbol_fmt2(tk->resolvedSyntaxInfo->keyword), Symbol_fmt2(tk->resolvedSymbol));
+			DUMP_P("Token(%d) '%s' syntax=%s%s, symbol=``%s%s''\n", n, KToken_t(tk), KSymbol_Fmt2(tk->resolvedSyntaxInfo->keyword), KSymbol_Fmt2(tk->resolvedSymbol));
 		}
 	}
 }
@@ -62,9 +62,9 @@ static void dumpIndent(KonohaContext *kctx, int nest)
 static int dumpBeginTokenList(int closure)
 {
 	switch(closure) {
-	case Symbol_ParenthesisGroup: return '(';
-	case Symbol_BraceGroup: return '{';
-	case Symbol_BracketGroup: return '[';
+	case KSymbol_ParenthesisGroup: return '(';
+	case KSymbol_BraceGroup: return '{';
+	case KSymbol_BracketGroup: return '[';
 	}
 	return '<';
 }
@@ -72,9 +72,9 @@ static int dumpBeginTokenList(int closure)
 static int dumpEndTokenList(int closure)
 {
 	switch(closure) {
-	case Symbol_ParenthesisGroup: return ')';
-	case Symbol_BraceGroup: return '}';
-	case Symbol_BracketGroup: return ']';
+	case KSymbol_ParenthesisGroup: return ')';
+	case KSymbol_BraceGroup: return '}';
+	case KSymbol_BracketGroup: return ']';
 	}
 	return '>';
 }
@@ -119,7 +119,7 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 				DBG_ASSERT(IS_Array(expr->cons));
 			}
 			else {
-				DUMP_P("[%d] Expr: kw='%s%s', syn=%p, size=%ld", n, Symbol_fmt2(expr->syn->keyword), expr->syn, kArray_size(expr->cons));
+				DUMP_P("[%d] Expr: kw='%s%s', syn=%p, size=%ld", n, KSymbol_Fmt2(expr->syn->keyword), expr->syn, kArray_size(expr->cons));
 				DUMP_P("\n");
 				size_t i;
 				for(i=0; i < kArray_size(expr->cons); i++) {
@@ -131,14 +131,14 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 						dumpIndent(kctx, nest+1);
 						if(kObject_class(o) == KClass_Token) {
 							kToken *tk = (kToken *)o;
-							DUMP_P("[%d] O: %s ", i, KClass_t(o->h.ct));
+							DUMP_P("[%d] O: %s ", i, KClass_text(o->h.ct));
 							dumpToken(kctx, tk, -1);
 						}
 						else if(o == K_NULL) {
 							DUMP_P("[%d] O: null\n", i);
 						}
 						else {
-							DUMP_P("[%d] O: %s\n", i, KClass_t(o->h.ct));
+							DUMP_P("[%d] O: %s\n", i, KClass_text(o->h.ct));
 						}
 					}
 				}

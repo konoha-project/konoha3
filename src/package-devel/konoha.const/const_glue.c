@@ -34,11 +34,11 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
 	kNameSpace *ns = Stmt_ns(stmt);
-	kToken *symbolToken = SUGAR kStmt_GetToken(kctx, stmt, Symbol_SymbolPattern, NULL);
+	kToken *symbolToken = SUGAR kStmt_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 	ksymbol_t unboxKey = symbolToken->resolvedSymbol;
-	kbool_t result = SUGAR kStmt_TypeCheckByName(kctx, stmt, Symbol_ExprPattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
+	kbool_t result = SUGAR kStmt_TypeCheckByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
 	if(result) {
-		kExpr *constExpr = SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
+		kExpr *constExpr = SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, NULL);
 		KonohaClass *constClass = KClass_(constExpr->attrTypeId);
 		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
@@ -61,7 +61,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 			result = KLIB kNameSpace_SetConstData(kctx, ns, unboxKey, type, unboxValue, false/*isOverride*/, trace);
 		}
 		else {
-			kStmt_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", Symbol_fmt2(unboxKey));
+			kStmt_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", KSymbol_Fmt2(unboxKey));
 		}
 	}
 	kStmt_done(kctx, stmt);
@@ -72,7 +72,7 @@ static kbool_t const_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("const"), 0, "\"const\" $Symbol \"=\" $Expr", 0, 0, NULL, NULL, Statement_ConstDecl, NULL, NULL, },
-		{ Symbol_END, },
+		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;

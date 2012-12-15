@@ -110,7 +110,7 @@ static KMETHOD TypeCheck_as(KonohaContext *kctx, KonohaStack *sfp)
 			DBG_ASSERT(mtd != NULL);
 			KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, targetClass));
 		}
-		KReturn(kStmtExpr_Message(kctx, stmt, selfExpr, ErrTag, "unable to downcast: %s as %s", KType_t(selfExpr->attrTypeId), KType_t(targetExpr->attrTypeId)));
+		KReturn(kStmtExpr_Message(kctx, stmt, selfExpr, ErrTag, "unable to downcast: %s as %s", KType_text(selfExpr->attrTypeId), KType_text(targetExpr->attrTypeId)));
 	}
 }
 
@@ -122,7 +122,7 @@ static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 	if(selfExpr != K_NULLEXPR && targetExpr != K_NULLEXPR) {
 		KonohaClass *selfClass = KClass_(selfExpr->attrTypeId), *targetClass = KClass_(targetExpr->attrTypeId);
 		if(selfExpr->attrTypeId == targetExpr->attrTypeId || selfClass->isSubType(kctx, selfClass, targetClass)) {
-			kStmtExpr_Message(kctx, stmt, selfExpr, InfoTag, "no need: %s to %s", KType_t(selfExpr->attrTypeId), KType_t(targetExpr->attrTypeId));
+			kStmtExpr_Message(kctx, stmt, selfExpr, InfoTag, "no need: %s to %s", KType_text(selfExpr->attrTypeId), KType_text(targetExpr->attrTypeId));
 			KReturn(selfExpr);
 		}
 		kNameSpace *ns = Stmt_ns(stmt);
@@ -131,7 +131,7 @@ static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 			mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, selfClass, MN_("to"), 0, MethodMatch_CamelStyle);
 			DBG_ASSERT(mtd != NULL);  // because Object.to is found.
 			if(mtd->typeId != selfClass->typeId) {
-				KReturn(kStmtExpr_Message(kctx, stmt, selfExpr, ErrTag, "undefined coercion: %s to %s", KClass_t(selfClass), KClass_t(targetClass)));
+				KReturn(kStmtExpr_Message(kctx, stmt, selfExpr, ErrTag, "undefined coercion: %s to %s", KClass_text(selfClass), KClass_text(targetClass)));
 			}
 		}
 		KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, targetClass));
@@ -145,7 +145,7 @@ static kbool_t subtype_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceI
 		{ SYM_("<:"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_InstanceOf, },
 		{ SYM_("as"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_as},
 		{ SYM_("to"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_to},
-		{ Symbol_END, },
+		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;

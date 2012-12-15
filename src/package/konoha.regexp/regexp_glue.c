@@ -704,7 +704,7 @@ static kbool_t regexp_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("$RegExp"),  TypeCheck_(RegExp), },
-		{ .keyword = Symbol_END, },
+		{ .keyword = KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	SUGAR kNameSpace_SetTokenFunc(kctx, ns, SYM_("$RegExp"), KonohaChar_Slash, new_SugarFunc(ns, TokenFunc_JavaScriptRegExp));

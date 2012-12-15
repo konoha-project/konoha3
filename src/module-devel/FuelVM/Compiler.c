@@ -47,17 +47,17 @@ static enum TypeId ConvertToTypeId(KonohaContext *kctx, ktypeattr_t type)
 
 static kBlock *Stmt_getFirstBlock(KonohaContext *kctx, kStmt *stmt)
 {
-	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, Symbol_BlockPattern, K_NULLBLOCK);
+	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_BlockPattern, K_NULLBLOCK);
 }
 
 static kBlock *Stmt_getElseBlock(KonohaContext *kctx, kStmt *stmt)
 {
-	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, Symbol_else, K_NULLBLOCK);
+	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_else, K_NULLBLOCK);
 }
 
 static kExpr *Stmt_getFirstExpr(KonohaContext *kctx, kStmt *stmt)
 {
-	return SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
+	return SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, NULL);
 }
 
 static kStmt *kStmt_GetStmt(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw)
@@ -77,7 +77,7 @@ static int CallExpr_getArgCount(kExpr *expr)
 
 static kString *Stmt_getErrorMessage(KonohaContext *kctx, kStmt *stmt)
 {
-	kString* msg = (kString *)kStmt_GetObjectNULL(kctx, stmt, Symbol_ERR);
+	kString* msg = (kString *)kStmt_GetObjectNULL(kctx, stmt, KSymbol_ERR);
 	DBG_ASSERT(IS_String(msg));
 	return msg;
 }
@@ -266,7 +266,7 @@ static bool FuelVM_VisitBlockStmt(KonohaContext *kctx, KBuilder *builder, kStmt 
 
 static bool FuelVM_VisitReturnStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
-	kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
+	kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, NULL);
 	if(expr != NULL && IS_Expr(expr) && expr->attrTypeId != KType_void) {
 		SUGAR VisitExpr(kctx, builder, stmt, expr);
 		INode *Ret  = FuelVM_getExpression(builder);
@@ -365,7 +365,7 @@ static bool FuelVM_VisitTryStmt(KonohaContext *kctx, KBuilder *builder, kStmt *s
 
 static bool FuelVM_VisitUndefinedStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
-	DBG_P("undefined asm syntax kw='%s'", Symbol_text(stmt->syn->keyword));
+	DBG_P("undefined asm syntax kw='%s'", KSymbol_text(stmt->syn->keyword));
 	return true;
 }
 
@@ -656,7 +656,7 @@ typedef void (*GenCodeFunc)(KonohaContext*, kMethod*, kBlock *, int options);
 
 void RecompileMethod(KonohaContext *kctx, kMethod *mtd)
 {
-	DBG_P("[Recompile]: %s.%s%s", KType_t(mtd->typeId), MethodName_Fmt2(mtd->mn));
+	DBG_P("[Recompile]: %s.%s%s", KType_text(mtd->typeId), MethodName_Fmt2(mtd->mn));
 	KonohaLibVar *l = (KonohaLibVar *) kctx->klib;
 	GenCodeFunc OldFunc = l->kMethod_GenCode;
 #ifdef FUELVM_USE_LLVM

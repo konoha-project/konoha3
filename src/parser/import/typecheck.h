@@ -50,7 +50,7 @@ static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *g
 {
 	int callCount = 0;
 	SugarSyntax *syn = expr->syn;
-	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, Symbol_fmt2(syn->keyword));
+	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, KSymbol_Fmt2(syn->keyword));
 	while(true) {
 		int index, size;
 		kFunc **FuncItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_TypeCheck, &size);
@@ -70,8 +70,8 @@ static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *g
 			return kStmtToken_Message(kctx, stmt, expr->termToken, ErrTag, "undefined term: %s", KToken_t(expr->termToken));
 		}
 		else {
-			DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", expr->syn, expr->syn->parentSyntaxNULL, Symbol_fmt2(syn->keyword));
-			return kStmt_Message(kctx, stmt, ErrTag, "undefined operator: %s%s",  Symbol_fmt2(expr->syn->keyword));
+			DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", expr->syn, expr->syn->parentSyntaxNULL, KSymbol_Fmt2(syn->keyword));
+			return kStmt_Message(kctx, stmt, ErrTag, "undefined operator: %s%s",  KSymbol_Fmt2(expr->syn->keyword));
 		}
 	}
 	return K_NULLEXPR;
@@ -124,7 +124,7 @@ static kExpr *kStmtExpr_ToBox(KonohaContext *kctx, kStmt *stmt, kExpr *texpr, kG
 	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, kStmt_ns(stmt), c, MN_box, 0, MethodMatch_CamelStyle);
 	DBG_ASSERT(mtd != NULL);
 	//return new_TypedCallExpr(kctx, stmt, gma, reqClass, mtd, 1, texpr);
-	kExprVar *expr = new_UntypedCallStyleExpr(kctx, SYN_(Stmt_ns(stmt), Symbol_ExprMethodCall), 2, mtd, texpr);
+	kExprVar *expr = new_UntypedCallStyleExpr(kctx, SYN_(Stmt_ns(stmt), KSymbol_ExprMethodCall), 2, mtd, texpr);
 	return kExpr_typed(expr, CALL, c->typeId/*reqClass->typeId*/);
 }
 
@@ -149,7 +149,7 @@ static kExpr *kExpr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGa
 			return texpr;
 		}
 		if(KClass_Is(TypeVar, typedClass)) {
-			return kStmtExpr_Message(kctx, stmt, expr, ErrTag, "not type variable %s", KClass_t(typedClass));
+			return kStmtExpr_Message(kctx, stmt, expr, ErrTag, "not type variable %s", KClass_text(typedClass));
 		}
 		if(reqClass->typeId == KType_var || typedClass == reqClass || FLAG_is(pol, TypeCheckPolicy_NOCHECK)) {
 			return texpr;
@@ -166,12 +166,12 @@ static kExpr *kExpr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGa
 				return new_TypedCallExpr(kctx, stmt, gma, reqClass, mtd, 1, texpr);
 			}
 			if(kNameSpace_IsAllowed(ImplicitCoercion, ns)) {
-				kStmtExpr_Message(kctx, stmt, expr, InfoTag, "implicit type coercion: %s to %s", KClass_t(typedClass), KClass_t(reqClass));
+				kStmtExpr_Message(kctx, stmt, expr, InfoTag, "implicit type coercion: %s to %s", KClass_text(typedClass), KClass_text(reqClass));
 				return new_TypedCallExpr(kctx, stmt, gma, reqClass, mtd, 1, texpr);
 			}
 		}
-		DBG_P("%s(%d) is requested, but %s(%d) is given", KClass_t(reqClass), reqClass->typeId, KClass_t(typedClass), typedClass->typeId);
-		return kStmtExpr_Message(kctx, stmt, expr, ErrTag, "%s is requested, but %s is given", KClass_t(reqClass), KClass_t(typedClass));
+		DBG_P("%s(%d) is requested, but %s(%d) is given", KClass_text(reqClass), reqClass->typeId, KClass_text(typedClass), typedClass->typeId);
+		return kStmtExpr_Message(kctx, stmt, expr, ErrTag, "%s is requested, but %s is given", KClass_text(reqClass), KClass_text(typedClass));
 	}
 	return texpr;
 }
@@ -366,11 +366,11 @@ static void kGamma_InitIt(KonohaContext *kctx, GammaAllocaData *genv, kParam *pa
 
 static ktypeattr_t kStmt_CheckReturnType(KonohaContext *kctx, kStmt *stmt)
 {
-	if(stmt->syn != NULL && stmt->syn->keyword == Symbol_ExprPattern) {
-		kExpr *expr = (kExpr *)kStmt_GetObjectNULL(kctx, stmt, Symbol_ExprPattern);
+	if(stmt->syn != NULL && stmt->syn->keyword == KSymbol_ExprPattern) {
+		kExpr *expr = (kExpr *)kStmt_GetObjectNULL(kctx, stmt, KSymbol_ExprPattern);
 		DBG_ASSERT(expr != NULL);
 		if(expr->attrTypeId != KType_void) {
-			kStmt_setsyn(stmt, SYN_(Stmt_ns(stmt), Symbol_return));
+			kStmt_setsyn(stmt, SYN_(Stmt_ns(stmt), KSymbol_return));
 			kStmt_typed(stmt, RETURN);
 			return expr->attrTypeId;
 		}
@@ -423,7 +423,7 @@ static kstatus_t kBlock_EvalAtTopLevel(KonohaContext *kctx, kBlock *bk, kMethod 
 		kctx->stack->evalty = KType_void;
 		return K_CONTINUE;
 	}
-	if(stmt->syn != NULL && stmt->syn->keyword == Symbol_ERR) {
+	if(stmt->syn != NULL && stmt->syn->keyword == KSymbol_ERR) {
 		return K_BREAK;
 	}
 	kbool_t isTryEval = true;
@@ -433,7 +433,7 @@ static kstatus_t kBlock_EvalAtTopLevel(KonohaContext *kctx, kBlock *bk, kMethod 
 		for(i = 0; i < kArray_size(bk->StmtList); i++) {
 			kStmt *stmt = bk->StmtList->StmtItems[0];
 			if(stmt->build == TSTMT_EXPR) {
-				kExpr *expr = kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
+				kExpr *expr = kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, NULL);
 				DBG_ASSERT(expr != NULL);
 				if(expr->build == TEXPR_CALL) {  // Check NameSpace method
 					kMethod *callMethod = expr->cons->MethodItems[0];

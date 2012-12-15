@@ -61,12 +61,12 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 	kNameSpace *ns = Stmt_ns(stmt);
 	kMethod *mtd = KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, kObject_class(o), symbol, KType_var);
 	if(mtd != NULL) {
-		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "already defined name: %s", Symbol_text(symbol));
+		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "already defined name: %s", KSymbol_text(symbol));
 		return NULL;
 	}
 	mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, kObject_class(o), symbol);
 	if(mtd != NULL && kMethod_GetReturnType(mtd)->typeId != ty) {
-		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "differently defined name: %s", Symbol_text(symbol));
+		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "differently defined name: %s", KSymbol_text(symbol));
 		return NULL;
 	}
 	KLIB KonohaClass_AddField(kctx, kObject_class(o), ty, symbol);
@@ -81,8 +81,8 @@ static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gm
 		kExpr *recvExpr =  new_ConstValueExpr(kctx, NULL, scr);
 		kExpr *setterExpr = SUGAR new_TypedCallExpr(kctx, stmt, gma, KType_void, mtd,  2, recvExpr, valueExpr);
 		kStmt *newstmt = new_(Stmt, stmt->uline, OnGcStack);
-		kStmt_setsyn(newstmt, SYN_(ns, Symbol_ExprPattern));
-		KLIB kObjectProto_SetObject(kctx, newstmt, Symbol_ExprPattern, KType_Expr, setterExpr);
+		kStmt_setsyn(newstmt, SYN_(ns, KSymbol_ExprPattern));
+		KLIB kObjectProto_SetObject(kctx, newstmt, KSymbol_ExprPattern, KType_Expr, setterExpr);
 		return newstmt;
 	}
 	return NULL;
@@ -111,8 +111,8 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	trace->pline = stmt->uline;
 	if(kNameSpace_InitGlobalObject(kctx, ns, trace)) {
-		kToken *tk  = SUGAR kStmt_GetToken(kctx, stmt, Symbol_TypePattern, NULL);
-		kExpr  *expr = SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
+		kToken *tk  = SUGAR kStmt_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
+		kExpr  *expr = SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, NULL);
 		kStmt *lastStmt = stmt;
 		result = SUGAR kStmt_DeclType(kctx, stmt, gma, tk->resolvedTypeId, expr, ns->globalObjectNULL_OnList, TypeDeclAndMakeSetter, &lastStmt);
 	}
@@ -122,7 +122,7 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	SUGAR kNameSpace_AddSugarFunc(kctx, ns, Symbol_TypeDeclPattern, SugarFunc_TopLevelStatement, new_SugarFunc(ns, Statement_GlobalTypeDecl));
+	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_TypeDeclPattern, SugarFunc_TopLevelStatement, new_SugarFunc(ns, Statement_GlobalTypeDecl));
 	return true;
 }
 

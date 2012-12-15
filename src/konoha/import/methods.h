@@ -65,7 +65,7 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 		kNameSpace *ns = KGetLexicalNameSpace(sfp);
 		DBG_ASSERT(IS_NameSpace(ns));
 		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, kObject_class(self), KClass_String);
-//		DBG_P("BEFORE >>>>>>>>>>> %s %lld\n", KType_t(kObject_typeId(self)), sfp[0].unboxValue);
+//		DBG_P("BEFORE >>>>>>>>>>> %s %lld\n", KType_text(kObject_typeId(self)), sfp[0].unboxValue);
 		sfp[0].unboxValue = kObject_Unbox(self);
 //		DBG_P("AFTER >>>>>>>>>>> %lld\n", sfp[0].unboxValue);
 		if(mtd != NULL && sfp[K_MTDIDX].calledMethod != mtd /* to avoid infinite loop */) {
@@ -94,7 +94,7 @@ static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
 	KonohaClass *c = KGetReturnType(sfp);
 	DBG_ASSERT(KClass_Is(UnboxType, c));
 	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
-//	DBG_P(">>>>>>>>>>> boxing %s %lld\n", KType_t(c->typeId), sfp[0].unboxValue);
+//	DBG_P(">>>>>>>>>>> boxing %s %lld\n", KType_text(c->typeId), sfp[0].unboxValue);
 	KReturn(KLIB new_kObject(kctx, OnStack, c, sfp[0].unboxValue));
 }
 
@@ -103,7 +103,7 @@ static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const method Boolean Boolean.toString();
 static KMETHOD Boolean_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *s = (sfp[0].boolValue) ? Symbol_GetString(kctx, SYM_("true")) : Symbol_GetString(kctx, SYM_("false"));
+	kString *s = (sfp[0].boolValue) ? KSymbol_GetString(kctx, SYM_("true")) : KSymbol_GetString(kctx, SYM_("false"));
 	KReturn(s);
 }
 

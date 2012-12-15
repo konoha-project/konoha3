@@ -55,7 +55,7 @@ static void prototype_defineClass(KonohaContext *kctx, kNameSpace *ns, int optio
 static KMETHOD Prototype_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaClass *targetClass = KGetReturnType(sfp);
-	DBG_P("requesting type=%s", KClass_t(targetClass));
+	DBG_P("requesting type=%s", KClass_text(targetClass));
 	ksymbol_t symbol = sfp[1].intValue;
 	KKeyValue *kvs = KLIB kObjectProto_GetKeyValue(kctx, sfp[0].asObject, symbol);
 	if(kvs != NULL) {
@@ -68,14 +68,14 @@ static KMETHOD Prototype_get(KonohaContext *kctx, KonohaStack *sfp)
 				KReturnField(kvs->ObjectValue);
 			}
 		}
-		DBG_P("requesting type=%s <: %s ? %d", KClass_t(c), KClass_t(targetClass), c->isSubType(kctx, c, targetClass));
+		DBG_P("requesting type=%s <: %s ? %d", KClass_text(c), KClass_text(targetClass), c->isSubType(kctx, c, targetClass));
 		if(c->isSubType(kctx, c, targetClass)) {
 			if(KClass_Is(UnboxType, c)) {
 				if(KClass_Is(UnboxType, targetClass)) {
 					KReturnUnboxValue(kvs->unboxValue);
 				}
 				else {
-					DBG_P("boxing type=%s <: %s ? %d", KClass_t(c), KClass_t(targetClass), c->isSubType(kctx, c, targetClass));
+					DBG_P("boxing type=%s <: %s ? %d", KClass_text(c), KClass_text(targetClass), c->isSubType(kctx, c, targetClass));
 					KReturn(KLIB new_kObject(kctx, OnStack, c, kvs->unboxValue));
 				}
 			}

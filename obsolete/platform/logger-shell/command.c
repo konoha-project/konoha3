@@ -105,7 +105,7 @@ static void TEST_reportCaughtException(KonohaContext *kctx, const char *exceptio
 {
 	stdlog_count++;
 	if(sfp != NULL) {
-		const char* scriptName = PLATAPI shortFilePath(FileId_t(sfp[K_RTNIDX].calledFileLine));
+		const char* scriptName = PLATAPI shortFilePath(KFileLine_textFileName (sfp[K_RTNIDX].calledFileLine));
 		int line = (kushort_t)sfp[K_RTNIDX].calledFileLine;
 		fprintf(stdlog, " ** %s (%s:%d)\n", exceptionName, scriptName, line);
 	}
@@ -257,7 +257,7 @@ static void CommandLine_define(KonohaContext *kctx, char *keyvalue)
 		char namebuf[len+1];
 		memcpy(namebuf, keyvalue, len); namebuf[len] = 0;
 		DBG_P("name='%s'", namebuf);
-		ksymbol_t key = KLIB Ksymbol(kctx, namebuf, len, 0, Symbol_NewId);
+		ksymbol_t key = KLIB Ksymbol(kctx, namebuf, len, 0, KSymbol_NewId);
 		uintptr_t unboxValue;
 		ktypeattr_t ty;
 		if(isdigit(p[1])) {

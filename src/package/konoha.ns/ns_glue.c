@@ -94,7 +94,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
 	kstatus_t result = K_CONTINUE;
-	kToken *tk = SUGAR kStmt_GetToken(kctx, stmt, Symbol_BlockPattern, NULL);
+	kToken *tk = SUGAR kStmt_GetToken(kctx, stmt, KSymbol_BlockPattern, NULL);
 	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		INIT_GCSTACK();
 		kNameSpace *ns = new_(NameSpace, Stmt_ns(stmt), _GcStack);
@@ -114,11 +114,11 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
 	kNameSpace *ns = Stmt_ns(stmt);
-	kToken *symbolToken = SUGAR kStmt_GetToken(kctx, stmt, Symbol_SymbolPattern, NULL);
+	kToken *symbolToken = SUGAR kStmt_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 	ksymbol_t unboxKey = symbolToken->resolvedSymbol;
-	kbool_t result = SUGAR kStmt_TypeCheckByName(kctx, stmt, Symbol_ExprPattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
+	kbool_t result = SUGAR kStmt_TypeCheckByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
 	if(result) {
-		kExpr *constExpr = SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
+		kExpr *constExpr = SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, NULL);
 		KonohaClass *constClass = KClass_(constExpr->attrTypeId);
 		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
@@ -141,7 +141,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 			result = KLIB kNameSpace_SetConstData(kctx, ns, unboxKey, type, unboxValue, false/*isOverride*/, trace);
 		}
 		else {
-			kStmt_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", Symbol_fmt2(unboxKey));
+			kStmt_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", KSymbol_Fmt2(unboxKey));
 		}
 	}
 	kStmt_done(kctx, stmt);
@@ -173,17 +173,17 @@ static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 {
 	int i;
 	for(i = beginIdx; i < endIdx; i++) {
-		if(i + 1 == endIdx || tokenList->TokenItems[i+1]->resolvedSyntaxInfo->keyword == Symbol_COMMA) {
+		if(i + 1 == endIdx || tokenList->TokenItems[i+1]->resolvedSyntaxInfo->keyword == KSymbol_COMMA) {
 			kTokenVar *tk = tokenList->TokenVarItems[i];
-			if(tk->resolvedSyntaxInfo->keyword != Symbol_SymbolPattern) {  // defined
-				tk->resolvedSyntaxInfo = SYN_(ns, Symbol_TextPattern);  // switch to text pattern
+			if(tk->resolvedSyntaxInfo->keyword != KSymbol_SymbolPattern) {  // defined
+				tk->resolvedSyntaxInfo = SYN_(ns, KSymbol_TextPattern);  // switch to text pattern
 			}
 			i++;
 		}
 		while(i < endIdx) {
 			kTokenVar *tk = tokenList->TokenVarItems[i];
 			i++;
-			if(tk->resolvedSyntaxInfo->keyword == Symbol_COMMA) break;
+			if(tk->resolvedSyntaxInfo->keyword == KSymbol_COMMA) break;
 		}
 	}
 }
@@ -209,7 +209,7 @@ static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTrac
 		{ SYM_("namespace"), 0, "\"namespace\" $Block", 0, 0, NULL, NULL, Statement_namespace, NULL, NULL, },
 		{ SYM_("const"), 0, "\"const\" $Symbol \"=\" $Expr", 0, 0, NULL, NULL, Statement_ConstDecl, NULL, NULL, },
 		{ SYM_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Expression_Defined, NULL, NULL, TypeCheck_Defined, },
-		{ Symbol_END, },
+		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;

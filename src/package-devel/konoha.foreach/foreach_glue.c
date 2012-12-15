@@ -47,7 +47,7 @@ static kToken* new_TypeToken(KonohaContext *kctx, kNameSpace *ns, ktypeattr_t ty
 static kToken* new_ParsedExprToken(KonohaContext *kctx, kNameSpace *ns, kExpr *expr)
 {
 	kTokenVar *ParsedExprToken = new_(TokenVar, 0, OnGcStack);
-	ParsedExprToken->resolvedSyntaxInfo = SYN_(ns, Symbol_ExprPattern);
+	ParsedExprToken->resolvedSyntaxInfo = SYN_(ns, KSymbol_ExprPattern);
 	KFieldSet(ParsedExprToken, ParsedExprToken->parsedExpr, expr);
 	return (kToken *)ParsedExprToken;
 }
@@ -102,7 +102,7 @@ static kBlock *new_MacroBlock(KonohaContext *kctx, kStmt *stmt, kToken *Iterator
 static void kStmt_appendBlock(KonohaContext *kctx, kStmt *stmt, kBlock *bk)
 {
 	if(bk != NULL) {
-		kBlock *block = SUGAR kStmt_GetBlock(kctx, stmt, Stmt_ns(stmt), Symbol_BlockPattern, NULL);
+		kBlock *block = SUGAR kStmt_GetBlock(kctx, stmt, Stmt_ns(stmt), KSymbol_BlockPattern, NULL);
 		size_t i;
 		for(i = 0; i < kArray_size(bk->StmtList); i++) {
 			KLIB kArray_Add(kctx, block->StmtList, bk->StmtList->StmtItems[i]);
@@ -115,12 +115,12 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Statement(stmt, gma);
 	DBG_P("for statement .. ");
 	int isOkay = false;
-	if(SUGAR kStmt_TypeCheckByName(kctx, stmt, Symbol_ExprPattern, gma, KClass_INFER, 0)) {
+	if(SUGAR kStmt_TypeCheckByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_INFER, 0)) {
 		kNameSpace *ns = Stmt_ns(stmt);
-		kToken *TypeToken = SUGAR kStmt_GetToken(kctx, stmt, Symbol_TypePattern, NULL);
-		kToken *VariableToken  = SUGAR kStmt_GetToken(kctx, stmt, Symbol_SymbolPattern, NULL);
+		kToken *TypeToken = SUGAR kStmt_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
+		kToken *VariableToken  = SUGAR kStmt_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 		DBG_P("typeToken=%p, varToken=%p", TypeToken, VariableToken);
-		kExpr *IteratorExpr = SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
+		kExpr *IteratorExpr = SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, NULL);
 		if(!KType_IsIterator(IteratorExpr->attrTypeId)) {
 			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_(IteratorExpr->attrTypeId), MethodName_To(KType_Iterator), 0, MethodMatch_NoOption);
 			if(mtd == NULL) {
@@ -128,17 +128,17 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 				KReturnUnboxValue(false);
 			}
 			IteratorExpr = SUGAR new_TypedCallExpr(kctx, stmt, gma, KClass_INFER, mtd, 1, IteratorExpr);
-			kStmt_setObject(kctx, stmt, Symbol_ExprPattern, IteratorExpr);
+			kStmt_setObject(kctx, stmt, KSymbol_ExprPattern, IteratorExpr);
 		}
 		kBlock *block = new_MacroBlock(kctx, stmt, new_TypeToken(kctx, ns, KClass_(IteratorExpr->attrTypeId)), new_ParsedExprToken(kctx, ns, IteratorExpr), TypeToken, VariableToken);
 		kStmt *IfStmt = block->StmtList->StmtItems[1]; // @see macro;
-		kStmt_appendBlock(kctx, IfStmt, SUGAR kStmt_GetBlock(kctx, stmt, ns, Symbol_BlockPattern, NULL));
+		kStmt_appendBlock(kctx, IfStmt, SUGAR kStmt_GetBlock(kctx, stmt, ns, KSymbol_BlockPattern, NULL));
 		kStmt_Set(CatchBreak, IfStmt, true);
 		kStmt_Set(CatchContinue, IfStmt, true);
 		isOkay = SUGAR kBlock_TypeCheckAll(kctx, block, gma);
 		if(isOkay) {
 			kStmt_typed(IfStmt, LOOP);
-			kStmt_setObject(kctx, stmt, Symbol_BlockPattern, block);
+			kStmt_setObject(kctx, stmt, KSymbol_BlockPattern, block);
 			kStmt_typed(stmt, BLOCK);
 		}
 	}
@@ -149,7 +149,7 @@ static kbool_t foreach_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceI
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("for"), 0, "\"for\" \"(\" [$Type] $Symbol \"in\" $Expr  \")\" [$Block] ", 0, 0, NULL, NULL, NULL, Statement_for, NULL, },
-		{ Symbol_END, },
+		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;

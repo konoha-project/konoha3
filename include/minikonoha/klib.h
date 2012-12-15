@@ -22,9 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef MINIOKNOHA_INLINELIBS_H_
-#define MINIOKNOHA_INLINELIBS_H_
-
+#ifndef KLIB_H_
+#define KLIB_H_
 
 #ifndef MINIOKNOHA_H_
 #error Do not include klib.h without minikonoha.h.
@@ -58,43 +57,38 @@ static kinline uintptr_t strhash(const char *name, size_t len)
 	return hcode;
 }
 
-#define FileId_s(X)  FileId_s_(kctx, X)
-#define FileId_t(X)  kString_text(FileId_s_(kctx, X))
-static kinline kString* FileId_s_(KonohaContext *kctx, kfileline_t fileid)
+#define KFileLine_textFileName(X)  kString_text(KFileLine_GetFileName(kctx, X))
+static kinline kString* KFileLine_GetFileName(KonohaContext *kctx, kfileline_t fileid)
 {
 	kfileline_t n = (fileid >> (sizeof(kshort_t) * 8));
 	DBG_ASSERT(n < kArray_size(kctx->share->fileIdList_OnGlobalConstList));
 	return kctx->share->fileIdList_OnGlobalConstList->stringItems[n];
 }
 
-#define PackageId_s(X)    PackageId_s_(kctx, X)
-#define PackageId_t(X)    kString_text(PackageId_s_(kctx, X))
-static kinline kString* PackageId_s_(KonohaContext *kctx, kpackageId_t packageId)
+#define KPackage_text(X)    kString_text(KPackage_GetName(kctx, X))
+static kinline kString* KPackage_GetName(KonohaContext *kctx, kpackageId_t packageId)
 {
 	DBG_ASSERT(packageId < kArray_size(kctx->share->packageIdList_OnGlobalConstList));
 	return kctx->share->packageIdList_OnGlobalConstList->stringItems[packageId];
 }
 
-#define KClass_s(X)   KClass_s_(kctx, X)
-#define KClass_t(X)   kString_text(KClass_s_(kctx, X))
-static kinline kString* KClass_s_(KonohaContext *kctx, KonohaClass *ct)
+#define KClass_text(X)   kString_text(KClass_GetName(kctx, X))
+static kinline kString* KClass_GetName(KonohaContext *kctx, KonohaClass *ct)
 {
 	return kctx->klib->KonohaClass_shortName(kctx, ct);
 }
 
-#define KType_s(X)   KType_s_(kctx, X)
-#define KType_t(X)   kString_text(KType_s(TypeAttr_Unmask(X)))
-#define AKType_t(X)  KType_t(TypeAttr_Unmask(X))
-static kinline kString* KType_s_(KonohaContext *kctx, ktypeattr_t ty)
+#define KType_text(X)   kString_text(KType_GetString(kctx,TypeAttr_Unmask(X)))
+static kinline kString* KType_GetString(KonohaContext *kctx, ktypeattr_t ty)
 {
 	DBG_ASSERT(ty < KARRAYSIZE(kctx->share->classTable.bytemax, intptr));
-	return KClass_s_(kctx, KClass_(ty));
+	return KClass_GetName(kctx, KClass_(ty));
 }
 
-#define Symbol_text(sym)   kString_text(Symbol_GetString(kctx, sym))
-static kinline kString* Symbol_GetString(KonohaContext *kctx, ksymbol_t sym)
+#define KSymbol_text(sym)   kString_text(KSymbol_GetString(kctx, sym))
+static kinline kString* KSymbol_GetString(KonohaContext *kctx, ksymbol_t sym)
 {
-	size_t index = (size_t) Symbol_Unmask(sym);
+	size_t index = (size_t) KSymbol_Unmask(sym);
 //	if(!(index < kArray_size(kctx->share->symbolList_OnGlobalConstList))) {
 //		DBG_P("index=%d, size=%d", index, kArray_size(kctx->share->symbolList_OnGlobalConstList));
 //	}
@@ -102,10 +96,10 @@ static kinline kString* Symbol_GetString(KonohaContext *kctx, ksymbol_t sym)
 	return kctx->share->symbolList_OnGlobalConstList->stringItems[index];
 }
 
-#define Symbol_fmt2(sym)   Symbol_prefixText(sym), kString_text(Symbol_GetString(kctx, sym))
-static kinline const char* Symbol_prefixText(ksymbol_t sym)
+#define KSymbol_Fmt2(sym)   KSymbol_prefixText(sym), kString_text(KSymbol_GetString(kctx, sym))
+static kinline const char* KSymbol_prefixText(ksymbol_t sym)
 {
-	size_t mask = ((size_t)(Symbol_Attr(sym)) >> ((sizeof(ksymbol_t) * 8)-3));
+	size_t mask = ((size_t)(KSymbol_Attr(sym)) >> ((sizeof(ksymbol_t) * 8)-3));
 	DBG_ASSERT(mask < 8);
 	static const char* prefixes[] = {
 		/*000*/ "",   /*001*/ "set", /*010*/ "get", /*011*/ "@",
@@ -117,9 +111,9 @@ static kinline const char* Symbol_prefixText(ksymbol_t sym)
 #define SYM_equals(S1, S2)     sym_equals(kctx, S1, S2)
 static kinline kbool_t sym_equals(KonohaContext *kctx, ksymbol_t s1, ksymbol_t s2)
 {
-	if(Symbol_Attr(s1) == Symbol_Attr(s2)) {
-		const char *t1 = kString_text(kctx->share->symbolList_OnGlobalConstList->stringItems[Symbol_Unmask(s1)]);
-		const char *t2 = kString_text(kctx->share->symbolList_OnGlobalConstList->stringItems[Symbol_Unmask(s2)]);
+	if(KSymbol_Attr(s1) == KSymbol_Attr(s2)) {
+		const char *t1 = kString_text(kctx->share->symbolList_OnGlobalConstList->stringItems[KSymbol_Unmask(s1)]);
+		const char *t2 = kString_text(kctx->share->symbolList_OnGlobalConstList->stringItems[KSymbol_Unmask(s2)]);
 		while(1) {
 			if(t1[0] != t2[0]) {
 				if(t1[0] == '_') { t1++; continue; }
@@ -217,4 +211,4 @@ static const char _utf8len[] = {
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-#endif /* MINIOKNOHA_INLINELIBS_H_ */
+#endif /* KLIB_H_ */

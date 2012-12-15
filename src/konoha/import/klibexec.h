@@ -501,7 +501,7 @@ static ksymbol_t KHashMap_getcode(KonohaContext *kctx, KHashMap *kmp, kArray *li
 		}
 		e = e->next;
 	}
-	if(def == Symbol_NewId) {
+	if(def == KSymbol_NewId) {
 		uintptr_t sym = kArray_size(list);
 		kString *stringKey = KLIB new_kString(kctx, list, name, len, spol);
 		KHashMap_AddStringUnboxValue(kctx, kmp, hcode, stringKey, sym);
@@ -532,7 +532,7 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 {
 	ksymbol_t mask = 0;
 	int ch0 = name[0], ch1 = name[1];
-	if(def != Symbol_NewRaw) {
+	if(def != KSymbol_NewRaw) {
 		if(ch1 == 'e' && name[2] == 't') {
 			if(ch0 == 'g' || ch0 == 'G') {
 				len -= 3; name += 3;
@@ -553,7 +553,7 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 		}
 	}
 	else {
-		def = Symbol_NewId;
+		def = KSymbol_NewId;
 	}
 	uintptr_t hcode = strhash(name, len);
 	KLock(kctx->share->symbolMutex);
@@ -755,7 +755,7 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 	if(w->count > 0) {
 		KLIB KBuffer_Write(kctx, w->wb, ", ", 2);
 	}
-	KLIB KBuffer_printf(kctx, w->wb, "%s%s: (%s)", Symbol_fmt2(key), AKType_t(d->attrTypeId));
+	KLIB KBuffer_printf(kctx, w->wb, "%s%s: (%s)", KSymbol_Fmt2(key), KType_text(d->attrTypeId));
 	if(TypeAttr_Is(Boxed, d->attrTypeId)) {
 		KUnsafeFieldSet(w->values[w->pos].asObject, d->ObjectValue);
 	}
@@ -782,10 +782,10 @@ static void DumpObject(KonohaContext *kctx, kObject *o, const char *file, const 
 	kObject_class(o)->p(kctx, lsfp, 0, &wb);
 	const char *msg = KLIB KBuffer_text(kctx, &wb, EnsureZero);
 	if(file == NULL) {
-		PLATAPI printf_i("(%s)%s\n", KClass_t(kObject_class(o)), msg);
+		PLATAPI printf_i("(%s)%s\n", KClass_text(kObject_class(o)), msg);
 	}
 	else {
-		PLATAPI ReportDebugMessage(file, func, line, "(%s)%s", KClass_t(kObject_class(o)), msg);
+		PLATAPI ReportDebugMessage(file, func, line, "(%s)%s", KClass_text(kObject_class(o)), msg);
 	}
 	KLIB KBuffer_Free(&wb);
 }
@@ -811,7 +811,7 @@ static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp
 		KStackCall(sfp);
 	}
 	else {
-		PLATAPI ReportCaughtException(kctx, Symbol_text(jumpResult), runtime->faultInfo, kString_text(runtime->OptionalErrorInfo), runtime->bottomStack, runtime->topStack);
+		PLATAPI ReportCaughtException(kctx, KSymbol_text(jumpResult), runtime->faultInfo, kString_text(runtime->OptionalErrorInfo), runtime->bottomStack, runtime->topStack);
 		result = false;
 	}
 	RESET_GCSTACK();
@@ -838,7 +838,7 @@ static void PushParam(KonohaContext *kctx, KonohaStack *sfp, const char *fmt, va
 
 static uintptr_t ApplySystemFunc(KonohaContext *kctx, uintptr_t defval, const char *name, const char *param, ...)
 {
-	ksymbol_t mn = KLIB Ksymbol(kctx, name, strlen(name), StringPolicy_TEXT, Symbol_NewId);
+	ksymbol_t mn = KLIB Ksymbol(kctx, name, strlen(name), StringPolicy_TEXT, KSymbol_NewId);
 	int i, psize = param == NULL ? 0 : strlen(param) / 2;
 	kNameSpace *ns = KNULL(NameSpace);
 	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, kObject_class(ns), mn, psize, MethodMatch_NoOption);
@@ -900,7 +900,7 @@ static int DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 		fault ^= ExternalFault;
 	}
 	if(KFlag_Is(int, fault, SoftwareFault)) {
-		if(PLATAPI DiagnosisCheckSoftwareTestIsPass(kctx, FileId_t(trace->pline), (kushort_t)trace->pline)) {
+		if(PLATAPI DiagnosisCheckSoftwareTestIsPass(kctx, KFileLine_textFileName (trace->pline), (kushort_t)trace->pline)) {
 			KFlag_Set(int, fault, SoftwareFault, false);
 		}
 	}

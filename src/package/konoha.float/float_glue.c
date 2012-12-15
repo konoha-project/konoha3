@@ -316,7 +316,7 @@ static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("$Float"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_Float, },
-		{ Symbol_END, },
+		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;

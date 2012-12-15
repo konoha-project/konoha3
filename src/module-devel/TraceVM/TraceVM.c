@@ -90,7 +90,7 @@
 ////	case VMT_F:
 ////		KLIB KBuffer_printf(kctx, wb, " function(%p)", c->p[i]); break;
 ////	case VMT_TY:
-////		KLIB KBuffer_printf(kctx, wb, "(%s)", KClass_t(c->ct[i])); break;
+////		KLIB KBuffer_printf(kctx, wb, "(%s)", KClass_text(c->ct[i])); break;
 ////	}/*switch*/
 ////}
 //
@@ -410,8 +410,8 @@
 //			if((kushort_t)uline != (kushort_t)pc->line) {
 //				char key[BUFSIZE];
 //				uline = pc->line;
-//				PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptResult\", \"ScriptName\": \"%s\", \"ScriptLine\": %d , \"Count\": %d}", FileId_t(pc->line), (kushort_t)pc->line, pc->count);
-//				PLATAPI snprintf_i(key, BUFSIZE, "\"%s:%d\"", FileId_t(pc->line), (kushort_t)pc->line);
+//				PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptResult\", \"ScriptName\": \"%s\", \"ScriptLine\": %d , \"Count\": %d}", KFileLine_textFileName (pc->line), (kushort_t)pc->line, pc->count);
+//				PLATAPI snprintf_i(key, BUFSIZE, "\"%s:%d\"", KFileLine_textFileName (pc->line), (kushort_t)pc->line);
 //				TraceVMStoreCoverageLog(kctx, key, pc->count);
 //			}
 //		}

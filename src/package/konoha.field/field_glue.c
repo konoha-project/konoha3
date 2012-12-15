@@ -203,7 +203,7 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 			mtd = KLIB kNameSpace_GetMethodBySignatureNULL(kctx, ns, KClass_(self->attrTypeId), MethodNameAttr_Getter, paramdom, 1, p);
 			if(mtd != NULL) {
 				KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
-				KLIB kArray_Add(kctx, expr->cons, new_UnboxConstValueExpr(kctx, KType_Symbol, Symbol_Unmask(fn)));
+				KLIB kArray_Add(kctx, expr->cons, new_UnboxConstValueExpr(kctx, KType_Symbol, KSymbol_Unmask(fn)));
 				KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, KClass_(reqty)));
 			}
 		}
@@ -215,7 +215,7 @@ static kbool_t field_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("."), 0, NULL, -1, 0, NULL, NULL, NULL, NULL, TypeCheck_Getter, },
-		{ Symbol_END, },
+		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;

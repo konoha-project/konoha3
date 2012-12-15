@@ -141,7 +141,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	defSymbol.cflag = CFLAG_int;
 	defSymbol.init = KClass_(KType_int)->init;
 	defSymbol.unbox = KClass_(KType_int)->unbox;
-	defSymbol.p = kSymbol_p;
+	defSymbol.p = kKSymbol_p;
 
 	KDEFINE_CLASS defToken = {0};
 	SETSTRUCTNAME(defToken, Token);
@@ -257,7 +257,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 static KMETHOD NameSpace_loadScript(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char pathbuf[512];
-	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), FileId_t(sfp[K_RTNIDX].calledFileLine), kString_text(sfp[1].asString));
+	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), KFileLine_textFileName (sfp[K_RTNIDX].calledFileLine), kString_text(sfp[1].asString));
 	KMakeTrace(trace, sfp);
 	kNameSpace_LoadScript(kctx, sfp[0].asNameSpace, path, trace);
 }
@@ -320,13 +320,13 @@ static KMETHOD String_toSymbol(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## @Public @Const @Immutable @Coercion String Symbol.toString();
-static KMETHOD Symbol_toString(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD KSymbol_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t symbol = (ksymbol_t)sfp[0].intValue;
-	kString *s = Symbol_GetString(kctx, Symbol_Unmask(symbol));
-	if(Symbol_Attr(symbol) != 0) {
+	kString *s = KSymbol_GetString(kctx, KSymbol_Unmask(symbol));
+	if(KSymbol_Attr(symbol) != 0) {
 		KBuffer wb;
-		const char *prefix = Symbol_prefixText(symbol);
+		const char *prefix = KSymbol_prefixText(symbol);
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KLIB KBuffer_Write(kctx, &wb, prefix, strlen(prefix));
 		KLIB KBuffer_Write(kctx, &wb, kString_text(s), kString_size(s));
@@ -352,7 +352,7 @@ void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 		_Public, _F(NameSpace_loadScript), KType_void, KType_NameSpace, MN_("include"), 1, KType_String, FN_("filename"),
 		_Public, _F(NameSpace_useStaticFunc), KType_void, KType_NameSpace, MN_("UseStaticFunc"), 1, KType_Object, FN_("class"),
 		_Public|_Coercion|_Const|_Imm, _F(String_toSymbol), KType_Symbol, KType_String, MethodName_To(KType_Symbol), 0,
-		_Public|_Coercion|_Const|_Imm, _F(Symbol_toString), KType_String, KType_Symbol, MethodName_To(KType_String), 0,
+		_Public|_Coercion|_Const|_Imm, _F(KSymbol_toString), KType_String, KType_Symbol, MethodName_To(KType_String), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, NULL);

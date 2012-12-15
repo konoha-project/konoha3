@@ -544,7 +544,7 @@ static void kNameSpace_Free(KonohaContext *kctx, kObject *o)
 static void kNameSpace_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	kNameSpace *ns = v[pos].asNameSpace;
-	KLIB KBuffer_printf(kctx, wb, "%s", PackageId_t(ns->packageId));
+	KLIB KBuffer_printf(kctx, wb, "%s", KPackage_text(ns->packageId));
 }
 
 // ---------------
@@ -573,7 +573,7 @@ static void Func_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visit
 static KonohaClass *T_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
 {
 	kParam *cparam = KClass_cparam(self);
-	//DBG_P("ct=%s, self=%s", KClass_t(ct), KClass_t(self));
+	//DBG_P("ct=%s, self=%s", KClass_text(ct), KClass_text(self));
 	DBG_ASSERT(ct->optvalue < cparam->psize);
 	KonohaClass *pct = KClass_(cparam->paramtypeItems[ct->optvalue].attrTypeId);
 	return pct->realtype(kctx, pct, self);
@@ -727,7 +727,7 @@ static KonohaClass *KonohaClass_extendedBody(KonohaContext *kctx, KonohaClass *c
 
 static KonohaClass *Generics_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
 {
-	//DBG_P("trying resolve generic type: %s %s", KClass_t(ct), KClass_t(self));
+	//DBG_P("trying resolve generic type: %s %s", KClass_text(ct), KClass_text(self));
 	kParam *param = KClass_cparam(ct);
 	kushort_t i;
 	kparamtype_t *p = ALLOCA(kparamtype_t, param->psize);
@@ -740,7 +740,7 @@ static KonohaClass *Generics_realtype(KonohaContext *kctx, KonohaClass *ct, Kono
 
 static KonohaClass *Func_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
 {
-	//DBG_P("trying resolve generic type: %s %s", KClass_t(ct), KClass_t(self));
+	//DBG_P("trying resolve generic type: %s %s", KClass_text(ct), KClass_text(self));
 	KonohaClass *cReturn = KClass_(ct->p0);
 	ktypeattr_t rtype = cReturn->realtype(kctx, cReturn, self)->typeId;
 	kParam *param = KClass_cparam(ct);
@@ -766,7 +766,7 @@ static void checkTypeVar(KonohaContext *kctx, KonohaClassVar *newct, ktypeattr_t
 		}
 	}
 	if(isTypeVar) {
-		//DBG_P("Generics %s has TypeVar", KClass_t(newct));
+		//DBG_P("Generics %s has TypeVar", KClass_text(newct));
 		newct->cflag |= KClassFlag_TypeVar;
 		newct->realtype = newct->baseTypeId == KType_Func ? Func_realtype : Generics_realtype;
 	}
@@ -802,7 +802,7 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 {
 	if(ct->shortClassNameNULL == NULL) {
 		if(ct->cparamdom == 0 && ct->baseTypeId != KType_Func) {
-			((KonohaClassVar *)ct)->shortClassNameNULL = Symbol_GetString(kctx, ct->classNameSymbol);
+			((KonohaClassVar *)ct)->shortClassNameNULL = KSymbol_GetString(kctx, ct->classNameSymbol);
 		}
 		else {
 			size_t i, c = 0;
@@ -813,7 +813,7 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 				KonohaClass_shortName(kctx, KClass_(cparam->paramtypeItems[i].attrTypeId));
 			}
 			KBuffer_Init(&(kctx->stack->cwb), &wb);
-			kString *s = Symbol_GetString(kctx, ct->classNameSymbol);
+			kString *s = KSymbol_GetString(kctx, ct->classNameSymbol);
 			KLIB KBuffer_Write(kctx, &wb, kString_text(s), kString_size(s));
 			KLIB KBuffer_Write(kctx, &wb, "[", 1);
 			if(ct->baseTypeId == KType_Func) {
@@ -836,7 +836,7 @@ static void KonohaClass_setName(KonohaContext *kctx, KonohaClassVar *ct, KTraceI
 {
 	if(trace != NULL) {
 		/* To avoid SEGV, because this message is called at the initial time. */
-		KLIB ReportScriptMessage(kctx, trace, DebugTag, "new class %s.%s", PackageId_t(ct->packageId), Symbol_text(ct->classNameSymbol));
+		KLIB ReportScriptMessage(kctx, trace, DebugTag, "new class %s.%s", KPackage_text(ct->packageId), KSymbol_text(ct->classNameSymbol));
 	}
 	if(ct->classMethodList == NULL) {
 		ct->classMethodList = K_EMPTYARRAY;
@@ -999,9 +999,9 @@ static void defineDefaultKeywordSymbol(KonohaContext *kctx)
 		"new", "void"
 	};
 	for(i = 0; i < sizeof(keywords) / sizeof(const char *); i++) {
-		ksymbolSPOL(keywords[i], strlen(keywords[i]), StringPolicy_TEXT|StringPolicy_ASCII, Symbol_NewId);
-		//ksymbol_t sym = ksymbolSPOL(keywords[i], strlen(keywords[i]), StringPolicy_TEXT|StringPolicy_ASCII, Symbol_NewId);
-		//fprintf(stdout, "#define Symbol_%s (((ksymbol_t)%d)|0) /*%s*/\n", Symbol_text(sym), Symbol_Unmask(sym), keywords[i]);
+		ksymbolSPOL(keywords[i], strlen(keywords[i]), StringPolicy_TEXT|StringPolicy_ASCII, KSymbol_NewId);
+		//ksymbol_t sym = ksymbolSPOL(keywords[i], strlen(keywords[i]), StringPolicy_TEXT|StringPolicy_ASCII, KSymbol_NewId);
+		//fprintf(stdout, "#define KSymbol_%s (((ksymbol_t)%d)|0) /*%s*/\n", KSymbol_text(sym), KSymbol_Unmask(sym), keywords[i]);
 	}
 }
 

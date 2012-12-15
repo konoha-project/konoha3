@@ -230,20 +230,20 @@ typedef struct {
 
 #define TypeAttr_Is(P, t)   (((t) & TypeAttr_##P) == TypeAttr_##P)
 
-#define Symbol_MAX            KFLAG_H3
-#define Symbol_Attr(sym)      (sym  & (KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
-#define Symbol_Unmask(sym)    (sym & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3)))
+#define KSymbol_MAX            KFLAG_H3
+#define KSymbol_Attr(sym)      (sym  & (KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
+#define KSymbol_Unmask(sym)    (sym & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3)))
 
-#define Symbol_Noname          ((ksymbol_t)-1)
-#define Symbol_NewId           ((ksymbol_t)-2)
-#define Symbol_NewRaw          ((ksymbol_t)-3)
-#define _NEWID                 Symbol_NewId
-#define _NEWRAW                Symbol_NewRaw
+#define KSymbol_Noname          ((ksymbol_t)-1)
+#define KSymbol_NewId           ((ksymbol_t)-2)
+#define KSymbol_NewRaw          ((ksymbol_t)-3)
+#define _NEWID                 KSymbol_NewId
+#define _NEWRAW                KSymbol_NewRaw
 
 #define SymbolAttr_Annotation        (KFLAG_H1|KFLAG_H2)
 #define SymbolAttr_Pattern           (KFLAG_H0|KFLAG_H1|KFLAG_H2)
-#define Symbol_IsAnnotation(S)       ((S & SymbolAttr_Pattern) == SymbolAttr_Annotation)
-#define Symbol_IsPattern(S)          ((S & SymbolAttr_Pattern) == SymbolAttr_Pattern)
+#define KSymbol_IsAnnotation(S)       ((S & SymbolAttr_Pattern) == SymbolAttr_Annotation)
+#define KSymbol_IsPattern(S)          ((S & SymbolAttr_Pattern) == SymbolAttr_Pattern)
 
 /* MethodName
  * 110   to$(TypeId)
@@ -259,16 +259,16 @@ typedef struct {
 #define MethodNameAttr_Setter     KFLAG_H2
 
 #define MethodName_Unmask(mn)        (mn & (~(KFLAG_H1|KFLAG_H2)))
-#define MethodName_IsGetter(mn)      (Symbol_Attr(mn) == MethodNameAttr_Getter)
+#define MethodName_IsGetter(mn)      (KSymbol_Attr(mn) == MethodNameAttr_Getter)
 #define MethodName_ToGetter(mn)      ((MethodName_Unmask(mn)) | MethodNameAttr_Getter)
-#define MethodName_IsSetter(mn)      (Symbol_Attr(mn) == MethodNameAttr_Setter)
+#define MethodName_IsSetter(mn)      (KSymbol_Attr(mn) == MethodNameAttr_Setter)
 #define MethodName_ToSetter(mn)      ((MethodName_Unmask(mn)) | MethodNameAttr_Setter)
 
 #define MethodName_To(cid)            ((cid) | MethodNameAttr_Coercion)
-#define MethodName_IsCoercion(mn)     ((Symbol_Unmask(mn)) == MethodNameAttr_Coercion)
+#define MethodName_IsCoercion(mn)     ((KSymbol_Unmask(mn)) == MethodNameAttr_Coercion)
 #define MethodName_As(cid)            ((cid) | MethodNameAttr_Upcast)
-#define MethodName_IsUpcast(mn)       ((Symbol_Unmask(mn)) == MethodNameAttr_Upcast)
-#define MethodName_Fmt2(mn)           Symbol_prefixText(mn), ((mn & MethodNameAttr_Type) == MethodNameAttr_Type ? KType_t(Symbol_Unmask(mn)) : Symbol_text(Symbol_Unmask(mn)))
+#define MethodName_IsUpcast(mn)       ((KSymbol_Unmask(mn)) == MethodNameAttr_Upcast)
+#define MethodName_Fmt2(mn)           KSymbol_prefixText(mn), ((mn & MethodNameAttr_Type) == MethodNameAttr_Type ? KType_text(KSymbol_Unmask(mn)) : KSymbol_text(KSymbol_Unmask(mn)))
 
 /* ------------------------------------------------------------------------ */
 /* platform */
@@ -414,11 +414,11 @@ typedef struct KTraceInfo {
 	KTraceInfo TRACENAME##REF_ = {sfp, UL}, *TRACENAME = &TRACENAME##REF_;
 
 #define KBeginCritical(trace, T, F) \
-	int errorSymbol_ = trace->errorSymbol, faultType_ = trace->faultType;\
+	int errorKSymbol_ = trace->errorSymbol, faultType_ = trace->faultType;\
 	trace->errorSymbol = EXPT_(T); trace->faultType = F
 
 #define KEndCritical(trace) \
-	trace->errorSymbol = errorSymbol_; trace->faultType = faultType_
+	trace->errorSymbol = errorKSymbol_; trace->faultType = faultType_
 
 #define Trace_pline(trace) (trace == NULL ? 0 : trace->pline)
 
@@ -1361,7 +1361,7 @@ static const char* MethodFlagData[] = {
 #define kMethod_GetReturnType(mtd)   KClass_((kMethod_GetParam(mtd))->rtype)
 #define kMethod_IsReturnFunc(mtd)    (KClass_((kMethod_GetParam(mtd))->rtype)->baseTypeId == KType_Func)
 #define kMethod_ParamSize(mtd)       ((kMethod_GetParam(mtd))->psize)
-#define Method_t(mtd)                KType_t((mtd)->typeId),  MethodName_Fmt2((mtd)->mn)
+#define Method_t(mtd)                KType_text((mtd)->typeId),  MethodName_Fmt2((mtd)->mn)
 
 /* method data */
 #define DEND     (-1)
@@ -1741,8 +1741,8 @@ struct KonohaLibVar {
 #define MN_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 #define MN_box                    MN_("box")
 
-#define MN_new                    38  /* @see Symbol_return + 1*/
-#define Symbol_void                   39
+#define MN_new                    38  /* @see KSymbol_return + 1*/
+#define KSymbol_void                   39
 
 #define new_(C, A, STACK)                 (k##C *)(KLIB new_kObject(kctx, STACK, KClass_##C, ((uintptr_t)A)))
 #define GcUnsafe                          NULL
@@ -1799,7 +1799,7 @@ typedef struct {
 	void *func = kctx->klib->T;\
 	((KonohaLibVar *)kctx->klib)->T = F;\
 	if(TRACE && func != NULL) {\
-		KLIB ReportScriptMessage(kctx, TRACE, DebugTag, "overriding KLIB function " #T " in %s", PackageId_t(PKGID));\
+		KLIB ReportScriptMessage(kctx, TRACE, DebugTag, "overriding KLIB function " #T " in %s", KPackage_text(PKGID));\
 	}\
 } while(0)
 
@@ -1807,7 +1807,7 @@ typedef struct {
 		void *func = C->T;\
 		((KonohaClassVar *)C)->T = F;\
 		if(TRACE && func != NULL) {\
-			KLIB ReportScriptMessage(kctx, TRACE, DebugTag, "overriding CLASS %s funcion " #T " in %s", KClass_t(C), PackageId_t(PKGID)) ;\
+			KLIB ReportScriptMessage(kctx, TRACE, DebugTag, "overriding CLASS %s funcion " #T " in %s", KClass_text(C), KPackage_text(PKGID)) ;\
 		}\
 	}while(0)\
 

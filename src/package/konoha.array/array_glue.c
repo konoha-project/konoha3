@@ -595,7 +595,7 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *currentToken = tokenList->TokenItems[operatorIdx];
 	if(beginIdx == operatorIdx) {
 		/* transform '[ Value1, Value2, ... ]' to '(Call Untyped new (Value1, Value2, ...))' */
-		DBG_ASSERT(currentToken->resolvedSyntaxInfo->keyword == Symbol_BracketGroup);
+		DBG_ASSERT(currentToken->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup);
 		kExpr *arrayExpr = SUGAR new_UntypedCallStyleExpr(kctx, currentToken->resolvedSyntaxInfo, 2, currentToken, K_NULL);
 		KReturn(SUGAR kStmt_AddExprParam(kctx, stmt, arrayExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), NULL));
 	}
@@ -609,7 +609,7 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 			size_t subTokenSize = kArray_size(currentToken->subTokenList);
 			if(subTokenSize == 0) {
 				/* transform 'new Type0 [ ]' => (Call Type0 new) */
-				kExpr_Setsyn(leftExpr, SYN_(ns, Symbol_ExprMethodCall));
+				kExpr_Setsyn(leftExpr, SYN_(ns, KSymbol_ExprMethodCall));
 			} else {
 				/* transform 'new Type0 [ Type1 ] (...) => new 'Type0<Type1>' (...) */
 				KonohaClass *classT0 = NULL;
@@ -619,7 +619,7 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 					beginIdx = SUGAR TokenUtils_ParseTypePattern(kctx, ns, subTokenList, 0, kArray_size(subTokenList), &classT0);
 				}
 				beginIdx = (beginIdx == -1) ? 0 : beginIdx;
-				kExpr_Setsyn(leftExpr, SYN_(ns, Symbol_ExprMethodCall));
+				kExpr_Setsyn(leftExpr, SYN_(ns, KSymbol_ExprMethodCall));
 				DBG_P("currentToken->subtoken:%d", kArray_size(subTokenList));
 				leftExpr = SUGAR kStmt_AddExprParam(kctx, stmt, leftExpr, subTokenList, beginIdx, kArray_size(subTokenList), "[");
 			}
@@ -629,7 +629,7 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 			kTokenVar *tkN = /*G*/new_(TokenVar, 0, OnGcStack);
 			tkN->resolvedSymbol= MethodName_ToGetter(0);
 			tkN->uline = currentToken->uline;
-			SugarSyntax *syn = SYN_(Stmt_ns(stmt), Symbol_ExprMethodCall);
+			SugarSyntax *syn = SYN_(Stmt_ns(stmt), KSymbol_ExprMethodCall);
 			leftExpr  = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, tkN, leftExpr);
 			leftExpr = SUGAR kStmt_AddExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), "[");
 		}
@@ -640,8 +640,8 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t array_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ Symbol_BracketGroup, SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, Expression_Bracket, NULL, NULL, TypeCheck_Bracket, },
-		{ Symbol_END, },
+		{ KSymbol_BracketGroup, SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, Expression_Bracket, NULL, NULL, TypeCheck_Bracket, },
+		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;

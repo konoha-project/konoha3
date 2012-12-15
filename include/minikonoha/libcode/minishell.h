@@ -105,7 +105,7 @@ static void DumpEval(KonohaContext *kctx, KBuffer *wb)
 		}
 		KClass_(ty)->p(kctx, lsfp, 0, wb);
 		fflush(stdout);
-		PLATAPI printf_i("  (%s) %s\n", KType_t(ty), KLIB KBuffer_text(kctx, wb, EnsureZero));
+		PLATAPI printf_i("  (%s) %s\n", KType_text(ty), KLIB KBuffer_text(kctx, wb, EnsureZero));
 		base->evalty = KType_void;
 	}
 }

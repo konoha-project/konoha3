@@ -42,11 +42,11 @@ static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktypeatt
 			kStmtToken_Message(kctx, stmt, termToken, ErrTag, "unavailable global variable");
 			return;
 		}
-		kStmtToken_Message(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", Symbol_fmt2(termToken->resolvedSymbol), KType_t(ty));
+		kStmtToken_Message(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", KSymbol_Fmt2(termToken->resolvedSymbol), KType_text(ty));
 		KLIB KonohaClass_AddField(kctx, kObject_class(ns->globalObjectNULL_OnList), ty, termToken->resolvedSymbol);
 	}
 	else {
-		kStmtToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", Symbol_fmt2(termToken->resolvedSymbol), KType_t(ty));
+		kStmtToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", KSymbol_Fmt2(termToken->resolvedSymbol), KType_text(ty));
 		SUGAR kGamma_AddLocalVariable(kctx, gma, ty, termToken->resolvedSymbol);
 	}
 }

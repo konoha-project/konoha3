@@ -607,7 +607,7 @@ static KMETHOD Method_getCname(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
 	ktypeattr_t cid = mtd->typeId;
-	const char *cname = KType_t(cid);
+	const char *cname = KType_text(cid);
 	KReturn(KLIB new_kString(kctx, cname, strlen(cname), 0));
 }
 

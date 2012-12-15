@@ -47,10 +47,10 @@ static void kNameSpace_FreeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns
 /* --------------- */
 /* Symbol */
 
-static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+static void kKSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	ksymbol_t symbol = (ksymbol_t)v[pos].unboxValue;
-	KLIB KBuffer_printf(kctx, wb, "%s%s", Symbol_fmt2(symbol));
+	KLIB KBuffer_printf(kctx, wb, "%s%s", KSymbol_Fmt2(symbol));
 }
 
 /* --------------- */
@@ -61,11 +61,11 @@ static void kToken_Init(KonohaContext *kctx, kObject *o, void *conf)
 	kTokenVar *tk = (kTokenVar *)o;
 	tk->uline     =   0;
 	tk->unresolvedTokenType = (ksymbol_t)(intptr_t)conf;
-	if(tk->unresolvedTokenType == 0  || Symbol_Unmask(tk->unresolvedTokenType) != tk->unresolvedTokenType) {
+	if(tk->unresolvedTokenType == 0  || KSymbol_Unmask(tk->unresolvedTokenType) != tk->unresolvedTokenType) {
 		KUnsafeFieldInit(tk->text, TS_EMPTY);
 	}
 	else {
-		KUnsafeFieldInit(tk->text, Symbol_GetString(kctx, tk->unresolvedTokenType));
+		KUnsafeFieldInit(tk->text, KSymbol_GetString(kctx, tk->unresolvedTokenType));
 	}
 	tk->resolvedSyntaxInfo = NULL;
 }
@@ -89,9 +89,9 @@ static const char *kToken_t(KonohaContext *kctx, kToken *tk)
 	else {
 		switch(tk->resolvedSymbol) {
 			case TokenType_CODE:
-			case Symbol_BraceGroup: return "{... }";
-			case Symbol_ParenthesisGroup: return "(... )";
-			case Symbol_BracketGroup: return "[... ]";
+			case KSymbol_BraceGroup: return "{... }";
+			case KSymbol_ParenthesisGroup: return "(... )";
+			case KSymbol_BracketGroup: return "[... ]";
 		}
 		return "";
 	}
@@ -105,7 +105,7 @@ static void KBuffer_WriteTokenSymbol(KonohaContext *kctx, KBuffer *wb, kToken *t
 	}
 	else {
 		ksymbol_t symbolType = tk->resolvedSyntaxInfo == NULL ? tk->resolvedSymbol : tk->resolvedSyntaxInfo->keyword;
-		KLIB KBuffer_printf(kctx, wb, "%s%s ", Symbol_fmt2(symbolType));
+		KLIB KBuffer_printf(kctx, wb, "%s%s ", KSymbol_Fmt2(symbolType));
 	}
 }
 
@@ -193,7 +193,7 @@ static void kExpr_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 		kExprTerm_p(kctx, (kObject *)expr->objectConstValue, values, pos+1, wb);
 	}
 	else if(expr->build == TEXPR_NEW) {
-		KLIB KBuffer_printf(kctx, wb, "new %s", KType_t(expr->attrTypeId));
+		KLIB KBuffer_printf(kctx, wb, "new %s", KType_text(expr->attrTypeId));
 	}
 	else if(expr->build == TEXPR_NULL) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("null"));
@@ -232,7 +232,7 @@ static void kExpr_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 	}
 	KLIB KBuffer_Write(kctx, wb, ")", 1);
 	if(expr->attrTypeId != KType_var) {
-		KLIB KBuffer_printf(kctx, wb, ":%s", KType_t(expr->attrTypeId));
+		KLIB KBuffer_printf(kctx, wb, ":%s", KType_text(expr->attrTypeId));
 	}
 #endif
 }
@@ -376,7 +376,7 @@ static void kStmt_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 		KLIB KBuffer_printf(kctx, wb, "DONE {uline: %d, ", (kshort_t)stmt->uline);
 	}
 	else {
-		KLIB KBuffer_printf(kctx, wb, "%s%s {uline: %d, ", Symbol_fmt2(stmt->syn->keyword), (kshort_t)stmt->uline);
+		KLIB KBuffer_printf(kctx, wb, "%s%s {uline: %d, ", KSymbol_Fmt2(stmt->syn->keyword), (kshort_t)stmt->uline);
 	}
 	KLIB kObjectProto_p(kctx, values, pos, wb, 0);
 	KLIB KBuffer_Write(kctx, wb, "}", 1);

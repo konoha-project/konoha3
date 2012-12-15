@@ -137,7 +137,7 @@ static void CommandLine_Define(KonohaContext *kctx, char *keyvalue, KTraceInfo *
 		char *namebuf = ALLOCA(char, len+1);
 		memcpy(namebuf, keyvalue, len); namebuf[len] = 0;
 //		DBG_P("name='%s'", namebuf);
-		ksymbol_t key = KLIB Ksymbol(kctx, namebuf, len, 0, Symbol_NewId);
+		ksymbol_t key = KLIB Ksymbol(kctx, namebuf, len, 0, KSymbol_NewId);
 		uintptr_t unboxValue;
 		ktypeattr_t ty;
 		if(isdigit(p[1])) {
