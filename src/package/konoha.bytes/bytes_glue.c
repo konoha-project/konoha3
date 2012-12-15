@@ -133,7 +133,7 @@ static void KBuffer_convertCharset(KonohaContext *kctx, KBuffer* wb, const char 
 	}
 }
 
-static kBytes* new_kBytes(KonohaContext *kctx, kArray *gcstack, KonohaClass *c, const char *buf, size_t bufsiz)
+static kBytes* new_kBytes(KonohaContext *kctx, kArray *gcstack, KClass *c, const char *buf, size_t bufsiz)
 {
 	kBytes* ba = (kBytes *) KLIB new_kObject(kctx, gcstack, c, bufsiz);
 	if(bufsiz > 0) {

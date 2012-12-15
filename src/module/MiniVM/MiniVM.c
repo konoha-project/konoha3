@@ -176,7 +176,7 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 {
 	int jmpresult;
 	INIT_GCSTACK();
-	KonohaStackRuntimeVar *base = kctx->stack;
+	KStackRuntimeVar *base = kctx->stack;
 	jmpbuf_i lbuf = {};
 	if(base->evaljmpbuf == NULL) {
 		base->evaljmpbuf = (jmpbuf_i *)KCalloc_UNTRACE(sizeof(jmpbuf_i), 1);
@@ -526,7 +526,7 @@ static void KBuilder_AsmSAFEPOINT(KonohaContext *kctx, KBuilder *builder, kfilel
 	ASM(SAFEPOINT, uline, SFP_(espidx));
 }
 
-static void KBuilder_AsmNMOV(KonohaContext *kctx, KBuilder *builder, int a, KonohaClass *ty, int b)
+static void KBuilder_AsmNMOV(KonohaContext *kctx, KBuilder *builder, int a, KClass *ty, int b)
 {
 	ASM(NMOV, TC_(a, ty), TC_(b, ty), ty);
 }
@@ -747,7 +747,7 @@ static void KBuilder_VisitFieldExpr(KonohaContext *kctx, KBuilder *builder, kStm
 	int a = builder->common.a;
 	kshort_t index = (kshort_t)expr->index;
 	kshort_t xindex = (kshort_t)(expr->index >> (sizeof(kshort_t)*8));
-	KonohaClass *ty = KClass_(expr->attrTypeId);
+	KClass *ty = KClass_(expr->attrTypeId);
 	ASM(NMOVx, TC_(a, ty), OC_(index), xindex, ty);
 }
 
@@ -856,7 +856,7 @@ static void KBuilder_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 		builder->common.a = a;
 		kshort_t index  = (kshort_t)leftHandExpr->index;
 		kshort_t xindex = (kshort_t)(leftHandExpr->index >> (sizeof(kshort_t)*8));
-		KonohaClass *lhsClass = KClass_(leftHandExpr->attrTypeId), *rhClass = KClass_(rightHandExpr->attrTypeId);
+		KClass *lhsClass = KClass_(leftHandExpr->attrTypeId), *rhClass = KClass_(rightHandExpr->attrTypeId);
 
 		ASM(XNMOV, OC_(index), xindex, TC_(espidx, rhClass), lhsClass);
 		if(expr->attrTypeId != KType_void) {

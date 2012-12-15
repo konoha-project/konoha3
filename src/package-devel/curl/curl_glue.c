@@ -761,7 +761,7 @@ static kbool_t curl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		.reftrace = Curl_Reftrace,
 		.free = Curl_Free,
 	};
-	KonohaClass *cCurl = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCurl, trace);
+	KClass *cCurl = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCurl, trace);
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Curl_new), KType_Curl, KType_Curl, MN_("new"), 0,

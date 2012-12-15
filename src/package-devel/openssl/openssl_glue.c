@@ -89,7 +89,7 @@ static kbool_t openssl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 		"MD5",
 		"SHA1",
 	};
-	KonohaClass *tbls[2];
+	KClass *tbls[2];
 	static KDEFINE_CLASS Def = {
 			.structname = "",
 			.typeId = TypeAttr_NewId,

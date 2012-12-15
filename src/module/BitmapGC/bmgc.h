@@ -2073,7 +2073,7 @@ static void *concgc_thread_entry(void *o)
 
 static inline void bmgc_Object_Free(KonohaContext *kctx, kObject *o)
 {
-	KonohaClass *ct = kObject_class(o);
+	KClass *ct = kObject_class(o);
 	if(ct) {
 #if GCDEBUG
 		OLDTRACE_SWITCH_TO_KTrace(LOGPOL_DEBUG,

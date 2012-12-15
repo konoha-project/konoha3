@@ -179,8 +179,8 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 				KExit(EXIT_FAILURE);
 			}
 			if(trace->errorSymbol != 0 && trace->faultType != 0) {
-				KLIB KonohaRuntime_raise(kctx, trace->errorSymbol, trace->faultType, emsg, trace->baseStack);
-				return; /* in case of that KonohaRuntime_raise cannot jump; */
+				KLIB KRuntime_raise(kctx, trace->errorSymbol, trace->faultType, emsg, trace->baseStack);
+				return; /* in case of that KRuntime_raise cannot jump; */
 			}
 		}
 		KLIB KBuffer_Free(&wb);

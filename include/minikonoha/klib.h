@@ -73,9 +73,9 @@ static kinline kString* KPackage_GetName(KonohaContext *kctx, kpackageId_t packa
 }
 
 #define KClass_text(X)   kString_text(KClass_GetName(kctx, X))
-static kinline kString* KClass_GetName(KonohaContext *kctx, KonohaClass *ct)
+static kinline kString* KClass_GetName(KonohaContext *kctx, KClass *ct)
 {
-	return kctx->klib->KonohaClass_shortName(kctx, ct);
+	return kctx->klib->KClass_shortName(kctx, ct);
 }
 
 #define KType_text(X)   kString_text(KType_GetString(kctx,TypeAttr_Unmask(X)))
@@ -133,10 +133,10 @@ static kinline uintptr_t longid(kushort_t packageDomain, kushort_t un)
 	return (hcode << (sizeof(kshort_t)*8)) | un;
 }
 
-static kinline KonohaClass *KClass_p0(KonohaContext *kctx, KonohaClass *ct, ktypeattr_t ty)
+static kinline KClass *KClass_p0(KonohaContext *kctx, KClass *ct, ktypeattr_t ty)
 {
 	kparamtype_t p = {ty, 0};
-	return KLIB KonohaClass_Generics(kctx, ct, KType_void, 1, &p);
+	return KLIB KClass_Generics(kctx, ct, KType_void, 1, &p);
 }
 
 #define uNULL   ((uintptr_t)NULL)
@@ -173,7 +173,7 @@ static kinline const char* TAG_t(kinfotag_t t)
 
 #define KCheckIndex(N, MAX) \
 	if(unlikely (!(((size_t)N) < ((size_t)MAX)))) {\
-		KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfBoundary"), SoftwareFault, NULL, sfp);\
+		KLIB KRuntime_raise(kctx, EXPT_("OutOfBoundary"), SoftwareFault, NULL, sfp);\
 	}\
 
 

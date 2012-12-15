@@ -530,7 +530,7 @@ typedef struct {
 
 typedef struct  {
 	kshortflag_t  flag;      kshortflag_t  cflag;
-	KonohaClass   *thisClass;
+	KClass   *thisClass;
 	//ktypeattr_t      static_cid;
 	kMethod      *currentWorkingMethod;
 	GammaStack    localScope;
@@ -581,14 +581,14 @@ typedef kStmt* (*TypeDeclFunc)(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kt
 struct KBuilder;
 
 typedef struct {
-	KonohaModule  h;
-	KonohaClass *cSymbol;
-	KonohaClass *cToken;
-	KonohaClass *cExpr;
-	KonohaClass *cStmt;
-	KonohaClass *cBlock;
-	KonohaClass *cGamma;
-	KonohaClass *cTokenArray;
+	KRuntimeModule  h;
+	KClass *cSymbol;
+	KClass *cToken;
+	KClass *cExpr;
+	KClass *cStmt;
+	KClass *cBlock;
+	KClass *cGamma;
+	KClass *cTokenArray;
 
 	KSyntax*    (*kNameSpace_GetSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
 	void            (*kNameSpace_DefineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *, KTraceInfo *);
@@ -602,7 +602,7 @@ typedef struct {
 	int         (*TokenSeq_Preprocess)(KonohaContext *, TokenSeq *, MacroSet *, TokenSeq *, int);
 	kstatus_t   (*TokenSeq_Eval)(KonohaContext *, TokenSeq *, KTraceInfo *);
 
-	int         (*TokenUtils_ParseTypePattern)(KonohaContext *, kNameSpace *, kArray *, int , int , KonohaClass **classRef);
+	int         (*TokenUtils_ParseTypePattern)(KonohaContext *, kNameSpace *, kArray *, int , int , KClass **classRef);
 	kTokenVar*  (*kToken_ToBraceGroup)(KonohaContext *, kTokenVar *, kNameSpace *, MacroSet *);
 
 	void        (*kStmt_AddParsedObject)(KonohaContext *, kStmt *, ksymbol_t, kObject *o);
@@ -625,18 +625,18 @@ typedef struct {
 	kExpr*       (*kStmt_AddExprParam)(KonohaContext *, kStmt *, kExpr *, kArray *tokenList, int, int, const char *hintBeforeText);
 	kExpr*       (*kStmt_RightJoinExpr)(KonohaContext *, kStmt *, kExpr *, kArray *, int, int);
 
-	kExpr*       (*kExpr_SetConstValue)(KonohaContext *, kExprVar *, KonohaClass *, kObject *o);
+	kExpr*       (*kExpr_SetConstValue)(KonohaContext *, kExprVar *, KClass *, kObject *o);
 	kExpr*       (*kExpr_SetUnboxConstValue)(KonohaContext *, kExprVar *, ktypeattr_t, uintptr_t unboxValue);
 	kExpr*       (*kExpr_SetVariable)(KonohaContext *, kExprVar *, kGamma *, kexpr_t build, ktypeattr_t, intptr_t index);
-	kExpr *      (*new_TypedCallExpr)(KonohaContext *, kStmt *, kGamma *, KonohaClass *, kMethod *mtd, int n, ...);
+	kExpr *      (*new_TypedCallExpr)(KonohaContext *, kStmt *, kGamma *, KClass *, kMethod *mtd, int n, ...);
 
 	kbool_t     (*kBlock_TypeCheckAll)(KonohaContext *, kBlock *, kGamma *);
-	kbool_t     (*kStmt_TypeCheckByName)(KonohaContext *, kStmt*, ksymbol_t, kGamma *, KonohaClass *, int);
-	kExpr*      (*kStmt_TypeCheckExprAt)(KonohaContext *, kStmt *, kExpr *, size_t, kGamma *, KonohaClass *, int);
-	kExpr *     (*kStmtkExpr_TypeCheckCallParam)(KonohaContext *, kStmt *, kExprVar *, kMethod *, kGamma *, KonohaClass *);
+	kbool_t     (*kStmt_TypeCheckByName)(KonohaContext *, kStmt*, ksymbol_t, kGamma *, KClass *, int);
+	kExpr*      (*kStmt_TypeCheckExprAt)(KonohaContext *, kStmt *, kExpr *, size_t, kGamma *, KClass *, int);
+	kExpr *     (*kStmtkExpr_TypeCheckCallParam)(KonohaContext *, kStmt *, kExprVar *, kMethod *, kGamma *, KClass *);
 	int         (*kGamma_AddLocalVariable)(KonohaContext *, kGamma *, ktypeattr_t, ksymbol_t);
 	kbool_t     (*kStmt_DeclType)(KonohaContext *, kStmt *, kGamma *, ktypeattr_t, kExpr *, kObject *, TypeDeclFunc, kStmt **);
-	kExpr*      (*kStmt_TypeCheckVariableNULL)(KonohaContext *, kStmt *, kExprVar *, kGamma *, KonohaClass *);
+	kExpr*      (*kStmt_TypeCheckVariableNULL)(KonohaContext *, kStmt *, kExprVar *, kGamma *, KClass *);
 
 	void       (*kToken_ToError)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
 	kExpr *    (*kStmt_Message2)(KonohaContext *, kStmt *, kToken *, kinfotag_t, const char *fmt, ...);
@@ -653,7 +653,7 @@ typedef struct {
 } KModuleSugar;
 
 typedef struct {
-	KonohaModuleContext h;
+	KContextModule h;
 	kArray            *preparedTokenList;
 	KGrowingArray errorMessageBuffer;
 	kArray            *errorMessageList;

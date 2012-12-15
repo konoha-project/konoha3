@@ -163,7 +163,7 @@ static void PushBoxedValue(KonohaContext *kctx, SValue Val)
 static void RaiseError(KonohaContext *kctx, KonohaStack *sfp, kString *ErrorInfo, kfileline_t uline)
 {
 	sfp[K_RTNIDX].calledFileLine = uline;
-	KLIB KonohaRuntime_raise(kctx, EXPT_("RuntimeScript"), SoftwareFault, ErrorInfo, sfp);
+	KLIB KRuntime_raise(kctx, EXPT_("RuntimeScript"), SoftwareFault, ErrorInfo, sfp);
 }
 
 #define CompileTimeAssert(...)
@@ -172,7 +172,7 @@ static void RaiseError(KonohaContext *kctx, KonohaStack *sfp, kString *ErrorInfo
 
 static kObject *CreateObject(KonohaContext *kctx, TypeId Type)
 {
-	KonohaClass *ct = KClass_(Type);
+	KClass *ct = KClass_(Type);
 	kObject *obj = KLIB new_kObject(kctx, 0, ct, 0);
 	return obj;
 }

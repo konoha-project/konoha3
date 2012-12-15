@@ -58,7 +58,7 @@ static KMETHOD String_toSymbol(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(keyword);
 }
 
-static KonohaClass *defineSymbolClass(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+static KClass *defineSymbolClass(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	static KDEFINE_CLASS defSymbol = {0};
 	defSymbol.structname = "Symbol";
@@ -66,7 +66,7 @@ static KonohaClass *defineSymbolClass(KonohaContext *kctx, kNameSpace *ns, KTrac
 	defSymbol.init = KClass_(KType_int)->init;
 	defSymbol.unbox = KClass_(KType_int)->unbox;
 	defSymbol.p = kKSymbol_p;
-	KonohaClass *cSymbol = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSymbol, trace);
+	KClass *cSymbol = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSymbol, trace);
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Coercion|_Const, _F(String_toSymbol), cSymbol->typeId, KType_String, MethodName_To(cSymbol->typeId), 0,
 		DEND,
@@ -213,7 +213,7 @@ static KMETHOD Stmt_AddParsedObject(KonohaContext *kctx, KonohaStack *sfp)
 //static KMETHOD PatternMatch_Type(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
-//	KonohaClass *foundClass = NULL;
+//	KClass *foundClass = NULL;
 //	int returnIdx = TokenUtils_ParseTypePattern(kctx, Stmt_ns(stmt), tokenList, beginIdx, endIdx, &foundClass);
 //	DBG_P("tk=%s, returnIdx=%d", tokenList->TokenItems[beginIdx], returnIdx);
 //	if(foundClass != NULL) {
@@ -300,7 +300,7 @@ static KMETHOD Object_tocid(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(cid);
 }
 
-static KonohaClass *loadcidClass(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+static KClass *loadcidClass(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	static KDEFINE_CLASS defcid = {0};
 	defcid.structname = "cid";
@@ -308,7 +308,7 @@ static KonohaClass *loadcidClass(KonohaContext *kctx, kNameSpace *ns, KTraceInfo
 	defcid.init = KClass_(KType_int)->init;
 	defcid.unbox = KClass_(KType_int)->unbox;
 	defcid.p = kcid_p;
-	KonohaClass *ccid = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcid, trace);
+	KClass *ccid = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcid, trace);
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Coercion|_Const, _F(Object_tocid), ccid->typeId, KType_Object, MethodName_To(ccid->typeId), 0,
 		DEND,
@@ -435,19 +435,19 @@ static void LoadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, KTraceI
 
 	/* Func[Int, Token, String] */
 	kparamtype_t P_FuncTokenize[] = {{KType_Token}, {KType_String}};
-	int KType_FuncToken = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_int, 2, P_FuncTokenize))->typeId;
+	int KType_FuncToken = (KLIB KClass_Generics(kctx, KClass_Func, KType_int, 2, P_FuncTokenize))->typeId;
 	/* Func[Int, Stmt, Int, Token[], Int, Int] */
 	kparamtype_t P_FuncPatternMatch[] = {{KType_Stmt}, {KType_int}, {KType_TokenArray}, {KType_int}, {KType_int}};
-	int KType_FuncPatternMatch = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_int, 5, P_FuncPatternMatch))->typeId;
+	int KType_FuncPatternMatch = (KLIB KClass_Generics(kctx, KClass_Func, KType_int, 5, P_FuncPatternMatch))->typeId;
 	/* Func[Expr, Stmt, Token[], Int, Int, Int] */
 	kparamtype_t P_FuncExpression[] = {{KType_Stmt}, {KType_TokenArray}, {KType_int}, {KType_int}, {KType_int}};
-	int KType_FuncExpression = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_Expr, 5, P_FuncExpression))->typeId;
+	int KType_FuncExpression = (KLIB KClass_Generics(kctx, KClass_Func, KType_Expr, 5, P_FuncExpression))->typeId;
 	/* Func[Boolean, Stmt, Gamma] */
 	kparamtype_t P_FuncStatement[] = {{KType_Stmt}, {KType_Gamma}};
-	int KType_FuncStatement = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_boolean, 2, P_FuncStatement))->typeId;
+	int KType_FuncStatement = (KLIB KClass_Generics(kctx, KClass_Func, KType_boolean, 2, P_FuncStatement))->typeId;
 	/* Func[Expr, Stmt, Expr, Gamma, Int] */
 	kparamtype_t P_FuncTypeCheck[] = {{KType_Stmt}, {KType_Expr}, {KType_Gamma}, {KType_int}};
-	int KType_FuncTypeCheck = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_Expr, 4, P_FuncTypeCheck))->typeId;
+	int KType_FuncTypeCheck = (KLIB KClass_Generics(kctx, KClass_Func, KType_Expr, 4, P_FuncTypeCheck))->typeId;
 	//DBG_P("func=%s", KType_text(KType_FuncTypeCheck));
 
 	KDEFINE_METHOD MethodData[] = {
@@ -695,7 +695,7 @@ static KMETHOD Stmt_newTypedCallExpr1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStmt *stmt          = sfp[0].asStmt;
 	kGamma *gma          = sfp[1].asGamma;
-	KonohaClass *ct      = KClass_(sfp[2].intValue);/*FIXME typeId => KonohaClass */
+	KClass *ct      = KClass_(sfp[2].intValue);/*FIXME typeId => KClass */
 	ksymbol_t methodName = (ksymbol_t)sfp[3].intValue;
 	kExpr *firstExpr     = sfp[4].asExpr;
 	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), ct, methodName, 1, MethodMatch_CamelStyle);
@@ -710,7 +710,7 @@ static KMETHOD Stmt_newTypedCallExpr2(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStmt *stmt          = sfp[0].asStmt;
 	kGamma *gma          = sfp[1].asGamma;
-	KonohaClass *ct      = KClass_(sfp[2].intValue);/*FIXME typeId => KonohaClass */
+	KClass *ct      = KClass_(sfp[2].intValue);/*FIXME typeId => KClass */
 	ksymbol_t methodName = (ksymbol_t)sfp[3].intValue;
 	kExpr *firstExpr     = sfp[4].asExpr;
 	kExpr *secondExpr    = sfp[5].asExpr;
@@ -807,7 +807,7 @@ static KMETHOD Expr_getTermToken(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Expr_setConstValue(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kExprVar *expr = (kExprVar *) sfp[0].asExpr;
-	KonohaClass *ct = kObject_class(sfp[1].asObject);
+	KClass *ct = kObject_class(sfp[1].asObject);
 	if(KClass_Is(UnboxType, (ct)) {
 		KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, ct->typeId, sfp[1].unboxValue));
 	}
@@ -838,7 +838,7 @@ static KMETHOD Expr_newVariableExpr(KonohaContext *kctx, KonohaStack *sfp)
 //## Expr Expr.new(Object value);
 static KMETHOD Expr_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaClass *ct = kObject_class(sfp[1].asObject);
+	KClass *ct = kObject_class(sfp[1].asObject);
 	if(KClass_Is(UnboxType, (ct)) {
 		KReturn(new_UnboxConstValueExpr(kctx, ct->typeId, sfp[1].unboxValue));
 	}
@@ -964,16 +964,16 @@ static kbool_t RENAMEME_InitNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 
 static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-//	KonohaClass *cSymbol = defineSymbolClass(kctx, ns, trace);
-	KonohaClass *ccid = loadcidClass(kctx, ns, trace);
+//	KClass *cSymbol = defineSymbolClass(kctx, ns, trace);
+	KClass *ccid = loadcidClass(kctx, ns, trace);
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-		{"Symbol", VirtualType_KonohaClass, (uintptr_t)KClass_Symbol},
-		{"Token", VirtualType_KonohaClass, (uintptr_t)KClass_Token},
-		{"Stmt", VirtualType_KonohaClass,  (uintptr_t)KClass_Stmt},
-		{"Expr", VirtualType_KonohaClass,  (uintptr_t)KClass_Expr},
-		{"Block", VirtualType_KonohaClass, (uintptr_t)KClass_Block},
-		{"Gamma", VirtualType_KonohaClass, (uintptr_t)KClass_Gamma},
-		{"NameSpace", VirtualType_KonohaClass, (uintptr_t)KClass_NameSpace},
+		{"Symbol", VirtualType_KClass, (uintptr_t)KClass_Symbol},
+		{"Token", VirtualType_KClass, (uintptr_t)KClass_Token},
+		{"Stmt", VirtualType_KClass,  (uintptr_t)KClass_Stmt},
+		{"Expr", VirtualType_KClass,  (uintptr_t)KClass_Expr},
+		{"Block", VirtualType_KClass, (uintptr_t)KClass_Block},
+		{"Gamma", VirtualType_KClass, (uintptr_t)KClass_Gamma},
+		{"NameSpace", VirtualType_KClass, (uintptr_t)KClass_NameSpace},
 		{NULL},
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), false/*isOverride*/, trace);
@@ -991,7 +991,7 @@ static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 
 	/* Array[String] */
 	kparamtype_t P_StringArray[] = {{KType_String}};
-	int KType_StringArray = (KLIB KonohaClass_Generics(kctx, KClass_Array, KType_void, 1, P_StringArray))->typeId;
+	int KType_StringArray = (KLIB KClass_Generics(kctx, KClass_Array, KType_void, 1, P_StringArray))->typeId;
 
 	ktypeattr_t KType_cid = ccid->typeId;
 

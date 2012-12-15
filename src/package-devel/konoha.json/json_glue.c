@@ -340,7 +340,7 @@ static kbool_t json_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		.free = kJson_Free,
 		.p    = kJson_p,
 	};
-	KonohaClass *cJson = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &JsonDef, trace);
+	KClass *cJson = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &JsonDef, trace);
 
 	int FN_k = FN_("key");
 	int FN_v = FN_("value");

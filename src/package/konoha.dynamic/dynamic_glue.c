@@ -51,7 +51,7 @@ static kbool_t kMethod_CheckMethodKStackCall(KonohaContext *kctx, KonohaStack *s
 	int i;
 	kParam *param = kMethod_GetParam(mtd);
 	for(i = 1; i <= argc; i++) {
-		KonohaClass *paramClass = kObject_class(sfp[i].asObject);
+		KClass *paramClass = kObject_class(sfp[i].asObject);
 		ktypeattr_t ptype = param->paramtypeItems[i-1].attrTypeId;
 		if(ptype != paramClass->typeId) {
 			return false;
@@ -83,7 +83,7 @@ static KMETHOD Dynamic_(KonohaContext *kctx, KonohaStack *sfp)
 			return;
 		}
 	}
-	KLIB KonohaRuntime_raise(kctx, EXPT_("NoSuchMethod"), SoftwareFault, NULL, sfp);
+	KLIB KRuntime_raise(kctx, EXPT_("NoSuchMethod"), SoftwareFault, NULL, sfp);
 }
 
 // --------------------------------------------------------------------------
@@ -97,7 +97,7 @@ static kbool_t dynamic_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	static KDEFINE_CLASS defDynamic = {0};
 	defDynamic.structname = "dynamic";
 	defDynamic.cflag = KClassFlag_Final;
-	KonohaClass *cDynamic = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDynamic, trace);
+	KClass *cDynamic = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDynamic, trace);
 	int KType_Dynamic = cDynamic->typeId;
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im, _F(Dynamic_), KType_Object, KType_Dynamic, MN_(""), 0,

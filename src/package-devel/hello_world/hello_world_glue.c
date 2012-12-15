@@ -116,7 +116,7 @@ static kbool_t HelloWorld_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, i
 	defPerson.p         = Person_p;
 	defPerson.reftrace  = Person_Reftrace;
 	defPerson.free      = Person_Free;
-	KonohaClass *PersonClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defPerson, trace);
+	KClass *PersonClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defPerson, trace);
 
 	/* You can define methods with the following procedures. */
 	int KType_Person = PersonClass->typeId;

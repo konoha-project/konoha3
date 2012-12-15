@@ -607,7 +607,7 @@ static kbool_t date_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	SETSTRUCTNAME(defDate, Date);
 	defDate.cflag = KClassFlag_Final;
 
-	KonohaClass *cDate = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDate, trace);
+	KClass *cDate = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDate, trace);
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Date_new0), KType_Date, KType_Date, MN_("new"), 0,

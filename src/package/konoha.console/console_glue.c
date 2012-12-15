@@ -99,7 +99,7 @@ static kbool_t console_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	SETSTRUCTNAME(defConsole, Console);
 	defConsole.cflag = KClassFlag_Final | KClassFlag_Singleton;
 
-	KonohaClass *cConsole = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defConsole, trace);
+	KClass *cConsole = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defConsole, trace);
 	int KType_Console = cConsole->typeId;
 
 	KDEFINE_METHOD MethodData[] = {

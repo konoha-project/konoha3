@@ -35,7 +35,7 @@ extern "C"{
 static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline, KTraceInfo *trace)
 {
 	kstatus_t result;
-	kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
+	kmodsugar->h.setupModuleContext(kctx, (KRuntimeModule *)kmodsugar, 0/*lazy*/);
 	INIT_GCSTACK();
 	{
 		TokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList};

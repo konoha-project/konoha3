@@ -75,7 +75,7 @@ static void Jansson_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 #define CHECK_JSON(obj, ret_stmt) do {\
 		if(!json_is_object(obj)) {\
 			DBG_P("[ERROR]: Object is not Json object.");\
-			/*KLIB KonohaRuntime_raise(kctx, 1, sfp, pline, msg);*/\
+			/*KLIB KRuntime_raise(kctx, 1, sfp, pline, msg);*/\
 			ret_stmt;\
 		}\
 	} while(0);
@@ -261,7 +261,7 @@ static KMETHOD Json_setFloat(KonohaContext *kctx, KonohaStack *sfp)
 	json_t* val = json_real(fval);
 	if(!json_is_real(val)) {
 		DBG_P("[ERROR]: Value is not Json object.");
-		//KLIB KonohaRuntime_raise(kctx, 1, sfp, pline, msg);
+		//KLIB KRuntime_raise(kctx, 1, sfp, pline, msg);
 		KReturnDefaultValue();
 	}
 	int ret = json_object_set(obj, key, val);
@@ -282,7 +282,7 @@ static KMETHOD Json_setInt(KonohaContext *kctx, KonohaStack *sfp)
 	json_t* val = json_integer((json_int_t)ival);
 	if(!json_is_integer(val)) {
 		DBG_P("[ERROR]: Value is not Json object.");
-		//KLIB KonohaRuntime_raise(kctx, 1, sfp, pline, msg);
+		//KLIB KRuntime_raise(kctx, 1, sfp, pline, msg);
 		KReturnDefaultValue();
 	}
 	int ret = json_object_set(obj, key, val);
@@ -303,7 +303,7 @@ static KMETHOD Json_setString(KonohaContext *kctx, KonohaStack *sfp)
 	json_t* val = json_string(stringValue);
 	if(!json_is_string(val)) {
 		DBG_P("[ERROR]: Value is not Json object.");
-		//KLIB KonohaRuntime_raise(kctx, 1, sfp, pline, msg);
+		//KLIB KRuntime_raise(kctx, 1, sfp, pline, msg);
 		KReturnDefaultValue();
 	}
 	int ret = json_object_set(obj, key, val);
@@ -362,7 +362,7 @@ static KMETHOD JsonArray_Add(KonohaContext *kctx, KonohaStack *sfp)
 	json_t* ja = (json_t *)a->ObjectItems;
 	if(!json_is_array(ja)) {
 		DBG_P("[ERROR]: Object is not Json Array.");
-		//KLIB KonohaRuntime_raise(kctx, 1, sfp, pline, msg);
+		//KLIB KRuntime_raise(kctx, 1, sfp, pline, msg);
 		KReturnDefaultValue();
 	}
 	struct kJanssonVar *json = (struct kJanssonVar *)sfp[1].asObject;
@@ -423,7 +423,7 @@ static kbool_t jansson_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 		.free = Jansson_Free,
 		.p    = Jansson_p,
 	};
-	KonohaClass *cJson = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &JsonDef, trace);
+	KClass *cJson = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &JsonDef, trace);
 	ktypeattr_t KType_JsonArray = KClass_JsonArray->typeId;
 	ktypeattr_t KType_StringArray0 = KClass_StringArray0->typeId;
 

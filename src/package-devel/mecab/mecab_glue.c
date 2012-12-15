@@ -345,8 +345,8 @@ static kbool_t mecab_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 		.free = MecabNode_Free,
 	};
 
-	KonohaClass *cTagger = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &TaggerDef, trace);
-	KonohaClass *cMecabNode = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MecabNodeDef, trace);
+	KClass *cTagger = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &TaggerDef, trace);
+	KClass *cMecabNode = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MecabNodeDef, trace);
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const, _F(Tagger_new),         KType_Tagger,  KType_Tagger, MN_("new"),   0,

@@ -56,14 +56,14 @@ typedef struct {
 #define EVENT_TYPE_MAX 2
 
 typedef struct {
-	KonohaModule h;
+	KRuntimeModule h;
 	int flag;
-	KonohaClass *cEvent;
+	KClass *cEvent;
 	LocalQueue *localQueues[EVENT_TYPE_MAX];
 } KModuleEvent;
 
 typedef struct {
-	KonohaModuleContext h;
+	KContextModule h;
 	kFunc *invokeFuncNULL;
 	kFunc *enqFuncNULL;
 } EventContext;
@@ -146,7 +146,7 @@ static void Event_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visi
 #define CHECK_JSON(obj, ret_stmt) do {\
 		if(!json_is_object(obj)) {\
 			DBG_P("[ERROR]: Object is not Json object.");\
-			/*KLIB KonohaRuntime_raise(kctx, 1, sfp, pline, msg);*/\
+			/*KLIB KRuntime_raise(kctx, 1, sfp, pline, msg);*/\
 			ret_stmt;\
 		}\
 	} while(0);
@@ -473,7 +473,7 @@ static void KscheduleEvent(KonohaContext *kctx) {
 	}
 }
 
-static void EventContext_Reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh, KObjectVisitor *visitor)
+static void EventContext_Reftrace(KonohaContext *kctx, struct KContextModule *baseh, KObjectVisitor *visitor)
 {
 	EventContext *base = (EventContext *)baseh;
 //	BEGIN_REFTRACE(2);
@@ -482,13 +482,13 @@ static void EventContext_Reftrace(KonohaContext *kctx, struct KonohaModuleContex
 //	END_REFTRACE();
 }
 
-static void EventContext_Free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
+static void EventContext_Free(KonohaContext *kctx, struct KContextModule *baseh)
 {
 	EventContext *base = (EventContext *)baseh;
 	KFree(base, sizeof(EventContext));
 }
 
-static void EventModule_Setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
+static void EventModule_Setup(KonohaContext *kctx, struct KRuntimeModule *def, int newctx)
 {
 	if(!newctx && kctx->modlocal[MOD_EVENT] == NULL) {
 		EventContext *base = (EventContext *)KCalloc_UNTRACE(sizeof(EventContext), 1);
@@ -496,11 +496,11 @@ static void EventModule_Setup(KonohaContext *kctx, struct KonohaModule *def, int
 		base->h.free     = EventContext_Free;
 		KUnsafeFieldInit(base->invokeFuncNULL, K_NULL);
 		KUnsafeFieldInit(base->enqFuncNULL, K_NULL);
-		kctx->modlocal[MOD_EVENT] = (KonohaModuleContext *)base;
+		kctx->modlocal[MOD_EVENT] = (KContextModule *)base;
 	}
 }
 
-static void EventModule_Free(KonohaContext *kctx, struct KonohaModule *def)
+static void EventModule_Free(KonohaContext *kctx, struct KRuntimeModule *def)
 {
 	KModuleEvent *mod = (KModuleEvent *)def;
 	int i = 0;
@@ -519,7 +519,7 @@ static void MODEVENT_Init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace
 	mod->h.allocSize = sizeof(KModuleEvent);
 	mod->h.setupModuleContext    = EventModule_Setup;
 	mod->h.freeModule = EventModule_Free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_EVENT, (KonohaModule *)mod, 0);
+	KLIB KRuntime_setModule(kctx, MOD_EVENT, (KRuntimeModule *)mod, 0);
 
 	KSetKLibFunc(ns->packageId, KscheduleEvent, KscheduleEvent, trace);
 
@@ -531,7 +531,7 @@ static void MODEVENT_Init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace
 		.free = Event_Free,
 	};
 
-	KonohaClass *cEvent = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defEvent, trace);
+	KClass *cEvent = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defEvent, trace);
 	mod->cEvent = cEvent;
 	mod->flag = 0;
 
@@ -569,12 +569,12 @@ static kbool_t eventlistener_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns
 		.structname = "SignalEventListener",
 		.typeId = TypeAttr_NewId,
 	};
-	KonohaClass *cHttpEventListener = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defHttpEventListener, trace);
-	KonohaClass *cSignalEventListener = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSignalEventListener, trace);
-	KonohaClass *cEvent = kmodevent->cEvent;
+	KClass *cHttpEventListener = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defHttpEventListener, trace);
+	KClass *cSignalEventListener = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSignalEventListener, trace);
+	KClass *cEvent = kmodevent->cEvent;
 
 	kparamtype_t P_Func[] = {{KType_Event}};
-	int KType_EnqFunc = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_void, 1, P_Func))->typeId;
+	int KType_EnqFunc = (KLIB KClass_Generics(kctx, KClass_Func, KType_void, 1, P_Func))->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
 		/* event gen */

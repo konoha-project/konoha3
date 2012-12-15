@@ -287,12 +287,12 @@ static kbool_t thread_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		.init  = kCond_Init,
 		.free  = kCond_Free,
 	};
-	KonohaClass *cThread = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defThread, trace);
-	KonohaClass *cMutex  = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defMutex, trace);
-	KonohaClass *cCond   = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCond, trace);
+	KClass *cThread = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defThread, trace);
+	KClass *cMutex  = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defMutex, trace);
+	KClass *cCond   = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCond, trace);
 
 	kparamtype_t P_Func[] = {{}};
-	int KType_FUNC = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_void, 0, P_Func))->typeId;
+	int KType_FUNC = (KLIB KClass_Generics(kctx, KClass_Func, KType_void, 0, P_Func))->typeId;
 
 	int FN_func = FN_("func");
 	int FN_x = FN_("x");

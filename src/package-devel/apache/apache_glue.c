@@ -79,8 +79,8 @@ static void AprTableEntry_Free(KonohaContext *kctx, kObject *po)
 	((kAprTableEntry *)po)->entry = NULL;
 }
 
-static void ApacheModule_Setup(KonohaContext *kctx, struct KonohaModule *def, int newctx) {}
-static void ApacheModule_Free(KonohaContext *kctx, struct KonohaModule *baseh)
+static void ApacheModule_Setup(KonohaContext *kctx, struct KRuntimeModule *def, int newctx) {}
+static void ApacheModule_Free(KonohaContext *kctx, struct KRuntimeModule *baseh)
 {
 	KFree(baseh, sizeof(KModuleApache));
 }
@@ -115,7 +115,7 @@ static kbool_t apache_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	mod->h.allocSize          = sizeof(KModuleApache);
 	mod->h.setupModuleContext = ApacheModule_Setup;
 	mod->h.freeModule         = ApacheModule_Free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_APACHE, (KonohaModule *)mod, trace);
+	KLIB KRuntime_setModule(kctx, MOD_APACHE, (KRuntimeModule *)mod, trace);
 	mod->cRequest       = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &Def, 0);
 	mod->cAprTable      = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &aprTableDef, 0);
 	mod->cAprTableEntry = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &aprTableEntryDef, 0);

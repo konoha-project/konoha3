@@ -46,7 +46,7 @@ static kExpr *CallTypeCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 	return (kExpr *)lsfp[K_RTNIDX].asObject;
 }
 
-static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, KonohaClass* reqtc)
+static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, KClass* reqtc)
 {
 	int callCount = 0;
 	KSyntax *syn = expr->syn;
@@ -100,7 +100,7 @@ static void kExpr_PutConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *s
 	}
 }
 
-static kExpr* kStmtExpr_ToConstValue(KonohaContext *kctx, kStmt *stmt, kExprVar *expr, kArray *cons, KonohaClass *rtype)
+static kExpr* kStmtExpr_ToConstValue(KonohaContext *kctx, kStmt *stmt, kExprVar *expr, kArray *cons, KClass *rtype)
 {
 	size_t i, size = kArray_size(cons), psize = size - 2;
 	kMethod *mtd = cons->MethodItems[0];
@@ -117,9 +117,9 @@ static kExpr* kStmtExpr_ToConstValue(KonohaContext *kctx, kStmt *stmt, kExprVar 
 	return SUGAR kExpr_SetConstValue(kctx, expr, NULL, lsfp[K_RTNIDX].asObject);
 }
 
-static kExpr *kStmtExpr_ToBox(KonohaContext *kctx, kStmt *stmt, kExpr *texpr, kGamma *gma, KonohaClass* reqClass)
+static kExpr *kStmtExpr_ToBox(KonohaContext *kctx, kStmt *stmt, kExpr *texpr, kGamma *gma, KClass* reqClass)
 {
-	KonohaClass *c = KClass_(texpr->attrTypeId);
+	KClass *c = KClass_(texpr->attrTypeId);
 	if(c->typeId != KType_boolean) c = KClass_Int;
 	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, kStmt_ns(stmt), c, MN_box, 0, MethodMatch_CamelStyle);
 	DBG_ASSERT(mtd != NULL);
@@ -128,7 +128,7 @@ static kExpr *kStmtExpr_ToBox(KonohaContext *kctx, kStmt *stmt, kExpr *texpr, kG
 	return kExpr_typed(expr, CALL, c->typeId/*reqClass->typeId*/);
 }
 
-static kExpr *kExpr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, KonohaClass* reqClass, int pol)
+static kExpr *kExpr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, KClass* reqClass, int pol)
 {
 	kExpr *texpr = expr;
 	if(kStmt_isERR(stmt)) texpr = K_NULLEXPR;
@@ -141,7 +141,7 @@ static kExpr *kExpr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGa
 	}
 	if(texpr != K_NULLEXPR) {
 		kNameSpace *ns = Stmt_ns(stmt);
-		KonohaClass *typedClass = KClass_(texpr->attrTypeId);
+		KClass *typedClass = KClass_(texpr->attrTypeId);
 		if(typedClass->typeId == KType_void) {
 			if(!FLAG_is(pol, TypeCheckPolicy_ALLOWVOID)) {
 				texpr = kStmtExpr_Message(kctx, stmt, expr, ErrTag, "void is not acceptable");
@@ -176,7 +176,7 @@ static kExpr *kExpr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGa
 	return texpr;
 }
 
-static kExpr* kStmt_TypeCheckExprAt(KonohaContext *kctx, kStmt *stmt, kExpr *exprP, size_t pos, kGamma *gma, KonohaClass *reqClass, int pol)
+static kExpr* kStmt_TypeCheckExprAt(KonohaContext *kctx, kStmt *stmt, kExpr *exprP, size_t pos, kGamma *gma, KClass *reqClass, int pol)
 {
 	if(!Expr_isTerm(exprP) && pos < kArray_size(exprP->cons)) {
 		kExpr *expr = exprP->cons->ExprItems[pos];
@@ -187,7 +187,7 @@ static kExpr* kStmt_TypeCheckExprAt(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 	return K_NULLEXPR;
 }
 
-static kbool_t kStmt_TypeCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t symbol, kGamma *gma, KonohaClass *reqClass, int pol)
+static kbool_t kStmt_TypeCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t symbol, kGamma *gma, KClass *reqClass, int pol)
 {
 	kExpr *expr = (kExpr *)kStmt_GetObjectNULL(kctx, stmt, symbol);
 	DBG_ASSERT(expr != NULL);
@@ -355,7 +355,7 @@ static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t 
 
 static void kGamma_InitIt(KonohaContext *kctx, GammaAllocaData *genv, kParam *pa)
 {
-	KonohaStackRuntimeVar *base = kctx->stack;
+	KStackRuntimeVar *base = kctx->stack;
 	genv->localScope.varsize = 0;
 	if(base->evalty != KType_void) {
 		genv->localScope.varItems[1].name = FN_("it");
@@ -381,14 +381,14 @@ static ktypeattr_t kStmt_CheckReturnType(KonohaContext *kctx, kStmt *stmt)
 static kstatus_t kMethod_RunEval(KonohaContext *kctx, kMethod *mtd, ktypeattr_t rtype, kfileline_t uline, KTraceInfo *trace)
 {
 	BEGIN_UnusedStack(lsfp);
-	KonohaStackRuntimeVar *runtime = kctx->stack;
+	KStackRuntimeVar *runtime = kctx->stack;
 	if(runtime->evalty != KType_void) {
 		KUnsafeFieldSet(lsfp[1].asObject, runtime->stack[runtime->evalidx].asObject);
 		lsfp[1].intValue = runtime->stack[runtime->evalidx].intValue;
 	}
 	KStackSetMethodAll(lsfp, KLIB Knull(kctx, KClass_(rtype)), uline, mtd, 1);
 	kstatus_t result = K_CONTINUE;
-	if(KLIB KonohaRuntime_tryCallMethod(kctx, lsfp)) {
+	if(KLIB KRuntime_tryCallMethod(kctx, lsfp)) {
 		runtime->evalidx = ((lsfp + K_RTNIDX) - kctx->stack->stack);
 		runtime->evalty = rtype;
 	}

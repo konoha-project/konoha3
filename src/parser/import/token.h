@@ -374,7 +374,7 @@ static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 static void CallSugarMethod(KonohaContext *kctx, KonohaStack *sfp, kFunc *fo, int argc, kObject *obj)
 {
 	KStackSetFuncAll(sfp, obj, 0, fo, argc);
-	KLIB KonohaRuntime_tryCallMethod(kctx, sfp);
+	KLIB KRuntime_tryCallMethod(kctx, sfp);
 }
 
 static int CallTokenFunc(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Tokenizer *tokenizer, kStringVar *preparedString, int tok_start)

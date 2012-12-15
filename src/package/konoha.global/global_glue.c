@@ -69,7 +69,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "differently defined name: %s", KSymbol_text(symbol));
 		return NULL;
 	}
-	KLIB KonohaClass_AddField(kctx, kObject_class(o), ty, symbol);
+	KLIB KClass_AddField(kctx, kObject_class(o), ty, symbol);
 	return KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, kObject_class(o), symbol, ty);
 }
 
@@ -96,7 +96,7 @@ static kbool_t kNameSpace_InitGlobalObject(KonohaContext *kctx, kNameSpace *ns, 
 		defGlobalObject.typeId = TypeAttr_NewId;
 		defGlobalObject.cflag = KClassFlag_Singleton|KClassFlag_Final;
 		defGlobalObject.cstruct_size = sizeof(kGlobalObject);
-		KonohaClass *cGlobalObject = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defGlobalObject, trace);
+		KClass *cGlobalObject = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defGlobalObject, trace);
 		((kNameSpaceVar *)ns)->globalObjectNULL_OnList =  KLIB Knull(kctx, cGlobalObject);
 		return KLIB kNameSpace_SetConstData(kctx, ns, SYM_("global"), cGlobalObject->typeId, (uintptr_t)ns->globalObjectNULL_OnList, true/*isOverride*/, trace);
 	}

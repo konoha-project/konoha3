@@ -119,12 +119,12 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 	kbool_t result = SUGAR kStmt_TypeCheckByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
 	if(result) {
 		kExpr *constExpr = SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, NULL);
-		KonohaClass *constClass = KClass_(constExpr->attrTypeId);
+		KClass *constClass = KClass_(constExpr->attrTypeId);
 		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
 		result = false;
 		if(constExpr->build == TEXPR_NULL) {   // const C = String
-			type = VirtualType_KonohaClass;
+			type = VirtualType_KClass;
 			unboxValue = (uintptr_t)constClass;
 			result = true;
 		}

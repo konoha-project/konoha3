@@ -217,7 +217,7 @@ void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformA
 KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);
 int Konoha_Destroy(KonohaContext *kctx);
 
-KonohaContext* konoha_create(KonohaClass **cRequest)
+KonohaContext* konoha_create(KClass **cRequest)
 {
 	struct KonohaFactory factory = {};
 	int argc = 0;
@@ -235,7 +235,7 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 #define KType_Tbl  (KClass_AprTable->typeId)
 #define KType_TblEntry  (KClass_AprTableEntry->typeId)
 
-	KonohaClass *KClass_TblEntryArray = KClass_p0(kctx, KClass_Array, KType_TblEntry);
+	KClass *KClass_TblEntryArray = KClass_p0(kctx, KClass_Array, KType_TblEntry);
 	ktypeattr_t KType_TblEntryArray = KClass_TblEntryArray->typeId;
 
 	int FN_x = FN_("x");
@@ -273,7 +273,7 @@ static int konoha_handler(request_rec *r)
 	// 	 TODO 
 	// 	return HTTP_METHOD_NOT_ALLOWED;
 	// }
-	KonohaClass *cRequest;
+	KClass *cRequest;
 	verbose_debug = 1;
 	KonohaContext* konoha = konoha_create(&cRequest);
 	//assert(cRequest != NULL);

@@ -44,7 +44,7 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 //		}
 
 	}
-//	KonohaClass *foundClass = NULL;
+//	KClass *foundClass = NULL;
 //	int nextIdx = SUGAR TokenUtils_ParseTypePattern(kctx, stmt, Stmt_ns(stmt), tokenList, beginIdx + 1, endIdx, &foundClass);
 //	if(nextIdx != -1 && nextIdx < kArray_size(tokenList)) {
 //		kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
@@ -61,7 +61,7 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 //		}
 //		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup) {     // dollar int [100]
 //			KSyntax *syn = SYN_(Stmt_ns(stmt), SYM_("dollar"));
-//			KonohaClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
+//			KClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
 //			dollarToken->resolvedSymbol = MN_("dollarArray");
 //			kExpr *expr = SUGAR dollar_UntypedCallStyleExpr(kctx, syn, 2, dollarToken, NewExpr(kctx, syn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));
 //			KReturn(expr);

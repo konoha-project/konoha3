@@ -178,7 +178,7 @@ static KMETHOD Map_keys(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
 	kMap *m = (kMap *)sfp[0].asObject;
-	KonohaClass *cArray = KClass_p0(kctx, KClass_Array, kObject_p0(m));
+	KClass *cArray = KClass_p0(kctx, KClass_Array, kObject_p0(m));
 	kArray *a = (kArray *)(KLIB new_kObject(kctx, _GcStack, cArray, m->map->size));
 	KLIB KHashMap_DoEach(kctx, m->map, (void *)a, MapEntry_appendKey);
 	KReturnWith(a, RESET_GCSTACK());
@@ -211,7 +211,7 @@ static kbool_t map_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 	defMap.reftrace  = kMap_Reftrace;
 	defMap.free      = kMap_Free;
 
-	KonohaClass *cMap = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defMap, trace);
+	KClass *cMap = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defMap, trace);
 	int FN_key = MN_("key");
 	int KType_Array0 = KClass_p0(kctx, KClass_Array, KType_0)->typeId;
 	KDEFINE_METHOD MethodData[] = {

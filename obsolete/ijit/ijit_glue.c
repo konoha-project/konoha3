@@ -37,21 +37,21 @@ extern "C" {
 
 typedef void (*FgenCode)(KonohaContext *kctx, kMethod *mtd, kBlock *bk);
 typedef struct {
-	KonohaModule h;
+	KRuntimeModule h;
 	kMethod *genCode;
 	kArray  *constPool;
 	kArray  *global_value;
 	FgenCode defaultCodeGen;
 	KHashMap *jitcache;
 	kfileline_t uline;
-	KonohaClass *cPointer;
+	KClass *cPointer;
 } kmodjit_t;
 
 typedef struct {
-	KonohaModuleContext h;
+	KContextModule h;
 } kjitmod_t;
 
-static void kmodjit_Setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
+static void kmodjit_Setup(KonohaContext *kctx, struct KRuntimeModule *def, int newctx)
 {
 	(void)kctx;(void)def;(void)newctx;
 }
@@ -64,7 +64,7 @@ static void val_Reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 	END_REFTRACE();
 }
 
-static void kmodjit_Reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
+static void kmodjit_Reftrace(KonohaContext *kctx, struct KRuntimeModule *baseh, KObjectVisitor *visitor)
 {
 	kmodjit_t *mod = (kmodjit_t *) baseh;
 	BEGIN_REFTRACE(3);
@@ -75,7 +75,7 @@ static void kmodjit_Reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KO
 	KLIB KHashMap_DoEach(kctx, mod->jitcache, (void *) visitor, val_Reftrace);
 }
 
-static void kmodjit_Free(KonohaContext *kctx, struct KonohaModule *baseh)
+static void kmodjit_Free(KonohaContext *kctx, struct KRuntimeModule *baseh)
 {
 	kmodjit_t *modshare = (kmodjit_t *) baseh;
 	KLIB KHashMap_Free(kctx, modshare->jitcache, NULL);
@@ -735,7 +735,7 @@ static kbool_t ijit_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	//};
 	//KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), trace);
 
-	KLIB KonohaRuntime_setModule(kctx, MOD_jit, &base->h, trace);
+	KLIB KRuntime_setModule(kctx, MOD_jit, &base->h, trace);
 	return true;
 }
 
@@ -743,7 +743,7 @@ static kbool_t ijit_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 {
 	/* Array[Expr] */
 	kparamtype_t P_ExprArray[] = {{KType_Expr}};
-	int KType_ExprArray = (KLIB KonohaClass_Generics(kctx, KClass_Array, KType_void, 1, P_ExprArray))->typeId;
+	int KType_ExprArray = (KLIB KClass_Generics(kctx, KClass_Array, KType_void, 1, P_ExprArray))->typeId;
 
 	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KType_System, MN_("genCode"), 0, MPOL_FIRST);
 	KUnsafeFieldInit(kmodjit->genCode, mtd);

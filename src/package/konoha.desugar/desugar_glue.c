@@ -716,7 +716,7 @@ static void desugar_defineStmtMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 //static KMETHOD Expr_setConstValue(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kExpr *expr = sfp[0].asExpr;
-//	KonohaClass *ct = kObject_class(sfp[1].asObject);
+//	KClass *ct = kObject_class(sfp[1].asObject);
 //	if(KClass_Is(UnboxType, (ct)) {
 //		KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, ct->typeId, sfp[1].unboxValue));
 //	}
@@ -747,7 +747,7 @@ static void desugar_defineStmtMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 //## Expr Expr.new(Object value);
 static KMETHOD Expr_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaClass *ct = kObject_class(sfp[1].asObject);
+	KClass *ct = kObject_class(sfp[1].asObject);
 	if(KClass_Is(UnboxType, ct)) {
 		KReturn(new_UnboxConstValueExpr(kctx, ct->typeId, sfp[1].unboxValue));
 	}
@@ -875,15 +875,15 @@ static void desugar_defineExprMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 
 //static kbool_t desugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 //{
-//	KonohaClass *cSymbol = defineSymbolClass(kctx, ns, trace);
+//	KClass *cSymbol = defineSymbolClass(kctx, ns, trace);
 //	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-//		{"Token", VirtualType_KonohaClass, (uintptr_t)KClass_Token},
-//		{"Stmt", VirtualType_KonohaClass,  (uintptr_t)KClass_Stmt},
-//		{"Expr", VirtualType_KonohaClass,  (uintptr_t)KClass_Expr},
-//		{"Block", VirtualType_KonohaClass, (uintptr_t)KClass_Block},
-//		{"Gamma", VirtualType_KonohaClass, (uintptr_t)KClass_Gamma},
-//		{"NameSpace", VirtualType_KonohaClass, (uintptr_t)KClass_NameSpace},
-//		{"symbol", VirtualType_KonohaClass, (uintptr_t)cSymbol},
+//		{"Token", VirtualType_KClass, (uintptr_t)KClass_Token},
+//		{"Stmt", VirtualType_KClass,  (uintptr_t)KClass_Stmt},
+//		{"Expr", VirtualType_KClass,  (uintptr_t)KClass_Expr},
+//		{"Block", VirtualType_KClass, (uintptr_t)KClass_Block},
+//		{"Gamma", VirtualType_KClass, (uintptr_t)KClass_Gamma},
+//		{"NameSpace", VirtualType_KClass, (uintptr_t)KClass_NameSpace},
+//		{"symbol", VirtualType_KClass, (uintptr_t)cSymbol},
 //		{NULL},
 //	};
 //	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), 0);
@@ -902,7 +902,7 @@ static void desugar_defineExprMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 //
 //	/* Array[String] */
 //	kparamtype_t P_StringArray[] = {{KType_String}};
-//	int KType_StringArray = (KLIB KonohaClass_Generics(kctx, KClass_Array, KType_void, 1, P_StringArray))->typeId;
+//	int KType_StringArray = (KLIB KClass_Generics(kctx, KClass_Array, KType_void, 1, P_StringArray))->typeId;
 //
 //	ktypeattr_t KType_Symbol = cSymbol->typeId;
 //	ktypeattr_t KType_cid = ccid->typeId;
@@ -1071,19 +1071,19 @@ static void desugar_defineNameSpaceMethod(KonohaContext *kctx, kNameSpace *ns, K
 	int FN_func = SYM_("func");
 	/* Func[Int, Token, String] */
 	kparamtype_t P_FuncTokenize[] = {{KType_Token}, {KType_String}};
-	int KType_FuncToken = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_int, 2, P_FuncTokenize))->typeId;
+	int KType_FuncToken = (KLIB KClass_Generics(kctx, KClass_Func, KType_int, 2, P_FuncTokenize))->typeId;
 	/* Func[Int, Stmt, Int, Token[], Int, Int] */
 	kparamtype_t P_FuncPatternMatch[] = {{KType_Stmt}, {KType_int}, {KType_TokenArray}, {KType_int}, {KType_int}};
-	int KType_FuncPatternMatch = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_int, 5, P_FuncPatternMatch))->typeId;
+	int KType_FuncPatternMatch = (KLIB KClass_Generics(kctx, KClass_Func, KType_int, 5, P_FuncPatternMatch))->typeId;
 	/* Func[Expr, Stmt, Token[], Int, Int, Int] */
 	kparamtype_t P_FuncExpression[] = {{KType_Stmt}, {KType_TokenArray}, {KType_int}, {KType_int}, {KType_int}};
-	int KType_FuncExpression = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_Expr, 5, P_FuncExpression))->typeId;
+	int KType_FuncExpression = (KLIB KClass_Generics(kctx, KClass_Func, KType_Expr, 5, P_FuncExpression))->typeId;
 	/* Func[Boolean, Stmt, Gamma] */
 	kparamtype_t P_FuncStatement[] = {{KType_Stmt}, {KType_Gamma}};
-	int KType_FuncStatement = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_boolean, 2, P_FuncStatement))->typeId;
+	int KType_FuncStatement = (KLIB KClass_Generics(kctx, KClass_Func, KType_boolean, 2, P_FuncStatement))->typeId;
 	/* Func[Expr, Stmt, Expr, Gamma, Int] */
 	kparamtype_t P_FuncTypeCheck[] = {{KType_Stmt}, {KType_Expr}, {KType_Gamma}, {KType_int}};
-	int KType_FuncTypeCheck = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_Expr, 4, P_FuncTypeCheck))->typeId;
+	int KType_FuncTypeCheck = (KLIB KClass_Generics(kctx, KClass_Func, KType_Expr, 4, P_FuncTypeCheck))->typeId;
 	//DBG_P("func=%s", KType_text(KType_FuncTypeCheck));
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im, _F(NameSpace_DefinedSyntax), KType_boolean, KType_NameSpace, MN_("DefinedSyntax"), 1, TP_kw,
@@ -1217,13 +1217,13 @@ static kbool_t desugar_defineSyntaxStatement(KonohaContext *kctx, kNameSpace *ns
 static kbool_t desugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-		{"Symbol", VirtualType_KonohaClass, (uintptr_t)KClass_Symbol},
-		{"Token",  VirtualType_KonohaClass, (uintptr_t)KClass_Token},
-		{"Stmt",   VirtualType_KonohaClass,  (uintptr_t)KClass_Stmt},
-		{"Expr",   VirtualType_KonohaClass,  (uintptr_t)KClass_Expr},
-		{"Block",  VirtualType_KonohaClass, (uintptr_t)KClass_Block},
-		{"Gamma",  VirtualType_KonohaClass, (uintptr_t)KClass_Gamma},
-		{"NameSpace", VirtualType_KonohaClass, (uintptr_t)KClass_NameSpace},
+		{"Symbol", VirtualType_KClass, (uintptr_t)KClass_Symbol},
+		{"Token",  VirtualType_KClass, (uintptr_t)KClass_Token},
+		{"Stmt",   VirtualType_KClass,  (uintptr_t)KClass_Stmt},
+		{"Expr",   VirtualType_KClass,  (uintptr_t)KClass_Expr},
+		{"Block",  VirtualType_KClass, (uintptr_t)KClass_Block},
+		{"Gamma",  VirtualType_KClass, (uintptr_t)KClass_Gamma},
+		{"NameSpace", VirtualType_KClass, (uintptr_t)KClass_NameSpace},
 		{NULL},
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), false/*isOverride*/, 0);

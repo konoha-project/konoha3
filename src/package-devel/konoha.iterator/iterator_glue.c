@@ -122,7 +122,7 @@ static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
 static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	KonohaClass *cIterator = KClass_p0(kctx, KClass_Iterator, kObject_class(a)->p0);
+	KClass *cIterator = KClass_p0(kctx, KClass_Iterator, kObject_class(a)->p0);
 	kIterator *itr = (kIterator *)KLIB new_kObject(kctx, OnStack, cIterator, 0);
 	KFieldSet(itr, itr->arrayList, a);
 	itr->hasNext = Array_hasNext;

@@ -33,7 +33,7 @@ extern "C"{
 static kbool_t var_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-		{"var", VirtualType_KonohaClass, (uintptr_t)KClass_(KType_var)},
+		{"var", VirtualType_KClass, (uintptr_t)KClass_(KType_var)},
 		{NULL},
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), false/*isOverride*/, trace);

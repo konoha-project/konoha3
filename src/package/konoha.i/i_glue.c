@@ -103,7 +103,7 @@ static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *list = kctx->stack->gcstack_OnContextConstList;
 	size_t start = kArray_size(list);
 	kNameSpace *ns = sfp[0].asNameSpace;
-	KonohaClass *ct = kObject_class(sfp[1].asObject);
+	KClass *ct = kObject_class(sfp[1].asObject);
 	DBG_P("*** man %s", KType_text(ct->typeId));
 	while(ns != NULL) {
 		copyMethodList(kctx, ct->typeId, ns->methodList_OnList, list);

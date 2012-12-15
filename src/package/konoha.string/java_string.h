@@ -48,7 +48,7 @@ static void Throw_IndexOutOfBoundsException(KonohaContext *kctx, KonohaStack *sf
 	KMakeTrace(trace, sfp);
 	KTraceApi(trace, UserFault, "charAt",
 			LogUint("index", index));
-	KLIB KonohaRuntime_raise(kctx, EXPT_("IndexOutOfBounds"),
+	KLIB KRuntime_raise(kctx, EXPT_("IndexOutOfBounds"),
 			UserFault, NULL, trace->baseStack);
 }
 
@@ -57,7 +57,7 @@ static void Throw_NotImplement(KonohaContext *kctx, KonohaStack *sfp, const char
 	KMakeTrace(trace, sfp);
 	KTraceApi(trace, UserFault, "charAt",
 			LogText("Func", FuncName));
-	KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplement"),
+	KLIB KRuntime_raise(kctx, EXPT_("NotImplement"),
 			SystemFault, NULL, trace->baseStack);
 }
 

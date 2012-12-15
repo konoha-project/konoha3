@@ -167,7 +167,7 @@ static Value *GetStackTop(LLVMIRBuilder *writer)
 	return stack_top;
 }
 
-static void StoreValueToStack(IRBuilder<> *builder, KonohaClass *ct, int Idx, Value *Vsfp, Value *V)
+static void StoreValueToStack(IRBuilder<> *builder, KClass *ct, int Idx, Value *Vsfp, Value *V)
 {
 	int fieldIdx = (KClass_IsUnbox(ct)) ?KonohaValueVar_unboxValue : KonohaValueVar_asObject;
 	Value *Dst = builder->CreateConstInBoundsGEP2_32(Vsfp, Idx, fieldIdx);
@@ -175,7 +175,7 @@ static void StoreValueToStack(IRBuilder<> *builder, KonohaClass *ct, int Idx, Va
 }
 
 
-static Value *LoadValueFromStack(IRBuilder<> *builder, KonohaClass *ct, int Idx, Value *Vsfp)
+static Value *LoadValueFromStack(IRBuilder<> *builder, KClass *ct, int Idx, Value *Vsfp)
 {
 	int fieldIdx = (KClass_IsUnbox(ct)) ?KonohaValueVar_unboxValue : KonohaValueVar_asObject;
 	Value *Src = builder->CreateConstInBoundsGEP2_32(Vsfp, Idx, fieldIdx);
@@ -425,7 +425,7 @@ static void LLVMIRBuilder_visitValue(Visitor *visitor, INode *Node, const char *
 
 static const char *ConstructMethodName(KonohaContext *kctx, kMethod *mtd, const char *suffix)
 {
-	KonohaClass *kclass = KClass_(mtd->typeId);
+	KClass *kclass = KClass_(mtd->typeId);
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KLIB KBuffer_printf(kctx, &wb, "%s_%s%s%s",
@@ -436,7 +436,7 @@ static const char *ConstructMethodName(KonohaContext *kctx, kMethod *mtd, const 
 /* Create Method Specific interface */
 static Function *CreateInternalFunction(KonohaContext *kctx, Module *M, kMethod *mtd)
 {
-	KonohaClass *RetTy = kMethod_GetReturnType(mtd);
+	KClass *RetTy = kMethod_GetReturnType(mtd);
 	std::vector<Type *> ParamTy;
 	kParam *params = kMethod_GetParam(mtd);
 
@@ -485,7 +485,7 @@ static Function *CreateFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Fu
 		Value *V = LoadValueFromStack(builder, KClass_(type), i, Vsfp);
 		Params.push_back(V);
 	}
-	KonohaClass *RetTy = kMethod_GetReturnType(mtd);
+	KClass *RetTy = kMethod_GetReturnType(mtd);
 	Value *Ret = builder->CreateCall(Func, Params);
 	if(RetTy != KClass_void) {
 		StoreValueToStack(builder, RetTy, -4, Vsfp, Ret);

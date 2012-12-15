@@ -62,7 +62,7 @@ typedef struct VirtualCode {
 		intptr_t data[OPARGSIZE];
 		void *p[OPARGSIZE];
 		kObject *o[OPARGSIZE];
-		KonohaClass *ct[OPARGSIZE];
+		KClass *ct[OPARGSIZE];
 		char *u[OPARGSIZE];
 	};
 } VirtualCode;
@@ -155,7 +155,7 @@ typedef struct OPNSET {
 	KCODE_HEAD;
 	kreg_t a;
 	kint_t n;
-	KonohaClass* ty;
+	KClass* ty;
 } OPNSET;
 
 #ifndef OPEXEC_NSET
@@ -171,7 +171,7 @@ typedef struct OPNMOV {
 	KCODE_HEAD;
 	kreg_t a;
 	kreg_t b;
-	KonohaClass* ty;
+	KClass* ty;
 } OPNMOV;
 
 #ifndef OPEXEC_NMOV
@@ -188,7 +188,7 @@ typedef struct OPNMOVx {
 	kreg_t a;
 	kreg_t b;
 	uintptr_t bx;
-	KonohaClass* ty;
+	KClass* ty;
 } OPNMOVx;
 
 #ifndef OPEXEC_NMOVx
@@ -205,7 +205,7 @@ typedef struct OPXNMOV {
 	kreg_t a;
 	uintptr_t ax;
 	kreg_t b;
-	KonohaClass* ty;
+	KClass* ty;
 } OPXNMOV;
 
 #ifndef OPEXEC_XNMOV
@@ -221,7 +221,7 @@ typedef struct OPNEW {
 	KCODE_HEAD;
 	kreg_t a;
 	uintptr_t p;
-	KonohaClass* ty;
+	KClass* ty;
 } OPNEW;
 
 #ifndef OPEXEC_NEW
@@ -236,7 +236,7 @@ typedef struct OPNEW {
 typedef struct OPNLL {
 	KCODE_HEAD;
 	kreg_t a;
-	KonohaClass* ty;
+	KClass* ty;
 } OPNUL;
 
 #ifndef OPEXEC_NUL
@@ -395,7 +395,7 @@ typedef struct OPERROR {
 #define OPEXEC_ERROR() do {\
 	OPERROR *op = (OPERROR *)pc;\
 	((KonohaStack *)rbp)[K_RTNIDX].calledFileLine = op->uline;\
-	KLIB KonohaRuntime_raise(kctx, EXPT_("RuntimeScript"), SoftwareFault, op->msg, (KonohaStack *)rbp);\
+	KLIB KRuntime_raise(kctx, EXPT_("RuntimeScript"), SoftwareFault, op->msg, (KonohaStack *)rbp);\
 } while(0)
 #endif
 

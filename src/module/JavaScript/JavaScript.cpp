@@ -305,7 +305,7 @@ static kbool_t JSBuilder_VisitUndefinedStmt(KonohaContext *kctx, KBuilder *build
 	return false;
 }
 
-static void JSBuilder_EmitKonohaValue(KonohaContext *kctx, KBuilder *builder, KonohaClass* ct, KonohaStack* sfp)
+static void JSBuilder_EmitKonohaValue(KonohaContext *kctx, KBuilder *builder, KClass* ct, KonohaStack* sfp)
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
@@ -322,7 +322,7 @@ static void JSBuilder_EmitConstValue(KonohaContext *kctx, KBuilder *builder, kOb
 	JSBuilder_EmitKonohaValue(kctx, builder, kObject_class(obj), sfp);
 }
 
-static void JSBuilder_EmitNConstValue(KonohaContext *kctx, KBuilder *builder, KonohaClass *ct, unsigned long long unboxVal)
+static void JSBuilder_EmitNConstValue(KonohaContext *kctx, KBuilder *builder, KClass *ct, unsigned long long unboxVal)
 {
 	KonohaStack sfp[1];
 	sfp[0].unboxValue = unboxVal;
@@ -393,7 +393,7 @@ static void JSBuilder_VisitExprParams(KonohaContext *kctx, KBuilder *builder, kS
 
 static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr, kExpr *receiver, kMethod *mtd)
 {
-	KonohaClass *globalObjectClass = KLIB kNameSpace_GetClassByFullName(kctx, Stmt_ns(stmt), "GlobalObject", 12, NULL);
+	KClass *globalObjectClass = KLIB kNameSpace_GetClassByFullName(kctx, Stmt_ns(stmt), "GlobalObject", 12, NULL);
 	kbool_t isGlobal = (KClass_(receiver->attrTypeId) == globalObjectClass || receiver->attrTypeId == KType_NameSpace);
 	const char *methodName = KSymbol_text(mtd->mn);
 	if(receiver->attrTypeId == KType_NameSpace) {
@@ -523,7 +523,7 @@ static void JSBuilder_VisitStackTopExpr(KonohaContext *kctx, KBuilder *builder, 
 
 static void compileAllDefinedMethods(KonohaContext *kctx)
 {
-	KonohaRuntime *share = kctx->share;
+	KRuntime *share = kctx->share;
 	size_t i;
 	for(i = 0; i < kArray_size(share->GlobalConstList); i++) {
 		kObject *o = share->GlobalConstList->ObjectItems[i];
@@ -552,10 +552,10 @@ static void JSBuilder_EmitExtendFunctionCode(KonohaContext *kctx, KBuilder *buil
 	JSBuilder_EmitNewLineWith(kctx, builder, "}");
 }
 
-static void JSBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder, KonohaClass *kclass)
+static void JSBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder, KClass *kclass)
 {
 	kushort_t i;
-	KonohaClassField *field = kclass->fieldItems;
+	KClassField *field = kclass->fieldItems;
 	kObject *constList = kclass->defaultNullValue;
 	for(i = 0; i < kclass->fieldsize; ++i) {
 		JSBuilder_EmitString(kctx, builder, "this.", KSymbol_text(field[i].name), " = ");
@@ -570,7 +570,7 @@ static void JSBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder, K
 
 static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 {
-	KonohaClass *kclass = KClass_(mtd->typeId);
+	KClass *kclass = KClass_(mtd->typeId);
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kParam *params = kMethod_GetParam(mtd);
@@ -598,10 +598,10 @@ static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, k
 	KLIB KBuffer_Free(&wb);
 }
 
-static void JSBuilder_EmitClassHeader(KonohaContext *kctx, KBuilder *builder, KonohaClass *kclass)
+static void JSBuilder_EmitClassHeader(KonohaContext *kctx, KBuilder *builder, KClass *kclass)
 {
 	JSBuilder *jsBuilder = (JSBuilder *)builder;
-	KonohaClass *base = KClass_(kclass->superTypeId);
+	KClass *base = KClass_(kclass->superTypeId);
 	if(base->typeId != KType_Object) {
 		JSBuilder_EmitExtendFunctionCode(kctx, builder);
 		JSBuilder_EmitString(kctx, builder, "var ", KClass_text(kclass), " = (function (_super) {");
@@ -616,10 +616,10 @@ static void JSBuilder_EmitClassHeader(KonohaContext *kctx, KBuilder *builder, Ko
 	}
 }
 
-static void JSBuilder_EmitClassFooter(KonohaContext *kctx, KBuilder *builder, KonohaClass *kclass)
+static void JSBuilder_EmitClassFooter(KonohaContext *kctx, KBuilder *builder, KClass *kclass)
 {
 	JSBuilder *jsBuilder = (JSBuilder *)builder;
-	KonohaClass *base = KClass_(kclass->superTypeId);
+	KClass *base = KClass_(kclass->superTypeId);
 	JSBuilder_EmitString(kctx, builder, "return ", KClass_text(kclass), ";");
 	JSBuilder_EmitNewLineWith(kctx, builder, "");
 	jsBuilder->indent--;
@@ -642,8 +642,8 @@ static void JSBuilder_Init(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 	jsBuilder->indent = 0;
 	KLIB KBuffer_Init(&jsBuilder->buffer, &jsBuilder->jsCodeBuffer);
 	
-	KonohaClass *kclass = KClass_(mtd->typeId);
-	KonohaClass *base  = KClass_(kclass->superTypeId);
+	KClass *kclass = KClass_(mtd->typeId);
+	KClass *base  = KClass_(kclass->superTypeId);
 	
 	if(mtd->mn != 0) {
 		KLIB kMethod_SetFunc(kctx, mtd, NULL);
@@ -674,7 +674,7 @@ static void JSBuilder_Free(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 		jsBuilder->indent--;
 		JSBuilder_EmitNewLineWith(kctx, builder, "}");
 		if(strcmp(KSymbol_text(mtd->mn), "new") == 0) {
-			KonohaClass *kclass = KClass_(mtd->typeId);
+			KClass *kclass = KClass_(mtd->typeId);
 			JSBuilder_EmitClassFooter(kctx, builder, kclass);
 		}
 	}

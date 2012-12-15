@@ -47,7 +47,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_ASSERT(beginIdx == currentIdx);
 	if(beginIdx + 1 < endIdx) {
 		kTokenVar *newToken = tokenList->TokenVarItems[beginIdx];
-		KonohaClass *foundClass = NULL;
+		KClass *foundClass = NULL;
 		kNameSpace *ns = Stmt_ns(stmt);
 		int nextIdx = SUGAR TokenUtils_ParseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
 		if((size_t)nextIdx < kArray_size(tokenList)) {
@@ -61,7 +61,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 			KSyntax *newsyn = SYN_(ns, SYM_("new"));
 			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup) {     // new int [100]
 				kArray *subTokenList = nextTokenAfterClassName->subTokenList;
-				KonohaClass *classT0 = NULL;
+				KClass *classT0 = NULL;
 				kExpr *expr;
 				int hasGenerics = -1;
 				if(kArray_size(subTokenList) > 0) {
@@ -69,7 +69,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 				}
 				if(hasGenerics != -1) {
 					/* new Type1[Type2[]] => Type1<Type2>.new Or Type1<Type2>.newList */
-					KonohaClass *realType = KClass_p0(kctx, foundClass, classT0->typeId);
+					KClass *realType = KClass_p0(kctx, foundClass, classT0->typeId);
 					KSyntax *syn;// = (realType->baseTypeId != KType_Array) ? SYN_(ns, KSymbol_ExprMethodCall) : newsyn;
 					syn = newsyn;
 					newToken->resolvedSymbol = (realType->baseTypeId != KType_Array) ? MN_new : MN_("newArray");
@@ -77,7 +77,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 							NewExpr(kctx, syn, tokenList->TokenVarItems[beginIdx+1], realType->typeId));
 				} else {
 					/* new Type1[] => Array<Type1>.newList */
-					KonohaClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
+					KClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
 					newToken->resolvedSymbol = MN_("newArray");
 					expr = SUGAR new_UntypedCallStyleExpr(kctx, newsyn, 2, newToken,
 							NewExpr(kctx, newsyn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));

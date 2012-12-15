@@ -59,7 +59,7 @@ typedef struct VirtualCode {
 		intptr_t data[5];
 		void *p[5];
 		kObject *o[5];
-		KonohaClass *ct[5];
+		KClass *ct[5];
 		char *u[5];
 	};
 } VirtualCode;
@@ -146,16 +146,16 @@ struct kByteCodeVar {
 #define CODE_NCALL        kmodcode->PRECOMPILED_NCALL
 
 typedef struct {
-	KonohaModule     header;
-	KonohaClass     *cBasicBlock;
-	KonohaClass     *cByteCode;
+	KRuntimeModule     header;
+	KClass     *cBasicBlock;
+	KClass     *cByteCode;
 	kByteCode       *codeNull;
 	struct VirtualCode  *PRECOMPILED_ENTER;
 	struct VirtualCode  *PRECOMPILED_NCALL;
 } KModuleByteCode;
 
 typedef struct {
-	KonohaModuleContext      h;
+	KContextModule      h;
 	kfileline_t      uline;
 	kArray          *codeList;
 	kBasicBlock     *lbINIT; // ON GCSTACK
@@ -235,7 +235,7 @@ typedef struct OPNSET {
 	KCODE_HEAD;
 	kreg_t a;
 	kint_t n;
-	KonohaClass* ty;
+	KClass* ty;
 } OPNSET;
 
 #define OPEXEC_NSET(A, N, CT) rbp[(A)].unboxValue = (N)
@@ -246,7 +246,7 @@ typedef struct OPNMOV {
 	KCODE_HEAD;
 	kreg_t a;
 	kreg_t b;
-	KonohaClass* ty;
+	KClass* ty;
 } OPNMOV;
 
 #define OPEXEC_NMOV(A, B, CT) rbp[(A)].unboxValue = rbp[(B)].unboxValue
@@ -258,7 +258,7 @@ typedef struct OPNMOVx {
 	kreg_t a;
 	kreg_t b;
 	uintptr_t bx;
-	KonohaClass* ty;
+	KClass* ty;
 } OPNMOVx;
 
 #define OPEXEC_NMOVx(A, B, BX, CT) rbp[(A)].unboxValue = (rbp[(B)].asObject)->fieldUnboxItems[(BX)]
@@ -270,7 +270,7 @@ typedef struct OPXNMOV {
 	kreg_t a;
 	uintptr_t ax;
 	kreg_t b;
-	KonohaClass* ty;
+	KClass* ty;
 } OPXNMOV;
 
 #define OPEXEC_XNMOV(A, AX, B, CT) (rbp[(A)].asObjectVar)->fieldUnboxItems[AX] = rbp[(B)].unboxValue
@@ -281,7 +281,7 @@ typedef struct OPNEW {
 	KCODE_HEAD;
 	kreg_t a;
 	uintptr_t p;
-	KonohaClass* ty;
+	KClass* ty;
 } OPNEW;
 
 
@@ -292,7 +292,7 @@ typedef struct OPNEW {
 typedef struct OPNULL {
 	KCODE_HEAD;
 	kreg_t a;
-	KonohaClass* ty;
+	KClass* ty;
 } OPNULL;
 
 #define OPEXEC_NULL(A, CT)     rbp[(A)].asObject = KLIB Knull(kctx, CT)
@@ -420,7 +420,7 @@ typedef struct OPERROR {
 
 #define OPEXEC_ERROR(UL, msg, ESP) do {\
 	((KonohaStack *)rbp)[K_RTNIDX].calledFileLine = UL;\
-	KLIB KonohaRuntime_raise(kctx, EXPT_("RuntimeScript"), SoftwareFault, msg, (KonohaStack *)rbp);\
+	KLIB KRuntime_raise(kctx, EXPT_("RuntimeScript"), SoftwareFault, msg, (KonohaStack *)rbp);\
 } while(0)
 
 /* SAFEPOINT */
@@ -445,7 +445,7 @@ typedef struct OPCHKSTACK {
 
 #define OPEXEC_CHKSTACK(UL) do {\
 	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
-		KLIB KonohaRuntime_raise(kctx, EXPT_("StackOverflow"), SoftwareFault, NULL, (KonohaStack *)(rbp));\
+		KLIB KRuntime_raise(kctx, EXPT_("StackOverflow"), SoftwareFault, NULL, (KonohaStack *)(rbp));\
 	}\
 	kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].calledFileLine : UL;\
 	KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack *)rbp, uline);\

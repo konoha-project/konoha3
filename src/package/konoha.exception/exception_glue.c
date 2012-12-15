@@ -53,13 +53,13 @@
 //#define IS_Exception(e)      (kObject_class(e) == KClass_Exception)
 //
 //typedef struct {
-//	KonohaModule  h;
-//	KonohaClass *cException;
+//	KRuntimeModule  h;
+//	KClass *cException;
 //	//
 //} KonohaExceptionModule;
 //
 //typedef struct {
-//	KonohaModuleContext h;
+//	KContextModule h;
 //	kException        *thrownException;
 //	//
 //} KonohaExceptionContext;
@@ -78,7 +78,7 @@
 //	}
 ////	int i = 0, psize = kMethod_ParamSize(mtd);
 ////	kParam *pa = kMethod_GetParam(mtd);
-////	KonohaClass *thisClass = O_cid(sfp[0]);
+////	KClass *thisClass = O_cid(sfp[0]);
 ////	for(i = 0; i < psize; i++) {
 ////		pa->paramtypeItems[0].attrTypeId;
 ////		if(i > 0) {
@@ -131,7 +131,7 @@
 //			p--;
 //		}
 //	}
-//	//KLIB KonohaRuntime_raise(kctx, 1);
+//	//KLIB KRuntime_raise(kctx, 1);
 //}
 //
 ///* ------------------------------------------------------------------------ */
@@ -191,16 +191,16 @@
 //	KLIB KBuffer_printf(kctx, wb, "%s", kString_text(v[pos].asException->message));
 //}
 //
-//static void kModuleException_Setup(KonohaContext *kctx, KonohaModule *def, int newctx)
+//static void kModuleException_Setup(KonohaContext *kctx, KRuntimeModule *def, int newctx)
 //{
 //
 //}
 //
-//static void kModuleException_Reftrace(KonohaContext *kctx, KonohaModule *baseh, KObjectVisitor *visitor)
+//static void kModuleException_Reftrace(KonohaContext *kctx, KRuntimeModule *baseh, KObjectVisitor *visitor)
 //{
 //}
 //
-//static void kModuleException_Free(KonohaContext *kctx, KonohaModule *baseh)
+//static void kModuleException_Free(KonohaContext *kctx, KRuntimeModule *baseh)
 //{
 //	KFree(baseh, sizeof(KonohaExceptionModule));
 //}
@@ -212,7 +212,7 @@
 //	mod->h.setup    = kModuleException_Setup;
 //	mod->h.reftrace = kModuleException_Reftrace;
 //	mod->h.free     = kModuleException_Free;
-//	KLIB KonohaRuntime_setModule(kctx, MOD_exception, &mod->h, trace);
+//	KLIB KRuntime_setModule(kctx, MOD_exception, &mod->h, trace);
 //	KDEFINE_CLASS defException = {
 //		STRUCTNAME(Exception),
 //		.cflag = CFLAG_Exception,

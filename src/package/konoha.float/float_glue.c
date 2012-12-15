@@ -56,7 +56,7 @@ extern "C" {
 
 static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), SoftwareFault, NULL, sfp);
+	KLIB KRuntime_raise(kctx, EXPT_("ZeroDivided"), SoftwareFault, NULL, sfp);
 }
 
 // --------------------------------------------------------------------------
@@ -337,7 +337,7 @@ static kbool_t float_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 {
 	if(sizeof(kfloat_t) == sizeof(double)) {
 		KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-			{"double", VirtualType_KonohaClass, (uintptr_t)KClass_Float},
+			{"double", VirtualType_KClass, (uintptr_t)KClass_Float},
 			{NULL},
 		};
 		KLIB kNameSpace_LoadConstData(kctx, exportNS, KonohaConst_(ClassData), false/*isOverride*/, trace);

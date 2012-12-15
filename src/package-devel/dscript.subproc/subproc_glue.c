@@ -701,10 +701,10 @@ static kbool_t subproc_InitSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		.init     = kSubProc_Init,
 		.reftrace = kSubProc_Reftrace,
 	};
-	KonohaClass *cSubproc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSubProc, trace);
+	KClass *cSubproc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSubProc, trace);
 
 	kparamtype_t ps = {KType_String, FN_("str")};
-	KonohaClass *KClass_StringArray2 = KLIB KonohaClass_Generics(kctx, KClass_Array, KType_String, 1, &ps);
+	KClass *KClass_StringArray2 = KLIB KClass_Generics(kctx, KClass_Array, KType_String, 1, &ps);
 	ktypeattr_t KType_StringArray = KClass_StringArray2->typeId, KType_SubProc = cSubproc->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
@@ -893,7 +893,7 @@ static int spSplit(char* str, char* args[])
 /**
  * @return "konoha.posix.File" class id
  */
-//static KonohaClass khn_getFileClass(KonohaContext *kctx) {
+//static KClass khn_getFileClass(KonohaContext *kctx) {
 //	char *name = "konoha.posix.File";
 //	kbytes_t lname;
 //	lname.ubuf = (kchar_t *)name;
@@ -1828,10 +1828,10 @@ static kbool_t subproc_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 		.reftrace = kSubproc_Reftrace,
 	};
 
-	KonohaClass *cSubproc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSubproc, trace);
+	KClass *cSubproc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSubproc, trace);
 
 	kparamtype_t ps = {KType_String, FN_("str")};
-	KonohaClass *KClass_StringArray2 = KLIB KonohaClass_Generics(kctx, KClass_Array, KType_String, 1, &ps);
+	KClass *KClass_StringArray2 = KLIB KClass_Generics(kctx, KClass_Array, KType_String, 1, &ps);
 	ktypeattr_t KType_StringArray = KClass_StringArray2->typeId;
 
 	KDEFINE_METHOD MethodData[] = {

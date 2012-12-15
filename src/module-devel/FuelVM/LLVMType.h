@@ -22,14 +22,14 @@ enum STRUKClass_TYPE_ID {
 	ID_MAX,
 	ID_uint = ID_int,
 	ID_ulong = ID_long,
-	ID_PtrKonohaClassVar = ID_Ptrvoid,
+	ID_PtrKClassVar = ID_Ptrvoid,
 	ID_PtrKProtoMap = ID_Ptrvoid,
 	ID_PtrKonohaFactory = ID_Ptrvoid,
 	ID_PtrKonohaLibVar = ID_Ptrvoid,
-	ID_PtrKonohaRuntimeVar = ID_Ptrvoid,
-	ID_PtrKonohaStackRuntimeVar = ID_Ptrvoid,
-	ID_PtrPtrKonohaModule = ID_Ptrvoid,
-	ID_PtrPtrKonohaModuleContext = ID_Ptrvoid,
+	ID_PtrKRuntimeVar = ID_Ptrvoid,
+	ID_PtrKStackRuntimeVar = ID_Ptrvoid,
+	ID_PtrPtrKRuntimeModule = ID_Ptrvoid,
+	ID_PtrPtrKContextModule = ID_Ptrvoid,
 	ID_PtrVirtualCode = ID_Ptrvoid,
 	ID_PtrkTokenVar = ID_Ptrvoid,
 	ID_PtrkNameSpaceVar = ID_Ptrvoid,
@@ -204,7 +204,7 @@ static llvm::Type *convert_type(KonohaContext *kctx, ktypeattr_t type)
 	return LLVMTYPE_ObjectPtr;
 }
 
-static llvm::Type *convert_type(KonohaContext *kctx, KonohaClass *kclass)
+static llvm::Type *convert_type(KonohaContext *kctx, KClass *kclass)
 {
 	return convert_type(kctx, kclass->typeId);
 }

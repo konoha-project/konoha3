@@ -43,7 +43,7 @@ typedef struct _kMpf {
 
 static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), SoftwareFault, NULL, sfp);
+	KLIB KRuntime_raise(kctx, EXPT_("ZeroDivided"), SoftwareFault, NULL, sfp);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -955,8 +955,8 @@ static kbool_t gmp_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 	MpfDef.free  = Mpf_Free;
 	MpfDef.p     = Mpf_p;
 
-	KonohaClass *cMpz = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MpzDef, trace);
-	KonohaClass *cMpf = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MpfDef, trace);
+	KClass *cMpz = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MpzDef, trace);
+	KClass *cMpf = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MpfDef, trace);
 
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {

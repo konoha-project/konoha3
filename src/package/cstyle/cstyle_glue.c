@@ -277,8 +277,8 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 		kExprVar *arrayExpr = SUGAR new_UntypedCallStyleExpr(kctx, stmt->syn/*DUMMY*/, 2, K_NULL, K_NULL);
 		SUGAR kStmt_AddExprParam(kctx, stmt, arrayExpr, termToken->subTokenList, 0, kArray_size(termToken->subTokenList), NULL);
 		size_t i;
-		KonohaClass *requestClass = KClass_(reqty);
-		KonohaClass *paramType = KClass_INFER;
+		KClass *requestClass = KClass_(reqty);
+		KClass *paramType = KClass_INFER;
 		if(requestClass->baseTypeId == KType_Array) {
 			paramType = KClass_(requestClass->p0);
 		}
@@ -379,7 +379,7 @@ static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Expression_Indexer(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
-	KonohaClass *genericsClass = NULL;
+	KClass *genericsClass = NULL;
 	kNameSpace *ns = Stmt_ns(stmt);
 	int nextIdx = SUGAR TokenUtils_ParseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, &genericsClass);
 	if(nextIdx != -1) {  // to avoid Func[T]
@@ -849,7 +849,7 @@ static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 static kbool_t cstyle_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	KDEFINE_INT_CONST ClassData[] = {   // long as alias
-		{"long", VirtualType_KonohaClass, (uintptr_t)KClass_Int},
+		{"long", VirtualType_KClass, (uintptr_t)KClass_Int},
 		{NULL},
 	};
 	KLIB kNameSpace_LoadConstData(kctx, exportNS, KonohaConst_(ClassData), false/*isOverride*/, trace);

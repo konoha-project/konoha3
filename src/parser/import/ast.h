@@ -180,14 +180,14 @@ static int TokenUtils_SkipIndent(kArray *tokenList, int currentIdx, int endIdx)
 	return currentIdx;
 }
 
-static int TokenUtils_ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef);
-static KonohaClass* TokenUtils_ParseGenericsType(KonohaContext *kctx, kNameSpace *ns, KonohaClass *baseClass, kArray *tokenList, int beginIdx, int endIdx)
+static int TokenUtils_ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KClass **classRef);
+static KClass* TokenUtils_ParseGenericsType(KonohaContext *kctx, kNameSpace *ns, KClass *baseClass, kArray *tokenList, int beginIdx, int endIdx)
 {
 	int currentIdx = beginIdx;
 	size_t psize = 0;
 	kparamtype_t *p = ALLOCA(kparamtype_t, endIdx);
 	while(currentIdx < endIdx) {
-		KonohaClass *paramClass = NULL;
+		KClass *paramClass = NULL;
 		currentIdx = TokenUtils_ParseTypePattern(kctx, ns, tokenList, currentIdx, endIdx, &paramClass);
 		if(paramClass == NULL) {
 			return NULL;
@@ -199,18 +199,18 @@ static KonohaClass* TokenUtils_ParseGenericsType(KonohaContext *kctx, kNameSpace
 		}
 	}
 	if(baseClass->baseTypeId == KType_Func) {
-		return KLIB KonohaClass_Generics(kctx, baseClass, p[0].attrTypeId, psize-1, p+1);
+		return KLIB KClass_Generics(kctx, baseClass, p[0].attrTypeId, psize-1, p+1);
 	}
 	else {
-		return KLIB KonohaClass_Generics(kctx, baseClass, KType_void, psize, p);
+		return KLIB KClass_Generics(kctx, baseClass, KType_void, psize, p);
 	}
 }
 
-static int TokenUtils_ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef)
+static int TokenUtils_ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KClass **classRef)
 {
 	int nextIdx = -1;
 	kToken *tk = tokenList->TokenItems[beginIdx];
-	KonohaClass *foundClass = NULL;
+	KClass *foundClass = NULL;
 	if(tk->resolvedSyntaxInfo->keyword == KSymbol_TypePattern) {
 		foundClass = KClass_(tk->resolvedTypeId);
 		nextIdx = beginIdx + 1;
@@ -230,7 +230,7 @@ static int TokenUtils_ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArr
 			}
 			int sizeofBracketTokens = kArray_size(tk->subTokenList);
 			if(isAllowedGenerics &&  sizeofBracketTokens > 0) {  // C[T][]
-				KonohaClass *foundGenericClass = TokenUtils_ParseGenericsType(kctx, ns, foundClass, tk->subTokenList, 0, sizeofBracketTokens);
+				KClass *foundGenericClass = TokenUtils_ParseGenericsType(kctx, ns, foundClass, tk->subTokenList, 0, sizeofBracketTokens);
 				if(foundGenericClass == NULL) break;
 				foundClass = foundGenericClass;
 			}

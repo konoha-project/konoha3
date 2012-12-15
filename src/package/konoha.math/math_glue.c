@@ -214,7 +214,7 @@ static kbool_t math_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	MathDef.structname = "Math"; /*structname*/
 	MathDef.typeId = TypeAttr_NewId; /*cid*/
 
-	KonohaClass *cMath = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MathDef, trace);
+	KClass *cMath = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MathDef, trace);
 	int FN_x = FN_("x");
 	int FN_y = FN_("y");
 	KDEFINE_METHOD MethodData[] = {

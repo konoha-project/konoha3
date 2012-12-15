@@ -511,21 +511,21 @@ static KMETHOD MPIData_seti(KonohaContext *kctx, KonohaStack *sfp)
 #define _F(F)   (intptr_t)(F)
 
 typedef struct {
-	KonohaModule h;
-	KonohaClass *cValue;
+	KRuntimeModule h;
+	KClass *cValue;
 } KModuleMpi;
 
-static void MpiModule_Setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
+static void MpiModule_Setup(KonohaContext *kctx, struct KRuntimeModule *def, int newctx)
 {
 	(void)kctx;(void)def;(void)newctx;
 }
 
-static void kmodmpi_Reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
+static void kmodmpi_Reftrace(KonohaContext *kctx, struct KRuntimeModule *baseh, KObjectVisitor *visitor)
 {
 	(void)kctx;(void)baseh;
 }
 
-static void MpiModule_Free(KonohaContext *kctx, struct KonohaModule *baseh)
+static void MpiModule_Free(KonohaContext *kctx, struct KRuntimeModule *baseh)
 {
 	MPI_Finalize();
 }
@@ -538,7 +538,7 @@ static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 	mod->h.name     = "mpi";
 	mod->h.setupModuleContext    = MpiModule_Setup;
 	mod->h.freeModule     = MpiModule_Free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_mpi, (KonohaModule *)mod, trace);
+	KLIB KRuntime_setModule(kctx, MOD_mpi, (KRuntimeModule *)mod, trace);
 
 	int argc = 0;
 	char *args[1] = {};
@@ -567,11 +567,11 @@ static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 	//	.structname = "MPIOp",
 	//	.typeId = TypeAttr_NewId
 	//};
-	KonohaClass *KClass_MPI = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPIDef, trace);
-	KonohaClass *KClass_MPIComm = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPICommDef, trace);
-	KonohaClass *KClass_MPIRequest = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPIRequestDef, trace);
-	KonohaClass *KClass_MPIData = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPIDataDef, trace);
-	//KonohaClass *KClass_MPIOp = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPIOpDef, trace);
+	KClass *KClass_MPI = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPIDef, trace);
+	KClass *KClass_MPIComm = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPICommDef, trace);
+	KClass *KClass_MPIRequest = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPIRequestDef, trace);
+	KClass *KClass_MPIData = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPIDataDef, trace);
+	//KClass *KClass_MPIOp = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPIOpDef, trace);
 #define KType_MPI         (KClass_MPI->typeId)
 #define KType_MPIComm     (KClass_MPIComm->typeId)
 #define KType_MPIRequest  (KClass_MPIRequest->typeId)

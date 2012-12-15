@@ -48,10 +48,10 @@ static void konoha_Init(void)
 /* ------------------------------------------------------------------------ */
 /* stack */
 
-static void KonohaStackRuntime_Init(KonohaContext *kctx, KonohaContextVar *ctx, size_t stacksize)
+static void KStackRuntime_Init(KonohaContext *kctx, KonohaContextVar *ctx, size_t stacksize)
 {
 	size_t i;
-	KonohaStackRuntimeVar *base = (KonohaStackRuntimeVar *)KCalloc_UNTRACE(sizeof(KonohaStackRuntimeVar), 1);
+	KStackRuntimeVar *base = (KStackRuntimeVar *)KCalloc_UNTRACE(sizeof(KStackRuntimeVar), 1);
 	base->stacksize = stacksize;
 	base->stack = (KonohaStack *)KCalloc_UNTRACE(sizeof(KonohaStack), stacksize);
 	assert(stacksize>64);
@@ -67,7 +67,7 @@ static void KonohaStackRuntime_Init(KonohaContext *kctx, KonohaContextVar *ctx, 
 	ctx->stack = base;
 }
 
-static void KonohaStackRuntime_Reftrace(KonohaContext *kctx, KonohaContextVar *ctx, KObjectVisitor *visitor)
+static void KStackRuntime_Reftrace(KonohaContext *kctx, KonohaContextVar *ctx, KObjectVisitor *visitor)
 {
 	KonohaStack *sp = ctx->stack->stack;
 	while(sp < ctx->esp) {
@@ -78,17 +78,17 @@ static void KonohaStackRuntime_Reftrace(KonohaContext *kctx, KonohaContextVar *c
 	KRefTrace(ctx->stack->OptionalErrorInfo);
 }
 
-static void KonohaStackRuntime_Free(KonohaContext *kctx, KonohaContextVar *ctx)
+static void KStackRuntime_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	if(ctx->stack->evaljmpbuf != NULL) {
 		KFree(ctx->stack->evaljmpbuf, sizeof(jmpbuf_i));
 	}
 	KLIB KArray_Free(kctx, &ctx->stack->cwb);
 	KFree(ctx->stack->stack, sizeof(KonohaStack) * ctx->stack->stacksize);
-	KFree(ctx->stack, sizeof(KonohaStackRuntimeVar));
+	KFree(ctx->stack, sizeof(KStackRuntimeVar));
 }
 
-static kbool_t KonohaRuntime_setModule(KonohaContext *kctx, int x, KonohaModule *d, KTraceInfo *trace)
+static kbool_t KRuntime_setModule(KonohaContext *kctx, int x, KRuntimeModule *d, KTraceInfo *trace)
 {
 	if(kctx->modshare[x] != NULL) {
 		KLIB ReportScriptMessage(kctx, trace, ErrTag, "module %s already registered", kctx->modshare[x]->name);
@@ -115,7 +115,7 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 	if(kctx == NULL) {  // NULL means first one
 		KonohaLibVar *klib = (KonohaLibVar *)calloc(sizeof(KonohaLib) + sizeof(KonohaContextVar), 1);
 		klib_Init(klib);
-		klib->KonohaRuntime_setModule  = KonohaRuntime_setModule;
+		klib->KRuntime_setModule  = KRuntime_setModule;
 		klib->KonohaContext_Init = new_KonohaContext;
 		klib->KonohaContext_Free = KonohaContext_Free;
 		klib->ReftraceAll = ReftraceAll;
@@ -125,11 +125,11 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		newctx->klib = (KonohaLib *)klib;
 		newctx->platApi = platApi;
 		kctx = (KonohaContext *)newctx;
-		newctx->modshare = (KonohaModule**)calloc(sizeof(KonohaModule *), KonohaModule_MAXSIZE);
-		newctx->modlocal = (KonohaModuleContext**)calloc(sizeof(KonohaModuleContext *), KonohaModule_MAXSIZE);
+		newctx->modshare = (KRuntimeModule**)calloc(sizeof(KRuntimeModule *), KRuntimeModule_MAXSIZE);
+		newctx->modlocal = (KContextModule**)calloc(sizeof(KContextModule *), KRuntimeModule_MAXSIZE);
 		DBG_ASSERT(PLATAPI InitGcContext != NULL);
 		PLATAPI InitGcContext(newctx);
-		KonohaRuntime_Init(kctx, newctx);
+		KRuntime_Init(kctx, newctx);
 	}
 	else {   // others take ctx as its parent
 		newctx = (KonohaContextVar *)KCalloc_UNTRACE(sizeof(KonohaContextVar), 1);
@@ -137,10 +137,10 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		newctx->platApi = kctx->platApi;
 		newctx->share = kctx->share;
 		newctx->modshare = kctx->modshare;
-		newctx->modlocal = (KonohaModuleContext**)KCalloc_UNTRACE(sizeof(KonohaModuleContext *), KonohaModule_MAXSIZE);
+		newctx->modlocal = (KContextModule**)KCalloc_UNTRACE(sizeof(KContextModule *), KRuntimeModule_MAXSIZE);
 		PLATAPI InitGcContext(kctx);
 	}
-	KonohaStackRuntime_Init(kctx, newctx, platApi->stacksize);
+	KStackRuntime_Init(kctx, newctx, platApi->stacksize);
 	if(IS_RootKonohaContext(newctx)) {
 //		MODCODE_Init(kctx, newctx);
 		MODSUGAR_Init(kctx, newctx);
@@ -149,8 +149,8 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 	}
 	else {
 		int i;
-		for(i = 0; i < KonohaModule_MAXSIZE; i++) {
-			KonohaModule *mod = newctx->modshare[i];
+		for(i = 0; i < KRuntimeModule_MAXSIZE; i++) {
+			KRuntimeModule *mod = newctx->modshare[i];
 			if(mod == NULL) continue;
 			if(mod->setupModuleContext != NULL) {
 				mod->setupModuleContext((KonohaContext *)newctx, mod, true);
@@ -164,11 +164,11 @@ static void KonohaContext_Reftrace(KonohaContext *kctx, KonohaContextVar *ctx, K
 {
 	size_t i;
 	if(IS_RootKonohaContext(kctx)) {
-		KonohaRuntime_Reftrace(kctx, ctx, visitor);
+		KRuntime_Reftrace(kctx, ctx, visitor);
 	}
-	KonohaStackRuntime_Reftrace(kctx, ctx, visitor);
-	for(i = 0; i < KonohaModule_MAXSIZE; i++) {
-		KonohaModuleContext *p = ctx->modlocal[i];
+	KStackRuntime_Reftrace(kctx, ctx, visitor);
+	for(i = 0; i < KRuntimeModule_MAXSIZE; i++) {
+		KContextModule *p = ctx->modlocal[i];
 		if(p != NULL && p->reftrace != NULL) {
 			p->reftrace(kctx, p, visitor);
 		}
@@ -183,18 +183,18 @@ static void ReftraceAll(KonohaContext *kctx, KObjectVisitor *visitor)
 static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	size_t i;
-	for(i = 1; i < KonohaModule_MAXSIZE; i++) {   // 0 is LOGGER, free lately
-		KonohaModuleContext *p = ctx->modlocal[i];
+	for(i = 1; i < KRuntimeModule_MAXSIZE; i++) {   // 0 is LOGGER, free lately
+		KContextModule *p = ctx->modlocal[i];
 		if(p != NULL && p->free != NULL) {
 			p->free(ctx, p);
 		}
 	}
-	KonohaStackRuntime_Free(kctx, ctx);
+	KStackRuntime_Free(kctx, ctx);
 	if(IS_RootKonohaContext(ctx)){  // share
 		//PLATAPI DeleteVirtualMachine(ctx);
 		KonohaLibVar *kklib = (KonohaLibVar *)ctx - 1;
-		for(i = 0; i < KonohaModule_MAXSIZE; i++) {
-			KonohaModule *p = ctx->modshare[i];
+		for(i = 0; i < KRuntimeModule_MAXSIZE; i++) {
+			KRuntimeModule *p = ctx->modshare[i];
 			if(p == NULL) continue;
 			if(p->allocSize > 0) {
 				KFree(p, p->allocSize);
@@ -204,7 +204,7 @@ static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 			}
 		}
 		PLATAPI DeleteGcContext(ctx);
-		KonohaRuntime_Free(kctx, ctx);
+		KRuntime_Free(kctx, ctx);
 		//MODGC_Check_malloced_size(kctx);
 		free(kctx->modlocal);
 		free(kctx->modshare);
@@ -212,7 +212,7 @@ static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 	}
 	else {
 		PLATAPI DeleteGcContext(ctx);
-		KFree(ctx->modlocal, sizeof(KonohaModuleContext *) * KonohaModule_MAXSIZE);
+		KFree(ctx->modlocal, sizeof(KContextModule *) * KRuntimeModule_MAXSIZE);
 		KFree(ctx, sizeof(KonohaContextVar));
 	}
 }

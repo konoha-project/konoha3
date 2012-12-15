@@ -462,7 +462,7 @@ static KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 //## @SmartReturn Object ResultSet.get(String n);
 static KMETHOD ResultSet_get(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaClass *retClass = KGetReturnType(sfp);
+	KClass *retClass = KGetReturnType(sfp);
 	if(retClass->typeId == KType_int) {
 		ResultSet_getInt(kctx, sfp);
 	} else if(retClass->typeId == KType_String) {
@@ -499,8 +499,8 @@ static kbool_t sql_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 		.p = kResultSet_p,
 	};
 
-	KonohaClass *cConnection = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &ConnectionDef, trace);
-	KonohaClass *cResultSet = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &ResultSetDef, trace);
+	KClass *cConnection = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &ConnectionDef, trace);
+	KClass *cResultSet = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &ResultSetDef, trace);
 
 	KDEFINE_METHOD MethodData[] = {
 		/* Connection method */

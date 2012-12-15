@@ -272,7 +272,7 @@ static kExprVar* new_UntypedCallStyleExpr(KonohaContext *kctx, KSyntax *syn, int
 	return expr;
 }
 
-static kExpr* new_TypedConsExpr(KonohaContext *kctx, int build, KonohaClass *ty, int n, ...)
+static kExpr* new_TypedConsExpr(KonohaContext *kctx, int build, KClass *ty, int n, ...)
 {
 	kExprVar *expr = new_(ExprVar, NULL, OnGcStack);
 	va_list ap;
@@ -284,9 +284,9 @@ static kExpr* new_TypedConsExpr(KonohaContext *kctx, int build, KonohaClass *ty,
 	return (kExpr *)expr;
 }
 
-static kExpr *kStmtkExpr_TypeCheckCallParam(KonohaContext *kctx, kStmt *stmt, kExprVar *expr, kMethod *mtd, kGamma *gma, KonohaClass *reqClass);
+static kExpr *kStmtkExpr_TypeCheckCallParam(KonohaContext *kctx, kStmt *stmt, kExprVar *expr, kMethod *mtd, kGamma *gma, KClass *reqClass);
 
-static kExpr* new_TypedCallExpr(KonohaContext *kctx, kStmt *stmt, kGamma *gma, KonohaClass *reqClass, kMethod *mtd, int n, ...)
+static kExpr* new_TypedCallExpr(KonohaContext *kctx, kStmt *stmt, kGamma *gma, KClass *reqClass, kMethod *mtd, int n, ...)
 {
 	va_list ap;
 	va_start(ap, n);
@@ -310,7 +310,7 @@ static kExpr* kExpr_Add(KonohaContext *kctx, kExpr *expr, kExpr *e)
 	return K_NULLEXPR;
 }
 
-static kExpr* SUGAR kExpr_SetConstValue(KonohaContext *kctx, kExprVar *expr, KonohaClass *typedClass, kObject *o)
+static kExpr* SUGAR kExpr_SetConstValue(KonohaContext *kctx, kExprVar *expr, KClass *typedClass, kObject *o)
 {
 	expr = (expr == NULL) ? new_(ExprVar, 0, OnGcStack) : expr;
 	if(typedClass == NULL) typedClass = kObject_class(o);

@@ -309,7 +309,7 @@ static void konoha_startup(KonohaContext *kctx, const char *startup_script)
 static void CommandLine_setARGV(KonohaContext *kctx, int argc, char** argv)
 {
 	INIT_GCSTACK();
-	KonohaClass *KClass_StringArray0 = KClass_p0(kctx, KClass_Array, KType_String);
+	KClass *KClass_StringArray0 = KClass_p0(kctx, KClass_Array, KType_String);
 	kArray *a = (kArray*)KLIB new_kObject(kctx, _GcStack, KClass_StringArray0, 0);
 	int i;
 	for(i = 0; i < argc; i++) {

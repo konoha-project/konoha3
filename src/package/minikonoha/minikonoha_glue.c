@@ -147,8 +147,8 @@ static kbool_t minikonoha_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTra
 	defKonoha.init = kKonoha_Init;
 	defKonoha.free = kKonoha_Free;
 
-	KonohaClass *cKonohaFactory = KLIB KonohaClass_define(kctx, ns->packageId, NULL, &defKonohaFactory, trace);
-	KonohaClass *cKonoha =  KLIB KonohaClass_define(kctx, ns->packageId, NULL, &defKonoha, trace);
+	KClass *cKonohaFactory = KLIB KClass_define(kctx, ns->packageId, NULL, &defKonohaFactory, trace);
+	KClass *cKonoha =  KLIB KClass_define(kctx, ns->packageId, NULL, &defKonoha, trace);
 	int KType_KonohaFactory = cKonohaFactory->typeId, KType_Konoha = cKonoha->typeId;
 
 	KDEFINE_METHOD MethodData[] = {

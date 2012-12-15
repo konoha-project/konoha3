@@ -29,15 +29,15 @@ typedef struct kApache {
 } kApache;
 
 typedef struct {
-	KonohaModule h;
-	KonohaClass *cRequest;
-	KonohaClass *cAprTable;
-	KonohaClass *cAprTableEntry;
-	KonohaClass *cApache;
+	KRuntimeModule h;
+	KClass *cRequest;
+	KClass *cAprTable;
+	KClass *cAprTableEntry;
+	KClass *cApache;
 } KModuleApache;
 
 typedef struct {
-	KonohaModuleContext h;
+	KContextModule h;
 	//kRequest *req;
 } ctxapache_t;
 

@@ -31,7 +31,7 @@ extern "C" {
 // @SmartReturn Object Object.to()
 static KMETHOD Object_to(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaClass *selfClass = kObject_class(sfp[0].asObject), *targetClass = KGetReturnType(sfp);
+	KClass *selfClass = kObject_class(sfp[0].asObject), *targetClass = KGetReturnType(sfp);
 	if(selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass)) {
 		sfp[K_RTNIDX].unboxValue = kObject_Unbox(sfp[0].asObject);
 		KReturnField(sfp[0].asObject);
@@ -91,7 +91,7 @@ static KMETHOD Boolean_box(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const @SmartReturn method Object Int.box();
 static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaClass *c = KGetReturnType(sfp);
+	KClass *c = KGetReturnType(sfp);
 	DBG_ASSERT(KClass_Is(UnboxType, c));
 	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
 //	DBG_P(">>>>>>>>>>> boxing %s %lld\n", KType_text(c->typeId), sfp[0].unboxValue);
@@ -149,7 +149,7 @@ static KMETHOD Int_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 	kint_t n = sfp[1].intValue;
 	if(unlikely(n == 0)) {
 		KMakeTrace(trace, sfp);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), SoftwareFault, NULL, trace->baseStack);
+		KLIB KRuntime_raise(kctx, EXPT_("ZeroDivided"), SoftwareFault, NULL, trace->baseStack);
 	}
 	KReturnUnboxValue(sfp[0].intValue / n);
 }
@@ -160,7 +160,7 @@ static KMETHOD Int_opMOD(KonohaContext *kctx, KonohaStack *sfp)
 	kint_t n = sfp[1].intValue;
 	if(unlikely(n == 0)) {
 		KMakeTrace(trace, sfp);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), SoftwareFault, NULL, trace->baseStack);
+		KLIB KRuntime_raise(kctx, EXPT_("ZeroDivided"), SoftwareFault, NULL, trace->baseStack);
 	}
 	KReturnUnboxValue(sfp[0].intValue % n);
 }
@@ -274,7 +274,7 @@ static KMETHOD NameSpace_assert(KonohaContext *kctx, KonohaStack *sfp)
 	if(cond == false) {
 		KMakeTrace(trace, sfp);
 		((KonohaFactory *)kctx->platApi)->exitStatus = 1;  // just in case
-		KLIB KonohaRuntime_raise(kctx, EXPT_("Assertion"), SoftwareFault, NULL, trace->baseStack);
+		KLIB KRuntime_raise(kctx, EXPT_("Assertion"), SoftwareFault, NULL, trace->baseStack);
 	}
 }
 

@@ -587,7 +587,7 @@ static void KProtoMap_Free(KonohaContext *kctx, KProtoMap* p)
 
 static void kObjectProto_Free(KonohaContext *kctx, kObjectVar *o)
 {
-	KonohaClass *ct = kObject_class(o);
+	KClass *ct = kObject_class(o);
 	ct->free(kctx, o);
 	if(KGetProtoMap(o) != NULL) {
 		KProtoMap_Free(kctx, KGetProtoMap(o));
@@ -670,7 +670,7 @@ static void kObjectProto_DoEach(KonohaContext *kctx, kAbstractObject *ao, void *
 
 static void kObjectProto_Free(KonohaContext *kctx, kObjectVar *o)
 {
-	KonohaClass *ct = kObject_class(o);
+	KClass *ct = kObject_class(o);
 	protomap_delete((Kprotomap_t *)o->h.prototypePtr);
 	ct->free(kctx, o);
 }
@@ -792,9 +792,9 @@ static void DumpObject(KonohaContext *kctx, kObject *o, const char *file, const 
 
 // -------------------------------------------------------------------------
 
-static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp)
+static kbool_t KRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaStackRuntimeVar *runtime = kctx->stack;
+	KStackRuntimeVar *runtime = kctx->stack;
 	KonohaStack *bottomStack = runtime->bottomStack;
 	jmpbuf_i lbuf = {};
 	if(runtime->evaljmpbuf == NULL) {
@@ -843,7 +843,7 @@ static uintptr_t ApplySystemFunc(KonohaContext *kctx, uintptr_t defval, const ch
 	kNameSpace *ns = KNULL(NameSpace);
 	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, kObject_class(ns), mn, psize, MethodMatch_NoOption);
 	if(mtd != NULL) {
-		KonohaClass *returnType = kMethod_GetReturnType(mtd);
+		KClass *returnType = kMethod_GetReturnType(mtd);
 		BEGIN_UnusedStack(lsfp);
 		KUnsafeFieldSet(lsfp[0].asNameSpace, ns);
 		for(i = 0; i < psize; i++) {
@@ -865,9 +865,9 @@ static uintptr_t ApplySystemFunc(KonohaContext *kctx, uintptr_t defval, const ch
 	return defval;
 }
 
-static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, int fault, kString *optionalErrorInfo, KonohaStack *top)
+static void KRuntime_raise(KonohaContext *kctx, int symbol, int fault, kString *optionalErrorInfo, KonohaStack *top)
 {
-	KonohaStackRuntimeVar *runtime = kctx->stack;
+	KStackRuntimeVar *runtime = kctx->stack;
 	KNH_ASSERT(symbol != 0);
 	if(runtime->evaljmpbuf != NULL) {
 		runtime->topStack = top;
@@ -969,10 +969,10 @@ static void klib_Init(KonohaLibVar *l)
 	l->KfileId       = KfileId;
 	l->KpackageId    = KpackageId;
 	l->Ksymbol       = Ksymbol;
-	l->KonohaRuntime_tryCallMethod = KonohaRuntime_tryCallMethod;
+	l->KRuntime_tryCallMethod = KRuntime_tryCallMethod;
 	l->ApplySystemFunc             = ApplySystemFunc;
 
-	l->KonohaRuntime_raise         = KonohaRuntime_raise;
+	l->KRuntime_raise         = KRuntime_raise;
 	l->ReportScriptMessage         = TRACE_ReportScriptMessage; /* perror.h */
 	l->CheckSafePoint              = CheckSafePoint;
 	l->DiagnosisFaultType          = DiagnosisFaultType;

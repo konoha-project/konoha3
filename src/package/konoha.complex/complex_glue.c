@@ -655,7 +655,7 @@ static kbool_t Complex_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	defComplex.cflag     = KClassFlag_Final;
 	defComplex.init      = Complex_Init;
 	defComplex.free      = Complex_Free;
-	KonohaClass *ComplexClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defComplex, trace);
+	KClass *ComplexClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defComplex, trace);
 
 	/* You can define methods with the following procedures. */
 	int KType_Complex = ComplexClass->typeId;

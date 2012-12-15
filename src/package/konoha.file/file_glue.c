@@ -56,7 +56,7 @@ static int TRACE_fgetc(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
 	int ch = fgetc(file->fp);
 	if(ferror(file->fp) != 0) {
 		KTraceErrorPoint(trace, SystemFault, "fgetc", LogFile(file), LogErrno);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
+		KLIB KRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
 	}
 	return ch;
 }
@@ -65,7 +65,7 @@ static int TRACE_fputc(KonohaContext *kctx, kFile *file, int ch, KTraceInfo *tra
 {
 	if(fputc(ch, file->fp) == EOF) {
 		KTraceErrorPoint(trace, SystemFault, "fputc", LogFile(file), LogErrno);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
+		KLIB KRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
 	}
 	else if(!kFile_is(ChangeLessStream, file)) {
 		KTraceChangeSystemPoint(trace, "fputc", LogFile(file), LogWrittenByte(1));
@@ -108,7 +108,7 @@ static size_t TRACE_fread(KonohaContext *kctx, kFile *file, char *buf, size_t bu
 	size_t size = fread(buf, 1, bufsiz, file->fp);
 	if(ferror(file->fp) != 0){
 		KTraceErrorPoint(trace, SystemFault, "fread", LogFile(file), LogErrno);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
+		KLIB KRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
 	}
 	kFile_CheckEOF(kctx, file, trace);
 	return size;
@@ -119,7 +119,7 @@ static size_t TRACE_fwrite(KonohaContext *kctx, kFile *file, const char *buf, si
 	size_t size = fwrite(buf, 1, bufsiz, file->fp);
 	if(ferror(file->fp) != 0){
 		KTraceErrorPoint(trace, SystemFault, "fwrite", LogFile(file), LogErrno);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
+		KLIB KRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
 	}
 	if(size > 0 && !kFile_is(ChangeLessStream, file)) {
 		KTraceChangeSystemPoint(trace, "fwrite", LogFile(file), LogWrittenByte(size));
@@ -186,7 +186,7 @@ static KMETHOD File_new(KonohaContext *kctx, KonohaStack *sfp)
 		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "fopen",
 			LogText("filename", kString_text(path)), LogText("mode", mode), LogErrno);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), fault, NULL, sfp);
+		KLIB KRuntime_raise(kctx, EXPT_("IO"), fault, NULL, sfp);
 	}
 	if(mode[0] == 'w' || mode[0] == 'a' || mode[1] == '+') {
 		KTraceChangeSystemPoint(trace, "fopen", LogFileName(kString_text(path)), LogText("mode", mode));
@@ -545,7 +545,7 @@ static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 static kbool_t file_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-		{"FILE", VirtualType_KonohaClass, (uintptr_t)KClass_File},
+		{"FILE", VirtualType_KClass, (uintptr_t)KClass_File},
 		{NULL},
 	};
 	KLIB kNameSpace_LoadConstData(kctx, exportNS, KonohaConst_(ClassData), false/*isOverride*/, trace);

@@ -421,7 +421,7 @@ static KMETHOD System_opendir(KonohaContext *kctx, KonohaStack *sfp)
 	if(d == NULL) {
 		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "opendir", LogText("dirname", kString_text(path)), LogErrno);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), fault, NULL, sfp);
+		KLIB KRuntime_raise(kctx, EXPT_("IO"), fault, NULL, sfp);
 	}
 	kDir *dir = (kDir *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)d);
 	KFieldSet(dir, dir->PathInfoNULL, path);
@@ -513,7 +513,7 @@ static void path_defineDIR(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trac
 	defDIR.reftrace  = kDir_Reftrace;
 	defDIR.free  = kDir_Free;
 	defDIR.p     = kDir_p;
-	KonohaClass *cDIR = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDIR, trace);
+	KClass *cDIR = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDIR, trace);
 	int KType_DIR = cDIR->typeId;
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static|_C, _F(System_opendir),   KType_DIR,    KType_System, MN_("opendir"),  1, KType_String, FN_("dirname"),

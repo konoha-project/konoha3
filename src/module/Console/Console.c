@@ -89,7 +89,7 @@ static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, k
 	PLATAPI printf_i("%s - %s%s\n", beginTag, msg, endTag);
 }
 
-static void KBuffer_WriteValue(KonohaContext *kctx, KBuffer *wb, KonohaClass *c, KonohaStack *sfp)
+static void KBuffer_WriteValue(KonohaContext *kctx, KBuffer *wb, KClass *c, KonohaStack *sfp)
 {
 	if(KClass_Is(UnboxType, c)) {
 		c->p(kctx, sfp, 0, wb);
@@ -131,7 +131,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 		kfileline_t uline = sfp[K_RTNIDX].calledFileLine;
 		const char *file = PLATAPI shortFilePath(KFileLine_textFileName (uline));
 		PLATAPI printf_i(" [%ld] (%s:%d) %s.%s%s(", (sfp - kctx->stack->stack), file, (kushort_t)uline, Method_t(mtd));
-		KonohaClass *cThis = KClass_(mtd->typeId);
+		KClass *cThis = KClass_(mtd->typeId);
 		if(!KClass_Is(UnboxType, cThis)) {
 			cThis = kObject_class(sfp[0].asObject);
 		}
@@ -146,7 +146,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 			if(i > 0) {
 				PLATAPI printf_i(", ");
 			}
-			KonohaClass *c = KClass_(param->paramtypeItems[i].attrTypeId);
+			KClass *c = KClass_(param->paramtypeItems[i].attrTypeId);
 			c = c->realtype(kctx, c, cThis);
 			KBuffer_WriteValue(kctx, &wb, c, sfp + i + 1);
 			PLATAPI printf_i("%s=(%s) %s", KSymbol_text(KSymbol_Unmask(param->paramtypeItems[i].name)), KClass_text(c), KLIB KBuffer_text(kctx, &wb, EnsureZero));

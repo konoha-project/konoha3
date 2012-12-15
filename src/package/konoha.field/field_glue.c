@@ -139,15 +139,15 @@ static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, ktypea
 	return mtd;
 }
 
-static kbool_t KonohaClass_AddField(KonohaContext *kctx, KonohaClass *ct, ktypeattr_t typeattr, ksymbol_t sym)
+static kbool_t KClass_AddField(KonohaContext *kctx, KClass *ct, ktypeattr_t typeattr, ksymbol_t sym)
 {
 	kushort_t pos = ct->fieldsize;
 	if(unlikely(ct->classMethodList == K_EMPTYARRAY)) {
-		((KonohaClassVar *)ct)->classMethodList = new_(MethodArray, 8, OnGlobalConstList);
+		((KClassVar *)ct)->classMethodList = new_(MethodArray, 8, OnGlobalConstList);
 	}
 	INIT_GCSTACK();
 	if(pos < ct->fieldAllocSize) {
-		KonohaClassVar *definedClass = (KonohaClassVar *)ct;
+		KClassVar *definedClass = (KClassVar *)ct;
 		definedClass->fieldsize += 1;
 		definedClass->fieldItems[pos].name = sym;
 		if(KType_Is(UnboxType, typeattr)) {
@@ -226,7 +226,7 @@ static kbool_t field_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 static kbool_t field_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KSetKLibFunc(ns->packageId, kMethod_indexOfField, KLIB2_Method_indexOfField, trace);
-	KSetKLibFunc(ns->packageId, KonohaClass_AddField, KonohaClass_AddField, trace);
+	KSetKLibFunc(ns->packageId, KClass_AddField, KClass_AddField, trace);
 	field_defineSyntax(kctx, ns, trace);
 	return true;
 }

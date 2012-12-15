@@ -549,7 +549,7 @@ static void FuelVM_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt *s
 		//SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
 		//kshort_t index  = (kshort_t)leftHandExpr->index;
 		//kshort_t xindex = (kshort_t)(leftHandExpr->index >> (sizeof(kshort_t)*8));
-		//KonohaClass *lhsClass = KClass_(leftHandExpr->attrTypeId);
+		//KClass *lhsClass = KClass_(leftHandExpr->attrTypeId);
 		//ASM(XNMOV, OC_(index), xindex, TC_(espidx, rightHandExpr->attrTypeId), lhsClass);
 		//if(expr->attrTypeId != KType_void) {
 		//	ASM(NMOVx, TC_(a, rightHandExpr->attrTypeId), OC_(index), xindex, lhsClass);

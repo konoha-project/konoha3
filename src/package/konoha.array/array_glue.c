@@ -246,7 +246,7 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 //	kFunc  *f = sfp[1].asFunc;
 //	size_t asize = kArray_size(a);
 //	ktypeattr_t resolve_type = kMethod_GetReturnType(f->mtd);  // FIXME
-//	KonohaClass *KClass_ArrayT0 = KClass_p0(kctx, KClass_Array, resolve_type);
+//	KClass *KClass_ArrayT0 = KClass_p0(kctx, KClass_Array, resolve_type);
 //	kArrayVar *returnValue = (kArrayVar *)KLIB new_kObject(kctx, _GcStack, KClass_ArrayT0, asize);
 //
 //	size_t i;
@@ -383,7 +383,7 @@ static KMETHOD Array_indexOf(KonohaContext *kctx, KonohaStack *sfp)
 		kObject *o = sfp[1].asObject;
 		for(i = 0; i < kArray_size(a); i++) {
 //			KMakeTrace(trace, sfp);
-//			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), NULL, trace);
+//			KLIB KRuntime_raise(kctx, EXPT_("NotImplemented"), NULL, trace);
 			if(kObject_class(o)->compareObject(a->ObjectItems[i], o) == 0) {
 				res = i; break;
 			}
@@ -410,7 +410,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 		kObject *o = sfp[1].asObject;
 		for(i = kArray_size(a)- 1; i != 0; i--) {
 //			KMakeTrace(trace, sfp);
-//			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), NULL, trace);
+//			KLIB KRuntime_raise(kctx, EXPT_("NotImplemented"), NULL, trace);
 			if(kObject_class(o)->compareObject(a->ObjectItems[i], o) == 0) {
 				break;
 			}
@@ -511,19 +511,19 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 	KRequireKonohaCommonModule(trace);
 	KImportPackageSymbol(ns, "cstyle", "[]", trace);
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-		{"Array", VirtualType_KonohaClass, (uintptr_t)KClass_(KType_Array)},
+		{"Array", VirtualType_KClass, (uintptr_t)KClass_(KType_Array)},
 		{NULL},
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), false/*isOverride*/, trace);
 
-	KonohaClass *KClass_ArrayT0 = KClass_p0(kctx, KClass_Array, KType_0);
+	KClass *KClass_ArrayT0 = KClass_p0(kctx, KClass_Array, KType_0);
 	ktypeattr_t KType_ArrayT0 = KClass_ArrayT0->typeId;
 
 	kparamtype_t p[] = {{KType_0}};
-	ktypeattr_t KType_FuncMap = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_0 , 1, p))->typeId;
+	ktypeattr_t KType_FuncMap = (KLIB KClass_Generics(kctx, KClass_Func, KType_0 , 1, p))->typeId;
 
 	kparamtype_t P_inject[] = {{KType_0},{KType_0}};
-	ktypeattr_t KType_FuncInject = (KLIB KonohaClass_Generics(kctx, KClass_Func, KType_0 , 2, P_inject))->typeId;
+	ktypeattr_t KType_FuncInject = (KLIB KClass_Generics(kctx, KClass_Func, KType_0 , 2, P_inject))->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im,    _F(Array_get), KType_0,   KType_Array, MN_("get"), 1, KType_int, FN_("index"),
@@ -562,8 +562,8 @@ static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	// [0] currentToken, [1] NULL, [2] ....
 	size_t i;
-	KonohaClass *requestClass = KClass_(reqty);
-	KonohaClass *paramType = (requestClass->baseTypeId == KType_Array) ? KClass_(requestClass->p0) : KClass_INFER;
+	KClass *requestClass = KClass_(reqty);
+	KClass *paramType = (requestClass->baseTypeId == KType_Array) ? KClass_(requestClass->p0) : KClass_INFER;
 	for(i = 2; i < kArray_size(expr->cons); i++) {
 		kExpr *typedExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, i, gma, paramType, 0);
 		if(typedExpr == K_NULLEXPR) {
@@ -586,7 +586,7 @@ static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
-	KonohaClass *genericsClass = NULL;
+	KClass *genericsClass = NULL;
 	kNameSpace *ns = Stmt_ns(stmt);
 	int nextIdx = SUGAR TokenUtils_ParseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, &genericsClass);
 	if(nextIdx != -1) {  // to avoid Func[T]
@@ -612,7 +612,7 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 				kExpr_Setsyn(leftExpr, SYN_(ns, KSymbol_ExprMethodCall));
 			} else {
 				/* transform 'new Type0 [ Type1 ] (...) => new 'Type0<Type1>' (...) */
-				KonohaClass *classT0 = NULL;
+				KClass *classT0 = NULL;
 				kArray *subTokenList = currentToken->subTokenList;
 				int beginIdx = -1;
 				if(kArray_size(subTokenList) > 0) {

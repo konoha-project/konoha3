@@ -126,12 +126,12 @@ struct kRawPtr {
 } while(0)
 
 typedef struct {
-	KonohaModule h;
-	KonohaClass *cValue;
+	KRuntimeModule h;
+	KClass *cValue;
 } kmodllvm_t;
 
 typedef struct {
-	KonohaModuleContext h;
+	KContextModule h;
 } kllvmmod_t;
 
 namespace konoha {
@@ -199,7 +199,7 @@ static void Type_free(KonohaContext *kctx _UNUSED_, kObject *po)
 	konoha::SetRawPtr(po, NULL);
 }
 
-static inline kObject *new_CppObject(KonohaContext *kctx, const KonohaClass *ct, void *ptr)
+static inline kObject *new_CppObject(KonohaContext *kctx, const KClass *ct, void *ptr)
 {
 	kObject *ret = KLIB new_kObject(kctx, OnStack, ct, (uintptr_t)ptr);
 	konoha::SetRawPtr(ret, ptr);
@@ -4606,12 +4606,12 @@ static KDEFINE_INT_CONST IntAttributes[] = {
 //	kapi->loadClassIntConst(kctx, cid, IntAttributes);
 //}
 
-static void kmodllvm_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
+static void kmodllvm_setup(KonohaContext *kctx, struct KRuntimeModule *def, int newctx)
 {
 	(void)kctx;(void)def;(void)newctx;
 }
 
-static void kmodllvm_free(KonohaContext *kctx, struct KonohaModule *baseh)
+static void kmodllvm_free(KonohaContext *kctx, struct KRuntimeModule *baseh)
 {
 	KFree(baseh, sizeof(kmodllvm_t));
 }
@@ -4631,7 +4631,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 	base->h.name     = "llvm";
 	base->h.setupModuleContext = kmodllvm_setup;
 	base->h.freeModule         = kmodllvm_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_llvm, &base->h, trace);
+	KLIB KRuntime_setModule(kctx, MOD_llvm, &base->h, trace);
 
 #define DEFINE_CLASS_CPP(\
 	/*const char * */structname,\
@@ -4640,7 +4640,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 	/*ktypeattr_t      */rtype,          /*kushort_t       */cparamsize,\
 	/*struct kparamtype_t   **/cparamItems,\
 	/*size_t     */cstruct_size,\
-	/*KonohaClassField   **/fieldItems,\
+	/*KClassField   **/fieldItems,\
 	/*kushort_t  */fieldsize,       /*kushort_t */fieldAllocSize,\
 		init,\
 		reftrace,\
@@ -4664,7 +4664,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 	/*ktypeattr_t      */rtype,          /*kushort_t       */cparamsize,\
 	/*struct kparamtype_t   * */cparamItems,\
 	/*size_t     */cstruct_size,\
-	/*KonohaClassField   * */fieldItems,\
+	/*KClassField   * */fieldItems,\
 	/*kushort_t  */fieldsize,       /*kushort_t */fieldAllocSize,\
 		init,\
 		reftrace,\
@@ -4720,8 +4720,8 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		"ArrayType",
 		"StructType"
 	};
-	KonohaClass *KClass_TypeTBL[6];
-	KonohaClass *KClass_BasicBlock, *KClass_IRBuilder;
+	KClass *KClass_TypeTBL[6];
+	KClass *KClass_BasicBlock, *KClass_IRBuilder;
 #define KType_BasicBlock  (KClass_BasicBlock)->typeId
 #define KType_IRBuilder   (KClass_IRBuilder)->typeId
 #define KType_Type         (KClass_TypeTBL[0])->typeId
@@ -4749,16 +4749,16 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 #if LLVM_VERSION >= 300
 	static KDEFINE_CLASS PassManagerBuilderDef = DEFINE_CLASS_0("PassManagerBuilder",
 			PassManagerBuilder_ptr_init, PassManagerBuilder_ptr_free, 0);
-	KonohaClass *KClass_PassManagerBuilder = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PassManagerBuilderDef, trace);
+	KClass *KClass_PassManagerBuilder = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PassManagerBuilderDef, trace);
 #define KType_PassManagerBuilder         (KClass_PassManagerBuilder)->typeId
 #endif
 	static KDEFINE_CLASS PassManagerDef = DEFINE_CLASS_0("PassManager",
 		PassManager_ptr_init, PassManager_ptr_free, 0);
 	static KDEFINE_CLASS FunctionPassManagerDef = DEFINE_CLASS_0("FunctionPassManager",
 			FunctionPassManager_ptr_init, FunctionPassManager_ptr_free, 0);
-	KonohaClass *KClass_PassManager = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PassManagerDef, trace);
-	KonohaClass *KClass_FunctionPassManager = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &FunctionPassManagerDef, trace);
-	KonohaClass *KClass_InstTBL[21];
+	KClass *KClass_PassManager = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PassManagerDef, trace);
+	KClass *KClass_FunctionPassManager = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &FunctionPassManagerDef, trace);
+	KClass *KClass_InstTBL[21];
 	{
 		static const char *InstDefName[] = {
 			"Instruction",
@@ -4818,7 +4818,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 #define KType_DynamicLibrary      (KClass_InstTBL[19])->typeId
 #define KType_intrinsic           (KClass_InstTBL[20])->typeId
 
-	KonohaClass *KClass_PassTBL[4];
+	KClass *KClass_PassTBL[4];
 	{
 		static const char *PassDefName[] = {
 			"Pass",
@@ -4845,10 +4845,10 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 #define KType_FunctionPassManager (KClass_FunctionPassManager)->typeId
 	/* TODO */
 	kparamtype_t P_TypeArray[] = {{KType_Type, 0}};
-	int KType_TypeArray = (KLIB KonohaClass_Generics(kctx, KClass_Array, KType_void, 1, P_TypeArray))->typeId;
+	int KType_TypeArray = (KLIB KClass_Generics(kctx, KClass_Array, KType_void, 1, P_TypeArray))->typeId;
 
 	kparamtype_t P_ValueArray[] = {{KType_Value, 0}};
-	int KType_ValueArray = (KLIB KonohaClass_Generics(kctx, KClass_Array, KType_void, 1, P_ValueArray))->typeId;
+	int KType_ValueArray = (KLIB KClass_Generics(kctx, KClass_Array, KType_void, 1, P_ValueArray))->typeId;
 #define KType_Array_Value    (KType_ValueArray)
 #define KType_Array_Type     (KType_TypeArray)
 #define KType_Array_Constant (KType_Array)

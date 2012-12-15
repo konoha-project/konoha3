@@ -96,7 +96,7 @@ static kstatus_t ReadStmt(KonohaContext *kctx, KBuffer *wb, kfileline_t *uline)
 
 static void DumpEval(KonohaContext *kctx, KBuffer *wb)
 {
-	KonohaStackRuntimeVar *base = kctx->stack;
+	KStackRuntimeVar *base = kctx->stack;
 	ktypeattr_t ty = base->evalty;
 	if(ty != KType_void) {
 		KonohaStack *lsfp = base->stack + base->evalidx;

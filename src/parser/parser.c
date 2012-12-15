@@ -53,7 +53,7 @@ int verbose_sugar = 0;
 static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline, KTraceInfo *trace)
 {
 	kstatus_t result;
-	kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
+	kmodsugar->h.setupModuleContext(kctx, (KRuntimeModule *)kmodsugar, 0/*lazy*/);
 	INIT_GCSTACK();
 	{
 		TokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
@@ -69,7 +69,7 @@ static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char
 /* ------------------------------------------------------------------------ */
 /* [GetSugarContext(kctx)] */
 
-static void SugarContext_Reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh, KObjectVisitor *visitor)
+static void SugarContext_Reftrace(KonohaContext *kctx, struct KContextModule *baseh, KObjectVisitor *visitor)
 {
 //	SugarContext *base = (SugarContext *)baseh;
 //	BEGIN_REFTRACE(4);
@@ -80,14 +80,14 @@ static void SugarContext_Reftrace(KonohaContext *kctx, struct KonohaModuleContex
 //	END_REFTRACE();
 }
 
-static void SugarContext_Free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
+static void SugarContext_Free(KonohaContext *kctx, struct KContextModule *baseh)
 {
 	SugarContext *base = (SugarContext *)baseh;
 	KLIB KArray_Free(kctx, &base->errorMessageBuffer);
 	KFree(base, sizeof(SugarContext));
 }
 
-static void SugarModule_Setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
+static void SugarModule_Setup(KonohaContext *kctx, struct KRuntimeModule *def, int newctx)
 {
 	if(!newctx && kctx->modlocal[MOD_sugar] == NULL) {
 		SugarContext *base = (SugarContext *)KCalloc_UNTRACE(sizeof(SugarContext), 1);
@@ -101,7 +101,7 @@ static void SugarModule_Setup(KonohaContext *kctx, struct KonohaModule *def, int
 		base->preparedGamma     = new_(Gamma, NULL, OnContextConstList);
 
 		KLIB KArray_Init(kctx, &base->errorMessageBuffer, K_PAGESIZE);
-		kctx->modlocal[MOD_sugar] = (KonohaModuleContext *)base;
+		kctx->modlocal[MOD_sugar] = (KContextModule *)base;
 	}
 }
 
@@ -114,7 +114,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->h.name     = "sugar";
 	mod->h.allocSize = sizeof(KModuleSugar);
 	mod->h.setupModuleContext    = SugarModule_Setup;
-	KLIB KonohaRuntime_setModule(kctx, MOD_sugar, (KonohaModule *)mod, 0);
+	KLIB KRuntime_setModule(kctx, MOD_sugar, (KRuntimeModule *)mod, 0);
 
 	KonohaLibVar* l = (KonohaLibVar *)ctx->klib;
 	l->kNameSpace_GetClassByFullName       = kNameSpace_GetClassByFullName;
@@ -170,12 +170,12 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	SETSTRUCTNAME(defGamma, Gamma);
 	defGamma.init = Gamma_Init;
 
-	mod->cSymbol =    KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defSymbol, 0);
-	mod->cToken =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defToken, 0);
-	mod->cExpr  =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defExpr, 0);
-	mod->cStmt  =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defStmt, 0);
-	mod->cBlock =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defBlock, 0);
-	mod->cGamma =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defGamma, 0);
+	mod->cSymbol =    KLIB KClass_define(kctx, PackageId_sugar, NULL, &defSymbol, 0);
+	mod->cToken =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defToken, 0);
+	mod->cExpr  =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defExpr, 0);
+	mod->cStmt  =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defStmt, 0);
+	mod->cBlock =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defBlock, 0);
+	mod->cGamma =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defGamma, 0);
 	mod->cTokenArray = KClass_p0(kctx, KClass_Array, mod->cToken->typeId);
 
 	KLIB Knull(kctx, mod->cToken);
@@ -186,12 +186,12 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	SugarModule_Setup(kctx, &mod->h, 0);
 
 	KDEFINE_INT_CONST ClassData[] = {   // minikonoha defined class
-		{"void", VirtualType_KonohaClass, (uintptr_t)KClass_void},
-		{"boolean", VirtualType_KonohaClass, (uintptr_t)KClass_Boolean},
-		{"int",    VirtualType_KonohaClass, (uintptr_t)KClass_Int},
-		{"String", VirtualType_KonohaClass, (uintptr_t)KClass_String},
-		{"Func",   VirtualType_KonohaClass, (uintptr_t)KClass_Func},
-		{"System", VirtualType_KonohaClass, (uintptr_t)KClass_System},
+		{"void", VirtualType_KClass, (uintptr_t)KClass_void},
+		{"boolean", VirtualType_KClass, (uintptr_t)KClass_Boolean},
+		{"int",    VirtualType_KClass, (uintptr_t)KClass_Int},
+		{"String", VirtualType_KClass, (uintptr_t)KClass_String},
+		{"Func",   VirtualType_KClass, (uintptr_t)KClass_Func},
+		{"System", VirtualType_KClass, (uintptr_t)KClass_System},
 		{NULL},
 	};
 	kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(ClassData), true/*isOverride*/, 0);
@@ -303,7 +303,7 @@ static void kNameSpace_SetStaticFunction(KonohaContext *kctx, kNameSpace *ns, kA
 static KMETHOD NameSpace_useStaticFunc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KMakeTrace(trace, sfp);
-	KonohaClass *ct = kObject_class(sfp[1].asObject);
+	KClass *ct = kObject_class(sfp[1].asObject);
 	kNameSpace *ns = sfp[0].asNameSpace;
 	kNameSpace_SetStaticFunction(kctx, ns, ct->classMethodList, ct->typeId, trace);
 	while(ns != NULL) {
@@ -380,7 +380,7 @@ static void KonohaContext_ExitCStack(KonohaContext *kctx)
 static kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, KTraceInfo *trace)
 {
 	if(GetSugarContext(kctx) == NULL) {
-		kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
+		kmodsugar->h.setupModuleContext(kctx, (KRuntimeModule *)kmodsugar, 0/*lazy*/);
 	}
 	INIT_GCSTACK();
 	kpackageId_t packageId = KLIB KpackageId(kctx, "main", sizeof("main")-1, 0, _NEWID);
@@ -406,7 +406,7 @@ kbool_t Konoha_Eval(KonohaContext* kctx, const char *script, kfileline_t uline)
 	if(verbose_sugar) {
 		DUMP_P("\n>>>----\n'%s'\n------\n", script);
 	}
-	kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
+	kmodsugar->h.setupModuleContext(kctx, (KRuntimeModule *)kmodsugar, 0/*lazy*/);
 	kbool_t res = (kNameSpace_Eval(kctx, KNULL(NameSpace), script, uline, NULL/*trace*/) == K_CONTINUE);    // FIXME
 	KEndKonohaContext();
 	return res;

@@ -42,17 +42,17 @@ extern "C" {
 	}\
 
 typedef struct {
-	KonohaModule h;
-	KonohaClass *cPrototype;
-	KonohaClass *cFloat;
-	KonohaClass *cRegExp;
+	KRuntimeModule h;
+	KClass *cPrototype;
+	KClass *cFloat;
+	KClass *cRegExp;
 
-	KonohaClass *cIterator;
-	KonohaClass *cStringIterator;
-	KonohaClass *cGenericIterator;
+	KClass *cIterator;
+	KClass *cStringIterator;
+	KClass *cGenericIterator;
 
-	KonohaClass *cBytes;
-	KonohaClass *cFile;
+	KClass *cBytes;
+	KClass *cFile;
 	struct kFileVar       *fileStdIn_OnGlobalConstList;
 	struct kFileVar       *fileStdOut_OnGlobalConstList;
 	struct kFileVar       *fileStdErr_OnGlobalConstList;
@@ -64,7 +64,7 @@ static inline void KonohaCommonModule_Init(KonohaContext *kctx, KTraceInfo *trac
 	KonohaCommonModule *base = (KonohaCommonModule *)KCalloc(sizeof(KonohaCommonModule), 1, trace);
 	base->h.name      = "KonohaCommon";
 	base->h.allocSize = sizeof(KonohaCommonModule);
-	KLIB KonohaRuntime_setModule(kctx, MOD_konoha, &base->h, trace);
+	KLIB KRuntime_setModule(kctx, MOD_konoha, &base->h, trace);
 }
 
 /* ------------------------------------------------------------------------ */

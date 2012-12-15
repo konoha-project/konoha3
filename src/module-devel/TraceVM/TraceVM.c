@@ -126,7 +126,7 @@
 //{
 //	int jmpresult;
 //	INIT_GCSTACK();
-//	KonohaStackRuntimeVar *base = kctx->stack;
+//	KStackRuntimeVar *base = kctx->stack;
 //	jmpbuf_i lbuf = {};
 //	if(base->evaljmpbuf == NULL) {
 //		base->evaljmpbuf = (jmpbuf_i *)KCalloc_UNTRACE(sizeof(jmpbuf_i), 1);
@@ -421,7 +421,7 @@
 //
 ////static void TraceVMDeleteVirtualMachine(KonohaContext *kctx)
 ////{
-////	KonohaRuntime *share = kctx->share;
+////	KRuntime *share = kctx->share;
 ////	size_t i;
 ////	for(i = 0; i < kArray_size(share->GlobalConstList); i++) {
 ////		kObject *o = share->GlobalConstList->ObjectItems[i];
