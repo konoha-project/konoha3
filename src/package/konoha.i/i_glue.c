@@ -100,7 +100,7 @@ static void dumpMethodList(KonohaContext *kctx, KonohaStack *sfp, size_t start, 
 static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
-	kArray *list = kctx->stack->gcstack_OnContextConstList;
+	kArray *list = kctx->stack->gcStack;
 	size_t start = kArray_size(list);
 	kNameSpace *ns = sfp[0].asNameSpace;
 	KClass *ct = kObject_class(sfp[1].asObject);

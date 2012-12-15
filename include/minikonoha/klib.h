@@ -61,15 +61,15 @@ static kinline uintptr_t strhash(const char *name, size_t len)
 static kinline kString* KFileLine_GetFileName(KonohaContext *kctx, kfileline_t fileid)
 {
 	kfileline_t n = (fileid >> (sizeof(kshort_t) * 8));
-	DBG_ASSERT(n < kArray_size(kctx->share->fileIdList_OnGlobalConstList));
-	return kctx->share->fileIdList_OnGlobalConstList->stringItems[n];
+	DBG_ASSERT(n < kArray_size(kctx->share->fileIdList));
+	return kctx->share->fileIdList->stringItems[n];
 }
 
 #define KPackage_text(X)    kString_text(KPackage_GetName(kctx, X))
 static kinline kString* KPackage_GetName(KonohaContext *kctx, kpackageId_t packageId)
 {
-	DBG_ASSERT(packageId < kArray_size(kctx->share->packageIdList_OnGlobalConstList));
-	return kctx->share->packageIdList_OnGlobalConstList->stringItems[packageId];
+	DBG_ASSERT(packageId < kArray_size(kctx->share->packageIdList));
+	return kctx->share->packageIdList->stringItems[packageId];
 }
 
 #define KClass_text(X)   kString_text(KClass_GetName(kctx, X))
@@ -89,11 +89,11 @@ static kinline kString* KType_GetString(KonohaContext *kctx, ktypeattr_t ty)
 static kinline kString* KSymbol_GetString(KonohaContext *kctx, ksymbol_t sym)
 {
 	size_t index = (size_t) KSymbol_Unmask(sym);
-//	if(!(index < kArray_size(kctx->share->symbolList_OnGlobalConstList))) {
-//		DBG_P("index=%d, size=%d", index, kArray_size(kctx->share->symbolList_OnGlobalConstList));
+//	if(!(index < kArray_size(kctx->share->symbolList))) {
+//		DBG_P("index=%d, size=%d", index, kArray_size(kctx->share->symbolList));
 //	}
-	DBG_ASSERT(index < kArray_size(kctx->share->symbolList_OnGlobalConstList));
-	return kctx->share->symbolList_OnGlobalConstList->stringItems[index];
+	DBG_ASSERT(index < kArray_size(kctx->share->symbolList));
+	return kctx->share->symbolList->stringItems[index];
 }
 
 #define KSymbol_Fmt2(sym)   KSymbol_prefixText(sym), kString_text(KSymbol_GetString(kctx, sym))
@@ -112,8 +112,8 @@ static kinline const char* KSymbol_prefixText(ksymbol_t sym)
 static kinline kbool_t sym_equals(KonohaContext *kctx, ksymbol_t s1, ksymbol_t s2)
 {
 	if(KSymbol_Attr(s1) == KSymbol_Attr(s2)) {
-		const char *t1 = kString_text(kctx->share->symbolList_OnGlobalConstList->stringItems[KSymbol_Unmask(s1)]);
-		const char *t2 = kString_text(kctx->share->symbolList_OnGlobalConstList->stringItems[KSymbol_Unmask(s2)]);
+		const char *t1 = kString_text(kctx->share->symbolList->stringItems[KSymbol_Unmask(s1)]);
+		const char *t2 = kString_text(kctx->share->symbolList->stringItems[KSymbol_Unmask(s2)]);
 		while(1) {
 			if(t1[0] != t2[0]) {
 				if(t1[0] == '_') { t1++; continue; }

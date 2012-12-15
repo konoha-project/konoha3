@@ -126,7 +126,7 @@
 //{
 //	int jmpresult;
 //	INIT_GCSTACK();
-//	KStackRuntimeVar *base = kctx->stack;
+//	KRuntimeContextVar *base = kctx->stack;
 //	jmpbuf_i lbuf = {};
 //	if(base->evaljmpbuf == NULL) {
 //		base->evaljmpbuf = (jmpbuf_i *)KCalloc_UNTRACE(sizeof(jmpbuf_i), 1);

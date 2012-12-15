@@ -787,8 +787,8 @@ typedef struct KClassField         KClassFieldVar;
 
 typedef const struct KRuntimeVar           KRuntime;
 typedef struct KRuntimeVar                 KRuntimeVar;
-typedef const struct KStackRuntimeVar      KStackRuntime;
-typedef struct KStackRuntimeVar            KStackRuntimeVar;
+typedef const struct KRuntimeContextVar      KRuntimeContext;
+typedef struct KRuntimeContextVar            KRuntimeContextVar;
 typedef struct KonohaValueVar                   KonohaStack;
 typedef struct KonohaValueVar                   KonohaValue;
 
@@ -802,7 +802,7 @@ struct KonohaContextVar {
 	PlatformApi                      *platApi;
 	KonohaLib                        *klib;
 	KRuntime                         *share;
-	KStackRuntimeVar                 *stack;
+	KRuntimeContextVar                 *stack;
 	KRuntimeModule                  **modshare;
 	KContextModule                  **modlocal;
 	void                             *gcContext; // defined in each module
@@ -815,28 +815,28 @@ struct KRuntimeVar {
 	kmutex_t                 *classTableMutex;
 	/* system shared const */
 	kArray                   *GlobalConstList;
-	kObject                  *constNull_OnGlobalConstList;
-	kBoolean                 *constTrue_OnGlobalConstList;
-	kBoolean                 *constFalse_OnGlobalConstList;
-	kString                  *emptyString_OnGlobalConstList;
-	kArray                   *emptyArray_OnGlobalConstList;
+	kObject                  *constNull;   /*on GlobalConstList*/
+	kBoolean                 *constTrue;   /*on GlobalConstList*/
+	kBoolean                 *constFalse;  /*on GlobalConstList*/
+	kString                  *emptyString; /*on GlobalConstList*/
+	kArray                   *emptyArray;  /*on GlobalConstList*/
 
 	kmutex_t                 *filepackMutex;
-	kArray                   *fileIdList_OnGlobalConstList;    // file, http://
+	kArray                   *fileIdList;  /*on GlobalConstList*/
 	KHashMap                 *fileIdMap_KeyOnList;   //
 
-	kArray                   *packageIdList_OnGlobalConstList;
+	kArray                   *packageIdList; /*on GlobalConstList*/
 	KHashMap                 *packageIdMap_KeyOnList;
 	KHashMap                 *packageMapNO;
 
 	kmutex_t                 *symbolMutex;
-	kArray                   *symbolList_OnGlobalConstList;  // NAME, Name, INT_MAX Int_MAX
+	kArray                   *symbolList;    /*on GlobalConstList*/
 	KHashMap                 *symbolMap_KeyOnList;
 
 	kmutex_t                 *paramMutex;
-	kArray                   *paramList_OnGlobalConstList;
+	kArray                   *paramList;     /*on GlobalConstList*/
 	KHashMap                 *paramMap_KeyOnList;
-	kArray                   *paramdomList_OnGlobalConstList;
+	kArray                   *paramdomList;  /*on GlobalConstList*/
 	KHashMap                 *paramdomMap_KeyOnList;
 };
 
@@ -849,18 +849,18 @@ struct KRuntimeVar {
 #define KonohaContext_Is(P, X)   (KFlag_Is(kshortflag_t,(X)->stack->flag, kContext_##P))
 #define KonohaContext_Set(P, X)   KFlag_Set1(kshortflag_t, (X)->stack->flag, kContext_##P)
 
-struct KStackRuntimeVar {
+struct KRuntimeContextVar {
 	KonohaStack*               stack;
 	size_t                     stacksize;
 	KonohaStack*               stack_uplimit;
 	kArray                    *ContextConstList;
-	kArray                    *gcstack_OnContextConstList;
+	kArray                    *gcStack; /* ContextConstList */
 	KGrowingArray              cwb;
 	// local info
 	kshortflag_t               flag;
 	KonohaContext             *rootctx;
 	void*                      cstack_bottom;  // for GC
-	ktypeattr_t                    evalty;
+	ktypeattr_t                evalty;
 	kushort_t                  evalidx;
 	kString                   *OptionalErrorInfo;
 	int                        faultInfo;
@@ -871,17 +871,16 @@ struct KStackRuntimeVar {
 
 // module
 #define KRuntimeModule_MAXSIZE    32
-#define MOD_logger     0
 #define MOD_gc         1
-#define MOD_code       2
+//#define MOD_code       2
 #define MOD_sugar      3
 #define MOD_konoha     6
 
 #define MOD_exception  5
-#define MOD_float      11
-#define MOD_iterator   12
-#define MOD_iconv      13
-#define MOD_IO         14
+//#define MOD_float      11
+//#define MOD_iterator   12
+//#define MOD_iconv      13
+//#define MOD_IO         14
 //#define MOD_llvm       15
 #define MOD_REGEXP     16
 #define MOD_APACHE     17
@@ -980,7 +979,7 @@ typedef enum {
 		void         (*setFieldUnboxValue)(KonohaContext*, kObject*, ksymbol_t, ktypeattr_t, uintptr_t);\
 		void         (*initdef)(KonohaContext*, KClassVar*, KTraceInfo *);\
 		kbool_t      (*isSubType)(KonohaContext*, KClass*, KClass *);\
-		KClass* (*realtype)(KonohaContext*, KClass*, KClass *)
+		KClass*      (*realtype)(KonohaContext*, KClass*, KClass *)
 
 
 typedef struct KDEFINE_CLASS {
@@ -1108,7 +1107,7 @@ struct KClassField {
 #define CFLAG_0                 KClassFlag_TypeVar|KClassFlag_UnboxType|KClassFlag_Singleton|KClassFlag_Final
 
 #define KClass_(T)                kctx->share->classTable.classItems[TypeAttr_Unmask(T)]
-#define KClass_cparam(CT)         kctx->share->paramdomList_OnGlobalConstList->ParamItems[(CT)->cparamdom]
+#define KClass_cparam(CT)         kctx->share->paramdomList->ParamItems[(CT)->cparamdom]
 #define KClass_Is(P, C)           (KFlag_Is(kshortflag_t, (C)->cflag, KClassFlag_##P))
 #define KClass_Set(P, C, B)       KFlag_Set(kshortflag_t, (C)->cflag, KClassFlag_##P, B)
 
@@ -1357,7 +1356,7 @@ static const char* MethodFlagData[] = {
 #define kMethod_Is(P, MTD)            (KFlag_Is(uintptr_t, (MTD)->flag, kMethod_##P))
 #define kMethod_Set(P, MTD, B)        KFlag_Set(uintptr_t, (MTD)->flag, kMethod_##P, B)
 
-#define kMethod_GetParam(mtd)        kctx->share->paramList_OnGlobalConstList->ParamItems[mtd->paramid]
+#define kMethod_GetParam(mtd)        kctx->share->paramList->ParamItems[mtd->paramid]
 #define kMethod_GetReturnType(mtd)   KClass_((kMethod_GetParam(mtd))->rtype)
 #define kMethod_IsReturnFunc(mtd)    (KClass_((kMethod_GetParam(mtd))->rtype)->baseTypeId == KType_Func)
 #define kMethod_ParamSize(mtd)       ((kMethod_GetParam(mtd))->psize)
@@ -1707,12 +1706,12 @@ struct KonohaLibVar {
 	void                (*DumpObject)(KonohaContext *, kObject *, const char *, const char *, int);
 };
 
-#define K_NULL            (kctx->share->constNull_OnGlobalConstList)
-#define K_TRUE            (kctx->share->constTrue_OnGlobalConstList)
-#define K_FALSE           (kctx->share->constFalse_OnGlobalConstList)
-#define K_NULLPARAM       (kctx->share->paramList_OnGlobalConstList->ParamItems[0])
-#define K_EMPTYARRAY      (kctx->share->emptyArray_OnGlobalConstList)
-#define TS_EMPTY          (kctx->share->emptyString_OnGlobalConstList)
+#define K_NULL            (kctx->share->constNull)
+#define K_TRUE            (kctx->share->constTrue)
+#define K_FALSE           (kctx->share->constFalse)
+#define K_NULLPARAM       (kctx->share->paramList->ParamItems[0])
+#define K_EMPTYARRAY      (kctx->share->emptyArray)
+#define TS_EMPTY          (kctx->share->emptyString)
 
 #define UPCAST(o)         ((kObject *)o)
 
@@ -1751,7 +1750,7 @@ struct KonohaLibVar {
 #define OnVirtualField                    NULL
 #define OnGlobalConstList                 (kctx->share->GlobalConstList)
 #define OnContextConstList                (kctx->stack->ContextConstList)
-#define OnGcStack                         (kctx->stack->gcstack_OnContextConstList)
+#define OnGcStack                         (kctx->stack->gcStack)
 
 #define KNULL(C)                  (k##C *)KLIB Knull(kctx, KClass_##C)
 
@@ -1819,9 +1818,9 @@ typedef struct {
 #define OBJECT_SET(var, val) var = (typeof(var))(val)
 #endif /* defined(_MSC_VER) */
 
-#define INIT_GCSTACK()         kArray* _GcStack = kctx->stack->gcstack_OnContextConstList; size_t _gcstackpos = kArray_size(_GcStack)
+#define INIT_GCSTACK()         kArray* _GcStack = kctx->stack->gcStack; size_t _gcstackpos = kArray_size(_GcStack)
 #define RESET_GCSTACK()        KLIB kArray_Clear(kctx, _GcStack, _gcstackpos)
-#define PUSH_GCSTACK2(o)       KLIB kArray_Add(kctx, kctx->stack->gcstack_OnContextConstList, o)
+#define PUSH_GCSTACK2(o)       KLIB kArray_Add(kctx, kctx->stack->gcStack, o)
 
 #define KRefIncObject(T, O)
 #define KRefDecObject(T, O)

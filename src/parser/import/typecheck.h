@@ -355,7 +355,7 @@ static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t 
 
 static void kGamma_InitIt(KonohaContext *kctx, GammaAllocaData *genv, kParam *pa)
 {
-	KStackRuntimeVar *base = kctx->stack;
+	KRuntimeContextVar *base = kctx->stack;
 	genv->localScope.varsize = 0;
 	if(base->evalty != KType_void) {
 		genv->localScope.varItems[1].name = FN_("it");
@@ -381,7 +381,7 @@ static ktypeattr_t kStmt_CheckReturnType(KonohaContext *kctx, kStmt *stmt)
 static kstatus_t kMethod_RunEval(KonohaContext *kctx, kMethod *mtd, ktypeattr_t rtype, kfileline_t uline, KTraceInfo *trace)
 {
 	BEGIN_UnusedStack(lsfp);
-	KStackRuntimeVar *runtime = kctx->stack;
+	KRuntimeContextVar *runtime = kctx->stack;
 	if(runtime->evalty != KType_void) {
 		KUnsafeFieldSet(lsfp[1].asObject, runtime->stack[runtime->evalidx].asObject);
 		lsfp[1].intValue = runtime->stack[runtime->evalidx].intValue;

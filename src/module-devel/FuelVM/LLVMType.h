@@ -27,7 +27,7 @@ enum STRUKClass_TYPE_ID {
 	ID_PtrKonohaFactory = ID_Ptrvoid,
 	ID_PtrKonohaLibVar = ID_Ptrvoid,
 	ID_PtrKRuntimeVar = ID_Ptrvoid,
-	ID_PtrKStackRuntimeVar = ID_Ptrvoid,
+	ID_PtrKRuntimeContextVar = ID_Ptrvoid,
 	ID_PtrPtrKRuntimeModule = ID_Ptrvoid,
 	ID_PtrPtrKContextModule = ID_Ptrvoid,
 	ID_PtrVirtualCode = ID_Ptrvoid,

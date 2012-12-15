@@ -514,7 +514,7 @@ static kfileline_t KfileId(KonohaContext *kctx, const char *name, size_t len, in
 {
 	uintptr_t hcode = strhash(name, len);
 	KLock(kctx->share->filepackMutex);
-	kfileline_t uline = KHashMap_getcode(kctx, kctx->share->fileIdMap_KeyOnList, kctx->share->fileIdList_OnGlobalConstList, name, len, hcode, spol, def);
+	kfileline_t uline = KHashMap_getcode(kctx, kctx->share->fileIdMap_KeyOnList, kctx->share->fileIdList, name, len, hcode, spol, def);
 	KUnlock(kctx->share->filepackMutex);
 	return uline << (sizeof(kshort_t) * 8);
 }
@@ -523,7 +523,7 @@ static kpackageId_t KpackageId(KonohaContext *kctx, const char *name, size_t len
 {
 	uintptr_t hcode = strhash(name, len);
 	KLock(kctx->share->filepackMutex);
-	kpackageId_t packid = KHashMap_getcode(kctx, kctx->share->packageIdMap_KeyOnList, kctx->share->packageIdList_OnGlobalConstList, name, len, hcode, spol | StringPolicy_ASCII, def);
+	kpackageId_t packid = KHashMap_getcode(kctx, kctx->share->packageIdMap_KeyOnList, kctx->share->packageIdList, name, len, hcode, spol | StringPolicy_ASCII, def);
 	KUnlock(kctx->share->filepackMutex);
 	return packid;
 }
@@ -557,7 +557,7 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 	}
 	uintptr_t hcode = strhash(name, len);
 	KLock(kctx->share->symbolMutex);
-	ksymbol_t sym = KHashMap_getcode(kctx, kctx->share->symbolMap_KeyOnList, kctx->share->symbolList_OnGlobalConstList, name, len, hcode, spol | StringPolicy_ASCII, def);
+	ksymbol_t sym = KHashMap_getcode(kctx, kctx->share->symbolMap_KeyOnList, kctx->share->symbolList, name, len, hcode, spol | StringPolicy_ASCII, def);
 	KUnlock(kctx->share->symbolMutex);
 	return (sym == def) ? def : (sym | mask);
 }
@@ -794,7 +794,7 @@ static void DumpObject(KonohaContext *kctx, kObject *o, const char *file, const 
 
 static kbool_t KRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KStackRuntimeVar *runtime = kctx->stack;
+	KRuntimeContextVar *runtime = kctx->stack;
 	KonohaStack *bottomStack = runtime->bottomStack;
 	jmpbuf_i lbuf = {};
 	if(runtime->evaljmpbuf == NULL) {
@@ -867,7 +867,7 @@ static uintptr_t ApplySystemFunc(KonohaContext *kctx, uintptr_t defval, const ch
 
 static void KRuntime_raise(KonohaContext *kctx, int symbol, int fault, kString *optionalErrorInfo, KonohaStack *top)
 {
-	KStackRuntimeVar *runtime = kctx->stack;
+	KRuntimeContextVar *runtime = kctx->stack;
 	KNH_ASSERT(symbol != 0);
 	if(runtime->evaljmpbuf != NULL) {
 		runtime->topStack = top;

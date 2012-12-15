@@ -420,7 +420,7 @@ static kToken* new_CommaToken(KonohaContext *kctx, kArray *gcstack)
 
 static int TokenSeq_ApplyMacroSyntax(KonohaContext *kctx, TokenSeq *tokens, KSyntax *syn, MacroSet *macroParam, TokenSeq *source, int currentIdx)
 {
-	TokenSeq dummy = {tokens->ns, kctx->stack->gcstack_OnContextConstList};
+	TokenSeq dummy = {tokens->ns, kctx->stack->gcStack};
 	TokenSeq_Push(kctx, dummy);
 	int nextIdx = TokenUtils_SkipIndent(source->tokenList, currentIdx+1, source->endIdx);
 	kbool_t isApplied = false;

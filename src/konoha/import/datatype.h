@@ -439,7 +439,7 @@ static kparamId_t Kparam(KonohaContext *kctx, ktypeattr_t rtype, kushort_t psize
 {
 	uintptr_t hcode = hashparam(rtype, psize, p);
 	KLock(kctx->share->paramMutex);
-	kparamId_t param = KHashMap_getparamid(kctx, kctx->share->paramMap_KeyOnList, kctx->share->paramList_OnGlobalConstList, hcode, equalsParam, rtype, psize, p);
+	kparamId_t param = KHashMap_getparamid(kctx, kctx->share->paramMap_KeyOnList, kctx->share->paramList, hcode, equalsParam, rtype, psize, p);
 	KUnlock(kctx->share->paramMutex);
 	return param;
 }
@@ -448,7 +448,7 @@ static kparamId_t Kparamdom(KonohaContext *kctx, kushort_t psize, const kparamty
 {
 	uintptr_t hcode = hashparamdom(psize, p);
 	KLock(kctx->share->paramMutex);
-	kparamId_t param = KHashMap_getparamid(kctx, kctx->share->paramdomMap_KeyOnList, kctx->share->paramdomList_OnGlobalConstList, hcode, equalsParamDom, KType_void, psize, p);
+	kparamId_t param = KHashMap_getparamid(kctx, kctx->share->paramdomMap_KeyOnList, kctx->share->paramdomList, hcode, equalsParamDom, KType_void, psize, p);
 	KUnlock(kctx->share->paramMutex);
 	return param;
 }
@@ -502,7 +502,7 @@ static kParam* kMethod_SetParam(KonohaContext *kctx, kMethod *mtd_, ktypeattr_t 
 		mtd->paramdom = Kparamdom(kctx, psize, p);
 		mtd->paramid  = paramId;
 	}
-	return kctx->share->paramList_OnGlobalConstList->ParamItems[paramId];
+	return kctx->share->paramList->ParamItems[paramId];
 }
 
 static intptr_t STUB_Method_indexOfField(kMethod *mtd)
@@ -1056,25 +1056,25 @@ static void KRuntime_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KUnsafeFieldInit(share->GlobalConstList, new_(Array, 8, OnField));
 
 	share->longClassNameMapNN = KLIB KHashMap_Init(kctx, 0);
-	share->fileIdList_OnGlobalConstList         = new_(StringArray, 8, OnGlobalConstList);
+	share->fileIdList         = new_(StringArray, 8, OnGlobalConstList);
 	share->fileIdMap_KeyOnList        = KLIB KHashMap_Init(kctx, 0);
-	share->packageIdList_OnGlobalConstList      = new_(StringArray, 8, OnGlobalConstList);
+	share->packageIdList      = new_(StringArray, 8, OnGlobalConstList);
 	share->packageIdMap_KeyOnList     = KLIB KHashMap_Init(kctx, 0);
 	share->packageMapNO       = KLIB KHashMap_Init(kctx, 0);
 
-	share->symbolList_OnGlobalConstList         = new_(StringArray, 32, OnGlobalConstList);
+	share->symbolList         = new_(StringArray, 32, OnGlobalConstList);
 	share->symbolMap_KeyOnList        = KLIB KHashMap_Init(kctx, 0);
 	share->paramMap_KeyOnList         = KLIB KHashMap_Init(kctx, 0);
-	share->paramList_OnGlobalConstList          = new_(Array, 32, OnGlobalConstList);
+	share->paramList          = new_(Array, 32, OnGlobalConstList);
 	share->paramdomMap_KeyOnList      = KLIB KHashMap_Init(kctx, 0);
-	share->paramdomList_OnGlobalConstList       = new_(Array, 32, OnGlobalConstList);
+	share->paramdomList       = new_(Array, 32, OnGlobalConstList);
 	//
-	share->constNull_OnGlobalConstList =  new_(Object, NULL, OnGlobalConstList);
-	kObject_Set(NullObject, share->constNull_OnGlobalConstList, true);
-	share->constTrue_OnGlobalConstList =   new_(Boolean, 1, OnGlobalConstList);
-	share->constFalse_OnGlobalConstList =  new_(Boolean, 0, OnGlobalConstList);
-	share->emptyString_OnGlobalConstList = new_(String, NULL, OnGlobalConstList);
-	share->emptyArray_OnGlobalConstList =  new_(Array, 0, OnGlobalConstList);
+	share->constNull =  new_(Object, NULL, OnGlobalConstList);
+	kObject_Set(NullObject, share->constNull, true);
+	share->constTrue =   new_(Boolean, 1, OnGlobalConstList);
+	share->constFalse =  new_(Boolean, 0, OnGlobalConstList);
+	share->emptyString = new_(String, NULL, OnGlobalConstList);
+	share->emptyArray =  new_(Array, 0, OnGlobalConstList);
 
 	Kparam(kctx, KType_void, 0, NULL);  // PARAM_void
 	Kparamdom(kctx, 0, NULL);        // PARAMDOM_void
