@@ -98,7 +98,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 		kString *name = tokenList->TokenItems[i]->text;
 		KLIB KBuffer_Write(kctx, &wb, kString_text(name), kString_size(name));
 
-		kString *pkgname = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_Stringfy(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
+		kString *pkgname = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_text(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
 		expr = CreateImportCall(kctx, syn, tkImport, ns, pkgname);
 	}
 	KLIB kObjectProto_SetObject(kctx, stmt, Symbol_ExprPattern, KType_Expr, expr);

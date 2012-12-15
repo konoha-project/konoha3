@@ -33,20 +33,20 @@ static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 		if(n < 0) n = (short)tk->uline;
 		if(tk->resolvedSyntaxInfo == NULL) {
 			if(kToken_isIndent(tk)) {
-				DUMP_P("Token[%d] '%s' TokenType=%s%s indent=%d\n", n, KToken_t(tk), PSYM_t(tk->unresolvedTokenType), tk->indent);
+				DUMP_P("Token[%d] '%s' TokenType=%s%s indent=%d\n", n, KToken_t(tk), Symbol_fmt2(tk->unresolvedTokenType), tk->indent);
 			}
 			else {
-				DUMP_P("Token[%d] '%s' TokenType=``%s%s''\n", n, KToken_t(tk), PSYM_t(tk->unresolvedTokenType));
+				DUMP_P("Token[%d] '%s' TokenType=``%s%s''\n", n, KToken_t(tk), Symbol_fmt2(tk->unresolvedTokenType));
 			}
 		}
 //		else if(Token_isRule(tk)) {
-//			DUMP_P("RuleToken(%d) '%s' resolvedSymbol=%s%s classNameSymbol=%s%s\n", n, KToken_t(tk), PSYM_t(tk->resolvedSymbol), PSYM_t(tk->indent));
+//			DUMP_P("RuleToken(%d) '%s' resolvedSymbol=%s%s classNameSymbol=%s%s\n", n, KToken_t(tk), Symbol_fmt2(tk->resolvedSymbol), Symbol_fmt2(tk->indent));
 //		}
 		else if(tk->resolvedSyntaxInfo->keyword == Symbol_TypePattern) {
 			DUMP_P("Token(%d) '%s' type=%s\n", n, KToken_t(tk), KType_t(tk->resolvedTypeId));
 		}
 		else {
-			DUMP_P("Token(%d) '%s' syntax=%s%s, symbol=``%s%s''\n", n, KToken_t(tk), PSYM_t(tk->resolvedSyntaxInfo->keyword), PSYM_t(tk->resolvedSymbol));
+			DUMP_P("Token(%d) '%s' syntax=%s%s, symbol=``%s%s''\n", n, KToken_t(tk), Symbol_fmt2(tk->resolvedSyntaxInfo->keyword), Symbol_fmt2(tk->resolvedSymbol));
 		}
 	}
 }
@@ -119,7 +119,7 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 				DBG_ASSERT(IS_Array(expr->cons));
 			}
 			else {
-				DUMP_P("[%d] Expr: kw='%s%s', syn=%p, size=%ld", n, PSYM_t(expr->syn->keyword), expr->syn, kArray_size(expr->cons));
+				DUMP_P("[%d] Expr: kw='%s%s', syn=%p, size=%ld", n, Symbol_fmt2(expr->syn->keyword), expr->syn, kArray_size(expr->cons));
 				DUMP_P("\n");
 				size_t i;
 				for(i=0; i < kArray_size(expr->cons); i++) {

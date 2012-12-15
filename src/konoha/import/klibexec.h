@@ -130,7 +130,7 @@ KLIBDECL void KBuffer_printf(KonohaContext *kctx, KGrowingBuffer *wb, const char
 	va_end(ap);
 }
 
-KLIBDECL const char* KBuffer_Stringfy(KonohaContext *kctx, KGrowingBuffer *wb, int ensureZero)
+KLIBDECL const char* KBuffer_text(KonohaContext *kctx, KGrowingBuffer *wb, int ensureZero)
 {
 	KGrowingArray *m = wb->m;
 	if(ensureZero) {
@@ -147,6 +147,15 @@ KLIBDECL void KBuffer_Free(KGrowingBuffer *wb)
 	KGrowingArray *m = wb->m;
 	bzero(m->bytebuf + wb->pos, m->bytesize - wb->pos);
 	m->bytesize = wb->pos;
+}
+
+KLIBDECL kString* KBuffer_Stringfy(KonohaContext *kctx, KGrowingBuffer *wb, kArray *gcstack, int policy)
+{
+	kString *s = KLIB new_kString(kctx, gcstack, KBuffer_text(kctx, wb, 0), KBuffer_bytesize(wb), policy);
+	if(KFlag_Is(int, policy, StringPolicy_FreeKBuffer)) {
+		KBuffer_Free(wb);
+	}
+	return s;
 }
 
 KLIBDECL kbool_t KBuffer_iconv(KonohaContext *kctx, KGrowingBuffer* wb, uintptr_t ic, const char *sourceBuf, size_t sourceSize, KTraceInfo *trace)
@@ -746,7 +755,7 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 	if(w->count > 0) {
 		KLIB KBuffer_Write(kctx, w->wb, ", ", 2);
 	}
-	KLIB KBuffer_printf(kctx, w->wb, "%s%s: (%s)", PSYM_t(key), AKType_t(d->attrTypeId));
+	KLIB KBuffer_printf(kctx, w->wb, "%s%s: (%s)", Symbol_fmt2(key), AKType_t(d->attrTypeId));
 	if(TypeAttr_Is(Boxed, d->attrTypeId)) {
 		KUnsafeFieldSet(w->values[w->pos].asObject, d->ObjectValue);
 	}
@@ -771,7 +780,7 @@ static void DumpObject(KonohaContext *kctx, kObject *o, const char *file, const 
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KUnsafeFieldSet(lsfp[0].asObject, o);
 	kObject_class(o)->p(kctx, lsfp, 0, &wb);
-	const char *msg = KLIB KBuffer_Stringfy(kctx, &wb, 1);
+	const char *msg = KLIB KBuffer_text(kctx, &wb, 1);
 	if(file == NULL) {
 		PLATAPI printf_i("(%s)%s\n", KClass_t(kObject_class(o)), msg);
 	}
@@ -802,7 +811,7 @@ static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp
 		KStackCall(sfp);
 	}
 	else {
-		PLATAPI ReportCaughtException(kctx, SYM_t(jumpResult), runtime->faultInfo, kString_text(runtime->OptionalErrorInfo), runtime->bottomStack, runtime->topStack);
+		PLATAPI ReportCaughtException(kctx, Symbol_text(jumpResult), runtime->faultInfo, kString_text(runtime->OptionalErrorInfo), runtime->bottomStack, runtime->topStack);
 		result = false;
 	}
 	RESET_GCSTACK();
@@ -925,8 +934,9 @@ static void klib_Init(KonohaLibVar *l)
 	l->KBuffer_Write     = KBuffer_Write;
 	l->KBuffer_vprintf   = KBuffer_vprintf;
 	l->KBuffer_printf    = KBuffer_printf;
-	l->KBuffer_Stringfy       = KBuffer_Stringfy;
+	l->KBuffer_text       = KBuffer_text;
 	l->KBuffer_Free      = KBuffer_Free;
+	l->KBuffer_Stringfy  = KBuffer_Stringfy;
 	l->KBuffer_iconv     = KBuffer_iconv;
 
 	l->KDict_GetNULL     = KDict_GetNULL;

@@ -61,12 +61,12 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 	kNameSpace *ns = Stmt_ns(stmt);
 	kMethod *mtd = KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, kObject_class(o), symbol, KType_var);
 	if(mtd != NULL) {
-		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "already defined name: %s", SYM_t(symbol));
+		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "already defined name: %s", Symbol_text(symbol));
 		return NULL;
 	}
 	mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, kObject_class(o), symbol);
 	if(mtd != NULL && kMethod_GetReturnType(mtd)->typeId != ty) {
-		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "differently defined name: %s", SYM_t(symbol));
+		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "differently defined name: %s", Symbol_text(symbol));
 		return NULL;
 	}
 	KLIB KonohaClass_AddField(kctx, kObject_class(o), ty, symbol);

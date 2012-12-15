@@ -305,7 +305,7 @@ static KMETHOD NameSpace_useStaticFunc(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	KonohaClass *ct = kObject_class(sfp[1].asObject);
 	kNameSpace *ns = sfp[0].asNameSpace;
-	kNameSpace_SetStaticFunction(kctx, ns, ct->methodList_OnGlobalConstList, ct->typeId, trace);
+	kNameSpace_SetStaticFunction(kctx, ns, ct->classMethodList, ct->typeId, trace);
 	while(ns != NULL) {
 		kNameSpace_SetStaticFunction(kctx, ns, ns->methodList_OnList, ct->typeId, trace);
 		ns = ns->parentNULL;
@@ -317,6 +317,22 @@ static KMETHOD NameSpace_useStaticFunc(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD String_toSymbol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KReturnUnboxValue(ksymbolA(kString_text(sfp[0].asString), kString_size(sfp[0].asString), _NEWID));
+}
+
+//## @Public @Const @Immutable @Coercion String Symbol.toString();
+static KMETHOD Symbol_toString(KonohaContext *kctx, KonohaStack *sfp)
+{
+	ksymbol_t symbol = (ksymbol_t)sfp[0].intValue;
+	kString *s = Symbol_GetString(kctx, Symbol_Unmask(symbol));
+	if(Symbol_Attr(symbol) != 0) {
+		KGrowingBuffer wb;
+		const char *prefix = Symbol_prefixText(symbol);
+		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+		KLIB KBuffer_Write(kctx, &wb, prefix, strlen(prefix));
+		KLIB KBuffer_Write(kctx, &wb, kString_text(s), kString_size(s));
+		s = KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer);
+	}
+	KReturn(s);
 }
 
 #include <minikonoha/import/methoddecl.h>
@@ -334,8 +350,9 @@ void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 		_Public, _F(NameSpace_hate), KType_boolean, KType_NameSpace, MN_("hate"), 1, KType_String, FN_("symbol"),
 		_Public, _F(NameSpace_loadScript), KType_void, KType_NameSpace, MN_("load"), 1, KType_String, FN_("filename"),
 		_Public, _F(NameSpace_loadScript), KType_void, KType_NameSpace, MN_("include"), 1, KType_String, FN_("filename"),
-		_Public, _F(NameSpace_useStaticFunc), KType_void, KType_NameSpace, MN_("useStaticFunc"), 1, KType_Object, FN_("class"),
-		_Public|_Coercion|_Const, _F(String_toSymbol), KType_Symbol, KType_String, MethodName_To(KType_Symbol), 0,
+		_Public, _F(NameSpace_useStaticFunc), KType_void, KType_NameSpace, MN_("UseStaticFunc"), 1, KType_Object, FN_("class"),
+		_Public|_Coercion|_Const|_Imm, _F(String_toSymbol), KType_Symbol, KType_String, MethodName_To(KType_Symbol), 0,
+		_Public|_Coercion|_Const|_Imm, _F(Symbol_toString), KType_String, KType_Symbol, MethodName_To(KType_String), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, NULL);

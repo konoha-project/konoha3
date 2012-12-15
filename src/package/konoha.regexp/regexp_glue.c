@@ -460,7 +460,7 @@ static KMETHOD RegExp_exec(KonohaContext *kctx, KonohaStack *sfp)
 
 static kString *KBuffer_newString(KonohaContext *kctx, kArray *gcstack, KGrowingBuffer *wb)
 {
-	return KLIB new_kString(kctx, gcstack, KLIB KBuffer_Stringfy(kctx, wb, false), KBuffer_bytesize(wb), 0);
+	return KLIB new_kString(kctx, gcstack, KLIB KBuffer_text(kctx, wb, false), KBuffer_bytesize(wb), 0);
 }
 
 //## @Const method String String.replace(RegExp searchvalue, String newvalue);

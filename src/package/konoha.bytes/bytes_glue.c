@@ -156,7 +156,7 @@ static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KBuffer_convertCharset(kctx, &wb, PLATAPI systemCharset, "UTF-8", kString_text(thisString), size, trace);
 		KReturnWith(
-			new_kBytes(kctx, OnStack, KGetReturnType(sfp), KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb)),
+			new_kBytes(kctx, OnStack, KGetReturnType(sfp), KLIB KBuffer_text(kctx, &wb, 0), KBuffer_bytesize(&wb)),
 			KLIB KBuffer_Free(&wb)
 		);
 	}
@@ -172,7 +172,7 @@ static KMETHOD String_new_fromBytes_withDefaultDecode(KonohaContext *kctx, Konoh
 		KGrowingBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KBuffer_convertCharset(kctx, &wb, "UTF-8", PLATAPI systemCharset, ba->buf, ba->bytesize, trace);
-		s = KLIB new_kString(kctx, OnStack, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
+		s = KLIB new_kString(kctx, OnStack, KLIB KBuffer_text(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
 	}
 	KReturn(s);
 }
@@ -191,7 +191,7 @@ static KMETHOD String_new_fromSubBytes_withDefaultDecode(KonohaContext *kctx, Ko
 		KGrowingBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KBuffer_convertCharset(kctx, &wb, "UTF-8", PLATAPI systemCharset, ba->buf + offset, length, trace);
-		s = KLIB new_kString(kctx, OnStack, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
+		s = KLIB new_kString(kctx, OnStack, KLIB KBuffer_text(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
 	}
 	KReturn(s);
 }
@@ -212,7 +212,7 @@ static KMETHOD String_new_fromSubBytes_withSpecifiedDecode(KonohaContext *kctx, 
 		KGrowingBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KBuffer_convertCharset(kctx, &wb, "UTF-8", charset, ba->buf + offset, length, trace);
-		s = KLIB new_kString(kctx, OnStack, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
+		s = KLIB new_kString(kctx, OnStack, KLIB KBuffer_text(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
 	}
 	KReturn(s);
 }
@@ -230,7 +230,7 @@ static KMETHOD String_new_fromBytes_withSpecifiedDecode(KonohaContext *kctx, Kon
 		KGrowingBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KBuffer_convertCharset(kctx, &wb, kString_text(charset), "UTF-8", ba->buf, ba->bytesize, trace);
-		s = KLIB new_kString(kctx, OnStack, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
+		s = KLIB new_kString(kctx, OnStack, KLIB KBuffer_text(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
 	}
 	KReturn(s);
 }

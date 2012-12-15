@@ -60,8 +60,8 @@ static kbool_t KonohaClass_setClassFieldObjectValue(KonohaContext *kctx, KonohaC
 {
 	int i;
 	for(i = definedClass->fieldsize - 1; i >= 0; i--) {
-		if(definedClass->fieldItems[i].name == sym  && kObject_class(definedClass->defaultNullValueVar_OnGlobalConstList->fieldObjectItems[i]) == kObject_class(ObjectValue)) {
-			kObjectVar *o = definedClass->defaultNullValueVar_OnGlobalConstList;
+		if(definedClass->fieldItems[i].name == sym  && kObject_class(definedClass->defaultNullValueVar->fieldObjectItems[i]) == kObject_class(ObjectValue)) {
+			kObjectVar *o = definedClass->defaultNullValueVar;
 			KFieldSet(o, o->fieldObjectItems[i], ObjectValue);
 			return true;
 		}
@@ -74,7 +74,7 @@ static kbool_t KonohaClass_setClassFieldUnboxValue(KonohaContext *kctx, KonohaCl
 	int i;
 	for(i = definedClass->fieldsize - 1; i >= 0; i--) {
 		if(definedClass->fieldItems[i].name == sym  && KType_Is(UnboxType, definedClass->fieldItems[i].attrTypeId)) {
-			definedClass->defaultNullValueVar_OnGlobalConstList->fieldUnboxItems[i] = unboxValue;
+			definedClass->defaultNullValueVar->fieldUnboxItems[i] = unboxValue;
 			return true;
 		}
 	}
@@ -111,7 +111,7 @@ static void ObjectField_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	KonohaClass *c = kObject_class(o);
 	size_t fieldsize = c->fieldsize;
-	memcpy(((kObjectVar *)o)->fieldObjectItems, c->defaultNullValue_OnGlobalConstList->fieldObjectItems, fieldsize * sizeof(void *));
+	memcpy(((kObjectVar *)o)->fieldObjectItems, c->defaultNullValue->fieldObjectItems, fieldsize * sizeof(void *));
 }
 
 static void ObjectField_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
@@ -176,7 +176,7 @@ static void KonohaClass_InitField(KonohaContext *kctx, KonohaClassVar *definedCl
 	}
 	definedClass->fnull(kctx, definedClass);  // first generation of DefaultValueAsNull
 	superClass->fnull(kctx, superClass); // ensure default value of super class
-	memcpy(definedClass->defaultNullValueVar_OnGlobalConstList->fieldObjectItems, superClass->defaultNullValueVar_OnGlobalConstList->fieldObjectItems, sizeof(kObject *) * superClass->fieldsize);
+	memcpy(definedClass->defaultNullValueVar->fieldObjectItems, superClass->defaultNullValueVar->fieldObjectItems, sizeof(kObject *) * superClass->fieldsize);
 	definedClass->init     = ObjectField_Init;
 	definedClass->reftrace = ObjectField_Reftrace;
 	definedClass->superTypeId = superClass->typeId;
@@ -203,7 +203,7 @@ static kBlock* kStmt_ParseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 				kToken *tk = range.tokenList->TokenItems[i];
 				if(tk->hintChar == '(' && prevToken->unresolvedTokenType == TokenType_SYMBOL && strcmp(cname, kString_text(prevToken->text)) == 0) {
 					kTokenVar *newToken = new_(TokenVar, TokenType_SYMBOL, sourceRange.tokenList);
-					KFieldSet(newToken, newToken->text, SYM_s(MN_new));
+					KFieldSet(newToken, newToken->text, Symbol_GetString(kctx, MN_new));
 				}
 				KLIB kArray_Add(kctx, sourceRange.tokenList, tk);
 				prevToken = tk;
@@ -223,7 +223,7 @@ static size_t kBlock_countFieldSize(KonohaContext *kctx, kBlock *bk)
 	if(bk != NULL) {
 		for(i = 0; i < kArray_size(bk->StmtList); i++) {
 			kStmt *stmt = bk->StmtList->StmtItems[i];
-			DBG_P("stmt->keyword=%s%s", PSYM_t(stmt->syn->keyword));
+			DBG_P("stmt->keyword=%s%s", Symbol_fmt2(stmt->syn->keyword));
 			if(stmt->syn->keyword == Symbol_TypeDeclPattern) {
 				kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, Symbol_ExprPattern, NULL);
 				if(expr->syn->keyword == Symbol_COMMA) {
@@ -312,7 +312,7 @@ static void kBlock_AddMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *to
 				lastStmt = stmt;
 			}
 			else {
-				SUGAR kStmt_Message2(kctx, stmt, NULL, WarnTag, "%s is not available within the class clause", PSYM_t(stmt->syn->keyword));
+				SUGAR kStmt_Message2(kctx, stmt, NULL, WarnTag, "%s is not available within the class clause", Symbol_fmt2(stmt->syn->keyword));
 			}
 		}
 	}

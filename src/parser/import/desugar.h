@@ -33,7 +33,7 @@ static void kStmt_AddParsedObject(KonohaContext *kctx, kStmt *stmt, ksymbol_t ke
 		KLIB kObjectProto_SetObject(kctx, stmt, keyid, kObject_typeId(o), o);
 	}
 	else {
-		//DBG_P(">>> keyid=%s%s valueList=%s, value=%s", PSYM_t(keyid), KClass_t(kObject_class(valueList)), KClass_t(kObject_class(o)));
+		//DBG_P(">>> keyid=%s%s valueList=%s, value=%s", Symbol_fmt2(keyid), KClass_t(kObject_class(valueList)), KClass_t(kObject_class(o)));
 		if(!IS_Array(valueList)) {
 			INIT_GCSTACK();
 			kArray *newList = /*G*/new_(Array, 0, _GcStack);
@@ -241,7 +241,7 @@ static KMETHOD Expression_OperatorMethod(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	if(/*syn->keyword != Symbol_LET && */syn->sugarFuncTable[SugarFunc_TypeCheck] == NULL) {
-		DBG_P("switching type checker of %s%s to MethodCall ..", PSYM_t(syn->keyword));
+		DBG_P("switching type checker of %s%s to MethodCall ..", Symbol_fmt2(syn->keyword));
 		syn = SYN_(Stmt_ns(stmt), Symbol_ExprMethodCall);  // switch type checker
 	}
 	kTokenVar *tk = tokenList->TokenVarItems[operatorIdx];
@@ -398,7 +398,7 @@ static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, si
 		}
 		text++;
 	}
-	kString *s = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_Stringfy(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
+	kString *s = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_text(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
 	KLIB KBuffer_Free(&wb);
 	return s;
 }
@@ -809,7 +809,7 @@ static kExpr *kStmtExpr_LookupMethod(KonohaContext *kctx, kStmt *stmt, kExprVar 
 		if(methodToken->resolvedSymbol == MN_new && psize == 0 && KClass_(kExpr_at(expr, 1)->attrTypeId)->baseTypeId == KType_Object) {
 			return kExpr_at(expr, 1);  // new Person(); // default constructor
 		}
-		kStmtToken_Message(kctx, stmt, methodToken, ErrTag, "undefined method: %s.%s%s", KClass_t(thisClass), PSYM_t(methodToken->resolvedSymbol));
+		kStmtToken_Message(kctx, stmt, methodToken, ErrTag, "undefined method: %s.%s%s", KClass_t(thisClass), Symbol_fmt2(methodToken->resolvedSymbol));
 	}
 	if(mtd != NULL) {
 		if(kMethod_Is(Overloaded, mtd)) {
@@ -1081,13 +1081,13 @@ static kbool_t kStmt_DeclType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kty
 			ktypeattr_t attr = TypeAttr_Attr(attrTypeId);
 			kToken *termToken = kExpr_at(declExpr, 1)->termToken;
 			attrTypeId = kExpr_at(declExpr, 2)->attrTypeId | attr;
-			kStmtToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", PSYM_t(termToken->resolvedSymbol), KType_t(attrTypeId));
+			kStmtToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", Symbol_fmt2(termToken->resolvedSymbol), KType_t(attrTypeId));
 		}
 		newstmt = TypeDecl(kctx, stmt, gma, attrTypeId, kExpr_at(declExpr, 1), kExpr_at(declExpr, 2), thunk);
 	}
 	else if(kExpr_isSymbolTerm(declExpr)) {
 		if(attrTypeId == KType_var  || !KType_Is(Nullable, attrTypeId)) {
-			kStmt_Message(kctx, stmt, ErrTag, "%s %s%s: initial value is expected", KType_t(attrTypeId), PSYM_t(declExpr->termToken->resolvedSymbol));
+			kStmt_Message(kctx, stmt, ErrTag, "%s %s%s: initial value is expected", KType_t(attrTypeId), Symbol_fmt2(declExpr->termToken->resolvedSymbol));
 			return false;
 		}
 		else {

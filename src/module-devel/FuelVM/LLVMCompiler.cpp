@@ -430,7 +430,7 @@ static const char *ConstructMethodName(KonohaContext *kctx, kMethod *mtd, const 
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KLIB KBuffer_printf(kctx, &wb, "%s_%s%s%s",
 			KClass_t(kclass), MethodName_Fmt2(mtd->mn), suffix);
-	return KLIB KBuffer_Stringfy(kctx, &wb, 1);
+	return KLIB KBuffer_text(kctx, &wb, 1);
 }
 
 /* Create Method Specific interface */
@@ -451,7 +451,7 @@ static Function *CreateInternalFunction(KonohaContext *kctx, Module *M, kMethod 
 	Function::arg_iterator args = F->arg_begin();
 
 	for(unsigned i = 0; i < params->psize; ++i) {
-		const char *name = SYM_t(params->paramtypeItems[i].name);
+		const char *name = Symbol_text(params->paramtypeItems[i].name);
 		SetName(args++, name);
 	}
 	return F;

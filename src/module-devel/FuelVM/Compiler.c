@@ -365,7 +365,7 @@ static bool FuelVM_VisitTryStmt(KonohaContext *kctx, KBuilder *builder, kStmt *s
 
 static bool FuelVM_VisitUndefinedStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
-	DBG_P("undefined asm syntax kw='%s'", SYM_t(stmt->syn->keyword));
+	DBG_P("undefined asm syntax kw='%s'", Symbol_text(stmt->syn->keyword));
 	return true;
 }
 

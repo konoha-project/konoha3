@@ -142,8 +142,8 @@ static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, ktypea
 static kbool_t KonohaClass_AddField(KonohaContext *kctx, KonohaClass *ct, ktypeattr_t typeattr, ksymbol_t sym)
 {
 	kushort_t pos = ct->fieldsize;
-	if(unlikely(ct->methodList_OnGlobalConstList == K_EMPTYARRAY)) {
-		((KonohaClassVar *)ct)->methodList_OnGlobalConstList = new_(MethodArray, 8, OnGlobalConstList);
+	if(unlikely(ct->classMethodList == K_EMPTYARRAY)) {
+		((KonohaClassVar *)ct)->classMethodList = new_(MethodArray, 8, OnGlobalConstList);
 	}
 	INIT_GCSTACK();
 	if(pos < ct->fieldAllocSize) {
@@ -151,31 +151,31 @@ static kbool_t KonohaClass_AddField(KonohaContext *kctx, KonohaClass *ct, ktypea
 		definedClass->fieldsize += 1;
 		definedClass->fieldItems[pos].name = sym;
 		if(KType_Is(UnboxType, typeattr)) {
-			definedClass->defaultNullValueVar_OnGlobalConstList->fieldUnboxItems[pos] = 0;
+			definedClass->defaultNullValueVar->fieldUnboxItems[pos] = 0;
 			definedClass->fieldItems[pos].attrTypeId = typeattr;
 		}
 		else {
-			kObjectVar *o = definedClass->defaultNullValueVar_OnGlobalConstList;
+			kObjectVar *o = definedClass->defaultNullValueVar;
 			KFieldSet(o, o->fieldObjectItems[pos], KLIB Knull(kctx, KClass_(typeattr)));
 			definedClass->fieldItems[pos].attrTypeId = typeattr | TypeAttr_Boxed;
 		}
 		if(1/*FLAG_is(flag, kField_Getter)*/) {
 			kMethod *mtd = new_FieldGetter(kctx, _GcStack, definedClass->typeId, sym, TypeAttr_Unmask(typeattr), pos);
-			KLIB kArray_Add(kctx, ct->methodList_OnGlobalConstList, mtd);
+			KLIB kArray_Add(kctx, ct->classMethodList, mtd);
 		}
 		if(!TypeAttr_Is(ReadOnly, typeattr)/*FLAG_is(flag, kField_Setter)*/) {
 			kMethod *mtd = new_FieldSetter(kctx, _GcStack, definedClass->typeId, sym, TypeAttr_Unmask(typeattr), pos);
-			KLIB kArray_Add(kctx, ct->methodList_OnGlobalConstList, mtd);
+			KLIB kArray_Add(kctx, ct->classMethodList, mtd);
 		}
 	}
 	else {
 		if(1/*FLAG_is(flag, kField_Getter)*/) {
 			kMethod *mtd = new_PrototypeGetter(kctx, _GcStack, ct->typeId, sym, TypeAttr_Unmask(typeattr));
-			KLIB kArray_Add(kctx, ct->methodList_OnGlobalConstList, mtd);
+			KLIB kArray_Add(kctx, ct->classMethodList, mtd);
 		}
 		if(!TypeAttr_Is(ReadOnly, typeattr)/*FLAG_is(flag, kField_Setter)*/) {
 			kMethod *mtd = new_PrototypeSetter(kctx, _GcStack, ct->typeId, sym, TypeAttr_Unmask(typeattr));
-			KLIB kArray_Add(kctx, ct->methodList_OnGlobalConstList, mtd);
+			KLIB kArray_Add(kctx, ct->classMethodList, mtd);
 		}
 	}
 	RESET_GCSTACK();

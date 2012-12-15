@@ -34,7 +34,7 @@ void test_Kwb(KonohaContext *kctx)
     kctx->klib->KBuffer_Init(&a, &wb);
     kctx->klib->KBuffer_Write(kctx, &wb, "abcd", 4);
     kctx->klib->KBuffer_Write(kctx, &wb, "abcd", 4);
-    const char *data = kctx->klib->KBuffer_Stringfy(kctx, &wb, 1);
+    const char *data = kctx->klib->KBuffer_text(kctx, &wb, 1);
     assert(strcmp(data, "abcdabcd") == 0);
     kctx->klib->KBuffer_Free(&wb);
     kctx->klib->KArray_Free(kctx, &a);

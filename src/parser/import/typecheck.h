@@ -50,7 +50,7 @@ static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *g
 {
 	int callCount = 0;
 	SugarSyntax *syn = expr->syn;
-	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, PSYM_t(syn->keyword));
+	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, Symbol_fmt2(syn->keyword));
 	while(true) {
 		int index, size;
 		kFunc **FuncItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_TypeCheck, &size);
@@ -70,8 +70,8 @@ static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *g
 			return kStmtToken_Message(kctx, stmt, expr->termToken, ErrTag, "undefined term: %s", KToken_t(expr->termToken));
 		}
 		else {
-			DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", expr->syn, expr->syn->parentSyntaxNULL, PSYM_t(syn->keyword));
-			return kStmt_Message(kctx, stmt, ErrTag, "undefined operator: %s%s",  PSYM_t(expr->syn->keyword));
+			DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", expr->syn, expr->syn->parentSyntaxNULL, Symbol_fmt2(syn->keyword));
+			return kStmt_Message(kctx, stmt, ErrTag, "undefined operator: %s%s",  Symbol_fmt2(expr->syn->keyword));
 		}
 	}
 	return K_NULLEXPR;

@@ -455,7 +455,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //		END_UnusedStack();
 //
 //	}
-//	const char *KGrowingBufferTopChar = KLIB KBuffer_Stringfy(kctx, &wb, 0);
+//	const char *KGrowingBufferTopChar = KLIB KBuffer_text(kctx, &wb, 0);
 //	size_t strsize = strlen(KGrowingBufferTopChar);
 //	kString *ret = KLIB new_kString(kctx, KGrowingBufferTopChar, strsize, 0);
 //	KLIB KBuffer_Free(&wb);

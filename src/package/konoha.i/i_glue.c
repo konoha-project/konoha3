@@ -61,7 +61,7 @@ static void kMethod_WriteToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuf
 			if(TypeAttr_Is(Coercion, pa->paramtypeItems[i].attrTypeId)) {
 				KLIB KBuffer_printf(kctx, wb, "@Coercion ");
 			}
-			KLIB KBuffer_printf(kctx, wb, "%s %s", AKType_t(pa->paramtypeItems[i].attrTypeId), SYM_t(pa->paramtypeItems[i].name));
+			KLIB KBuffer_printf(kctx, wb, "%s %s", AKType_t(pa->paramtypeItems[i].attrTypeId), Symbol_text(pa->paramtypeItems[i].name));
 		}
 		KLIB KBuffer_Write(kctx, wb, ")", 1);
 	}
@@ -84,7 +84,7 @@ static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kMethod_WriteToBuffer(kctx, mtd, &wb);
-	PLATAPI printf_i("%s\n", KLIB KBuffer_Stringfy(kctx, &wb, 1));
+	PLATAPI printf_i("%s\n", KLIB KBuffer_text(kctx, &wb, 1));
 	KLIB KBuffer_Free(&wb);
 	return;
 }
@@ -109,7 +109,7 @@ static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 		copyMethodList(kctx, ct->typeId, ns->methodList_OnList, list);
 		ns = ns->parentNULL;
 	}
-	copyMethodList(kctx, ct->typeId, ct->methodList_OnGlobalConstList, list);
+	copyMethodList(kctx, ct->typeId, ct->classMethodList, list);
 	dumpMethodList(kctx, sfp, start, list);
 	RESET_GCSTACK();
 }

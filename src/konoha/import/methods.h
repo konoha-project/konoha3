@@ -77,7 +77,7 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kObject_class(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
-	kString* returnValue = KLIB new_kString(kctx, OnStack, KLIB KBuffer_Stringfy(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
+	kString* returnValue = KLIB new_kString(kctx, OnStack, KLIB KBuffer_text(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
 	KLIB KBuffer_Free(&wb);
 	KReturn(returnValue);
 }
@@ -105,7 +105,7 @@ static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const method Boolean Boolean.toString();
 static KMETHOD Boolean_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *s = (sfp[0].boolValue) ? SYM_s(SYM_("true")) : SYM_s(SYM_("false"));
+	kString *s = (sfp[0].boolValue) ? Symbol_GetString(kctx, SYM_("true")) : Symbol_GetString(kctx, SYM_("false"));
 	KReturn(s);
 }
 

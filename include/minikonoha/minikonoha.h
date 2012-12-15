@@ -268,7 +268,7 @@ typedef struct {
 #define MethodName_IsCoercion(mn)     ((Symbol_Unmask(mn)) == MethodNameAttr_Coercion)
 #define MethodName_As(cid)            ((cid) | MethodNameAttr_Upcast)
 #define MethodName_IsUpcast(mn)       ((Symbol_Unmask(mn)) == MethodNameAttr_Upcast)
-#define MethodName_Fmt2(mn)           SYM_PRE(mn), ((mn & MethodNameAttr_Type) == MethodNameAttr_Type ? KType_t(Symbol_Unmask(mn)) : SYM_t(Symbol_Unmask(mn)))
+#define MethodName_Fmt2(mn)           Symbol_prefixText(mn), ((mn & MethodNameAttr_Type) == MethodNameAttr_Type ? KType_t(Symbol_Unmask(mn)) : Symbol_text(Symbol_Unmask(mn)))
 
 /* ------------------------------------------------------------------------ */
 /* platform */
@@ -1031,11 +1031,11 @@ struct KonohaClassVar {
 	const char               *DBG_NAME;
 	ksymbol_t   classNameSymbol;  kushort_t   optvalue;
 	size_t      sortedMethodList;
-	kArray     *methodList_OnGlobalConstList;
-	kString    *shortClassNameNULL_OnGlobalConstList;
+	kArray     *classMethodList /* OnGlobalConstList*/;
+	kString    *shortClassNameNULL /* OnGlobalConstList*/;
 	union {   // default value
-		kObject           *defaultNullValue_OnGlobalConstList;
-		kObjectVar        *defaultNullValueVar_OnGlobalConstList;
+		kObject           *defaultNullValue    /*OnGlobalConstList*/;
+		kObjectVar        *defaultNullValueVar /*OnGlobalConstList*/;
 	};
 	KonohaClass              *searchSimilarClassNULL;
 	KonohaClass              *searchSuperMethodClassNULL;
@@ -1247,7 +1247,8 @@ typedef enum {
 	StringPolicy_UTF8     =     (1<<2),
 	StringPolicy_NOCOPY   =     (1<<3),
 	StringPolicy_NOPOOL   =     (1<<4),   /* UNUSED in the future */
-	StringPolicy_SystemInfo =   (1<<5)    /* UNUSED */
+	StringPolicy_SystemInfo =   (1<<5),   /* UNUSED */
+	StringPolicy_FreeKBuffer =  (1<<6),   /* KBuffer_Stringfy */
 } StringPolicy;
 
 #define K_NULLTEXT          "null"
@@ -1601,8 +1602,9 @@ struct KonohaLibVar {
 	void                (*KBuffer_Write)(KonohaContext*, KGrowingBuffer *, const char *, size_t);
 	void                (*KBuffer_vprintf)(KonohaContext*, KGrowingBuffer *, const char *fmt, va_list ap);
 	void                (*KBuffer_printf)(KonohaContext*, KGrowingBuffer *, const char *fmt, ...);
-	const char*         (*KBuffer_Stringfy)(KonohaContext*, KGrowingBuffer *, int);
+	const char*         (*KBuffer_text)(KonohaContext*, KGrowingBuffer *, int);
 	void                (*KBuffer_Free)(KGrowingBuffer *);
+	kString*            (*KBuffer_Stringfy)(KonohaContext *, KGrowingBuffer *, kArray *gcstack, int isClear);
 	kbool_t             (*KBuffer_iconv)(KonohaContext *, KGrowingBuffer*, uintptr_t iconv, const char *, size_t, KTraceInfo *);
 
 	KKeyValue*          (*KDict_GetNULL)(KonohaContext *, KDict *, ksymbol_t);

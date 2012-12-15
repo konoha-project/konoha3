@@ -61,7 +61,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 			result = KLIB kNameSpace_SetConstData(kctx, ns, unboxKey, type, unboxValue, false/*isOverride*/, trace);
 		}
 		else {
-			kStmt_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", PSYM_t(unboxKey));
+			kStmt_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", Symbol_fmt2(unboxKey));
 		}
 	}
 	kStmt_done(kctx, stmt);

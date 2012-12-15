@@ -91,9 +91,8 @@ static kinline kString* KType_s_(KonohaContext *kctx, ktypeattr_t ty)
 	return KClass_s_(kctx, KClass_(ty));
 }
 
-#define SYM_s(sym)   SYM_s_(kctx, sym)
-#define SYM_t(sym)   kString_text(SYM_s_(kctx, sym))
-static kinline kString* SYM_s_(KonohaContext *kctx, ksymbol_t sym)
+#define Symbol_text(sym)   kString_text(Symbol_GetString(kctx, sym))
+static kinline kString* Symbol_GetString(KonohaContext *kctx, ksymbol_t sym)
 {
 	size_t index = (size_t) Symbol_Unmask(sym);
 //	if(!(index < kArray_size(kctx->share->symbolList_OnGlobalConstList))) {
@@ -103,8 +102,8 @@ static kinline kString* SYM_s_(KonohaContext *kctx, ksymbol_t sym)
 	return kctx->share->symbolList_OnGlobalConstList->stringItems[index];
 }
 
-#define PSYM_t(sym)   SYM_PRE(sym),kString_text(SYM_s_(kctx, sym))
-static kinline const char* SYM_PRE(ksymbol_t sym)
+#define Symbol_fmt2(sym)   Symbol_prefixText(sym), kString_text(Symbol_GetString(kctx, sym))
+static kinline const char* Symbol_prefixText(ksymbol_t sym)
 {
 	size_t mask = ((size_t)(Symbol_Attr(sym)) >> ((sizeof(ksymbol_t) * 8)-3));
 	DBG_ASSERT(mask < 8);

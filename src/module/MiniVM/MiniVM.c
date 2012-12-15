@@ -151,7 +151,7 @@ static void DumpVirtualCode(KonohaContext *kctx, VirtualCode *c)
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	WriteVirtualCode(kctx, &wb, c);
-	DBG_P(">>>\n%s", KLIB KBuffer_Stringfy(kctx, &wb, true));
+	DBG_P(">>>\n%s", KLIB KBuffer_text(kctx, &wb, true));
 	KLIB KBuffer_Free(&wb);
 }
 
@@ -687,7 +687,7 @@ static kbool_t KBuilder_VisitTryStmt(KonohaContext *kctx, KBuilder *builder, kSt
 
 static kbool_t KBuilder_VisitUndefinedStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
-	DBG_P("undefined asm syntax kw='%s'", SYM_t(stmt->syn->keyword));
+	DBG_P("undefined asm syntax kw='%s'", Symbol_text(stmt->syn->keyword));
 	return true;
 }
 
@@ -908,7 +908,7 @@ static struct VirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *bui
 	DBG_P(">>>>>> codesize=%d", codesize);
 	DBG_ASSERT(codesize != 0);
 	VirtualCode *vcode = (VirtualCode *)KCalloc_UNTRACE(codesize, 1);
-	memcpy((void *)vcode, KLIB KBuffer_Stringfy(kctx, &wb, 0), codesize);
+	memcpy((void *)vcode, KLIB KBuffer_text(kctx, &wb, 0), codesize);
 	BasicBlock_setJumpAddr(kctx, BasicBlock_FindById(kctx, beginId), (char *)vcode);
 	KLIB KBuffer_Free(&wb);
 	vcode = MakeThreadedCode(kctx, builder, vcode, codesize);

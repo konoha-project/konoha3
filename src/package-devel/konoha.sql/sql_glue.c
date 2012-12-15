@@ -443,7 +443,7 @@ static KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 			KGrowingBuffer wb;
 			KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 			KLIB KBuffer_printf(kctx, &wb, KFLOAT_FMT, val[0].floatValue);
-			const char *text = KLIB KBuffer_Stringfy(kctx, &wb, 0);
+			const char *text = KLIB KBuffer_text(kctx, &wb, 0);
 			res = KLIB new_kString(kctx, OnStack, text, KBuffer_bytesize(&wb), 0);
 			KLIB KBuffer_Free(&wb);
 		} else if(KDefinedKonohaCommonModule() && type == KType_float) {
@@ -451,7 +451,7 @@ static KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 			KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 			KLIB KBuffer_printf(kctx, &wb, KFLOAT_FMT, val[0].floatValue);
 			KLIB KBuffer_Free(&wb);
-			const char *text = KLIB KBuffer_Stringfy(kctx, &wb, 0);
+			const char *text = KLIB KBuffer_text(kctx, &wb, 0);
 			res = KLIB new_kString(kctx, OnStack, text, KBuffer_bytesize(&wb), 0);
 			KLIB KBuffer_Free(&wb);
 		}

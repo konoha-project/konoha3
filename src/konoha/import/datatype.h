@@ -637,17 +637,17 @@ static KonohaClass* DEFAULT_realtype(KonohaContext *kctx, KonohaClass* c, Konoha
 
 static kObject* DEFAULT_fnull(KonohaContext *kctx, KonohaClass *ct)
 {
-	DBG_ASSERT(ct->defaultNullValue_OnGlobalConstList != NULL);
-	return ct->defaultNullValue_OnGlobalConstList;
+	DBG_ASSERT(ct->defaultNullValue != NULL);
+	return ct->defaultNullValue;
 }
 
 static kObject* DEFAULT_fnullinit(KonohaContext *kctx, KonohaClass *ct)
 {
-	DBG_ASSERT(ct->defaultNullValue_OnGlobalConstList == NULL);
-	((KonohaClassVar *)ct)->defaultNullValue_OnGlobalConstList = KLIB new_kObject(kctx, OnGlobalConstList, ct, 0);
-	kObject_Set(NullObject, ct->defaultNullValue_OnGlobalConstList, true);
+	DBG_ASSERT(ct->defaultNullValue == NULL);
+	((KonohaClassVar *)ct)->defaultNullValue = KLIB new_kObject(kctx, OnGlobalConstList, ct, 0);
+	kObject_Set(NullObject, ct->defaultNullValue, true);
 	((KonohaClassVar *)ct)->fnull = DEFAULT_fnull;
-	return ct->defaultNullValue_OnGlobalConstList;
+	return ct->defaultNullValue;
 }
 
 static kObject *Knull(KonohaContext *kctx, KonohaClass *ct)
@@ -672,7 +672,7 @@ static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KD
 	KUnlock(share->classTableMutex);
 	if(bct != NULL) {
 		DBG_ASSERT(s == NULL);
-		memcpy(ct, bct, offsetof(KonohaClass, methodList_OnGlobalConstList));
+		memcpy(ct, bct, offsetof(KonohaClass, classMethodList));
 		ct->typeId = newid;
 		if(ct->fnull == DEFAULT_fnull) ct->fnull =  DEFAULT_fnullinit;
 	}
@@ -717,7 +717,7 @@ static KonohaClass *KonohaClass_extendedBody(KonohaContext *kctx, KonohaClass *c
 			KonohaClassVar *newct = new_KonohaClass(kctx, bct, NULL, NOPLINE);
 			newct->cflag |= KClassFlag_Private;
 			newct->cstruct_size = ct->cstruct_size * 2;
-			newct->methodList_OnGlobalConstList = ct->methodList_OnGlobalConstList;
+			newct->classMethodList = ct->classMethodList;
 			((KonohaClassVar *)ct)->searchSimilarClassNULL = (KonohaClass *)newct;
 		}
 		ct = ct->searchSimilarClassNULL;
@@ -789,7 +789,7 @@ static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, k
 	KonohaClassVar *newct = new_KonohaClass(kctx, ct0, NULL, NOPLINE);
 	newct->cparamdom = paramdom;
 	newct->p0 = isNotFuncClass ? p[0].attrTypeId : rtype;
-	newct->methodList_OnGlobalConstList = K_EMPTYARRAY;
+	newct->classMethodList = K_EMPTYARRAY;
 	if(newct->searchSuperMethodClassNULL == NULL) {
 		newct->searchSuperMethodClassNULL = ct0;
 	}
@@ -800,9 +800,9 @@ static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, k
 
 static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 {
-	if(ct->shortClassNameNULL_OnGlobalConstList == NULL) {
+	if(ct->shortClassNameNULL == NULL) {
 		if(ct->cparamdom == 0 && ct->baseTypeId != KType_Func) {
-			((KonohaClassVar *)ct)->shortClassNameNULL_OnGlobalConstList = SYM_s(ct->classNameSymbol);
+			((KonohaClassVar *)ct)->shortClassNameNULL = Symbol_GetString(kctx, ct->classNameSymbol);
 		}
 		else {
 			size_t i, c = 0;
@@ -813,7 +813,7 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 				KonohaClass_shortName(kctx, KClass_(cparam->paramtypeItems[i].attrTypeId));
 			}
 			KBuffer_Init(&(kctx->stack->cwb), &wb);
-			kString *s = SYM_s(ct->classNameSymbol);
+			kString *s = Symbol_GetString(kctx, ct->classNameSymbol);
 			KLIB KBuffer_Write(kctx, &wb, kString_text(s), kString_size(s));
 			KLIB KBuffer_Write(kctx, &wb, "[", 1);
 			if(ct->baseTypeId == KType_Func) {
@@ -826,22 +826,20 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 				KLIB KBuffer_Write(kctx, &wb, kString_text(s), kString_size(s));
 			}
 			KLIB KBuffer_Write(kctx, &wb, "]", 1);
-			const char *text = KBuffer_Stringfy(kctx, &wb, 1);
-			((KonohaClassVar *)ct)->shortClassNameNULL_OnGlobalConstList = new_kString(kctx, OnGlobalConstList, text, KBuffer_bytesize(&wb), StringPolicy_ASCII);
-			KLIB KBuffer_Free(&wb);
+			((KonohaClassVar *)ct)->shortClassNameNULL = KLIB KBuffer_Stringfy(kctx, &wb, OnGlobalConstList, StringPolicy_ASCII|StringPolicy_FreeKBuffer);
 		}
 	}
-	return ct->shortClassNameNULL_OnGlobalConstList;
+	return ct->shortClassNameNULL;
 }
 
 static void KonohaClass_setName(KonohaContext *kctx, KonohaClassVar *ct, KTraceInfo *trace)
 {
 	if(trace != NULL) {
 		/* To avoid SEGV, because this message is called at the initial time. */
-		KLIB ReportScriptMessage(kctx, trace, DebugTag, "new class %s.%s", PackageId_t(ct->packageId), SYM_t(ct->classNameSymbol));
+		KLIB ReportScriptMessage(kctx, trace, DebugTag, "new class %s.%s", PackageId_t(ct->packageId), Symbol_text(ct->classNameSymbol));
 	}
-	if(ct->methodList_OnGlobalConstList == NULL) {
-		ct->methodList_OnGlobalConstList = K_EMPTYARRAY;
+	if(ct->classMethodList == NULL) {
+		ct->classMethodList = K_EMPTYARRAY;
 		if(ct->typeId > KType_Object) {
 			ct->searchSuperMethodClassNULL = KClass_(ct->superTypeId);
 		}
@@ -1003,7 +1001,7 @@ static void defineDefaultKeywordSymbol(KonohaContext *kctx)
 	for(i = 0; i < sizeof(keywords) / sizeof(const char *); i++) {
 		ksymbolSPOL(keywords[i], strlen(keywords[i]), StringPolicy_TEXT|StringPolicy_ASCII, Symbol_NewId);
 		//ksymbol_t sym = ksymbolSPOL(keywords[i], strlen(keywords[i]), StringPolicy_TEXT|StringPolicy_ASCII, Symbol_NewId);
-		//fprintf(stdout, "#define Symbol_%s (((ksymbol_t)%d)|0) /*%s*/\n", SYM_t(sym), Symbol_Unmask(sym), keywords[i]);
+		//fprintf(stdout, "#define Symbol_%s (((ksymbol_t)%d)|0) /*%s*/\n", Symbol_text(sym), Symbol_Unmask(sym), keywords[i]);
 	}
 }
 

@@ -455,7 +455,7 @@ static int TokenSeq_ApplyMacroSyntax(KonohaContext *kctx, TokenSeq *tokens, Suga
 	}
 	if(!isApplied) {
 		kTokenVar *tk = source->tokenList->TokenVarItems[currentIdx];
-		kToken_ToError(kctx, tk, ErrTag, "macro %s%s takes %d parameter(s)", PSYM_t(syn->keyword), (int)syn->macroParamSize);
+		kToken_ToError(kctx, tk, ErrTag, "macro %s%s takes %d parameter(s)", Symbol_fmt2(syn->keyword), (int)syn->macroParamSize);
 		source->SourceConfig.foundErrorToken = tk;
 		nextIdx = source->endIdx;
 	}
@@ -527,7 +527,7 @@ static int TokenSeq_Preprocess(KonohaContext *kctx, TokenSeq *tokens, MacroSet *
 				tk->resolvedSyntaxInfo = SYN_(tokens->ns, tk->unresolvedTokenType);
 				if(!kToken_is(StatementSeparator, tk) && tk->unresolvedTokenType != TokenType_INDENT) {
 					if(tk->resolvedSyntaxInfo == NULL) {
-						kToken_ToError(kctx, tk, ErrTag, "undefined pattern: %s%s", PSYM_t(tk->unresolvedTokenType));
+						kToken_ToError(kctx, tk, ErrTag, "undefined pattern: %s%s", Symbol_fmt2(tk->unresolvedTokenType));
 						source->SourceConfig.foundErrorToken = tk;
 						goto RETURN_ERROR;
 					}
@@ -582,7 +582,7 @@ static int SugarSyntax_MatchPattern(KonohaContext *kctx, SugarSyntax *syn, kToke
 		}
 	}
 	if(callCount == 0) {
-		kStmtToken_Message(kctx, stmt, patternToken, ErrTag, "undefined syntax pattern: %s%s", PSYM_t(patternToken->resolvedSymbol));
+		kStmtToken_Message(kctx, stmt, patternToken, ErrTag, "undefined syntax pattern: %s%s", Symbol_fmt2(patternToken->resolvedSymbol));
 	}
 	return -1;
 }
@@ -677,7 +677,7 @@ static SugarSyntax* kStmt_GuessStatementSyntax(KonohaContext *kctx, kStmt *stmt,
 	kToken *tk = tokenList->TokenItems[beginIdx];
 	SugarSyntax *syn = tk->resolvedSyntaxInfo;
 	kNameSpace *ns = Stmt_ns(stmt);
-	//DBG_P(">>>>>>>>>>>>>>>>>>> finding SugarSyntax=%s%s syn->syntaxPatternListNULL=%p", PSYM_t(syn->keyword), syn->syntaxPatternListNULL_OnList);
+	//DBG_P(">>>>>>>>>>>>>>>>>>> finding SugarSyntax=%s%s syn->syntaxPatternListNULL=%p", Symbol_fmt2(syn->keyword), syn->syntaxPatternListNULL_OnList);
 	if(syn->syntaxPatternListNULL_OnList == NULL) {
 		kNameSpace *currentNameSpace = ns;
 		while(currentNameSpace != NULL) {
@@ -686,7 +686,7 @@ static SugarSyntax* kStmt_GuessStatementSyntax(KonohaContext *kctx, kStmt *stmt,
 				int i;
 				for(i = kArray_size(stmtPatternList) - 1; i >=0; i--) {
 					kToken *patternToken = stmtPatternList->TokenItems[i];
-					//DBG_P(">>>>>>>>>> searching patternToken=%s%s", PSYM_t(patternToken->resolvedSymbol));
+					//DBG_P(">>>>>>>>>> searching patternToken=%s%s", Symbol_fmt2(patternToken->resolvedSymbol));
 					if(SugarSyntax_MatchPattern(kctx, patternToken->resolvedSyntaxInfo, patternToken, stmt, 0, tokenList, beginIdx, endIdx) != -1) {
 						return SYN_(ns, patternToken->stmtEntryKey);
 					}
@@ -703,7 +703,7 @@ static SugarSyntax* kStmt_GuessStatementSyntax(KonohaContext *kctx, kStmt *stmt,
 
 static const char* StatementName(KonohaContext *kctx, ksymbol_t keyword)
 {
-	const char *statement = SYM_t(keyword);
+	const char *statement = Symbol_text(keyword);
 #ifndef USE_SMALLBUILD
 	if(keyword == Symbol_ExprPattern) statement = "expression";
 	else if(keyword == Symbol_TypeDeclPattern) statement = "variable";
@@ -766,12 +766,12 @@ static int kStmt_ParseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int inde
 //		KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
 //		KdumpTokenArray(kctx, stmtSyntax->syntaxPatternListNULL_OnList, 0, kArray_size(stmtSyntax->syntaxPatternListNULL_OnList));
 #ifdef USE_SMALLBULD
-		kStmt_Message(kctx, stmt, ErrTag, "%s%s: %s%s is expected", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule[0]->resolvedSymbol));
+		kStmt_Message(kctx, stmt, ErrTag, "%s%s: %s%s is expected", KWSTMT_t(stmt->syn->keyword), Symbol_fmt2(errRule[0]->resolvedSymbol));
 #else
 		if(errRule[1] != NULL) {
-			kStmt_Message(kctx, stmt, ErrTag, "%s%s: %s%s is expected before %s", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule[0]->resolvedSymbol), KToken_t(errRule[1]));
+			kStmt_Message(kctx, stmt, ErrTag, "%s%s: %s%s is expected before %s", KWSTMT_t(stmt->syn->keyword), Symbol_fmt2(errRule[0]->resolvedSymbol), KToken_t(errRule[1]));
 		} else {
-			kStmt_Message(kctx, stmt, ErrTag, "%s%s: %s%s is expected", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule[0]->resolvedSymbol));
+			kStmt_Message(kctx, stmt, ErrTag, "%s%s: %s%s is expected", KWSTMT_t(stmt->syn->keyword), Symbol_fmt2(errRule[0]->resolvedSymbol));
 		}
 #endif
 	}

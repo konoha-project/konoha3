@@ -598,7 +598,7 @@ static KMETHOD Method_getFname(KonohaContext *kctx, KonohaStack *sfp)
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KLIB KBuffer_printf(kctx, &wb, "%s%s", MethodName_Fmt2(mtd->mn));
-	kString *fname = KLIB new_kString(kctx, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), StringPolicy_POOL);
+	kString *fname = KLIB new_kString(kctx, KLIB KBuffer_text(kctx, &wb, 0), KBuffer_bytesize(&wb), StringPolicy_POOL);
 	KReturn(fname);
 }
 

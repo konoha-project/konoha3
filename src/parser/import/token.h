@@ -117,7 +117,7 @@ static void kToken_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char 
 	if(IS_NOTNULL(tk)) {
 		ksymbol_t kw = ksymbolA(t, len, Symbol_Noname);
 		if(kw == Symbol_Unmask(kw)) {
-			KFieldSet(tk, tk->text, SYM_s(kw));
+			KFieldSet(tk, tk->text, Symbol_GetString(kctx, kw));
 		}
 		else {
 			KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, t, len, StringPolicy_ASCII));

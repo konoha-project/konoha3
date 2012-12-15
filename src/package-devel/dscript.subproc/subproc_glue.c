@@ -398,7 +398,7 @@ static kString *kFILE_readAll(KonohaContext *kctx, kArray *gcstack, kFile *file,
 		return ret;
 	}
 	if(KBuffer_bytesize(&wb) > 0) {
-		ret = KLIB new_kString(kctx, gcstack, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
+		ret = KLIB new_kString(kctx, gcstack, KLIB KBuffer_text(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
 	}
 	KLIB KBuffer_Free(&wb);
 	return ret;
@@ -1289,7 +1289,7 @@ static kString *kPipeReadStringNULL(KonohaContext *kctx, FILE *fp)
 	if(ferror(fp)) {
 		return NULL;
 	}
-	kString *ret = KLIB new_kString(kctx, GcUnsafe, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
+	kString *ret = KLIB new_kString(kctx, GcUnsafe, KLIB KBuffer_text(kctx, &wb, 0), KBuffer_bytesize(&wb), 0);
 	KLIB KBuffer_Free(&wb);
 	return ret;
 }

@@ -695,7 +695,7 @@ static KMETHOD Curl_receiveString(KonohaContext *kctx, KonohaStack *sfp)
 	}
 
 	KReturnWith(
-		KLIB new_kString(rbuf.kctx, OnStack, KLIB KBuffer_Stringfy(rbuf.kctx, &rbuf.wb, 0), KBuffer_bytesize(&rbuf.wb), 0),
+		KLIB new_kString(rbuf.kctx, OnStack, KLIB KBuffer_text(rbuf.kctx, &rbuf.wb, 0), KBuffer_bytesize(&rbuf.wb), 0),
 		KLIB KBuffer_Free(&rbuf.wb)
 	);
 }

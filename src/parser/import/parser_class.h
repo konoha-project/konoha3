@@ -50,7 +50,7 @@ static void kNameSpace_FreeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns
 static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	ksymbol_t symbol = (ksymbol_t)v[pos].unboxValue;
-	KLIB KBuffer_printf(kctx, wb, "%s%s", PSYM_t(symbol));
+	KLIB KBuffer_printf(kctx, wb, "%s%s", Symbol_fmt2(symbol));
 }
 
 /* --------------- */
@@ -65,7 +65,7 @@ static void kToken_Init(KonohaContext *kctx, kObject *o, void *conf)
 		KUnsafeFieldInit(tk->text, TS_EMPTY);
 	}
 	else {
-		KUnsafeFieldInit(tk->text, SYM_s(tk->unresolvedTokenType));
+		KUnsafeFieldInit(tk->text, Symbol_GetString(kctx, tk->unresolvedTokenType));
 	}
 	tk->resolvedSyntaxInfo = NULL;
 }
@@ -105,7 +105,7 @@ static void KBuffer_WriteTokenSymbol(KonohaContext *kctx, KGrowingBuffer *wb, kT
 	}
 	else {
 		ksymbol_t symbolType = tk->resolvedSyntaxInfo == NULL ? tk->resolvedSymbol : tk->resolvedSyntaxInfo->keyword;
-		KLIB KBuffer_printf(kctx, wb, "%s%s ", PSYM_t(symbolType));
+		KLIB KBuffer_printf(kctx, wb, "%s%s ", Symbol_fmt2(symbolType));
 	}
 }
 
@@ -376,7 +376,7 @@ static void kStmt_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingB
 		KLIB KBuffer_printf(kctx, wb, "DONE {uline: %d, ", (kshort_t)stmt->uline);
 	}
 	else {
-		KLIB KBuffer_printf(kctx, wb, "%s%s {uline: %d, ", PSYM_t(stmt->syn->keyword), (kshort_t)stmt->uline);
+		KLIB KBuffer_printf(kctx, wb, "%s%s {uline: %d, ", Symbol_fmt2(stmt->syn->keyword), (kshort_t)stmt->uline);
 	}
 	KLIB kObjectProto_p(kctx, values, pos, wb, 0);
 	KLIB KBuffer_Write(kctx, wb, "}", 1);

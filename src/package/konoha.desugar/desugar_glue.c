@@ -121,7 +121,7 @@ static void KBuffer_WriteToken(KonohaContext *kctx, KGrowingBuffer *wb, kToken *
 		KLIB KBuffer_Write(kctx, wb, &c, 1);
 	}
 	else {
-		KLIB KBuffer_printf(kctx, wb, "%s%s", PSYM_t(tk->resolvedSymbol));
+		KLIB KBuffer_printf(kctx, wb, "%s%s", Symbol_fmt2(tk->resolvedSymbol));
 	}
 }
 
@@ -136,7 +136,7 @@ static KMETHOD Token_toString(KonohaContext *kctx, KonohaStack *sfp)
 		KGrowingBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KBuffer_WriteToken(kctx, &wb, tk);
-		KReturnWith(KLIB new_kString(kctx, OnStack, KLIB KBuffer_Stringfy(kctx, &wb, 1), KBuffer_bytesize(&wb), 0), KLIB KBuffer_Free(&wb));
+		KReturnWith(KLIB new_kString(kctx, OnStack, KLIB KBuffer_text(kctx, &wb, 1), KBuffer_bytesize(&wb), 0), KLIB KBuffer_Free(&wb));
 	}
 }
 
@@ -1181,7 +1181,7 @@ static KMETHOD Statement_syntax(KonohaContext *kctx, KonohaStack *sfp)
 		SugarSyntaxVar *syn = kNameSpace_guessSyntaxFromTokenList(kctx, ns, tokenList);
 		if(syn != NULL) {
 			if(syn->syntaxPatternListNULL_OnList != NULL) {
-				SUGAR kStmt_Message2(kctx, stmt, NULL, InfoTag, "oveloading syntax: %s%s", PSYM_t(syn->keyword));
+				SUGAR kStmt_Message2(kctx, stmt, NULL, InfoTag, "oveloading syntax: %s%s", Symbol_fmt2(syn->keyword));
 			}
 			else {
 				syn->syntaxPatternListNULL_OnList = new_(TokenArray, 0, ns->NameSpaceConstList);

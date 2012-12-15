@@ -55,7 +55,7 @@ static kString* new_StringMessage(KonohaContext *kctx, kArray *gcstack, KGrowing
 		KLIB KBuffer_printf(kctx, wb, "%s" , msg);
 	}
 	KLIB KBuffer_vprintf(kctx, wb, fmt, ap);
-	msg = KLIB KBuffer_Stringfy(kctx, wb, 0);
+	msg = KLIB KBuffer_text(kctx, wb, 0);
 	return KLIB new_kString(kctx, gcstack, msg, KBuffer_bytesize(wb), 0);
 }
 

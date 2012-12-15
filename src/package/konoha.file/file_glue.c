@@ -282,7 +282,7 @@ static KMETHOD File_readLine(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		kFile_CheckEOF(kctx, file, trace);
 		KReturnWith(
-			KLIB new_kString(kctx, OnStack, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), policy),
+			KLIB new_kString(kctx, OnStack, KLIB KBuffer_text(kctx, &wb, 0), KBuffer_bytesize(&wb), policy),
 			KLIB KBuffer_Free(&wb)
 		);
 	}
@@ -312,7 +312,7 @@ static KMETHOD File_print(KonohaContext *kctx, KonohaStack *sfp)
 		KGrowingBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KLIB KBuffer_iconv(kctx, &wb, file->writerIconv, kString_text(line), kString_size(line), trace);
-		TRACE_fwrite(kctx, file, KLIB KBuffer_Stringfy(kctx, &wb, 0), KBuffer_bytesize(&wb), trace);
+		TRACE_fwrite(kctx, file, KLIB KBuffer_text(kctx, &wb, 0), KBuffer_bytesize(&wb), trace);
 		KLIB KBuffer_Free(&wb);
 	}
 }

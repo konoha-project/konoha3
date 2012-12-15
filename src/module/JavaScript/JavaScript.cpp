@@ -135,7 +135,7 @@ enum kSymbolPrefix{
 	kSymbolPrefix_DOLLAR,
 };
 
-static enum kSymbolPrefix SYM_PRE_ID(ksymbol_t sym)
+static enum kSymbolPrefix Symbol_prefixText_ID(ksymbol_t sym)
 {
 	size_t mask = ((size_t)(Symbol_Attr(sym)) >> ((sizeof(ksymbol_t) * 8)-3));
 	DBG_ASSERT(mask < 8);
@@ -310,7 +310,7 @@ static void JSBuilder_EmitKonohaValue(KonohaContext *kctx, KBuilder *builder, Ko
 	KGrowingBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	ct->p(kctx, sfp, 0, &wb);
-	char *str = (char *)KLIB KBuffer_Stringfy(kctx, &wb, 0);
+	char *str = (char *)KLIB KBuffer_text(kctx, &wb, 0);
 	JSBuilder_EmitString(kctx, builder, str, "", "");
 	KLIB KBuffer_Free(&wb);
 }
@@ -395,7 +395,7 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 {
 	KonohaClass *globalObjectClass = KLIB kNameSpace_GetClassByFullName(kctx, Stmt_ns(stmt), "GlobalObject", 12, NULL);
 	kbool_t isGlobal = (KClass_(receiver->attrTypeId) == globalObjectClass || receiver->attrTypeId == KType_NameSpace);
-	const char *methodName = SYM_t(mtd->mn);
+	const char *methodName = Symbol_text(mtd->mn);
 	if(receiver->attrTypeId == KType_NameSpace) {
 		if(mtd->mn == MN_("import")) {
 			kString *packageNameString = (kString *)kExpr_at(expr, 2)->objectConstValue;
@@ -407,10 +407,10 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 	}
 	if(receiver->attrTypeId == KType_System && methodName[0] == 'p') {
 		JSBuilder_EmitString(kctx, builder, LOG_FUNCTION_NAME, "", "");
-	}else if(strcmp(SYM_t(mtd->mn), "new") == 0) {
+	}else if(strcmp(Symbol_text(mtd->mn), "new") == 0) {
 		JSBuilder_EmitString(kctx, builder, "new ", KClass_t(KClass_(receiver->attrTypeId)), "");
-	}else if(strcmp(SYM_t(mtd->mn), "newList") == 0) {
-	}else if(strcmp(SYM_t(mtd->mn), "newArray") == 0) {
+	}else if(strcmp(Symbol_text(mtd->mn), "newList") == 0) {
+	}else if(strcmp(Symbol_text(mtd->mn), "newArray") == 0) {
 		JSBuilder_EmitString(kctx, builder, "new Array", "", "");
 	}else{
 		if(!isGlobal) {
@@ -421,7 +421,7 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 				SUGAR VisitExpr(kctx, builder, stmt, receiver);
 			}
 		}
-		switch(SYM_PRE_ID(mtd->mn)) {
+		switch(Symbol_prefixText_ID(mtd->mn)) {
 		case kSymbolPrefix_GET:
 			if(kArray_size(expr->cons) > 2) {
 				JSBuilder_VisitExpr(kctx, builder, stmt, kExpr_at(expr, 2), "[", "]");
@@ -470,20 +470,20 @@ static void JSBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStm
 		JSBuilder_EmitString(kctx, builder, ")", "", "");
 	}
 	else if(MethodName_isBinaryOperator(kctx, mtd->mn)) {
-		JSBuilder_VisitExprParams(kctx, builder, stmt, expr, 1, SYM_t(mtd->mn),"(", ")");
+		JSBuilder_VisitExprParams(kctx, builder, stmt, expr, 1, Symbol_text(mtd->mn),"(", ")");
 	}
 	else{
 		kExpr *receiver = kExpr_at(expr, 1);
 		/*if(mtd == jsBuilder->visitingMethod) {
 			JSBuilder_EmitString(kctx, builder, "arguments.callee", "", "");
 		}
-		else*/ if(strcmp(SYM_t(mtd->mn), "newList") == 0) {
+		else*/ if(strcmp(Symbol_text(mtd->mn), "newList") == 0) {
 			isArray = true;
 		}
 		else {
 			JSBuilder_ConvertAndEmitMethodName(kctx, builder, stmt, expr, receiver, mtd);
 		}
-		switch(SYM_PRE_ID(mtd->mn)) {
+		switch(Symbol_prefixText_ID(mtd->mn)) {
 		case kSymbolPrefix_GET:
 		case kSymbolPrefix_TO:
 			break;
@@ -556,9 +556,9 @@ static void JSBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder, K
 {
 	kushort_t i;
 	KonohaClassField *field = kclass->fieldItems;
-	kObject *constList = kclass->defaultNullValue_OnGlobalConstList;
+	kObject *constList = kclass->defaultNullValue;
 	for(i = 0; i < kclass->fieldsize; ++i) {
-		JSBuilder_EmitString(kctx, builder, "this.", SYM_t(field[i].name), " = ");
+		JSBuilder_EmitString(kctx, builder, "this.", Symbol_text(field[i].name), " = ");
 		if(KType_Is(UnboxType, field[i].attrTypeId)) {
 			JSBuilder_EmitNConstValue(kctx, builder, KClass_(field[i].attrTypeId), constList->fieldUnboxItems[i]);
 		}else{
@@ -577,7 +577,7 @@ static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, k
 	unsigned i;
 	if(mtd->typeId == KType_NameSpace) {
 		KLIB KBuffer_printf(kctx, &wb, "var %s%s = function(", MethodName_Fmt2(mtd->mn));
-	}else if(strcmp(SYM_t(mtd->mn), "new") == 0) {
+	}else if(strcmp(Symbol_text(mtd->mn), "new") == 0) {
 		KLIB KBuffer_printf(kctx, &wb, "function %s(", KClass_t(kclass));
 	}else{
 		compileAllDefinedMethods(kctx);
@@ -591,10 +591,10 @@ static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, k
 		if(i != 0) {
 			KLIB KBuffer_printf(kctx, &wb, ", ");
 		}
-		KLIB KBuffer_printf(kctx, &wb, "%s", SYM_t(params->paramtypeItems[i].name));
+		KLIB KBuffer_printf(kctx, &wb, "%s", Symbol_text(params->paramtypeItems[i].name));
 	}
 	KLIB KBuffer_printf(kctx, &wb, ")");
-	JSBuilder_EmitString(kctx, builder, KLIB KBuffer_Stringfy(kctx, &wb, 1), "", "");
+	JSBuilder_EmitString(kctx, builder, KLIB KBuffer_text(kctx, &wb, 1), "", "");
 	KLIB KBuffer_Free(&wb);
 }
 
@@ -647,7 +647,7 @@ static void JSBuilder_Init(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 	
 	if(mtd->mn != 0) {
 		KLIB kMethod_SetFunc(kctx, mtd, NULL);
-		if(strcmp(SYM_t(mtd->mn), "new") == 0) {
+		if(strcmp(Symbol_text(mtd->mn), "new") == 0) {
 			isConstractor = true;
 		}
 		if(isConstractor) {
@@ -673,12 +673,12 @@ static void JSBuilder_Free(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 	if(mtd->mn != 0) {
 		jsBuilder->indent--;
 		JSBuilder_EmitNewLineWith(kctx, builder, "}");
-		if(strcmp(SYM_t(mtd->mn), "new") == 0) {
+		if(strcmp(Symbol_text(mtd->mn), "new") == 0) {
 			KonohaClass *kclass = KClass_(mtd->typeId);
 			JSBuilder_EmitClassFooter(kctx, builder, kclass);
 		}
 	}
-	const char* jsSrc = KLIB KBuffer_Stringfy(kctx, &jsBuilder->jsCodeBuffer, 1);
+	const char* jsSrc = KLIB KBuffer_text(kctx, &jsBuilder->jsCodeBuffer, 1);
 #ifdef HAVE_LIBV8
 	kbool_t isCompileOnly = KonohaContext_Is(CompileOnly, kctx);
 #else

@@ -573,9 +573,9 @@ struct kGammaVar {
 #define IS_Block(O)  (kObject_class(O) == KClass_Block)
 #define IS_Gamma(O)  (kObject_class(O) == KClass_Gamma)
 
-#define K_NULLTOKEN  (kToken *)((KClass_Token)->defaultNullValue_OnGlobalConstList)
-#define K_NULLEXPR   (kExpr *)((KClass_Expr)->defaultNullValue_OnGlobalConstList)
-#define K_NULLBLOCK  (kBlock *)((KClass_Block)->defaultNullValue_OnGlobalConstList)
+#define K_NULLTOKEN  (kToken *)((KClass_Token)->defaultNullValue)
+#define K_NULLEXPR   (kExpr *)((KClass_Expr)->defaultNullValue)
+#define K_NULLBLOCK  (kBlock *)((KClass_Block)->defaultNullValue)
 
 typedef kStmt* (*TypeDeclFunc)(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktypeattr_t ty, kExpr *termExpr, kExpr *vexpr, kObject *thunk);
 struct KBuilder;
@@ -817,7 +817,7 @@ static inline kNameSpace *kStmt_ns(kStmt *stmt)
 static inline void Stmt_setsyn(KonohaContext *kctx, kStmt *stmt, SugarSyntax *syn)
 {
 	//if(syn == NULL && stmt->syn != NULL) {
-	//	DBG_P("DONE: STMT='%s'", PSYM_t(syn->keyword));
+	//	DBG_P("DONE: STMT='%s'", Symbol_fmt2(syn->keyword));
 	//}
 	((kStmtVar *)stmt)->syn = syn;
 	(void)kctx;

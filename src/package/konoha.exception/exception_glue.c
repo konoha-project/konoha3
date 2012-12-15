@@ -88,7 +88,7 @@
 ////		knh_putc(ctx, cwb->w, '=');
 ////		knh_Write_sfp(ctx, cwb->w, type, &sfp[i+1], FMT_line);
 ////	}
-//	const char *msg = KLIB KBuffer_Stringfy(kctx, &wb, 1);
+//	const char *msg = KLIB KBuffer_text(kctx, &wb, 1);
 //	KLIB new_kString(kctx, e->StackTraceList, msg, strlen(msg), 0);
 ////	if((mtd)->mn != MN_LAMBDA) {
 ////		knh_uline_t uline = knh_stack_uline(ctx, sfp);
