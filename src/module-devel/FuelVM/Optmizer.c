@@ -60,12 +60,13 @@ static void ReplaceOldValueWith(INode *Node, INode *oldVal, INode *newVal)
 		CASE(IField) {
 			IField *Inst = (IField *) Node;
 			switch(Inst->Op) {
-				case GlobalScope:;
-				case EnvScope:;
-				case FieldScope:;
-						assert(0 && "TODO");
-				case LocalScope:;
-						break;
+				case GlobalScope:
+				case EnvScope:
+				case FieldScope:
+					ReplaceValue((INode **)&(Inst->Node), oldVal, newVal);
+					break;
+				case LocalScope:
+					break;
 			}
 			break;
 		}
@@ -107,7 +108,7 @@ static void ReplaceOldValueWith(INode *Node, INode *oldVal, INode *newVal)
 		case IR_TYPE_ITry:
 		break;
 		CASE(IThrow) {
-			assert(0 && "TODO");
+			ReplaceValue(&((IThrow *)Node)->Val, oldVal, newVal);
 			break;
 		}
 		CASE(IYield) {
@@ -214,7 +215,17 @@ static INode *SimplifyIBinary(FuelIRBuilder *builder, enum BinaryOp Op, IConstan
 		if(ToINode(RHS)->Type == TYPE_int) {
 			switch(Op) {
 #define CASE(X) case X: ret = X##_int_int(LHS->Value, RHS->Value); break
-				CASE(Add); CASE(Sub); CASE(Mul); CASE(Div); CASE(Mod);
+				CASE(Add); CASE(Sub); CASE(Mul);
+				case Div: {
+					if(unlikely(RHS->Value.ival == 0)) {
+						KonohaContext *kctx = builder->Context;
+						KBaseTrace(trace);
+						KLIB KRuntime_raise(kctx, KException_("ZeroDivided"),
+								SoftwareFault, NULL, trace->baseStack);
+					}
+					ret = Div_int_int(LHS->Value, RHS->Value);
+				}
+				CASE(Mod);
 				CASE(LShift); CASE(RShift); CASE(And); CASE(Or); CASE(Xor);
 				CASE(Eq); CASE(Nq); CASE(Gt); CASE(Ge); CASE(Lt); CASE(Le);
 #undef CASE
@@ -228,22 +239,82 @@ static INode *SimplifyIBinary(FuelIRBuilder *builder, enum BinaryOp Op, IConstan
 	return NULL;
 }
 
+static INode *SimplifyICond(FuelIRBuilder *builder, ICond *Inst)
+{
+	enum ConditionalOp Op = Inst->Op;
+	INodePtr *x, *e;
+	FOR_EACH_ARRAY(Inst->Insts, x, e) {
+		if(!CHECK_KIND(*x, IConstant))
+			return NULL;
+	}
+	SValue val = {}; val.bval = true;
+	if(Op == LogicalAnd) {
+		FOR_EACH_ARRAY(Inst->Insts, x, e) {
+			IConstant *C = (IConstant *) *x;
+			val.bval = val.bval && C->Value.bval;
+		}
+	} else if(Op == LogicalOr) {
+		FOR_EACH_ARRAY(Inst->Insts, x, e) {
+			IConstant *C = (IConstant *) *x;
+			val.bval = val.bval || C->Value.bval;
+		}
+	} else {
+		assert(0 && "unreachable");
+	}
+	return (INode *) builder->API->newConstant(builder, TYPE_boolean, val);
+}
+
+static INode *SimplifyICall(FuelIRBuilder *builder, ICall *Inst)
+{
+	SValue val = {};
+	unsigned i;
+	INodePtr *x;
+	INode **MtdPtr = ARRAY_n(Inst->Params, 0);
+	kMethod *mtd = (kMethod *) ((IConstant *) *MtdPtr)->Value.obj;
+	if(!kMethod_Is(Const, mtd)) {
+		return NULL;
+	}
+	FOR_EACH_ARRAY_(Inst->Params, x, i) {
+		if(!CHECK_KIND(*x, IConstant))
+			return NULL;
+	}
+
+	KonohaContext *kctx = builder->Context;
+	KClass *kclass = kMethod_GetReturnType(mtd);
+	unsigned psize = ARRAY_size(Inst->Params) - 1;
+	BEGIN_UnusedStack(lsfp);
+
+	FOR_EACH_ARRAY_(Inst->Params, x, i) {
+		if(i == 0)
+			continue;
+		IConstant *C = (IConstant *) *x;
+		if(IsUnBoxedType(C->base.Type)) {
+			lsfp[i-1].unboxValue = C->Value.bits;
+		} else {
+			KUnsafeFieldSet(lsfp[i-1].asObject, C->Value.obj);
+			lsfp[i-1].unboxValue = kObject_Unbox(C->Value.obj);
+		}
+	}
+	KStackSetMethodAll(lsfp, KLIB Knull(kctx, kclass), Inst->uline, mtd, psize);
+	KStackCall(lsfp);
+	END_UnusedStack();
+
+	enum TypeId Type = ConvertToTypeId(kctx, kclass->typeId);
+	if(IsUnBoxedType(Type)) {
+		val.bits = lsfp[K_RTNIDX].unboxValue;
+	} else {
+		val.obj  = lsfp[K_RTNIDX].asObject;
+	}
+	return (INode *) builder->API->newConstant(builder, Type, val);
+}
+
 static INode *SimplifyInst(FuelIRBuilder *builder, INode *Node)
 {
+	if(Node->Kind == IR_TYPE_ICond) {
+		return SimplifyICond(builder, (ICond *) Node);
+	}
 	if(Node->Kind == IR_TYPE_ICall) {
-		ICall *Inst = (ICall *) Node;
-		INodePtr *x;
-		//INode **MtdPtr = (ARRAY_n(Inst->Params, 0));
-		//IConstant *Mtd = (IConstant *) *MtdPtr;
-		unsigned i = 0;
-		FOR_EACH_ARRAY_(Inst->Params, x, i) {
-			/* Skip method object */
-			if(i == 0) continue;
-			if(!CHECK_KIND(*x, IConstant))
-				return NULL;
-		}
-		//asm volatile("int3");
-		//fprintf(stderr, "%s\n", "hi");
+		return SimplifyICall(builder, (ICall *) Node);
 	}
 	if(Node->Kind == IR_TYPE_IUnary) {
 		IUnary *Inst = (IUnary *) Node;
@@ -281,9 +352,15 @@ static void SchedulingReplaceValue(FuelIRBuilder *builder, INode *oldNode, INode
 static void Block_insertNode(Block *block, ARRAY(INodePtr) *List)
 {
 	unsigned shift = ARRAYp_size(List);
-	ARRAY_ensureSize(INodePtr, &block->insts, ARRAY_size(block->insts) + shift);
-	memmove(block->insts.list+shift, block->insts.list, sizeof(BlockPtr)*shift);
-	memcpy(block->insts.list, List->list, sizeof(BlockPtr)*shift);
+	if(shift) {
+		unsigned size = ARRAY_size(block->insts);
+		INode *Insts[size];
+		ARRAY_ensureSize(INodePtr, &block->insts, size + shift + 1);
+		memcpy(Insts, block->insts.list, sizeof(INodePtr)*size);
+		memcpy(block->insts.list, List->list, sizeof(INodePtr)*shift);
+		memcpy(block->insts.list+shift, Insts, sizeof(INodePtr)*size);
+		ARRAY_size(block->insts) = ARRAY_size(block->insts) + shift;
+	}
 }
 
 void IRBuilder_SimplifyStdCall(FuelIRBuilder *builder)
@@ -293,6 +370,7 @@ void IRBuilder_SimplifyStdCall(FuelIRBuilder *builder)
 	ARRAY_init(INodePtr, &Modified, 0);
 	FOR_EACH_ARRAY(builder->Blocks, x, e) {
 		INodePtr *Inst, *End;
+		ARRAY_clear(Modified);
 		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
 			INode *Node = SimplifyInst(builder, *Inst);
 			if(Node) {
@@ -327,13 +405,13 @@ void IRBuilder_RemoveTrivialCondBranch(FuelIRBuilder *builder)
 						TargetBB  = Br->ElseBB;
 						RemovedBB = Br->ThenBB;
 					}
-					ARRAY_clear(RemovedBB->insts);
 					*NodePtr = (INode *) builder->API->newJump(builder, TargetBB);
 				}
 			}
 		}
 	}
 }
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

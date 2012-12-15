@@ -92,13 +92,17 @@ static ILabel *newILabel(FuelIRBuilder *builder, int Symbol)
 
 #define disposeILabel disposeINodeImpl
 
-static IField *newIField(FuelIRBuilder *builder, enum ScopeOp Op, enum TypeId Type, unsigned Index)
+static IField *newIField(FuelIRBuilder *builder, enum ScopeOp Op, enum TypeId Type, unsigned Index, INode *Val, unsigned FieldIdx)
 {
 	IField *Node = CREATE_NODE(IField);
 	Node->Op = Op;
-	Node->Id = Index;
+	if(Op == LocalScope) {
+		Node->Id = Index;
+	} else {
+		Node->Node = Val;
+	}
 	Node->Hash = 0;
-	Node->NumOfUpdate = 0;
+	Node->FieldIndex = FieldIdx;
 	Node->base.Type = Type;
 	return (Node);
 }
@@ -108,6 +112,7 @@ static IField *newIField(FuelIRBuilder *builder, enum ScopeOp Op, enum TypeId Ty
 static ICond *newICond(FuelIRBuilder *builder, enum ConditionalOp Op)
 {
 	ICond *Node = CREATE_NODE(ICond);
+	Node->Op = Op;
 	ARRAY_init(INodePtr, &Node->Insts, 0);
 	return (Node);
 }
@@ -121,10 +126,11 @@ static void disposeICond(INode *Node)
 	}
 }
 
-static INew *newINew(FuelIRBuilder *builder, enum TypeId Type)
+static INew *newINew(FuelIRBuilder *builder, uintptr_t Conf, enum TypeId Type)
 {
 	INew *Node = CREATE_NODE(INew);
 	Node->base.Type = Type;
+	Node->Conf = Conf;
 	return (Node);
 }
 
@@ -175,7 +181,6 @@ static IUpdate *newIUpdate(FuelIRBuilder *builder, IField *LHS, INode *RHS)
 	IUpdate *Node = CREATE_NODE(IUpdate);
 	Node->LHS = LHS;
 	Node->RHS = RHS;
-	LHS->NumOfUpdate += 1;
 	return (Node);
 }
 
@@ -386,10 +391,23 @@ void CondInst_addParam(ICond *Inst, INode *Param)
 	ARRAY_add(INodePtr, &Inst->Insts, Param);
 }
 
-void IRBuilder_Init(FuelIRBuilder *builder)
+void CondInst_SetBranchInst(ICond *Cond, IBranch *Branch)
+{
+	Cond->Branch = Branch;
+	INodePtr *x, *e;
+	FOR_EACH_ARRAY(Cond->Insts, x, e) {
+		ICond *Inst;
+		if((Inst = CHECK_KIND(*x, ICond)) != 0) {
+			CondInst_SetBranchInst(Inst, Branch);
+		}
+	}
+}
+
+void IRBuilder_Init(FuelIRBuilder *builder, KonohaContext *kctx)
 {
 	builder->API = &API;
 	builder->API->Fn_Init(builder);
+	builder->Context = kctx;
 }
 
 void IRBuilder_Exit(FuelIRBuilder *builder)
@@ -400,7 +418,7 @@ void IRBuilder_Exit(FuelIRBuilder *builder)
 INode *CreateLocal(FuelIRBuilder *builder, enum TypeId type)
 {
 	unsigned Id = builder->LocalId++;
-	INode *Node = (INode *) builder->API->newField(builder, LocalScope, type, Id);
+	INode *Node = (INode *) builder->API->newField(builder, LocalScope, type, Id, 0, 0);
 	ARRAY_add(INodePtr, &builder->LocalVar, Node);
 	assert(ARRAY_size(builder->LocalVar) == Id+1);
 	IRBuilder_add(builder, Node);
@@ -412,7 +430,8 @@ INode *IRBuilder_FindLocalVarByHash(FuelIRBuilder *builder, enum TypeId Type, ui
 	INodePtr *x, *e;
 	FOR_EACH_ARRAY(builder->LocalVar, x, e) {
 		IField *Node = (IField *) *x;
-		if(ToINode(Node)->Type == Type && Node->Hash == Hash) {
+		enum TypeId NodeTy = ToINode(Node)->Type;
+		if((NodeTy == Type || Type == TYPE_Object) && Node->Hash == Hash) {
 			return ToINode(Node);
 		}
 	}

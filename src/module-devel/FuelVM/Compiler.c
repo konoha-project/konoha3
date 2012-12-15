@@ -25,22 +25,12 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/klib.h>
 #include <minikonoha/sugar.h>
-#include <minikonoha/konoha_common.h>
 #include "codegen.h"
 #include "FuelVM.h"
-
-#define FloatIsDefined(kctx) (KDefinedKonohaCommonModule() && KClass_Float != NULL)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-static enum TypeId ConvertToTypeId(KonohaContext *kctx, ktypeattr_t type)
-{
-	if(FloatIsDefined(kctx) && type == KType_float)
-		return TYPE_float;
-	return type;
-}
 
 /*----------------------------------------------------------------------------*/
 /* Konoha AST API */
@@ -308,15 +298,18 @@ static bool FuelVM_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt *
 {
 	Block *HeaderBB = CreateBlock(BLD(builder));
 	Block *BodyBB   = CreateBlock(BLD(builder));
+	Block *ItrBB    = CreateBlock(BLD(builder));
 	Block *MergeBB  = CreateBlock(BLD(builder));
 	/* Head  : if(COND) { goto Body } else {goto Merge }
 	 * Body  :   Body1
 	 *           Body2
+	 *           goto Itr
+	 * Itr   :   Body3
 	 *           goto Header
 	 * Merge : ...
 	 */
 
-	kStmt_setLabelBlock(kctx, stmt, KSymbol_("continue"), HeaderBB);
+	kStmt_setLabelBlock(kctx, stmt, KSymbol_("continue"), ItrBB);
 	kStmt_setLabelBlock(kctx, stmt, KSymbol_("break"),    MergeBB);
 
 	if(kStmt_Is(RedoLoop, stmt)) {
@@ -324,19 +317,18 @@ static bool FuelVM_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt *
 	} else {
 		IRBuilder_JumpTo(BLD(builder), HeaderBB);
 	}
-	IRBuilder_setBlock(BLD(builder), HeaderBB);
 
+	IRBuilder_setBlock(BLD(builder), HeaderBB);
 	SUGAR VisitExpr(kctx, builder, stmt, Stmt_getFirstExpr(kctx, stmt));
 	CreateBranch(BLD(builder), FuelVM_getExpression(builder), BodyBB, MergeBB);
+
 	IRBuilder_setBlock(BLD(builder), BodyBB);
 	SUGAR VisitBlock(kctx, builder, Stmt_getFirstBlock(kctx, stmt));
+	IRBuilder_JumpTo(BLD(builder), ItrBB);
 
+	IRBuilder_setBlock(BLD(builder), ItrBB);
 	kBlock *itrBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_("Iterator"), NULL);
 	if(itrBlock != NULL) {
-		assert(!Block_HasTerminatorInst(BLD(builder)->Current));
-		Block *BB = CreateBlock(BLD(builder));
-		IRBuilder_JumpTo(BLD(builder), BB);
-		IRBuilder_setBlock(BLD(builder), BB);
 		SUGAR VisitBlock(kctx, builder, itrBlock);
 	}
 
@@ -389,7 +381,8 @@ static void FuelVM_VisitNConstExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 
 static void FuelVM_VisitNewExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
-	INode *Expr = CreateNew(BLD(builder), ConvertToTypeId(kctx, expr->attrTypeId));
+	enum TypeId Type = ConvertToTypeId(kctx, expr->attrTypeId);
+	INode *Expr = CreateNew(BLD(builder), expr->unboxConstValue, Type);
 	builder->Value = Expr;
 }
 
@@ -408,7 +401,7 @@ static void FuelVM_VisitNullExpr(KonohaContext *kctx, KBuilder *builder, kStmt *
 static void FuelVM_VisitLocalExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
 	INode *Inst;
-	if ((Inst = IRBuilder_FindLocalVarByHash(BLD(builder), ConvertToTypeId(kctx, expr->attrTypeId), expr->index)) == 0) {
+	if((Inst = IRBuilder_FindLocalVarByHash(BLD(builder), ConvertToTypeId(kctx, expr->attrTypeId), expr->index)) == 0) {
 		Inst = CreateLocal(BLD(builder), ConvertToTypeId(kctx, expr->attrTypeId));
 		IField_setHash((IField *) Inst, expr->index);
 	}
@@ -417,18 +410,24 @@ static void FuelVM_VisitLocalExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 
 static void FuelVM_VisitBlockExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
-	TODO();
 	DBG_ASSERT(IS_Block(expr->block));
+	TODO();
 	//SUGAR VisitBlock(kctx, builder, expr->block);
 	//KBuilder_AsmNMOV(kctx, builder, a, expr->attrTypeId, espidx);
 }
 
 static void FuelVM_VisitFieldExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
-	TODO();
-	//kshort_t index = (kshort_t)expr->index;
-	//kshort_t xindex = (kshort_t)(expr->index >> (sizeof(kshort_t)*8));
-	//ASM(NMOVx, TC_(a, expr->attrTypeId), OC_(index), xindex, KClass_(expr->attrTypeId));
+	INode *Node;
+	kshort_t index  = (kshort_t)expr->index;
+	kshort_t xindex = (kshort_t)(expr->index >> (sizeof(kshort_t)*8));
+	enum TypeId Type = ConvertToTypeId(kctx, expr->attrTypeId);
+	if((Node = IRBuilder_FindLocalVarByHash(BLD(builder), TYPE_Object, index)) == 0) {
+		Node = CreateLocal(BLD(builder), TYPE_Object);
+		IField_setHash((IField *) Node, index);
+	}
+	Node = CreateField(BLD(builder), FieldScope, Type, Node, xindex);
+	builder->Value = Node;
 }
 
 static void FuelVM_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
@@ -496,28 +495,31 @@ static void FuelVM_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt *
 	builder->Value = Inst;
 }
 
-static void FuelVM_VisitAndExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
+static void CreateICond(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr, enum ConditionalOp Op)
 {
 	kExpr *LHS = kExpr_at(expr, 1);
 	kExpr *RHS = kExpr_at(expr, 2);
-	INode *Node = CreateCond(BLD(builder), LogicalAnd);
+	INode *Left, *Right;
 	SUGAR VisitExpr(kctx, builder, stmt, LHS);
-	CondInst_addParam((ICond *) Node, FuelVM_getExpression(builder));
+	Left = FuelVM_getExpression(builder);
 	SUGAR VisitExpr(kctx, builder, stmt, RHS);
-	CondInst_addParam((ICond *) Node, FuelVM_getExpression(builder));
+	Right = FuelVM_getExpression(builder);
+
+	INode *Node = CreateCond(BLD(builder), Op);
+	CondInst_addParam((ICond *) Node, Left);
+	CondInst_addParam((ICond *) Node, Right);
+	INode_setType(Node, TYPE_boolean);
 	builder->Value = Node;
+}
+
+static void FuelVM_VisitAndExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
+{
+	CreateICond(kctx, builder, stmt, expr, LogicalAnd);
 }
 
 static void FuelVM_VisitOrExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
-	kExpr *LHS = kExpr_at(expr, 1);
-	kExpr *RHS = kExpr_at(expr, 2);
-	INode *Node = CreateCond(BLD(builder), LogicalOr);
-	SUGAR VisitExpr(kctx, builder, stmt, LHS);
-	CondInst_addParam((ICond *) Node, FuelVM_getExpression(builder));
-	SUGAR VisitExpr(kctx, builder, stmt, RHS);
-	CondInst_addParam((ICond *) Node, FuelVM_getExpression(builder));
-	builder->Value = Node;
+	CreateICond(kctx, builder, stmt, expr, LogicalOr);
 }
 
 static void FuelVM_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
@@ -529,15 +531,15 @@ static void FuelVM_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt *s
 
 	kExpr *leftHandExpr = kExpr_at(expr, 1);
 	kExpr *rightHandExpr = kExpr_at(expr, 2);
+	INode *Node;
 	if(leftHandExpr->build == TEXPR_LOCAL) {
-		INode *Field;
 		enum TypeId type = ConvertToTypeId(kctx, leftHandExpr->attrTypeId);
-		if ((Field = IRBuilder_FindLocalVarByHash(BLD(builder), type, leftHandExpr->index)) == 0) {
-			Field = CreateLocal(BLD(builder), type);
-			IField_setHash((IField *) Field, leftHandExpr->index);
+		if((Node = IRBuilder_FindLocalVarByHash(BLD(builder), type, leftHandExpr->index)) == 0) {
+			Node = CreateLocal(BLD(builder), type);
+			IField_setHash((IField *) Node, leftHandExpr->index);
 		}
 		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
-		CreateUpdate(BLD(builder), Field, FuelVM_getExpression(builder));
+		CreateUpdate(BLD(builder), Node, FuelVM_getExpression(builder));
 	}
 	else if(leftHandExpr->build == TEXPR_STACKTOP) {
 		assert(0 && "TODO");
@@ -545,16 +547,21 @@ static void FuelVM_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt *s
 	}
 	else{
 		assert(leftHandExpr->build == TEXPR_FIELD);
-		assert(0 && "TODO");
-		//SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
-		//kshort_t index  = (kshort_t)leftHandExpr->index;
-		//kshort_t xindex = (kshort_t)(leftHandExpr->index >> (sizeof(kshort_t)*8));
-		//KClass *lhsClass = KClass_(leftHandExpr->attrTypeId);
-		//ASM(XNMOV, OC_(index), xindex, TC_(espidx, rightHandExpr->attrTypeId), lhsClass);
-		//if(expr->attrTypeId != KType_void) {
-		//	ASM(NMOVx, TC_(a, rightHandExpr->attrTypeId), OC_(index), xindex, lhsClass);
-		//}
+		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
+		kshort_t index  = (kshort_t)leftHandExpr->index;
+		kshort_t xindex = (kshort_t)(leftHandExpr->index >> (sizeof(kshort_t)*8));
+
+		INode *Left;
+		if((Left = IRBuilder_FindLocalVarByHash(BLD(builder), TYPE_Object, index)) == 0) {
+			Left = CreateLocal(BLD(builder), TYPE_Object);
+			IField_setHash((IField *) Left, index);
+		}
+		enum TypeId type = ConvertToTypeId(kctx, leftHandExpr->attrTypeId);
+		Node = CreateField(BLD(builder), FieldScope, type, Left, xindex);
+		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
+		CreateUpdate(BLD(builder), Node, FuelVM_getExpression(builder));
 	}
+	builder->Value = Node;
 }
 
 static void FuelVM_VisitStackTopExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
@@ -566,18 +573,20 @@ static void FuelVM_VisitStackTopExpr(KonohaContext *kctx, KBuilder *builder, kSt
 /* end of Visitor */
 /*----------------------------------------------------------------------------*/
 
-static void SetUpArguments(KonohaContext *kctx, FuelIRBuilder *builder, kMethod *mtd)
+static INode *SetUpArguments(KonohaContext *kctx, FuelIRBuilder *builder, kMethod *mtd)
 {
 	kParam *params = kMethod_GetParam(mtd);
 	unsigned i;
 	INode *Arg;
 	INode *Val;
+	INode *Arg0;
 	if(mtd->typeId != TYPE_void) {
 		Arg = CreateArgument(builder, 0);
 		Val = CreateLocal(builder, mtd->typeId);
 		CreateUpdate(builder, Val, Arg);
 		INode_setType(Arg, mtd->typeId);
 		IField_setHash((IField *) Val, 0);
+		Arg0 = Val;
 	}
 	for(i = 0; i < params->psize; ++i) {
 		enum TypeId type = ConvertToTypeId(kctx, params->paramtypeItems[i].attrTypeId);
@@ -587,6 +596,7 @@ static void SetUpArguments(KonohaContext *kctx, FuelIRBuilder *builder, kMethod 
 		INode_setType(Arg, type);
 		IField_setHash((IField *) Val, i+1);
 	}
+	return Arg0;
 }
 
 static struct KVirtualCode *FuelVM_GenerateKVirtualCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
@@ -595,17 +605,22 @@ static struct KVirtualCode *FuelVM_GenerateKVirtualCode(KonohaContext *kctx, kMe
 	KBuilder builderbuf = {}, *builder = &builderbuf;
 	FuelIRBuilder Builder = {};
 	INIT_GCSTACK();
-	IRBuilder_Init(&Builder);
+	IRBuilder_Init(&Builder, kctx);
 	builder->builder = &Builder;
 	builder->common.api = ns->builderApi;
 	Block *EntryBlock = CreateBlock(BLD(builder));
 	IRBuilder_setBlock(BLD(builder), EntryBlock);
-	SetUpArguments(kctx, &Builder, mtd);
+	INode *Self = SetUpArguments(kctx, &Builder, mtd);
 
 	SUGAR VisitBlock(kctx, builder, block);
 
 	if(!Block_HasTerminatorInst(BLD(builder)->Current)) {
-		CreateReturn(BLD(builder), 0);
+		if(mtd->mn == MN_new) {
+			INode *Ret = CreateReturn(BLD(builder), Self);
+			INode_setType(Ret, ConvertToTypeId(kctx, mtd->typeId));
+		} else {
+			CreateReturn(BLD(builder), 0);
+		}
 	}
 	RESET_GCSTACK();
 	IMethod Mtd = {kctx, mtd, EntryBlock};

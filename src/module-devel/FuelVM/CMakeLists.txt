@@ -3,18 +3,18 @@
 set(MODULE_SOURCE_CODE Compiler.c FuelVM.c codegen.c lowering.c visitor.c
         Optmizer.c)
 
-#set(LLVM_INSTALL_DIR "" CACHE STRING "Install dir which llvm installed")
-#find_program(LLVM_CONFIG
-#   NAMES llvm-config
-#         llvm-config-3.1
-#         llvm-config-3.0
-#         llvm-config-2.9
-#         llvm-config-2.8
-#   PATH  ${LLVM_INSTALL_DIR}/bin/
-#         /usr/local/bin/
-#         /usr/bin/
-#   DOC "llvm-config")
-#
+set(LLVM_INSTALL_DIR "" CACHE STRING "Install dir which llvm installed")
+find_program(LLVM_CONFIG
+   NAMES llvm-config
+         llvm-config-3.1
+         llvm-config-3.0
+         llvm-config-2.9
+         llvm-config-2.8
+   PATH  ${LLVM_INSTALL_DIR}/bin/
+         /usr/local/bin/
+         /usr/bin/
+   DOC "llvm-config")
+
 #set(USE_LLVMJIT)
 if(LLVM_CONFIG AND USE_LLVMJIT)
     execute_process(

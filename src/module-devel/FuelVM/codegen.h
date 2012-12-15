@@ -178,9 +178,12 @@ enum ScopeOp {
 /*$ Value Field { FieldOp } */
 typedef struct IField {
 	INode base;
+	union {
+		INode *Node;
+		unsigned Id;
+	};
 	enum ScopeOp Op;
-	unsigned Id;
-	unsigned NumOfUpdate; /* this field represents how many update this field. */
+	unsigned FieldIndex;
 	uintptr_t Hash;
 } IField;
 
@@ -193,12 +196,14 @@ typedef struct ICond {
 	INode base;
 	enum ConditionalOp Op;
 	ARRAY(INodePtr) Insts;
+	struct IBranch *Branch; /* is nonnull if Branch is used this node. */
 } ICond;
 
 /*$ Any  New { Method, [Inst] } */
 typedef struct INew {
 	INode base;
 	unsigned Flags;
+	uintptr_t Conf;
 	ARRAY(INodePtr) Params;
 } INew;
 
@@ -326,10 +331,10 @@ typedef struct IRBuilderAPI {
 	IConstant *(*newConstant)(FuelIRBuilder *builder, enum TypeId typeId, SValue value);
 	IArgument *(*newArgument)(FuelIRBuilder *builder, unsigned Index);
 	ILabel    *(*newLabel)(FuelIRBuilder *builder, int Symbol);
-	IField    *(*newField)(FuelIRBuilder *builder, enum ScopeOp Op, enum TypeId Type, unsigned Index);
+	IField    *(*newField)(FuelIRBuilder *builder, enum ScopeOp Op, enum TypeId Type, unsigned Index, INode *Node, unsigned FieldIdx);
 	/* Create IInstruction Node */
 	ICond     *(*newCond)(FuelIRBuilder *builder, enum ConditionalOp Op);
-	INew      *(*newNew)(FuelIRBuilder *builder, enum TypeId Type);
+	INew      *(*newNew)(FuelIRBuilder *builder, uintptr_t Conf, enum TypeId Type);
 	ICall     *(*newCall)(FuelIRBuilder *builder, enum CallOp Op, uintptr_t uline);
 	IFunction *(*newFunction)(FuelIRBuilder *builder);
 	IUpdate   *(*newUpdate)(FuelIRBuilder *builder, IField *Sym, INode *RHS);
@@ -356,9 +361,10 @@ struct FuelIRBuilder {
 		int   InstructionId; /* used by InstructionDumper */
 		void *ByteCode;
 	};
+	KonohaContext *Context;
 };
 
-void IRBuilder_Init(FuelIRBuilder *builder);
+void IRBuilder_Init(FuelIRBuilder *builder, KonohaContext *kctx);
 void IRBuilder_Exit(FuelIRBuilder *builder);
 union ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option);
 union ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd);
@@ -368,6 +374,7 @@ void IRBuilder_add(FuelIRBuilder *builder, INode *Stmt);
 void INewInst_addParam(INew *Inst, INode *Param);
 void CallInst_addParam(ICall *Inst, INode *Param);
 void CondInst_addParam(ICond *Inst, INode *Param);
+void CondInst_SetBranchInst(ICond *Cond, IBranch *Branch);
 
 static inline void IField_setHash(IField *Inst, uintptr_t Hash)
 {
@@ -419,6 +426,14 @@ static inline INode *CreateObject(FuelIRBuilder *builder, enum TypeId Type, void
 	return CreateConstant(builder, Type, S0);
 }
 
+static inline INode *CreateField(FuelIRBuilder *builder, enum ScopeOp Op, enum TypeId type, INode *Node, unsigned FieldIdx)
+{
+	assert(Op != LocalScope);
+	Node = (INode *) builder->API->newField(builder, Op, type, 0, Node, FieldIdx);
+	IRBuilder_add(builder, Node);
+	return Node;
+}
+
 static inline INode *CreateCond(FuelIRBuilder *builder, enum ConditionalOp Op)
 {
 	INode *Node = (INode *) builder->API->newCond(builder, Op);
@@ -461,9 +476,9 @@ static inline INode *CreateThrow(FuelIRBuilder *builder, INode *Val, uintptr_t u
 	return Node;
 }
 
-static inline INode *CreateNew(FuelIRBuilder *builder, enum TypeId type)
+static inline INode *CreateNew(FuelIRBuilder *builder, uintptr_t conf, enum TypeId type)
 {
-	INode *Node = (INode *) builder->API->newNew(builder, type);
+	INode *Node = (INode *) builder->API->newNew(builder, conf, type);
 	IRBuilder_add(builder, Node);
 	return Node;
 }
@@ -533,6 +548,7 @@ static inline bool Block_HasTerminatorInst(Block *block)
 #define ToINode(NODE) (&(NODE)->base)
 #define Block_IsVisited(BB) INode_getRangeBegin(&(BB)->base)
 #define Block_SetVisited(BB, BOOLVAL) INode_setRangeBegin(&(BB)->base, BOOLVAL)
+#define Block_SetRemoved(BB) INode_setRangeEnd(&(BB)->base, 1)
 
 static inline unsigned GetNodeId(INode *Node)
 {
@@ -544,15 +560,6 @@ static inline unsigned GetNodeId(INode *Node)
 	return (Node)->Id;
 }
 #define NODE_ID(NODE) GetNodeId((INode *)NODE)
-
-static inline bool IsLocalVariable(INode *Node)
-{
-	IField *Inst;
-	if((Inst = CHECK_KIND(Node, IField)) != 0) {
-		return (Inst->Op == LocalScope);
-	}
-	return false;
-}
 
 /* ------------------------------------------------------------------------- */
 /* Optimizer API */
