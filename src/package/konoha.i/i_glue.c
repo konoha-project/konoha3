@@ -32,7 +32,7 @@
 extern "C"{
 #endif
 
-static void Method_WriteAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
+static void Method_WriteAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KBuffer *wb)
 {
 	size_t i;
 	for(i = 0; i < sizeof(MethodFlagData)/sizeof(const char *); i++) {
@@ -43,7 +43,7 @@ static void Method_WriteAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KGr
 	}
 }
 
-static void kMethod_WriteToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
+static void kMethod_WriteToBuffer(KonohaContext *kctx, kMethod *mtd, KBuffer *wb)
 {
 	kParam *pa = kMethod_GetParam(mtd);
 	Method_WriteAttributeToBuffer(kctx, mtd, wb);
@@ -81,7 +81,7 @@ static void copyMethodList(KonohaContext *kctx, ktypeattr_t cid, kArray *s, kArr
 
 static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 {
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kMethod_WriteToBuffer(kctx, mtd, &wb);
 	PLATAPI printf_i("%s\n", KLIB KBuffer_text(kctx, &wb, EnsureZero));

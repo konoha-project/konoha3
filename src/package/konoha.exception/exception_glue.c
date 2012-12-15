@@ -69,7 +69,7 @@
 //static void kException_AddStackTrace(KonohaContext *kctx, KonohaStack *sfp, kException *e)
 //{
 //	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
-//	KGrowingBuffer wb;
+//	KBuffer wb;
 //	KLIB KBuffer_Init(&kctx->stack->cwb, &wb);
 //	kfileline_t uline = sfp[K_RTNIDX].calledFileLine;
 //	if(uline > 0) {
@@ -186,7 +186,7 @@
 //
 //}
 //
-//static void Exception_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+//static void Exception_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 //{
 //	KLIB KBuffer_printf(kctx, wb, "%s", kString_text(v[pos].asException->message));
 //}

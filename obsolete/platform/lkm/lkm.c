@@ -158,7 +158,7 @@ PlatformApi* platform_kernel(void)
 
 static void KonohaContext_EvalScript(KonohaContext *kctx, char *data, size_t len)
 {
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KLIB KBuffer_Write(kctx, &wb,data,len);
 	kfileline_t uline = FILEID_("(kernel)") | 1;

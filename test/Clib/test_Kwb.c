@@ -28,7 +28,7 @@
 void test_Kwb(KonohaContext *kctx)
 {
     KGrowingArray a;
-    KGrowingBuffer wb;
+    KBuffer wb;
     /* if we use karray as kwb, struct_size should be sizeof(char) */
     kctx->klib->KArray_Init(kctx, &a, 4);
     kctx->klib->KBuffer_Init(&a, &wb);

@@ -76,7 +76,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 			KReturnUnboxValue(false);
 		}
 	} else {
-		KGrowingBuffer wb;
+		KBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		/* case : import konoha.import */
 		ksymbol_t star = SYM_("*");

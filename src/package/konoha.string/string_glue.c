@@ -133,7 +133,7 @@ static KMETHOD String_fromCharCode(KonohaContext *kctx, KonohaStack *sfp)
 /* copied from src/sugar/sugarfunc.h */
 static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, size_t start)
 {
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	const char *text = kString_text(tk->text) + start;
 	const char *end  = kString_text(tk->text) + kString_size(tk->text);
@@ -214,7 +214,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 			break;
 		}
 
-		KGrowingBuffer wb;
+		KBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KLIB KBuffer_Write(kctx, &wb, "(", 1);
 		KLIB KBuffer_Write(kctx, &wb, start+2, end-(start+2));

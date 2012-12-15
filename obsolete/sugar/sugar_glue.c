@@ -45,7 +45,7 @@ static ksymbol_t StringToKsymbol(KonohaContext *kctx, kString *key)
 	return ksymbolA(kString_text(key), kString_size(key), _NEWID);
 }
 
-static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	ksymbol_t symbol = (ksymbol_t)v[pos].unboxValue;
 	KLIB KBuffer_printf(kctx, wb, "%s%s", PSYM_t(symbol));
@@ -284,7 +284,7 @@ static void sugar_defineMessageMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 // --------------------------------------------------------------------------
 /* cid class */
 
-static void kcid_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kcid_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	ktypeattr_t cid = (ktypeattr_t)v[pos].intValue;
 	DBG_P(">>> Class=%s, cid=%d", SYM_t(KClass_(cid)->classNameSymbol), cid);

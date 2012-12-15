@@ -160,7 +160,7 @@ static void kFile_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kFile_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kFile_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	kFile *file = (kFile *)v[pos].asObject;
 	if(file->PathInfoNULL != NULL) {
@@ -241,7 +241,7 @@ static KMETHOD File_readLine(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFile *file = (kFile *)sfp[0].asObject;
 	if(file->fp != NULL) {
-		KGrowingBuffer wb;
+		KBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		int ch, pos = 0, hasUTF8 = false, bufferCount = 0, policy = StringPolicy_ASCII;
 		char buffer[K_PAGESIZE];
@@ -306,7 +306,7 @@ static KMETHOD File_print(KonohaContext *kctx, KonohaStack *sfp)
 		TRACE_fwrite(kctx, file, kString_text(line), kString_size(line), trace);
 	}
 	else {
-		KGrowingBuffer wb;
+		KBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KLIB KBuffer_iconv(kctx, &wb, file->writerIconv, kString_text(line), kString_size(line), trace);
 		TRACE_fwrite(kctx, file, KLIB KBuffer_text(kctx, &wb, NonZero), KBuffer_bytesize(&wb), trace);

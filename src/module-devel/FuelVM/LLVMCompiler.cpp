@@ -426,7 +426,7 @@ static void LLVMIRBuilder_visitValue(Visitor *visitor, INode *Node, const char *
 static const char *ConstructMethodName(KonohaContext *kctx, kMethod *mtd, const char *suffix)
 {
 	KonohaClass *kclass = KClass_(mtd->typeId);
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KLIB KBuffer_printf(kctx, &wb, "%s_%s%s%s",
 			KClass_t(kclass), MethodName_Fmt2(mtd->mn), suffix);

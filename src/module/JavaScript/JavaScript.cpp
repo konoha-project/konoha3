@@ -81,7 +81,7 @@ typedef struct JSBuilder {
 	kMethod *visitingMethod;
 	int indent;
 	KGrowingArray buffer;
-	KGrowingBuffer jsCodeBuffer;
+	KBuffer jsCodeBuffer;
 } JSBuilder;
 
 /* ------------------------------------------------------------------------ */
@@ -307,7 +307,7 @@ static kbool_t JSBuilder_VisitUndefinedStmt(KonohaContext *kctx, KBuilder *build
 
 static void JSBuilder_EmitKonohaValue(KonohaContext *kctx, KBuilder *builder, KonohaClass* ct, KonohaStack* sfp)
 {
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	ct->p(kctx, sfp, 0, &wb);
 	char *str = (char *)KLIB KBuffer_text(kctx, &wb, NonZero);
@@ -571,7 +571,7 @@ static void JSBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder, K
 static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 {
 	KonohaClass *kclass = KClass_(mtd->typeId);
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kParam *params = kMethod_GetParam(mtd);
 	unsigned i;

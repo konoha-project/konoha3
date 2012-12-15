@@ -367,7 +367,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 
 static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, size_t start)
 {
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	const char *text = kString_text(tk->text) + start;
 	const char *end  = kString_text(tk->text) + kString_size(tk->text);

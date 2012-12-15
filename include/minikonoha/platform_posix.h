@@ -944,7 +944,7 @@ static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, k
 	PLATAPI printf_i("%s - %s%s\n", beginTag, msg, endTag);
 }
 
-static void KBuffer_WriteValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass *c, KonohaStack *sfp)
+static void KBuffer_WriteValue(KonohaContext *kctx, KBuffer *wb, KonohaClass *c, KonohaStack *sfp)
 {
 	if(KClass_Is(UnboxType, c)) {
 		c->p(kctx, sfp, 0, wb);
@@ -979,7 +979,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 	PLATAPI printf_i("%sStackTrace\n", BeginTag(kctx, InfoTag));
 
 	KonohaStack *sfp = topStack;
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	while(bottomStack < sfp) {
 		kMethod *mtd = sfp[K_MTDIDX].calledMethod;

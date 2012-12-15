@@ -82,7 +82,7 @@ static void kMap_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-//static void kMap_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KGrowingBuffer *wb)
+//static void kMap_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KBuffer *wb)
 //{
 //	// TODO
 //}

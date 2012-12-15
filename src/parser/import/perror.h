@@ -44,7 +44,7 @@ static int IsPrintableMessage(KonohaContext *kctx, SugarContext *sugarContext, k
 	return true;
 }
 
-static kString* new_StringMessage(KonohaContext *kctx, kArray *gcstack, KGrowingBuffer *wb, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
+static kString* new_StringMessage(KonohaContext *kctx, kArray *gcstack, KBuffer *wb, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
 {
 	const char *msg = TAG_t(taglevel);
 	if(uline > 0) {
@@ -62,7 +62,7 @@ static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t tagle
 {
 	SugarContext *sugarContext = GetSugarContext(kctx);
 	if(IsPrintableMessage(kctx, sugarContext, taglevel)) {
-		KGrowingBuffer wb;
+		KBuffer wb;
 		KLIB KBuffer_Init(&sugarContext->errorMessageBuffer, &wb);
 		kString *emsg = new_StringMessage(kctx, sugarContext->errorMessageList, &wb, taglevel, uline, fmt, ap);
 		PLATAPI ReportCompilerMessage(kctx, taglevel, uline, kString_text(emsg));
@@ -169,7 +169,7 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 	}
 	else {
 		INIT_GCSTACK();
-		KGrowingBuffer wb;
+		KBuffer wb;
 		KLIB KBuffer_Init(&kctx->stack->cwb, &wb);
 		kString *emsg = new_StringMessage(kctx, _GcStack, &wb, taglevel, Trace_pline(trace), fmt, ap);
 		va_end(ap);

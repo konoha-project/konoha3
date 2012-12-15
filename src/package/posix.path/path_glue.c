@@ -404,7 +404,7 @@ static void kDir_Free(KonohaContext *kctx, kObject *o)
 	kDir_close(kctx, (kDir *)o);
 }
 
-static void kDir_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kDir_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	kDir *dir = (kDir *)v[pos].asObject;
 	KLIB KBuffer_printf(kctx, wb, "DIR: %s", kString_text(dir->PathInfoNULL));
@@ -452,7 +452,7 @@ static KMETHOD DIR_readFileName(KonohaContext *kctx, KonohaStack *sfp)
 				KReturn(KLIB new_kString(kctx, OnStack, d_name, strlen(d_name), StringPolicy_SystemInfo));
 			}
 			else {
-				KGrowingBuffer wb;
+				KBuffer wb;
 				KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 				KLIB KBuffer_iconv(kctx, &wb, dir->readerIconv, d_name, strlen(d_name), trace);
 				KReturn(KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer));
@@ -476,7 +476,7 @@ static KMETHOD DIR_readPath(KonohaContext *kctx, KonohaStack *sfp)
 		int ret = readdir_r(dir->dirp, &entry, &result);
 		if(result != NULL) {
 			char *d_name = result->d_name, delim[2] = {'/', 0};
-			KGrowingBuffer wb;
+			KBuffer wb;
 			KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 			KLIB KBuffer_Write(kctx, &wb, kString_text(dir->PathInfoNULL), kString_size(dir->PathInfoNULL));
 			KLIB KBuffer_Write(kctx, &wb, delim, 1);

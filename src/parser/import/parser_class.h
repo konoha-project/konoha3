@@ -47,7 +47,7 @@ static void kNameSpace_FreeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns
 /* --------------- */
 /* Symbol */
 
-static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	ksymbol_t symbol = (ksymbol_t)v[pos].unboxValue;
 	KLIB KBuffer_printf(kctx, wb, "%s%s", Symbol_fmt2(symbol));
@@ -98,7 +98,7 @@ static const char *kToken_t(KonohaContext *kctx, kToken *tk)
 }
 
 #ifndef USE_SMALLBUILD
-static void KBuffer_WriteTokenSymbol(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
+static void KBuffer_WriteTokenSymbol(KonohaContext *kctx, KBuffer *wb, kToken *tk)
 {
 	if(tk->resolvedSymbol == TokenType_INDENT) {
 		KLIB KBuffer_printf(kctx, wb, "$Indent ");
@@ -109,7 +109,7 @@ static void KBuffer_WriteTokenSymbol(KonohaContext *kctx, KGrowingBuffer *wb, kT
 	}
 }
 
-static void KBuffer_WriteTokenText(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
+static void KBuffer_WriteTokenText(KonohaContext *kctx, KBuffer *wb, kToken *tk)
 {
 	const char *text = IS_String(tk->text) ? kString_text(tk->text) : "...";
 	char c = kToken_GetOpenHintChar(tk);
@@ -122,7 +122,7 @@ static void KBuffer_WriteTokenText(KonohaContext *kctx, KGrowingBuffer *wb, kTok
 }
 #endif/*USE_SMALLBUILD*/
 
-static void kToken_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb)
+static void kToken_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb)
 {
 #ifndef USE_SMALLBUILD
 	kToken *tk = values[pos].asToken;
@@ -171,7 +171,7 @@ static void kExpr_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visi
 }
 
 #ifndef USE_SMALLBUILD
-static void kExprTerm_p(KonohaContext *kctx, kObject *o, KonohaValue *values, int pos, KGrowingBuffer *wb)
+static void kExprTerm_p(KonohaContext *kctx, kObject *o, KonohaValue *values, int pos, KBuffer *wb)
 {
 	if(IS_Token(o)) {
 		KBuffer_WriteTokenText(kctx, wb, (kToken *)o);
@@ -183,7 +183,7 @@ static void kExprTerm_p(KonohaContext *kctx, kObject *o, KonohaValue *values, in
 }
 #endif
 
-static void kExpr_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb)
+static void kExpr_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb)
 {
 #ifndef USE_SMALLBUILD
 	kExpr *expr = values[pos].asExpr;
@@ -369,7 +369,7 @@ static void kStmt_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visi
 	KRefTraceNullable(stmt->parentBlockNULL);
 }
 
-static void kStmt_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb)
+static void kStmt_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb)
 {
 	kStmt *stmt = values[pos].asStmt;
 	if(stmt->syn == NULL) {

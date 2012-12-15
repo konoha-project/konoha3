@@ -56,7 +56,7 @@ static void Person_Free(KonohaContext *kctx, kObject *o)
 	 */
 }
 
-static void Person_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void Person_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	/* This function is called when serializing the object. */
 	struct Person *p = (struct Person *) v[pos].asObject;

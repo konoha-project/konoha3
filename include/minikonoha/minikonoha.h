@@ -735,10 +735,10 @@ typedef struct KGrowingArray {
 	size_t bytemax;
 } KGrowingArray;
 
-typedef struct KGrowingBuffer {
+typedef struct KBuffer {
 	KGrowingArray *m;
 	size_t pos;
-} KGrowingBuffer;
+} KBuffer;
 
 typedef struct KDict {
 	KGrowingArray data;
@@ -970,7 +970,7 @@ typedef enum {
 		void         (*free)(KonohaContext*, kObject *);\
 		kObject*     (*fnull)(KonohaContext*, KonohaClass *);\
 		uintptr_t    (*unbox)(KonohaContext*, kObject *);\
-		void         (*p)(KonohaContext*, KonohaValue *, int, KGrowingBuffer *);\
+		void         (*p)(KonohaContext*, KonohaValue *, int, KBuffer *);\
 		int          (*compareObject)(kObject*, kObject *);\
 		int          (*compareUnboxValue)(uintptr_t, uintptr_t);\
 		kbool_t      (*hasField)(KonohaContext*, kObject*, ksymbol_t, ktypeattr_t);\
@@ -1371,7 +1371,7 @@ typedef KMETHOD   (*MethodFunc)(KonohaContext*, KonohaStack *);
 
 struct VirtualCodeAPI {
 	void (*FreeVirtualCode)(KonohaContext *kctx, struct VirtualCode *);
-	void (*WriteVirtualCode)(KonohaContext *kctx, KGrowingBuffer *, struct VirtualCode *);
+	void (*WriteVirtualCode)(KonohaContext *kctx, KBuffer *, struct VirtualCode *);
 };
 
 struct kMethodVar {
@@ -1599,15 +1599,15 @@ struct KonohaLibVar {
 	void                (*KArray_Expand)(KonohaContext*, KGrowingArray *, size_t);
 	void                (*KArray_Free)(KonohaContext*,   KGrowingArray *);
 
-	void                (*KBuffer_Init)(KGrowingArray *, KGrowingBuffer *);
-	void*               (*KBuffer_Alloca)(KonohaContext *, KGrowingBuffer *, size_t);
-	void                (*KBuffer_Write)(KonohaContext*, KGrowingBuffer *, const char *, size_t);
-	void                (*KBuffer_vprintf)(KonohaContext*, KGrowingBuffer *, const char *fmt, va_list ap);
-	void                (*KBuffer_printf)(KonohaContext*, KGrowingBuffer *, const char *fmt, ...);
-	const char*         (*KBuffer_text)(KonohaContext*, KGrowingBuffer *, int);
-	void                (*KBuffer_Free)(KGrowingBuffer *);
-	kString*            (*KBuffer_Stringfy)(KonohaContext *, KGrowingBuffer *, kArray *gcstack, int isClear);
-	kbool_t             (*KBuffer_iconv)(KonohaContext *, KGrowingBuffer*, uintptr_t iconv, const char *, size_t, KTraceInfo *);
+	void                (*KBuffer_Init)(KGrowingArray *, KBuffer *);
+	void*               (*KBuffer_Alloca)(KonohaContext *, KBuffer *, size_t);
+	void                (*KBuffer_Write)(KonohaContext*, KBuffer *, const char *, size_t);
+	void                (*KBuffer_vprintf)(KonohaContext*, KBuffer *, const char *fmt, va_list ap);
+	void                (*KBuffer_printf)(KonohaContext*, KBuffer *, const char *fmt, ...);
+	const char*         (*KBuffer_text)(KonohaContext*, KBuffer *, int);
+	void                (*KBuffer_Free)(KBuffer *);
+	kString*            (*KBuffer_Stringfy)(KonohaContext *, KBuffer *, kArray *gcstack, int isClear);
+	kbool_t             (*KBuffer_iconv)(KonohaContext *, KBuffer*, uintptr_t iconv, const char *, size_t, KTraceInfo *);
 
 	KKeyValue*          (*KDict_GetNULL)(KonohaContext *, KDict *, ksymbol_t);
 	void                (*KDict_Add)(KonohaContext *, KDict *, KKeyValue *);
@@ -1656,8 +1656,8 @@ struct KonohaLibVar {
 	void                (*kObjectProto_SetUnboxValue)(KonohaContext*, kAbstractObject *, ksymbol_t, ktypeattr_t, uintptr_t);
 	void                (*kObjectProto_RemoveKey)(KonohaContext*, kAbstractObject *, ksymbol_t);
 	void                (*kObjectProto_DoEach)(KonohaContext*, kAbstractObject *, void *thunk, void (*f)(KonohaContext*, void *, KKeyValue *d));
-	int                 (*kObjectProto_p)(KonohaContext *, KonohaStack *, int, KGrowingBuffer *, int count);
-	void                (*kObject_WriteToBuffer)(KonohaContext *, kObject *, int, KGrowingBuffer *, KonohaValue *, int);
+	int                 (*kObjectProto_p)(KonohaContext *, KonohaStack *, int, KBuffer *, int count);
+	void                (*kObject_WriteToBuffer)(KonohaContext *, kObject *, int, KBuffer *, KonohaValue *, int);
 
 	kString*            (*new_kString)(KonohaContext*, kArray *gcstack, const char *, size_t, int);
 

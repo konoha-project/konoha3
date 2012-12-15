@@ -258,7 +258,7 @@ static kString* String_replaceFirst(KonohaContext *kctx, kString *self, kString 
 	const size_t oldLen = kString_size(oldText);
 	if(pos == NULL)
 		return self;
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KLIB KBuffer_Write(kctx, &wb, text, pos - text);
 	KLIB KBuffer_Write(kctx, &wb, kString_text(newText), kString_size(newText));
@@ -273,7 +273,7 @@ static kString* String_replace(KonohaContext *kctx, kString *self, const char *o
 	const char *pos  = strstr(text, oldText);
 	if(pos == NULL)
 		return self;
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KLIB KBuffer_Write(kctx, &wb, text, pos - text);
 	KLIB KBuffer_Write(kctx, &wb, newText, newLen);
@@ -323,7 +323,7 @@ static kString *String_trim(KonohaContext *kctx, kString *self)
 
 static kString* String_toupper(KonohaContext *kctx, kString *self, const char *text, const char *pos, const char *end)
 {
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KLIB KBuffer_Write(kctx, &wb, text, pos - text);
 	size_t len = end - pos;
@@ -339,7 +339,7 @@ static kString* String_toupper(KonohaContext *kctx, kString *self, const char *t
 
 static kString* String_tolower(KonohaContext *kctx, kString *self, const char *text, const char *pos, const char *end)
 {
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KLIB KBuffer_Write(kctx, &wb, text, pos - text);
 	size_t len = end - pos;

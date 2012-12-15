@@ -882,7 +882,7 @@ static void ByteCode_free(KonohaContext *kctx, struct VirtualCode *vcode)
 	free(code);
 }
 
-static void ByteCode_write(KonohaContext *kctx, KGrowingBuffer *wb, struct VirtualCode *vcode)
+static void ByteCode_write(KonohaContext *kctx, KBuffer *wb, struct VirtualCode *vcode)
 {
 	ByteCode *code = (ByteCode *) vcode;
 	ByteCode_Dump(code);

@@ -247,7 +247,7 @@ static size_t knh_regexp_Matched(kregmatch_t* r, size_t maxmatch)
 	return n;
 }
 
-static void KBuffer_WriteRegexFormat(KonohaContext *kctx, KGrowingBuffer *wb, const char *fmttext, size_t fmtlen, const char *base, kregmatch_t *r, size_t matched)
+static void KBuffer_WriteRegexFormat(KonohaContext *kctx, KBuffer *wb, const char *fmttext, size_t fmtlen, const char *base, kregmatch_t *r, size_t matched)
 {
 	const char *ch = fmttext;
 	const char *eof = ch + fmtlen; // end of fmt
@@ -298,7 +298,7 @@ static void RegExp_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void RegExp_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void RegExp_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	kRegExp *re = v[pos].asRegExp;
 	KLIB KBuffer_printf(kctx, wb, "/%s/%s%s%s", kString_text(re->pattern),
@@ -467,7 +467,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 	size_t fmtlen = kString_size(sfp[2].asString);
 	kString *s = s0;
 	if(IS_NOTNULL(re) && kString_size(re->pattern) > 0) {
-		KGrowingBuffer wb;
+		KBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		const char *str = kString_text(s0);  // necessary
 		const char *base = str;

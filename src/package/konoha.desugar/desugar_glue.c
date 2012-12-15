@@ -95,7 +95,7 @@ static KMETHOD Token_setError(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(sfp[4].intValue);
 }
 
-static void KBuffer_WriteToken(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
+static void KBuffer_WriteToken(KonohaContext *kctx, KBuffer *wb, kToken *tk)
 {
 	char c = kToken_GetOpenHintChar(tk);
 	if(IS_String(tk)) {
@@ -133,7 +133,7 @@ static KMETHOD Token_toString(KonohaContext *kctx, KonohaStack *sfp)
 		KReturn(tk->text);
 	}
 	else {
-		KGrowingBuffer wb;
+		KBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KBuffer_WriteToken(kctx, &wb, tk);
 		KReturn(KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer));

@@ -61,7 +61,7 @@ static kObject *new_kObject(KonohaContext *kctx, kArray *gcstackNULL, KonohaClas
 	return (kObject *)o;
 }
 
-static void KonohaClass_WriteUnboxValueToBuffer(KonohaContext *kctx, KonohaClass *c, uintptr_t unboxValue, int isDelim, KGrowingBuffer *wb)
+static void KonohaClass_WriteUnboxValueToBuffer(KonohaContext *kctx, KonohaClass *c, uintptr_t unboxValue, int isDelim, KBuffer *wb)
 {
 	if(isDelim > 0) {
 		KLIB KBuffer_Write(kctx, wb, ", ", 2);
@@ -71,7 +71,7 @@ static void KonohaClass_WriteUnboxValueToBuffer(KonohaContext *kctx, KonohaClass
 	c->p(kctx, &v, 0, wb);
 }
 
-static void kObject_WriteToBuffer(KonohaContext *kctx, kObject *o, int isDelim, KGrowingBuffer *wb, KonohaValue *sfp, int pos)
+static void kObject_WriteToBuffer(KonohaContext *kctx, kObject *o, int isDelim, KBuffer *wb, KonohaValue *sfp, int pos)
 {
 	if(isDelim > 0) {
 		KLIB KBuffer_Write(kctx, wb, ", ", 2);
@@ -113,7 +113,7 @@ static void kNumber_Init(KonohaContext *kctx, kObject *o, void *conf)
 	n->unboxValue = (uintptr_t)conf;
 }
 
-static void kBoolean_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kBoolean_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	if(v[pos].boolValue) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("true"));
@@ -128,7 +128,7 @@ static kObject* kBoolean_fnull(KonohaContext *kctx, KonohaClass *ct)
 	return (kObject *)K_FALSE;
 }
 
-static void kInt_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kInt_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	KLIB KBuffer_printf(kctx, wb, KINT_FMT, v[pos].intValue);
 }
@@ -150,7 +150,7 @@ static void kString_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kString_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kString_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	const char *t = kString_text(v[pos].asString);
 	size_t i, len = kString_size(v[pos].asString);
@@ -281,7 +281,7 @@ static void kArray_Free(KonohaContext *kctx, kObject *o)
 	KLIB KArray_Free(kctx, &a->a);
 }
 
-static void kArray_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb)
+static void kArray_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb)
 {
 	size_t i;
 	kArray *a = values[pos].asArray;
@@ -541,7 +541,7 @@ static void kNameSpace_Free(KonohaContext *kctx, kObject *o)
 	KLIB KDict_Free(kctx, &(ns->constTable));
 }
 
-static void kNameSpace_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kNameSpace_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	kNameSpace *ns = v[pos].asNameSpace;
 	KLIB KBuffer_printf(kctx, wb, "%s", PackageId_t(ns->packageId));
@@ -605,7 +605,7 @@ static void DEFAULT_Free(KonohaContext *kctx, kObject *o)
 	(void)kctx;(void)o;
 }
 
-static void DEFAULT_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void DEFAULT_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	if(IS_NULL(v[pos].asObject)) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("null"));
@@ -807,7 +807,7 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 		else {
 			size_t i, c = 0;
 			kParam *cparam = KClass_cparam(ct);
-			KGrowingBuffer wb;
+			KBuffer wb;
 			KonohaClass_shortName(kctx, KClass_(ct->p0));
 			for(i = 0; i < cparam->psize; i++) {
 				KonohaClass_shortName(kctx, KClass_(cparam->paramtypeItems[i].attrTypeId));

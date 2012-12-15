@@ -379,7 +379,7 @@ static void kSubProc_wait(KonohaContext *kctx, kSubProc *sbp, int pid, KTraceInf
 static kString *kFILE_readAll(KonohaContext *kctx, kArray *gcstack, kFile *file, KTraceInfo *trace)
 {
 	char buf[K_PAGESIZE];
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kString *ret = KNULL(String);
 	while(1) {
@@ -1271,7 +1271,7 @@ static kbool_t kPipeReadArray(KonohaContext *kctx, kArray *a, FILE *fp)
 static kString *kPipeReadStringNULL(KonohaContext *kctx, FILE *fp)
 {
 	char buf[K_PAGESIZE];
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	while(1) {
 		size_t size = fread(buf, 1, sizeof(buf), fp);

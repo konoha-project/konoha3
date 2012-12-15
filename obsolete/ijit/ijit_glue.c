@@ -595,7 +595,7 @@ static KMETHOD Method_getReturnType(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Method_getFname(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KLIB KBuffer_printf(kctx, &wb, "%s%s", MethodName_Fmt2(mtd->mn));
 	kString *fname = KLIB new_kString(kctx, KLIB KBuffer_text(kctx, &wb, 0), KBuffer_bytesize(&wb), StringPolicy_POOL);

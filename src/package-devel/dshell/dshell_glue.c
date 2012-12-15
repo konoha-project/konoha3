@@ -87,7 +87,7 @@ static kbool_t isCommand(const char *cmd)
 static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 {
 	size_t i;
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	if(kObject_typeId(tokenList) == KType_Token) {
 		/* Single token was passed (e.g. "dsh ls;"). */

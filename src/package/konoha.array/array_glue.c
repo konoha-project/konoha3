@@ -425,7 +425,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kArray *a = sfp[0].asArray;
 //	size_t i = 0;
-//	KGrowingBuffer wb;
+//	KBuffer wb;
 //	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 //	if(kArray_size(a) < 1) {
 //		KReturn(KNULL(String));
@@ -455,9 +455,9 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //		END_UnusedStack();
 //
 //	}
-//	const char *KGrowingBufferTopChar = KLIB KBuffer_text(kctx, &wb, 0);
-//	size_t strsize = strlen(KGrowingBufferTopChar);
-//	kString *ret = KLIB new_kString(kctx, KGrowingBufferTopChar, strsize, 0);
+//	const char *KBufferTopChar = KLIB KBuffer_text(kctx, &wb, 0);
+//	size_t strsize = strlen(KBufferTopChar);
+//	kString *ret = KLIB new_kString(kctx, KBufferTopChar, strsize, 0);
 //	KLIB KBuffer_Free(&wb);
 //	KReturn(ret);
 //}

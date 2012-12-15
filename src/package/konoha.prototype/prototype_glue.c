@@ -31,7 +31,7 @@ extern "C"{
 #endif
 
 
-static void kPrototype_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb)
+static void kPrototype_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb)
 {
 	KLIB KBuffer_Write(kctx, wb, "{", 1);
 	KLIB kObjectProto_p(kctx, values, pos, wb, 0);

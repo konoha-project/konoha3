@@ -81,7 +81,7 @@ static const DEFINE_OPSPEC OPDATA[] = {
 	OPDEFINE(OPSPEC)
 };
 
-static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *vcode_start)
+static void DumpOpArgument(KonohaContext *kctx, KBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *vcode_start)
 {
 	switch(type) {
 	case VMT_VOID: break;
@@ -127,7 +127,7 @@ static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeT
 	}/*switch*/
 }
 
-static void WriteVirtualCode1(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, VirtualCode *vcode_start)
+static void WriteVirtualCode1(KonohaContext *kctx, KBuffer *wb, VirtualCode *c, VirtualCode *vcode_start)
 {
 	KLIB KBuffer_printf(kctx, wb, "[L%d:%d] %s(%d)", (int)(c - vcode_start), c->line, OPDATA[c->opcode].name, (int)c->opcode);
 	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg1, c, 0, vcode_start);
@@ -137,7 +137,7 @@ static void WriteVirtualCode1(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCo
 	KLIB KBuffer_printf(kctx, wb, "\n");
 }
 
-static void WriteVirtualCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c)
+static void WriteVirtualCode(KonohaContext *kctx, KBuffer *wb, VirtualCode *c)
 {
 	OPTHCODE *opTHCODE = (OPTHCODE *)(c-1);
 	size_t i, n = (opTHCODE->codesize / sizeof(VirtualCode)) - 1;
@@ -148,7 +148,7 @@ static void WriteVirtualCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCod
 
 static void DumpVirtualCode(KonohaContext *kctx, VirtualCode *c)
 {
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	WriteVirtualCode(kctx, &wb, c);
 	DBG_P(">>>\n%s", KLIB KBuffer_text(kctx, &wb, EnsureZero));
@@ -289,7 +289,7 @@ static bblock_t BasicBlock_id(KonohaContext *kctx, BasicBlock *bb)
 
 static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, bblock_t oldId)
 {
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	BasicBlock *bb = (BasicBlock *)KLIB KBuffer_Alloca(kctx, &wb, max);
 	if(oldId != -1) {
@@ -335,12 +335,12 @@ static bblock_t BasicBlock_Add(KonohaContext *kctx, bblock_t blockId, kfileline_
 	return BasicBlock_id(kctx, bb);
 }
 
-static int CodeOffset(KGrowingBuffer *wb)
+static int CodeOffset(KBuffer *wb)
 {
 	return KBuffer_bytesize(wb);
 }
 
-static void BasicBlock_WriteBuffer(KonohaContext *kctx, bblock_t blockId, KGrowingBuffer *wb)
+static void BasicBlock_WriteBuffer(KonohaContext *kctx, bblock_t blockId, KBuffer *wb)
 {
 	BasicBlock *bb = BasicBlock_FindById(kctx, blockId);
 	while(bb != NULL && bb->codeoffset == -1) {
@@ -899,7 +899,7 @@ static struct VirtualCode *MakeThreadedCode(KonohaContext *kctx, KBuilder *build
 
 static struct VirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *builder, bblock_t beginId, bblock_t returnId)
 {
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	BasicBlock_WriteBuffer(kctx, beginId, &wb);
 	BasicBlock_WriteBuffer(kctx, returnId, &wb);
@@ -929,7 +929,7 @@ static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr, size_
 
 static struct VirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
 {
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 
 	INIT_GCSTACK();

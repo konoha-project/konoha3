@@ -363,7 +363,7 @@ static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksym
 
 static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, const char **d, int isOverride, KTraceInfo *trace)
 {
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	while(d[0] != NULL) {
 		KKeyValue kvs;
@@ -434,7 +434,7 @@ static kbool_t kNameSpace_MergeConstData(KonohaContext *kctx, kNameSpaceVar *ns,
 		memcpy(ns->constTable.data.keyValueItems, kvs, nitems * sizeof(KKeyValue));
 	}
 	else {
-		KGrowingBuffer wb;
+		KBuffer wb;
 		KLIB KBuffer_Init(&(GetSugarContext(kctx)->errorMessageBuffer), &wb);
 		for(i = 0; i < nitems; i++) {
 			ksymbol_t key = kvs[i].key;
@@ -510,7 +510,7 @@ static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, con
 {
 	INIT_GCSTACK();
 	KKeyValue kv;
-	KGrowingBuffer wb;
+	KBuffer wb;
 	kbool_t result = true;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	while(d[0] != NULL) {

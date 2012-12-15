@@ -655,7 +655,7 @@ static KMETHOD Curl_perform(KonohaContext *kctx, KonohaStack *sfp)
 // writedata for Curl.receiveString()
 struct ReceiveBuffer {
 	KonohaContext *kctx;
-	KGrowingBuffer wb;
+	KBuffer wb;
 };
 
 // writefunction for Curl.receiveString()

@@ -325,7 +325,7 @@ static KMETHOD Symbol_toString(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t symbol = (ksymbol_t)sfp[0].intValue;
 	kString *s = Symbol_GetString(kctx, Symbol_Unmask(symbol));
 	if(Symbol_Attr(symbol) != 0) {
-		KGrowingBuffer wb;
+		KBuffer wb;
 		const char *prefix = Symbol_prefixText(symbol);
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KLIB KBuffer_Write(kctx, &wb, prefix, strlen(prefix));

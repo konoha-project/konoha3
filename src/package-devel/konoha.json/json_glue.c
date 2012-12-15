@@ -58,7 +58,7 @@ static void kJson_Free(KonohaContext *kctx, kObject *o)
 }
 
 
-static void kJson_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kJson_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 //	kJson *jo = (kJson *)v[pos].asObject;
 //	if(PLATAPI IsJsonType(&jo->jsonbuf, KJSON_STRING)) {

@@ -62,7 +62,7 @@ static void Mpz_Free(KonohaContext *kctx, kObject *o)
 	mpz_clear(mpz->mpz);
 }
 
-static void Mpz_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void Mpz_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	/* This function is called when serializing the object. */
 	kMpz *p = (kMpz *)v[pos].asObject;
@@ -468,7 +468,7 @@ static void Mpf_Free(KonohaContext *kctx, kObject *o)
 	mpf_clear(mpf->mpf);
 }
 
-static void Mpf_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void Mpf_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	/* This function is called when serializing the object. */
 	kMpf *p = (kMpf *)v[pos].asObject;

@@ -51,7 +51,7 @@ static void kBytes_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	kBytes *ba = v[pos].asBytes;
 	size_t i, j, n;
@@ -124,7 +124,7 @@ static KMETHOD Bytes_setAll(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
-static void KBuffer_convertCharset(KonohaContext *kctx, KGrowingBuffer* wb, const char *targetCharset, const char *sourceCharset, const char *sourceBuf, size_t sourceSize, KTraceInfo *trace)
+static void KBuffer_convertCharset(KonohaContext *kctx, KBuffer* wb, const char *targetCharset, const char *sourceCharset, const char *sourceBuf, size_t sourceSize, KTraceInfo *trace)
 {
 	uintptr_t conv = PLATAPI iconv_open_i(kctx, targetCharset, sourceCharset, trace);
 	if(conv != ICONV_NULL) {
@@ -152,7 +152,7 @@ static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else {
 		KMakeTrace(trace, sfp);
-		KGrowingBuffer wb;
+		KBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KBuffer_convertCharset(kctx, &wb, PLATAPI systemCharset, "UTF-8", kString_text(thisString), size, trace);
 		KReturnWith(
@@ -169,7 +169,7 @@ static KMETHOD String_new_fromBytes_withDefaultDecode(KonohaContext *kctx, Konoh
 	kString *s = TS_EMPTY;
 	if(ba->bytesize != 0) {
 		KMakeTrace(trace, sfp);
-		KGrowingBuffer wb;
+		KBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KBuffer_convertCharset(kctx, &wb, "UTF-8", PLATAPI systemCharset, ba->buf, ba->bytesize, trace);
 		s = KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer);
@@ -188,7 +188,7 @@ static KMETHOD String_new_fromSubBytes_withDefaultDecode(KonohaContext *kctx, Ko
 		// At this point, we assuem 'ba' is null terminated.
 		DBG_ASSERT(ba->buf[ba->bytesize-1] == '\0');
 		KMakeTrace(trace, sfp);
-		KGrowingBuffer wb;
+		KBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KBuffer_convertCharset(kctx, &wb, "UTF-8", PLATAPI systemCharset, ba->buf + offset, length, trace);
 		s = KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer);
@@ -209,7 +209,7 @@ static KMETHOD String_new_fromSubBytes_withSpecifiedDecode(KonohaContext *kctx, 
 		// At this point, we assuem 'ba' is null terminated.
 		DBG_ASSERT(ba->buf[ba->bytesize-1] == '\0');
 		KMakeTrace(trace, sfp);
-		KGrowingBuffer wb;
+		KBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KBuffer_convertCharset(kctx, &wb, "UTF-8", charset, ba->buf + offset, length, trace);
 		s = KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer);
@@ -227,7 +227,7 @@ static KMETHOD String_new_fromBytes_withSpecifiedDecode(KonohaContext *kctx, Kon
 		// At this point, we assuem 'ba' is null terminated.
 		DBG_ASSERT(ba->buf[ba->bytesize] == '\0');
 		KMakeTrace(trace, sfp);
-		KGrowingBuffer wb;
+		KBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KBuffer_convertCharset(kctx, &wb, kString_text(charset), "UTF-8", ba->buf, ba->bytesize, trace);
 		s = KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer);

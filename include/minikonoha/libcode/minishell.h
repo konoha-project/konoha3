@@ -56,7 +56,7 @@ static int CheckStmt(const char *t, size_t len)
 	return 1;
 }
 
-static kstatus_t ReadStmt(KonohaContext *kctx, KGrowingBuffer *wb, kfileline_t *uline)
+static kstatus_t ReadStmt(KonohaContext *kctx, KBuffer *wb, kfileline_t *uline)
 {
 	int line = 1;
 	kstatus_t status = K_CONTINUE;
@@ -94,7 +94,7 @@ static kstatus_t ReadStmt(KonohaContext *kctx, KGrowingBuffer *wb, kfileline_t *
 	return status;
 }
 
-static void DumpEval(KonohaContext *kctx, KGrowingBuffer *wb)
+static void DumpEval(KonohaContext *kctx, KBuffer *wb)
 {
 	KonohaStackRuntimeVar *base = kctx->stack;
 	ktypeattr_t ty = base->evalty;
@@ -112,7 +112,7 @@ static void DumpEval(KonohaContext *kctx, KGrowingBuffer *wb)
 
 static void RunShell(KonohaContext *kctx)
 {
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kfileline_t uline = FILEID_("(shell)") | 1;
 	while(1) {

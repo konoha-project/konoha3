@@ -75,7 +75,7 @@
 //	{OPSPEC_(TRACE)},
 //};
 //
-////static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *vcode_start)
+////static void DumpOpArgument(KonohaContext *kctx, KBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *vcode_start)
 ////{
 ////	switch(type) {
 ////	case VMT_VOID: break;

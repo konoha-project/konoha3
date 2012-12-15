@@ -95,7 +95,7 @@ static void kFileStatus_Free(KonohaContext *kctx, kObject *o)
 //	u_long   st_gen;    /* file generation number */
 //};
 
-static void kFileStatus_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kFileStatus_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	kFileStatus *stat = (kFileStatus *)v[pos].asObject;
 	KLIB KBuffer_printf(kctx, wb, "{dev: %d, ", stat->stat->st_dev);

@@ -67,7 +67,7 @@ static void Float_Init(KonohaContext *kctx, kObject *o, void *conf)
 	n->unboxValue = (uintptr_t)conf;  // conf is unboxed data
 }
 
-static void Float_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void Float_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	KLIB KBuffer_printf(kctx, wb, KFLOAT_FMT, v[pos].floatValue);
 }

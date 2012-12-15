@@ -69,13 +69,13 @@ KLIBDECL void KArray_Free(KonohaContext *kctx, KGrowingArray *m)
 	}
 }
 
-KLIBDECL void KBuffer_Init(KGrowingArray *m, KGrowingBuffer *wb)
+KLIBDECL void KBuffer_Init(KGrowingArray *m, KBuffer *wb)
 {
 	wb->m = m;
 	wb->pos = m->bytesize;
 }
 
-KLIBDECL void* KBuffer_Alloca(KonohaContext *kctx, KGrowingBuffer *wb, size_t bytelen)
+KLIBDECL void* KBuffer_Alloca(KonohaContext *kctx, KBuffer *wb, size_t bytelen)
 {
 	KGrowingArray *m = wb->m;
 	if(m->bytesize % sizeof(void *) != 0) {
@@ -93,7 +93,7 @@ KLIBDECL void* KBuffer_Alloca(KonohaContext *kctx, KGrowingBuffer *wb, size_t by
 	return p;
 }
 
-KLIBDECL void KBuffer_Write(KonohaContext *kctx, KGrowingBuffer *wb, const char *data, size_t bytelen)
+KLIBDECL void KBuffer_Write(KonohaContext *kctx, KBuffer *wb, const char *data, size_t bytelen)
 {
 	KGrowingArray *m = wb->m;
 	if(!(m->bytesize + bytelen < m->bytemax)) {
@@ -103,7 +103,7 @@ KLIBDECL void KBuffer_Write(KonohaContext *kctx, KGrowingBuffer *wb, const char 
 	m->bytesize += bytelen;
 }
 
-static void KBuffer_vprintf(KonohaContext *kctx, KGrowingBuffer *wb, const char *fmt, va_list ap)
+static void KBuffer_vprintf(KonohaContext *kctx, KBuffer *wb, const char *fmt, va_list ap)
 {
 	va_list ap2;
 #ifdef _MSC_VER
@@ -122,7 +122,7 @@ static void KBuffer_vprintf(KonohaContext *kctx, KGrowingBuffer *wb, const char 
 	m->bytesize += n;
 }
 
-KLIBDECL void KBuffer_printf(KonohaContext *kctx, KGrowingBuffer *wb, const char *fmt, ...)
+KLIBDECL void KBuffer_printf(KonohaContext *kctx, KBuffer *wb, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -130,7 +130,7 @@ KLIBDECL void KBuffer_printf(KonohaContext *kctx, KGrowingBuffer *wb, const char
 	va_end(ap);
 }
 
-KLIBDECL const char* KBuffer_text(KonohaContext *kctx, KGrowingBuffer *wb, int ensureZero)
+KLIBDECL const char* KBuffer_text(KonohaContext *kctx, KBuffer *wb, int ensureZero)
 {
 	KGrowingArray *m = wb->m;
 	if(ensureZero) {
@@ -142,14 +142,14 @@ KLIBDECL const char* KBuffer_text(KonohaContext *kctx, KGrowingBuffer *wb, int e
 	return (const char *)m->bytebuf + wb->pos;
 }
 
-KLIBDECL void KBuffer_Free(KGrowingBuffer *wb)
+KLIBDECL void KBuffer_Free(KBuffer *wb)
 {
 	KGrowingArray *m = wb->m;
 	bzero(m->bytebuf + wb->pos, m->bytesize - wb->pos);
 	m->bytesize = wb->pos;
 }
 
-KLIBDECL kString* KBuffer_Stringfy(KonohaContext *kctx, KGrowingBuffer *wb, kArray *gcstack, int policy)
+KLIBDECL kString* KBuffer_Stringfy(KonohaContext *kctx, KBuffer *wb, kArray *gcstack, int policy)
 {
 	kString *s = KLIB new_kString(kctx, gcstack, KBuffer_text(kctx, wb, NonZero), KBuffer_bytesize(wb), policy);
 	if(KFlag_Is(int, policy, StringPolicy_FreeKBuffer)) {
@@ -158,7 +158,7 @@ KLIBDECL kString* KBuffer_Stringfy(KonohaContext *kctx, KGrowingBuffer *wb, kArr
 	return s;
 }
 
-KLIBDECL kbool_t KBuffer_iconv(KonohaContext *kctx, KGrowingBuffer* wb, uintptr_t ic, const char *sourceBuf, size_t sourceSize, KTraceInfo *trace)
+KLIBDECL kbool_t KBuffer_iconv(KonohaContext *kctx, KBuffer* wb, uintptr_t ic, const char *sourceBuf, size_t sourceSize, KTraceInfo *trace)
 {
 	char convBuf[K_PAGESIZE];
 	char *presentPtrFrom = (char *)sourceBuf;
@@ -744,7 +744,7 @@ static void kObjectProto_DoEach(KonohaContext *kctx, kAbstractObject *o, void *t
 struct wbenv {
 	KonohaValue *values;
 	int pos;
-	KGrowingBuffer *wb;
+	KBuffer *wb;
 	int count;
 };
 
@@ -766,7 +766,7 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 	w->count++;
 }
 
-static int kObjectProto_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb, int count)
+static int kObjectProto_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb, int count)
 {
 	struct wbenv w = {values, pos+1, wb, count};
 	KLIB kObjectProto_DoEach(kctx, values[0].asObject, &w, dumpProto);
@@ -775,7 +775,7 @@ static int kObjectProto_p(KonohaContext *kctx, KonohaValue *values, int pos, KGr
 
 static void DumpObject(KonohaContext *kctx, kObject *o, const char *file, const char *func, int line)
 {
-	KGrowingBuffer wb;
+	KBuffer wb;
 	KonohaStack *lsfp = kctx->esp;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KUnsafeFieldSet(lsfp[0].asObject, o);
