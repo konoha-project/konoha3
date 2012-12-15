@@ -764,15 +764,15 @@ static kbool_t curl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	KClass *cCurl = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCurl, trace);
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Curl_new), KType_Curl, KType_Curl, MN_("new"), 0,
-		_Public, _F(Curl_setOptBoolean), KType_void, KType_Curl, MN_("setOpt"), 2, KType_int, FN_("option"), KType_boolean, FN_("data"),
-		_Public, _F(Curl_setOptInt),     KType_void, KType_Curl, MN_("setOpt"), 2, KType_int, FN_("option"), KType_int,     FN_("data"),
-		_Public, _F(Curl_setOptString),  KType_void, KType_Curl, MN_("setOpt"), 2, KType_int, FN_("option"), KType_String,  FN_("data"),
-		_Public, _F(Curl_setOptFile),    KType_void, KType_Curl, MN_("setOpt"), 2, KType_int, FN_("option"), KType_File,    FN_("data"),
-		_Public, _F(Curl_appendHeader), KType_void, KType_Curl, MN_("appendHeader"), 1, KType_String, FN_("header"),
-		_Public, _F(Curl_perform), KType_boolean, KType_Curl, MN_("perform"), 0,
-		_Public, _F(Curl_receiveString), KType_String, KType_Curl, MN_("receiveString"), 0,
-		_Public|_Im, _F(Curl_getInfo), KType_Object/*FIXME KType_Dynamic*/, KType_Curl, MN_("getInfo"), 1, KType_int, FN_("type"),
+		_Public, _F(Curl_new), KType_Curl, KType_Curl, KMethodName_("new"), 0,
+		_Public, _F(Curl_setOptBoolean), KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_boolean, KFieldName_("data"),
+		_Public, _F(Curl_setOptInt),     KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_int,     KFieldName_("data"),
+		_Public, _F(Curl_setOptString),  KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_String,  KFieldName_("data"),
+		_Public, _F(Curl_setOptFile),    KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_File,    KFieldName_("data"),
+		_Public, _F(Curl_appendHeader), KType_void, KType_Curl, KMethodName_("appendHeader"), 1, KType_String, KFieldName_("header"),
+		_Public, _F(Curl_perform), KType_boolean, KType_Curl, KMethodName_("perform"), 0,
+		_Public, _F(Curl_receiveString), KType_String, KType_Curl, KMethodName_("receiveString"), 0,
+		_Public|_Im, _F(Curl_getInfo), KType_Object/*FIXME KType_Dynamic*/, KType_Curl, KMethodName_("getInfo"), 1, KType_int, KFieldName_("type"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -876,7 +876,7 @@ static kbool_t curl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		{KDefineConstInt(CURLINFO_CONTENT_TYPE)},
 		{} // end of const data
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
 	return true;
 }
 

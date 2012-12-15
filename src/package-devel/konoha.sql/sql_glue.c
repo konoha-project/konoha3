@@ -504,21 +504,21 @@ static kbool_t sql_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 
 	KDEFINE_METHOD MethodData[] = {
 		/* Connection method */
-		_Public, _F(Connection_new), KType_Connection, KType_Connection, MN_("new"), 1, KType_String, FN_("dbname"),
-		_Public, _F(Connection_close), KType_void, KType_Connection, MN_("close"), 0,
-		_Public, _F(Connection_query), KType_ResultSet, KType_Connection, MN_("query"), 1, KType_String, FN_("query"),
+		_Public, _F(Connection_new), KType_Connection, KType_Connection, KMethodName_("new"), 1, KType_String, KFieldName_("dbname"),
+		_Public, _F(Connection_close), KType_void, KType_Connection, KMethodName_("close"), 0,
+		_Public, _F(Connection_query), KType_ResultSet, KType_Connection, KMethodName_("query"), 1, KType_String, KFieldName_("query"),
 #ifdef HAVE_MYSQL
-		_Public, _F(Connection_getInsertId), KType_int, KType_Connection, MN_("getInsertId"), 0,
+		_Public, _F(Connection_getInsertId), KType_int, KType_Connection, KMethodName_("getInsertId"), 0,
 #endif
 
 		/* ResultSet method */
-		_Public, _F(ResultSet_getInt), KType_int, KType_ResultSet, MN_("getInt"), 1, KType_String, FN_("query"),
-		_Public, _F(ResultSet_getFloat), KType_float, KType_ResultSet, MN_("getFloat"), 1, KType_String, FN_("query"),
-		_Public, _F(ResultSet_getString), KType_String, KType_ResultSet, MN_("getString"), 1, KType_String, FN_("query"),
-		_Public|kMethod_SmartReturn, _F(ResultSet_get), KType_Object, KType_ResultSet, MN_("get"), 1, KType_String, FN_("query"),
-		_Public, _F(ResultSet_next), KType_boolean, KType_ResultSet, MN_("next"), 0,
-		_Public, _F(ResultSet_getSize), KType_int, KType_ResultSet, MN_("getSize"), 0,
-		_Public, _F(ResultSet_getName), KType_String, KType_ResultSet, MN_("getName"), 1, KType_int, FN_("idx"),
+		_Public, _F(ResultSet_getInt), KType_int, KType_ResultSet, KMethodName_("getInt"), 1, KType_String, KFieldName_("query"),
+		_Public, _F(ResultSet_getFloat), KType_float, KType_ResultSet, KMethodName_("getFloat"), 1, KType_String, KFieldName_("query"),
+		_Public, _F(ResultSet_getString), KType_String, KType_ResultSet, KMethodName_("getString"), 1, KType_String, KFieldName_("query"),
+		_Public|kMethod_SmartReturn, _F(ResultSet_get), KType_Object, KType_ResultSet, KMethodName_("get"), 1, KType_String, KFieldName_("query"),
+		_Public, _F(ResultSet_next), KType_boolean, KType_ResultSet, KMethodName_("next"), 0,
+		_Public, _F(ResultSet_getSize), KType_int, KType_ResultSet, KMethodName_("getSize"), 0,
+		_Public, _F(ResultSet_getName), KType_String, KType_ResultSet, KMethodName_("getName"), 1, KType_int, KFieldName_("idx"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

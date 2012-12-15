@@ -98,10 +98,10 @@ static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 		/* Multiple tokens was passed (e.g. "dsh ls -la;"). */
 		for(i = 0; i < kArray_size(tokenList); i++) {
 			kToken *token = tokenList->TokenItems[i];
-			if(token->resolvedSymbol == SYM_("|")) {
+			if(token->resolvedSymbol == KSymbol_("|")) {
 				// TODO: PIPE
 			}
-			else if(token->resolvedSymbol == SYM_("$")) {
+			else if(token->resolvedSymbol == KSymbol_("$")) {
 				// TODO: parse dollar token ($token)
 				size_t start = i;
 				while(i < kArray_size(tokenList) && !kToken_is(BeforeWhiteSpace, tokenList->TokenItems[i])) {
@@ -148,7 +148,7 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 	KSyntaxVar *syn = (KSyntaxVar *) SYN_(ns, KSymbol_ExprMethodCall);
 	kTokenVar *callToken = new_(TokenVar, 0, OnGcStack);
 	kExpr *callExpr = new_ConstValueExpr(kctx, KClass_String, UPCAST(cmd));
-	callToken->resolvedSymbol = MN_("call");
+	callToken->resolvedSymbol = KMethodName_("call");
 	const char cname[] = "Subproc";
 	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3, callToken,
 			new_UnboxConstValueExpr(kctx, KLIB kNameSpace_GetClassByFullName(kctx, ns, cname, strlen(cname), NULL)->typeId, 0), callExpr);
@@ -233,8 +233,8 @@ static kbool_t shell_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 {
 	KRequirePackage("dscript.subproc", trace);
 	//KDEFINE_SYNTAX SYNTAX[] = {
-	//	{ SYM_("dsh"), 0, "\"dsh\" $Token*", 0, 0, NULL, NULL, Statement_dsh, Statement_dsh, NULL, },
-	//	{ SYM_("$Shell"), 0, "$Shell $Token*", 0, 0, PatternMatch_Shell, NULL, Statement_Shell, Statement_Shell},
+	//	{ KSymbol_("dsh"), 0, "\"dsh\" $Token*", 0, 0, NULL, NULL, Statement_dsh, Statement_dsh, NULL, },
+	//	{ KSymbol_("$Shell"), 0, "$Shell $Token*", 0, 0, PatternMatch_Shell, NULL, Statement_Shell, Statement_Shell},
 	//	{ KSymbol_END, },
 	//};
 	//SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

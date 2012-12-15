@@ -635,14 +635,14 @@ static kbool_t KBuilder_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kS
 	bblock_t lbCONTINUE = new_BasicBlockLABEL(kctx);
 	bblock_t lbENTRY    = new_BasicBlockLABEL(kctx);
 	bblock_t lbBREAK    = new_BasicBlockLABEL(kctx);
-	kStmt_setLabelBlock(kctx, stmt, SYM_("continue"), lbCONTINUE);
-	kStmt_setLabelBlock(kctx, stmt, SYM_("break"),    lbBREAK);
+	kStmt_setLabelBlock(kctx, stmt, KSymbol_("continue"), lbCONTINUE);
+	kStmt_setLabelBlock(kctx, stmt, KSymbol_("break"),    lbBREAK);
 	if(kStmt_Is(RedoLoop, stmt)) {
 		ASM_JMP(kctx, builder, lbENTRY);
 	}
 	ASM_LABEL(kctx, builder, lbCONTINUE);
 	KBuilder_AsmSAFEPOINT(kctx, builder, stmt->uline, espidx);
-	kBlock *iterBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, SYM_("Iterator"), NULL);
+	kBlock *iterBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_("Iterator"), NULL);
 	if(iterBlock != NULL) {
 		SUGAR VisitBlock(kctx, builder, iterBlock);
 		ASM_LABEL(kctx, builder, lbENTRY);
@@ -675,8 +675,8 @@ static kbool_t KBuilder_VisitJumpStmt(KonohaContext *kctx, KBuilder *builder, kS
 static kbool_t KBuilder_VisitTryStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
 	//FIXME
-	//kBlock *catchBlock   = SUGAR kStmt_GetBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
-	//kBlock *finallyBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
+	//kBlock *catchBlock   = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_("catch"),   K_NULLBLOCK);
+	//kBlock *finallyBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_("finally"), K_NULLBLOCK);
 	//if(catchBlock != K_NULLBLOCK){
 	//}
 	//if(finallyBlock != K_NULLBLOCK){

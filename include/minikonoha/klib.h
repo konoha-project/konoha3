@@ -173,7 +173,7 @@ static kinline const char* TAG_t(kinfotag_t t)
 
 #define KCheckIndex(N, MAX) \
 	if(unlikely (!(((size_t)N) < ((size_t)MAX)))) {\
-		KLIB KRuntime_raise(kctx, EXPT_("OutOfBoundary"), SoftwareFault, NULL, sfp);\
+		KLIB KRuntime_raise(kctx, KException_("OutOfBoundary"), SoftwareFault, NULL, sfp);\
 	}\
 
 

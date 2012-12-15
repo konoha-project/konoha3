@@ -195,7 +195,7 @@ static void CommandLine_SetARGV(KonohaContext *kctx, int argc, char** argv, KTra
 			{"SCRIPT_ARGV", KClass_StringArray0->typeId, (kObject*)a},
 			{}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(ObjectData), true/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(ObjectData), true/*isOverride*/, trace);
 	RESET_GCSTACK();
 }
 

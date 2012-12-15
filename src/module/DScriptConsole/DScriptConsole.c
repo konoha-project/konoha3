@@ -41,7 +41,7 @@ static const char *getThisFileName(KonohaContext *kctx)
 {
 	static char shell[] = "shell";
 	kNameSpace *ns = (kNameSpace *)KLIB Knull(kctx, KClass_NameSpace);
-	ksymbol_t sym = SYM_("SCRIPT_ARGV");
+	ksymbol_t sym = KSymbol_("SCRIPT_ARGV");
 	KKeyValue *kv = KLIB kNameSpace_GetConstNULL(kctx, ns, sym);
 	if(kv != NULL) {
 		kArray *sa = (kArray *)kv->ObjectValue;

@@ -118,23 +118,23 @@ static INode *FuelVM_getExpression(KBuilder *builder)
 	return Expr;
 }
 
-#define MN_opNOT  MN_("!")
-#define MN_opADD  MN_("+")
-#define MN_opSUB  MN_("-")
-#define MN_opMUL  MN_("*")
-#define MN_opDIV  MN_("/")
-#define MN_opMOD  MN_("%")
-#define MN_opEQ   MN_("==")
-#define MN_opNEQ  MN_("!=")
-#define MN_opLT   MN_("<")
-#define MN_opLTE  MN_("<=")
-#define MN_opGT   MN_(">")
-#define MN_opGTE  MN_(">=")
-#define MN_opLAND MN_("&")
-#define MN_opLOR  MN_("|")
-#define MN_opLXOR MN_("^")
-#define MN_opLSFT MN_("<<")
-#define MN_opRSFT MN_(">>")
+#define MN_opNOT  KMethodName_("!")
+#define MN_opADD  KMethodName_("+")
+#define MN_opSUB  KMethodName_("-")
+#define MN_opMUL  KMethodName_("*")
+#define MN_opDIV  KMethodName_("/")
+#define MN_opMOD  KMethodName_("%")
+#define MN_opEQ   KMethodName_("==")
+#define MN_opNEQ  KMethodName_("!=")
+#define MN_opLT   KMethodName_("<")
+#define MN_opLTE  KMethodName_("<=")
+#define MN_opGT   KMethodName_(">")
+#define MN_opGTE  KMethodName_(">=")
+#define MN_opLAND KMethodName_("&")
+#define MN_opLOR  KMethodName_("|")
+#define MN_opLXOR KMethodName_("^")
+#define MN_opLSFT KMethodName_("<<")
+#define MN_opRSFT KMethodName_(">>")
 
 static enum BinaryOp MethodName_toBinaryOperator(KonohaContext *kctx, kmethodn_t mn)
 {
@@ -316,8 +316,8 @@ static bool FuelVM_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt *
 	 * Merge : ...
 	 */
 
-	kStmt_setLabelBlock(kctx, stmt, SYM_("continue"), HeaderBB);
-	kStmt_setLabelBlock(kctx, stmt, SYM_("break"),    MergeBB);
+	kStmt_setLabelBlock(kctx, stmt, KSymbol_("continue"), HeaderBB);
+	kStmt_setLabelBlock(kctx, stmt, KSymbol_("break"),    MergeBB);
 
 	if(kStmt_Is(RedoLoop, stmt)) {
 		IRBuilder_JumpTo(BLD(builder), BodyBB);
@@ -331,7 +331,7 @@ static bool FuelVM_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt *
 	IRBuilder_setBlock(BLD(builder), BodyBB);
 	SUGAR VisitBlock(kctx, builder, Stmt_getFirstBlock(kctx, stmt));
 
-	kBlock *itrBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, SYM_("Iterator"), NULL);
+	kBlock *itrBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_("Iterator"), NULL);
 	if(itrBlock != NULL) {
 		assert(!Block_HasTerminatorInst(BLD(builder)->Current));
 		Block *BB = CreateBlock(BLD(builder));

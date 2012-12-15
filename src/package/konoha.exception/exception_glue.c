@@ -223,8 +223,8 @@
 //	mod->cException = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defException, trace);
 //
 //	KDEFINE_METHOD MethodData[] = {
-//		_Public, _F(Exception_new), KType_Exception,  KType_Exception, MN_("new"), 0, _Public|_Hidden, _F(System_throw), KType_void,  KType_System, MN_("throw"), 1, KType_Exception, FN_("e"),
-//		_Public|_Hidden, _F(System_getThrownException), KType_Exception, KType_System, MN_("getThrownException"), 0,
+//		_Public, _F(Exception_new), KType_Exception,  KType_Exception, KMethodName_("new"), 0, _Public|_Hidden, _F(System_throw), KType_void,  KType_System, KMethodName_("throw"), 1, KType_Exception, KFieldName_("e"),
+//		_Public|_Hidden, _F(System_getThrownException), KType_Exception, KType_System, KMethodName_("getThrownException"), 0,
 //		DEND,
 //	};
 //	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -240,8 +240,8 @@
 //{
 //	int i;
 //	kArray *bka = stmt->parentBlockNULL->StmtList;
-//	ksymbol_t trySym = SYM_("try");
-//	ksymbol_t catchSym = SYM_("catch");
+//	ksymbol_t trySym = KSymbol_("try");
+//	ksymbol_t catchSym = KSymbol_("catch");
 //	for(i = 0; kArray_size(bka); i++) {
 //		kStmt *s = bka->StmtItems[i];
 //		if(s == stmt) {
@@ -270,8 +270,8 @@
 //		KReturnUnboxValue(ret);
 //	}
 //
-//	catchBlock   = SUGAR kStmt_GetBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
-//	finallyBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
+//	catchBlock   = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_("catch"),   K_NULLBLOCK);
+//	finallyBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_("finally"), K_NULLBLOCK);
 //	ret = SUGAR kBlock_TypeCheckAll(kctx, tryBlock,   gma);
 //	ret = SUGAR kBlock_TypeCheckAll(kctx, catchBlock, gma);
 //	if(ret == false) {
@@ -302,7 +302,7 @@
 //		ret = SUGAR kBlock_TypeCheckAll(kctx, catchBlock, gma);
 //		kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, K_NULLEXPR);
 //		KLIB kObjectProto_SetObject(kctx, parentStmt, KSymbol_ExprPattern, KType_Exception, expr);
-//		KLIB kObjectProto_SetObject(kctx, parentStmt, SYM_("catch"), KType_Block, stmt);
+//		KLIB kObjectProto_SetObject(kctx, parentStmt, KSymbol_("catch"), KType_Block, stmt);
 //		kStmt_done(kctx, stmt);
 //	} else {
 //		kStmt_Message(kctx, stmt, ErrTag, "upper stmt is not try/catch");
@@ -322,7 +322,7 @@
 //		kStmt *tryStmt = Stmt_LookupTryOrCatchStmtNULL(kctx, stmt);
 //		if(tryStmt != NULL) {
 //			ret = SUGAR kBlock_TypeCheckAll(kctx, finallyBlock, gma);
-//			KLIB kObjectProto_SetObject(kctx, tryStmt, SYM_("finally"), KType_Block, finallyBlock);
+//			KLIB kObjectProto_SetObject(kctx, tryStmt, KSymbol_("finally"), KType_Block, finallyBlock);
 //			kStmt_done(kctx, stmt);
 //		}
 //	}
@@ -333,9 +333,9 @@
 //static kbool_t exception_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 //{
 //	KDEFINE_SYNTAX SYNTAX[] = {
-//		{ .keyword = SYM_("try"), Statement_(try), .rule = "\"try\" $Block [ \"catch\" \"(\" $Type $Symbol \")\" catch: $Block ] [ \"finally\" finally: $Block ]",},
-//		{ .keyword = SYM_("catch"), Statement_(catch), .rule = "\"catch\" \"(\" $Type $Symbol \")\" $Block",},
-//		{ .keyword = SYM_("finally"), Statement_(finally), .rule = "\"finally\" $Block ",},
+//		{ .keyword = KSymbol_("try"), Statement_(try), .rule = "\"try\" $Block [ \"catch\" \"(\" $Type $Symbol \")\" catch: $Block ] [ \"finally\" finally: $Block ]",},
+//		{ .keyword = KSymbol_("catch"), Statement_(catch), .rule = "\"catch\" \"(\" $Type $Symbol \")\" $Block",},
+//		{ .keyword = KSymbol_("finally"), Statement_(finally), .rule = "\"finally\" $Block ",},
 //		{ .keyword = KSymbol_END, },
 //	};
 //	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

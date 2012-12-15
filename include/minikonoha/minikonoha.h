@@ -415,7 +415,7 @@ typedef struct KTraceInfo {
 
 #define KBeginCritical(trace, T, F) \
 	int errorKSymbol_ = trace->errorSymbol, faultType_ = trace->faultType;\
-	trace->errorSymbol = EXPT_(T); trace->faultType = F
+	trace->errorSymbol = KException_(T); trace->faultType = F
 
 #define KEndCritical(trace) \
 	trace->errorSymbol = errorKSymbol_; trace->faultType = faultType_
@@ -1487,7 +1487,7 @@ struct _kSystem {
 
 #define KStackCheckOverflow(SFP) do {\
 		if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
-			KLIB KRuntime_raise(kctx, EXPT_("StackOverflow"), SoftwareFault, NULL, SFP);\
+			KLIB KRuntime_raise(kctx, KException_("StackOverflow"), SoftwareFault, NULL, SFP);\
 		}\
 }while(0)\
 
@@ -1729,16 +1729,16 @@ struct KonohaLibVar {
 #define PackageId_sugar           1
 #define PN_(T)                    KLIB KpackageId(kctx, T, sizeof(T)-1, StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 
-#define ksymbolA(T, L, DEF)       KLIB Ksymbol(kctx, T, L, StringPolicy_ASCII, DEF)
+#define KAsciiSymbol(T, L, DEF)            KLIB Ksymbol(kctx, T, L, StringPolicy_ASCII, DEF)
 #define ksymbolSPOL(T, L, SPOL, DEF)       KLIB Ksymbol(kctx, T, L, SPOL, DEF)
-#define SYM_(T)                   KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
-#define EXPT_(T)                  KLIB Ksymbol(kctx, (T "Exception"), (sizeof(T "Exception")-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
-#define FN_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
-#define MN_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
-#define MN_box                    MN_("box")
+#define KSymbol_(T)                        KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
+#define KException_(T)                     KLIB Ksymbol(kctx, (T "Exception"), (sizeof(T "Exception")-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
+#define KFieldName_(T)                     KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
+#define KMethodName_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
+#define MN_box                             KMethodName_("box")
 
 #define MN_new                    38  /* @see KSymbol_return + 1*/
-#define KSymbol_void                   39
+#define KSymbol_void              39
 
 #define new_(C, A, STACK)                 (k##C *)(KLIB new_kObject(kctx, STACK, KClass_##C, ((uintptr_t)A)))
 #define GcUnsafe                          NULL
@@ -1757,11 +1757,11 @@ struct KonohaLibVar {
 
 #define KRequirePackage(NAME, TRACE)       KLIB kNameSpace_RequirePackage(kctx, NAME, TRACE)
 #define KImportPackage(NS, NAME, TRACE)    KLIB kNameSpace_ImportPackage(kctx, NS, NAME, TRACE)
-#define KImportPackageSymbol(NS, NAME, SYMBOL, TRACE) KLIB kNameSpace_ImportPackageSymbol(kctx, NS, NAME, SYM_(SYMBOL), TRACE)
+#define KImportPackageSymbol(NS, NAME, SYMBOL, TRACE) KLIB kNameSpace_ImportPackageSymbol(kctx, NS, NAME, KSymbol_(SYMBOL), TRACE)
 
 typedef intptr_t  KDEFINE_METHOD;
 
-#define KonohaConst_(D)  ((const char **)D)
+#define KConst_(D)  ((const char **)D)
 
 #define KDefineConstInt(T) #T, KType_int, T
 
@@ -1788,8 +1788,6 @@ typedef struct {
 	uintptr_t ty;
 	kObject *value;
 } KDEFINE_OBJECT_CONST;
-
-
 
 #define KSetKLibFunc(PKGID, T, F, TRACE)   do {\
 	void *func = kctx->klib->T;\
@@ -1962,7 +1960,7 @@ typedef struct {
 ///* Konoha API */
 extern kbool_t Konoha_LoadScript(KonohaContext* konoha, const char *scriptfile);
 extern kbool_t Konoha_Eval(KonohaContext* konoha, const char *script, kfileline_t uline);
-extern kbool_t konoha_Run(KonohaContext* konoha);  // TODO
+extern kbool_t Konoha_Run(KonohaContext* konoha);  // TODO
 
 #ifdef __cplusplus
 } /* extern "C" */

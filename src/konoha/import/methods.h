@@ -103,7 +103,7 @@ static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const method Boolean Boolean.toString();
 static KMETHOD Boolean_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *s = (sfp[0].boolValue) ? KSymbol_GetString(kctx, SYM_("true")) : KSymbol_GetString(kctx, SYM_("false"));
+	kString *s = (sfp[0].boolValue) ? KSymbol_GetString(kctx, KSymbol_("true")) : KSymbol_GetString(kctx, KSymbol_("false"));
 	KReturn(s);
 }
 
@@ -149,7 +149,7 @@ static KMETHOD Int_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 	kint_t n = sfp[1].intValue;
 	if(unlikely(n == 0)) {
 		KMakeTrace(trace, sfp);
-		KLIB KRuntime_raise(kctx, EXPT_("ZeroDivided"), SoftwareFault, NULL, trace->baseStack);
+		KLIB KRuntime_raise(kctx, KException_("ZeroDivided"), SoftwareFault, NULL, trace->baseStack);
 	}
 	KReturnUnboxValue(sfp[0].intValue / n);
 }
@@ -160,7 +160,7 @@ static KMETHOD Int_opMOD(KonohaContext *kctx, KonohaStack *sfp)
 	kint_t n = sfp[1].intValue;
 	if(unlikely(n == 0)) {
 		KMakeTrace(trace, sfp);
-		KLIB KRuntime_raise(kctx, EXPT_("ZeroDivided"), SoftwareFault, NULL, trace->baseStack);
+		KLIB KRuntime_raise(kctx, KException_("ZeroDivided"), SoftwareFault, NULL, trace->baseStack);
 	}
 	KReturnUnboxValue(sfp[0].intValue % n);
 }
@@ -274,7 +274,7 @@ static KMETHOD NameSpace_assert(KonohaContext *kctx, KonohaStack *sfp)
 	if(cond == false) {
 		KMakeTrace(trace, sfp);
 		((KonohaFactory *)kctx->platApi)->exitStatus = 1;  // just in case
-		KLIB KRuntime_raise(kctx, EXPT_("Assertion"), SoftwareFault, NULL, trace->baseStack);
+		KLIB KRuntime_raise(kctx, KException_("Assertion"), SoftwareFault, NULL, trace->baseStack);
 	}
 }
 
@@ -305,40 +305,40 @@ static KMETHOD System_gc(KonohaContext *kctx, KonohaStack *sfp)
 
 static void LoadDefaultMethod(KonohaContext *kctx, kNameSpace *ns)
 {
-	int FN_x = FN_("x");
+	int FN_x = KFieldName_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn|_Virtual, _F(Object_to), KType_Object, KType_Object, MN_("to"), 0,
+		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn|_Virtual, _F(Object_to), KType_Object, KType_Object, KMethodName_("to"), 0,
 		_Public|_Im|_Const|_Virtual, _F(Object_toString), KType_String, KType_Object, MethodName_To(KType_String), 0,
 		_Public|_Im|_Const, _F(Boolean_toString), KType_String, KType_boolean, MethodName_To(KType_String), 0,
-		_Public|_Im|_Const, _F(Boolean_opNOT), KType_boolean, KType_boolean, MN_("!"), 0,
-		_Public|_Im|_Const, _F(Boolean_opEQ), KType_boolean, KType_boolean, MN_("=="), 1, KType_boolean, FN_x,
-		_Public|_Im|_Const, _F(Int_opNEQ), KType_boolean, KType_boolean, MN_("!="), 1, KType_boolean, FN_x,
-		_Public|_Im|_Const, _F(Int_opMINUS), KType_int, KType_int, MN_("-"), 0,
-		_Public|_Im|_Const, _F(Int_opADD), KType_int, KType_int, MN_("+"), 1, KType_int, FN_x,
-		_Public|_Im|_Const, _F(Int_opSUB), KType_int, KType_int, MN_("-"), 1, KType_int, FN_x,
-		_Public|_Im|_Const, _F(Int_opMUL), KType_int, KType_int, MN_("*"), 1, KType_int, FN_x,
+		_Public|_Im|_Const, _F(Boolean_opNOT), KType_boolean, KType_boolean, KMethodName_("!"), 0,
+		_Public|_Im|_Const, _F(Boolean_opEQ), KType_boolean, KType_boolean, KMethodName_("=="), 1, KType_boolean, FN_x,
+		_Public|_Im|_Const, _F(Int_opNEQ), KType_boolean, KType_boolean, KMethodName_("!="), 1, KType_boolean, FN_x,
+		_Public|_Im|_Const, _F(Int_opMINUS), KType_int, KType_int, KMethodName_("-"), 0,
+		_Public|_Im|_Const, _F(Int_opADD), KType_int, KType_int, KMethodName_("+"), 1, KType_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opSUB), KType_int, KType_int, KMethodName_("-"), 1, KType_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opMUL), KType_int, KType_int, KMethodName_("*"), 1, KType_int, FN_x,
 		/* opDIV and opMOD raise zero divided exception. Don't set _Const */
-		_Public|_Im, _F(Int_opDIV), KType_int, KType_int, MN_("/"), 1, KType_int, FN_x,
-		_Public|_Im, _F(Int_opMOD), KType_int, KType_int, MN_("%"), 1, KType_int, FN_x,
-		_Public|_Im|_Const, _F(Int_opEQ),  KType_boolean, KType_int, MN_("=="),  1, KType_int, FN_x,
-		_Public|_Im|_Const, _F(Int_opNEQ), KType_boolean, KType_int, MN_("!="), 1, KType_int, FN_x,
-		_Public|_Im|_Const, _F(Int_opLT),  KType_boolean, KType_int, MN_("<"),  1, KType_int, FN_x,
-		_Public|_Im|_Const, _F(Int_opLTE), KType_boolean, KType_int, MN_("<="), 1, KType_int, FN_x,
-		_Public|_Im|_Const, _F(Int_opGT),  KType_boolean, KType_int, MN_(">"),  1, KType_int, FN_x,
-		_Public|_Im|_Const, _F(Int_opGTE), KType_boolean, KType_int, MN_(">="), 1, KType_int, FN_x,
+		_Public|_Im, _F(Int_opDIV), KType_int, KType_int, KMethodName_("/"), 1, KType_int, FN_x,
+		_Public|_Im, _F(Int_opMOD), KType_int, KType_int, KMethodName_("%"), 1, KType_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opEQ),  KType_boolean, KType_int, KMethodName_("=="),  1, KType_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opNEQ), KType_boolean, KType_int, KMethodName_("!="), 1, KType_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opLT),  KType_boolean, KType_int, KMethodName_("<"),  1, KType_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opLTE), KType_boolean, KType_int, KMethodName_("<="), 1, KType_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opGT),  KType_boolean, KType_int, KMethodName_(">"),  1, KType_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opGTE), KType_boolean, KType_int, KMethodName_(">="), 1, KType_int, FN_x,
 		_Public|_Im|_Const,  _F(Int_toString), KType_String, KType_int, MethodName_To(KType_String), 0,
 		_Public|_Im|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Boolean_box), KType_Object, KType_boolean, MN_box, 0,
 		_Public|_Im|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Int_box), KType_Object, KType_int, MN_box, 0,
-		_Public|_Im|_Const, _F(String_opEQ),  KType_boolean, KType_String, MN_("=="),  1, KType_String, FN_x ,
-		_Public|_Im|_Const, _F(String_opNEQ), KType_boolean, KType_String, MN_("!="), 1, KType_String, FN_x ,
+		_Public|_Im|_Const, _F(String_opEQ),  KType_boolean, KType_String, KMethodName_("=="),  1, KType_String, FN_x ,
+		_Public|_Im|_Const, _F(String_opNEQ), KType_boolean, KType_String, KMethodName_("!="), 1, KType_String, FN_x ,
 		_Public|_Im|_Const, _F(String_toInt), KType_int, KType_String, MethodName_To(KType_int), 0,
-		_Public|_Im|_Const, _F(String_opADD), KType_String, KType_String, MN_("+"), 1, KType_String | TypeAttr_Coercion, FN_x,
+		_Public|_Im|_Const, _F(String_opADD), KType_String, KType_String, KMethodName_("+"), 1, KType_String | TypeAttr_Coercion, FN_x,
 		_Public|_Const|_Hidden, _F(Func_new), KType_Func, KType_Func, MN_new, 2, KType_Object, FN_x, KType_Method, FN_x,
-		_Public|kMethod_SmartReturn|_Hidden, _F(Func_invoke), KType_Object, KType_Func, MN_("invoke"), 0,
-		_Static|_Public|_Im, _F(NameSpace_assert), KType_void, KType_NameSpace, MN_("assert"), 1, KType_boolean, FN_x,
-		_Public|_Const, _F(NameSpace_AllowImplicitCoercion), KType_void, KType_NameSpace, MN_("AllowImplicitCoercion"), 1, KType_boolean, FN_("allow"),
-		_Static|_Public|_Im, _F(System_p), KType_void, KType_System, MN_("p"), 1, KType_String | TypeAttr_Coercion, FN_("s"),
-		_Static|_Public|_Im, _F(System_gc), KType_void, KType_System, MN_("gc"), 0,
+		_Public|kMethod_SmartReturn|_Hidden, _F(Func_invoke), KType_Object, KType_Func, KMethodName_("invoke"), 0,
+		_Static|_Public|_Im, _F(NameSpace_assert), KType_void, KType_NameSpace, KMethodName_("assert"), 1, KType_boolean, FN_x,
+		_Public|_Const, _F(NameSpace_AllowImplicitCoercion), KType_void, KType_NameSpace, KMethodName_("AllowImplicitCoercion"), 1, KType_boolean, KFieldName_("allow"),
+		_Static|_Public|_Im, _F(System_p), KType_void, KType_System, KMethodName_("p"), 1, KType_String | TypeAttr_Coercion, KFieldName_("s"),
+		_Static|_Public|_Im, _F(System_gc), KType_void, KType_System, KMethodName_("gc"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, NULL);

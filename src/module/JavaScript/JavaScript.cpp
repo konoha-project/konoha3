@@ -106,23 +106,23 @@ static kMethod* CallExpr_getMethod(kExpr *expr)
 	return expr->cons->MethodItems[0];
 }
 
-#define MN_opNOT  MN_("!")
-#define MN_opADD  MN_("+")
-#define MN_opSUB  MN_("-")
-#define MN_opMUL  MN_("*")
-#define MN_opDIV  MN_("/")
-#define MN_opMOD  MN_("%")
-#define MN_opEQ   MN_("==")
-#define MN_opNEQ  MN_("!=")
-#define MN_opLT   MN_("<")
-#define MN_opLTE  MN_("<=")
-#define MN_opGT   MN_(">")
-#define MN_opGTE  MN_(">=")
-#define MN_opLAND MN_("&")
-#define MN_opLOR  MN_("|")
-#define MN_opLXOR MN_("^")
-#define MN_opLSFT MN_("<<")
-#define MN_opRSFT MN_(">>")
+#define MN_opNOT  KMethodName_("!")
+#define MN_opADD  KMethodName_("+")
+#define MN_opSUB  KMethodName_("-")
+#define MN_opMUL  KMethodName_("*")
+#define MN_opDIV  KMethodName_("/")
+#define MN_opMOD  KMethodName_("%")
+#define MN_opEQ   KMethodName_("==")
+#define MN_opNEQ  KMethodName_("!=")
+#define MN_opLT   KMethodName_("<")
+#define MN_opLTE  KMethodName_("<=")
+#define MN_opGT   KMethodName_(">")
+#define MN_opGTE  KMethodName_(">=")
+#define MN_opLAND KMethodName_("&")
+#define MN_opLOR  KMethodName_("|")
+#define MN_opLXOR KMethodName_("^")
+#define MN_opLSFT KMethodName_("<<")
+#define MN_opRSFT KMethodName_(">>")
 
 enum kSymbolPrefix{
 	kSymbolPrefix_NONE,
@@ -285,8 +285,8 @@ static kbool_t JSBuilder_VisitTryStmt(KonohaContext *kctx, KBuilder *builder, kS
 {
 	JSBuilder_EmitNewLineWith(kctx, builder, "try ");
 	JSBuilder_VisitBlock(kctx, builder, Stmt_getFirstBlock(kctx, stmt));
-	kBlock *catchBlock   = SUGAR kStmt_GetBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
-	kBlock *finallyBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
+	kBlock *catchBlock   = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_("catch"),   K_NULLBLOCK);
+	kBlock *finallyBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_("finally"), K_NULLBLOCK);
 	if(catchBlock != K_NULLBLOCK) {
 		JSBuilder_EmitString(kctx, builder, "catch(e) ", "", "");
 		JSBuilder_VisitBlock(kctx, builder, catchBlock);
@@ -397,7 +397,7 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 	kbool_t isGlobal = (KClass_(receiver->attrTypeId) == globalObjectClass || receiver->attrTypeId == KType_NameSpace);
 	const char *methodName = KSymbol_text(mtd->mn);
 	if(receiver->attrTypeId == KType_NameSpace) {
-		if(mtd->mn == MN_("import")) {
+		if(mtd->mn == KMethodName_("import")) {
 			kString *packageNameString = (kString *)kExpr_at(expr, 2)->objectConstValue;
 			kNameSpace *ns = (kNameSpace *)receiver->objectConstValue;
 			JSBuilder_importPackage(kctx, ns, packageNameString, expr->termToken->uline);

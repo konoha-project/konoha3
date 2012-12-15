@@ -194,7 +194,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 		{"System", VirtualType_KClass, (uintptr_t)KClass_System},
 		{NULL},
 	};
-	kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(ClassData), true/*isOverride*/, 0);
+	kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(ClassData), true/*isOverride*/, 0);
 
 	mod->kNameSpace_SetTokenFunc       = kNameSpace_SetTokenFunc;
 	mod->TokenSeq_Tokenize        = TokenSeq_Tokenize;
@@ -273,7 +273,7 @@ static KMETHOD NameSpace_ImportPackage(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD NameSpace_ImportPackageSymbol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[2].asString;
-	ksymbol_t keyword = ksymbolA(kString_text(key), kString_size(key), _NEWID);
+	ksymbol_t keyword = KAsciiSymbol(kString_text(key), kString_size(key), _NEWID);
 	KMakeTrace(trace, sfp);
 	kNameSpace_ImportPackageSymbol(kctx, sfp[0].asNameSpace, kString_text(sfp[1].asString), keyword, trace);
 }
@@ -282,7 +282,7 @@ static KMETHOD NameSpace_ImportPackageSymbol(KonohaContext *kctx, KonohaStack *s
 static KMETHOD NameSpace_hate(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[2].asString;
-	ksymbol_t keyword = ksymbolA(kString_text(key), kString_size(key), _NEWID);
+	ksymbol_t keyword = KAsciiSymbol(kString_text(key), kString_size(key), _NEWID);
 	KMakeTrace(trace, sfp);
 	kNameSpace_RemoveSyntax(kctx, sfp[0].asNameSpace, keyword, trace);
 }
@@ -316,7 +316,7 @@ static KMETHOD NameSpace_useStaticFunc(KonohaContext *kctx, KonohaStack *sfp)
 //## @Public @Const @Immutable @Coercion Symbol String.toSymbol();
 static KMETHOD String_toSymbol(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturnUnboxValue(ksymbolA(kString_text(sfp[0].asString), kString_size(sfp[0].asString), _NEWID));
+	KReturnUnboxValue(KAsciiSymbol(kString_text(sfp[0].asString), kString_size(sfp[0].asString), _NEWID));
 }
 
 //## @Public @Const @Immutable @Coercion String Symbol.toString();
@@ -345,12 +345,12 @@ void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 	KSetKLibFunc(0, kNameSpace_ImportPackageSymbol, kNameSpace_ImportPackageSymbol, NULL);
 	KSetKLibFunc(0, kNameSpace_GetConstNULL,        kNameSpace_GetConstNULL,        NULL);
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_ImportPackage), KType_void, KType_NameSpace, MN_("import"), 1, KType_String, FN_("package"),
-		_Public, _F(NameSpace_ImportPackageSymbol), KType_void, KType_NameSpace, MN_("import"), 2, KType_String, FN_("package"), KType_String, FN_("symbol"),
-		_Public, _F(NameSpace_hate), KType_boolean, KType_NameSpace, MN_("hate"), 1, KType_String, FN_("symbol"),
-		_Public, _F(NameSpace_loadScript), KType_void, KType_NameSpace, MN_("load"), 1, KType_String, FN_("filename"),
-		_Public, _F(NameSpace_loadScript), KType_void, KType_NameSpace, MN_("include"), 1, KType_String, FN_("filename"),
-		_Public, _F(NameSpace_useStaticFunc), KType_void, KType_NameSpace, MN_("UseStaticFunc"), 1, KType_Object, FN_("class"),
+		_Public, _F(NameSpace_ImportPackage), KType_void, KType_NameSpace, KMethodName_("import"), 1, KType_String, KFieldName_("package"),
+		_Public, _F(NameSpace_ImportPackageSymbol), KType_void, KType_NameSpace, KMethodName_("import"), 2, KType_String, KFieldName_("package"), KType_String, KFieldName_("symbol"),
+		_Public, _F(NameSpace_hate), KType_boolean, KType_NameSpace, KMethodName_("hate"), 1, KType_String, KFieldName_("symbol"),
+		_Public, _F(NameSpace_loadScript), KType_void, KType_NameSpace, KMethodName_("load"), 1, KType_String, KFieldName_("filename"),
+		_Public, _F(NameSpace_loadScript), KType_void, KType_NameSpace, KMethodName_("include"), 1, KType_String, KFieldName_("filename"),
+		_Public, _F(NameSpace_useStaticFunc), KType_void, KType_NameSpace, KMethodName_("UseStaticFunc"), 1, KType_Object, KFieldName_("class"),
 		_Public|_Coercion|_Const|_Imm, _F(String_toSymbol), KType_Symbol, KType_String, MethodName_To(KType_Symbol), 0,
 		_Public|_Coercion|_Const|_Imm, _F(KSymbol_toString), KType_String, KType_Symbol, MethodName_To(KType_String), 0,
 		DEND,

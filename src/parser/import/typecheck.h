@@ -358,7 +358,7 @@ static void kGamma_InitIt(KonohaContext *kctx, GammaAllocaData *genv, kParam *pa
 	KRuntimeContextVar *base = kctx->stack;
 	genv->localScope.varsize = 0;
 	if(base->evalty != KType_void) {
-		genv->localScope.varItems[1].name = FN_("it");
+		genv->localScope.varItems[1].name = KFieldName_("it");
 		genv->localScope.varItems[1].attrTypeId = base->evalty;
 		genv->localScope.varsize = 1;
 	}

@@ -420,7 +420,7 @@ typedef struct OPERROR {
 
 #define OPEXEC_ERROR(UL, msg, ESP) do {\
 	((KonohaStack *)rbp)[K_RTNIDX].calledFileLine = UL;\
-	KLIB KRuntime_raise(kctx, EXPT_("RuntimeScript"), SoftwareFault, msg, (KonohaStack *)rbp);\
+	KLIB KRuntime_raise(kctx, KException_("RuntimeScript"), SoftwareFault, msg, (KonohaStack *)rbp);\
 } while(0)
 
 /* SAFEPOINT */
@@ -445,7 +445,7 @@ typedef struct OPCHKSTACK {
 
 #define OPEXEC_CHKSTACK(UL) do {\
 	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
-		KLIB KRuntime_raise(kctx, EXPT_("StackOverflow"), SoftwareFault, NULL, (KonohaStack *)(rbp));\
+		KLIB KRuntime_raise(kctx, KException_("StackOverflow"), SoftwareFault, NULL, (KonohaStack *)(rbp));\
 	}\
 	kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].calledFileLine : UL;\
 	KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack *)rbp, uline);\

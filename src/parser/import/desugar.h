@@ -947,7 +947,7 @@ static kExpr *kExpr_TypeCheckFuncParams(KonohaContext *kctx, kStmt *stmt, kExprV
 			return texpr;
 		}
 	}
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), KClass_Func, MN_("invoke"), -1, KMethodMatch_NoOption);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), KClass_Func, KMethodName_("invoke"), -1, KMethodMatch_NoOption);
 	DBG_ASSERT(mtd != NULL);
 	KFieldSet(expr->cons, expr->cons->ExprItems[1], expr->cons->ExprItems[0]);
 	return TypeMethodCallExpr(kctx, expr, mtd, KClass_(thisClass->p0));
@@ -1167,7 +1167,7 @@ static kbool_t StmtTypeDecl_setParam(KonohaContext *kctx, kStmt *stmt, int n, kp
 	DBG_ASSERT(expr != NULL);
 	if(kExpr_isSymbolTerm(expr)) {
 		kToken *tkN = expr->termToken;
-		ksymbol_t fn = ksymbolA(kString_text(tkN->text), kString_size(tkN->text), KSymbol_NewId);
+		ksymbol_t fn = KAsciiSymbol(kString_text(tkN->text), kString_size(tkN->text), KSymbol_NewId);
 		p[n].name = fn;
 		p[n].attrTypeId = Token_typeLiteral(tkT);
 		return true;
@@ -1256,17 +1256,17 @@ static KMETHOD Statement_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 		{kMethod_Restricted},
 	};
 	if(MethodDeclFlag[0].symbol == 0) {   // this is a tricky technique
-		MethodDeclFlag[0].symbol = SYM_("@Public");
-		MethodDeclFlag[1].symbol = SYM_("@Const");
-		MethodDeclFlag[2].symbol = SYM_("@Static");
-		MethodDeclFlag[3].symbol = SYM_("@Virtual");
-		MethodDeclFlag[4].symbol = SYM_("@Final");
-		MethodDeclFlag[5].symbol = SYM_("@Override");
-		MethodDeclFlag[6].symbol = SYM_("@Restricted");
+		MethodDeclFlag[0].symbol = KSymbol_("@Public");
+		MethodDeclFlag[1].symbol = KSymbol_("@Const");
+		MethodDeclFlag[2].symbol = KSymbol_("@Static");
+		MethodDeclFlag[3].symbol = KSymbol_("@Virtual");
+		MethodDeclFlag[4].symbol = KSymbol_("@Final");
+		MethodDeclFlag[5].symbol = KSymbol_("@Override");
+		MethodDeclFlag[6].symbol = KSymbol_("@Restricted");
 	}
 	uintptr_t flag    = kStmt_ParseFlag(kctx, stmt, MethodDeclFlag, 0);
 	kNameSpace *ns    = Stmt_ns(stmt);
-	ktypeattr_t typeId    = kStmt_GetClassId(kctx, stmt, ns, SYM_("ClassName"), kObject_typeId(ns));
+	ktypeattr_t typeId    = kStmt_GetClassId(kctx, stmt, ns, KSymbol_("ClassName"), kObject_typeId(ns));
 	kmethodn_t mn     = kStmt_GetMethodSymbol(kctx, stmt, ns, KSymbol_SymbolPattern, MN_new);
 	kParam *pa        = kStmt_newMethodParamNULL(kctx, stmt, gma);
 	if(KType_Is(Singleton, typeId)) { flag |= kMethod_Static; }
@@ -1293,13 +1293,13 @@ static KMETHOD Statement_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 
 static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 {
-	DBG_ASSERT(SYM_("$Param") == KSymbol_ParamPattern);
-	DBG_ASSERT(SYM_(".") == KSymbol_DOT);
-	DBG_ASSERT(SYM_(":") == KSymbol_COLON);
-	DBG_ASSERT(SYM_("true") == KSymbol_true);
-	DBG_ASSERT(SYM_("return") == KSymbol_return);
-	DBG_P("MN_new=%d", SYM_("new"));
-	DBG_ASSERT(SYM_("new") == MN_new);
+	DBG_ASSERT(KSymbol_("$Param") == KSymbol_ParamPattern);
+	DBG_ASSERT(KSymbol_(".") == KSymbol_DOT);
+	DBG_ASSERT(KSymbol_(":") == KSymbol_COLON);
+	DBG_ASSERT(KSymbol_("true") == KSymbol_true);
+	DBG_ASSERT(KSymbol_("return") == KSymbol_return);
+	DBG_P("MN_new=%d", KSymbol_("new"));
+	DBG_ASSERT(KSymbol_("new") == MN_new);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ TOKEN(ERR), SYNFLAG_StmtBreakExec, },
 		{ PATTERN(Symbol),  0, NULL, 0, 0, PatternMatch_MethodName, Expression_Term, NULL, NULL, TypeCheck_Symbol,},
@@ -1339,7 +1339,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(if),     0, "\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Block]", 0, 0, NULL, NULL, NULL, Statement_if, NULL, },
 		{ TOKEN(else),   0,  "\"else\" $Block", 0, 0, NULL, NULL, /*Statement_else*/NULL, Statement_else, NULL, },
 		{ TOKEN(return), SYNFLAG_StmtBreakExec, "\"return\" [$Expr]", 0, 0, NULL, NULL, NULL, Statement_return, NULL, },
-		{ SYM_("new"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Expression_new, NULL, NULL, NULL, },
+		{ KSymbol_("new"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Expression_new, NULL, NULL, NULL, },
 		{ KSymbol_END, },
 	};
 	kNameSpace_DefineSyntax(kctx, ns, SYNTAX, NULL);

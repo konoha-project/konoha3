@@ -56,7 +56,7 @@ static int TRACE_fgetc(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
 	int ch = fgetc(file->fp);
 	if(ferror(file->fp) != 0) {
 		KTraceErrorPoint(trace, SystemFault, "fgetc", LogFile(file), LogErrno);
-		KLIB KRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
+		KLIB KRuntime_raise(kctx, KException_("IO"), SystemFault, NULL, trace->baseStack);
 	}
 	return ch;
 }
@@ -65,7 +65,7 @@ static int TRACE_fputc(KonohaContext *kctx, kFile *file, int ch, KTraceInfo *tra
 {
 	if(fputc(ch, file->fp) == EOF) {
 		KTraceErrorPoint(trace, SystemFault, "fputc", LogFile(file), LogErrno);
-		KLIB KRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
+		KLIB KRuntime_raise(kctx, KException_("IO"), SystemFault, NULL, trace->baseStack);
 	}
 	else if(!kFile_is(ChangeLessStream, file)) {
 		KTraceChangeSystemPoint(trace, "fputc", LogFile(file), LogWrittenByte(1));
@@ -108,7 +108,7 @@ static size_t TRACE_fread(KonohaContext *kctx, kFile *file, char *buf, size_t bu
 	size_t size = fread(buf, 1, bufsiz, file->fp);
 	if(ferror(file->fp) != 0){
 		KTraceErrorPoint(trace, SystemFault, "fread", LogFile(file), LogErrno);
-		KLIB KRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
+		KLIB KRuntime_raise(kctx, KException_("IO"), SystemFault, NULL, trace->baseStack);
 	}
 	kFile_CheckEOF(kctx, file, trace);
 	return size;
@@ -119,7 +119,7 @@ static size_t TRACE_fwrite(KonohaContext *kctx, kFile *file, const char *buf, si
 	size_t size = fwrite(buf, 1, bufsiz, file->fp);
 	if(ferror(file->fp) != 0){
 		KTraceErrorPoint(trace, SystemFault, "fwrite", LogFile(file), LogErrno);
-		KLIB KRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
+		KLIB KRuntime_raise(kctx, KException_("IO"), SystemFault, NULL, trace->baseStack);
 	}
 	if(size > 0 && !kFile_is(ChangeLessStream, file)) {
 		KTraceChangeSystemPoint(trace, "fwrite", LogFile(file), LogWrittenByte(size));
@@ -186,7 +186,7 @@ static KMETHOD File_new(KonohaContext *kctx, KonohaStack *sfp)
 		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "fopen",
 			LogText("filename", kString_text(path)), LogText("mode", mode), LogErrno);
-		KLIB KRuntime_raise(kctx, EXPT_("IO"), fault, NULL, sfp);
+		KLIB KRuntime_raise(kctx, KException_("IO"), fault, NULL, sfp);
 	}
 	if(mode[0] == 'w' || mode[0] == 'a' || mode[1] == '+') {
 		KTraceChangeSystemPoint(trace, "fopen", LogFileName(kString_text(path)), LogText("mode", mode));
@@ -451,27 +451,27 @@ static KMETHOD File_scriptPath(KonohaContext *kctx, KonohaStack *sfp)
 static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static|_Const, _F(File_scriptPath), KType_String, KType_File, MN_("scriptPath"), 1, KType_String, FN_("filename"),
-		_Public, _F(File_setWriterCharset), KType_void, KType_File, MN_("setWriterCharset"), 1, KType_String, FN_("charset"),
-		_Public, _F(File_setReaderCharset), KType_void, KType_File, MN_("setReaderCharset"), 1, KType_String, FN_("charset"),
+		_Public|_Static|_Const, _F(File_scriptPath), KType_String, KType_File, KMethodName_("scriptPath"), 1, KType_String, KFieldName_("filename"),
+		_Public, _F(File_setWriterCharset), KType_void, KType_File, KMethodName_("setWriterCharset"), 1, KType_String, KFieldName_("charset"),
+		_Public, _F(File_setReaderCharset), KType_void, KType_File, KMethodName_("setReaderCharset"), 1, KType_String, KFieldName_("charset"),
 
-		_Public, _F(File_new), KType_File, KType_File, MN_("new"), 2, KType_String, FN_("filename"), KType_String, FN_("mode"),
-		_Public, _F(File_close), KType_void, KType_File, MN_("close"), 0,
-		_Public, _F(File_getc), KType_int, KType_File, MN_("getc"), 0,
-		_Public, _F(File_putc), KType_void, KType_File, MN_("putc"), 1, KType_int, FN_("char"),
-		_Public, _F(File_readLine), KType_String, KType_File, MN_("readLine"), 0,
-		_Public, _F(File_print), KType_String, KType_File, MN_("print"), 1, KType_String | TypeAttr_Coercion, FN_("str"),
-		_Public, _F(File_println), KType_void, KType_File, MN_("println"), 1, KType_String | TypeAttr_Coercion, FN_("str"),
-		_Public, _F(File_println0), KType_void, KType_File, MN_("println"), 0,
-		_Public, _F(File_flush), KType_void, KType_File, MN_("flush"), 0,
+		_Public, _F(File_new), KType_File, KType_File, KMethodName_("new"), 2, KType_String, KFieldName_("filename"), KType_String, KFieldName_("mode"),
+		_Public, _F(File_close), KType_void, KType_File, KMethodName_("close"), 0,
+		_Public, _F(File_getc), KType_int, KType_File, KMethodName_("getc"), 0,
+		_Public, _F(File_putc), KType_void, KType_File, KMethodName_("putc"), 1, KType_int, KFieldName_("char"),
+		_Public, _F(File_readLine), KType_String, KType_File, KMethodName_("readLine"), 0,
+		_Public, _F(File_print), KType_String, KType_File, KMethodName_("print"), 1, KType_String | TypeAttr_Coercion, KFieldName_("str"),
+		_Public, _F(File_println), KType_void, KType_File, KMethodName_("println"), 1, KType_String | TypeAttr_Coercion, KFieldName_("str"),
+		_Public, _F(File_println0), KType_void, KType_File, KMethodName_("println"), 0,
+		_Public, _F(File_flush), KType_void, KType_File, KMethodName_("flush"), 0,
 
-		_Public|_Const|_Im, _F(FILE_isatty), KType_boolean, KType_File, MN_("isatty"), 0,
-		_Public|_Const|_Im, _F(FILE_getfileno), KType_int, KType_File, MN_("getfileno"), 0,
+		_Public|_Const|_Im, _F(FILE_isatty), KType_boolean, KType_File, KMethodName_("isatty"), 0,
+		_Public|_Const|_Im, _F(FILE_getfileno), KType_int, KType_File, KMethodName_("getfileno"), 0,
 
-		_Public, _F(File_read),   KType_int, KType_File, MN_("read"), 1, KType_Bytes, FN_("buf"),
-		_Public, _F(File_read3),  KType_int, KType_File, MN_("read"), 3, KType_Bytes, FN_("buf"), KType_int, FN_("offset"), KType_int, FN_("len"),
-		_Public, _F(File_Write),  KType_int, KType_File, MN_("write"), 1, KType_Bytes, FN_("buf"),
-		_Public, _F(File_Write3), KType_int, KType_File, MN_("write"), 3, KType_Bytes, FN_("buf"), KType_int, FN_("offset"), KType_int, FN_("len"),
+		_Public, _F(File_read),   KType_int, KType_File, KMethodName_("read"), 1, KType_Bytes, KFieldName_("buf"),
+		_Public, _F(File_read3),  KType_int, KType_File, KMethodName_("read"), 3, KType_Bytes, KFieldName_("buf"), KType_int, KFieldName_("offset"), KType_int, KFieldName_("len"),
+		_Public, _F(File_Write),  KType_int, KType_File, KMethodName_("write"), 1, KType_Bytes, KFieldName_("buf"),
+		_Public, _F(File_Write3), KType_int, KType_File, KMethodName_("write"), 3, KType_Bytes, KFieldName_("buf"), KType_int, KFieldName_("offset"), KType_int, KFieldName_("len"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -511,12 +511,12 @@ static void file_defineConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *tr
 		{"stderr", KType_File, KFileStdErr},
 		{NULL}, /* sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(FileData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(FileData), false/*isOverride*/, trace);
 	KDEFINE_INT_CONST IntData[] = {
 		{"EOF", KType_int,  EOF},
 		{NULL}, /* sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
 
 }
 
@@ -548,7 +548,7 @@ static kbool_t file_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 		{"FILE", VirtualType_KClass, (uintptr_t)KClass_File},
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, exportNS, KonohaConst_(ClassData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(ClassData), false/*isOverride*/, trace);
 	return true;
 }
 

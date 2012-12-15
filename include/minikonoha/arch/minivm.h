@@ -395,7 +395,7 @@ typedef struct OPERROR {
 #define OPEXEC_ERROR() do {\
 	OPERROR *op = (OPERROR *)pc;\
 	((KonohaStack *)rbp)[K_RTNIDX].calledFileLine = op->uline;\
-	KLIB KRuntime_raise(kctx, EXPT_("RuntimeScript"), SoftwareFault, op->msg, (KonohaStack *)rbp);\
+	KLIB KRuntime_raise(kctx, KException_("RuntimeScript"), SoftwareFault, op->msg, (KonohaStack *)rbp);\
 } while(0)
 #endif
 

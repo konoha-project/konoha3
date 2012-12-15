@@ -48,7 +48,7 @@ static void Throw_IndexOutOfBoundsException(KonohaContext *kctx, KonohaStack *sf
 	KMakeTrace(trace, sfp);
 	KTraceApi(trace, UserFault, "charAt",
 			LogUint("index", index));
-	KLIB KRuntime_raise(kctx, EXPT_("IndexOutOfBounds"),
+	KLIB KRuntime_raise(kctx, KException_("IndexOutOfBounds"),
 			UserFault, NULL, trace->baseStack);
 }
 
@@ -57,7 +57,7 @@ static void Throw_NotImplement(KonohaContext *kctx, KonohaStack *sfp, const char
 	KMakeTrace(trace, sfp);
 	KTraceApi(trace, UserFault, "charAt",
 			LogText("Func", FuncName));
-	KLIB KRuntime_raise(kctx, EXPT_("NotImplement"),
+	KLIB KRuntime_raise(kctx, KException_("NotImplement"),
 			SystemFault, NULL, trace->baseStack);
 }
 
@@ -369,31 +369,31 @@ static KMETHOD KString_trim(KonohaContext *kctx,  KonohaStack *sfp)
 static kbool_t LoadJavaAPI(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		//_Public, _F(KString_charAt), KType_char, KType_String, MN_("charAt"), 1, KType_int, FN_("index"),
-		_Public|_Const|_Im, _F(KString_codePointAt), KType_int, KType_String, MN_("codePointAt"), 1, KType_int, FN_("index"),
-		_Public|_Const|_Im, _F(KString_codePointBefore), KType_int, KType_String, MN_("codePointBefore"), 1, KType_int, FN_("index"),
-		_Public|_Const|_Im, _F(KString_codePointCount), KType_int, KType_String, MN_("codePointCount"), 2, KType_int, FN_("beginIndex"),KType_int, FN_("endIndex"),
-		_Public|_Const|_Im, _F(KString_compareTo), KType_int, KType_String, MN_("compareTo"), 1, KType_String, FN_("anotherString"),
-		_Public|_Const|_Im, _F(KString_compareToIgnoreCase), KType_int, KType_String, MN_("compareToIgnoreCase"), 1, KType_String, FN_("str"),
-		_Public|_Const|_Im, _F(KString_endsWith), KType_boolean, KType_String, MN_("endsWith"), 1, KType_String, FN_("suffix"),
-		_Public|_Const    , _F(KString_hashCode), KType_int, KType_String, MN_("hashCode"), 0,
-		_Public|_Const|_Im, _F(KString_indexOf0), KType_int, KType_String, MN_("indexOf"), 2, KType_int, FN_("ch"),KType_int, FN_("fromIndex"),
-		_Public|_Const|_Im, _F(KString_indexOf1), KType_int, KType_String, MN_("indexOf"), 2, KType_String, FN_("str"),KType_int, FN_("fromIndex"),
-		_Public|_Const|_Im, _F(KString_lastIndexOf0), KType_int, KType_String, MN_("lastIndexOf"), 2, KType_int, FN_("ch"),KType_int, FN_("fromIndex"),
-		_Public|_Const|_Im, _F(KString_lastIndexOf1), KType_int, KType_String, MN_("lastIndexOf"), 2, KType_String, FN_("str"),KType_int, FN_("fromIndex"),
-		_Public|_Const|_Im, _F(KString_length), KType_int, KType_String, MN_("length"), 0,
-		_Public|_Const|_Im, _F(KString_Matches), KType_boolean, KType_String, MN_("matches"), 1, KType_String, FN_("regex"),
-		_Public|_Const|_Im, _F(KString_offsetByCodePoints), KType_int, KType_String, MN_("offsetByCodePoints"), 2, KType_int, FN_("index"),KType_int, FN_("codePointOffset"),
-		_Public|_Const|_Im, _F(KString_regionMatches), KType_boolean, KType_String, MN_("regionMaches"), 5, KType_boolean, FN_("ignoreCase"),KType_int, FN_("toffset"),KType_String, FN_("other"),KType_int, FN_("ooffset"),KType_int, FN_("len"),
-		_Public|_Const|_Im, _F(KString_replace), KType_String, KType_String, MN_("replace"), 2, KType_char, FN_("oldChar"),KType_char, FN_("newChar"),
-		_Public|_Const|_Im, _F(KString_replaceAll), KType_String, KType_String, MN_("replaceAll"), 2, KType_String, FN_("regex"),KType_String, FN_("replacement"),
-		_Public|_Const|_Im, _F(KString_replaceFirst), KType_String, KType_String, MN_("replaceFirst"), 2, KType_String, FN_("regex"),KType_String, FN_("replacement"),
-		_Public|_Const|_Im, _F(KString_split), TYPE_Array(String), KType_String, MN_("split"), 2, KType_String, FN_("regex"),KType_int, FN_("limit"),
-		_Public|_Const|_Im, _F(KString_startsWith), KType_boolean, KType_String, MN_("startsWith"), 2, KType_String, FN_("prefix"),KType_int, FN_("toffset"),
-		_Public|_Const|_Im, _F(KString_substring), KType_String, KType_String, MN_("substring"), 2, KType_int, FN_("beginIndex"),KType_int, FN_("endIndex"),
-		_Public|_Const|_Im, _F(KString_toLowerCase), KType_String, KType_String, MN_("toLowerCase"), 1, KType_Locale, FN_("locale"),
-		_Public|_Const|_Im, _F(KString_toUpperCase), KType_String, KType_String, MN_("toUpperCase"), 1, KType_Locale, FN_("locale"),
-		_Public|_Const|_Im, _F(KString_trim), KType_String, KType_String, MN_("trim"), 0,
+		//_Public, _F(KString_charAt), KType_char, KType_String, KMethodName_("charAt"), 1, KType_int, KFieldName_("index"),
+		_Public|_Const|_Im, _F(KString_codePointAt), KType_int, KType_String, KMethodName_("codePointAt"), 1, KType_int, KFieldName_("index"),
+		_Public|_Const|_Im, _F(KString_codePointBefore), KType_int, KType_String, KMethodName_("codePointBefore"), 1, KType_int, KFieldName_("index"),
+		_Public|_Const|_Im, _F(KString_codePointCount), KType_int, KType_String, KMethodName_("codePointCount"), 2, KType_int, KFieldName_("beginIndex"),KType_int, KFieldName_("endIndex"),
+		_Public|_Const|_Im, _F(KString_compareTo), KType_int, KType_String, KMethodName_("compareTo"), 1, KType_String, KFieldName_("anotherString"),
+		_Public|_Const|_Im, _F(KString_compareToIgnoreCase), KType_int, KType_String, KMethodName_("compareToIgnoreCase"), 1, KType_String, KFieldName_("str"),
+		_Public|_Const|_Im, _F(KString_endsWith), KType_boolean, KType_String, KMethodName_("endsWith"), 1, KType_String, KFieldName_("suffix"),
+		_Public|_Const    , _F(KString_hashCode), KType_int, KType_String, KMethodName_("hashCode"), 0,
+		_Public|_Const|_Im, _F(KString_indexOf0), KType_int, KType_String, KMethodName_("indexOf"), 2, KType_int, KFieldName_("ch"),KType_int, KFieldName_("fromIndex"),
+		_Public|_Const|_Im, _F(KString_indexOf1), KType_int, KType_String, KMethodName_("indexOf"), 2, KType_String, KFieldName_("str"),KType_int, KFieldName_("fromIndex"),
+		_Public|_Const|_Im, _F(KString_lastIndexOf0), KType_int, KType_String, KMethodName_("lastIndexOf"), 2, KType_int, KFieldName_("ch"),KType_int, KFieldName_("fromIndex"),
+		_Public|_Const|_Im, _F(KString_lastIndexOf1), KType_int, KType_String, KMethodName_("lastIndexOf"), 2, KType_String, KFieldName_("str"),KType_int, KFieldName_("fromIndex"),
+		_Public|_Const|_Im, _F(KString_length), KType_int, KType_String, KMethodName_("length"), 0,
+		_Public|_Const|_Im, _F(KString_Matches), KType_boolean, KType_String, KMethodName_("matches"), 1, KType_String, KFieldName_("regex"),
+		_Public|_Const|_Im, _F(KString_offsetByCodePoints), KType_int, KType_String, KMethodName_("offsetByCodePoints"), 2, KType_int, KFieldName_("index"),KType_int, KFieldName_("codePointOffset"),
+		_Public|_Const|_Im, _F(KString_regionMatches), KType_boolean, KType_String, KMethodName_("regionMaches"), 5, KType_boolean, KFieldName_("ignoreCase"),KType_int, KFieldName_("toffset"),KType_String, KFieldName_("other"),KType_int, KFieldName_("ooffset"),KType_int, KFieldName_("len"),
+		_Public|_Const|_Im, _F(KString_replace), KType_String, KType_String, KMethodName_("replace"), 2, KType_char, KFieldName_("oldChar"),KType_char, KFieldName_("newChar"),
+		_Public|_Const|_Im, _F(KString_replaceAll), KType_String, KType_String, KMethodName_("replaceAll"), 2, KType_String, KFieldName_("regex"),KType_String, KFieldName_("replacement"),
+		_Public|_Const|_Im, _F(KString_replaceFirst), KType_String, KType_String, KMethodName_("replaceFirst"), 2, KType_String, KFieldName_("regex"),KType_String, KFieldName_("replacement"),
+		_Public|_Const|_Im, _F(KString_split), TYPE_Array(String), KType_String, KMethodName_("split"), 2, KType_String, KFieldName_("regex"),KType_int, KFieldName_("limit"),
+		_Public|_Const|_Im, _F(KString_startsWith), KType_boolean, KType_String, KMethodName_("startsWith"), 2, KType_String, KFieldName_("prefix"),KType_int, KFieldName_("toffset"),
+		_Public|_Const|_Im, _F(KString_substring), KType_String, KType_String, KMethodName_("substring"), 2, KType_int, KFieldName_("beginIndex"),KType_int, KFieldName_("endIndex"),
+		_Public|_Const|_Im, _F(KString_toLowerCase), KType_String, KType_String, KMethodName_("toLowerCase"), 1, KType_Locale, KFieldName_("locale"),
+		_Public|_Const|_Im, _F(KString_toUpperCase), KType_String, KType_String, KMethodName_("toUpperCase"), 1, KType_Locale, KFieldName_("locale"),
+		_Public|_Const|_Im, _F(KString_trim), KType_String, KType_String, KMethodName_("trim"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

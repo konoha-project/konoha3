@@ -104,14 +104,14 @@ static kbool_t openssl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 		tbls[i] = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &Def, trace);
 	}
 
-	int FN_x = FN_("x");
+	int FN_x = KFieldName_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_P, _F(kMD5_Init),   KType_SHA1,   KType_MD5, MN_("new"), 0,
-		_P, _F(kMD5_Update), KType_int,   KType_MD5, MN_("update"), 1, KType_String, FN_x,
-		_P, _F(kMD5_Final),  KType_String, KType_MD5, MN_("final"), 0,
-		_P, _F(kSHA1_Init),   KType_SHA1,   KType_SHA1, MN_("new"), 0,
-		_P, _F(kSHA1_Update), KType_int,   KType_SHA1, MN_("update"), 1, KType_String, FN_x,
-		_P, _F(kSHA1_Final),  KType_String, KType_SHA1, MN_("final"), 0,
+		_P, _F(kMD5_Init),   KType_SHA1,   KType_MD5, KMethodName_("new"), 0,
+		_P, _F(kMD5_Update), KType_int,   KType_MD5, KMethodName_("update"), 1, KType_String, FN_x,
+		_P, _F(kMD5_Final),  KType_String, KType_MD5, KMethodName_("final"), 0,
+		_P, _F(kSHA1_Init),   KType_SHA1,   KType_SHA1, KMethodName_("new"), 0,
+		_P, _F(kSHA1_Update), KType_int,   KType_SHA1, KMethodName_("update"), 1, KType_String, FN_x,
+		_P, _F(kSHA1_Final),  KType_String, KType_SHA1, KMethodName_("final"), 0,
 
 		DEND,
 	};

@@ -56,7 +56,7 @@ extern "C" {
 
 static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KLIB KRuntime_raise(kctx, EXPT_("ZeroDivided"), SoftwareFault, NULL, sfp);
+	KLIB KRuntime_raise(kctx, KException_("ZeroDivided"), SoftwareFault, NULL, sfp);
 }
 
 // --------------------------------------------------------------------------
@@ -260,35 +260,35 @@ static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		defFloat.p     = Float_p;
 		KClass_Float = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defFloat, trace);
 	}
-	int FN_x = FN_("x");
+	int FN_x = KFieldName_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(Float_opPlus), KType_float, KType_float, MN_("+"), 0,
-		_Public|_Const|_Im, _F(Float_opADD), KType_float, KType_float, MN_("+"), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Int_opADD), KType_float, KType_int, MN_("+"), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Float_opSUB), KType_float, KType_float, MN_("-"), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Int_opSUB), KType_float, KType_int, MN_("-"), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Float_opMUL), KType_float, KType_float, MN_("*"), 1, KType_float, FN_x,
-		_Public|_Im, _F(Float_opDIV), KType_float, KType_float, MN_("/"), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Float_opEQ),  KType_boolean, KType_float, MN_("=="), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Float_opNEQ), KType_boolean, KType_float, MN_("!="), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Float_opLT),  KType_boolean, KType_float, MN_("<"), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Float_opLTE), KType_boolean, KType_float, MN_("<="), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Float_opGT),  KType_boolean, KType_float, MN_(">"), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Float_opGTE), KType_boolean, KType_float, MN_(">="), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Int_opMUL), KType_float, KType_int, MN_("*"), 1, KType_float, FN_x,
-		_Public|_Im, _F(Int_opDIV), KType_float, KType_int, MN_("/"), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Int_opEQ),  KType_boolean, KType_int, MN_("=="), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Int_opNEQ), KType_boolean, KType_int, MN_("!="), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Int_opLT),  KType_boolean, KType_int, MN_("<"), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Int_opLTE), KType_boolean, KType_int, MN_("<="), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Int_opGT),  KType_boolean, KType_int, MN_(">"), 1, KType_float, FN_x,
-		_Public|_Const|_Im, _F(Int_opGTE), KType_boolean, KType_int, MN_(">="), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Float_opPlus), KType_float, KType_float, KMethodName_("+"), 0,
+		_Public|_Const|_Im, _F(Float_opADD), KType_float, KType_float, KMethodName_("+"), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Int_opADD), KType_float, KType_int, KMethodName_("+"), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Float_opSUB), KType_float, KType_float, KMethodName_("-"), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Int_opSUB), KType_float, KType_int, KMethodName_("-"), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Float_opMUL), KType_float, KType_float, KMethodName_("*"), 1, KType_float, FN_x,
+		_Public|_Im, _F(Float_opDIV), KType_float, KType_float, KMethodName_("/"), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Float_opEQ),  KType_boolean, KType_float, KMethodName_("=="), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Float_opNEQ), KType_boolean, KType_float, KMethodName_("!="), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Float_opLT),  KType_boolean, KType_float, KMethodName_("<"), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Float_opLTE), KType_boolean, KType_float, KMethodName_("<="), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Float_opGT),  KType_boolean, KType_float, KMethodName_(">"), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Float_opGTE), KType_boolean, KType_float, KMethodName_(">="), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Int_opMUL), KType_float, KType_int, KMethodName_("*"), 1, KType_float, FN_x,
+		_Public|_Im, _F(Int_opDIV), KType_float, KType_int, KMethodName_("/"), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Int_opEQ),  KType_boolean, KType_int, KMethodName_("=="), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Int_opNEQ), KType_boolean, KType_int, KMethodName_("!="), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Int_opLT),  KType_boolean, KType_int, KMethodName_("<"), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Int_opLTE), KType_boolean, KType_int, KMethodName_("<="), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Int_opGT),  KType_boolean, KType_int, KMethodName_(">"), 1, KType_float, FN_x,
+		_Public|_Const|_Im, _F(Int_opGTE), KType_boolean, KType_int, KMethodName_(">="), 1, KType_float, FN_x,
 
 		_Public|_Const|_Im|_Coercion, _F(Float_toInt), KType_int, KType_float, MethodName_To(KType_int), 0,
 		_Public|_Const|_Im|_Coercion, _F(Int_toFloat), KType_float, KType_int, MethodName_To(KType_float), 0,
 		_Public|_Const|_Im, _F(Float_toString), KType_String, KType_float, MethodName_To(KType_String), 0,
 		_Public|_Const|_Im, _F(String_toFloat), KType_float, KType_String, MethodName_To(KType_float), 0,
-		_Public|_Const|_Im, _F(Float_opMINUS), KType_float, KType_float, MN_("-"), 0,
+		_Public|_Const|_Im, _F(Float_opMINUS), KType_float, KType_float, KMethodName_("-"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -298,7 +298,7 @@ static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		{"NaN", KType_float, NAN},
 		{NULL} /* sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(FloatData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(FloatData), false/*isOverride*/, trace);
 	return true;
 }
 
@@ -315,7 +315,7 @@ static KMETHOD TypeCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("$Float"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_Float, },
+		{ KSymbol_("$Float"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_Float, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
@@ -340,7 +340,7 @@ static kbool_t float_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 			{"double", VirtualType_KClass, (uintptr_t)KClass_Float},
 			{NULL},
 		};
-		KLIB kNameSpace_LoadConstData(kctx, exportNS, KonohaConst_(ClassData), false/*isOverride*/, trace);
+		KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(ClassData), false/*isOverride*/, trace);
 	}
 	return true;
 }

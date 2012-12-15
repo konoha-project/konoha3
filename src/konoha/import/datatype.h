@@ -585,7 +585,7 @@ static KClass* Kclass(KonohaContext *kctx, ktypeattr_t cid, KTraceInfo *trace)
 {
 	KRuntime *share = kctx->share;
 	if(!(cid < (share->classTable.bytesize/sizeof(KClassVar *)))) {
-		KLIB KRuntime_raise(kctx, EXPT_("InvalidParameter"), SoftwareFault, NULL, trace->baseStack);
+		KLIB KRuntime_raise(kctx, KException_("InvalidParameter"), SoftwareFault, NULL, trace->baseStack);
 	}
 	return share->classTable.classItems[cid];
 }
@@ -857,7 +857,7 @@ static KClass *KClass_define(KonohaContext *kctx, kpackageId_t packageId, kStrin
 		ct->classNameSymbol = ksymbolSPOL(n, strlen(n), StringPolicy_ASCII|StringPolicy_TEXT, _NEWID);
 	}
 	else {
-		ct->classNameSymbol = ksymbolA(kString_text(name), kString_size(name), _NEWID);
+		ct->classNameSymbol = KAsciiSymbol(kString_text(name), kString_size(name), _NEWID);
 	}
 	KClass_setName(kctx, ct, trace);
 	return (KClass *)ct;

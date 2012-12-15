@@ -134,7 +134,7 @@ static kbool_t apache_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		DEFINE_KEYWORD(APLOG_DEBUG),
 		{NULL, 0, 0}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
 	return true;
 }
 

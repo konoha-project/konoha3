@@ -391,19 +391,19 @@ static void DSE_defineConstData(DSE *dse, KonohaContext *kctx, Message *msg)
 			{"DSE_SCRIPT_DIR", VirtualType_Text, dse->scriptdir},
 			{}
 		};
-		KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), false/*isOverride*/, 0);
+		KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(TextData), false/*isOverride*/, 0);
 	}
 	else {
 		KDEFINE_TEXT_CONST TextData[] = {
 			{"DSE_SCRIPT_DIR", VirtualType_Text, dse->scriptdir},
 			{}
 		};
-		KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), false/*isOverride*/, 0);
+		KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(TextData), false/*isOverride*/, 0);
 	}
 	KDEFINE_INT_CONST IntData[] = {
 		{"DSE_DEBUG", KType_int, verbose_debug}, {}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(IntData), false/*isOverride*/, 0);
+	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(IntData), false/*isOverride*/, 0);
 }
 
 KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);

@@ -63,9 +63,9 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 static void object_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im|_Const|_Final, _F(Object_getTypeId), KType_int, KType_Object, MN_("getTypeId"), 0,
-		_Public|_Hidden|_Im|_Const|_Final, _F(Object_instanceOf), KType_boolean, KType_Object, MN_("<:"), 1, KType_Object, FN_("type"),
-		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn|_Final, _F(Object_as), KType_Object, KType_Object, MN_("as"), 0,
+		_Public|_Im|_Const|_Final, _F(Object_getTypeId), KType_int, KType_Object, KMethodName_("getTypeId"), 0,
+		_Public|_Hidden|_Im|_Const|_Final, _F(Object_instanceOf), KType_boolean, KType_Object, KMethodName_("<:"), 1, KType_Object, KFieldName_("type"),
+		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn|_Final, _F(Object_as), KType_Object, KType_Object, KMethodName_("as"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -85,7 +85,7 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 			KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_boolean, staticSubType));
 		}
 		kNameSpace *ns = Stmt_ns(stmt);
-		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, MN_("<:"), 1, KMethodMatch_NoOption);
+		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, KMethodName_("<:"), 1, KMethodMatch_NoOption);
 		DBG_ASSERT(mtd != NULL);
 		KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
 		kExpr *classValue = SUGAR kExpr_SetConstValue(kctx, expr->cons->ExprVarItems[2], NULL, KLIB Knull(kctx, targetClass));
@@ -106,7 +106,7 @@ static KMETHOD TypeCheck_as(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		if(selfClass->isSubType(kctx, targetClass, selfClass)) {
 			kNameSpace *ns = Stmt_ns(stmt);
-			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, MN_("as"), 0, KMethodMatch_CamelStyle);
+			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, KMethodName_("as"), 0, KMethodMatch_CamelStyle);
 			DBG_ASSERT(mtd != NULL);
 			KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, targetClass));
 		}
@@ -128,7 +128,7 @@ static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 		kNameSpace *ns = Stmt_ns(stmt);
 		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, selfClass, targetClass);
 		if(mtd == NULL) {
-			mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, selfClass, MN_("to"), 0, KMethodMatch_CamelStyle);
+			mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, selfClass, KMethodName_("to"), 0, KMethodMatch_CamelStyle);
 			DBG_ASSERT(mtd != NULL);  // because Object.to is found.
 			if(mtd->typeId != selfClass->typeId) {
 				KReturn(kStmtExpr_Message(kctx, stmt, selfExpr, ErrTag, "undefined coercion: %s to %s", KClass_text(selfClass), KClass_text(targetClass)));
@@ -142,9 +142,9 @@ static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t subtype_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("<:"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_InstanceOf, },
-		{ SYM_("as"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_as},
-		{ SYM_("to"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_to},
+		{ KSymbol_("<:"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_InstanceOf, },
+		{ KSymbol_("as"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_as},
+		{ KSymbol_("to"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_to},
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
@@ -160,7 +160,7 @@ static kbool_t object_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		{"Object", VirtualType_KClass, (uintptr_t)KClass_(KType_Object)},
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(ClassData), false/*isOverride*/, trace);
 	object_defineMethod(kctx, ns, trace);
 	subtype_defineSyntax(kctx, ns, trace);
 	return true;

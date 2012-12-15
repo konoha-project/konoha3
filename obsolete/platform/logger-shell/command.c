@@ -320,7 +320,7 @@ static void CommandLine_setARGV(KonohaContext *kctx, int argc, char** argv)
 			{"SCRIPT_ARGV", KClass_StringArray0->typeId, (kObject*)a},
 			{}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(ObjectData), 0);
+	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(ObjectData), 0);
 	RESET_GCSTACK();
 }
 

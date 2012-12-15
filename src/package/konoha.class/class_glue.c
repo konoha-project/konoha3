@@ -48,7 +48,7 @@ static KMETHOD NameSpace_AllowImplicitField(KonohaContext *kctx, KonohaStack *sf
 static void class_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Ignored, _F(NameSpace_AllowImplicitField), KType_void, KType_NameSpace, MN_("AllowImplicitField"), 1, KType_boolean, FN_("allow"),
+		_Public|_Const|_Ignored, _F(NameSpace_AllowImplicitField), KType_void, KType_NameSpace, KMethodName_("AllowImplicitField"), 1, KType_boolean, KFieldName_("allow"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -133,11 +133,11 @@ static kshortflag_t kStmt_ParseClassFlag(KonohaContext *kctx, kStmt *stmt, kshor
 		{KClassFlag_Prototype}, {KClassFlag_Interface},
 	};
 	if(ClassDeclFlag[0].symbol == 0) {   // this is a tricky technique
-		ClassDeclFlag[0].symbol = SYM_("@Private");
-		ClassDeclFlag[1].symbol = SYM_("@Singleton");
-		ClassDeclFlag[2].symbol = SYM_("@Immutable");
-		ClassDeclFlag[3].symbol = SYM_("@Prototype");
-		ClassDeclFlag[4].symbol = SYM_("@Interface");
+		ClassDeclFlag[0].symbol = KSymbol_("@Private");
+		ClassDeclFlag[1].symbol = KSymbol_("@Singleton");
+		ClassDeclFlag[2].symbol = KSymbol_("@Immutable");
+		ClassDeclFlag[3].symbol = KSymbol_("@Prototype");
+		ClassDeclFlag[4].symbol = KSymbol_("@Interface");
 	}
 	return (kshortflag_t)SUGAR kStmt_ParseFlag(kctx, stmt, ClassDeclFlag, cflag);
 }
@@ -156,7 +156,7 @@ static KClassVar* kNameSpace_DefineClassName(KonohaContext *kctx, kNameSpace *ns
 		{kString_text(name), VirtualType_KClass, definedClass},
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(ClassData), false/*isOverride*/, trace);
 	return definedClass;
 }
 
@@ -242,7 +242,7 @@ static kbool_t kStmt_AddClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma
 {
 	if(Expr_isTerm(expr)) {  // String name
 		kString *name = expr->termToken->text;
-		ksymbol_t symbol = ksymbolA(kString_text(name), kString_size(name), KSymbol_NewId);
+		ksymbol_t symbol = KAsciiSymbol(kString_text(name), kString_size(name), KSymbol_NewId);
 		KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 		return true;
 	}
@@ -250,7 +250,7 @@ static kbool_t kStmt_AddClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma
 		kExpr *lexpr = kExpr_at(expr, 1);
 		if(Expr_isTerm(lexpr)) {
 			kString *name = lexpr->termToken->text;
-			ksymbol_t symbol = ksymbolA(kString_text(name), kString_size(name), KSymbol_NewId);
+			ksymbol_t symbol = KAsciiSymbol(kString_text(name), kString_size(name), KSymbol_NewId);
 			kExpr *vexpr =  SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, KClass_(ty), 0);
 			if(vexpr == K_NULLEXPR) return false;
 			if(vexpr->build == TEXPR_CONST) {
@@ -307,7 +307,7 @@ static void kBlock_AddMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *to
 			if(stmt->syn->keyword == KSymbol_TypeDeclPattern) continue;
 			if(stmt->syn->keyword == KSymbol_MethodDeclPattern) {
 				kStmt *lastStmt = classStmt;
-				KLIB kObjectProto_SetObject(kctx, stmt, SYM_("ClassName"), KType_Token, tokenClassName);
+				KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_("ClassName"), KType_Token, tokenClassName);
 				SUGAR kBlock_InsertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, stmt);
 				lastStmt = stmt;
 			}
@@ -326,7 +326,7 @@ static inline size_t initFieldSizeOfVirtualClass(KClass *superClass)
 static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
-	kToken *tokenClassName = SUGAR kStmt_GetToken(kctx, stmt, SYM_("$ClassName"), NULL);
+	kToken *tokenClassName = SUGAR kStmt_GetToken(kctx, stmt, KSymbol_("$ClassName"), NULL);
 	kNameSpace *ns = Stmt_ns(stmt);
 	int isNewlyDefinedClass = false;
 	KClassVar *definedClass = (KClassVar *)KLIB kNameSpace_GetClassByFullName(kctx, ns, kString_text(tokenClassName->text), kString_size(tokenClassName->text), NULL);
@@ -340,7 +340,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	size_t declsize = kBlock_countFieldSize(kctx, bk);
 	if(isNewlyDefinedClass) {   // Already defined
 		KClass *superClass = KClass_Object;
-		kToken *tokenSuperClass= SUGAR kStmt_GetToken(kctx, stmt, SYM_("extends"), NULL);
+		kToken *tokenSuperClass= SUGAR kStmt_GetToken(kctx, stmt, KSymbol_("extends"), NULL);
 		if(tokenSuperClass != NULL) {
 			DBG_ASSERT(Token_isVirtualTypeLiteral(tokenSuperClass));
 			superClass = KClass_(Token_typeLiteral(tokenSuperClass));
@@ -391,8 +391,8 @@ static KMETHOD PatternMatch_ClassName(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t class_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("$ClassName"), 0, NULL, 0, 0, PatternMatch_ClassName, NULL, NULL, NULL, NULL, },
-		{ SYM_("class"), 0, "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", 0, 0, NULL, NULL, Statement_class, NULL, NULL, },
+		{ KSymbol_("$ClassName"), 0, NULL, 0, 0, PatternMatch_ClassName, NULL, NULL, NULL, NULL, },
+		{ KSymbol_("class"), 0, "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", 0, 0, NULL, NULL, Statement_class, NULL, NULL, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

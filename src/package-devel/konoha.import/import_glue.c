@@ -51,7 +51,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 	KSyntaxVar *syn = (KSyntaxVar *) SYN_(ns, KSymbol_ExprMethodCall);
 	kExpr *expr;
 	kTokenVar *tkImport = /*G*/new_(TokenVar, 0, OnGcStack);
-	tkImport->resolvedSymbol = MN_("import");
+	tkImport->resolvedSymbol = KMethodName_("import");
 	if(IS_Token(tokenList)) {
 		kTokenArray *list = ((kToken *) tokenList)->subTokenList;
 		if(IS_String(list)) {
@@ -79,7 +79,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 		KBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		/* case : import konoha.import */
-		ksymbol_t star = SYM_("*");
+		ksymbol_t star = KSymbol_("*");
 		size_t i = 0;
 		if(i + 2 < kArray_size(tokenList)) {
 			for (; i < kArray_size(tokenList)-1; i+=2) {
@@ -114,7 +114,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t import_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("import"), 0, "\"import\" $Token $Token* [ \".*\"] ", 0, 0, NULL, NULL, Statement_import, NULL, NULL, },
+		{ KSymbol_("import"), 0, "\"import\" $Token $Token* [ \".*\"] ", 0, 0, NULL, NULL, Statement_import, NULL, NULL, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

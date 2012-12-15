@@ -163,7 +163,7 @@ static void PushBoxedValue(KonohaContext *kctx, SValue Val)
 static void RaiseError(KonohaContext *kctx, KonohaStack *sfp, kString *ErrorInfo, kfileline_t uline)
 {
 	sfp[K_RTNIDX].calledFileLine = uline;
-	KLIB KRuntime_raise(kctx, EXPT_("RuntimeScript"), SoftwareFault, ErrorInfo, sfp);
+	KLIB KRuntime_raise(kctx, KException_("RuntimeScript"), SoftwareFault, ErrorInfo, sfp);
 }
 
 #define CompileTimeAssert(...)

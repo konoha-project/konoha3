@@ -107,7 +107,7 @@ static KMETHOD Prototype_setInt(KonohaContext *kctx, KonohaStack *sfp)
 
 static void ThrowTypeError(KonohaContext *kctx, KonohaStack *sfp, int argc)
 {
-	KLIB KRuntime_raise(kctx, EXPT_("TypeError"), SoftwareFault, NULL, sfp);
+	KLIB KRuntime_raise(kctx, KException_("TypeError"), SoftwareFault, NULL, sfp);
 }
 
 static void KStackDynamicTypeCheck(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd, KClass *thisClass)
@@ -170,11 +170,11 @@ static KMETHOD Prototype_(KonohaContext *kctx, KonohaStack *sfp)
 
 static void prototype_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	int FN_key = FN_("key"), FN_value = FN_("value");
+	int FN_key = KFieldName_("key"), FN_value = KFieldName_("value");
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im|_Const|kMethod_SmartReturn|_Final, _F(Prototype_get), KType_Object, KType_Prototype, MN_("get"), 1, KType_Symbol, FN_key,
-		_Public|_Final, _F(Prototype_setObject), KType_void, KType_Prototype, MN_("set"), 2, KType_Symbol, FN_key, KType_Object, FN_value,
-		_Public|_Final, _F(Prototype_setInt), KType_void, KType_Prototype, MN_("set"), 2, KType_Symbol, FN_key, KType_int, FN_value,
+		_Public|_Im|_Const|kMethod_SmartReturn|_Final, _F(Prototype_get), KType_Object, KType_Prototype, KMethodName_("get"), 1, KType_Symbol, FN_key,
+		_Public|_Final, _F(Prototype_setObject), KType_void, KType_Prototype, KMethodName_("set"), 2, KType_Symbol, FN_key, KType_Object, FN_value,
+		_Public|_Final, _F(Prototype_setInt), KType_void, KType_Prototype, KMethodName_("set"), 2, KType_Symbol, FN_key, KType_int, FN_value,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

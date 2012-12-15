@@ -70,7 +70,7 @@ static kMethod *new_FieldSetter(KonohaContext *kctx, kArray *gcstack, ktypeattr_
 {
 	kmethodn_t mn = MethodName_ToSetter(sym);
 	KMethodFunc f = (KType_Is(UnboxType, ty)) ? KMethodFunc_UnboxFieldSetter : KMethodFunc_ObjectFieldSetter;
-	kparamtype_t p = {ty, FN_("x")};
+	kparamtype_t p = {ty, KFieldName_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public, cid, mn, f);
 	KLIB kMethod_SetParam(kctx, mtd, ty, 1, &p);
 	((kMethodVar *)mtd)->delta = idx;   // FIXME
@@ -132,7 +132,7 @@ static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, ktypea
 {
 	kmethodn_t mn = MethodName_ToSetter(sym);
 	KMethodFunc f = (KType_Is(UnboxType, ty)) ? KMethodFunc_UnboxPrototypeSetter : KMethodFunc_ObjectPrototypeSetter;
-	kparamtype_t p = {ty, FN_("x")};
+	kparamtype_t p = {ty, KFieldName_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public, cid, mn, f);
 	KLIB kMethod_SetParam(kctx, mtd, ty, 1, &p);
 	((kMethodVar *)mtd)->delta = sym;
@@ -214,7 +214,7 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t field_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("."), 0, NULL, -1, 0, NULL, NULL, NULL, NULL, TypeCheck_Getter, },
+		{ KSymbol_("."), 0, NULL, -1, 0, NULL, NULL, NULL, NULL, TypeCheck_Getter, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

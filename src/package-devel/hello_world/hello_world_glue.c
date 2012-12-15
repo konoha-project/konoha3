@@ -120,11 +120,11 @@ static kbool_t HelloWorld_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, i
 
 	/* You can define methods with the following procedures. */
 	int KType_Person = PersonClass->typeId;
-	int FN_x = FN_("x");
-	int FN_y = FN_("y");
+	int FN_x = KFieldName_("x");
+	int FN_y = KFieldName_("y");
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Person_new), KType_Person, KType_Person, MN_("new"), 2, KType_String, FN_x, KType_int, FN_y,
-		_Public, _F(Person_say), KType_String, KType_Person, MN_("say"), 0,
+		_Public, _F(Person_new), KType_Person, KType_Person, KMethodName_("new"), 2, KType_String, FN_x, KType_int, FN_y,
+		_Public, _F(Person_say), KType_String, KType_Person, KMethodName_("say"), 0,
 		DEND, /* <= sentinel */
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -134,7 +134,7 @@ static kbool_t HelloWorld_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, i
 		{"NARUTO_AGE", KType_int, 18},
 		{} /* <= sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
 	return true;
 }
 

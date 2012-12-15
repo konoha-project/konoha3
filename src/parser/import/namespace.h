@@ -406,11 +406,11 @@ static KClass *kNameSpace_GetClassByFullName(KonohaContext *kctx, kNameSpace *ns
 	ksymbol_t  un = KSymbol_Noname;
 	const char *p = strrchr(name, '.');
 	if(p == NULL) {
-		un = ksymbolA(name, len, KSymbol_Noname);
+		un = KAsciiSymbol(name, len, KSymbol_Noname);
 	}
 	else {
 		size_t plen = p - name;
-		un = ksymbolA(name + (plen+1), len - (plen+1), KSymbol_Noname);
+		un = KAsciiSymbol(name + (plen+1), len - (plen+1), KSymbol_Noname);
 		packageId = KLIB KpackageId(kctx, name, plen, 0, KSymbol_Noname);
 	}
 	if(packageId != KSymbol_Noname) {

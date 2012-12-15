@@ -506,7 +506,7 @@ static int TokenSeq_Preprocess(KonohaContext *kctx, TokenSeq *tokens, MacroSet *
 			}
 			if(tk->unresolvedTokenType == TokenType_SYMBOL) {
 				const char *t = kString_text(tk->text);
-				ksymbol_t symbol = ksymbolA(t, kString_size(tk->text), KSymbol_NewId);
+				ksymbol_t symbol = KAsciiSymbol(t, kString_size(tk->text), KSymbol_NewId);
 				if(macroParam != NULL && TokenSeq_ExpandMacro(kctx, tokens, symbol, macroParam)) {
 					continue;
 				}
@@ -947,7 +947,7 @@ static kbool_t kArray_AddSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 				i = TokenSeq_NestedSyntaxPattern(kctx, patterns, i, KSymbol_BracketGroup, ']');
 			}
 			else {
-				tk->resolvedSymbol = ksymbolA(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId);
+				tk->resolvedSymbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId);
 			}
 			continue;
 		}
@@ -963,7 +963,7 @@ static kbool_t kArray_AddSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 		if(tk->hintChar == '$' && i+1 < patterns->endIdx) {  // $PatternName
 			tk = patterns->tokenList->TokenVarItems[++i];
 			if(IS_String(tk->text)) {
-				tk->resolvedSymbol = ksymbolA(kString_text(tk->text), kString_size(tk->text), KSymbol_NewRaw) | SymbolAttr_Pattern;
+				tk->resolvedSymbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewRaw) | SymbolAttr_Pattern;
 				if(stmtEntryKey == 0) stmtEntryKey = tk->resolvedSymbol;
 				tk->stmtEntryKey = stmtEntryKey;
 				tk->resolvedSyntaxInfo = SYN_(patterns->ns, tk->resolvedSymbol/*KSymbol_SymbolPattern*/);
@@ -973,7 +973,7 @@ static kbool_t kArray_AddSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 			}
 		}
 		if(i + 1 < patterns->endIdx && patterns->tokenList->TokenItems[i+1]->hintChar == ':' && IS_String(tk->text)) {
-			stmtEntryKey = ksymbolA(kString_text(tk->text), kString_size(tk->text), KSymbol_NewRaw);
+			stmtEntryKey = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewRaw);
 			i++;
 			continue;
 		}

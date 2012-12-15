@@ -506,7 +506,7 @@ static kbool_t python_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		_Public|_Const|_Im|_Coercion, _F(Int_toPyObject), KType_PyObject, KType_int, MethodName_To(KType_PyObject), 0,
 		_Public|_Const|_Im|_Coercion, _F(PyObject_toString), KType_String, KType_PyObject, MethodName_To(KType_String), 0,
 		_Public|_Const|_Im|_Coercion, _F(String_toPyObject), KType_PyObject, KType_String, MethodName_To(KType_PyObject), 0,
-		//_Public,                      _F(Array_Add), KType_void, KType_Array, MN_("add"), 1, KType_0, FN_("value"),
+		//_Public,                      _F(Array_Add), KType_void, KType_Array, KMethodName_("add"), 1, KType_0, KFieldName_("value"),
 		// [TODO] add following konoha class.
 		//_Public|_Const|_Im|_Coercion, _F(PyObject_toList), KType_Array, KType_PyObject, MethodName_To(KType_Array), 0,
 		//_Public|_Const|_Im|_Coercion, _F(Array_toPyObject), KType_PyObject, KType_Array, MethodName_To(KType_PyObject), 0,
@@ -546,8 +546,8 @@ static kbool_t python_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		//_Public|_Const|_Im|_Coercion, _F(PyObject_toSet), KType_Set, KType_PyObject, MethodName_To(KType_Set), 0,
 		//_Public|_Const|_Im|_Coercion, _F(Code_toPyObject), KType_PyObject, KType_Code, MethodName_To(KType_PyObject), 0,
 		//_Public|_Const|_Im|_Coercion, _F(PyObject_toCode), KType_Code, KType_PyObject, MethodName_To(KType_Code), 0,
-		_Public|_Im, _F(Python_Eval), KType_boolean, KType_System, FN_("pyEval"), 1, KType_String, FN_("script"),
-		_Public|_Im, _F(PyObject_import), KType_PyObject, KType_PyObject, FN_("import"), 1, KType_String, FN_("name"),
+		_Public|_Im, _F(Python_Eval), KType_boolean, KType_System, KFieldName_("pyEval"), 1, KType_String, KFieldName_("script"),
+		_Public|_Im, _F(PyObject_import), KType_PyObject, KType_PyObject, KFieldName_("import"), 1, KType_String, KFieldName_("name"),
 		_Public|_Im, _F(PyObject_), KType_PyObject, KType_PyObject, 0, 1, KType_PyObject, 0,
 		DEND,
 	};

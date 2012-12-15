@@ -3282,14 +3282,14 @@ static KMETHOD KvirNodeSetMemoryParameters(KonohaContext *kctx,  KonohaStack *sf
 static kbool_t PACKAGE_INIT_PKG(LIBVIRT_PACKAGE_NAME)(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	virt_loadStructData(kctx, ns, trace);
-	int FN_0 = FN_("arg0");
-	int FN_1 = FN_("arg1");
-	int FN_2 = FN_("arg2");
-	int FN_3 = FN_("arg3");
-	int FN_4 = FN_("arg4");
-	int FN_5 = FN_("arg5");
-	int FN_6 = FN_("arg6");
-	int FN_7 = FN_("arg7");
+	int FN_0 = KFieldName_("arg0");
+	int FN_1 = KFieldName_("arg1");
+	int FN_2 = KFieldName_("arg2");
+	int FN_3 = KFieldName_("arg3");
+	int FN_4 = KFieldName_("arg4");
+	int FN_5 = KFieldName_("arg5");
+	int FN_6 = KFieldName_("arg6");
+	int FN_7 = KFieldName_("arg7");
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(KvirDomainGetSchedulerParameters), KType_int, 3, KType_virDomainPtr, FN_0, KType_virTypedParameterPtr, FN_1,KType_intPtr, FN_2,
 		_Public, _F(KvirDomainGetSchedulerParametersFlags), KType_int, 4, KType_virDomainPtr, FN_0, KType_virTypedParameterPtr, FN_1,KType_intPtr, FN_2,KType_unsigned_int, FN_3,
@@ -3649,7 +3649,7 @@ static kbool_t PACKAGE_INIT_PKG(LIBVIRT_PACKAGE_NAME)(KonohaContext *kctx, kName
 		{"VIR_DOMAIN_REBOOT_GUEST_AGENT", KType_int, VIR_DOMAIN_REBOOT_GUEST_AGENT},
 		{} /* <= sentinel */
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), trace);
+	KLIB kNameSpace_loadConstData(kctx, ns, KConst_(IntData), trace);
 
 	return true;
 }

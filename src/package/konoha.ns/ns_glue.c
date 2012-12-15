@@ -32,9 +32,9 @@ extern "C" {
 #endif
 
 #include<minikonoha/import/methoddecl.h>
-#define TP_name         KType_String,     FN_("name")
-#define TP_paramsize    KType_int,        FN_("paramsize")
-#define TP_source       KType_String,     FN_("source")
+#define TP_name         KType_String,     KFieldName_("name")
+#define TP_paramsize    KType_int,        KFieldName_("paramsize")
+#define TP_source       KType_String,     KFieldName_("source")
 
 //## NameSpace NameSpace.GetNameSpace();
 static KMETHOD NameSpace_GetNameSpace(KonohaContext *kctx, KonohaStack *sfp)
@@ -55,7 +55,7 @@ static KMETHOD NameSpace_GetParentNameSpace(KonohaContext *kctx, KonohaStack *sf
 //## boolean NameSpace.DefineMacro(String symbol, String source);
 static KMETHOD NameSpace_DefineMacro2(KonohaContext *kctx, KonohaStack *sfp)
 {
-	ksymbol_t keyword = ksymbolA(kString_text(sfp[1].asString), kString_size(sfp[1].asString), _NEWID);
+	ksymbol_t keyword = KAsciiSymbol(kString_text(sfp[1].asString), kString_size(sfp[1].asString), _NEWID);
 	kString *source = sfp[2].asString;
 	KReturnUnboxValue(SUGAR kNameSpace_SetMacroData(kctx, sfp[0].asNameSpace, keyword, 0, kString_text(source), true));
 }
@@ -63,7 +63,7 @@ static KMETHOD NameSpace_DefineMacro2(KonohaContext *kctx, KonohaStack *sfp)
 //## boolean NameSpace.DefineMacro(String symbol, int param, String source);
 static KMETHOD NameSpace_DefineMacro(KonohaContext *kctx, KonohaStack *sfp)
 {
-	ksymbol_t keyword = ksymbolA(kString_text(sfp[1].asString), kString_size(sfp[1].asString), _NEWID);
+	ksymbol_t keyword = KAsciiSymbol(kString_text(sfp[1].asString), kString_size(sfp[1].asString), _NEWID);
 	int paramsize = (int)sfp[2].intValue;
 	kString *source = sfp[3].asString;
 	KReturnUnboxValue(SUGAR kNameSpace_SetMacroData(kctx, sfp[0].asNameSpace, keyword, paramsize, kString_text(source), true));
@@ -72,10 +72,10 @@ static KMETHOD NameSpace_DefineMacro(KonohaContext *kctx, KonohaStack *sfp)
 static void namespace_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(NameSpace_GetNameSpace), KType_NameSpace, KType_NameSpace, MN_("GetNameSpace"), 0,
-		_Public|_Const|_Im, _F(NameSpace_GetParentNameSpace), KType_NameSpace, KType_NameSpace, MN_("GetParentNameSpace"), 0,
-		_Public, _F(NameSpace_DefineMacro2), KType_boolean, KType_NameSpace, MN_("DefineMacro"), 2, TP_name, TP_source,
-		_Public, _F(NameSpace_DefineMacro), KType_boolean, KType_NameSpace, MN_("DefineMacro"), 3, TP_name, TP_paramsize, TP_source,
+		_Public|_Const|_Im, _F(NameSpace_GetNameSpace), KType_NameSpace, KType_NameSpace, KMethodName_("GetNameSpace"), 0,
+		_Public|_Const|_Im, _F(NameSpace_GetParentNameSpace), KType_NameSpace, KType_NameSpace, KMethodName_("GetParentNameSpace"), 0,
+		_Public, _F(NameSpace_DefineMacro2), KType_boolean, KType_NameSpace, KMethodName_("DefineMacro"), 2, TP_name, TP_source,
+		_Public, _F(NameSpace_DefineMacro), KType_boolean, KType_NameSpace, KMethodName_("DefineMacro"), 3, TP_name, TP_paramsize, TP_source,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -84,7 +84,7 @@ static void namespace_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 //		{"INT_MIN", KType_int, KINT_MIN},
 //		{NULL},
 //	};
-//	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), false/*isOverride*/, trace);
+//	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
 }
 
 
@@ -206,9 +206,9 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("namespace"), 0, "\"namespace\" $Block", 0, 0, NULL, NULL, Statement_namespace, NULL, NULL, },
-		{ SYM_("const"), 0, "\"const\" $Symbol \"=\" $Expr", 0, 0, NULL, NULL, Statement_ConstDecl, NULL, NULL, },
-		{ SYM_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Expression_Defined, NULL, NULL, TypeCheck_Defined, },
+		{ KSymbol_("namespace"), 0, "\"namespace\" $Block", 0, 0, NULL, NULL, Statement_namespace, NULL, NULL, },
+		{ KSymbol_("const"), 0, "\"const\" $Symbol \"=\" $Expr", 0, 0, NULL, NULL, Statement_ConstDecl, NULL, NULL, },
+		{ KSymbol_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Expression_Defined, NULL, NULL, TypeCheck_Defined, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

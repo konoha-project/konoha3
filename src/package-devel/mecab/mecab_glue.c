@@ -349,33 +349,33 @@ static kbool_t mecab_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 	KClass *cMecabNode = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MecabNodeDef, trace);
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const, _F(Tagger_new),         KType_Tagger,  KType_Tagger, MN_("new"),   0,
-		_Public|_Const, _F(Tagger_Parse),       KType_String,  KType_Tagger, MN_("parse"), 1, KType_String, FN_("input"),
-		_Public|_Const, _F(Tagger_NBestParse),  KType_String,  KType_Tagger, MN_("NBestParse"), 2, KType_int, FN_("n"), KType_String, FN_("input"),
-		_Public|_Const, _F(Tagger_NBestInit),   KType_String,  KType_Tagger, MN_("NBestInit"), 1, KType_String, FN_("input"),
-		_Public|_Const, _F(Tagger_NBestNext),   KType_String,  KType_Tagger, MN_("NBestNext"), 0,
-		_Public|_Const, _F(Tagger_ParseToNode), KType_MecabNode,  KType_Tagger, MN_("parseToNode"), 1, KType_String, FN_("input"),
-		_Public|_Const, _F(Tagger_destroy),     KType_void,    KType_Tagger, MN_("destroy"), 0,
+		_Public|_Const, _F(Tagger_new),         KType_Tagger,  KType_Tagger, KMethodName_("new"),   0,
+		_Public|_Const, _F(Tagger_Parse),       KType_String,  KType_Tagger, KMethodName_("parse"), 1, KType_String, KFieldName_("input"),
+		_Public|_Const, _F(Tagger_NBestParse),  KType_String,  KType_Tagger, KMethodName_("NBestParse"), 2, KType_int, KFieldName_("n"), KType_String, KFieldName_("input"),
+		_Public|_Const, _F(Tagger_NBestInit),   KType_String,  KType_Tagger, KMethodName_("NBestInit"), 1, KType_String, KFieldName_("input"),
+		_Public|_Const, _F(Tagger_NBestNext),   KType_String,  KType_Tagger, KMethodName_("NBestNext"), 0,
+		_Public|_Const, _F(Tagger_ParseToNode), KType_MecabNode,  KType_Tagger, KMethodName_("parseToNode"), 1, KType_String, KFieldName_("input"),
+		_Public|_Const, _F(Tagger_destroy),     KType_void,    KType_Tagger, KMethodName_("destroy"), 0,
 
-		_Public|_Const, _F(MecabNode_next),        KType_MecabNode,  KType_MecabNode, MN_("next"), 0,
-		_Public|_Const, _F(MecabNode_prev),        KType_MecabNode,  KType_MecabNode, MN_("prev"), 0,
-		_Public|_Const, _F(MecabNode_enext),       KType_MecabNode,  KType_MecabNode, MN_("enext"), 0,
-		_Public|_Const, _F(MecabNode_bnext),       KType_MecabNode,  KType_MecabNode, MN_("bnext"), 0,
-		_Public|_Const, _F(MecabNode_getSurface),  KType_String,  KType_MecabNode, MN_("getSurface"), 0,
-		_Public|_Const, _F(MecabNode_getFeature),  KType_String,  KType_MecabNode, MN_("getFeature"), 0,
-		_Public|_Const, _F(MecabNode_getLength),   KType_int,  KType_MecabNode, MN_("getLength"), 0,
-		_Public|_Const, _F(MecabNode_getRLength),  KType_int,  KType_MecabNode, MN_("getRLength"), 0,
-		_Public|_Const, _F(MecabNode_getRCAttr),   KType_int,  KType_MecabNode, MN_("getRCAttr"), 0,
-		_Public|_Const, _F(MecabNode_getLCAttr),   KType_int,  KType_MecabNode, MN_("getLCAttr"), 0,
-		_Public|_Const, _F(MecabNode_getCharType), KType_int,  KType_MecabNode, MN_("getCharType"), 0,
-		_Public|_Const, _F(MecabNode_getStat),     KType_int,  KType_MecabNode, MN_("getStat"), 0,
-		_Public|_Const, _F(MecabNode_getID),       KType_int,  KType_MecabNode, MN_("getID"), 0,
-		_Public|_Const, _F(MecabNode_isBest),      KType_boolean,  KType_MecabNode, MN_("isBest"), 0,
-		//_Public|_Const, _F(MecabNode_alpha),       KType_Float,  KType_MecabNode, MN_("alpha"), 0,
-		//_Public|_Const, _F(MecabNode_beta),        KType_Float,  KType_MecabNode, MN_("beta"), 0,
-		//_Public|_Const, _F(MecabNode_prob),        KType_Float,  KType_MecabNode, MN_("prob"), 0,
-		_Public|_Const, _F(MecabNode_wcost),       KType_int,  KType_MecabNode, MN_("wcost"), 0,
-		_Public|_Const, _F(MecabNode_cost),        KType_int,  KType_MecabNode, MN_("cost"), 0,
+		_Public|_Const, _F(MecabNode_next),        KType_MecabNode,  KType_MecabNode, KMethodName_("next"), 0,
+		_Public|_Const, _F(MecabNode_prev),        KType_MecabNode,  KType_MecabNode, KMethodName_("prev"), 0,
+		_Public|_Const, _F(MecabNode_enext),       KType_MecabNode,  KType_MecabNode, KMethodName_("enext"), 0,
+		_Public|_Const, _F(MecabNode_bnext),       KType_MecabNode,  KType_MecabNode, KMethodName_("bnext"), 0,
+		_Public|_Const, _F(MecabNode_getSurface),  KType_String,  KType_MecabNode, KMethodName_("getSurface"), 0,
+		_Public|_Const, _F(MecabNode_getFeature),  KType_String,  KType_MecabNode, KMethodName_("getFeature"), 0,
+		_Public|_Const, _F(MecabNode_getLength),   KType_int,  KType_MecabNode, KMethodName_("getLength"), 0,
+		_Public|_Const, _F(MecabNode_getRLength),  KType_int,  KType_MecabNode, KMethodName_("getRLength"), 0,
+		_Public|_Const, _F(MecabNode_getRCAttr),   KType_int,  KType_MecabNode, KMethodName_("getRCAttr"), 0,
+		_Public|_Const, _F(MecabNode_getLCAttr),   KType_int,  KType_MecabNode, KMethodName_("getLCAttr"), 0,
+		_Public|_Const, _F(MecabNode_getCharType), KType_int,  KType_MecabNode, KMethodName_("getCharType"), 0,
+		_Public|_Const, _F(MecabNode_getStat),     KType_int,  KType_MecabNode, KMethodName_("getStat"), 0,
+		_Public|_Const, _F(MecabNode_getID),       KType_int,  KType_MecabNode, KMethodName_("getID"), 0,
+		_Public|_Const, _F(MecabNode_isBest),      KType_boolean,  KType_MecabNode, KMethodName_("isBest"), 0,
+		//_Public|_Const, _F(MecabNode_alpha),       KType_Float,  KType_MecabNode, KMethodName_("alpha"), 0,
+		//_Public|_Const, _F(MecabNode_beta),        KType_Float,  KType_MecabNode, KMethodName_("beta"), 0,
+		//_Public|_Const, _F(MecabNode_prob),        KType_Float,  KType_MecabNode, KMethodName_("prob"), 0,
+		_Public|_Const, _F(MecabNode_wcost),       KType_int,  KType_MecabNode, KMethodName_("wcost"), 0,
+		_Public|_Const, _F(MecabNode_cost),        KType_int,  KType_MecabNode, KMethodName_("cost"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -387,7 +387,7 @@ static kbool_t mecab_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 			{KDefineConstInt(MECAB_EOS_NODE)},
 			{}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
 	return true;
 }
 

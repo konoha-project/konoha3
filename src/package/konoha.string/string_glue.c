@@ -197,7 +197,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 	}
 	expr = (kExprVar *) SUGAR kExpr_SetConstValue(kctx, expr, NULL, UPCAST(text));
 	kNameSpace *ns = Stmt_ns(stmt);
-	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_String, MN_("+"), 1, KMethodMatch_NoOption);
+	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_String, KMethodName_("+"), 1, KMethodMatch_NoOption);
 
 	expr = (kExprVar *) new_ConstValueExpr(kctx, NULL, UPCAST(TS_EMPTY));
 	while(true) {
@@ -259,8 +259,8 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 static kbool_t string_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	LoadRopeMethod(kctx, ns, trace);
-	int FN_s = FN_("s");
-	int FN_n = FN_("n");
+	int FN_s = KFieldName_("s");
+	int FN_n = KFieldName_("n");
 
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ KSymbol_TextPattern, 0,  NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_ExtendedTextLiteral, },
@@ -269,15 +269,15 @@ static kbool_t string_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 
 	KDEFINE_METHOD MethodData[] = {
-		_JS|_Public|_Const|_Im, _F(String_opLT),  KType_boolean, KType_String, MN_("<"),  1, KType_String, FN_s,
-		_JS|_Public|_Const|_Im, _F(String_opLTE),  KType_boolean, KType_String, MN_("<="),  1, KType_String, FN_s,
-		_JS|_Public|_Const|_Im, _F(String_opGT),  KType_boolean, KType_String, MN_(">"),  1, KType_String, FN_s,
-		_JS|_Public|_Const|_Im, _F(String_opGTE),  KType_boolean, KType_String, MN_(">="),  1, KType_String, FN_s,
-		_JS|_Public|_Const|_Im, _F(KString_length), KType_int, KType_String, MN_("getlength"), 0,
-		_JS|_Public|_Const|_Im, _F(String_get), KType_String, KType_String, MN_("charAt"), 1, KType_int, FN_n,
-		_JS|_Public|_Static|_Const|_Im, _F(String_fromCharCode), KType_String, KType_String, MN_("fromCharCode"), 1, KType_int, FN_n,
-		_JS|_Public|_Const|_Im|kMethod_Override, _F(String_get),        KType_String, KType_String, MN_("get"), 1, KType_int, FN_n,  /* [c] */
-		_JS|_Public|_Const|_Im, _F(KString_charAt), KType_int, KType_String, MN_("charCodeAt"), 1, KType_int, FN_n,
+		_JS|_Public|_Const|_Im, _F(String_opLT),  KType_boolean, KType_String, KMethodName_("<"),  1, KType_String, FN_s,
+		_JS|_Public|_Const|_Im, _F(String_opLTE),  KType_boolean, KType_String, KMethodName_("<="),  1, KType_String, FN_s,
+		_JS|_Public|_Const|_Im, _F(String_opGT),  KType_boolean, KType_String, KMethodName_(">"),  1, KType_String, FN_s,
+		_JS|_Public|_Const|_Im, _F(String_opGTE),  KType_boolean, KType_String, KMethodName_(">="),  1, KType_String, FN_s,
+		_JS|_Public|_Const|_Im, _F(KString_length), KType_int, KType_String, KMethodName_("getlength"), 0,
+		_JS|_Public|_Const|_Im, _F(String_get), KType_String, KType_String, KMethodName_("charAt"), 1, KType_int, FN_n,
+		_JS|_Public|_Static|_Const|_Im, _F(String_fromCharCode), KType_String, KType_String, KMethodName_("fromCharCode"), 1, KType_int, FN_n,
+		_JS|_Public|_Const|_Im|kMethod_Override, _F(String_get),        KType_String, KType_String, KMethodName_("get"), 1, KType_int, FN_n,  /* [c] */
+		_JS|_Public|_Const|_Im, _F(KString_charAt), KType_int, KType_String, KMethodName_("charCodeAt"), 1, KType_int, FN_n,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

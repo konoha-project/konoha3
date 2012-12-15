@@ -103,12 +103,12 @@ static kbool_t console_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	int KType_Console = cConsole->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static, _F(Console_notify), KType_void, KType_Console, MN_("notify"), 1, KType_String, FN_("message"),
-		_Public|_Static, _F(Console_readLine), KType_String, KType_Console, MN_("readLine"), 1, KType_String, FN_("message"),
-		_Public|_Static, _F(Console_inputUserApproval), KType_boolean, KType_Console, MN_("inputUserApproval"), 4,
-		    KType_String, FN_("message"), KType_String, FN_("yes"), KType_String, FN_("no"), KType_boolean, FN_("defval"),
-		_Public|_Static, _F(Console_inputUserPassword), KType_String, KType_Console, MN_("inputUserPassword"), 1, KType_String, FN_("message"),
-		_Public|_Static, _F(Console_inputUserPassword0), KType_String, KType_Console, MN_("inputUserPassword"), 0,
+		_Public|_Static, _F(Console_notify), KType_void, KType_Console, KMethodName_("notify"), 1, KType_String, KFieldName_("message"),
+		_Public|_Static, _F(Console_readLine), KType_String, KType_Console, KMethodName_("readLine"), 1, KType_String, KFieldName_("message"),
+		_Public|_Static, _F(Console_inputUserApproval), KType_boolean, KType_Console, KMethodName_("inputUserApproval"), 4,
+		    KType_String, KFieldName_("message"), KType_String, KFieldName_("yes"), KType_String, KFieldName_("no"), KType_boolean, KFieldName_("defval"),
+		_Public|_Static, _F(Console_inputUserPassword), KType_String, KType_Console, KMethodName_("inputUserPassword"), 1, KType_String, KFieldName_("message"),
+		_Public|_Static, _F(Console_inputUserPassword0), KType_String, KType_Console, KMethodName_("inputUserPassword"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

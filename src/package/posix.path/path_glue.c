@@ -151,7 +151,7 @@ static void path_defineAccessConst(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		{KDefineConstInt(F_OK)},
 		{NULL} /* sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(intData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(intData), false/*isOverride*/, trace);
 }
 
 // boolean System.access(String path, int mode);
@@ -421,7 +421,7 @@ static KMETHOD System_opendir(KonohaContext *kctx, KonohaStack *sfp)
 	if(d == NULL) {
 		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "opendir", LogText("dirname", kString_text(path)), LogErrno);
-		KLIB KRuntime_raise(kctx, EXPT_("IO"), fault, NULL, sfp);
+		KLIB KRuntime_raise(kctx, KException_("IO"), fault, NULL, sfp);
 	}
 	kDir *dir = (kDir *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)d);
 	KFieldSet(dir, dir->PathInfoNULL, path);
@@ -516,10 +516,10 @@ static void path_defineDIR(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trac
 	KClass *cDIR = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDIR, trace);
 	int KType_DIR = cDIR->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static|_C, _F(System_opendir),   KType_DIR,    KType_System, MN_("opendir"),  1, KType_String, FN_("dirname"),
-		_Public,            _F(DIR_close),        KType_void,   KType_DIR,    MN_("close"), 0,
-		_Public|_Iter,      _F(DIR_readFileName), KType_String, KType_DIR,    MN_("readFileName"), 0,
-		_Public|_Iter,      _F(DIR_readPath),     KType_String, KType_DIR,    MN_("readPath"), 0,
+		_Public|_Static|_C, _F(System_opendir),   KType_DIR,    KType_System, KMethodName_("opendir"),  1, KType_String, KFieldName_("dirname"),
+		_Public,            _F(DIR_close),        KType_void,   KType_DIR,    KMethodName_("close"), 0,
+		_Public|_Iter,      _F(DIR_readFileName), KType_String, KType_DIR,    KMethodName_("readFileName"), 0,
+		_Public|_Iter,      _F(DIR_readPath),     KType_String, KType_DIR,    KMethodName_("readPath"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -531,31 +531,31 @@ static kbool_t path_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 {
 	//	KRequireKonohaCommonModule(trace);
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static|_C, _F(System_getcwd),   KType_String,  KType_System, MN_("getcwd"), 0,
-		_Public|_Static|_C, _F(System_realpath), KType_String,  KType_System, MN_("realpath"),  1, KType_String, FN_("path"),
-		_Public|_Static|_C, _F(System_chdir),    KType_boolean, KType_System, MN_("chdir"),  1, KType_String, FN_("path"),
-		_Public|_Static|_C, _F(System_chroot),   KType_boolean, KType_System, MN_("chroot"), 1, KType_String, FN_("path"),
+		_Public|_Static|_C, _F(System_getcwd),   KType_String,  KType_System, KMethodName_("getcwd"), 0,
+		_Public|_Static|_C, _F(System_realpath), KType_String,  KType_System, KMethodName_("realpath"),  1, KType_String, KFieldName_("path"),
+		_Public|_Static|_C, _F(System_chdir),    KType_boolean, KType_System, KMethodName_("chdir"),  1, KType_String, KFieldName_("path"),
+		_Public|_Static|_C, _F(System_chroot),   KType_boolean, KType_System, KMethodName_("chroot"), 1, KType_String, KFieldName_("path"),
 
-		_Public|_Static|_C, _F(System_umask),    KType_int,     KType_System, MN_("umask"),  1, KType_int,    FN_("mode"),
-		_Public|_Static|_C, _F(System_chmod),    KType_boolean, KType_System, MN_("chmod"),  2, KType_String, FN_("path"), KType_int, FN_("mode"),
-		_Public|_Static|_C, _F(System_access),   KType_boolean, KType_System, MN_("access"), 2, KType_String, FN_("path"), KType_int, FN_("mode"),
-		_Public|_Static|_C, _F(System_chown),    KType_boolean, KType_System, MN_("chown"),  3, KType_String, FN_("path"), KType_int, FN_("owner"), KType_int, FN_("group"),
-		_Public|_Static|_C, _F(System_lchown),   KType_boolean, KType_System, MN_("lchown"), 3, KType_String, FN_("path"), KType_int, FN_("owner"), KType_int, FN_("group"),
+		_Public|_Static|_C, _F(System_umask),    KType_int,     KType_System, KMethodName_("umask"),  1, KType_int,    KFieldName_("mode"),
+		_Public|_Static|_C, _F(System_chmod),    KType_boolean, KType_System, KMethodName_("chmod"),  2, KType_String, KFieldName_("path"), KType_int, KFieldName_("mode"),
+		_Public|_Static|_C, _F(System_access),   KType_boolean, KType_System, KMethodName_("access"), 2, KType_String, KFieldName_("path"), KType_int, KFieldName_("mode"),
+		_Public|_Static|_C, _F(System_chown),    KType_boolean, KType_System, KMethodName_("chown"),  3, KType_String, KFieldName_("path"), KType_int, KFieldName_("owner"), KType_int, KFieldName_("group"),
+		_Public|_Static|_C, _F(System_lchown),   KType_boolean, KType_System, KMethodName_("lchown"), 3, KType_String, KFieldName_("path"), KType_int, KFieldName_("owner"), KType_int, KFieldName_("group"),
 
-		_Public|_Static|_C, _F(System_link),     KType_boolean, KType_System, MN_("link"), 2, KType_String, FN_("oldpath"), KType_String, FN_("newpath"),
-		_Public|_Static|_C, _F(System_unlink),   KType_boolean, KType_System, MN_("unlink"), 1, KType_String, FN_("path"),
-		_Public|_Static|_C, _F(System_rename),   KType_boolean, KType_System, MN_("rename"), 2, KType_String, FN_("oldpath"), KType_String, FN_("newpath"),
-		_Public|_Static|_C, _F(System_symlink),  KType_boolean, KType_System, MN_("symlink"), 2, KType_String, FN_("oldpath"), KType_String, FN_("newpath"),
-		_Public|_Static|_C, _F(System_readlink), KType_String,  KType_System, MN_("readlink"), 1, KType_String, FN_("path"),
+		_Public|_Static|_C, _F(System_link),     KType_boolean, KType_System, KMethodName_("link"), 2, KType_String, KFieldName_("oldpath"), KType_String, KFieldName_("newpath"),
+		_Public|_Static|_C, _F(System_unlink),   KType_boolean, KType_System, KMethodName_("unlink"), 1, KType_String, KFieldName_("path"),
+		_Public|_Static|_C, _F(System_rename),   KType_boolean, KType_System, KMethodName_("rename"), 2, KType_String, KFieldName_("oldpath"), KType_String, KFieldName_("newpath"),
+		_Public|_Static|_C, _F(System_symlink),  KType_boolean, KType_System, KMethodName_("symlink"), 2, KType_String, KFieldName_("oldpath"), KType_String, KFieldName_("newpath"),
+		_Public|_Static|_C, _F(System_readlink), KType_String,  KType_System, KMethodName_("readlink"), 1, KType_String, KFieldName_("path"),
 
 		// isdir() is not posix api
-		_Public|_Static,    _F(System_isDir),    KType_boolean, KType_System, MN_("isdir"),    1, KType_String, FN_("path"),
-		_Public|_Static|_C, _F(System_mkdir),    KType_boolean, KType_System, MN_("mkdir"),    2, KType_String, FN_("path"), KType_int, FN_("mode"),
-		_Public|_Static|_C, _F(System_rmdir),    KType_boolean, KType_System, MN_("rmdir"),    1, KType_String, FN_("path"),
-		_Public|_Static|_C, _F(System_truncate), KType_boolean, KType_System, MN_("truncate"), 2, KType_String, FN_("path"), KType_int, FN_("length"),
+		_Public|_Static,    _F(System_isDir),    KType_boolean, KType_System, KMethodName_("isdir"),    1, KType_String, KFieldName_("path"),
+		_Public|_Static|_C, _F(System_mkdir),    KType_boolean, KType_System, KMethodName_("mkdir"),    2, KType_String, KFieldName_("path"), KType_int, KFieldName_("mode"),
+		_Public|_Static|_C, _F(System_rmdir),    KType_boolean, KType_System, KMethodName_("rmdir"),    1, KType_String, KFieldName_("path"),
+		_Public|_Static|_C, _F(System_truncate), KType_boolean, KType_System, KMethodName_("truncate"), 2, KType_String, KFieldName_("path"), KType_int, KFieldName_("length"),
 
-//		_Public|_Static, _F(System_stat),  KType_Stat, KType_System, MN_("stat"), 1, KType_String, FN_("path"),
-//		_Public|_Static, _F(System_lstat), KType_Stat, KType_System, MN_("lstat"), 1, KType_String, FN_("path"),
+//		_Public|_Static, _F(System_stat),  KType_Stat, KType_System, KMethodName_("stat"), 1, KType_String, KFieldName_("path"),
+//		_Public|_Static, _F(System_lstat), KType_Stat, KType_System, KMethodName_("lstat"), 1, KType_String, KFieldName_("path"),
 
 		DEND,
 	};

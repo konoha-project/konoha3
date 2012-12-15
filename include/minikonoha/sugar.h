@@ -98,7 +98,7 @@ typedef enum {
 
 // reserved
 //#define MN_new       (8+KSymbol_void)
-#define FN_this      FN_("this")
+#define FN_this      KFieldName_("this")
 
 /* KonohaChar */
 

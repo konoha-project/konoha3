@@ -60,9 +60,9 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 //			KReturn(expr);
 //		}
 //		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup) {     // dollar int [100]
-//			KSyntax *syn = SYN_(Stmt_ns(stmt), SYM_("dollar"));
+//			KSyntax *syn = SYN_(Stmt_ns(stmt), KSymbol_("dollar"));
 //			KClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
-//			dollarToken->resolvedSymbol = MN_("dollarArray");
+//			dollarToken->resolvedSymbol = KMethodName_("dollarArray");
 //			kExpr *expr = SUGAR dollar_UntypedCallStyleExpr(kctx, syn, 2, dollarToken, NewExpr(kctx, syn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));
 //			KReturn(expr);
 //		}
@@ -75,7 +75,7 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t dollar_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("$"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Expression_dollar, NULL, NULL, NULL, },
+		{ KSymbol_("$"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Expression_dollar, NULL, NULL, NULL, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
