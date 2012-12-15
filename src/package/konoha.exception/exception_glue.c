@@ -73,7 +73,7 @@
 //	KLIB KBuffer_Init(&kctx->stack->cwb, &wb);
 //	kfileline_t uline = sfp[K_RTNIDX].calledFileLine;
 //	if(uline > 0) {
-//		const char *file = KFileLine_textFileName (uline);
+//		const char *file = KFileLine_textFileName(uline);
 //		KLIB KBuffer_printf(kctx, &wb, "(%s:%d) %s.%s%s" , PLATAPI shortFilePath(file), (kushort_t)uline, kMethod_Fmt3(mtd));
 //	}
 ////	int i = 0, psize = kMethod_ParamSize(mtd);

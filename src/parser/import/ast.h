@@ -963,7 +963,7 @@ static kbool_t kArray_AddSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 		if(tk->hintChar == '$' && i+1 < patterns->endIdx) {  // $PatternName
 			tk = patterns->tokenList->TokenVarItems[++i];
 			if(IS_String(tk->text)) {
-				tk->resolvedSymbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewRaw) | SymbolAttr_Pattern;
+				tk->resolvedSymbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewRaw) | KSymbolAttr_Pattern;
 				if(stmtEntryKey == 0) stmtEntryKey = tk->resolvedSymbol;
 				tk->stmtEntryKey = stmtEntryKey;
 				tk->resolvedSyntaxInfo = SYN_(patterns->ns, tk->resolvedSymbol/*KSymbol_SymbolPattern*/);

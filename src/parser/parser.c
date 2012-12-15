@@ -141,7 +141,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	defSymbol.cflag = KClassFlag_int;
 	defSymbol.init = KClass_(KType_int)->init;
 	defSymbol.unbox = KClass_(KType_int)->unbox;
-	defSymbol.p = kKSymbol_p;
+	defSymbol.p = kSymbol_p;
 
 	KDEFINE_CLASS defToken = {0};
 	SETSTRUCTNAME(defToken, Token);
@@ -257,7 +257,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 static KMETHOD NameSpace_loadScript(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char pathbuf[512];
-	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), KFileLine_textFileName (sfp[K_RTNIDX].calledFileLine), kString_text(sfp[1].asString));
+	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), KFileLine_textFileName(sfp[K_RTNIDX].calledFileLine), kString_text(sfp[1].asString));
 	KMakeTrace(trace, sfp);
 	kNameSpace_LoadScript(kctx, sfp[0].asNameSpace, path, trace);
 }

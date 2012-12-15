@@ -74,7 +74,7 @@ static void UI_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfilelin
 	const char *endTag = EndTag(kctx, level);
 	const char *kLF = isNewLine ? "\n" : "";
 	if(pline > 0) {
-		const char *file = KFileLine_textFileName (pline);
+		const char *file = KFileLine_textFileName(pline);
 		PLATAPI printf_i("%s - (%s:%d) %s%s%s" , beginTag, PLATAPI shortFilePath(file), (kushort_t)pline, msg, kLF, endTag);
 	}
 	else {
@@ -129,7 +129,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 	while(bottomStack < sfp) {
 		kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 		kfileline_t uline = sfp[K_RTNIDX].calledFileLine;
-		const char *file = PLATAPI shortFilePath(KFileLine_textFileName (uline));
+		const char *file = PLATAPI shortFilePath(KFileLine_textFileName(uline));
 		PLATAPI printf_i(" [%ld] (%s:%d) %s.%s%s(", (sfp - kctx->stack->stack), file, (kushort_t)uline, kMethod_Fmt3(mtd));
 		KClass *cThis = KClass_(mtd->typeId);
 		if(!KClass_Is(UnboxType, cThis)) {

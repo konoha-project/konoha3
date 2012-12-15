@@ -545,11 +545,11 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 		}
 		else if(ch0 == '@') {
 			len -= 1; name += 1;
-			mask = SymbolAttr_Annotation;
+			mask = KSymbolAttr_Annotation;
 		}
 		else if(ch0 == '$') {
 			len -= 1; name += 1;
-			mask = SymbolAttr_Pattern; // Pattern
+			mask = KSymbolAttr_Pattern; // Pattern
 		}
 	}
 	else {
@@ -900,7 +900,7 @@ static int DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 		fault ^= ExternalFault;
 	}
 	if(KFlag_Is(int, fault, SoftwareFault)) {
-		if(PLATAPI DiagnosisCheckSoftwareTestIsPass(kctx, KFileLine_textFileName (trace->pline), (kushort_t)trace->pline)) {
+		if(PLATAPI DiagnosisCheckSoftwareTestIsPass(kctx, KFileLine_textFileName(trace->pline), (kushort_t)trace->pline)) {
 			KFlag_Set(int, fault, SoftwareFault, false);
 		}
 	}

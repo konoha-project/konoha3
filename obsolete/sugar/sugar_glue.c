@@ -45,7 +45,7 @@ static ksymbol_t StringToKsymbol(KonohaContext *kctx, kString *key)
 	return KAsciiSymbol(kString_text(key), kString_size(key), _NEWID);
 }
 
-static void kKSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	ksymbol_t symbol = (ksymbol_t)v[pos].unboxValue;
 	KLIB KBuffer_printf(kctx, wb, "%s%s", PSYM_t(symbol));
@@ -65,7 +65,7 @@ static KClass *defineSymbolClass(KonohaContext *kctx, kNameSpace *ns, KTraceInfo
 	defSymbol.cflag = KClassFlag_int;
 	defSymbol.init = KClass_(KType_int)->init;
 	defSymbol.unbox = KClass_(KType_int)->unbox;
-	defSymbol.p = kKSymbol_p;
+	defSymbol.p = kSymbol_p;
 	KClass *cSymbol = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSymbol, trace);
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Coercion|_Const, _F(String_toSymbol), cSymbol->typeId, KType_String, KMethodName_To(cSymbol->typeId), 0,

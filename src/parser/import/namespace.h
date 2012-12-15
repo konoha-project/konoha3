@@ -988,7 +988,7 @@ static kbool_t kNameSpace_ImportSymbol(KonohaContext *kctx, kNameSpace *ns, kNam
 
 static kbool_t kNameSpace_isImported(KonohaContext *kctx, kNameSpace *ns, kNameSpace *packageNS, KTraceInfo *trace)
 {
-	KKeyValue *value = kNameSpace_GetLocalConstNULL(kctx, ns, packageNS->packageId | SymbolAttr_Pattern);
+	KKeyValue *value = kNameSpace_GetLocalConstNULL(kctx, ns, packageNS->packageId | KSymbolAttr_Pattern);
 	if(value != NULL) {
 		KLIB ReportScriptMessage(kctx, trace, DebugTag, "package %s has already imported in %s", KPackage_text(ns->packageId), KPackage_text(packageNS->packageId));
 		return true;
@@ -1014,7 +1014,7 @@ static kbool_t kNameSpace_ImportAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 			}
 		}
 		// record imported
-		return kNameSpace_SetConstData(kctx, ns, packageNS->packageId | SymbolAttr_Pattern, KType_int, packageNS->packageId);
+		return kNameSpace_SetConstData(kctx, ns, packageNS->packageId | KSymbolAttr_Pattern, KType_int, packageNS->packageId);
 	}
 	return false;
 }
@@ -1037,7 +1037,7 @@ static kbool_t kNameSpace_ImportPackage(KonohaContext *kctx, kNameSpace *ns, con
 				pack->packageHandler->ExportNameSpace(kctx, pack->packageNS, ns, option, trace);
 			}
 			if(pack->kickout_script != 0) {
-				kNameSpace_LoadScript(kctx, ns, KFileLine_textFileName (pack->kickout_script), trace);
+				kNameSpace_LoadScript(kctx, ns, KFileLine_textFileName(pack->kickout_script), trace);
 			}
 		}
 	}

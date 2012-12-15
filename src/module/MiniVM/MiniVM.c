@@ -90,7 +90,7 @@ static void DumpOpArgument(KonohaContext *kctx, KBuffer *wb, KVirtualCodeType ty
 		break;
 	case VMT_UL: {
 		kfileline_t uline = (kfileline_t)c->data[i];
-		KLIB KBuffer_printf(kctx, wb, " (%s:%d)", PLATAPI shortFilePath(KFileLine_textFileName (uline)), (kshort_t)uline);
+		KLIB KBuffer_printf(kctx, wb, " (%s:%d)", PLATAPI shortFilePath(KFileLine_textFileName(uline)), (kshort_t)uline);
 		break;
 	}
 	case VMT_R: {

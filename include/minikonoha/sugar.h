@@ -37,23 +37,23 @@ extern "C" {
 
 #define KSymbol_END              ((ksymbol_t)-1)
 #define KSymbol_ERR              (((ksymbol_t)0)|0) /**/
-#define KSymbol_ExprPattern      (((ksymbol_t)1)|SymbolAttr_Pattern) /*$Expr*/
-#define KSymbol_SymbolPattern    (((ksymbol_t)2)|SymbolAttr_Pattern) /*$Symbol*/
-#define KSymbol_TextPattern      (((ksymbol_t)3)|SymbolAttr_Pattern) /*$Text*/
-#define KSymbol_NumberPattern    (((ksymbol_t)4)|SymbolAttr_Pattern) /*$Number*/
-#define KSymbol_TypePattern      (((ksymbol_t)5)|SymbolAttr_Pattern) /*$Type*/
+#define KSymbol_ExprPattern      (((ksymbol_t)1)|KSymbolAttr_Pattern) /*$Expr*/
+#define KSymbol_SymbolPattern    (((ksymbol_t)2)|KSymbolAttr_Pattern) /*$Symbol*/
+#define KSymbol_TextPattern      (((ksymbol_t)3)|KSymbolAttr_Pattern) /*$Text*/
+#define KSymbol_NumberPattern    (((ksymbol_t)4)|KSymbolAttr_Pattern) /*$Number*/
+#define KSymbol_TypePattern      (((ksymbol_t)5)|KSymbolAttr_Pattern) /*$Type*/
 
 #define KSymbol_ParenthesisGroup (((ksymbol_t)6)) /*()*/
 #define KSymbol_BracketGroup     (((ksymbol_t)7)) /*[]*/
 #define KSymbol_BraceGroup       (((ksymbol_t)8)) /*{}*/
-#define KSymbol_TypeCastGroup    (((ksymbol_t)6)|SymbolAttr_Pattern)    /*$()*/
-#define KSymbol_TypeParamGroup   (((ksymbol_t)7)|SymbolAttr_Pattern)    /*$[]*/
+#define KSymbol_TypeCastGroup    (((ksymbol_t)6)|KSymbolAttr_Pattern)    /*$()*/
+#define KSymbol_TypeParamGroup   (((ksymbol_t)7)|KSymbolAttr_Pattern)    /*$[]*/
 #define KSymbol_OptionalGroup    (((ksymbol_t)7)|KSymbol_ATMARK)     /*@[]*/
-#define KSymbol_BlockPattern     (((ksymbol_t)9)|SymbolAttr_Pattern)    /*$Block*/
-#define KSymbol_ParamPattern     (((ksymbol_t)10)|SymbolAttr_Pattern)   /*$Param*/
-#define KSymbol_TypeDeclPattern  (((ksymbol_t)11)|SymbolAttr_Pattern)   /*$TypeDecl*/
-#define KSymbol_MethodDeclPattern  (((ksymbol_t)12)|SymbolAttr_Pattern) /*$MethodDecl*/
-#define KSymbol_TokenPattern     (((ksymbol_t)13)|SymbolAttr_Pattern)   /*$Token*/
+#define KSymbol_BlockPattern     (((ksymbol_t)9)|KSymbolAttr_Pattern)    /*$Block*/
+#define KSymbol_ParamPattern     (((ksymbol_t)10)|KSymbolAttr_Pattern)   /*$Param*/
+#define KSymbol_TypeDeclPattern  (((ksymbol_t)11)|KSymbolAttr_Pattern)   /*$TypeDecl*/
+#define KSymbol_MethodDeclPattern  (((ksymbol_t)12)|KSymbolAttr_Pattern) /*$MethodDecl*/
+#define KSymbol_TokenPattern     (((ksymbol_t)13)|KSymbolAttr_Pattern)   /*$Token*/
 
 #define KSymbol_ExprOperator        KSymbol_ParamPattern
 #define KSymbol_ExprTerm            KSymbol_SymbolPattern
@@ -76,8 +76,8 @@ extern "C" {
 #define KSymbol_NOT     (14+KSymbol_DOT)
 #define KSymbol_LET     (15+KSymbol_DOT)
 #define KSymbol_COMMA   (16+KSymbol_DOT)
-#define KSymbol_DOLLAR  SymbolAttr_Pattern
-#define KSymbol_ATMARK  SymbolAttr_Annotation
+#define KSymbol_DOLLAR  KSymbolAttr_Pattern
+#define KSymbol_ATMARK  KSymbolAttr_Annotation
 #define KSymbol_COLON   (17+KSymbol_DOT)
 #define KSymbol_SEMICOLON (18+KSymbol_DOT)
 

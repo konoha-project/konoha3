@@ -48,7 +48,7 @@ static kString* new_StringMessage(KonohaContext *kctx, kArray *gcstack, KBuffer 
 {
 	const char *msg = TAG_t(taglevel);
 	if(uline > 0) {
-		const char *file = KFileLine_textFileName (uline);
+		const char *file = KFileLine_textFileName(uline);
 		KLIB KBuffer_printf(kctx, wb, "%s(%s:%d) " , msg, PLATAPI shortFilePath(file), (kushort_t)uline);
 	}
 	else {
