@@ -196,8 +196,8 @@ static llvm::Type *convert_type(KonohaContext *kctx, ktypeattr_t type)
 {
 	switch (type) {
 		case KType_void:    return llvm::Type::getVoidTy(LLVM_CONTEXT());
-		case KType_boolean: return llvm::Type::getInt64Ty(LLVM_CONTEXT());
-		case KType_int:     return llvm::Type::getInt64Ty(LLVM_CONTEXT());
+		case KType_boolean: return getLongTy();
+		case KType_int:     return getLongTy();
 	}
 	if(KDefinedKonohaCommonModule() && type == KType_float)
 		return llvm::Type::getDoubleTy(LLVM_CONTEXT());

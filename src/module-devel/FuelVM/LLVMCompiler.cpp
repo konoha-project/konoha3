@@ -8,6 +8,10 @@
 #include <llvm/DataLayout.h>
 #include <llvm/Pass.h>
 #include <llvm/PassManager.h>
+
+#include <llvm/Analysis/Verifier.h>
+#include <llvm/Analysis/Passes.h>
+
 #include <llvm/Transforms/Scalar.h>
 #include <llvm/Transforms/IPO.h>
 #include <vector>
@@ -55,23 +59,23 @@ static void InitLLVM()
 	LLVMType_Init();
 }
 
-static Value *CreateConstant(IRBuilder<> *builder, bool bval)
+static Value *EmitConstant(IRBuilder<> *builder, bool bval)
 {
 	return builder->getInt1(bval);
 }
 
-static Value *CreateConstant(IRBuilder<> *builder, int64_t ival)
+static Value *EmitConstant(IRBuilder<> *builder, int64_t ival)
 {
 	return builder->getInt64(ival);
 }
 
-static Value *CreateConstant(IRBuilder<> *builder, double fval)
+static Value *EmitConstant(IRBuilder<> *builder, double fval)
 {
 	Type *Ty = builder->getDoubleTy();
 	return ConstantFP::get(Ty, fval);
 }
 
-static Value *CreateConstant(IRBuilder<> *builder, void *ptr)
+static Value *EmitConstant(IRBuilder<> *builder, void *ptr)
 {
 	PointerType *Ty = builder->getInt8PtrTy();
 	Constant *C = (sizeof(void*) == 4) ?
@@ -80,15 +84,15 @@ static Value *CreateConstant(IRBuilder<> *builder, void *ptr)
 	return ConstantExpr::getIntToPtr(C, Ty);
 }
 
-static Value *CreateConstant(IRBuilder<> *builder, kObject *obj)
+static Value *EmitConstant(IRBuilder<> *builder, kObject *obj)
 {
-	Constant *V = static_cast<Constant*>(CreateConstant(builder, (void *) obj));
+	Constant *V = static_cast<Constant*>(EmitConstant(builder, (void *) obj));
 	return builder->CreateBitCast(V, GetLLVMType(ID_PtrkObjectVar));
 }
 
-static Value *CreateConstant(IRBuilder<> *builder, kMethod *mtd)
+static Value *EmitConstant(IRBuilder<> *builder, kMethod *mtd)
 {
-	Constant *V = static_cast<Constant*>(CreateConstant(builder, (void *) mtd));
+	Constant *V = static_cast<Constant*>(EmitConstant(builder, (void *) mtd));
 	return builder->CreateBitCast(V, GetLLVMType(ID_PtrkMethodVar));
 }
 
@@ -104,7 +108,9 @@ static Value *GetValue(LLVMIRBuilder *writer, INode *Node)
 {
 	unsigned Idx = NODE_ID(Node);
 	std::vector<Value *> *table = writer->ValueTable;
-	return table->at(Idx);
+	Value *Val = table->at(Idx);
+	assert(Val != 0 && "undefined value");
+	return Val;
 }
 
 static BasicBlock *GetBlock(LLVMIRBuilder *writer, Block *Target)
@@ -126,16 +132,16 @@ static void SetConstant(LLVMIRBuilder *writer, INode *Node, SValue Val)
 	switch(Type) {
 		case TYPE_void:
 			assert(0 && "FIXME");
-		case TYPE_boolean: SetValue(writer, Node, CreateConstant(builder, Val.bval)); break;
-		case TYPE_int:     SetValue(writer, Node, CreateConstant(builder, Val.ival)); break;
-		case TYPE_float:   SetValue(writer, Node, CreateConstant(builder, Val.fval)); break;
+		case TYPE_boolean: SetValue(writer, Node, EmitConstant(builder, Val.bval)); break;
+		case TYPE_int:     SetValue(writer, Node, EmitConstant(builder, Val.ival)); break;
+		case TYPE_float:   SetValue(writer, Node, EmitConstant(builder, Val.fval)); break;
 		case TYPE_String:
 		case TYPE_Function:
 		case TYPE_Array:
 		case TYPE_Method:
 		case TYPE_Any:
 		default:
-			SetValue(writer, Node, CreateConstant(builder, (kObject *)Val.ptr));
+			SetValue(writer, Node, EmitConstant(builder, (kObject *)Val.ptr));
 			break;
 	}
 }
@@ -163,8 +169,26 @@ static Value *GetStackTop(LLVMIRBuilder *writer)
 	Value *Vctx = GetContext(writer);
 	Value *Vsfp = builder->CreateStructGEP(Vctx, KonohaContextVar_esp);
 	Vsfp = builder->CreateLoad(Vsfp);
-	Value *stack_top = Vsfp;//builder->CreateConstInBoundsGEP1_32(Vsfp, K_CALLDELTA);
-	return stack_top;
+	return Vsfp;
+}
+
+static void RestoreStackTop(LLVMIRBuilder *writer, Value *newVal)
+{
+	IRBuilder<> *builder = writer->builder;
+	Value *Vctx = GetContext(writer);
+	Value *Vsfp = builder->CreateStructGEP(Vctx, KonohaContextVar_esp);
+	builder->CreateStore(newVal, Vsfp, false);
+}
+
+static Value *ShiftStack(LLVMIRBuilder *writer, Value *Vsfp, unsigned Shift)
+{
+	IRBuilder<> *builder = writer->builder;
+	return builder->CreateConstInBoundsGEP1_32(Vsfp, Shift);
+}
+
+static Value *PrepareCallStack(LLVMIRBuilder *writer, Value *Vsfp)
+{
+	return ShiftStack(writer, Vsfp, K_CALLDELTA);
 }
 
 static void StoreValueToStack(IRBuilder<> *builder, KClass *ct, int Idx, Value *Vsfp, Value *V)
@@ -172,9 +196,11 @@ static void StoreValueToStack(IRBuilder<> *builder, KClass *ct, int Idx, Value *
 	int fieldIdx = KClass_Is(UnboxType, ct) ?
 		KonohaValueVar_unboxValue : KonohaValueVar_asObject;
 	Value *Dst = builder->CreateConstInBoundsGEP2_32(Vsfp, Idx, fieldIdx);
+	if(V->getType() == Type::getInt1Ty(LLVM_CONTEXT())) {
+		V = builder->CreateZExt(V, GetLLVMType(ID_long));
+	}
 	builder->CreateStore(V, Dst, false);
 }
-
 
 static Value *LoadValueFromStack(IRBuilder<> *builder, KClass *ct, int Idx, Value *Vsfp)
 {
@@ -184,20 +210,23 @@ static Value *LoadValueFromStack(IRBuilder<> *builder, KClass *ct, int Idx, Valu
 	return builder->CreateLoad(Src);
 }
 
-
-static void CreateCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::vector<Value *> &List)
+static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::vector<Value *> &List)
 {
 	KonohaContext *kctx = writer->kctx;
 	IRBuilder<> *builder = writer->builder;
 	kMethod *method = (kMethod *) Mtd->Value.ptr;
-	Value *MtdPtr  = CreateConstant(builder, method);
+	Value *MtdPtr  = EmitConstant(builder, method);
 	Value *FuncPtr = builder->CreateStructGEP(MtdPtr, kMethodVar_invokeKMethodFunc);
 
 	Value *Vctx = GetContext(writer);
 	Value *Vsfp = GetStackTop(writer);
+	Value *Vtop = PrepareCallStack(writer, Vsfp);
 
 	kParam *params = kMethod_GetParam(method);
-	StoreValueToStack(builder, KClass_(method->typeId), 0, Vsfp, List[0]);
+
+	int64_t uline = Inst->uline;
+	StoreValueToStack(builder, KClass_Int, K_RTNIDX, Vsfp, EmitConstant(builder, uline));
+	StoreValueToStack(builder, KClass_(method->typeId), 0, Vsfp, List[0]); /* this object */
 	for(unsigned i = 1; i < params->psize+1; ++i) {
 		ktypeattr_t type = params->paramtypeItems[i-1].attrTypeId;
 		Value *V = List[i];
@@ -205,11 +234,13 @@ static void CreateCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::
 	}
 
 	FuncPtr = builder->CreateLoad(FuncPtr);
-	Value *Ret = builder->CreateCall2(FuncPtr, Vctx, Vsfp);
+	RestoreStackTop(writer, Vtop);
+	Value *Ret = builder->CreateCall2(FuncPtr, Vctx, Vtop);
+	RestoreStackTop(writer, Vsfp);
 	SetValue(writer, ToINode(Inst), Ret);
 }
 
-static void CreateRet(LLVMIRBuilder *writer, INode *Node)
+static void EmitRet(LLVMIRBuilder *writer, INode *Node)
 {
 	IRBuilder<> *builder = writer->builder;
 	if(Node) {
@@ -220,14 +251,14 @@ static void CreateRet(LLVMIRBuilder *writer, INode *Node)
 	}
 }
 
-static void CreateJump(LLVMIRBuilder *writer, IJump *Node)
+static void EmitJump(LLVMIRBuilder *writer, IJump *Node)
 {
 	IRBuilder<> *builder = writer->builder;
 	BasicBlock *Target = GetBlock(writer, Node->TargetBlock);
 	builder->CreateBr(Target);
 }
 
-static void CreateBranch(LLVMIRBuilder *writer, IBranch *Node)
+static void EmitBranch(LLVMIRBuilder *writer, IBranch *Node)
 {
 	IRBuilder<> *builder = writer->builder;
 	Value *Cond = GetValue(writer, Node->Cond);
@@ -236,65 +267,61 @@ static void CreateBranch(LLVMIRBuilder *writer, IBranch *Node)
 	builder->CreateCondBr(Cond, ThenBB, ElseBB);
 }
 
-static void CreateBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
+static void EmitUnaryInst(LLVMIRBuilder *writer, IUnary *Node)
+{
+	Value *Val = GetValue(writer, Node->Node);
+#define VSET(WRITER, NODE, FUNC) SetValue(WRITER, (INode *)NODE, (WRITER)->builder->FUNC)
+
+	enum TypeId Type = Node->base.Type;
+	assert(Type == TYPE_int);
+#define CASE(X, OP) case X: VSET(writer, Node, Create##OP(Val, #X));return
+	if(Type == TYPE_int) {
+		switch(Op) {
+			CASE(Not, Not); CASE(Neg, Neg);
+			default:
+				assert(0 && "unreachable");
+				break;
+		}
+	} else if(Type == TYPE_float) {
+		switch(Op) {
+			default:
+			assert(0 && "unreachable");
+			break;
+		}
+	}
+#undef CASE
+}
+
+static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 {
 	Value *LHS = GetValue(writer, Node->LHS);
 	Value *RHS = GetValue(writer, Node->RHS);
 #define VSET(WRITER, NODE, FUNC) SetValue(WRITER, (INode *)NODE, (WRITER)->builder->FUNC)
-	switch(Node->Op) {
-#define CASE(X) case X:
-		CASE(Add) {
-			VSET(writer, Node, CreateAdd(LHS, RHS, "add"));break;
+
+	enum TypeId Type = Node->LHS->Type;
+#define CASE(X, OP) case X: VSET(writer, Node, Create##OP(LHS, RHS, #X));return
+	if(Type == TYPE_int) {
+		switch(Node->Op) {
+			CASE(Add, Add); CASE(Sub, Sub); CASE(Mul, Mul); CASE(Div, SDiv); CASE(Mod, SRem);
+			CASE(LShift, Shl); CASE(RShift, AShr); CASE(And, And); CASE(Or, Or); CASE(Xor, Xor);
+			CASE(Eq, ICmpEQ); CASE(Nq, ICmpNE); CASE(Gt, ICmpSGT);
+			CASE(Ge, ICmpSGE); CASE(Lt, ICmpSLT); CASE(Le, ICmpSLE);
+			default:
+				assert(0 && "unreachable");
+				break;
 		}
-		CASE(Sub) {
-			VSET(writer, Node, CreateSub(LHS, RHS, "sub"));break;
-		}
-		CASE(Mul) {
-			VSET(writer, Node, CreateMul(LHS, RHS, "mul"));break;
-		}
-		CASE(Div) {
-			VSET(writer, Node, CreateSDiv(LHS, RHS, "div"));break;
-		}
-		CASE(Mod) {
-			VSET(writer, Node, CreateSRem(LHS, RHS, "mod"));break;
-		}
-		CASE(LShift) {
-			VSET(writer, Node, CreateShl(LHS, RHS, "lshr"));break;
-		}
-		CASE(RShift) {
-			VSET(writer, Node, CreateAShr(LHS, RHS, "rshr"));break;
-		}
-		CASE(And) {
-			VSET(writer, Node, CreateAnd(LHS, RHS, "and"));break;
-		}
-		CASE(Or) {
-			VSET(writer, Node, CreateOr(LHS, RHS, "or"));break;
-		}
-		CASE(Xor) {
-			VSET(writer, Node, CreateXor(LHS, RHS, "xor"));break;
-		}
-		CASE(Eq) {
-			VSET(writer, Node, CreateICmpEQ(LHS, RHS, "eq"));break;
-		}
-		CASE(Nq) {
-			VSET(writer, Node, CreateICmpNE(LHS, RHS, "ne"));break;
-		}
-		CASE(Gt) {
-			VSET(writer, Node, CreateICmpSGT(LHS, RHS, "gt"));break;
-		}
-		CASE(Ge) {
-			VSET(writer, Node, CreateICmpSGE(LHS, RHS, "ge"));break;
-		}
-		CASE(Lt) {
-			VSET(writer, Node, CreateICmpSLT(LHS, RHS, "lt"));break;
-		}
-		CASE(Le) {
-			VSET(writer, Node, CreateICmpSLE(LHS, RHS, "le"));break;
-		}
-		default:
+	} else if(Type == TYPE_float) {
+		switch(Node->Op) {
+			CASE(Add, FAdd); CASE(Sub, FSub); CASE(Mul, FMul); CASE(Div, FDiv);
+			CASE(Eq, FCmpOEQ); CASE(Nq, FCmpONE); CASE(Gt, FCmpOGT);
+			CASE(Ge, FCmpOGE); CASE(Lt, FCmpOLT); CASE(Le, FCmpOLE);
+			default:
 			assert(0 && "unreachable");
-#undef CASE
+			break;
+		}
 	}
+	assert(0 && "unreachable");
+#undef CASE
 }
 
 #define CASE(KIND) case IR_TYPE_##KIND:
@@ -322,7 +349,7 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 					continue;
 				List.push_back(GetValue(writer, *x));
 			}
-			CreateCall(writer, Inst, Mtd, List);
+			EmitCall(writer, Inst, Mtd, List);
 			break;
 		}
 		CASE(IFunction) {
@@ -348,7 +375,7 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 			break;
 		}
 		CASE(IBranch) {
-			CreateBranch(writer, (IBranch *) Node);
+			EmitBranch(writer, (IBranch *) Node);
 			break;
 		}
 		CASE(ITest) {
@@ -357,11 +384,11 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 		}
 		CASE(IReturn) {
 			IReturn *Inst = (IReturn *) Node;
-			CreateRet(writer, Inst->Inst);
+			EmitRet(writer, Inst->Inst);
 			break;
 		}
 		CASE(IJump) {
-			CreateJump(writer, (IJump *) Node);
+			EmitJump(writer, (IJump *) Node);
 			break;
 		}
 		CASE(IThrow) {
@@ -377,11 +404,11 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 			break;
 		}
 		CASE(IUnary) {
-			assert(0 && "TODO");
+			EmitUnaryInst(writer, (IUnary *) Node);
 			break;
 		}
 		CASE(IBinary) {
-			CreateBinaryInst(writer, (IBinary *) Node);
+			EmitBinaryInst(writer, (IBinary *) Node);
 			break;
 		}
 		default:
@@ -415,7 +442,25 @@ static void LLVMIRBuilder_visitValue(Visitor *visitor, INode *Node, const char *
 			return;
 		}
 		CASE(IField) {
-			asm volatile("int3");
+			IField *Inst = (IField *) Node;
+			switch(Inst->Op) {
+				case GlobalScope:
+				case EnvScope:
+					assert(0 && "TODO");
+					break;
+				case FieldScope: {
+					/* TODO */
+					assert(0 && "TODO");
+					//unsigned Src = REGISTER_UNDEFINED;
+					//assert(Register_FindById(Allocator, NODE_ID(Inst->Node), &Src) == true);
+					//unsigned Dst = Register_FindByIdOrAllocate(Allocator, NODE_ID(Node));
+					//EMIT_LIR(writer, LoadField, Dst, Src, Inst->FieldIndex);
+					return;
+				}
+				case LocalScope:
+					SetValue(writer, Node, 0);
+					break;
+			}
 			return;
 		}
 		default:
@@ -433,8 +478,8 @@ static const char *ConstructMethodName(KonohaContext *kctx, kMethod *mtd, const 
 	return KLIB KBuffer_text(kctx, &wb, EnsureZero);
 }
 
-/* Create Method Specific interface */
-static Function *CreateInternalFunction(KonohaContext *kctx, Module *M, kMethod *mtd)
+/* Emit Method Specific interface */
+static Function *EmitInternalFunction(KonohaContext *kctx, Module *M, kMethod *mtd)
 {
 	KClass *RetTy = kMethod_GetReturnType(mtd);
 	std::vector<Type *> ParamTy;
@@ -447,7 +492,7 @@ static Function *CreateInternalFunction(KonohaContext *kctx, Module *M, kMethod 
 	}
 	const char *name = ConstructMethodName(kctx, mtd, "Impl");
 	FunctionType *FnTy = FunctionType::get(convert_type(kctx, RetTy), ParamTy, false);
-	Function *F = cast<Function>(M->getOrInsertFunction(name, FnTy));
+	Function *F = Function::Create(FnTy, GlobalValue::ExternalLinkage, name, M);
 	Function::arg_iterator args = F->arg_begin();
 
 	for(unsigned i = 0; i < params->psize; ++i) {
@@ -457,8 +502,8 @@ static Function *CreateInternalFunction(KonohaContext *kctx, Module *M, kMethod 
 	return F;
 }
 
-/* Create KMETHOD interface */
-static Function *CreateFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Function *Func)
+/* Emit KMETHOD interface */
+static Function *EmitFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Function *Func)
 {
 	std::vector<Type *> ParamTy;
 	ParamTy.push_back(GetLLVMType(ID_PtrKonohaContextVar));
@@ -466,7 +511,7 @@ static Function *CreateFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Fu
 
 	const char *name = ConstructMethodName(kctx, mtd, "");
 	FunctionType *FnTy = FunctionType::get(GetLLVMType(ID_void), ParamTy, false);
-	Function *FWrap = cast<Function>(M->getOrInsertFunction(name, FnTy));
+	Function *FWrap = Function::Create(FnTy, GlobalValue::ExternalLinkage, name, M);
 	Function::arg_iterator args = FWrap->arg_begin();
 	Value *Vctx = args++;
 	Value *Vsfp = args;
@@ -488,7 +533,7 @@ static Function *CreateFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Fu
 	KClass *RetTy = kMethod_GetReturnType(mtd);
 	Value *Ret = builder->CreateCall(Func, Params);
 	if(RetTy != KClass_void) {
-		StoreValueToStack(builder, RetTy, -4, Vsfp, Ret);
+		StoreValueToStack(builder, RetTy, K_RTNIDX, Vsfp, Ret);
 	}
 	builder->CreateRetVoid();
 	return FWrap;
@@ -497,7 +542,7 @@ static Function *CreateFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Fu
 static void EmitPrologue(LLVMIRBuilder *writer, FuelIRBuilder *builder, IMethod *Mtd)
 {
 	BasicBlock *EntryBB;
-	writer->Func = CreateInternalFunction(Mtd->Context, GlobalModule, Mtd->Method);
+	writer->Func = EmitInternalFunction(Mtd->Context, GlobalModule, Mtd->Method);
 	EntryBB = BasicBlock::Create(getGlobalContext(), "EntryBlock", writer->Func);
 	writer->builder = new IRBuilder<>(EntryBB);
 
@@ -537,7 +582,21 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 			visitINode(&writer.visitor, *Inst);
 		}
 	}
-	Function *Wrapper = CreateFunction(Mtd->Context, GlobalModule, Mtd->Method, writer.Func);
+	Function *Wrapper = EmitFunction(Mtd->Context, GlobalModule, Mtd->Method, writer.Func);
+
+	/* optimization */
+	FunctionPassManager pm(GlobalModule);
+	pm.add(new DataLayout(*(GlobalEngine->getDataLayout())));
+	pm.add(createVerifierPass());
+	pm.add(createInstructionCombiningPass()); // Cleanup for scalarrepl.
+	pm.add(createLICMPass());                 // Hoist loop invariants
+	pm.add(createIndVarSimplifyPass());       // Canonicalize indvars
+	pm.add(createLoopDeletionPass());         // Delete dead loops
+
+	pm.doInitialization();
+	pm.run(*Wrapper);
+	pm.run(*writer.Func);
+
 	GlobalModule->dump();
 	void *f = GlobalEngine->getPointerToFunction(Wrapper);
 	return (ByteCode *) f;

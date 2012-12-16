@@ -1110,6 +1110,7 @@ static bool IRBuilder_Optimize(FuelIRBuilder *builder, Block *BB, bool Flag)
 }
 
 #define COMPILE_ALWAYS 4096
+#define COMPILE_LLVM   1/*256*/
 static unsigned IRBuilder_CalculateThreshold(FuelIRBuilder *builder, IMethod *Mtd, int option)
 {
 	unsigned Threshold = (option == O2Compile) ? COMPILE_ALWAYS : 0;
@@ -1144,7 +1145,7 @@ ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option)
 
 	unsigned Threshold = IRBuilder_CalculateThreshold(builder, Mtd, option);
 
-	if(Threshold >= COMPILE_ALWAYS) {
+	if(Threshold >= COMPILE_LLVM) {
 		code = IRBuilder_CompileToLLVMIR(builder, Mtd);
 	} else {
 		code = IRBuilder_Lowering(builder);
