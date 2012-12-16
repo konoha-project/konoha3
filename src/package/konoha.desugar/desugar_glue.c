@@ -76,7 +76,7 @@ static KMETHOD Token_setText(KonohaContext *kctx, KonohaStack *sfp)
 		size_t len = kString_size(text);
 		size_t beginIdx = (size_t)sfp[3].intValue;
 		size_t endIdx   = (size_t)sfp[4].intValue;
-		if(beginIdx <= endIdx && endIdx < len) {
+		if(beginIdx <= endIdx && endIdx <= len) {
 			ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
 			tk->unresolvedTokenType = keyword;
 			KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, kString_text(text) + beginIdx, endIdx - beginIdx, 0));
