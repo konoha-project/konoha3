@@ -736,7 +736,7 @@ typedef kbool_t (*KStmtVisitFunc)(KonohaContext *kctx, KBuilder *builder, kStmt 
 typedef void (*KExprVisitFunc)(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr);
 
 struct KBuilderCommon {
-	struct KBuilderAPI2* api;
+	struct KBuilderAPI *api;
 	int option;
 	kfileline_t uline;
 	int a; /* whatis a ? */
@@ -744,7 +744,7 @@ struct KBuilderCommon {
 	int espidx;
 };
 
-struct KBuilderAPI2 {
+struct KBuilderAPI {
 	const char *target;
 	struct KVirtualCode*   (*GenerateKVirtualCode)(KonohaContext *, kMethod *mtd, kBlock *block, int option);
 	KMethodFunc            (*GenerateKMethodFunc)(KonohaContext *, struct KVirtualCode *);

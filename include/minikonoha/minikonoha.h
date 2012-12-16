@@ -622,7 +622,7 @@ struct KonohaFactory {
 //	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
 //	void *                (*GetVirtualMachineKMethodFunc)(void);
 	struct KVirtualCode*   (*GetDefaultBootCode)(void);
-	struct KBuilderAPI2*  (*GetDefaultBuilderAPI)(void);
+	struct KBuilderAPI*  (*GetDefaultBuilderAPI)(void);
 
 	/* JSON_API */
 	KModuleInfo *JsonDataInfo;
@@ -1451,7 +1451,7 @@ struct kNameSpaceVar {
 	void                              *tokenMatrix;
 	KHashMap                          *syntaxMapNN;
 	kArray                            *stmtPatternListNULL_OnList;
-	struct KBuilderAPI2               *builderApi;
+	struct KBuilderAPI                *builderApi;
 	KKeyValue                         *typeVariableItems;
 	size_t                             typesize;
 };
