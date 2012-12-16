@@ -40,11 +40,11 @@ def StoreField(Dst:VMRegister, FieldIdx:uint, Src:VMRegister) ::
 	Reg[Dst].obj->fields[FieldIdx] = Reg[Src];
 	DISPATCH_NEXT(PC);
 
-def And(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+def LAnd(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
 	Reg[Dst].bval = Reg[LHS].bval && Reg[RHS].bval;
 	DISPATCH_NEXT(PC);
 
-def Or(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+def LOr(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
 	Reg[Dst].bval = Reg[LHS].bval || Reg[RHS].bval;
 	DISPATCH_NEXT(PC);
 
@@ -52,11 +52,11 @@ def New(Dst:VMRegister, Param:uintptr_t, Type:TypeId) ::
 	Reg[Dst].obj = CreateObject(kctx, Param, Type);
 	DISPATCH_NEXT(PC);
 
-def Call(Dst:VMRegister, ParamSize:uchar, ReturnType:uchar, Mtd:kMethodPtr, uline:uintptr_t) ::
-	Reg[Dst] = CallMethod(kctx, Mtd, ParamSize, ReturnType, uline);
+def Call(ParamSize:uchar, Mtd:kMethodPtr, Obj:kObjectPtr, uline:uintptr_t) ::
+	Reg[Dst] = CallMethod(kctx, Mtd, ParamSize, ReturnType, Obj, uline);
 	DISPATCH_NEXT(PC);
 
-def VCall(Dst:VMRegister, ParamSize:uint, CacheInfo:Cache, uline:uintptr_t) ::
+def VCall(ParamSize:uint, CacheInfo:Cache, uline:uintptr_t) ::
 	Reg[Dst] = CallMethodWithCache(kctx, Mtd, ParamSize, CacheInfo, uline);
 	DISPATCH_NEXT(PC);
 
@@ -66,6 +66,14 @@ def PushI(Src:VMRegister) ::
 
 def PushO(Src:VMRegister) ::
 	PushBoxedValue(kctx, Reg[Src]);
+	DISPATCH_NEXT(PC);
+
+def PopI(Dst:VMRegister) ::
+	Reg[Dst] = PopUnboxedValue(kctx);
+	DISPATCH_NEXT(PC);
+
+def PopO(Dst:VMRegister) ::
+	Reg[Dst] = PopBoxedValue(kctx);
 	DISPATCH_NEXT(PC);
 
 def Func(Dst:VMRegister, StackLayout:IArray) ::
@@ -154,12 +162,12 @@ def RShift(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
 	Reg[Dst].ival = Reg[LHS].ival >> Reg[RHS].ival;
 	DISPATCH_NEXT(PC);
 
-def LAnd(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+def And(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
 	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
 	Reg[Dst].ival = Reg[LHS].ival & Reg[RHS].ival;
 	DISPATCH_NEXT(PC);
 
-def LOr(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+def Or(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
 	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
 	Reg[Dst].ival = Reg[LHS].ival | Reg[RHS].ival;
 	DISPATCH_NEXT(PC);

@@ -6,7 +6,7 @@
 #ifndef LLVMTYPE_H
 #define LLVMTYPE_H
 
-enum STRUKClass_TYPE_ID {
+enum STRUCT_TYPE_ID {
 	ID_void,
 	ID_Ptrvoid,
 	ID_long,
@@ -39,10 +39,10 @@ enum STRUKClass_TYPE_ID {
 struct TypeInfo {
 	const char *Name;
 	bool     IsFunction;
-	enum STRUKClass_TYPE_ID ReturnTypeId;
+	enum STRUCT_TYPE_ID ReturnTypeId;
 	unsigned ParamSize;
 	struct Param {
-		enum STRUKClass_TYPE_ID TypeId;
+		enum STRUCT_TYPE_ID TypeId;
 #ifdef PARAM_DEBUG
 		const char *name;
 #endif
@@ -128,7 +128,7 @@ static llvm::Type *LLVMTYPE_KonohaValuePtr = NULL;
 static llvm::Type *LLVMTYPE_MethodPtr = NULL;
 static llvm::Type *LLVMTYPE_KMethodFunc = NULL;
 
-static llvm::Type *ToType(enum STRUKClass_TYPE_ID ID)
+static llvm::Type *ToType(enum STRUCT_TYPE_ID ID)
 {
 	switch(ID) {
 	case ID_void:    return llvm::Type::getVoidTy(LLVM_CONTEXT());
@@ -209,7 +209,7 @@ static llvm::Type *convert_type(KonohaContext *kctx, KClass *kclass)
 	return convert_type(kctx, kclass->typeId);
 }
 
-static inline llvm::Type *GetLLVMType(enum STRUKClass_TYPE_ID Id)
+static inline llvm::Type *GetLLVMType(enum STRUCT_TYPE_ID Id)
 {
 	return ToType(Id);
 }

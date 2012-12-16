@@ -675,7 +675,7 @@ void RecompileMethod(KonohaContext *kctx, kMethod *mtd)
 	KonohaLibVar *l = (KonohaLibVar *) kctx->klib;
 	GenCodeFunc OldFunc = l->kMethod_GenCode;
 #ifdef FUELVM_USE_LLVM
-	l->kMethod_GenCode = FuelVM_GenerateLLVMIR;
+	//l->kMethod_GenCode = FuelVM_GenerateLLVMIR;
 #endif
 	KLIB kMethod_GenCode(kctx, mtd, mtd->CompiledBlock, O2Compile);
 	l->kMethod_GenCode = OldFunc;

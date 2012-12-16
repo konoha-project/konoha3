@@ -29,6 +29,7 @@ static inline const char *Opcode2String(ByteCode *code)
 #define FMT_uchar      "%s:%d"
 #define FMT_TypeId     "%s:%d"
 #define FMT_kMethodPtr "%s:%p"
+#define FMT_kObjectPtr "%s:%p"
 #define FMT_SValue     "%s:0x%llx"
 #define FMT_Cache      "%s:%p"
 #define FMT_IArray     "%s:%p"
@@ -43,6 +44,7 @@ static inline const char *Opcode2String(ByteCode *code)
 #define CONV_uchar(OPCODE, F)      "uchar",  CONV_DEFAULT(OPCODE,F)
 #define CONV_TypeId(OPCODE, F)     "Type", CONV_DEFAULT(OPCODE,F)
 #define CONV_kMethodPtr(OPCODE, F) "MtdObj", CONV_DEFAULT(OPCODE,F)
+#define CONV_kObjectPtr(OPCODE, F) "Obj", CONV_DEFAULT(OPCODE,F)
 #define CONV_Cache(OPCODE, F)      "Cache", CONV_DEFAULT(OPCODE,F)
 #define CONV_IArray(OPCODE, F)     "IAry", CONV_DEFAULT(OPCODE,F)
 #define CONV_TestFunc(OPCODE, F)   "TestF", CONV_DEFAULT(OPCODE,F)
@@ -74,6 +76,7 @@ static inline const char *Opcode2String(ByteCode *code)
 			index, Opcode2String(code),\
 			DUMP(OPCODE, T0, A0), DUMP(OPCODE, T1, A1), DUMP(OPCODE, T2, A2), DUMP(OPCODE, T3, A3))
 
+#if 0
 #define OP_5(OPCODE, T0, A0, T1, A1, T2, A2, T3, A3, T4, A4) \
 	fprintf(stderr, "%2d: %s "\
 			CONCAT(FMT_, T0) " " CONCAT(FMT_, T1) " " CONCAT(FMT_, T2) " " CONCAT(FMT_, T3) " "\
@@ -81,6 +84,7 @@ static inline const char *Opcode2String(ByteCode *code)
 			index, Opcode2String(code),\
 			DUMP(OPCODE, T0, A0), DUMP(OPCODE, T1, A1), DUMP(OPCODE, T2, A2),\
 			DUMP(OPCODE, T3, A3), DUMP(OPCODE, T4, A4))
+#endif
 
 static void dump(ByteCode *base, ByteCode *code, unsigned index)
 {
@@ -129,21 +133,21 @@ static SValue CallMethodWithCache(KonohaContext *kctx, unsigned ParamSize, void 
 	return Val;
 }
 
-static SValue CallMethod(KonohaContext *kctx, kMethod *Mtd, uchar ParamSize, uchar IsUnboxed, kfileline_t uline)
+static void CallMethod(KonohaContext *kctx, kMethod *Mtd, uchar ParamSize, kObject *object, kfileline_t uline)
 {
-	SValue Val = {};
 	KonohaStack *stack_top = kctx->esp - ParamSize;
 	KonohaStack *sfp = stack_top + K_CALLDELTA;
 	((KonohaContextVar *)kctx)->esp = sfp + ParamSize;
 	sfp[K_MTDIDX].calledMethod = Mtd;
 	sfp[K_RTNIDX].calledFileLine = uline;
+	KUnsafeFieldSet(sfp[K_RTNIDX].asObject, object);
 	Mtd->invokeKMethodFunc(kctx, sfp);
-	if(IsUnboxed)
-		Val.ival = sfp[K_RTNIDX].intValue;
-	else
-		Val.obj  = sfp[K_RTNIDX].asObject;
+	//if(IsUnboxed)
+	//	Val.ival = sfp[K_RTNIDX].intValue;
+	//else
+	//	Val.obj  = sfp[K_RTNIDX].asObject;
 	((KonohaContextVar *)kctx)->esp = stack_top;
-	return Val;
+	//return Val;
 }
 
 static void PushUnboxedValue(KonohaContext *kctx, SValue Val)
@@ -158,6 +162,22 @@ static void PushBoxedValue(KonohaContext *kctx, SValue Val)
 	KonohaStack *sp = kctx->esp;
 	sp[0+K_CALLDELTA].asObject   = (kObject *) Val.ptr;
 	((KonohaContextVar *)kctx)->esp = kctx->esp + 1;
+}
+
+static SValue PopUnboxedValue(KonohaContext *kctx)
+{
+	SValue Val = {};
+	KonohaStack *sfp = kctx->esp + K_CALLDELTA;
+	Val.bits = sfp[K_RTNIDX].unboxValue;
+	return Val;
+}
+
+static SValue PopBoxedValue(KonohaContext *kctx)
+{
+	SValue Val = {};
+	KonohaStack *sfp = kctx->esp + K_CALLDELTA;
+	Val.obj = sfp[K_RTNIDX].asObject;
+	return Val;
 }
 
 static void RaiseError(KonohaContext *kctx, KonohaStack *sfp, kString *ErrorInfo, kfileline_t uline)
@@ -182,8 +202,11 @@ static void AppendCache(TestFunc Func, SValue Val, void *Cache)
 	assert(0 && "TODO");
 }
 
+#define HOOKFUNC_DECL(X) static void hook_##X(OP##X *PC, SValue *Reg) {}
+#define HOOKFUNC(X) hook_##X((OP##X *)PC, Reg);
+BYTECODE_LIST(HOOKFUNC_DECL);
 #define LABELPTR(X) &&L_##X,
-#define CASE(X)       L_##X: /*OPEXEC_##X(PC);*//*dump(code, PC, PC - code);*/
+#define CASE(X)       L_##X: HOOKFUNC(X); /*OPEXEC_##X(PC);*//*dump(code, PC, PC - code);*/
 #define DISPATCH_BEGIN(CODE) goto *JUMP_TABLE[GetOpcode(CODE)]
 #define DISPATCH_END()
 #define DISPATCH_JUMPTO(PC)  goto *(((LIRHeader *)(PC))->codeaddr)
@@ -258,17 +281,17 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 		((kObjectVar *)Reg[Dst].obj)->fieldUnboxItems[FieldIdx] = Reg[Src].bits;
 		DISPATCH_NEXT(PC);
 	}
-	CASE(And) {
-		VMRegister Dst = ((OPAnd *)PC)->Dst;
-		VMRegister LHS = ((OPAnd *)PC)->LHS;
-		VMRegister RHS = ((OPAnd *)PC)->RHS;
+	CASE(LAnd) {
+		VMRegister Dst = ((OPLAnd *)PC)->Dst;
+		VMRegister LHS = ((OPLAnd *)PC)->LHS;
+		VMRegister RHS = ((OPLAnd *)PC)->RHS;
 		Reg[Dst].bval = Reg[LHS].bval && Reg[RHS].bval;
 		DISPATCH_NEXT(PC);
 	}
-	CASE(Or) {
-		VMRegister Dst = ((OPOr *)PC)->Dst;
-		VMRegister LHS = ((OPOr *)PC)->LHS;
-		VMRegister RHS = ((OPOr *)PC)->RHS;
+	CASE(LOr) {
+		VMRegister Dst = ((OPLOr *)PC)->Dst;
+		VMRegister LHS = ((OPLOr *)PC)->LHS;
+		VMRegister RHS = ((OPLOr *)PC)->RHS;
 		Reg[Dst].bval = Reg[LHS].bval || Reg[RHS].bval;
 		DISPATCH_NEXT(PC);
 	}
@@ -280,20 +303,18 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 		DISPATCH_NEXT(PC);
 	}
 	CASE(Call) {
-		VMRegister Dst = ((OPCall *)PC)->Dst;
 		uchar ParamSize = ((OPCall *)PC)->ParamSize;
-		uchar ReturnType = ((OPCall *)PC)->ReturnType;
 		kMethodPtr Mtd = ((OPCall *)PC)->Mtd;
+		kObjectPtr Obj = ((OPCall *)PC)->Obj;
 		uintptr_t uline = ((OPCall *)PC)->uline;
-		Reg[Dst] = CallMethod(kctx, Mtd, ParamSize, ReturnType, uline);
+		CallMethod(kctx, Mtd, ParamSize, Obj, uline);
 		DISPATCH_NEXT(PC);
 	}
 	CASE(VCall) {
-		VMRegister Dst = ((OPVCall *)PC)->Dst;
-		uint ParamSize = ((OPCall *)PC)->ParamSize;
+		uint ParamSize = ((OPVCall *)PC)->ParamSize;
 		Cache CacheInfo = ((OPVCall *)PC)->CacheInfo;
 		uintptr_t uline = ((OPVCall *)PC)->uline;
-		Reg[Dst] = CallMethodWithCache(kctx, ParamSize, CacheInfo, uline);
+		CallMethodWithCache(kctx, ParamSize, CacheInfo, uline);
 		DISPATCH_NEXT(PC);
 	}
 	CASE(PushI) {
@@ -304,6 +325,16 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 	CASE(PushO) {
 		VMRegister Src = ((OPPushO *)PC)->Src;
 		PushBoxedValue(kctx, Reg[Src]);
+		DISPATCH_NEXT(PC);
+	}
+	CASE(PopI) {
+		VMRegister Dst = ((OPPopI *)PC)->Dst;
+		Reg[Dst] = PopUnboxedValue(kctx);
+		DISPATCH_NEXT(PC);
+	}
+	CASE(PopO) {
+		VMRegister Dst = ((OPPopO *)PC)->Dst;
+		Reg[Dst] = PopBoxedValue(kctx);
 		DISPATCH_NEXT(PC);
 	}
 	CASE(Func) {
@@ -448,24 +479,22 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 		DISPATCH_NEXT(PC);
 	}
 
-	CASE(LAnd) {
-		VMRegister Dst = ((OPLAnd *)PC)->Dst;
-		VMRegister LHS = ((OPLAnd *)PC)->LHS;
-		VMRegister RHS = ((OPLAnd *)PC)->RHS;
+	CASE(And) {
+		VMRegister Dst = ((OPAnd *)PC)->Dst;
+		VMRegister LHS = ((OPAnd *)PC)->LHS;
+		VMRegister RHS = ((OPAnd *)PC)->RHS;
 		CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
 		Reg[Dst].ival = Reg[LHS].ival & Reg[RHS].ival;
 		DISPATCH_NEXT(PC);
 	}
-
-	CASE(LOr) {
-		VMRegister Dst = ((OPLOr *)PC)->Dst;
-		VMRegister LHS = ((OPLOr *)PC)->LHS;
-		VMRegister RHS = ((OPLOr *)PC)->RHS;
+	CASE(Or) {
+		VMRegister Dst = ((OPOr *)PC)->Dst;
+		VMRegister LHS = ((OPOr *)PC)->LHS;
+		VMRegister RHS = ((OPOr *)PC)->RHS;
 		CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
 		Reg[Dst].ival = Reg[LHS].ival | Reg[RHS].ival;
 		DISPATCH_NEXT(PC);
 	}
-
 	CASE(Xor) {
 		VMRegister Dst = ((OPXor *)PC)->Dst;
 		VMRegister LHS = ((OPXor *)PC)->LHS;

@@ -55,7 +55,6 @@ static void ReplaceOldValueWith(INode *Node, INode *oldVal, INode *newVal)
 	switch(Node->Kind) {
 		case IR_TYPE_IConstant:
 		case IR_TYPE_IArgument:
-		case IR_TYPE_ILabel:
 			break;
 		CASE(IField) {
 			IField *Inst = (IField *) Node;

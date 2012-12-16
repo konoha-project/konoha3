@@ -15,8 +15,7 @@ find_program(LLVM_CONFIG
          /usr/bin/
    DOC "llvm-config")
 
-#set(USE_LLVMJIT)
-if(LLVM_CONFIG AND USE_LLVMJIT)
+if(LLVM_CONFIG)
     execute_process(
             COMMAND ${LLVM_CONFIG} --version
             OUTPUT_VARIABLE LLVM_VERSION
@@ -72,6 +71,6 @@ if(LLVM_CONFIG AND USE_LLVMJIT)
     add_definitions(-DFUELVM_USE_LLVM=1)
     include_directories(${LLVM_INCLUDEDIR})
     set(MODULE_SOURCE_CODE ${MODULE_SOURCE_CODE} LLVMCompiler.cpp)
-endif(LLVM_CONFIG AND USE_LLVMJIT)
+endif()
 
 add_konoha_module(FuelVM)

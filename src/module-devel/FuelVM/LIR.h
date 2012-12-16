@@ -169,43 +169,43 @@ typedef struct OPStoreField {
 #define OPFIELDSIZE_StoreField 3
 #define DUMP_StoreField(OP_3) OP_3(StoreField, VMRegister, Dst, uint, FieldIdx, VMRegister, Src)
 
-#define OPCODE_And 9
-typedef struct OPAnd {
+#define OPCODE_LAnd 9
+typedef struct OPLAnd {
 	LIRHeader Header;
 	VMRegister Dst;
 	VMRegister LHS;
 	VMRegister RHS;
-} PACKED OPAnd;
+} PACKED OPLAnd;
 
-#define OPEXEC_And(PC) do {\
-	VMRegister Dst = ((OPAnd *)PC)->Dst;\
-	VMRegister LHS = ((OPAnd *)PC)->LHS;\
-	VMRegister RHS = ((OPAnd *)PC)->RHS;\
+#define OPEXEC_LAnd(PC) do {\
+	VMRegister Dst = ((OPLAnd *)PC)->Dst;\
+	VMRegister LHS = ((OPLAnd *)PC)->LHS;\
+	VMRegister RHS = ((OPLAnd *)PC)->RHS;\
 	Reg[Dst].bval = Reg[LHS].bval && Reg[RHS].bval;\
 	DISPATCH_NEXT(PC);\
 } while(0)
 
-#define OPFIELDSIZE_And 3
-#define DUMP_And(OP_3) OP_3(And, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
+#define OPFIELDSIZE_LAnd 3
+#define DUMP_LAnd(OP_3) OP_3(LAnd, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_Or 10
-typedef struct OPOr {
+#define OPCODE_LOr 10
+typedef struct OPLOr {
 	LIRHeader Header;
 	VMRegister Dst;
 	VMRegister LHS;
 	VMRegister RHS;
-} PACKED OPOr;
+} PACKED OPLOr;
 
-#define OPEXEC_Or(PC) do {\
-	VMRegister Dst = ((OPOr *)PC)->Dst;\
-	VMRegister LHS = ((OPOr *)PC)->LHS;\
-	VMRegister RHS = ((OPOr *)PC)->RHS;\
+#define OPEXEC_LOr(PC) do {\
+	VMRegister Dst = ((OPLOr *)PC)->Dst;\
+	VMRegister LHS = ((OPLOr *)PC)->LHS;\
+	VMRegister RHS = ((OPLOr *)PC)->RHS;\
 	Reg[Dst].bval = Reg[LHS].bval || Reg[RHS].bval;\
 	DISPATCH_NEXT(PC);\
 } while(0)
 
-#define OPFIELDSIZE_Or 3
-#define DUMP_Or(OP_3) OP_3(Or, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
+#define OPFIELDSIZE_LOr 3
+#define DUMP_LOr(OP_3) OP_3(LOr, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
 #define OPCODE_New 11
 typedef struct OPNew {
@@ -229,37 +229,33 @@ typedef struct OPNew {
 #define OPCODE_Call 12
 typedef struct OPCall {
 	LIRHeader Header;
-	VMRegister Dst;
 	uchar ParamSize;
-	uchar ReturnType;
 	kMethodPtr Mtd;
+	kObjectPtr Obj;
 	uintptr_t uline;
 } PACKED OPCall;
 
 #define OPEXEC_Call(PC) do {\
-	VMRegister Dst = ((OPCall *)PC)->Dst;\
 	uchar ParamSize = ((OPCall *)PC)->ParamSize;\
-	uchar ReturnType = ((OPCall *)PC)->ReturnType;\
 	kMethodPtr Mtd = ((OPCall *)PC)->Mtd;\
+	kObjectPtr Obj = ((OPCall *)PC)->Obj;\
 	uintptr_t uline = ((OPCall *)PC)->uline;\
-	Reg[Dst] = CallMethod(kctx, Mtd, ParamSize, ReturnType, uline);\
+	Reg[Dst] = CallMethod(kctx, Mtd, ParamSize, ReturnType, Obj, uline);\
 	DISPATCH_NEXT(PC);\
 } while(0)
 
-#define OPFIELDSIZE_Call 5
-#define DUMP_Call(OP_5) OP_5(Call, VMRegister, Dst, uchar, ParamSize, uchar, ReturnType, kMethodPtr, Mtd, uintptr_t, uline)
+#define OPFIELDSIZE_Call 4
+#define DUMP_Call(OP_4) OP_4(Call, uchar, ParamSize, kMethodPtr, Mtd, kObjectPtr, Obj, uintptr_t, uline)
 
 #define OPCODE_VCall 13
 typedef struct OPVCall {
 	LIRHeader Header;
-	VMRegister Dst;
 	uint ParamSize;
 	Cache CacheInfo;
 	uintptr_t uline;
 } PACKED OPVCall;
 
 #define OPEXEC_VCall(PC) do {\
-	VMRegister Dst = ((OPVCall *)PC)->Dst;\
 	uint ParamSize = ((OPVCall *)PC)->ParamSize;\
 	Cache CacheInfo = ((OPVCall *)PC)->CacheInfo;\
 	uintptr_t uline = ((OPVCall *)PC)->uline;\
@@ -267,8 +263,8 @@ typedef struct OPVCall {
 	DISPATCH_NEXT(PC);\
 } while(0)
 
-#define OPFIELDSIZE_VCall 4
-#define DUMP_VCall(OP_4) OP_4(VCall, VMRegister, Dst, uint, ParamSize, Cache, CacheInfo, uintptr_t, uline)
+#define OPFIELDSIZE_VCall 3
+#define DUMP_VCall(OP_3) OP_3(VCall, uint, ParamSize, Cache, CacheInfo, uintptr_t, uline)
 
 #define OPCODE_PushI 14
 typedef struct OPPushI {
@@ -300,7 +296,37 @@ typedef struct OPPushO {
 #define OPFIELDSIZE_PushO 1
 #define DUMP_PushO(OP_1) OP_1(PushO, VMRegister, Src)
 
-#define OPCODE_Func 16
+#define OPCODE_PopI 16
+typedef struct OPPopI {
+	LIRHeader Header;
+	VMRegister Dst;
+} PACKED OPPopI;
+
+#define OPEXEC_PopI(PC) do {\
+	VMRegister Dst = ((OPPopI *)PC)->Dst;\
+	Reg[Dst] = PopUnboxedValue(kctx);\
+	DISPATCH_NEXT(PC);\
+} while(0)
+
+#define OPFIELDSIZE_PopI 1
+#define DUMP_PopI(OP_1) OP_1(PopI, VMRegister, Dst)
+
+#define OPCODE_PopO 17
+typedef struct OPPopO {
+	LIRHeader Header;
+	VMRegister Dst;
+} PACKED OPPopO;
+
+#define OPEXEC_PopO(PC) do {\
+	VMRegister Dst = ((OPPopO *)PC)->Dst;\
+	Reg[Dst] = PopBoxedValue(kctx);\
+	DISPATCH_NEXT(PC);\
+} while(0)
+
+#define OPFIELDSIZE_PopO 1
+#define DUMP_PopO(OP_1) OP_1(PopO, VMRegister, Dst)
+
+#define OPCODE_Func 18
 typedef struct OPFunc {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -317,7 +343,7 @@ typedef struct OPFunc {
 #define OPFIELDSIZE_Func 2
 #define DUMP_Func(OP_2) OP_2(Func, VMRegister, Dst, IArray, StackLayout)
 
-#define OPCODE_Test 17
+#define OPCODE_Test 19
 typedef struct OPTest {
 	LIRHeader Header;
 	VMRegister Src;
@@ -336,7 +362,7 @@ typedef struct OPTest {
 #define OPFIELDSIZE_Test 3
 #define DUMP_Test(OP_3) OP_3(Test, VMRegister, Src, TestFunc, Func, Cache, CacheInfo)
 
-#define OPCODE_ReturnI 18
+#define OPCODE_ReturnI 20
 typedef struct OPReturnI {
 	LIRHeader Header;
 	VMRegister Src;
@@ -351,7 +377,7 @@ typedef struct OPReturnI {
 #define OPFIELDSIZE_ReturnI 1
 #define DUMP_ReturnI(OP_1) OP_1(ReturnI, VMRegister, Src)
 
-#define OPCODE_ReturnO 19
+#define OPCODE_ReturnO 21
 typedef struct OPReturnO {
 	LIRHeader Header;
 	VMRegister Src;
@@ -366,7 +392,7 @@ typedef struct OPReturnO {
 #define OPFIELDSIZE_ReturnO 1
 #define DUMP_ReturnO(OP_1) OP_1(ReturnO, VMRegister, Src)
 
-#define OPCODE_ReturnVoid 20
+#define OPCODE_ReturnVoid 22
 typedef struct OPReturnVoid {
 	LIRHeader Header;
 } PACKED OPReturnVoid;
@@ -378,7 +404,7 @@ typedef struct OPReturnVoid {
 #define OPFIELDSIZE_ReturnVoid 0
 #define DUMP_ReturnVoid(OP_0) OP_0(ReturnVoid)
 
-#define OPCODE_CondBrTrue 21
+#define OPCODE_CondBrTrue 23
 typedef struct OPCondBrTrue {
 	LIRHeader Header;
 	VMRegister Src;
@@ -395,7 +421,7 @@ typedef struct OPCondBrTrue {
 #define OPFIELDSIZE_CondBrTrue 2
 #define DUMP_CondBrTrue(OP_2) OP_2(CondBrTrue, VMRegister, Src, Address, Block)
 
-#define OPCODE_CondBrFalse 22
+#define OPCODE_CondBrFalse 24
 typedef struct OPCondBrFalse {
 	LIRHeader Header;
 	VMRegister Src;
@@ -412,7 +438,7 @@ typedef struct OPCondBrFalse {
 #define OPFIELDSIZE_CondBrFalse 2
 #define DUMP_CondBrFalse(OP_2) OP_2(CondBrFalse, VMRegister, Src, Address, Block)
 
-#define OPCODE_Jump 23
+#define OPCODE_Jump 25
 typedef struct OPJump {
 	LIRHeader Header;
 	Address Block;
@@ -427,7 +453,7 @@ typedef struct OPJump {
 #define OPFIELDSIZE_Jump 1
 #define DUMP_Jump(OP_1) OP_1(Jump, Address, Block)
 
-#define OPCODE_Throw 24
+#define OPCODE_Throw 26
 typedef struct OPThrow {
 	LIRHeader Header;
 	VMRegister Src;
@@ -443,7 +469,7 @@ typedef struct OPThrow {
 #define OPFIELDSIZE_Throw 2
 #define DUMP_Throw(OP_2) OP_2(Throw, VMRegister, Src, uintptr_t, uline)
 
-#define OPCODE_Try 25
+#define OPCODE_Try 27
 typedef struct OPTry {
 	LIRHeader Header;
 	Address Catch;
@@ -459,7 +485,7 @@ typedef struct OPTry {
 #define OPFIELDSIZE_Try 2
 #define DUMP_Try(OP_2) OP_2(Try, Address, Catch, Address, Finaly)
 
-#define OPCODE_Yield 26
+#define OPCODE_Yield 28
 typedef struct OPYield {
 	LIRHeader Header;
 	VMRegister Src;
@@ -474,7 +500,7 @@ typedef struct OPYield {
 #define OPFIELDSIZE_Yield 1
 #define DUMP_Yield(OP_1) OP_1(Yield, VMRegister, Src)
 
-#define OPCODE_Not 27
+#define OPCODE_Not 29
 typedef struct OPNot {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -492,7 +518,7 @@ typedef struct OPNot {
 #define OPFIELDSIZE_Not 2
 #define DUMP_Not(OP_2) OP_2(Not, VMRegister, Dst, VMRegister, Src)
 
-#define OPCODE_Neg 28
+#define OPCODE_Neg 30
 typedef struct OPNeg {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -510,7 +536,7 @@ typedef struct OPNeg {
 #define OPFIELDSIZE_Neg 2
 #define DUMP_Neg(OP_2) OP_2(Neg, VMRegister, Dst, VMRegister, Src)
 
-#define OPCODE_Add 29
+#define OPCODE_Add 31
 typedef struct OPAdd {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -530,7 +556,7 @@ typedef struct OPAdd {
 #define OPFIELDSIZE_Add 3
 #define DUMP_Add(OP_3) OP_3(Add, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_Sub 30
+#define OPCODE_Sub 32
 typedef struct OPSub {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -550,7 +576,7 @@ typedef struct OPSub {
 #define OPFIELDSIZE_Sub 3
 #define DUMP_Sub(OP_3) OP_3(Sub, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_Mul 31
+#define OPCODE_Mul 33
 typedef struct OPMul {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -570,7 +596,7 @@ typedef struct OPMul {
 #define OPFIELDSIZE_Mul 3
 #define DUMP_Mul(OP_3) OP_3(Mul, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_Div 32
+#define OPCODE_Div 34
 typedef struct OPDiv {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -590,7 +616,7 @@ typedef struct OPDiv {
 #define OPFIELDSIZE_Div 3
 #define DUMP_Div(OP_3) OP_3(Div, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_Mod 33
+#define OPCODE_Mod 35
 typedef struct OPMod {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -610,7 +636,7 @@ typedef struct OPMod {
 #define OPFIELDSIZE_Mod 3
 #define DUMP_Mod(OP_3) OP_3(Mod, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_LShift 34
+#define OPCODE_LShift 36
 typedef struct OPLShift {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -630,7 +656,7 @@ typedef struct OPLShift {
 #define OPFIELDSIZE_LShift 3
 #define DUMP_LShift(OP_3) OP_3(LShift, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_RShift 35
+#define OPCODE_RShift 37
 typedef struct OPRShift {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -650,47 +676,47 @@ typedef struct OPRShift {
 #define OPFIELDSIZE_RShift 3
 #define DUMP_RShift(OP_3) OP_3(RShift, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_LAnd 36
-typedef struct OPLAnd {
+#define OPCODE_And 38
+typedef struct OPAnd {
 	LIRHeader Header;
 	VMRegister Dst;
 	VMRegister LHS;
 	VMRegister RHS;
-} PACKED OPLAnd;
+} PACKED OPAnd;
 
-#define OPEXEC_LAnd(PC) do {\
-	VMRegister Dst = ((OPLAnd *)PC)->Dst;\
-	VMRegister LHS = ((OPLAnd *)PC)->LHS;\
-	VMRegister RHS = ((OPLAnd *)PC)->RHS;\
+#define OPEXEC_And(PC) do {\
+	VMRegister Dst = ((OPAnd *)PC)->Dst;\
+	VMRegister LHS = ((OPAnd *)PC)->LHS;\
+	VMRegister RHS = ((OPAnd *)PC)->RHS;\
 	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);\
 	Reg[Dst].ival = Reg[LHS].ival & Reg[RHS].ival;\
 	DISPATCH_NEXT(PC);\
 } while(0)
 
-#define OPFIELDSIZE_LAnd 3
-#define DUMP_LAnd(OP_3) OP_3(LAnd, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
+#define OPFIELDSIZE_And 3
+#define DUMP_And(OP_3) OP_3(And, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_LOr 37
-typedef struct OPLOr {
+#define OPCODE_Or 39
+typedef struct OPOr {
 	LIRHeader Header;
 	VMRegister Dst;
 	VMRegister LHS;
 	VMRegister RHS;
-} PACKED OPLOr;
+} PACKED OPOr;
 
-#define OPEXEC_LOr(PC) do {\
-	VMRegister Dst = ((OPLOr *)PC)->Dst;\
-	VMRegister LHS = ((OPLOr *)PC)->LHS;\
-	VMRegister RHS = ((OPLOr *)PC)->RHS;\
+#define OPEXEC_Or(PC) do {\
+	VMRegister Dst = ((OPOr *)PC)->Dst;\
+	VMRegister LHS = ((OPOr *)PC)->LHS;\
+	VMRegister RHS = ((OPOr *)PC)->RHS;\
 	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);\
 	Reg[Dst].ival = Reg[LHS].ival | Reg[RHS].ival;\
 	DISPATCH_NEXT(PC);\
 } while(0)
 
-#define OPFIELDSIZE_LOr 3
-#define DUMP_LOr(OP_3) OP_3(LOr, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
+#define OPFIELDSIZE_Or 3
+#define DUMP_Or(OP_3) OP_3(Or, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_Xor 38
+#define OPCODE_Xor 40
 typedef struct OPXor {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -710,7 +736,7 @@ typedef struct OPXor {
 #define OPFIELDSIZE_Xor 3
 #define DUMP_Xor(OP_3) OP_3(Xor, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_Eq 39
+#define OPCODE_Eq 41
 typedef struct OPEq {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -729,7 +755,7 @@ typedef struct OPEq {
 #define OPFIELDSIZE_Eq 3
 #define DUMP_Eq(OP_3) OP_3(Eq, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_Nq 40
+#define OPCODE_Nq 42
 typedef struct OPNq {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -748,7 +774,7 @@ typedef struct OPNq {
 #define OPFIELDSIZE_Nq 3
 #define DUMP_Nq(OP_3) OP_3(Nq, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_Gt 41
+#define OPCODE_Gt 43
 typedef struct OPGt {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -767,7 +793,7 @@ typedef struct OPGt {
 #define OPFIELDSIZE_Gt 3
 #define DUMP_Gt(OP_3) OP_3(Gt, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_Ge 42
+#define OPCODE_Ge 44
 typedef struct OPGe {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -786,7 +812,7 @@ typedef struct OPGe {
 #define OPFIELDSIZE_Ge 3
 #define DUMP_Ge(OP_3) OP_3(Ge, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_Lt 43
+#define OPCODE_Lt 45
 typedef struct OPLt {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -805,7 +831,7 @@ typedef struct OPLt {
 #define OPFIELDSIZE_Lt 3
 #define DUMP_Lt(OP_3) OP_3(Lt, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_Le 44
+#define OPCODE_Le 46
 typedef struct OPLe {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -824,7 +850,7 @@ typedef struct OPLe {
 #define OPFIELDSIZE_Le 3
 #define DUMP_Le(OP_3) OP_3(Le, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_FNeg 45
+#define OPCODE_FNeg 47
 typedef struct OPFNeg {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -842,7 +868,7 @@ typedef struct OPFNeg {
 #define OPFIELDSIZE_FNeg 2
 #define DUMP_FNeg(OP_2) OP_2(FNeg, VMRegister, Dst, VMRegister, Src)
 
-#define OPCODE_FAdd 46
+#define OPCODE_FAdd 48
 typedef struct OPFAdd {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -863,7 +889,7 @@ typedef struct OPFAdd {
 #define OPFIELDSIZE_FAdd 3
 #define DUMP_FAdd(OP_3) OP_3(FAdd, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_FSub 47
+#define OPCODE_FSub 49
 typedef struct OPFSub {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -884,7 +910,7 @@ typedef struct OPFSub {
 #define OPFIELDSIZE_FSub 3
 #define DUMP_FSub(OP_3) OP_3(FSub, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_FMul 48
+#define OPCODE_FMul 50
 typedef struct OPFMul {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -904,7 +930,7 @@ typedef struct OPFMul {
 #define OPFIELDSIZE_FMul 3
 #define DUMP_FMul(OP_3) OP_3(FMul, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_FDiv 49
+#define OPCODE_FDiv 51
 typedef struct OPFDiv {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -924,7 +950,7 @@ typedef struct OPFDiv {
 #define OPFIELDSIZE_FDiv 3
 #define DUMP_FDiv(OP_3) OP_3(FDiv, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_FEq 50
+#define OPCODE_FEq 52
 typedef struct OPFEq {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -943,7 +969,7 @@ typedef struct OPFEq {
 #define OPFIELDSIZE_FEq 3
 #define DUMP_FEq(OP_3) OP_3(FEq, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_FNq 51
+#define OPCODE_FNq 53
 typedef struct OPFNq {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -962,7 +988,7 @@ typedef struct OPFNq {
 #define OPFIELDSIZE_FNq 3
 #define DUMP_FNq(OP_3) OP_3(FNq, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_FGt 52
+#define OPCODE_FGt 54
 typedef struct OPFGt {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -981,7 +1007,7 @@ typedef struct OPFGt {
 #define OPFIELDSIZE_FGt 3
 #define DUMP_FGt(OP_3) OP_3(FGt, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_FGe 53
+#define OPCODE_FGe 55
 typedef struct OPFGe {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -1000,7 +1026,7 @@ typedef struct OPFGe {
 #define OPFIELDSIZE_FGe 3
 #define DUMP_FGe(OP_3) OP_3(FGe, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_FLt 54
+#define OPCODE_FLt 56
 typedef struct OPFLt {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -1019,7 +1045,7 @@ typedef struct OPFLt {
 #define OPFIELDSIZE_FLt 3
 #define DUMP_FLt(OP_3) OP_3(FLt, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_FLe 55
+#define OPCODE_FLe 57
 typedef struct OPFLe {
 	LIRHeader Header;
 	VMRegister Dst;
@@ -1038,7 +1064,7 @@ typedef struct OPFLe {
 #define OPFIELDSIZE_FLe 3
 #define DUMP_FLe(OP_3) OP_3(FLe, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
-#define OPCODE_Nop 56
+#define OPCODE_Nop 58
 typedef struct OPNop {
 	LIRHeader Header;
 } PACKED OPNop;
@@ -1060,13 +1086,15 @@ typedef struct OPNop {
 	OP(LoadField)\
 	OP(StoreLocal)\
 	OP(StoreField)\
-	OP(And)\
-	OP(Or)\
+	OP(LAnd)\
+	OP(LOr)\
 	OP(New)\
 	OP(Call)\
 	OP(VCall)\
 	OP(PushI)\
 	OP(PushO)\
+	OP(PopI)\
+	OP(PopO)\
 	OP(Func)\
 	OP(Test)\
 	OP(ReturnI)\
@@ -1087,8 +1115,8 @@ typedef struct OPNop {
 	OP(Mod)\
 	OP(LShift)\
 	OP(RShift)\
-	OP(LAnd)\
-	OP(LOr)\
+	OP(And)\
+	OP(Or)\
 	OP(Xor)\
 	OP(Eq)\
 	OP(Nq)\

@@ -262,7 +262,6 @@ static void TraceNode1(INode *Node)
 	switch(Node->Kind) {
 		case IR_TYPE_IConstant:
 		case IR_TYPE_IArgument:
-		case IR_TYPE_ILabel:
 			break;
 			CASE(IField) {
 				IField *Inst = (IField *) Node;
@@ -592,6 +591,7 @@ typedef struct ByteCodeWriter {
 	Visitor visitor;
 	ByteCodeList *ByteCode;
 	Block *Current;
+	KonohaContext *kctx;
 	RegisterAllocator RegAllocator;
 } ByteCodeWriter;
 
@@ -676,6 +676,9 @@ static void DeallocateWithoutLocalVar(ByteCodeWriter *writer)
 			continue;
 		}
 		if((Inst = CHECK_KIND(Node, ICond)) != 0 && Inst->Branch != 0) {
+			continue;
+		}
+		if(CHECK_KIND(Node, ICall) != 0 && Node->Type == TYPE_void) {
 			continue;
 		}
 		if(IsLocalOrField(Node))
@@ -772,9 +775,9 @@ static void EmitNode(ByteCodeWriter *writer, INode *Node)
 						continue;
 					assert(Register_FindById(&writer->RegAllocator, NODE_ID(*x), &RHS) == true);
 					if(Inst->Op == LogicalOr) {
-						EMIT_LIR(writer, Or, Dst, LHS, RHS);
+						EMIT_LIR(writer, LOr, Dst, LHS, RHS);
 					} else {
-						EMIT_LIR(writer, And, Dst, LHS, RHS);
+						EMIT_LIR(writer, LAnd, Dst, LHS, RHS);
 					}
 					LHS = Dst;
 				}
@@ -806,10 +809,17 @@ static void EmitNode(ByteCodeWriter *writer, INode *Node)
 					EMIT_LIR(writer, PushO, Reg);
 				}
 			}
-			unsigned Dst = RegAllocate(writer, NODE_ID(Inst));
-			unsigned IsUnboxed = Node->Type != TYPE_void ? IsUnBoxedType(Node->Type) : 0;
-			EMIT_LIR(writer, Call, Dst, ARRAY_size(Inst->Params)-1,
-					IsUnboxed, Mtd->Value.ptr, Inst->uline);
+			KonohaContext *kctx = writer->kctx;
+			kObject *Obj = KLIB Knull(kctx, KClass_(Node->Type));
+			EMIT_LIR(writer, Call, ARRAY_size(Inst->Params)-1, Mtd->Value.ptr, Obj, Inst->uline);
+			if(Node->Type != TYPE_void) {
+				unsigned Dst = RegAllocate(writer, NODE_ID(Inst));
+				if(IsUnBoxedType(Node->Type)) {
+					EMIT_LIR(writer, PopI, Dst);
+				} else {
+					EMIT_LIR(writer, PopO, Dst);
+				}
+			}
 			break;
 		}
 		CASE(IFunction) {
@@ -950,10 +960,6 @@ static void CodeWriter_visitValue(Visitor *visitor, INode *Node, const char *Tag
 			}
 			return;
 		}
-		CASE(ILabel) {
-			assert(0 && "unreachable");
-			break;
-		}
 		CASE(IField) {
 			IField *Inst = (IField *) Node;
 			switch(Inst->Op) {
@@ -1039,6 +1045,7 @@ static ByteCode *IRBuilder_Lowering(FuelIRBuilder *builder)
 		CodeWriter_visitList,
 		CodeWriter_visitValue},
 	};
+	writer.kctx = builder->Context;
 	ARRAY(ByteCode) Code;
 	ARRAY_init(ByteCode, &Code, 4);
 	RegisterAllocator_Init(&writer.RegAllocator, builder->LastNodeId);
@@ -1101,11 +1108,27 @@ static bool IRBuilder_Optimize(FuelIRBuilder *builder, Block *BB, bool Flag)
 	return Flag;
 }
 
+#define COMPILE_ALWAYS 4096
+static unsigned IRBuilder_CalculateThreshold(FuelIRBuilder *builder, IMethod *Mtd, int option)
+{
+	unsigned Threshold = (option == O2Compile) ? COMPILE_ALWAYS : 0;
+	if(Mtd->Method->mn == 0) {
+		return 0;
+	}
+	BlockPtr *x, *e;
+	Threshold += ARRAY_size(builder->Blocks) * 8;
+	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+		Threshold += ARRAY_size((*x)->insts) * 4;
+	}
+	return Threshold;
+}
+
 ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option)
 {
 	Block *BB = Mtd->EntryBlock;
 	bool Flag = true;
 	ARRAY_init(BlockPtr, &builder->Blocks, 1);
+	IRBuilder_LinkBlocks(builder, BB, Flag); Flag = !Flag;
 	IRBuilder_RemoveInstructionAfterBranchInst(builder);
 
 	Flag = IRBuilder_Optimize(builder, BB, Flag);
@@ -1114,9 +1137,13 @@ ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option)
 
 	IRBuilder_RemoveRedundantConstants(builder);
 	IRBuilder_RemoveUnusedVariable(builder);
+
 	IRBuilder_DumpFunction(builder);
 	ByteCode *code = NULL;
-	if(option == O2Compile && Mtd->Method->mn != 0) {
+
+	unsigned Threshold = IRBuilder_CalculateThreshold(builder, Mtd, option);
+
+	if(Threshold >= COMPILE_ALWAYS) {
 		code = IRBuilder_CompileToLLVMIR(builder, Mtd);
 	} else {
 		code = IRBuilder_Lowering(builder);

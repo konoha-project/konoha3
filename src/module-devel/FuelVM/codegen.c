@@ -83,15 +83,6 @@ static IArgument *newIArgument(FuelIRBuilder *builder, unsigned Index)
 
 #define disposeIArgument disposeINodeImpl
 
-static ILabel *newILabel(FuelIRBuilder *builder, int Symbol)
-{
-	ILabel *Node = CREATE_NODE(ILabel);
-	Node->Id = Symbol;
-	return (Node);
-}
-
-#define disposeILabel disposeINodeImpl
-
 static IField *newIField(FuelIRBuilder *builder, enum ScopeOp Op, enum TypeId Type, unsigned Index, INode *Val, unsigned FieldIdx)
 {
 	IField *Node = CREATE_NODE(IField);

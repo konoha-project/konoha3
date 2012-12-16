@@ -65,10 +65,10 @@ static Value *CreateConstant(IRBuilder<> *builder, int64_t ival)
 	return builder->getInt64(ival);
 }
 
-static Value *CreateConstant(IRBuilder<> *builder, double dval)
+static Value *CreateConstant(IRBuilder<> *builder, double fval)
 {
 	Type *Ty = builder->getDoubleTy();
-	return ConstantFP::get(Ty, dval);
+	return ConstantFP::get(Ty, fval);
 }
 
 static Value *CreateConstant(IRBuilder<> *builder, void *ptr)
@@ -128,7 +128,7 @@ static void SetConstant(LLVMIRBuilder *writer, INode *Node, SValue Val)
 			assert(0 && "FIXME");
 		case TYPE_boolean: SetValue(writer, Node, CreateConstant(builder, Val.bval)); break;
 		case TYPE_int:     SetValue(writer, Node, CreateConstant(builder, Val.ival)); break;
-		case TYPE_float:   SetValue(writer, Node, CreateConstant(builder, Val.dval)); break;
+		case TYPE_float:   SetValue(writer, Node, CreateConstant(builder, Val.fval)); break;
 		case TYPE_String:
 		case TYPE_Function:
 		case TYPE_Array:
@@ -169,7 +169,8 @@ static Value *GetStackTop(LLVMIRBuilder *writer)
 
 static void StoreValueToStack(IRBuilder<> *builder, KClass *ct, int Idx, Value *Vsfp, Value *V)
 {
-	int fieldIdx = (KClass_IsUnbox(ct)) ?KonohaValueVar_unboxValue : KonohaValueVar_asObject;
+	int fieldIdx = KClass_Is(UnboxType, ct) ?
+		KonohaValueVar_unboxValue : KonohaValueVar_asObject;
 	Value *Dst = builder->CreateConstInBoundsGEP2_32(Vsfp, Idx, fieldIdx);
 	builder->CreateStore(V, Dst, false);
 }
@@ -177,7 +178,8 @@ static void StoreValueToStack(IRBuilder<> *builder, KClass *ct, int Idx, Value *
 
 static Value *LoadValueFromStack(IRBuilder<> *builder, KClass *ct, int Idx, Value *Vsfp)
 {
-	int fieldIdx = (KClass_IsUnbox(ct)) ?KonohaValueVar_unboxValue : KonohaValueVar_asObject;
+	int fieldIdx = KClass_Is(UnboxType, ct) ?
+		KonohaValueVar_unboxValue : KonohaValueVar_asObject;
 	Value *Src = builder->CreateConstInBoundsGEP2_32(Vsfp, Idx, fieldIdx);
 	return builder->CreateLoad(Src);
 }
@@ -197,7 +199,7 @@ static void CreateCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::
 	kParam *params = kMethod_GetParam(method);
 	StoreValueToStack(builder, KClass_(method->typeId), 0, Vsfp, List[0]);
 	for(unsigned i = 1; i < params->psize+1; ++i) {
-		kattrtype_t type = params->paramtypeItems[i-1].attrTypeId;
+		ktypeattr_t type = params->paramtypeItems[i-1].attrTypeId;
 		Value *V = List[i];
 		StoreValueToStack(builder, KClass_(type), i, Vsfp, V);
 	}
@@ -289,6 +291,8 @@ static void CreateBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 		CASE(Le) {
 			VSET(writer, Node, CreateICmpSLE(LHS, RHS, "le"));break;
 		}
+		default:
+			assert(0 && "unreachable");
 #undef CASE
 	}
 }
@@ -481,7 +485,7 @@ static Function *CreateFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Fu
 	std::vector<Value *> Params;
 	Params.push_back(Vctx);
 	for(unsigned i = 0; i < params->psize; ++i) {
-		kattrtype_t type = params->paramtypeItems[i].attrTypeId;
+		ktypeattr_t type = params->paramtypeItems[i].attrTypeId;
 		Value *V = LoadValueFromStack(builder, KClass_(type), i, Vsfp);
 		Params.push_back(V);
 	}

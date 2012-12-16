@@ -79,13 +79,6 @@ static void visitIArgument(Visitor *visitor, INode *Node)
 	VISIT_VALUE(Node, 0, S);
 }
 
-static void visitILabel(Visitor *visitor, INode *Node)
-{
-	ILabel *Inst = (ILabel *) Node;
-	SValue S; S.ival = Inst->Id;
-	VISIT_VALUE(Node, 0, S);
-}
-
 static void visitIField(Visitor *visitor, INode *Node)
 {
 	IField *Inst = (IField *) Node;

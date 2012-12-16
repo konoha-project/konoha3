@@ -58,8 +58,8 @@ typedef struct FuelIRBuilder FuelIRBuilder;
  *     |                       |
  *  [Constant]           +-----+--------+
  *  [Argument]     [BranchInst]     [NAryInst]
- *  [Label]              |              |
- *  [Field]            [Branch]       [New]
+ *  [Field]              |              |
+ *                     [Branch]       [New]
  *                     [Test]         [Call]
  *                     [Return]       [Cond]
  *                     [Throw]        [Update]
@@ -71,7 +71,6 @@ typedef struct FuelIRBuilder FuelIRBuilder;
 #define IR_LIST(OP)\
 	OP(IConstant)\
 	OP(IArgument)\
-	OP(ILabel)\
 	OP(IField)\
 	OP(ICond)\
 	OP(INew)\
@@ -165,12 +164,6 @@ typedef struct IArgument {
 	unsigned Index;
 } IArgument;
 
-/*$ Value Label { Int } */
-typedef struct ILabel {
-	INode base;
-	unsigned Id;
-} ILabel;
-
 enum ScopeOp {
 	GlobalScope, EnvScope, FieldScope, LocalScope
 };
@@ -259,7 +252,7 @@ typedef struct IReturn {
 	INode *Inst;
 } IReturn;
 
-/*$ void Jump { Label } */
+/*$ void Jump { Block } */
 typedef struct IJump {
 	INode base;
 	Block *TargetBlock;
@@ -330,7 +323,6 @@ typedef struct IRBuilderAPI {
 	/* Create Literal Node */
 	IConstant *(*newConstant)(FuelIRBuilder *builder, enum TypeId typeId, SValue value);
 	IArgument *(*newArgument)(FuelIRBuilder *builder, unsigned Index);
-	ILabel    *(*newLabel)(FuelIRBuilder *builder, int Symbol);
 	IField    *(*newField)(FuelIRBuilder *builder, enum ScopeOp Op, enum TypeId Type, unsigned Index, INode *Node, unsigned FieldIdx);
 	/* Create IInstruction Node */
 	ICond     *(*newCond)(FuelIRBuilder *builder, enum ConditionalOp Op);
