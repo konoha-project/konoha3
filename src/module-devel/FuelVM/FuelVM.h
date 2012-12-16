@@ -59,6 +59,7 @@ extern void ByteCode_Dump(ByteCode *code);
 extern void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code);
 
 #define FUELVM_REGISTER_SIZE 512/*FIXME Implement clever register allocation algorithm */
+#define FUELVM_BYTECODE_MAGICNUMBER 31416U
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -626,7 +626,6 @@ static struct KVirtualCode *FuelVM_GenerateKVirtualCode(KonohaContext *kctx, kMe
 	IMethod Mtd = {kctx, mtd, EntryBlock};
 	union ByteCode *code = IRBuilder_Compile(BLD(builder), &Mtd, option);
 	IRBuilder_Exit(&Builder);
-	KFieldSet(mtd, ((kMethodVar *)mtd)->CompiledBlock, block);
 	return (struct KVirtualCode *) code;
 }
 
@@ -638,47 +637,40 @@ static struct KVirtualCode *FuelVM_Run(KonohaContext *kctx, struct KonohaValueVa
 	return NULL;
 }
 
-#ifdef FUELVM_USE_LLVM
-#define ENABLE_FULL_JIT 1
-#endif
-
 static KMETHOD FuelVM_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 	DBG_ASSERT(IS_Method(mtd));
-#ifdef ENABLE_FULL_JIT
-	if(mtd->mn != 0) {
-		RecompileMethod(kctx, mtd);
-		mtd->invokeKMethodFunc(kctx, sfp);
-		return;
-	}
-#endif
 	union ByteCode *code = (union ByteCode *) mtd->vcode_start;
 	FuelVM_Exec(kctx, sfp, code);
 }
 
 static KMethodFunc FuelVM_GenerateKMethodFunc(KonohaContext *kctx, struct KVirtualCode *vcode)
 {
-	return FuelVM_RunVirtualMachine;
+	unsigned *magic = (unsigned *)(((ByteCode*)vcode)-1);
+	if(*magic == FUELVM_BYTECODE_MAGICNUMBER)
+		return FuelVM_RunVirtualMachine;
+	else
+		return (KMethodFunc) vcode;
 }
 
-static struct KVirtualCode* GetDefaultBootCode(void)
+static struct KVirtualCode *GetDefaultBootCode(void)
 {
 	return NULL;
 }
 
-typedef void (*GenCodeFunc)(KonohaContext*, kMethod*, kBlock *, int options);
+//void RecompileMethod(KonohaContext *kctx, kMethod *mtd)
+//{
+//	DBG_P("[Recompile]: %s.%s%s", KType_text(mtd->typeId), KMethodName_Fmt2(mtd->mn));
+//	KLIB kMethod_GenCode(kctx, mtd, mtd->CompiledBlock, O2Compile);
+//}
 
-void RecompileMethod(KonohaContext *kctx, kMethod *mtd)
+static void FuelVM_SetMethodCode(KonohaContext *kctx, kMethodVar *mtd, struct KVirtualCode *vcode, KMethodFunc func)
 {
-	DBG_P("[Recompile]: %s.%s%s", KType_text(mtd->typeId), KMethodName_Fmt2(mtd->mn));
-	KonohaLibVar *l = (KonohaLibVar *) kctx->klib;
-	GenCodeFunc OldFunc = l->kMethod_GenCode;
-#ifdef FUELVM_USE_LLVM
-	//l->kMethod_GenCode = FuelVM_GenerateLLVMIR;
-#endif
-	KLIB kMethod_GenCode(kctx, mtd, mtd->CompiledBlock, O2Compile);
-	l->kMethod_GenCode = OldFunc;
+	KLIB kMethod_SetFunc(kctx, mtd, func);
+	if(func == FuelVM_RunVirtualMachine) {
+		mtd->vcode_start = vcode;
+	}
 }
 
 static void InitStaticBuilderApi(struct KBuilderAPI *builderApi)
@@ -689,7 +681,8 @@ static void InitStaticBuilderApi(struct KBuilderAPI *builderApi)
 #undef DEFINE_BUILDER_API
 	builderApi->GenerateKVirtualCode = FuelVM_GenerateKVirtualCode;
 	builderApi->GenerateKMethodFunc  = FuelVM_GenerateKMethodFunc;
-	builderApi->RunVirtualMachine   = FuelVM_Run;
+	builderApi->SetMethodCode        = FuelVM_SetMethodCode;
+	builderApi->RunVirtualMachine    = FuelVM_Run;
 }
 
 static struct KBuilderAPI *GetDefaultBuilderAPI(void)

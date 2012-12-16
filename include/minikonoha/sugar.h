@@ -746,9 +746,10 @@ struct KBuilderCommon {
 
 struct KBuilderAPI {
 	const char *target;
-	struct KVirtualCode*   (*GenerateKVirtualCode)(KonohaContext *, kMethod *mtd, kBlock *block, int option);
-	KMethodFunc            (*GenerateKMethodFunc)(KonohaContext *, struct KVirtualCode *);
-	struct KVirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
+	struct KVirtualCode *(*GenerateKVirtualCode)(KonohaContext *, kMethod *mtd, kBlock *block, int option);
+	KMethodFunc          (*GenerateKMethodFunc)(KonohaContext *, struct KVirtualCode *);
+	void                 (*SetMethodCode)(KonohaContext *, kMethodVar *mtd, struct KVirtualCode *, KMethodFunc func);
+	struct KVirtualCode *(*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
 
 	KStmtVisitFunc visitErrStmt;
 	KStmtVisitFunc visitExprStmt;

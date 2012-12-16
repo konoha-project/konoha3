@@ -460,7 +460,6 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 
 static void JSBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
-	JSBuilder *jsBuilder = (JSBuilder *)builder;
 	kMethod *mtd = CallExpr_getMethod(expr);
 	kbool_t isArray = false;
 
@@ -722,6 +721,12 @@ static KMETHOD KMethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *s
 {
 }
 
+static void V8_SetMethodCode(KonohaContext *kctx, kMethodVar *mtd, KVirtualCode *vcode, KMethodFunc func)
+{
+	KLIB kMethod_SetFunc(kctx, mtd, func);
+	mtd->vcode_start = vcode;
+}
+
 static KMethodFunc V8_GenerateKMethodFunc(KonohaContext *kctx, KVirtualCode *vcode)
 {
 	return KMethodFunc_RunVirtualMachine;
@@ -740,6 +745,7 @@ static void InitStaticBuilderApi(struct KBuilderAPI *builderApi)
 #undef DEFINE_BUILDER_API
 	builderApi->GenerateKVirtualCode = V8_GenerateKVirtualCode;
 	builderApi->GenerateKMethodFunc  = V8_GenerateKMethodFunc;
+	builderApi->SetMethodCode        = V8_SetMethodCode;
 	//builderApi->RunVirtualMachine   = KonohaVirtualMachine_Run;
 }
 

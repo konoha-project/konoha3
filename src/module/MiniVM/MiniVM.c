@@ -1005,6 +1005,12 @@ static KMethodFunc MiniVM_GenerateKMethodFunc(KonohaContext *kctx, KVirtualCode 
 	return KMethodFunc_RunVirtualMachine;
 }
 
+static void MiniVM_SetMethodCode(KonohaContext *kctx, kMethodVar *mtd, KVirtualCode *vcode, KMethodFunc func)
+{
+	KLIB kMethod_SetFunc(kctx, mtd, func);
+	mtd->vcode_start = vcode;
+}
+
 static struct KVirtualCode* GetDefaultBootCode(void)
 {
 	return BOOTCODE_NCALL;
@@ -1018,6 +1024,7 @@ static void InitStaticBuilderApi(struct KBuilderAPI *builderApi)
 #undef DEFINE_BUILDER_API
 	builderApi->GenerateKVirtualCode = MiniVM_GenerateKVirtualCode;
 	builderApi->GenerateKMethodFunc = MiniVM_GenerateKMethodFunc;
+	builderApi->SetMethodCode = MiniVM_SetMethodCode;
 	builderApi->RunVirtualMachine   = KonohaVirtualMachine_Run;
 }
 

@@ -1078,6 +1078,7 @@ static ByteCode *IRBuilder_Lowering(FuelIRBuilder *builder)
 
 	struct KVirtualCodeAPI **api = (struct KVirtualCodeAPI **) (pc+1);
 	api[-1] = &fuelvm_api;
+	((unsigned *) pc)[0] = FUELVM_BYTECODE_MAGICNUMBER;
 
 	Code.list = 0;
 	return pc+1;
