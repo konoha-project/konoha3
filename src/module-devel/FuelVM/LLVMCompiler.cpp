@@ -414,10 +414,6 @@ static void LLVMIRBuilder_visitValue(Visitor *visitor, INode *Node, const char *
 			SetArgument(writer, Node, Val.ival);
 			return;
 		}
-		CASE(ILabel) {
-			assert(0 && "unreachable");
-			break;
-		}
 		CASE(IField) {
 			asm volatile("int3");
 			return;
