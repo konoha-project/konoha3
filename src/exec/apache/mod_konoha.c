@@ -32,6 +32,7 @@
 #endif
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/klib.h>
 #include <minikonoha/platform.h>
 #include <minikonoha/platform_posix.h>
 #include "../../package/apache/apache_glue.h"

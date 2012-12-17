@@ -116,7 +116,7 @@ static KMETHOD System_getUline(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Expr_getCons(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kExpr *expr = (kExpr *) sfp[0].asObject;
-	KReturn(expr->cons);
+	KReturn(expr->NodeList);
 }
 
 static KMETHOD Expr_getSingle(KonohaContext *kctx, KonohaStack *sfp)
@@ -415,7 +415,7 @@ static KMETHOD Block_getEspIndex(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Block_getBlocks(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBlock *bk = (kBlock *) sfp[0].asObject;
-	KReturn(bk->StmtList);
+	KReturn(bk->NodeList);
 }
 
 //## int Array.getSize();

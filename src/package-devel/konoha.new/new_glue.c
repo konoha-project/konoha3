@@ -34,9 +34,9 @@ extern "C"{
 static kExpr* NewExpr(KonohaContext *kctx, KSyntax *syn, kToken *tk, ktypeattr_t ty)
 {
 	kExprVar *expr = new_(ExprVar, syn, OnGcStack);
-	KFieldSet(expr, expr->termToken, tk);
+	KFieldSet(expr, expr->TermToken, tk);
 	kExpr_SetTerm(expr, 1);
-	expr->build = TEXPR_NEW;
+	expr->node = TEXPR_NEW;
 	expr->attrTypeId = ty;
 	return (kExpr *)expr;
 }

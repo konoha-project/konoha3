@@ -25,6 +25,7 @@
 #include <minikonoha/minikonoha.h>
 #define USE_AsciiToKonohaChar
 #include <minikonoha/sugar.h>
+#include <minikonoha/klib.h>
 #include <minikonoha/konoha_common.h>
 #include <stdio.h>
 
@@ -302,10 +303,10 @@ static KMETHOD Block_TypeCheckAll(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(SUGAR kBlock_TypeCheckAll(kctx, sfp[0].asBlock, sfp[1].asGamma));
 }
 
-//## Array[Stmt] Block.GetStmtList();
-static KMETHOD Block_GetStmtList(KonohaContext *kctx, KonohaStack *sfp)
+//## Array[Stmt] Block.GetNodeList();
+static KMETHOD Block_GetNodeList(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturn(sfp[0].asBlock->StmtList);
+	KReturn(sfp[0].asBlock->NodeList);
 }
 
 //## Stmt Block.GetParentStmt();
@@ -323,7 +324,7 @@ static void desugar_defineBlockMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 		_Public|_Const, _F(Block_new), KType_Block, KType_Block, KKMethodName_("new"), 1, KType_NameSpace, KFieldName_("namespace"),
 		_Public, _F(Block_TypeCheckAll), KType_boolean, KType_Block, KKMethodName_("TypeCheckAll"), 1, TP_gma,
 		_Public, _F(Stmt_newBlock), KType_Block, KType_Stmt, KKMethodName_("newBlock"), 3, TP_tokens, TP_begin, TP_end,
-		_Public, _F(Block_GetStmtList), KType_StmtArray, KType_Block, KKMethodName_("GetStmtList"), 0,
+		_Public, _F(Block_GetNodeList), KType_StmtArray, KType_Block, KKMethodName_("GetNodeList"), 0,
 		_Public, _F(Block_GetParentStmt), KType_Stmt, KType_Block, KKMethodName_("GetParentStmt"), 0,
 		DEND,
 	};
@@ -422,14 +423,14 @@ static KMETHOD Stmt_getToken(KonohaContext *kctx, KonohaStack *sfp)
 ////## int Stmt.getBuild();
 //static KMETHOD Stmt_getBuild(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	KReturnUnboxValue(sfp[0].asStmt->build);
+//	KReturnUnboxValue(sfp[0].asStmt->node);
 //}
 //
 ////## void Stmt.setBuild(int buildid);
 //static KMETHOD Stmt_setBuild(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kStmtVar *stmt = (kStmtVar *) sfp[0].asStmt;
-//	stmt->build = sfp[1].intValue;
+//	stmt->node = sfp[1].intValue;
 //}
 
 //## boolean Stmt.TypeCheckExpr(symbol key, Gamma gma, Object type, int policy);
@@ -587,7 +588,7 @@ static KMETHOD Stmt_getParentBlock(KonohaContext *kctx, KonohaStack *sfp)
 static kStmt* kStmt_LookupStmtNULL(KonohaContext *kctx, kStmt *stmt, ksymbol_t keyword)
 {
 	int i;
-	kArray *bka = stmt->parentBlockNULL->StmtList;
+	kArray *bka = stmt->parentBlockNULL->NodeList;
 	kStmt *prevTargetStmt = NULL;
 	for(i = 0; kArray_size(bka); i++) {
 		kStmt *s = bka->StmtItems[i];
@@ -709,7 +710,7 @@ static void desugar_defineStmtMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 //static KMETHOD Expr_getTermToken(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kExpr *expr = sfp[0].asExpr;
-//	KReturn(expr->termToken);
+//	KReturn(expr->TermToken);
 //}
 //
 ////## Expr Expr.setConstValue(Object value);
@@ -728,7 +729,7 @@ static void desugar_defineStmtMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 //{
 //	kExpr *expr    = sfp[0].asExpr;
 //	kGamma *gma    = sfp[1].asGamma;
-//	kexpr_t build  = (kexpr_t)sfp[2].intValue;
+//	knode_t build  = (knode_t)sfp[2].intValue;
 //	ktypeattr_t cid    = (ktypeattr_t)sfp[3].intValue;
 //	intptr_t index = sfp[4].unboxValue;
 //	KReturn(SUGAR kExpr_SetVariable(kctx, expr, gma, build, cid, index));
@@ -738,7 +739,7 @@ static void desugar_defineStmtMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 //static KMETHOD Expr_newVariableExpr(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kGamma *gma    = sfp[1].asGamma;
-//	kexpr_t build  = (kexpr_t)sfp[2].intValue;
+//	knode_t build  = (knode_t)sfp[2].intValue;
 //	ktypeattr_t cid    = (ktypeattr_t)sfp[3].intValue;
 //	intptr_t index = sfp[4].unboxValue;
 //	KReturn(new_VariableExpr(kctx, gma, build, cid, index));
@@ -758,9 +759,9 @@ static KMETHOD Expr_new(KonohaContext *kctx, KonohaStack *sfp)
 //static KMETHOD Expr_setType(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kExprVar *expr = (kExprVar *)sfp[0].asExpr;
-//	kexpr_t build  = (kexpr_t)sfp[1].intValue;
+//	knode_t build  = (knode_t)sfp[1].intValue;
 //	ktypeattr_t cid    = (ktypeattr_t)sfp[2].intValue;
-//	expr->build = build;
+//	expr->node = build;
 //	expr->attrTypeId = cid;
 //	KReturnVoid();
 //}
@@ -834,7 +835,7 @@ static void desugar_defineExprMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 //	assert(tk->keyword != 0);
 //	kExprVar *expr = /*G*/new_(ExprVar, KSyntax_(Stmt_ns(stmt), tk->keyword));
 //	KFieldSet(expr, expr->tk, tk);
-//	KFieldSet(expr, expr->cons, new_(Array, 8));
+//	KFieldSet(expr, expr->NodeList, new_(Array, 8));
 //	KReturn(expr);
 //}
 
@@ -861,11 +862,11 @@ static void desugar_defineExprMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 //{
 //	kExpr *expr  = sfp[0].asExpr;
 //	kExpr *o     = sfp[1].asExpr;
-//	if(IS_NULL(o) && IS_Array(expr->cons)) {
+//	if(IS_NULL(o) && IS_Array(expr->NodeList)) {
 //		kObject_Set(NullObject, expr, 1);
 //	}
 //	if(IS_NOTNULL(expr)) {
-//		KLIB kArray_Add(kctx, expr->cons, o);
+//		KLIB kArray_Add(kctx, expr->NodeList, o);
 //	}
 //	KReturn(expr);
 //}

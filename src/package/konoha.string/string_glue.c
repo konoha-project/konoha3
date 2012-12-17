@@ -181,7 +181,7 @@ static kString *remove_escapes(KonohaContext *kctx, kToken *tk)
 static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
-	kToken  *tk   = expr->termToken;
+	kToken  *tk   = expr->TermToken;
 	INIT_GCSTACK();
 	kString *text = remove_escapes(kctx, tk);
 	if(text == NULL) {

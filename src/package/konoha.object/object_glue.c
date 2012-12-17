@@ -87,9 +87,9 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 		kNameSpace *ns = Stmt_ns(stmt);
 		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, KKMethodName_("<:"), 1, KMethodMatch_NoOption);
 		DBG_ASSERT(mtd != NULL);
-		KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
-		kExpr *classValue = SUGAR kExpr_SetConstValue(kctx, expr->cons->ExprVarItems[2], NULL, KLIB Knull(kctx, targetClass));
-		KFieldSet(expr->cons, expr->cons->ExprItems[2], classValue);
+		KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], mtd);
+		kExpr *classValue = SUGAR kExpr_SetConstValue(kctx, expr->NodeList->ExprVarItems[2], NULL, KLIB Knull(kctx, targetClass));
+		KFieldSet(expr->NodeList, expr->NodeList->ExprItems[2], classValue);
 		KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, KClass_Boolean));
 	}
 }

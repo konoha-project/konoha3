@@ -24,6 +24,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/klib.h>
 #include <minikonoha/konoha_common.h>
 
 #ifdef __cplusplus
@@ -564,7 +565,7 @@ static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	size_t i;
 	KClass *requestClass = KClass_(reqty);
 	KClass *paramType = (requestClass->baseTypeId == KType_Array) ? KClass_(requestClass->p0) : KClass_INFER;
-	for(i = 2; i < kArray_size(expr->cons); i++) {
+	for(i = 2; i < kArray_size(expr->NodeList); i++) {
 		kExpr *typedExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, i, gma, paramType, 0);
 		if(typedExpr == K_NULLEXPR) {
 			KReturn(typedExpr);
@@ -578,8 +579,8 @@ static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), KClass_Array, KKMethodName_("[]"), -1, KMethodMatch_NoOption);
 	DBG_ASSERT(mtd != NULL);
-	KFieldSet(expr, expr->cons->MethodItems[0], mtd);
-	KFieldSet(expr, expr->cons->ExprItems[1], SUGAR kExpr_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, kArray_size(expr->cons) - 2));
+	KFieldSet(expr, expr->NodeList->MethodItems[0], mtd);
+	KFieldSet(expr, expr->NodeList->ExprItems[1], SUGAR kExpr_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, kArray_size(expr->NodeList) - 2));
 	KReturn(Expr_typed(expr, TEXPR_CALL, requestClass->typeId));
 }
 

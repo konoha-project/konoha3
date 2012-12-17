@@ -26,7 +26,7 @@ static kbool_t VisitStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
 	kbool_t ret = false;
 	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
-	switch(stmt->build) {
+	switch(stmt->node) {
 		case TSTMT_ERR:   ret = cbuilder->api->visitErrStmt(kctx, builder, stmt); break;
 		case TSTMT_EXPR:  ret = cbuilder->api->visitExprStmt(kctx, builder, stmt);   break;
 		case TSTMT_BLOCK: ret = cbuilder->api->visitBlockStmt(kctx, builder, stmt);  break;
@@ -46,7 +46,7 @@ static void VisitExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr
 	int a = cbuilder->a;
 	int espidx = cbuilder->espidx;
 	int shift = cbuilder->shift;
-	switch(expr->build) {
+	switch(expr->node) {
 		case TEXPR_CONST:    cbuilder->api->visitConstExpr(kctx, builder, stmt, expr);  break;
 		case TEXPR_NEW:      cbuilder->api->visitNewExpr(kctx, builder, stmt, expr);    break;
 		case TEXPR_NULL:     cbuilder->api->visitNullExpr(kctx, builder, stmt, expr);   break;
@@ -59,7 +59,7 @@ static void VisitExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr
 		case TEXPR_OR:       cbuilder->api->visitOrExpr(kctx, builder, stmt, expr);     break;
 		case TEXPR_LET:      cbuilder->api->visitLetExpr(kctx, builder, stmt, expr);    break;
 		case TEXPR_STACKTOP: cbuilder->api->visitStackTopExpr(kctx, builder, stmt, expr);break;
-		default: DBG_ABORT("unknown expr=%d", expr->build);
+		default: DBG_ABORT("unknown expr=%d", expr->node);
 	}
 	cbuilder->a = a;
 	cbuilder->espidx = espidx;
@@ -72,11 +72,11 @@ static kbool_t VisitBlock(KonohaContext *kctx, KBuilder *builder, kBlock *block)
 	int a = cbuilder->a;
 	int espidx = cbuilder->espidx;
 	int shift = cbuilder->shift;
-	cbuilder->espidx = (block->esp->build == TEXPR_STACKTOP) ? shift + block->esp->index : block->esp->index;
+	cbuilder->espidx = (block->esp->node == TEXPR_STACKTOP) ? shift + block->esp->index : block->esp->index;
 	kbool_t ret = true;
 	size_t i;
-	for (i = 0; i < kArray_size(block->StmtList); i++) {
-		kStmt *stmt = block->StmtList->StmtItems[i];
+	for (i = 0; i < kArray_size(block->NodeList); i++) {
+		kStmt *stmt = block->NodeList->StmtItems[i];
 		if(stmt->syn == NULL) continue;
 		cbuilder->uline = stmt->uline;
 		if(!VisitStmt(kctx, builder, stmt)) {

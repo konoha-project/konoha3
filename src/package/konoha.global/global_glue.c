@@ -76,7 +76,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktypeattr_t ty, kExpr *termExpr, kExpr *valueExpr, kObject *scr)
 {
 	kNameSpace *ns = Stmt_ns(stmt);
-	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termExpr->termToken->resolvedSymbol);
+	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termExpr->TermToken->resolvedSymbol);
 	if(mtd != NULL) {
 		kExpr *recvExpr =  new_ConstValueExpr(kctx, NULL, scr);
 		kExpr *setterExpr = SUGAR new_TypedCallExpr(kctx, stmt, gma, KType_void, mtd,  2, recvExpr, valueExpr);

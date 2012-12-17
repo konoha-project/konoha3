@@ -22,7 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-
 #define PACKSUGAR    .packageId = 1, .packageDomain = 1
 
 /* --------------- */
@@ -148,25 +147,128 @@ static void kToken_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer 
 #endif
 }
 
+#ifdef USE_NODE
+/* Node */
+
+static void kNode_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kNodeVar *node = (kNodeVar *)o;
+	node->node             = KNode_Done;
+	node->attrTypeId       = KType_var;
+	node->parentNULL = NULL;
+	if(conf != NULL) {
+		KFieldInit(node, node->TermToken, (kToken *)conf);
+	}
+	else {
+		KFieldInit(node, node->NodeList, K_EMPTYARRAY);
+	}
+	node->index = 0L;
+}
+
+static void kNode_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+{
+	kNodeVar *node = (kNodeVar *)o;
+	KRefTrace(node->TermToken);
+	if(kNode_Is(ObjectConst, node)) {
+		KRefTrace(node->ObjectConstValue);
+	}
+}
+
+static kUNode* new_UntypedNode(KonohaContext *kctx, kArray *gcstack, KSyntax *syn, kToken *termNULL)
+{
+	kUNode *unode = (kUNode *)new_(Node, termNULL, gcstack);
+	unode->syn = syn;
+	return unode;
+}
+
+static kUNode* new_TermNode(KonohaContext *kctx, kToken *tk)
+{
+	kUNode *unode = new_UntypedNode(kctx, OnGcStack, tk->resolvedSyntaxInfo, tk);
+	unode->uline = tk->uline;
+	return unode;
+}
+
+static kUNode* new_OperatorNode(KonohaContext *kctx, kToken *tk)
+{
+	kUNode *unode = new_UntypedNode(kctx, OnGcStack, tk->resolvedSyntaxInfo, NULL);
+	KFieldSet(unode, unode->NodeList, new_(Array, 0, OnField));
+	KLIB kArray_Add(kctx, unode->NodeList, tk);
+	unode->uline = tk->uline;
+	return unode;
+}
+
+static void kNode_addNode(KonohaContext *kctx, kUNode *self, kUNode *node)
+{
+	if(self->NodeList == K_EMPTYARRAY) {
+		KFieldSet(self, self->NodeList, new_(Array, 0, OnField));
+	}
+	DBG_ASSERT(IS_Array(self->NodeList));
+	KLIB kArray_Add(kctx, self->NodeList, node);
+	DBG_ASSERT(node->parentNULL == NULL);
+	KFieldInit(node, node->parentNULL, self);
+}
+
+static kUNode* new_BlockNode(KonohaContext *kctx, kNameSpace *ns)
+{
+	KSyntax *syn = KSyntax_(ns, KSymbol_BlockPattern);
+	kUNode *unode = new_UntypedNode(kctx, OnGcStack, syn, NULL);
+	return unode;
+}
+
+static kUNode* new_StmtNode(KonohaContext *kctx, kToken *tk)
+{
+	kUNode *unode = new_UntypedNode(kctx, OnGcStack, tk->resolvedSyntaxInfo, NULL);
+	unode->uline = tk->uline;
+	return unode;
+}
+
+static kNodeVar* kNode_AddSeveral(KonohaContext *kctx, kNodeVar *expr, int n, va_list ap)
+{
+	int i;
+	if(!IS_Array(expr->NodeList)) {
+		KFieldSet(expr, expr->NodeList, new_(Array, 0, OnField));
+	}
+	for(i = 0; i < n; i++) {
+		kObject *v =  (kObject *)va_arg(ap, kObject *);
+		if(v == NULL || v == (kObject *)K_NULLEXPR) {
+			return (kNodeVar *)K_NULLEXPR;
+		}
+		KLIB kArray_Add(kctx, expr->NodeList, v);
+	}
+	return expr;
+}
+
+static kNodeVar* new_UntypedCallStyleNode(KonohaContext *kctx, KSyntax *syn, int n, ...)
+{
+	va_list ap;
+	va_start(ap, n);
+	DBG_ASSERT(syn != NULL);
+	kNodeVar *expr = new_(NodeVar, syn, OnGcStack);
+	expr = kNode_AddSeveral(kctx, expr, n, ap);
+	va_end(ap);
+	return expr;
+}
+
+#else
 /* --------------- */
 /* Expr */
 
 static void kExpr_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kExprVar *expr = (kExprVar *)o;
-	expr->build    = TEXPR_UNTYPED;
+	expr->node    = TEXPR_UNTYPED;
 	expr->attrTypeId       = KType_var;
 	expr->index    = 0;
-	KFieldInit(expr, expr->termToken, K_NULLTOKEN);
+	KFieldInit(expr, expr->TermToken, K_NULLTOKEN);
 	expr->syn = (KSyntax *)conf;
 }
 
 static void kExpr_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kExpr *expr = (kExpr *)o;
-	KRefTrace(expr->termToken);
+	KRefTrace(expr->TermToken);
 	if(kExpr_HasObjectConstValue(expr)) {
-		KRefTrace(expr->objectConstValue);
+		KRefTrace(expr->ObjectConstValue);
 	}
 }
 
@@ -188,46 +290,46 @@ static void kExpr_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 #ifndef USE_SMALLBUILD
 	kExpr *expr = values[pos].asExpr;
 	KLIB KBuffer_Write(kctx, wb, "(", 1);
-	if(expr->build == TEXPR_CONST) {
+	if(expr->node == TEXPR_CONST) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("const "));
-		kExprTerm_p(kctx, (kObject *)expr->objectConstValue, values, pos+1, wb);
+		kExprTerm_p(kctx, (kObject *)expr->ObjectConstValue, values, pos+1, wb);
 	}
-	else if(expr->build == TEXPR_NEW) {
+	else if(expr->node == TEXPR_NEW) {
 		KLIB KBuffer_printf(kctx, wb, "new %s", KType_text(expr->attrTypeId));
 	}
-	else if(expr->build == TEXPR_NULL) {
+	else if(expr->node == TEXPR_NULL) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("null"));
 	}
-	else if(expr->build == TEXPR_NCONST) {
+	else if(expr->node == TEXPR_NCONST) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("const "));
 		values[pos+1].unboxValue = expr->unboxConstValue;
 		KClass_(expr->attrTypeId)->p(kctx, values, pos+1, wb);
 	}
-	else if(expr->build == TEXPR_LOCAL) {
+	else if(expr->node == TEXPR_LOCAL) {
 		KLIB KBuffer_printf(kctx, wb, "local sfp[%d]", (int)expr->index);
 	}
-	else if(expr->build == TEXPR_BLOCK) {
+	else if(expr->node == TEXPR_BLOCK) {
 		KLIB KBuffer_printf(kctx, wb, "block %d", expr->index);
 	}
-	else if(expr->build == TEXPR_FIELD) {
+	else if(expr->node == TEXPR_FIELD) {
 		kshort_t index  = (kshort_t)expr->index;
 		kshort_t xindex = (kshort_t)(expr->index >> (sizeof(kshort_t)*8));
 		KLIB KBuffer_printf(kctx, wb, "field sfp[%d][%d]", (int)index, (int)xindex);
 	}
-	else if(expr->build == TEXPR_STACKTOP) {
+	else if(expr->node == TEXPR_STACKTOP) {
 		KLIB KBuffer_printf(kctx, wb, "stack %d", expr->index);
 	}
 	else if(kExpr_IsTerm(expr)) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("term "));
-		kExprTerm_p(kctx, (kObject *)expr->termToken, values, pos+1, wb);
+		kExprTerm_p(kctx, (kObject *)expr->TermToken, values, pos+1, wb);
 	}
-	else if(IS_Array(expr->cons)) {
+	else if(IS_Array(expr->NodeList)) {
 		size_t i;
-		for(i = 0; i < kArray_size(expr->cons); i++) {
+		for(i = 0; i < kArray_size(expr->NodeList); i++) {
 			if(i > 0) {
 				KLIB KBuffer_Write(kctx, wb, " ", 1);
 			}
-			kExprTerm_p(kctx, expr->cons->ObjectItems[i], values, pos+1, wb);
+			kExprTerm_p(kctx, expr->NodeList->ObjectItems[i], values, pos+1, wb);
 		}
 	}
 	KLIB KBuffer_Write(kctx, wb, ")", 1);
@@ -240,7 +342,7 @@ static void kExpr_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 static kExpr* new_TermExpr(KonohaContext *kctx, kToken *tk)
 {
 	kExprVar *expr = new_(ExprVar, tk->resolvedSyntaxInfo, OnGcStack);
-	KFieldSet(expr, expr->termToken, tk);
+	KFieldSet(expr, expr->TermToken, tk);
 	kExpr_SetTerm(expr, 1);
 	return (kExpr *)expr;
 }
@@ -248,15 +350,15 @@ static kExpr* new_TermExpr(KonohaContext *kctx, kToken *tk)
 static kExprVar* kExpr_AddSeveral(KonohaContext *kctx, kExprVar *expr, int n, va_list ap)
 {
 	int i;
-	if(!IS_Array(expr->cons)) {
-		KFieldSet(expr, expr->cons, new_(Array, 0, OnField));
+	if(!IS_Array(expr->NodeList)) {
+		KFieldSet(expr, expr->NodeList, new_(Array, 0, OnField));
 	}
 	for(i = 0; i < n; i++) {
 		kObject *v =  (kObject *)va_arg(ap, kObject *);
 		if(v == NULL || v == (kObject *)K_NULLEXPR) {
 			return (kExprVar *)K_NULLEXPR;
 		}
-		KLIB kArray_Add(kctx, expr->cons, v);
+		KLIB kArray_Add(kctx, expr->NodeList, v);
 	}
 	return expr;
 }
@@ -279,7 +381,7 @@ static kExpr* new_TypedConsExpr(KonohaContext *kctx, int build, KClass *ty, int 
 	va_start(ap, n);
 	expr = kExpr_AddSeveral(kctx, expr, n, ap);
 	va_end(ap);
-	expr->build = build;
+	expr->node = build;
 	expr->attrTypeId = ty->typeId;
 	return (kExpr *)expr;
 }
@@ -291,20 +393,20 @@ static kExpr* new_TypedCallExpr(KonohaContext *kctx, kStmt *stmt, kGamma *gma, K
 	va_list ap;
 	va_start(ap, n);
 	kExprVar *expr = new_(ExprVar, NULL, OnGcStack);
-	KFieldSet(expr, expr->cons, new_(Array, 8, OnField));
-	KLIB kArray_Add(kctx, expr->cons, mtd);
+	KFieldSet(expr, expr->NodeList, new_(Array, 8, OnField));
+	KLIB kArray_Add(kctx, expr->NodeList, mtd);
 	expr = kExpr_AddSeveral(kctx, expr, n, ap);
 	va_end(ap);
-	expr->build = TEXPR_CALL;
+	expr->node = TEXPR_CALL;
 	//expr->attrTypeId = reqClass->typeId;
 	return kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, reqClass);
 }
 
 static kExpr* kExpr_Add(KonohaContext *kctx, kExpr *expr, kExpr *e)
 {
-	DBG_ASSERT(IS_Array(expr->cons));
+	DBG_ASSERT(IS_Array(expr->NodeList));
 	if(expr != K_NULLEXPR && e != NULL && e != K_NULLEXPR) {
-		KLIB kArray_Add(kctx, expr->cons, e);
+		KLIB kArray_Add(kctx, expr->NodeList, e);
 		return expr;
 	}
 	return K_NULLEXPR;
@@ -316,12 +418,12 @@ static kExpr* SUGAR kExpr_SetConstValue(KonohaContext *kctx, kExprVar *expr, KCl
 	if(typedClass == NULL) typedClass = kObject_class(o);
 	expr->attrTypeId = typedClass->typeId;
 	if(KClass_Is(UnboxType, typedClass)) {
-		expr->build = TEXPR_NCONST;
+		expr->node = TEXPR_NCONST;
 		expr->unboxConstValue = kNumber_ToInt(o);
 	}
 	else {
-		expr->build = TEXPR_CONST;
-		KFieldInit(expr, expr->objectConstValue, o);
+		expr->node = TEXPR_CONST;
+		KFieldInit(expr, expr->ObjectConstValue, o);
 		kExpr_SetObjectConstValue(expr, 1);
 	}
 	return (kExpr *)expr;
@@ -330,20 +432,20 @@ static kExpr* SUGAR kExpr_SetConstValue(KonohaContext *kctx, kExprVar *expr, KCl
 static kExpr* SUGAR kExpr_SetUnboxConstValue(KonohaContext *kctx, kExprVar *expr, ktypeattr_t attrTypeId, uintptr_t unboxValue)
 {
 	expr = (expr == NULL) ? new_(ExprVar, 0, OnGcStack) : (kExprVar *)expr;
-	expr->build = TEXPR_NCONST;
+	expr->node = TEXPR_NCONST;
 	expr->unboxConstValue = unboxValue;
 	expr->attrTypeId = attrTypeId;
 	return (kExpr *)expr;
 }
 
-static kExpr* SUGAR kExpr_SetVariable(KonohaContext *kctx, kExprVar *expr, kGamma *gma, kexpr_t build, ktypeattr_t attrTypeId, intptr_t index)
+static kExpr* SUGAR kExpr_SetVariable(KonohaContext *kctx, kExprVar *expr, kGamma *gma, knode_t build, ktypeattr_t attrTypeId, intptr_t index)
 {
 	expr = (expr == NULL) ? new_(ExprVar, 0, OnGcStack) : (kExprVar *)expr;
-	expr->build = build;
+	expr->node = build;
 	expr->attrTypeId = attrTypeId;
 	expr->index = index;
 	if(build == TEXPR_LOCAL && gma->genv->blockScopeShiftSize > 0 && index >= gma->genv->blockScopeShiftSize) {
-		expr->build = TEXPR_STACKTOP;
+		expr->node = TEXPR_STACKTOP;
 		expr->index -= gma->genv->blockScopeShiftSize;
 	}
 	return (kExpr *)expr;
@@ -357,10 +459,10 @@ static void kStmt_Init(KonohaContext *kctx, kObject *o, void *conf)
 	kStmtVar *stmt = (kStmtVar *)o;
 	stmt->uline    = (kfileline_t)conf;
 	stmt->syn      = NULL;
-	stmt->build    = 0;
+	stmt->node    = 0;
 
 	stmt->parentBlockNULL = NULL;
-	stmt->build    = 0;
+	stmt->node    = 0;
 }
 
 static void kStmt_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
@@ -434,7 +536,7 @@ static const char* kStmt_GetText(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw,
 	kExpr *expr = (kExpr *)kStmt_GetObjectNULL(kctx, stmt, kw);
 	if(expr != NULL) {
 		if(IS_Expr(expr) && kExpr_IsTerm(expr)) {
-			return kString_text(expr->termToken->text);
+			return kString_text(expr->TermToken->text);
 		}
 		else if(IS_Token(expr)) {
 			kToken *tk = (kToken *)expr;
@@ -453,7 +555,7 @@ static void kBlock_Init(KonohaContext *kctx, kObject *o, void *conf)
 	kNameSpace *ns = (conf != NULL) ? (kNameSpace *)conf : KNULL(NameSpace);
 	bk->parentStmtNULL = NULL;
 	KFieldInit(bk, bk->BlockNameSpace, ns);
-	KFieldInit(bk, bk->StmtList, new_(StmtArray, 0, OnField));
+	KFieldInit(bk, bk->NodeList, new_(StmtArray, 0, OnField));
 	KFieldInit(bk, bk->esp, new_(Expr, 0, OnField));
 }
 
@@ -461,7 +563,7 @@ static void kBlock_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 {
 	kBlock *bk = (kBlock *)o;
 	KRefTrace(bk->BlockNameSpace);
-	KRefTrace(bk->StmtList);
+	KRefTrace(bk->NodeList);
 	KRefTrace(bk->esp);
 	KRefTraceNullable(bk->parentStmtNULL);
 }
@@ -471,18 +573,20 @@ static void kBlock_InsertAfter(KonohaContext *kctx, kBlock *bk, kStmtNULL *targe
 	KFieldSet(stmt, ((kStmtVar *)stmt)->parentBlockNULL, bk);
 	if(target != NULL) {
 		size_t i;
-		for(i = 0; i < kArray_size(bk->StmtList); i++) {
-			if(bk->StmtList->StmtItems[i] == target) {
-				KLIB kArray_Insert(kctx, bk->StmtList, i+1, stmt);
+		for(i = 0; i < kArray_size(bk->NodeList); i++) {
+			if(bk->NodeList->StmtItems[i] == target) {
+				KLIB kArray_Insert(kctx, bk->NodeList, i+1, stmt);
 				return;
 			}
 		}
 		DBG_ABORT("target was not found!!");
 	}
 	else {
-		KLIB kArray_Add(kctx, bk->StmtList, stmt);
+		KLIB kArray_Add(kctx, bk->NodeList, stmt);
 	}
 }
+
+#endif/*USE_NODE*/
 
 /* --------------- */
 /* Block */

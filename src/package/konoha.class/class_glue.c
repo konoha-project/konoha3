@@ -221,13 +221,13 @@ static size_t kBlock_countFieldSize(KonohaContext *kctx, kBlock *bk)
 {
 	size_t i, c = 0;
 	if(bk != NULL) {
-		for(i = 0; i < kArray_size(bk->StmtList); i++) {
-			kStmt *stmt = bk->StmtList->StmtItems[i];
+		for(i = 0; i < kArray_size(bk->NodeList); i++) {
+			kStmt *stmt = bk->NodeList->StmtItems[i];
 			DBG_P("stmt->keyword=%s%s", KSymbol_Fmt2(stmt->syn->keyword));
 			if(stmt->syn->keyword == KSymbol_TypeDeclPattern) {
 				kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, NULL);
 				if(expr->syn->keyword == KSymbol_COMMA) {
-					c += (kArray_size(expr->cons) - 1);
+					c += (kArray_size(expr->NodeList) - 1);
 				}
 				else if(expr->syn->keyword == KSymbol_LET || kExpr_IsTerm(expr)) {
 					c++;
@@ -241,7 +241,7 @@ static size_t kBlock_countFieldSize(KonohaContext *kctx, kBlock *bk)
 static kbool_t kStmt_AddClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma, KClassVar *definedClass, ktypeattr_t ty, kExpr *expr)
 {
 	if(kExpr_IsTerm(expr)) {  // String name
-		kString *name = expr->termToken->text;
+		kString *name = expr->TermToken->text;
 		ksymbol_t symbol = KAsciiSymbol(kString_text(name), kString_size(name), KSymbol_NewId);
 		KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 		return true;
@@ -249,30 +249,30 @@ static kbool_t kStmt_AddClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma
 	else if(expr->syn->keyword == KSymbol_LET) {  // String name = "naruto";
 		kExpr *lexpr = kExpr_At(expr, 1);
 		if(kExpr_IsTerm(lexpr)) {
-			kString *name = lexpr->termToken->text;
+			kString *name = lexpr->TermToken->text;
 			ksymbol_t symbol = KAsciiSymbol(kString_text(name), kString_size(name), KSymbol_NewId);
 			kExpr *vexpr =  SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, KClass_(ty), 0);
 			if(vexpr == K_NULLEXPR) return false;
-			if(vexpr->build == TEXPR_CONST) {
+			if(vexpr->node == TEXPR_CONST) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
-				KClass_setClassFieldObjectValue(kctx, definedClass, symbol, vexpr->objectConstValue);
+				KClass_setClassFieldObjectValue(kctx, definedClass, symbol, vexpr->ObjectConstValue);
 			}
-			else if(vexpr->build == TEXPR_NCONST) {
+			else if(vexpr->node == TEXPR_NCONST) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 				KClass_setClassFieldUnboxValue(kctx, definedClass, symbol, vexpr->unboxConstValue);
 			}
-			else if(vexpr->build == TEXPR_NULL) {
+			else if(vexpr->node == TEXPR_NULL) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 			}
 			else {
-				SUGAR kStmt_Message2(kctx, stmt, lexpr->termToken, ErrTag, "field initial value must be const: %s", kString_text(name));
+				SUGAR kStmt_Message2(kctx, stmt, lexpr->TermToken, ErrTag, "field initial value must be const: %s", kString_text(name));
 				return false;
 			}
 			return true;
 		}
 	} else if(expr->syn->keyword == KSymbol_COMMA) {   // String (firstName = naruto, lastName)
 		size_t i;
-		for(i = 1; i < kArray_size(expr->cons); i++) {
+		for(i = 1; i < kArray_size(expr->NodeList); i++) {
 			if(!kStmt_AddClassField(kctx, stmt, gma, definedClass, ty, kExpr_At(expr, i))) return false;
 		}
 		return true;
@@ -285,8 +285,8 @@ static kbool_t kBlock_declClassField(KonohaContext *kctx, kBlock *bk, kGamma *gm
 {
 	size_t i;
 	kbool_t failedOnce = false;
-	for(i = 0; i < kArray_size(bk->StmtList); i++) {
-		kStmt *stmt = bk->StmtList->StmtItems[i];
+	for(i = 0; i < kArray_size(bk->NodeList); i++) {
+		kStmt *stmt = bk->NodeList->StmtItems[i];
 		if(stmt->syn->keyword == KSymbol_TypeDeclPattern) {
 			kToken *tk  = SUGAR kStmt_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
 			kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt,  KSymbol_ExprPattern, NULL);
@@ -302,8 +302,8 @@ static void kBlock_AddMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *to
 {
 	if(bk != NULL) {
 		size_t i;
-		for(i = 0; i < kArray_size(bk->StmtList); i++) {
-			kStmt *stmt = bk->StmtList->StmtItems[i];
+		for(i = 0; i < kArray_size(bk->NodeList); i++) {
+			kStmt *stmt = bk->NodeList->StmtItems[i];
 			if(stmt->syn->keyword == KSymbol_TypeDeclPattern) continue;
 			if(stmt->syn->keyword == KSymbol_MethodDeclPattern) {
 				kStmt *lastStmt = classStmt;
