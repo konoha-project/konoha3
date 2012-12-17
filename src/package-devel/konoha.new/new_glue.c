@@ -31,30 +31,30 @@ extern "C"{
 
 // --------------------------------------------------------------------------
 
-static kExpr* NewExpr(KonohaContext *kctx, KSyntax *syn, kToken *tk, ktypeattr_t ty)
+static kNode* NewNode(KonohaContext *kctx, KSyntax *syn, kToken *tk, ktypeattr_t ty)
 {
-	kExprVar *expr = new_(ExprVar, syn, OnGcStack);
+	kNodeVar *expr = new_(NodeVar, syn, OnGcStack);
 	KFieldSet(expr, expr->TermToken, tk);
-	kExpr_SetTerm(expr, 1);
+	kNode_SetTerm(expr, 1);
 	expr->node = TEXPR_NEW;
 	expr->attrTypeId = ty;
-	return (kExpr *)expr;
+	return (kNode *)expr;
 }
 
-static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Nodeession_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Expression(stmt, tokenList, beginIdx, currentIdx, endIdx);
+	VAR_Nodeession(stmt, tokenList, beginIdx, currentIdx, endIdx);
 	DBG_ASSERT(beginIdx == currentIdx);
 	if(beginIdx + 1 < endIdx) {
 		kTokenVar *newToken = tokenList->TokenVarItems[beginIdx];
 		KClass *foundClass = NULL;
-		kNameSpace *ns = Stmt_ns(stmt);
+		kNameSpace *ns = Node_ns(stmt);
 		int nextIdx = SUGAR TokenUtils_ParseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
 		if((size_t)nextIdx < kArray_size(tokenList)) {
 			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
 			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // new C (...)
-				KSyntax *syn = KSyntax_(ns, KSymbol_ExprMethodCall);
-				kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
+				KSyntax *syn = KSyntax_(ns, KSymbol_NodeMethodCall);
+				kNode *expr = SUGAR new_UntypedCallStyleNode(kctx, syn, 2, newToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
 				newToken->resolvedSymbol = MN_new;
 				KReturn(expr);
 			}
@@ -62,7 +62,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup) {     // new int [100]
 				kArray *subTokenList = nextTokenAfterClassName->subTokenList;
 				KClass *classT0 = NULL;
-				kExpr *expr;
+				kNode *expr;
 				int hasGenerics = -1;
 				if(kArray_size(subTokenList) > 0) {
 					hasGenerics = SUGAR TokenUtils_ParseTypePattern(kctx, ns, subTokenList, 0, kArray_size(subTokenList), &classT0);
@@ -70,17 +70,17 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 				if(hasGenerics != -1) {
 					/* new Type1[Type2[]] => Type1<Type2>.new Or Type1<Type2>.newList */
 					KClass *realType = KClass_p0(kctx, foundClass, classT0->typeId);
-					KSyntax *syn;// = (realType->baseTypeId != KType_Array) ? KSyntax_(ns, KSymbol_ExprMethodCall) : newsyn;
+					KSyntax *syn;// = (realType->baseTypeId != KType_Array) ? KSyntax_(ns, KSymbol_NodeMethodCall) : newsyn;
 					syn = newsyn;
 					newToken->resolvedSymbol = (realType->baseTypeId != KType_Array) ? MN_new : KKMethodName_("newArray");
-					expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, newToken,
-							NewExpr(kctx, syn, tokenList->TokenVarItems[beginIdx+1], realType->typeId));
+					expr = SUGAR new_UntypedCallStyleNode(kctx, syn, 2, newToken,
+							NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], realType->typeId));
 				} else {
 					/* new Type1[] => Array<Type1>.newList */
 					KClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
 					newToken->resolvedSymbol = KKMethodName_("newArray");
-					expr = SUGAR new_UntypedCallStyleExpr(kctx, newsyn, 2, newToken,
-							NewExpr(kctx, newsyn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));
+					expr = SUGAR new_UntypedCallStyleNode(kctx, newsyn, 2, newToken,
+							NewNode(kctx, newsyn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));
 				}
 				KReturn(expr);
 			}
@@ -94,7 +94,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t new_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("new"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Expression_new, NULL, NULL, NULL, },
+		{ KSymbol_("new"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Nodeession_new, NULL, NULL, NULL, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

@@ -34,14 +34,14 @@
 extern "C" {
 #endif
 
-struct Block;
-typedef struct Block Block;
-typedef Block *BlockPtr;
+struct Node;
+typedef struct Node Node;
+typedef Node *NodePtr;
 typedef struct INode INode;
 typedef INode *INodePtr;
 
-DEF_ARRAY_STRUCT(BlockPtr);
-DEF_ARRAY_T(BlockPtr);
+DEF_ARRAY_STRUCT(NodePtr);
+DEF_ARRAY_T(NodePtr);
 
 DEF_ARRAY_STRUCT(INodePtr);
 DEF_ARRAY_T(INodePtr);
@@ -89,7 +89,7 @@ typedef struct FuelIRBuilder FuelIRBuilder;
 	OP(IBinary)
 
 enum IRType {
-	TYPE_IR_Block,
+	TYPE_IR_Node,
 #define IR_TYPE_DECL(X) IR_TYPE_##X,
 	IR_LIST(IR_TYPE_DECL)
 #undef IR_TYPE_DECL
@@ -142,14 +142,14 @@ static inline void INode_setType(struct INode *Node, enum TypeId Type)
 typedef struct IMethod {
 	KonohaContext *Context;
 	kMethod       *Method;
-	Block         *EntryBlock;
+	Node         *EntryNode;
 } IMethod;
 
-/*$ BasicBlock */
-struct Block {
+/*$ BasicNode */
+struct Node {
 	INode base;
-	ARRAY(BlockPtr) preds;
-	ARRAY(BlockPtr) succs;
+	ARRAY(NodePtr) preds;
+	ARRAY(NodePtr) succs;
 	ARRAY(INodePtr) insts;
 };
 
@@ -233,24 +233,24 @@ typedef struct IUpdate {
 	INode  *RHS;
 } IUpdate;
 
-/*$ void IBranch { Inst, Block, Block } */
+/*$ void IBranch { Inst, Node, Node } */
 typedef struct IBranch {
 	INode base;
 	INode *Cond;
-	Block *ThenBB;
-	Block *ElseBB;
+	Node *ThenBB;
+	Node *ElseBB;
 } IBranch;
 
 enum TestOp {
 	TypeCheck, TypeGuard, SafePointCheck, Recompilation, BoundaryCheck
 };
 
-/*$ void Test { Variable, Block } */
+/*$ void Test { Variable, Node } */
 typedef struct ITest {
 	INode base;
 	enum TestOp Op;
 	IField *Value;
-	Block *TargetBlock;
+	Node *TargetNode;
 } ITest;
 
 /*$ Any Return { Inst } */
@@ -262,7 +262,7 @@ typedef struct IReturn {
 /*$ void Jump { Label } */
 typedef struct IJump {
 	INode base;
-	Block *TargetBlock;
+	Node *TargetNode;
 } IJump;
 
 /*$ void Throw { Inst } */
@@ -272,12 +272,12 @@ typedef struct IThrow {
 	uintptr_t uline;
 } IThrow;
 
-/*$ void Try { Block, [Field Block], Block } */
+/*$ void Try { Node, [Field Node], Node } */
 typedef struct ITry {
 	INode base;
-	Block *TryBB;
-	Block *FinallyBB;
-	ARRAY(BlockPtr) CatchBBs;
+	Node *TryBB;
+	Node *FinallyBB;
+	ARRAY(NodePtr) CatchBBs;
 } ITry;
 
 /*$ void Yield { Variable } */
@@ -313,7 +313,7 @@ typedef struct IBinary {
 
 typedef union INodeImpl {
 	INode Node;
-	Block Blk;
+	Node Blk;
 #define IR_TYPE_DECL(X) X _##X;
 	IR_LIST(IR_TYPE_DECL)
 #undef IR_TYPE_DECL
@@ -325,8 +325,8 @@ typedef struct IRBuilderAPI {
 	void (*Fn_Init)(FuelIRBuilder *builder);
 	void (*Fn_Exit)(FuelIRBuilder *builder);
 	void (*Fn_Dispose)(INode *Node);
-	/* Create BasicBlock Node */
-	Block *(*newBlock)(FuelIRBuilder *builder);
+	/* Create BasicNode Node */
+	Node *(*newNode)(FuelIRBuilder *builder);
 	/* Create Literal Node */
 	IConstant *(*newConstant)(FuelIRBuilder *builder, enum TypeId typeId, SValue value);
 	IArgument *(*newArgument)(FuelIRBuilder *builder, unsigned Index);
@@ -338,12 +338,12 @@ typedef struct IRBuilderAPI {
 	ICall     *(*newCall)(FuelIRBuilder *builder, enum CallOp Op, uintptr_t uline);
 	IFunction *(*newFunction)(FuelIRBuilder *builder);
 	IUpdate   *(*newUpdate)(FuelIRBuilder *builder, IField *Sym, INode *RHS);
-	IBranch   *(*newBranch)(FuelIRBuilder *builder, INode *cond, Block *thenStmt, Block *elseEtmt);
-	ITest     *(*newTest)(FuelIRBuilder *builder, enum TestOp Op, IField *Field, Block *TargetBlock);
+	IBranch   *(*newBranch)(FuelIRBuilder *builder, INode *cond, Node *thenNode, Node *elseEtmt);
+	ITest     *(*newTest)(FuelIRBuilder *builder, enum TestOp Op, IField *Field, Node *TargetNode);
 	IReturn   *(*newReturn)(FuelIRBuilder *builder, INode *expr);
-	IJump     *(*newJump)(FuelIRBuilder *builder, Block *TargetBlock);
+	IJump     *(*newJump)(FuelIRBuilder *builder, Node *TargetNode);
 	IThrow    *(*newThrow)(FuelIRBuilder *builder, INode *Exception, uintptr_t uline);
-	ITry      *(*newTry)(FuelIRBuilder *builder, Block *tryBlock, Block *finallyBlock);
+	ITry      *(*newTry)(FuelIRBuilder *builder, Node *tryNode, Node *finallyNode);
 	IYield    *(*newYield)(FuelIRBuilder *builder, INode *INode);
 	IUnary    *(*newUnary)(FuelIRBuilder *builder, enum UnaryOp Op, INode *INode);
 	IBinary   *(*newBinary)(FuelIRBuilder *builder, enum BinaryOp Op, INode *LHS, INode *RHS);
@@ -355,8 +355,8 @@ struct FuelIRBuilder {
 	unsigned LocalId;
 	MemoryPool mp;
 	VariableTable LocalVar;
-	Block *Current;
-	ARRAY(BlockPtr) Blocks;
+	Node *Current;
+	ARRAY(NodePtr) Nodes;
 	union {
 		int   InstructionId; /* used by InstructionDumper */
 		void *ByteCode;
@@ -370,7 +370,7 @@ union ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int opti
 union ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd);
 INode *IRBuilder_FindLocalVarByHash(FuelIRBuilder *builder, enum TypeId type, uintptr_t Hash);
 
-void IRBuilder_add(FuelIRBuilder *builder, INode *Stmt);
+void IRBuilder_add(FuelIRBuilder *builder, INode *Node);
 void INewInst_addParam(INew *Inst, INode *Param);
 void CallInst_addParam(ICall *Inst, INode *Param);
 void CondInst_addParam(ICond *Inst, INode *Param);
@@ -381,9 +381,9 @@ static inline void IField_setHash(IField *Inst, uintptr_t Hash)
 	Inst->Hash = Hash;
 }
 
-static inline Block *CreateBlock(FuelIRBuilder *builder)
+static inline Node *CreateNode(FuelIRBuilder *builder)
 {
-	return builder->API->newBlock(builder);
+	return builder->API->newNode(builder);
 }
 
 INode *CreateLocal(FuelIRBuilder *builder, enum TypeId type);
@@ -448,16 +448,16 @@ static inline INode *CreateUpdate(FuelIRBuilder *builder, INode *Field, INode *I
 	return Node;
 }
 
-static inline INode *CreateBranch(FuelIRBuilder *builder, INode *Val, Block *ThenBB, Block *ElseBB)
+static inline INode *CreateBranch(FuelIRBuilder *builder, INode *Val, Node *ThenBB, Node *ElseBB)
 {
 	INode *Node = (INode *) builder->API->newBranch(builder, Val, ThenBB, ElseBB);
 	IRBuilder_add(builder, Node);
 	return Node;
 }
 
-static inline INode *CreateJump(FuelIRBuilder *builder, Block *Block)
+static inline INode *CreateJump(FuelIRBuilder *builder, Node *Node)
 {
-	INode *Node = (INode *) builder->API->newJump(builder, Block);
+	INode *Node = (INode *) builder->API->newJump(builder, Node);
 	IRBuilder_add(builder, Node);
 	return Node;
 }
@@ -504,14 +504,14 @@ static inline INode *CreateBinaryInst(FuelIRBuilder *builder, enum BinaryOp Op, 
 	return Node;
 }
 
-static inline void IRBuilder_setBlock(FuelIRBuilder *builder, Block *Block)
+static inline void IRBuilder_setNode(FuelIRBuilder *builder, Node *Node)
 {
-	builder->Current = Block;
+	builder->Current = Node;
 }
 
-static inline void IRBuilder_JumpTo(FuelIRBuilder *builder, Block *Block)
+static inline void IRBuilder_JumpTo(FuelIRBuilder *builder, Node *Node)
 {
-	CreateJump(builder, Block);
+	CreateJump(builder, Node);
 }
 
 static inline INode *check_kind(INode *Node, enum IRType Kind)
@@ -535,7 +535,7 @@ static inline bool IsBranchInst(INode *Node)
 			Kind == IR_TYPE_IJump);
 }
 
-static inline bool Block_HasTerminatorInst(Block *block)
+static inline bool Node_HasTerminatorInst(Node *block)
 {
 	if(ARRAY_size(block->insts) == 0) {
 		return false;
@@ -546,9 +546,9 @@ static inline bool Block_HasTerminatorInst(Block *block)
 
 #define CHECK_KIND(NODE, KIND) ((KIND *) check_kind(NODE, IR_TYPE_##KIND))
 #define ToINode(NODE) (&(NODE)->base)
-#define Block_IsVisited(BB) INode_getRangeBegin(&(BB)->base)
-#define Block_SetVisited(BB, BOOLVAL) INode_setRangeBegin(&(BB)->base, BOOLVAL)
-#define Block_SetRemoved(BB) INode_setRangeEnd(&(BB)->base, 1)
+#define Node_IsVisited(BB) INode_getRangeBegin(&(BB)->base)
+#define Node_SetVisited(BB, BOOLVAL) INode_setRangeBegin(&(BB)->base, BOOLVAL)
+#define Node_SetRemoved(BB) INode_setRangeEnd(&(BB)->base, 1)
 
 static inline unsigned GetNodeId(INode *Node)
 {

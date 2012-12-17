@@ -256,9 +256,9 @@ struct KBuilder {   /* MiniVM Builder */
 
 /* ------------------------------------------------------------------------ */
 
-typedef struct BasicBlock BasicBlock;
+typedef struct BasicNode BasicNode;
 
-struct BasicBlock {
+struct BasicNode {
 	long     incoming;
 	bblock_t newid;
 	bblock_t nextid;
@@ -269,42 +269,42 @@ struct BasicBlock {
 	size_t   max;
 };
 
-static BasicBlock *BasicBlock_FindById(KonohaContext *kctx, bblock_t id)
+static BasicNode *BasicNode_FindById(KonohaContext *kctx, bblock_t id)
 {
-	BasicBlock *bb = NULL;
+	BasicNode *bb = NULL;
 	while(id != -1) {
-		bb = (BasicBlock *)(kctx->stack->cwb.bytebuf + id);
+		bb = (BasicNode *)(kctx->stack->cwb.bytebuf + id);
 		id = bb->newid;
 	}
 	return bb;
 }
 
-static bblock_t BasicBlock_id(KonohaContext *kctx, BasicBlock *bb)
+static bblock_t BasicNode_id(KonohaContext *kctx, BasicNode *bb)
 {
 	while(bb->newid != -1) {
-		bb = BasicBlock_FindById(kctx, bb->newid);
+		bb = BasicNode_FindById(kctx, bb->newid);
 	}
 	return ((char *)bb) - kctx->stack->cwb.bytebuf;
 }
 
-static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, bblock_t oldId)
+static BasicNode* new_BasicNode(KonohaContext *kctx, size_t max, bblock_t oldId)
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	BasicBlock *bb = (BasicBlock *)KLIB KBuffer_Alloca(kctx, &wb, max);
+	BasicNode *bb = (BasicNode *)KLIB KBuffer_Alloca(kctx, &wb, max);
 	if(oldId != -1) {
-		BasicBlock *oldbb = BasicBlock_FindById(kctx, oldId);
+		BasicNode *oldbb = BasicNode_FindById(kctx, oldId);
 		if(((char *)oldbb) + oldbb->max == (char *)bb) {
-			oldbb->max += (max - sizeof(BasicBlock));
-			wb.m->bytesize -= sizeof(BasicBlock);
+			oldbb->max += (max - sizeof(BasicNode));
+			wb.m->bytesize -= sizeof(BasicNode);
 			return oldbb;
 		}
 		memcpy(bb, oldbb, oldbb->size);
-		oldbb->newid = BasicBlock_id(kctx, bb);
+		oldbb->newid = BasicNode_id(kctx, bb);
 		oldbb->size = 0;
 	}
 	else {
-		bb->size = sizeof(BasicBlock);
+		bb->size = sizeof(BasicNode);
 		bb->newid    = -1;
 		bb->nextid   = -1;
 		bb->branchid = -1;
@@ -317,22 +317,22 @@ static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, bblock_t oldI
 
 static inline size_t newsize2(size_t max)
 {
-	return ((max - sizeof(BasicBlock)) * 2) + sizeof(BasicBlock);
+	return ((max - sizeof(BasicNode)) * 2) + sizeof(BasicNode);
 }
 
-static bblock_t BasicBlock_Add(KonohaContext *kctx, bblock_t blockId, kfileline_t uline, KVirtualCode *op, size_t size, size_t padding_size)
+static bblock_t BasicNode_Add(KonohaContext *kctx, bblock_t blockId, kfileline_t uline, KVirtualCode *op, size_t size, size_t padding_size)
 {
-	BasicBlock *bb = BasicBlock_FindById(kctx, blockId);
+	BasicNode *bb = BasicNode_FindById(kctx, blockId);
 	DBG_ASSERT(bb->newid == -1);
 	DBG_ASSERT(size <= padding_size);
 	DBG_ASSERT(bb->nextid == -1 && bb->branchid == -1);
 	if(!(bb->size + size < bb->max)) {
 		size_t newsize = newsize2(bb->max);
-		bb = new_BasicBlock(kctx, newsize, blockId);
+		bb = new_BasicNode(kctx, newsize, blockId);
 	}
 	memcpy(((char *)bb) + bb->size, op, size);
 	bb->size += padding_size;
-	return BasicBlock_id(kctx, bb);
+	return BasicNode_id(kctx, bb);
 }
 
 static int CodeOffset(KBuffer *wb)
@@ -340,88 +340,88 @@ static int CodeOffset(KBuffer *wb)
 	return KBuffer_bytesize(wb);
 }
 
-static void BasicBlock_WriteBuffer(KonohaContext *kctx, bblock_t blockId, KBuffer *wb)
+static void BasicNode_WriteBuffer(KonohaContext *kctx, bblock_t blockId, KBuffer *wb)
 {
-	BasicBlock *bb = BasicBlock_FindById(kctx, blockId);
+	BasicNode *bb = BasicNode_FindById(kctx, blockId);
 	while(bb != NULL && bb->codeoffset == -1) {
-		size_t len = bb->size - sizeof(BasicBlock);
+		size_t len = bb->size - sizeof(BasicNode);
 		bb->codeoffset = CodeOffset(wb);
 		if(bb->nextid == bb->branchid  && bb->nextid != -1) {
 			bb->branchid = -1;
 			len -= sizeof(KVirtualCode); // remove unnecesarry jump ..
 		}
 		if(len > 0) {
-			bblock_t id = BasicBlock_id(kctx, bb);
+			bblock_t id = BasicNode_id(kctx, bb);
 			char buf[len];  // bb is growing together with wb.
-			memcpy(buf, ((char *)bb) + sizeof(BasicBlock), len);
+			memcpy(buf, ((char *)bb) + sizeof(BasicNode), len);
 			KLIB KBuffer_Write(kctx, wb, buf, len);
-			bb = BasicBlock_FindById(kctx, id);  // recheck
+			bb = BasicNode_FindById(kctx, id);  // recheck
 			bb->lastoffset = CodeOffset(wb) - sizeof(KVirtualCode);
 			DBG_ASSERT(bb->codeoffset + ((len / sizeof(KVirtualCode)) - 1) * sizeof(KVirtualCode) == bb->lastoffset);
 		}
 		else {
 			DBG_ASSERT(bb->branchid == -1);
 		}
-		bb = BasicBlock_FindById(kctx, bb->nextid);
+		bb = BasicNode_FindById(kctx, bb->nextid);
 	}
-	bb = BasicBlock_FindById(kctx, blockId);
+	bb = BasicNode_FindById(kctx, blockId);
 	while(bb != NULL) {
 		if(bb->branchid != -1 /*&& bb->branchid != builder->bbReturnId*/) {
-			BasicBlock *bbJ = BasicBlock_FindById(kctx, bb->branchid);
+			BasicNode *bbJ = BasicNode_FindById(kctx, bb->branchid);
 			if(bbJ->codeoffset == -1) {
-				BasicBlock_WriteBuffer(kctx, bb->branchid, wb);
+				BasicNode_WriteBuffer(kctx, bb->branchid, wb);
 			}
 		}
-		bb = BasicBlock_FindById(kctx, bb->nextid);
+		bb = BasicNode_FindById(kctx, bb->nextid);
 	}
 }
 
-static int BasicBlock_size(BasicBlock *bb)
+static int BasicNode_size(BasicNode *bb)
 {
-	return (bb->size - sizeof(BasicBlock)) / sizeof(KVirtualCode);
+	return (bb->size - sizeof(BasicNode)) / sizeof(KVirtualCode);
 }
 
-static BasicBlock *BasicBlock_leapJump(KonohaContext *kctx, BasicBlock *bb)
+static BasicNode *BasicNode_leapJump(KonohaContext *kctx, BasicNode *bb)
 {
 	while(bb->nextid != -1) {
-		if(BasicBlock_size(bb) != 0) return bb;
-		bb = BasicBlock_FindById(kctx, bb->nextid);
+		if(BasicNode_size(bb) != 0) return bb;
+		bb = BasicNode_FindById(kctx, bb->nextid);
 	}
-	if(bb->nextid == -1 && bb->branchid != -1 && BasicBlock_size(bb) == 1) {
-		return BasicBlock_leapJump(kctx, BasicBlock_FindById(kctx, bb->branchid));
+	if(bb->nextid == -1 && bb->branchid != -1 && BasicNode_size(bb) == 1) {
+		return BasicNode_leapJump(kctx, BasicNode_FindById(kctx, bb->branchid));
 	}
 	return bb;
 }
 
-#define BasicBlock_isVisited(bb)     (bb->incoming == -1)
-#define BasicBlock_setVisited(bb)    bb->incoming = -1
+#define BasicNode_isVisited(bb)     (bb->incoming == -1)
+#define BasicNode_setVisited(bb)    bb->incoming = -1
 
-static void BasicBlock_setJumpAddr(KonohaContext *kctx, BasicBlock *bb, char *vcode)
+static void BasicNode_setJumpAddr(KonohaContext *kctx, BasicNode *bb, char *vcode)
 {
 	while(bb != NULL) {
-		BasicBlock_setVisited(bb);
+		BasicNode_setVisited(bb);
 		if(bb->branchid != -1) {
-			BasicBlock *bbJ = BasicBlock_leapJump(kctx, BasicBlock_FindById(kctx, bb->branchid));
+			BasicNode *bbJ = BasicNode_leapJump(kctx, BasicNode_FindById(kctx, bb->branchid));
 			OPJMP *j = (OPJMP *)(vcode + bb->lastoffset);
 			DBG_ASSERT(j->opcode == OPCODE_JMP || j->opcode == OPCODE_JMPF);
 			j->jumppc = (KVirtualCode *)(vcode + bbJ->codeoffset);
-			bbJ = BasicBlock_FindById(kctx, bb->branchid);
-			if(!BasicBlock_isVisited(bbJ)) {
-				BasicBlock_setVisited(bbJ);
-				BasicBlock_setJumpAddr(kctx, bbJ, vcode);
+			bbJ = BasicNode_FindById(kctx, bb->branchid);
+			if(!BasicNode_isVisited(bbJ)) {
+				BasicNode_setVisited(bbJ);
+				BasicNode_setJumpAddr(kctx, bbJ, vcode);
 			}
 		}
-		bb = BasicBlock_FindById(kctx, bb->nextid);
+		bb = BasicNode_FindById(kctx, bb->nextid);
 	}
 }
 
 
 /* ------------------------------------------------------------------------ */
 
-static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
+static bblock_t new_BasicNodeLABEL(KonohaContext *kctx)
 {
-	BasicBlock *bb = new_BasicBlock(kctx, sizeof(KVirtualCode) * 2 + sizeof(BasicBlock), -1);
-	return BasicBlock_id(kctx, bb);
+	BasicNode *bb = new_BasicNode(kctx, sizeof(KVirtualCode) * 2 + sizeof(BasicNode), -1);
+	return BasicNode_id(kctx, bb);
 }
 
 #if defined(USE_DIRECT_THREADED_CODE)
@@ -448,15 +448,15 @@ static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
 
 static void KBuilder_Asm(KonohaContext *kctx, KBuilder *builder, KVirtualCode *op, size_t opsize)
 {
-	builder->bbMainId = BasicBlock_Add(kctx, builder->bbMainId, builder->common.uline, op, opsize, sizeof(KVirtualCode));
+	builder->bbMainId = BasicNode_Add(kctx, builder->bbMainId, builder->common.uline, op, opsize, sizeof(KVirtualCode));
 }
 
-static void kStmt_SetLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label, bblock_t labelId)
+static void kNode_SetLabelNode(KonohaContext *kctx, kNode *stmt, ksymbol_t label, bblock_t labelId)
 {
 	KLIB kObjectProto_SetUnboxValue(kctx, stmt, label, KType_int, labelId);
 }
 
-static bblock_t kStmt_GetLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label)
+static bblock_t kNode_GetLabelNode(KonohaContext *kctx, kNode *stmt, ksymbol_t label)
 {
 	KKeyValue *kvs = KLIB kObjectProto_GetKeyValue(kctx, stmt, label);
 	if(kvs != NULL) {
@@ -467,40 +467,40 @@ static bblock_t kStmt_GetLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t 
 
 static void ASM_LABEL(KonohaContext *kctx, KBuilder *builder, bblock_t labelId)
 {
-	BasicBlock *bb = BasicBlock_FindById(kctx, builder->bbMainId);
+	BasicNode *bb = BasicNode_FindById(kctx, builder->bbMainId);
 	DBG_ASSERT(bb != NULL);
 	DBG_ASSERT(bb->nextid == -1);
-	BasicBlock *labelBlock = BasicBlock_FindById(kctx, labelId);
-	labelBlock->incoming += 1;
-	builder->bbMainId = BasicBlock_id(kctx, labelBlock);
+	BasicNode *labelNode = BasicNode_FindById(kctx, labelId);
+	labelNode->incoming += 1;
+	builder->bbMainId = BasicNode_id(kctx, labelNode);
 	bb->nextid = builder->bbMainId;
 }
 
 static void ASM_JMP(KonohaContext *kctx, KBuilder *builder, bblock_t labelId)
 {
-	BasicBlock *bb = BasicBlock_FindById(kctx, builder->bbMainId);
+	BasicNode *bb = BasicNode_FindById(kctx, builder->bbMainId);
 	DBG_ASSERT(bb != NULL);
 	DBG_ASSERT(bb->nextid == -1);
 	if(bb->branchid == -1) {
 		ASM(JMP, NULL);
-		BasicBlock *labelBlock = BasicBlock_FindById(kctx, labelId);
-		bb = BasicBlock_FindById(kctx, builder->bbMainId);
-		bb->branchid = BasicBlock_id(kctx, labelBlock);
-		labelBlock->incoming += 1;
+		BasicNode *labelNode = BasicNode_FindById(kctx, labelId);
+		bb = BasicNode_FindById(kctx, builder->bbMainId);
+		bb->branchid = BasicNode_id(kctx, labelNode);
+		labelNode->incoming += 1;
 	}
 }
 
 static bblock_t KBuilder_AsmJMPF(KonohaContext *kctx, KBuilder *builder, int flocal, bblock_t jumpId)
 {
-	BasicBlock *bb = BasicBlock_FindById(kctx, builder->bbMainId);
+	BasicNode *bb = BasicNode_FindById(kctx, builder->bbMainId);
 	DBG_ASSERT(bb != NULL);
 	DBG_ASSERT(bb->nextid == -1 && bb->branchid == -1);
-	bblock_t nextId = new_BasicBlockLABEL(kctx);
+	bblock_t nextId = new_BasicNodeLABEL(kctx);
 	ASM(JMPF, NULL, NC_(flocal));
-	bb = BasicBlock_FindById(kctx, builder->bbMainId);
-	BasicBlock *lbJUMP = BasicBlock_FindById(kctx, jumpId);
-	BasicBlock *lbNEXT = BasicBlock_FindById(kctx, nextId);
-	bb->branchid = BasicBlock_id(kctx, lbJUMP);
+	bb = BasicNode_FindById(kctx, builder->bbMainId);
+	BasicNode *lbJUMP = BasicNode_FindById(kctx, jumpId);
+	BasicNode *lbNEXT = BasicNode_FindById(kctx, nextId);
+	bb->branchid = BasicNode_id(kctx, lbJUMP);
 	bb->nextid = nextId;
 	lbNEXT->incoming += 1;
 	lbJUMP->incoming += 1;
@@ -508,10 +508,10 @@ static bblock_t KBuilder_AsmJMPF(KonohaContext *kctx, KBuilder *builder, int flo
 	return nextId;
 }
 
-static bblock_t KBuilder_asmJMPIF(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr, int isTRUE, bblock_t labelId)
+static bblock_t KBuilder_asmJMPIF(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr, int isTRUE, bblock_t labelId)
 {
 	int a = builder->common.a;
-	SUGAR VisitExpr(kctx, builder, stmt, expr);
+	SUGAR VisitNode(kctx, builder, stmt, expr);
 	return KBuilder_AsmJMPF(kctx, builder, a, labelId);
 }
 
@@ -534,186 +534,186 @@ static void KBuilder_AsmNMOV(KonohaContext *kctx, KBuilder *builder, int a, KCla
 
 //----------------------------------------------------------------------------
 
-static kBlock* Stmt_getFirstBlock(KonohaContext *kctx, kStmt *stmt)
+static kNode* Node_getFirstNode(KonohaContext *kctx, kNode *stmt)
 {
-	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_BlockPattern, K_NULLBLOCK);
+	return SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
 }
 
-static kBlock* Stmt_getElseBlock(KonohaContext *kctx, kStmt *stmt)
+static kNode* Node_getElseNode(KonohaContext *kctx, kNode *stmt)
 {
-	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_else, K_NULLBLOCK);
+	return SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_else, K_NULLBLOCK);
 }
 
-static kExpr* Stmt_getFirstExpr(KonohaContext *kctx, kStmt *stmt)
+static kNode* Node_getFirstNode(KonohaContext *kctx, kNode *stmt)
 {
-	return SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, NULL);
+	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
 }
 
-static kStmt *kStmt_GetStmt(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw)
+static kNode *kNode_GetNode(KonohaContext *kctx, kNode *stmt, ksymbol_t kw)
 {
-	return (kStmt *) kStmt_GetObject(kctx, stmt, kw, NULL);
+	return (kNode *) kNode_GetObject(kctx, stmt, kw, NULL);
 }
 
-static kMethod* CallExpr_getMethod(kExpr *expr)
+static kMethod* CallNode_getMethod(kNode *expr)
 {
 	return expr->NodeList->MethodItems[0];
 }
 
-static int CallExpr_getArgCount(kExpr *expr)
+static int CallNode_getArgCount(kNode *expr)
 {
 	return kArray_size(expr->NodeList) - 2;
 }
 
-static kString* Stmt_getErrorMessage(KonohaContext *kctx, kStmt *stmt)
+static kString* Node_getErrorMessage(KonohaContext *kctx, kNode *stmt)
 {
-	kString* msg = (kString *)kStmt_GetObjectNULL(kctx, stmt, KSymbol_ERR);
+	kString* msg = (kString *)kNode_GetObjectNULL(kctx, stmt, KSymbol_ERR);
 	DBG_ASSERT(IS_String(msg));
 	return msg;
 }
 
 /* Visitor */
 
-static kbool_t KBuilder_VisitErrStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitErrNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 {
-	ASM(ERROR, stmt->uline, Stmt_getErrorMessage(kctx, stmt));
+	ASM(ERROR, stmt->uline, Node_getErrorMessage(kctx, stmt));
 	return false;
 }
 
-static kbool_t KBuilder_VisitExprStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitNodeNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 {
 	int a = builder->common.a;
 	builder->common.a = builder->common.espidx;
-	SUGAR VisitExpr(kctx, builder, stmt, Stmt_getFirstExpr(kctx, stmt));
+	SUGAR VisitNode(kctx, builder, stmt, Node_getFirstNode(kctx, stmt));
 	builder->common.a = a;
 	return true;
 }
 
-static kbool_t KBuilder_VisitBlockStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitNodeNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 {
-	return SUGAR VisitBlock(kctx, builder, Stmt_getFirstBlock(kctx, stmt));
+	return SUGAR VisitNode(kctx, builder, Node_getFirstNode(kctx, stmt));
 }
 
-static kbool_t KBuilder_VisitReturnStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitReturnNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 {
-	kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, NULL);
-	if(expr != NULL && IS_Expr(expr) && expr->attrTypeId != KType_void) {
+	kNode *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
+	if(expr != NULL && IS_Node(expr) && expr->attrTypeId != KType_void) {
 		int a = builder->common.a;
 		builder->common.a = K_RTNIDX;
-		SUGAR VisitExpr(kctx, builder, stmt, expr);
+		SUGAR VisitNode(kctx, builder, stmt, expr);
 		builder->common.a = a;
 	}
 	ASM_JMP(kctx, builder, builder->bbReturnId); // RET
 	return false;
 }
 
-static kbool_t KBuilder_VisitIfStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitIfNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 {
 	int espidx = builder->common.espidx;
 	int a = builder->common.a;
-	bblock_t lbELSE = new_BasicBlockLABEL(kctx);
-	bblock_t lbEND  = new_BasicBlockLABEL(kctx);
+	bblock_t lbELSE = new_BasicNodeLABEL(kctx);
+	bblock_t lbEND  = new_BasicNodeLABEL(kctx);
 	/* if */
 	builder->common.a = espidx;
-	KBuilder_asmJMPIF(kctx, builder, stmt, Stmt_getFirstExpr(kctx, stmt), 0/*FALSE*/, lbELSE);
+	KBuilder_asmJMPIF(kctx, builder, stmt, Node_getFirstNode(kctx, stmt), 0/*FALSE*/, lbELSE);
 	builder->common.a = a;
 	/* then */
-	SUGAR VisitBlock(kctx, builder, Stmt_getFirstBlock(kctx, stmt));
+	SUGAR VisitNode(kctx, builder, Node_getFirstNode(kctx, stmt));
 	ASM_JMP(kctx, builder, lbEND);
 	/* else */
 	ASM_LABEL(kctx, builder, lbELSE);
-	SUGAR VisitBlock(kctx, builder, Stmt_getElseBlock(kctx, stmt));
+	SUGAR VisitNode(kctx, builder, Node_getElseNode(kctx, stmt));
 	//ASM(NOP);
 	/* endif */
 	ASM_LABEL(kctx, builder, lbEND);
 	return true;
 }
 
-static kbool_t KBuilder_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitLoopNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 {
 	int espidx = builder->common.espidx;
 	int a = builder->common.a;
-	bblock_t lbCONTINUE = new_BasicBlockLABEL(kctx);
-	bblock_t lbENTRY    = new_BasicBlockLABEL(kctx);
-	bblock_t lbBREAK    = new_BasicBlockLABEL(kctx);
-	kStmt_SetLabelBlock(kctx, stmt, KSymbol_("continue"), lbCONTINUE);
-	kStmt_SetLabelBlock(kctx, stmt, KSymbol_("break"),    lbBREAK);
-	if(kStmt_Is(RedoLoop, stmt)) {
+	bblock_t lbCONTINUE = new_BasicNodeLABEL(kctx);
+	bblock_t lbENTRY    = new_BasicNodeLABEL(kctx);
+	bblock_t lbBREAK    = new_BasicNodeLABEL(kctx);
+	kNode_SetLabelNode(kctx, stmt, KSymbol_("continue"), lbCONTINUE);
+	kNode_SetLabelNode(kctx, stmt, KSymbol_("break"),    lbBREAK);
+	if(kNode_Is(RedoLoop, stmt)) {
 		ASM_JMP(kctx, builder, lbENTRY);
 	}
 	ASM_LABEL(kctx, builder, lbCONTINUE);
 	KBuilder_AsmSAFEPOINT(kctx, builder, stmt->uline, espidx);
-	kBlock *iterBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_("Iterator"), NULL);
-	if(iterBlock != NULL) {
-		SUGAR VisitBlock(kctx, builder, iterBlock);
+	kNode *iterNode = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_("Iterator"), NULL);
+	if(iterNode != NULL) {
+		SUGAR VisitNode(kctx, builder, iterNode);
 		ASM_LABEL(kctx, builder, lbENTRY);
 		builder->common.a = espidx;
-		KBuilder_asmJMPIF(kctx, builder, stmt, Stmt_getFirstExpr(kctx, stmt), 0/*FALSE*/, lbBREAK);
+		KBuilder_asmJMPIF(kctx, builder, stmt, Node_getFirstNode(kctx, stmt), 0/*FALSE*/, lbBREAK);
 		builder->common.a = a;
 	}
 	else {
 		builder->common.a = espidx;
-		KBuilder_asmJMPIF(kctx, builder, stmt, Stmt_getFirstExpr(kctx, stmt), 0/*FALSE*/, lbBREAK);
+		KBuilder_asmJMPIF(kctx, builder, stmt, Node_getFirstNode(kctx, stmt), 0/*FALSE*/, lbBREAK);
 		builder->common.a = a;
 		ASM_LABEL(kctx, builder, lbENTRY);
 	}
-	SUGAR VisitBlock(kctx, builder, Stmt_getFirstBlock(kctx, stmt));
+	SUGAR VisitNode(kctx, builder, Node_getFirstNode(kctx, stmt));
 	ASM_JMP(kctx, builder, lbCONTINUE);
 	ASM_LABEL(kctx, builder, lbBREAK);
 	return true;
 }
 
-static kbool_t KBuilder_VisitJumpStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitJumpNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 {
 	KSyntax *syn = stmt->syn;
-	kStmt *jump = kStmt_GetStmt(kctx, stmt, syn->keyword);
-	DBG_ASSERT(jump != NULL && IS_Stmt(jump));
-	bblock_t lbJUMP = kStmt_GetLabelBlock(kctx, jump, syn->keyword);
+	kNode *jump = kNode_GetNode(kctx, stmt, syn->keyword);
+	DBG_ASSERT(jump != NULL && IS_Node(jump));
+	bblock_t lbJUMP = kNode_GetLabelNode(kctx, jump, syn->keyword);
 	ASM_JMP(kctx, builder, lbJUMP);
 	return false;
 }
 
-static kbool_t KBuilder_VisitTryStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitTryNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 {
 	//FIXME
-	//kBlock *catchBlock   = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_("catch"),   K_NULLBLOCK);
-	//kBlock *finallyBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_("finally"), K_NULLBLOCK);
-	//if(catchBlock != K_NULLBLOCK){
+	//kNode *catchNode   = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_("catch"),   K_NULLBLOCK);
+	//kNode *finallyNode = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_("finally"), K_NULLBLOCK);
+	//if(catchNode != K_NULLBLOCK){
 	//}
-	//if(finallyBlock != K_NULLBLOCK){
+	//if(finallyNode != K_NULLBLOCK){
 	//}
 	return true;
 }
 
 
-static kbool_t KBuilder_VisitUndefinedStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitUndefinedNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 {
 	DBG_P("undefined asm syntax kw='%s'", KSymbol_text(stmt->syn->keyword));
 	return true;
 }
 
-static void KBuilder_VisitConstExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
+static void KBuilder_VisitConstNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr)
 {
 	int a = builder->common.a;
 	kObject *v = expr->ObjectConstValue;
 	DBG_ASSERT(!KType_Is(UnboxType, expr->attrTypeId));
-	DBG_ASSERT(kExpr_HasObjectConstValue(expr));
+	DBG_ASSERT(kNode_HasObjectConstValue(expr));
 	v = KBuilder_AddConstPool(kctx, builder, v);
 	ASM(NSET, OC_(a), (uintptr_t)v, KClass_(expr->attrTypeId));
 }
 
-static void KBuilder_VisitNConstExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
+static void KBuilder_VisitNConstNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr)
 {
 	int a = builder->common.a;
 	ASM(NSET, NC_(a), expr->unboxConstValue, KClass_(expr->attrTypeId));
 }
 
-static void KBuilder_VisitNewExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
+static void KBuilder_VisitNewNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr)
 {
 	int a = builder->common.a;
 	ASM(NEW, OC_(a), expr->index, KClass_(expr->attrTypeId));
 }
 
-static void KBuilder_VisitNullExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
+static void KBuilder_VisitNullNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr)
 {
 	int a = builder->common.a;
 	if(KType_Is(UnboxType, expr->attrTypeId)) {
@@ -724,25 +724,25 @@ static void KBuilder_VisitNullExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 	}
 }
 
-static void KBuilder_VisitLocalExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
+static void KBuilder_VisitLocalNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr)
 {
 	KBuilder_AsmNMOV(kctx, builder, builder->common.a, KClass_(expr->attrTypeId), expr->index);
 }
 
-static void KBuilder_VisitBlockExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
+static void KBuilder_VisitNodeNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr)
 {
 	int a      = builder->common.a;
 	int shift  = builder->common.shift;
 	int espidx = builder->common.espidx;
-	DBG_ASSERT(IS_Block(expr->block));
+	DBG_ASSERT(IS_Node(expr->block));
 	builder->common.shift = builder->common.espidx;
-	SUGAR VisitBlock(kctx, builder, expr->block);
+	SUGAR VisitNode(kctx, builder, expr->block);
 	builder->common.shift = shift;
 	KBuilder_AsmNMOV(kctx, builder, a, KClass_(expr->attrTypeId), espidx);
 	builder->common.espidx = espidx;
 }
 
-static void KBuilder_VisitFieldExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
+static void KBuilder_VisitFieldNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr)
 {
 	int a = builder->common.a;
 	kshort_t index = (kshort_t)expr->index;
@@ -751,25 +751,25 @@ static void KBuilder_VisitFieldExpr(KonohaContext *kctx, KBuilder *builder, kStm
 	ASM(NMOVx, TC_(a, ty), OC_(index), xindex, ty);
 }
 
-static void KBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
+static void KBuilder_VisitCallNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr)
 {
-	kMethod *mtd = CallExpr_getMethod(expr);
+	kMethod *mtd = CallNode_getMethod(expr);
 	DBG_ASSERT(IS_Method(mtd));
 
 	/*
-	 * [CallExpr] := this.method(arg1, arg2, ...)
+	 * [CallNode] := this.method(arg1, arg2, ...)
 	 * expr->NodeList = [method, this, arg1, arg2, ...]
 	 **/
 	int i, a = builder->common.a;
 	int s = kMethod_Is(Static, mtd) ? 2 : 1;
 	int espidx  = builder->common.espidx;
 	int thisidx = espidx + K_CALLDELTA;
-	int argc = CallExpr_getArgCount(expr);
+	int argc = CallNode_getArgCount(expr);
 	for (i = s; i < argc + 2; i++) {
-		kExpr *exprN = kExpr_At(expr, i);
-		DBG_ASSERT(IS_Expr(exprN));
+		kNode *exprN = kNode_At(expr, i);
+		DBG_ASSERT(IS_Node(exprN));
 		builder->common.a = builder->common.espidx = thisidx + i - 1;
-		SUGAR VisitExpr(kctx, builder, stmt, exprN);
+		SUGAR VisitNode(kctx, builder, stmt, exprN);
 	}
 	builder->common.espidx = espidx;
 	builder->common.a = a;
@@ -778,19 +778,19 @@ static void KBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 		ASM(NSET, NC_(thisidx-1), (intptr_t)mtd, KClass_Method);
 		if(kMethod_Is(Virtual, mtd)) {
 			// set namespace to enable method lookups
-			ASM(NSET, OC_(thisidx-2), (intptr_t)Stmt_ns(stmt), KClass_NameSpace);
+			ASM(NSET, OC_(thisidx-2), (intptr_t)Node_ns(stmt), KClass_NameSpace);
 		}
 	}
 	else {
-		ASM(NSET, OC_(thisidx-2), (intptr_t)Stmt_ns(stmt), KClass_NameSpace);
-		ASM(LOOKUP, SFP_(thisidx), Stmt_ns(stmt), mtd);
+		ASM(NSET, OC_(thisidx-2), (intptr_t)Node_ns(stmt), KClass_NameSpace);
+		ASM(LOOKUP, SFP_(thisidx), Node_ns(stmt), mtd);
 	}
 
 	int esp_ = SFP_(espidx + argc + K_CALLDELTA + 1);
 	ASM(CALL, builder->common.uline, SFP_(thisidx), esp_, KLIB Knull(kctx, KClass_(expr->attrTypeId)));
 
 	if(mtd->mn == MN_box) {  /* boxed value of unbox value must be shifted to OC */
-		((kExprVar *)expr)->attrTypeId = KType_Object;
+		((kNodeVar *)expr)->attrTypeId = KType_Object;
 	}
 
 	if(a != espidx) {
@@ -798,65 +798,65 @@ static void KBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 	}
 }
 
-static void KBuilder_VisitAndExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
+static void KBuilder_VisitAndNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr)
 {
-	bblock_t lbFINAL  = new_BasicBlockLABEL(kctx);
-	KBuilder_asmJMPIF(kctx, builder, stmt, kExpr_At(expr, 1), 0/*FALSE*/, lbFINAL);
-	SUGAR VisitExpr(kctx, builder, stmt, kExpr_At(expr, 2));
+	bblock_t lbFINAL  = new_BasicNodeLABEL(kctx);
+	KBuilder_asmJMPIF(kctx, builder, stmt, kNode_At(expr, 1), 0/*FALSE*/, lbFINAL);
+	SUGAR VisitNode(kctx, builder, stmt, kNode_At(expr, 2));
 	ASM_LABEL(kctx, builder, lbFINAL);
 }
 
-static void KBuilder_VisitOrExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
+static void KBuilder_VisitOrNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr)
 {
-	bblock_t lbFALSE = new_BasicBlockLABEL(kctx);
-	bblock_t lbFINAL  = new_BasicBlockLABEL(kctx);
-	KBuilder_asmJMPIF(kctx, builder, stmt, kExpr_At(expr, 1), 0/*FALSE*/, lbFALSE);
+	bblock_t lbFALSE = new_BasicNodeLABEL(kctx);
+	bblock_t lbFINAL  = new_BasicNodeLABEL(kctx);
+	KBuilder_asmJMPIF(kctx, builder, stmt, kNode_At(expr, 1), 0/*FALSE*/, lbFALSE);
 	ASM_JMP(kctx, builder, lbFINAL);
 
 	ASM_LABEL(kctx, builder, lbFALSE); // false
-	SUGAR VisitExpr(kctx, builder, stmt, kExpr_At(expr, 2));
+	SUGAR VisitNode(kctx, builder, stmt, kNode_At(expr, 2));
 	ASM_LABEL(kctx, builder, lbFINAL);
 }
 
-static void KBuilder_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
+static void KBuilder_VisitLetNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr)
 {
 	int a = builder->common.a;
 	int shift = builder->common.shift;
 	int espidx = builder->common.espidx;
 
 	/*
-	 * [LetExpr] := lhs = rhs
+	 * [LetNode] := lhs = rhs
 	 * expr->NodeList = [NULL, lhs, rhs]
 	 **/
 
-	kExpr *leftHandExpr = kExpr_At(expr, 1);
-	kExpr *rightHandExpr = kExpr_At(expr, 2);
+	kNode *leftHandNode = kNode_At(expr, 1);
+	kNode *rightHandNode = kNode_At(expr, 2);
 	//DBG_P("LET (%s) a=%d, shift=%d, espidx=%d", KType_text(expr->attrTypeId), a, shift, espidx);
-	if(leftHandExpr->node == TEXPR_LOCAL) {
-		builder->common.a = leftHandExpr->index;
-		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
+	if(leftHandNode->node == TEXPR_LOCAL) {
+		builder->common.a = leftHandNode->index;
+		SUGAR VisitNode(kctx, builder, stmt, rightHandNode);
 		builder->common.a = a;
-		if(expr->attrTypeId != KType_void && a != leftHandExpr->index) {
-			KBuilder_AsmNMOV(kctx, builder, a, KClass_(leftHandExpr->attrTypeId), leftHandExpr->index);
+		if(expr->attrTypeId != KType_void && a != leftHandNode->index) {
+			KBuilder_AsmNMOV(kctx, builder, a, KClass_(leftHandNode->attrTypeId), leftHandNode->index);
 		}
 	}
-	else if(leftHandExpr->node == TEXPR_STACKTOP) {
-		//DBG_P("LET TEXPR_STACKTOP a=%d, leftHandExpr->index=%d, espidx=%d", a, leftHandExpr->index, espidx);
-		builder->common.a = leftHandExpr->index + shift;
-		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
+	else if(leftHandNode->node == TEXPR_STACKTOP) {
+		//DBG_P("LET TEXPR_STACKTOP a=%d, leftHandNode->index=%d, espidx=%d", a, leftHandNode->index, espidx);
+		builder->common.a = leftHandNode->index + shift;
+		SUGAR VisitNode(kctx, builder, stmt, rightHandNode);
 		builder->common.a = a;
-		if(expr->attrTypeId != KType_void && a != leftHandExpr->index + shift) {
-			KBuilder_AsmNMOV(kctx, builder, a, KClass_(leftHandExpr->attrTypeId), leftHandExpr->index + shift);
+		if(expr->attrTypeId != KType_void && a != leftHandNode->index + shift) {
+			KBuilder_AsmNMOV(kctx, builder, a, KClass_(leftHandNode->attrTypeId), leftHandNode->index + shift);
 		}
 	}
 	else{
-		assert(leftHandExpr->node == TEXPR_FIELD);
+		assert(leftHandNode->node == TEXPR_FIELD);
 		builder->common.a = espidx;
-		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
+		SUGAR VisitNode(kctx, builder, stmt, rightHandNode);
 		builder->common.a = a;
-		kshort_t index  = (kshort_t)leftHandExpr->index;
-		kshort_t xindex = (kshort_t)(leftHandExpr->index >> (sizeof(kshort_t)*8));
-		KClass *lhsClass = KClass_(leftHandExpr->attrTypeId), *rhClass = KClass_(rightHandExpr->attrTypeId);
+		kshort_t index  = (kshort_t)leftHandNode->index;
+		kshort_t xindex = (kshort_t)(leftHandNode->index >> (sizeof(kshort_t)*8));
+		KClass *lhsClass = KClass_(leftHandNode->attrTypeId), *rhClass = KClass_(rightHandNode->attrTypeId);
 
 		ASM(XNMOV, OC_(index), xindex, TC_(espidx, rhClass), lhsClass);
 		if(expr->attrTypeId != KType_void) {
@@ -865,7 +865,7 @@ static void KBuilder_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 	}
 }
 
-static void KBuilder_VisitStackTopExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
+static void KBuilder_VisitStackTopNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr)
 {
 	int shift = builder->common.shift;
 	int a = builder->common.a;
@@ -901,15 +901,15 @@ static struct KVirtualCode *CompileKVirtualCode(KonohaContext *kctx, KBuilder *b
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	BasicBlock_WriteBuffer(kctx, beginId, &wb);
-	BasicBlock_WriteBuffer(kctx, returnId, &wb);
+	BasicNode_WriteBuffer(kctx, beginId, &wb);
+	BasicNode_WriteBuffer(kctx, returnId, &wb);
 
 	size_t codesize = KBuffer_bytesize(&wb);
 	DBG_P(">>>>>> codesize=%d", codesize);
 	DBG_ASSERT(codesize != 0);
 	KVirtualCode *vcode = (KVirtualCode *)KCalloc_UNTRACE(codesize, 1);
 	memcpy((void *)vcode, KLIB KBuffer_text(kctx, &wb, NonZero), codesize);
-	BasicBlock_setJumpAddr(kctx, BasicBlock_FindById(kctx, beginId), (char *)vcode);
+	BasicNode_setJumpAddr(kctx, BasicNode_FindById(kctx, beginId), (char *)vcode);
 	KLIB KBuffer_Free(&wb);
 	vcode = MakeThreadedCode(kctx, builder, vcode, codesize);
 	DumpKVirtualCode(kctx, vcode);
@@ -927,28 +927,28 @@ static void _THCODE(KonohaContext *kctx, KVirtualCode *pc, void **codeaddr, size
 #endif
 }
 
-static struct KVirtualCode* MiniVM_GenerateKVirtualCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
+static struct KVirtualCode* MiniVM_GenerateKVirtualCode(KonohaContext *kctx, kMethod *mtd, kNode *block, int option)
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 
 	INIT_GCSTACK();
 	KBuilder builderbuf = {}, *builder = &builderbuf;
-	kNameSpace *ns = block->BlockNameSpace;
+	kNameSpace *ns = block->NodeNameSpace;
 	builder->common.api = ns->builderApi;
 	builder->common.espidx = 0;
 	builder->common.a = 0;
 	builder->common.shift = 0;
 
 	builder->constPools = ns->NameSpaceConstList;
-	builder->bbBeginId = new_BasicBlockLABEL(kctx);
-	builder->bbReturnId = new_BasicBlockLABEL(kctx);
+	builder->bbBeginId = new_BasicNodeLABEL(kctx);
+	builder->bbReturnId = new_BasicNodeLABEL(kctx);
 	builder->bbMainId = builder->bbBeginId;
 	ASM(THCODE, 0, _THCODE);
 	ASM(CHKSTACK, 0);
 	//ASM_LABEL(kctx, builder, builder->bbBeginId);
 
-	SUGAR VisitBlock(kctx, builder, block);
+	SUGAR VisitNode(kctx, builder, block);
 
 	builder->common.shift = 0;
 	ASM_LABEL(kctx, builder,  builder->bbReturnId);

@@ -181,8 +181,8 @@ typedef struct gc_stat {
 	size_t markingTime;
 	size_t sweepingTime;
 	size_t current_request_size;
-	//AllocationBlock *managed_heap;
-	//AllocationBlock *managed_heap_end;
+	//AllocationNode *managed_heap;
+	//AllocationNode *managed_heap_end;
 	FILE *fp;
 } msgc_stat;
 

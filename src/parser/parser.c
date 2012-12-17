@@ -161,22 +161,22 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	defNode.reftrace = kNode_Reftrace;
 	defNode.p        = kNode_p;
 #else
-	KDEFINE_CLASS defExpr = {0};
-	SETSTRUCTNAME(defExpr, Expr);
-	defExpr.init = kExpr_Init;
-	defExpr.reftrace = kExpr_Reftrace;
-	defExpr.p        = kExpr_p;
+	KDEFINE_CLASS defNode = {0};
+	SETSTRUCTNAME(defNode, Node);
+	defNode.init = kNode_Init;
+	defNode.reftrace = kNode_Reftrace;
+	defNode.p        = kNode_p;
 
-	KDEFINE_CLASS defStmt = {0};
-	SETSTRUCTNAME(defStmt, Stmt);
-	defStmt.init = kStmt_Init;
-	defStmt.reftrace = kStmt_Reftrace;
-	defStmt.p        = kStmt_p;
+	KDEFINE_CLASS defNode = {0};
+	SETSTRUCTNAME(defNode, Node);
+	defNode.init = kNode_Init;
+	defNode.reftrace = kNode_Reftrace;
+	defNode.p        = kNode_p;
 
-	KDEFINE_CLASS defBlock = {0};
-	SETSTRUCTNAME(defBlock, Block);
-	defBlock.init = kBlock_Init;
-	defBlock.reftrace = kBlock_Reftrace;
+	KDEFINE_CLASS defNode = {0};
+	SETSTRUCTNAME(defNode, Node);
+	defNode.init = kNode_Init;
+	defNode.reftrace = kNode_Reftrace;
 #endif
 
 	KDEFINE_CLASS defGamma = {0};
@@ -188,9 +188,9 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 #ifdef USE_NODE
 	mod->cNode  =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defNode, 0);
 #else
-	mod->cExpr  =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defExpr, 0);
-	mod->cStmt  =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defStmt, 0);
-	mod->cBlock =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defBlock, 0);
+	mod->cNode  =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defNode, 0);
+	mod->cNode  =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defNode, 0);
+	mod->cNode =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defNode, 0);
 #endif
 	mod->cGamma =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defGamma, 0);
 	mod->cTokenArray = KClass_p0(kctx, KClass_Array, mod->cToken->typeId);
@@ -199,9 +199,9 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 #ifdef USE_NODE
 	KLIB Knull(kctx, mod->cNode);
 #else
-	KLIB Knull(kctx, mod->cExpr);
-	kStmtVar *NullStmt = (kStmtVar *)KLIB Knull(kctx, mod->cStmt);
-	KFieldSet(NullStmt, NullStmt->parentBlockNULL, (kBlock *)KLIB Knull(kctx, mod->cBlock));
+	KLIB Knull(kctx, mod->cNode);
+	kNodeVar *NullNode = (kNodeVar *)KLIB Knull(kctx, mod->cNode);
+	KFieldSet(NullNode, NullNode->parentNodeNULL, (kNode *)KLIB Knull(kctx, mod->cNode));
 #endif
 	SugarModule_Setup(kctx, &mod->h, 0);
 
@@ -224,50 +224,50 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->KTokenSeq_Eval            = KTokenSeq_Eval;
 	mod->TokenUtils_ParseTypePattern     = TokenUtils_ParseTypePattern;
 	mod->kToken_ToBraceGroup = kToken_ToBraceGroup;
-	mod->kStmt_AddParsedObject      = kStmt_AddParsedObject;
+	mod->kNode_AddParsedObject      = kNode_AddParsedObject;
 	mod->kNameSpace_FindEndOfStatement = kNameSpace_FindEndOfStatement;
-	mod->kStmt_ParseFlag            = kStmt_ParseFlag;
-	mod->kStmt_GetToken             = kStmt_GetToken;
-	mod->kStmt_GetBlock             = kStmt_GetBlock;
-	mod->kStmt_GetExpr              = kStmt_GetExpr;
-	mod->kStmt_GetText              = kStmt_GetText;
-	mod->kExpr_SetConstValue        = kExpr_SetConstValue;
-	mod->kExpr_SetUnboxConstValue   = kExpr_SetUnboxConstValue;
-	mod->kExpr_SetVariable          = kExpr_SetVariable;
-	mod->kStmt_TypeCheckExprAt        = kStmt_TypeCheckExprAt;
-	mod->kStmt_TypeCheckByName        = kStmt_TypeCheckByName;
-	mod->kBlock_TypeCheckAll          = kBlock_TypeCheckAll;
-	mod->kStmtkExpr_TypeCheckCallParam = kStmtkExpr_TypeCheckCallParam;
-	mod->new_TypedCallExpr          = new_TypedCallExpr;
+	mod->kNode_ParseFlag            = kNode_ParseFlag;
+	mod->kNode_GetToken             = kNode_GetToken;
+	mod->kNode_GetNode             = kNode_GetNode;
+	mod->kNode_GetNode              = kNode_GetNode;
+	mod->kNode_GetText              = kNode_GetText;
+	mod->kNode_SetConstValue        = kNode_SetConstValue;
+	mod->kNode_SetUnboxConstValue   = kNode_SetUnboxConstValue;
+	mod->kNode_SetVariable          = kNode_SetVariable;
+	mod->kNode_TypeCheckNodeAt        = kNode_TypeCheckNodeAt;
+	mod->kNode_TypeCheckByName        = kNode_TypeCheckByName;
+	mod->kNode_TypeCheckAll          = kNode_TypeCheckAll;
+	mod->kNodekNode_TypeCheckCallParam = kNodekNode_TypeCheckCallParam;
+	mod->new_TypedCallNode          = new_TypedCallNode;
 	mod->kGamma_AddLocalVariable = kGamma_AddLocalVariable;
-	mod->kStmt_DeclType             = kStmt_DeclType;
-	mod->kStmt_TypeCheckVariableNULL  = kStmt_TypeCheckVariableNULL;
+	mod->kNode_DeclType             = kNode_DeclType;
+	mod->kNode_TypeCheckVariableNULL  = kNode_TypeCheckVariableNULL;
 
 	mod->kNameSpace_DefineSyntax    = kNameSpace_DefineSyntax;
 	mod->kNameSpace_GetSyntax       = kNameSpace_GetSyntax;
 	mod->kArray_AddSyntaxRule       = kArray_AddSyntaxPattern;
 //	mod->kNameSpace_SetSugarFunc    = kNameSpace_SetSugarFunc;
 	mod->kNameSpace_AddSugarFunc    = kNameSpace_AddSugarFunc;
-	mod->new_kBlock                 = new_kBlock;
-	mod->new_kStmt                  = new_kStmt;
-	mod->kBlock_InsertAfter         = kBlock_InsertAfter;
-	mod->new_TermExpr        = new_TermExpr;
-	mod->new_UntypedCallStyleExpr   = new_UntypedCallStyleExpr;
-	mod->kStmt_ParseOperatorExpr    = kStmt_ParseOperatorExpr;
-	mod->kStmt_ParseExpr            = kStmt_ParseExpr;
-	mod->kStmt_AddExprParam         = kStmt_AddExprParam;
-	mod->kStmt_RightJoinExpr        = kStmt_RightJoinExpr;
+	mod->new_kNode                 = new_kNode;
+	mod->new_kNode                  = new_kNode;
+	mod->kNode_InsertAfter         = kNode_InsertAfter;
+	mod->new_TermNode        = new_TermNode;
+	mod->new_UntypedCallStyleNode   = new_UntypedCallStyleNode;
+	mod->kNode_ParseOperatorNode    = kNode_ParseOperatorNode;
+	mod->kNode_ParseNode            = kNode_ParseNode;
+	mod->kNode_AddNodeParam         = kNode_AddNodeParam;
+	mod->kNode_RightJoinNode        = kNode_RightJoinNode;
 	mod->kToken_ToError        = kToken_ToError;
-	mod->kStmt_Message2        = kStmt_Message2;
+	mod->kNode_Message2        = kNode_Message2;
 
-	mod->VisitStmt                  = VisitStmt;
-	mod->VisitExpr                  = VisitExpr;
-	mod->VisitBlock                 = VisitBlock;
+	mod->VisitNode                  = VisitNode;
+	mod->VisitNode                  = VisitNode;
+	mod->VisitNode                 = VisitNode;
 
 #ifndef USE_SMALLBUILD
 	mod->dumpToken      = dumpToken;
 	mod->dumpTokenArray = dumpTokenArray;
-	mod->dumpExpr       = dumpExpr;
+	mod->dumpNode       = dumpNode;
 #endif
 
 	DefineDefaultSyntax(kctx, KNULL(NameSpace));

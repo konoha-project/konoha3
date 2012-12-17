@@ -1,5 +1,5 @@
 /*************************************************
-*       Perl-Compatible Regular Expressions      *
+*       Perl-Compatible Regular Nodeessions      *
 *************************************************/
 
 /* This is the public header file for the PCRE library, to be #included by

@@ -37,7 +37,7 @@ extern "C" {
 #endif
 
 /* ------------------------------------------------------------------------- */
-DEF_ARRAY_OP_NOPOINTER(BlockPtr);
+DEF_ARRAY_OP_NOPOINTER(NodePtr);
 DEF_ARRAY_OP_NOPOINTER(INodePtr);
 
 #define debug(FMT, ...) do {\
@@ -46,39 +46,39 @@ DEF_ARRAY_OP_NOPOINTER(INodePtr);
 	}\
 } while(0)
 
-static void Block_addPred(Block *BB, Block *Pred)
+static void Node_addPred(Node *BB, Node *Pred)
 {
-	ARRAY_add(BlockPtr, &BB->preds, Pred);
+	ARRAY_add(NodePtr, &BB->preds, Pred);
 }
 
-static void Block_addSucc(Block *BB, Block *Succ)
+static void Node_addSucc(Node *BB, Node *Succ)
 {
-	ARRAY_add(BlockPtr, &BB->succs, Succ);
+	ARRAY_add(NodePtr, &BB->succs, Succ);
 }
 
 /* ------------------------------------------------------------------------- */
 
-static void LinkBlocks(FuelIRBuilder *builder, Block *BB, bool IsVisited)
+static void LinkNodes(FuelIRBuilder *builder, Node *BB, bool IsVisited)
 {
-	while(Block_IsVisited(BB) != IsVisited) {
-		Block_SetVisited(BB, IsVisited);
+	while(Node_IsVisited(BB) != IsVisited) {
+		Node_SetVisited(BB, IsVisited);
 		INode *Inst = *(ARRAY_last(BB->insts));
 		enum IRType Kind = Inst->Kind;
 		assert(IsBranchInst(Inst));
-		ARRAY_add(BlockPtr, &builder->Blocks, BB);
+		ARRAY_add(NodePtr, &builder->Nodes, BB);
 		switch(Kind) {
 		case IR_TYPE_IBranch:
-			Block_addSucc(BB, ((IBranch *)Inst)->ThenBB);
-			Block_addSucc(BB, ((IBranch *)Inst)->ElseBB);
-			Block_addPred(((IBranch *)Inst)->ThenBB, BB);
-			Block_addPred(((IBranch *)Inst)->ElseBB, BB);
-			LinkBlocks(builder, ((IBranch *)Inst)->ThenBB, IsVisited);
+			Node_addSucc(BB, ((IBranch *)Inst)->ThenBB);
+			Node_addSucc(BB, ((IBranch *)Inst)->ElseBB);
+			Node_addPred(((IBranch *)Inst)->ThenBB, BB);
+			Node_addPred(((IBranch *)Inst)->ElseBB, BB);
+			LinkNodes(builder, ((IBranch *)Inst)->ThenBB, IsVisited);
 			BB = ((IBranch *)Inst)->ElseBB;
 			break;
 		case IR_TYPE_ITest:
-			Block_addSucc(BB, ((ITest *)Inst)->TargetBlock);
-			Block_addPred(((ITest *)Inst)->TargetBlock, BB);
-			BB = ((ITest *)Inst)->TargetBlock;
+			Node_addSucc(BB, ((ITest *)Inst)->TargetNode);
+			Node_addPred(((ITest *)Inst)->TargetNode, BB);
+			BB = ((ITest *)Inst)->TargetNode;
 			break;
 		case IR_TYPE_IReturn:
 		case IR_TYPE_IThrow:
@@ -88,9 +88,9 @@ static void LinkBlocks(FuelIRBuilder *builder, Block *BB, bool IsVisited)
 			assert(0 && "TODO");
 			break;
 		case IR_TYPE_IJump:
-			Block_addSucc(BB, ((IJump *)Inst)->TargetBlock);
-			Block_addPred(((IJump *)Inst)->TargetBlock, BB);
-			BB = ((IJump *)Inst)->TargetBlock;
+			Node_addSucc(BB, ((IJump *)Inst)->TargetNode);
+			Node_addPred(((IJump *)Inst)->TargetNode, BB);
+			BB = ((IJump *)Inst)->TargetNode;
 			break;
 		default:
 			assert(0 && "unreachable");
@@ -99,17 +99,17 @@ static void LinkBlocks(FuelIRBuilder *builder, Block *BB, bool IsVisited)
 	}
 }
 
-static void IRBuilder_LinkBlocks(FuelIRBuilder *builder, Block *BB, bool IsVisited)
+static void IRBuilder_LinkNodes(FuelIRBuilder *builder, Node *BB, bool IsVisited)
 {
-	if(ARRAY_size(builder->Blocks) > 0) {
-		BlockPtr *x, *e;
-		FOR_EACH_ARRAY(builder->Blocks, x, e) {
+	if(ARRAY_size(builder->Nodes) > 0) {
+		NodePtr *x, *e;
+		FOR_EACH_ARRAY(builder->Nodes, x, e) {
 			ARRAY_clear((*x)->preds);
 			ARRAY_clear((*x)->succs);
 		}
-		ARRAY_clear(builder->Blocks);
+		ARRAY_clear(builder->Nodes);
 	}
-	LinkBlocks(builder, BB, IsVisited);
+	LinkNodes(builder, BB, IsVisited);
 }
 
 static void IRBuilder_SimplifyCFG(FuelIRBuilder *builder)
@@ -122,10 +122,10 @@ static void IRBuilder_SimplifyCFG(FuelIRBuilder *builder)
 	 * BB1: iAdd $c $d    |      ...
 	 *      ...           |
 	 */
-	BlockPtr *x, *e;
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+	NodePtr *x, *e;
+	FOR_EACH_ARRAY(builder->Nodes, x, e) {
 		if(ARRAY_size((*x)->succs) == 1) {
-			Block *Target = ARRAY_get(BlockPtr, &((*x)->succs), 0);
+			Node *Target = ARRAY_get(NodePtr, &((*x)->succs), 0);
 			if(ARRAY_size(Target->preds) > 1) {
 				return;
 			}
@@ -147,8 +147,8 @@ static void IRBuilder_SimplifyCFG(FuelIRBuilder *builder)
 
 static void IRBuilder_RemoveInstructionAfterBranchInst(FuelIRBuilder *builder)
 {
-	BlockPtr *x, *e;
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+	NodePtr *x, *e;
+	FOR_EACH_ARRAY(builder->Nodes, x, e) {
 		INodePtr *Inst;
 		INodePtr *LastInst = (ARRAY_last((*x)->insts));
 		unsigned i;
@@ -162,8 +162,8 @@ static void IRBuilder_RemoveInstructionAfterBranchInst(FuelIRBuilder *builder)
 
 static void IRBuilder_FlattenICond(FuelIRBuilder *builder)
 {
-	BlockPtr *x, *e;
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+	NodePtr *x, *e;
+	FOR_EACH_ARRAY(builder->Nodes, x, e) {
 		INodePtr *Inst;
 		INodePtr *LastInst = (ARRAY_last((*x)->insts));
 		unsigned i;
@@ -181,30 +181,30 @@ static void IRBuilder_FlattenICond(FuelIRBuilder *builder)
 }
 
 
-static void CopyIfBlockHasSingleInst(Block *BB, INode *LastInst, Block *Block)
+static void CopyIfNodeHasSingleInst(Node *BB, INode *LastInst, Node *Node)
 {
-	if(ARRAY_size(Block->insts) == 1) {
-		INode *Inst = ARRAY_get(INodePtr, &Block->insts, 0);
+	if(ARRAY_size(Node->insts) == 1) {
+		INode *Inst = ARRAY_get(INodePtr, &Node->insts, 0);
 		if(CHECK_KIND(LastInst, IJump) && CHECK_KIND(Inst, IReturn)) {
-			//debug("Jump %d=>%d\n", BB->base.Id, Block->base.Id);
+			//debug("Jump %d=>%d\n", BB->base.Id, Node->base.Id);
 			memcpy(LastInst, Inst, sizeof(INodeImpl));
 		}
 		else if(CHECK_KIND(LastInst, IBranch) && CHECK_KIND(Inst, IJump)) {
-			//debug("Branch %d=>%d\n", BB->base.Id, Block->base.Id);
+			//debug("Branch %d=>%d\n", BB->base.Id, Node->base.Id);
 			IBranch *Branch = (IBranch *) LastInst;
 			IJump   *Jump   = (IJump *) Inst;
-			if(Branch->ThenBB == Block) {
-				Branch->ThenBB = Jump->TargetBlock;
+			if(Branch->ThenBB == Node) {
+				Branch->ThenBB = Jump->TargetNode;
 			} else {
-				Branch->ElseBB = Jump->TargetBlock;
+				Branch->ElseBB = Jump->TargetNode;
 			}
 		}
 	}
 }
 
-static void IRBuilder_RemoveIndirectJumpBlock(FuelIRBuilder *builder, Block *BB, bool IsVisited)
+static void IRBuilder_RemoveIndirectJumpNode(FuelIRBuilder *builder, Node *BB, bool IsVisited)
 {
-	/* Remove Block that contain only one Jump Instruction
+	/* Remove Node that contain only one Jump Instruction
 	 * [Case1]
 	 *     [Before]            [After]
 	 * BB0: IUpdate $a $b | BB0: IUpdate $a $b
@@ -219,26 +219,26 @@ static void IRBuilder_RemoveIndirectJumpBlock(FuelIRBuilder *builder, Block *BB,
 	 *      IJump BB3     |      IJump BB3
 	 * BB3: ...           | BB3: ...
 	 */
-	while(Block_IsVisited(BB) != IsVisited) {
-		Block_SetVisited(BB, IsVisited);
+	while(Node_IsVisited(BB) != IsVisited) {
+		Node_SetVisited(BB, IsVisited);
 		INode *Inst = *(ARRAY_last(BB->insts));
 		assert(IsBranchInst(Inst));
 		IBranch *Branch;
 		ITest   *Test;
 		IJump   *Jump;
 		if((Branch = CHECK_KIND(Inst, IBranch)) != 0) {
-			CopyIfBlockHasSingleInst(BB, ToINode(Branch), ((IBranch *)Inst)->ThenBB);
-			CopyIfBlockHasSingleInst(BB, ToINode(Branch), ((IBranch *)Inst)->ElseBB);
-			IRBuilder_RemoveIndirectJumpBlock(builder, ((IBranch *)Inst)->ThenBB, IsVisited);
+			CopyIfNodeHasSingleInst(BB, ToINode(Branch), ((IBranch *)Inst)->ThenBB);
+			CopyIfNodeHasSingleInst(BB, ToINode(Branch), ((IBranch *)Inst)->ElseBB);
+			IRBuilder_RemoveIndirectJumpNode(builder, ((IBranch *)Inst)->ThenBB, IsVisited);
 			BB = ((IBranch *)Inst)->ElseBB;
 		}
 		else if((Jump = CHECK_KIND(Inst, IJump)) != 0) {
-			Block *NextBB = ((IJump *)Inst)->TargetBlock;
-			CopyIfBlockHasSingleInst(BB, ToINode(Jump), ((IJump *)Inst)->TargetBlock);
+			Node *NextBB = ((IJump *)Inst)->TargetNode;
+			CopyIfNodeHasSingleInst(BB, ToINode(Jump), ((IJump *)Inst)->TargetNode);
 			BB = NextBB;
 		}
 		else if((Test = CHECK_KIND(Inst, ITest)) != 0) {
-			BB = ((ITest *)Inst)->TargetBlock;
+			BB = ((ITest *)Inst)->TargetNode;
 		}
 		else if(CHECK_KIND(Inst, ITry) != 0) {
 			assert(0 && "TODO");
@@ -396,15 +396,15 @@ static void TraceNode2(INode *Node)
 
 static void IRBuilder_RemoveUnusedVariable(FuelIRBuilder *builder)
 {
-	BlockPtr *x, *e;
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+	NodePtr *x, *e;
+	FOR_EACH_ARRAY(builder->Nodes, x, e) {
 		INodePtr *Inst, *End;
 		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
 			TraceNode1(*Inst);
 		}
 	}
 
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+	FOR_EACH_ARRAY(builder->Nodes, x, e) {
 		INodePtr *Inst, *End;
 		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
 			TraceNode2(*Inst);
@@ -413,7 +413,7 @@ static void IRBuilder_RemoveUnusedVariable(FuelIRBuilder *builder)
 
 	ARRAY(INodePtr) Insts;
 	ARRAY_init(INodePtr, &Insts, 32);
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+	FOR_EACH_ARRAY(builder->Nodes, x, e) {
 		INodePtr *Inst, *End;
 		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
 			if(INode_IsMarked(*Inst)) {
@@ -433,7 +433,7 @@ static void IRBuilder_RemoveUnusedVariable(FuelIRBuilder *builder)
 #ifdef DUMP_IR
 
 static const char *OPTEXT[] = {
-	"Block",
+	"Node",
 #define IR_TEXT_DECL(X) #X,
 	IR_LIST(IR_TEXT_DECL)
 #undef IR_TEXT_DECL
@@ -467,10 +467,10 @@ static const char *Type2String(enum TypeId Type)
 #endif
 }
 
-static void Block_DumpName(Block *BB)
+static void Node_DumpName(Node *BB)
 {
-	debug("  Block $%d : preds=[", BB->base.Id);
-	BlockPtr *x, *e;
+	debug("  Node $%d : preds=[", BB->base.Id);
+	NodePtr *x, *e;
 	FOR_EACH_ARRAY(BB->preds, x, e) {
 		if(x != ARRAY_n(BB->preds, 0)) {
 			debug(", ");
@@ -557,9 +557,9 @@ static void IRBuilder_DumpFunction(FuelIRBuilder *builder)
 
 	debug("Function {\n");
 	IRBuilder_DumpLocalVariable(builder);
-	BlockPtr *x, *e;
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
-		Block_DumpName(*x);
+	NodePtr *x, *e;
+	FOR_EACH_ARRAY(builder->Nodes, x, e) {
+		Node_DumpName(*x);
 		INodePtr *Inst, *End;
 		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
 			visitINode(&DumpVisitor, *Inst);
@@ -591,7 +591,7 @@ typedef ARRAY(ByteCode) ByteCodeList;
 typedef struct ByteCodeWriter {
 	Visitor visitor;
 	ByteCodeList *ByteCode;
-	Block *Current;
+	Node *Current;
 	RegisterAllocator RegAllocator;
 } ByteCodeWriter;
 
@@ -667,7 +667,7 @@ static inline bool IsLocalOrField(INode *Node)
 
 static void DeallocateWithoutLocalVar(ByteCodeWriter *writer)
 {
-	Block *cur = writer->Current;
+	Node *cur = writer->Current;
 	INodePtr *x, *e;
 	FOR_EACH_ARRAY(cur->insts, x, e) {
 		INode *Node = *x;
@@ -727,7 +727,7 @@ static void DumpRegister(ByteCodeWriter *writer)
 static void EmitCondBranch(ByteCodeWriter *writer, IBranch *Inst, ICond *Cond, int IsTopDecl)
 {
 	INodePtr *x, *e;
-	Block *ThenBB, *ElseBB;
+	Node *ThenBB, *ElseBB;
 	unsigned Src;
 
 	if(Cond->Op == LogicalOr) {
@@ -880,7 +880,7 @@ static void EmitNode(ByteCodeWriter *writer, INode *Node)
 		CASE(IJump) {
 			IJump *Inst = (IJump *) Node;
 			DeallocateWithoutLocalVar(writer);
-			EMIT_LIR(writer, Jump, Inst->TargetBlock);
+			EMIT_LIR(writer, Jump, Inst->TargetNode);
 			break;
 		}
 		CASE(IThrow) {
@@ -982,12 +982,12 @@ static void CodeWriter_visitValue(Visitor *visitor, INode *Node, const char *Tag
 
 static void ByteCodeWriter_SaveCurrentInstId(ByteCodeWriter *writer)
 {
-	Block *Current = writer->Current;
+	Node *Current = writer->Current;
 	unsigned Index = ARRAY_size(*writer->ByteCode);
 	INode_setRangeEnd(ToINode(Current), Index);
 }
 
-static void ByteCode_Link(ARRAY(BlockPtr) *blocks, ByteCode *code)
+static void ByteCode_Link(ARRAY(NodePtr) *blocks, ByteCode *code)
 {
 	ByteCode *pc = code, *end = code + ((OPThreadedCode *) code)->CodeSize;
 	while(pc < end) {
@@ -995,14 +995,14 @@ static void ByteCode_Link(ARRAY(BlockPtr) *blocks, ByteCode *code)
 			case OPCODE_CondBrTrue:
 			case OPCODE_CondBrFalse: {
 				OPCondBrTrue *Inst  = (OPCondBrTrue *) pc;
-				unsigned offset = INode_getRangeEnd(ToINode((Block *)Inst->Block));
-				Inst->Block = (void *) (code + offset);
+				unsigned offset = INode_getRangeEnd(ToINode((Node *)Inst->Node));
+				Inst->Node = (void *) (code + offset);
 				break;
 			}
 			case OPCODE_Jump: {
 				OPJump *Inst = (OPJump *) pc;
-				unsigned offset = INode_getRangeEnd(ToINode((Block *)Inst->Block));
-				Inst->Block = (void *) (code + offset);
+				unsigned offset = INode_getRangeEnd(ToINode((Node *)Inst->Node));
+				Inst->Node = (void *) (code + offset);
 				break;
 			}
 			case OPCODE_Try:
@@ -1046,8 +1046,8 @@ static ByteCode *IRBuilder_Lowering(FuelIRBuilder *builder)
 
 	EMIT_LIR(&writer, ThreadedCode, 0);
 
-	BlockPtr *x, *e;
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+	NodePtr *x, *e;
+	FOR_EACH_ARRAY(builder->Nodes, x, e) {
 		writer.Current = *x;
 		INodePtr *Inst, *End;
 		ByteCodeWriter_SaveCurrentInstId(&writer);
@@ -1058,9 +1058,9 @@ static ByteCode *IRBuilder_Lowering(FuelIRBuilder *builder)
 	RegisterAllocator_Dispose(&writer.RegAllocator);
 	ByteCode *pc = ARRAY_n(Code, 0);
 	((OPThreadedCode *) (pc))->CodeSize = ARRAY_size(Code);
-	BlockPtr *block = ARRAY_n(builder->Blocks, 0);
+	NodePtr *block = ARRAY_n(builder->Nodes, 0);
 	INode_setRangeEnd(ToINode(*block), 0);
-	ByteCode_Link(&builder->Blocks, pc);
+	ByteCode_Link(&builder->Nodes, pc);
 
 #ifdef DUMP_FUEL_IR
 	ByteCode_Dump(pc);
@@ -1084,28 +1084,28 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 }
 #endif
 
-static bool IRBuilder_Optimize(FuelIRBuilder *builder, Block *BB, bool Flag)
+static bool IRBuilder_Optimize(FuelIRBuilder *builder, Node *BB, bool Flag)
 {
-	IRBuilder_RemoveIndirectJumpBlock(builder, BB, Flag); Flag = !Flag;
-	IRBuilder_LinkBlocks(builder, BB, Flag); Flag = !Flag;
+	IRBuilder_RemoveIndirectJumpNode(builder, BB, Flag); Flag = !Flag;
+	IRBuilder_LinkNodes(builder, BB, Flag); Flag = !Flag;
 	unsigned i;
 	for(i = 0; i < 2; i++) {
 		IRBuilder_SimplifyStdCall(builder);
 	}
 	IRBuilder_RemoveTrivialCondBranch(builder);
-	IRBuilder_LinkBlocks(builder, BB, Flag); Flag = !Flag;
+	IRBuilder_LinkNodes(builder, BB, Flag); Flag = !Flag;
 	for(i = 0; i < 2; i++) {
 		IRBuilder_SimplifyCFG(builder);
-		IRBuilder_LinkBlocks(builder, BB, Flag); Flag = !Flag;
+		IRBuilder_LinkNodes(builder, BB, Flag); Flag = !Flag;
 	}
 	return Flag;
 }
 
 ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option)
 {
-	Block *BB = Mtd->EntryBlock;
+	Node *BB = Mtd->EntryNode;
 	bool Flag = true;
-	ARRAY_init(BlockPtr, &builder->Blocks, 1);
+	ARRAY_init(NodePtr, &builder->Nodes, 1);
 	IRBuilder_RemoveInstructionAfterBranchInst(builder);
 
 	Flag = IRBuilder_Optimize(builder, BB, Flag);
@@ -1121,7 +1121,7 @@ ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option)
 	} else {
 		code = IRBuilder_Lowering(builder);
 	}
-	ARRAY_dispose(BlockPtr, &builder->Blocks);
+	ARRAY_dispose(NodePtr, &builder->Nodes);
 	return code;
 }
 

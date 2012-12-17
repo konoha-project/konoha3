@@ -33,27 +33,27 @@ extern "C"{
 static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
-	kNameSpace *ns = Stmt_ns(stmt);
-	kToken *symbolToken = SUGAR kStmt_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
+	kNameSpace *ns = Node_ns(stmt);
+	kToken *symbolToken = SUGAR kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 	ksymbol_t unboxKey = symbolToken->resolvedSymbol;
-	kbool_t result = SUGAR kStmt_TypeCheckByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
+	kbool_t result = SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
 	if(result) {
-		kExpr *constExpr = SUGAR kStmt_GetExpr(kctx, stmt, KSymbol_ExprPattern, NULL);
-		KClass *constClass = KClass_(constExpr->attrTypeId);
+		kNode *constNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
+		KClass *constClass = KClass_(constNode->attrTypeId);
 		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
 		result = false;
-		if(constExpr->node == TEXPR_NULL) {   // const C = String
+		if(constNode->node == TEXPR_NULL) {   // const C = String
 			type = VirtualType_KClass;
 			unboxValue = (uintptr_t)constClass;
 			result = true;
 		}
-		else if(constExpr->node == TEXPR_CONST) {   // const C = "1"
-			unboxValue = (uintptr_t)constExpr->ObjectConstValue;
+		else if(constNode->node == TEXPR_CONST) {   // const C = "1"
+			unboxValue = (uintptr_t)constNode->ObjectConstValue;
 			result = true;
 		}
-		else if(constExpr->node == TEXPR_NCONST) {  // const c = 1
-			unboxValue = constExpr->unboxConstValue;
+		else if(constNode->node == TEXPR_NCONST) {  // const c = 1
+			unboxValue = constNode->unboxConstValue;
 			result = true;
 		}
 		if(result) {
@@ -61,17 +61,17 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 			result = KLIB kNameSpace_SetConstData(kctx, ns, unboxKey, type, unboxValue, false/*isOverride*/, trace);
 		}
 		else {
-			kStmt_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", KSymbol_Fmt2(unboxKey));
+			kNode_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", KSymbol_Fmt2(unboxKey));
 		}
 	}
-	kStmt_done(kctx, stmt);
+	kNode_done(kctx, stmt);
 	KReturnUnboxValue(result);
 }
 
 static kbool_t const_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("const"), 0, "\"const\" $Symbol \"=\" $Expr", 0, 0, NULL, NULL, Statement_ConstDecl, NULL, NULL, },
+		{ KSymbol_("const"), 0, "\"const\" $Symbol \"=\" $Node", 0, 0, NULL, NULL, Statement_ConstDecl, NULL, NULL, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

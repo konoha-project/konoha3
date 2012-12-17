@@ -57,7 +57,7 @@ static inline OPCODE GetOpcode(ByteCode *code)
 extern void ByteCode_Dump(ByteCode *code);
 extern void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code);
 
-extern void FuelVM_GenerateLLVMIR(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option);
+extern void FuelVM_GenerateLLVMIR(KonohaContext *kctx, kMethod *mtd, kNode *block, int option);
 extern void RecompileMethod(KonohaContext *kctx, kMethod *mtd);
 
 #define FUELVM_REGISTER_SIZE 512/*FIXME Implement clever register allocation algorithm */

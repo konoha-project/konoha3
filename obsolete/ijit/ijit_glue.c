@@ -35,7 +35,7 @@ extern "C" {
 #define GenCodeMtd (kmodjit)->genCode
 #define GenCodeDefault (kmodjit)->defaultCodeGen
 
-typedef void (*FgenCode)(KonohaContext *kctx, kMethod *mtd, kBlock *bk);
+typedef void (*FgenCode)(KonohaContext *kctx, kMethod *mtd, kNode *bk);
 typedef struct {
 	KRuntimeModule h;
 	kMethod *genCode;
@@ -113,16 +113,16 @@ static KMETHOD System_getUline(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(kmodjit->uline);
 }
 
-static KMETHOD Expr_getCons(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Node_getCons(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kExpr *expr = (kExpr *) sfp[0].asObject;
+	kNode *expr = (kNode *) sfp[0].asObject;
 	KReturn(expr->NodeList);
 }
 
-static KMETHOD Expr_getSingle(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Node_getSingle(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kExpr *expr = (kExpr *) sfp[0].asObject;
-	DBG_ASSERT(IS_Expr(expr->single));
+	kNode *expr = (kNode *) sfp[0].asObject;
+	DBG_ASSERT(IS_Node(expr->single));
 	KReturn(expr->single);
 }
 
@@ -405,16 +405,16 @@ static KMETHOD System_getTyStack(KonohaContext *kctx, KonohaStack *sfp)
 
 
 //## int bk.getEspIndex();
-static KMETHOD Block_getEspIndex(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Node_getEspIndex(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBlock *bk = (kBlock *) sfp[0].asObject;
+	kNode *bk = (kNode *) sfp[0].asObject;
 	KReturnUnboxValue(bk->esp->index);
 }
 
-//## Array Block.getBlocks();
-static KMETHOD Block_getBlocks(KonohaContext *kctx, KonohaStack *sfp)
+//## Array Node.getNodes();
+static KMETHOD Node_getNodes(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBlock *bk = (kBlock *) sfp[0].asObject;
+	kNode *bk = (kNode *) sfp[0].asObject;
 	KReturn(bk->NodeList);
 }
 
@@ -424,23 +424,23 @@ static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(kArray_size(sfp[0].asArray));
 }
 
-//## int Stmt.getUline();
-static KMETHOD Stmt_getUline(KonohaContext *kctx, KonohaStack *sfp)
+//## int Node.getUline();
+static KMETHOD Node_getUline(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kStmt *stmt = (kStmt *) sfp[0].asObject;
+	kNode *stmt = (kNode *) sfp[0].asObject;
 	KReturnUnboxValue(stmt->uline);
 }
-//## boolean Stmt.hasSyntax();
-static KMETHOD Stmt_hasSyntax(KonohaContext *kctx, KonohaStack *sfp)
+//## boolean Node.hasSyntax();
+static KMETHOD Node_hasSyntax(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kStmt *stmt = (kStmt *) sfp[0].asObject;
+	kNode *stmt = (kNode *) sfp[0].asObject;
 	KReturnUnboxValue(stmt->syn != NULL);
 }
-//## Object Stmt.getObjectNULL(int id);
-static KMETHOD Stmt_getObjectNULL(KonohaContext *kctx, KonohaStack *sfp)
+//## Object Node.getObjectNULL(int id);
+static KMETHOD Node_getObjectNULL(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kStmt *stmt = (kStmt *) sfp[0].asObject;
-	kObject *o = kStmt_GetObjectNULL(kctx, stmt, sfp[1].intValue);
+	kNode *stmt = (kNode *) sfp[0].asObject;
+	kObject *o = kNode_GetObjectNULL(kctx, stmt, sfp[1].intValue);
 	if(!o) {
 		o = K_NULL;
 	}
@@ -456,14 +456,14 @@ static KMETHOD Object_unbox(KonohaContext *kctx, KonohaStack *sfp)
 
 
 //FIXME TODO stupid down cast
-static KMETHOD Object_toStmt(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Object_toNode(KonohaContext *kctx, KonohaStack *sfp)
 {
 	(void)kctx;
 	KReturn(sfp[0].asObject);
 }
 
 //FIXME TODO stupid down cast
-static KMETHOD Object_toExpr(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Object_toNode(KonohaContext *kctx, KonohaStack *sfp)
 {
 	(void)kctx;
 	KReturn(sfp[0].asObject);
@@ -684,14 +684,14 @@ static KMETHOD Pointer_toObject(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 ////FIXME TODO stupid down cast
-//static KMETHOD Object_toExpr(KonohaContext *kctx, KonohaStack *sfp)
+//static KMETHOD Object_toNode(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	(void)kctx;
 //	KReturn(sfp[0].asObject);
 //}
 
 /****************************************************************/
-static void _kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
+static void _kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kNode *bk)
 {
 	DBG_P("START CODE GENERATION..");
 	BEGIN_UnusedStack(lsfp, 8);
@@ -741,9 +741,9 @@ static kbool_t ijit_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 
 static kbool_t ijit_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
-	/* Array[Expr] */
-	kparamtype_t P_ExprArray[] = {{KType_Expr}};
-	int KType_ExprArray = (KLIB KClass_Generics(kctx, KClass_Array, KType_void, 1, P_ExprArray))->typeId;
+	/* Array[Node] */
+	kparamtype_t P_NodeArray[] = {{KType_Node}};
+	int KType_NodeArray = (KLIB KClass_Generics(kctx, KClass_Array, KType_void, 1, P_NodeArray))->typeId;
 
 	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KType_System, KKMethodName_("genCode"), 0, MPOL_FIRST);
 	KUnsafeFieldInit(kmodjit->genCode, mtd);
@@ -794,12 +794,12 @@ static kbool_t ijit_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 		_Public|_Static|_Coercion, _F(System_getTyMethod),   KType_O,    KType_System, KKMethodName_("getTyMethod"), 0,
 		_Public|_Static|_Coercion, _F(System_getTyContext),  KType_O,    KType_System, KKMethodName_("getTyContext"), 0,
 		_Public|_Static|_Coercion, _F(System_getTyStack),    KType_O,    KType_System, KKMethodName_("getTyStack"), 0,
-		_Public, _F(Block_getEspIndex), KType_int, KType_Block, KKMethodName_("getEspIndex"), 0,
-		_Public, _F(Block_getBlocks), KType_Array, KType_Block, KKMethodName_("getBlocks"), 0,
+		_Public, _F(Node_getEspIndex), KType_int, KType_Node, KKMethodName_("getEspIndex"), 0,
+		_Public, _F(Node_getNodes), KType_Array, KType_Node, KKMethodName_("getNodes"), 0,
 		_Public, _F(Array_getSize), KType_int, KType_Array, KKMethodName_("getSize"), 0,
-		_Public, _F(Stmt_getUline), KType_int, KType_Stmt,  KKMethodName_("getUline"), 0,
-		_Public, _F(Stmt_hasSyntax), KType_boolean, KType_Stmt,  KKMethodName_("hasSyntax"), 0,
-		_Public, _F(Stmt_getObjectNULL), KType_O, KType_Stmt, KKMethodName_("getObjectNULL"), 1, KType_int, FN_x,
+		_Public, _F(Node_getUline), KType_int, KType_Node,  KKMethodName_("getUline"), 0,
+		_Public, _F(Node_hasSyntax), KType_boolean, KType_Node,  KKMethodName_("hasSyntax"), 0,
+		_Public, _F(Node_getObjectNULL), KType_O, KType_Node, KKMethodName_("getObjectNULL"), 1, KType_int, FN_x,
 		_Public, _F(System_AddConstPool), KType_void, KType_System, KKMethodName_("addConstPool"), 1, KType_O, FN_x,
 		_Public, _F(Object_unbox), KType_int, KType_O, KKMethodName_("unbox"), 0,
 		_Public|_Static, _F(Array_new1), KType_Array, KType_Array, KKMethodName_("new1"), 1, KType_O, FN_x,
@@ -818,10 +818,10 @@ static kbool_t ijit_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 		_Public|_Static, _F(System_getNULL), KType_Object, KType_System, KKMethodName_("getNULL"), 1, KType_int, FN_x,
 		_Public, _F(Method_isStatic_), KType_boolean, KType_Method, KKMethodName_("isStatic"), 0,
 		_Public, _F(Method_isVirtual_), KType_boolean, KType_Method, KKMethodName_("isVirtual"), 0,
-		_Public|_Coercion, _F(Object_toStmt), KType_Stmt, KType_Object, KMethodName_To(KType_Stmt), 0,
-		_Public|_Coercion, _F(Object_toExpr), KType_Expr, KType_Object, KMethodName_To(KType_Expr), 0,
-		_Public, _F(Expr_getSingle), KType_Expr, KType_Expr, KKMethodName_("getSingle"), 0,
-		_Public, _F(Expr_getCons), KType_ExprArray, KType_Expr, KKMethodName_("getCons"), 0,
+		_Public|_Coercion, _F(Object_toNode), KType_Node, KType_Object, KMethodName_To(KType_Node), 0,
+		_Public|_Coercion, _F(Object_toNode), KType_Node, KType_Object, KMethodName_To(KType_Node), 0,
+		_Public, _F(Node_getSingle), KType_Node, KType_Node, KKMethodName_("getSingle"), 0,
+		_Public, _F(Node_getCons), KType_NodeArray, KType_Node, KKMethodName_("getCons"), 0,
 
 
 		_Public|_Static, _F(Pointer_get), KType_int,  KType_System, KKMethodName_("getPointer"),3, KType_int, FN_x, KType_int, FN_y, KType_int, FN_z,
@@ -829,7 +829,7 @@ static kbool_t ijit_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 		_Public|_Coercion, _F(Object_getAddr), KType_int, KType_O, KKMethodName_("getAddr"), 0,
 		_Public, _F(Object_getCid), KType_int, KType_O, KKMethodName_("getCid"), 0,
 		_Public, _F(Method_getCid), KType_int, KType_Method, KKMethodName_("getCid"), 0,
-		//_Public|_Coercion, _F(Object_toStmt), KType_Stmt, KType_Object, KMethodName_To(KType_Stmt), 0,
+		//_Public|_Coercion, _F(Object_toNode), KType_Node, KType_Object, KMethodName_To(KType_Node), 0,
 
 #define TO(T) _Public|_Static, _F(Pointer_toObject), KType_##T, KType_System, KKMethodName_("convertTo" # T), 1, KType_int, FN_x
 		TO(Array),

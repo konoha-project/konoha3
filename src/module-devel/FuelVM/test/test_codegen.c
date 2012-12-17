@@ -29,12 +29,12 @@ static void f()
      *   return void;
      * }
      */
-    Block *EntryBB = CreateBlock(builder);
-    Block *ThenBB  = CreateBlock(builder);
-    Block *ElseBB  = CreateBlock(builder);
-    Block *MergeBB = CreateBlock(builder);
+    Node *EntryBB = CreateNode(builder);
+    Node *ThenBB  = CreateNode(builder);
+    Node *ElseBB  = CreateNode(builder);
+    Node *MergeBB = CreateNode(builder);
 
-    IRBuilder_setBlock(builder, EntryBB);
+    IRBuilder_setNode(builder, EntryBB);
     INode *Field0 = CreateLocal(builder, TYPE_boolean);
     INode *Field1 = CreateLocal(builder, TYPE_int);
     {
@@ -43,19 +43,19 @@ static void f()
         CreateBranch(builder, Val0, ThenBB, ElseBB);
     }
 
-    IRBuilder_setBlock(builder, ThenBB);
+    IRBuilder_setNode(builder, ThenBB);
     {
         CreateUpdate(builder, Field1, CreateInt(builder, 100));
         IRBuilder_JumpTo(builder, MergeBB);
     }
 
-    IRBuilder_setBlock(builder, ElseBB);
+    IRBuilder_setNode(builder, ElseBB);
     {
         CreateUpdate(builder, Field1, CreateInt(builder, 200));
         IRBuilder_JumpTo(builder, MergeBB);
     }
 
-    IRBuilder_setBlock(builder, MergeBB);
+    IRBuilder_setNode(builder, MergeBB);
     {
         INode *Sys = CreateObject(builder, TYPE_Any, 0);
         INode *Mtd = CreateObject(builder, TYPE_Method, (void *) System_Print);
@@ -99,15 +99,15 @@ static void g()
      *       goto BB1
      * BB6:  return i;
      */
-    Block *BB0 = CreateBlock(builder);
-    Block *BB1 = CreateBlock(builder);
-    Block *BB2 = CreateBlock(builder);
-    Block *BB3 = CreateBlock(builder);
-    Block *BB4 = CreateBlock(builder);
-    Block *BB5 = CreateBlock(builder);
-    Block *BB6 = CreateBlock(builder);
+    Node *BB0 = CreateNode(builder);
+    Node *BB1 = CreateNode(builder);
+    Node *BB2 = CreateNode(builder);
+    Node *BB3 = CreateNode(builder);
+    Node *BB4 = CreateNode(builder);
+    Node *BB5 = CreateNode(builder);
+    Node *BB6 = CreateNode(builder);
 
-    IRBuilder_setBlock(builder, BB0);
+    IRBuilder_setNode(builder, BB0);
     INode *Field0 = CreateLocal(builder, TYPE_int);
     INode *Field1 = CreateLocal(builder, TYPE_int);
 
@@ -117,38 +117,38 @@ static void g()
         IRBuilder_JumpTo(builder, BB1);
     }
 
-    IRBuilder_setBlock(builder, BB1);
+    IRBuilder_setNode(builder, BB1);
     {
         INode *Val0 = CreateBinaryInst(builder, Lt, Field1, CreateInt(builder, 10));
         CreateBranch(builder, Val0, BB2, BB6);
     }
 
-    IRBuilder_setBlock(builder, BB2);
+    IRBuilder_setNode(builder, BB2);
     {
         INode *Val0 = CreateBinaryInst(builder, Eq, Field1, Field0);
         CreateBranch(builder, Val0, BB3, BB4);
     }
 
-    IRBuilder_setBlock(builder, BB3);
+    IRBuilder_setNode(builder, BB3);
     {
         INode *Val0 = CreateBinaryInst(builder, Mul, Field1, CreateInt(builder, 2));
         CreateUpdate(builder, Field1, Val0);
         IRBuilder_JumpTo(builder, BB6);
     }
 
-    IRBuilder_setBlock(builder, BB4);
+    IRBuilder_setNode(builder, BB4);
     {
         IRBuilder_JumpTo(builder, BB5);
     }
 
-    IRBuilder_setBlock(builder, BB5);
+    IRBuilder_setNode(builder, BB5);
     {
         INode *Val0 = CreateBinaryInst(builder, Add, Field1, CreateInt(builder, 1));
         CreateUpdate(builder, Field1, Val0);
         IRBuilder_JumpTo(builder, BB1);
     }
 
-    IRBuilder_setBlock(builder, BB6);
+    IRBuilder_setNode(builder, BB6);
     {
         CreateReturn(builder, Field1);
     }
@@ -181,23 +181,23 @@ static void h()
      *       int ret1 = fibo(sub1);
      *       return ret0 + ret1;
      */
-    Block *BB0 = CreateBlock(builder);
-    Block *BB1 = CreateBlock(builder);
-    Block *BB2 = CreateBlock(builder);
+    Node *BB0 = CreateNode(builder);
+    Node *BB1 = CreateNode(builder);
+    Node *BB2 = CreateNode(builder);
 
-    IRBuilder_setBlock(builder, BB0);
+    IRBuilder_setNode(builder, BB0);
     {
         INode *Val0 = CreateBinaryInst(builder, Lt,
                 CreateArgument(builder, 1), CreateInt(builder, 10));
         CreateBranch(builder, Val0, BB1, BB2);
     }
 
-    IRBuilder_setBlock(builder, BB1);
+    IRBuilder_setNode(builder, BB1);
     {
         CreateReturn(builder, CreateInt(builder, 1));
     }
 
-    IRBuilder_setBlock(builder, BB2);
+    IRBuilder_setNode(builder, BB2);
     {
         INode *Sys = CreateObject(builder, TYPE_Any, 0);
         INode *Mtd = CreateObject(builder, TYPE_Method, (void *) 0);

@@ -28,7 +28,7 @@
 extern "C" {
 #endif
 
-DEF_ARRAY_OP_NOPOINTER(BlockPtr);
+DEF_ARRAY_OP_NOPOINTER(NodePtr);
 DEF_ARRAY_OP_NOPOINTER(INodePtr);
 
 /* Node API */
@@ -42,21 +42,21 @@ static void disposeINodeImpl(INode *Node)
 {
 }
 
-static Block *newBlock(FuelIRBuilder *builder)
+static Node *newNode(FuelIRBuilder *builder)
 {
-	Block *Node = (Block *) newINode(builder, TYPE_IR_Block);
-	ARRAY_init(BlockPtr, &Node->preds, 0);
-	ARRAY_init(BlockPtr, &Node->succs, 0);
+	Node *Node = (Node *) newINode(builder, TYPE_IR_Node);
+	ARRAY_init(NodePtr, &Node->preds, 0);
+	ARRAY_init(NodePtr, &Node->succs, 0);
 	ARRAY_init(INodePtr, &Node->insts, 0);
-	Block_SetVisited(Node, 0);
+	Node_SetVisited(Node, 0);
 	return (Node);
 }
 
-static void disposeBlock(INode *Node)
+static void disposeNode(INode *Node)
 {
-	Block *block = (Block *) Node;
-	ARRAY_dispose(BlockPtr, &block->preds);
-	ARRAY_dispose(BlockPtr, &block->succs);
+	Node *block = (Node *) Node;
+	ARRAY_dispose(NodePtr, &block->preds);
+	ARRAY_dispose(NodePtr, &block->succs);
 	INodePtr *x, *e;
 	FOR_EACH_ARRAY(block->insts, x, e) {
 		DISPOSE_NODE(*x);
@@ -191,7 +191,7 @@ static void disposeIUpdate(INode *Node)
 	DISPOSE_NODE(Update->RHS);
 }
 
-static IBranch *newIBranch(FuelIRBuilder *builder, INode *Cond, Block *thenBB, Block *elseBB)
+static IBranch *newIBranch(FuelIRBuilder *builder, INode *Cond, Node *thenBB, Node *elseBB)
 {
 	IBranch *Node = CREATE_NODE(IBranch);
 	Node->Cond = Cond;
@@ -206,12 +206,12 @@ static void disposeIBranch(INode *Node)
 	DISPOSE_NODE(Inst->Cond);
 }
 
-static ITest *newITest(FuelIRBuilder *builder, enum TestOp Op, IField *Field, Block *Block)
+static ITest *newITest(FuelIRBuilder *builder, enum TestOp Op, IField *Field, Node *Node)
 {
 	ITest *Node = CREATE_NODE(ITest);
 	Node->Op = Op;
 	Node->Value = Field;
-	Node->TargetBlock = Block;
+	Node->TargetNode = Node;
 	return (Node);
 }
 
@@ -234,10 +234,10 @@ static void disposeIReturn(INode *Node)
 	DISPOSE_NODE(Inst->Inst);
 }
 
-static IJump *newIJump(FuelIRBuilder *builder, Block *Block)
+static IJump *newIJump(FuelIRBuilder *builder, Node *Node)
 {
 	IJump *Node = CREATE_NODE(IJump);
-	Node->TargetBlock = Block;
+	Node->TargetNode = Node;
 	return (Node);
 }
 
@@ -257,17 +257,17 @@ static void disposeIThrow(INode *Node)
 	DISPOSE_NODE(Inst->Val);
 }
 
-static ITry *newITry(FuelIRBuilder *builder, Block *tryBlock, Block *finallyBlock)
+static ITry *newITry(FuelIRBuilder *builder, Node *tryNode, Node *finallyNode)
 {
 	ITry *Node = CREATE_NODE(ITry);
-	ARRAY_init(BlockPtr, &Node->CatchBBs, 0);
+	ARRAY_init(NodePtr, &Node->CatchBBs, 0);
 	return (Node);
 }
 
 static void disposeITry(INode *Node)
 {
 	ITry *Inst = (ITry *) Node;
-	ARRAY_dispose(BlockPtr, &Inst->CatchBBs);
+	ARRAY_dispose(NodePtr, &Inst->CatchBBs);
 }
 
 static IYield *newIYield(FuelIRBuilder *builder, INode *INode)
@@ -344,7 +344,7 @@ static void disposeINode(INode *Node)
 {
 	typedef void (*FnNode)(INode *);
 	static FnNode Fn[] = {
-		disposeBlock,
+		disposeNode,
 #define IR_TYPE_DECL(X) dispose##X,
 		IR_LIST(IR_TYPE_DECL)
 #undef IR_TYPE_DECL
@@ -356,7 +356,7 @@ static const struct IRBuilderAPI API = {
 	visitInit,
 	visitExit,
 	disposeINode,
-	newBlock,
+	newNode,
 #define IR_API_DECL(X) new##X,
 	IR_LIST(IR_API_DECL)
 #undef IR_API_DECL
@@ -365,15 +365,15 @@ static const struct IRBuilderAPI API = {
 /* -------------------------------------------------------------------------- */
 /* [API] */
 
-static void Block_add(Block *BB, INode *Stmt)
+static void Node_add(Node *BB, INode *Node)
 {
-	//assert(Block_HasTerminatorInst(BB) == false);
-	ARRAY_add(INodePtr, &BB->insts, Stmt);
+	//assert(Node_HasTerminatorInst(BB) == false);
+	ARRAY_add(INodePtr, &BB->insts, Node);
 }
 
-void IRBuilder_add(FuelIRBuilder *builder, INode *Stmt)
+void IRBuilder_add(FuelIRBuilder *builder, INode *Node)
 {
-	Block_add(builder->Current, Stmt);
+	Node_add(builder->Current, Node);
 }
 
 void INewInst_addParam(INew *Inst, INode *Param)

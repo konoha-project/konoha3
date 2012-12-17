@@ -472,29 +472,8 @@ typedef struct kNameSpaceVar            kNameSpaceVar;
 typedef const struct kTokenVar          kToken;
 typedef struct kTokenVar                kTokenVar;
 
-#ifdef USE_NODE
-typedef const struct kNodeVar           kNode;
+typedef struct kNodeVar                 kNode;
 typedef struct kNodeVar                 kNodeVar;
-typedef struct kUNode                   kUNode;
-
-typedef const struct kNodeVar           kExpr;
-typedef struct kNodeVar                 kExprVar;
-typedef const struct kNodeVar           kStmt;
-typedef const struct kNodeVar           kStmtNULL;  // Nullable
-typedef struct kNodeVar                 kStmtVar;
-typedef const struct kNodeVar          kBlock;
-typedef struct kNodeVar                kBlockVar;
-#endif
-
-#ifndef USE_NODE
-typedef const struct kExprVar           kExpr;
-typedef struct kExprVar                 kExprVar;
-typedef const struct kStmtVar           kStmt;
-typedef const struct kStmtVar           kStmtNULL;  // Nullable
-typedef struct kStmtVar                 kStmtVar;
-typedef const struct kBlockVar          kBlock;
-typedef struct kBlockVar                kBlockVar;
-#endif
 
 typedef struct kGammaVar                kGamma;
 typedef struct kGammaVar                kGammaVar;
@@ -632,7 +611,7 @@ struct KonohaFactory {
 	// CodeGenerator
 	KModuleInfo  *CodeGeneratorInfo;
 	void*       (*GetCodeGenerateKMethodFunc)(void);
-	void*       (*GenerateCode)(KonohaContext *kctx, kMethod *mtd, kBlock *bk, int options);
+	void*       (*GenerateCode)(KonohaContext *kctx, kMethod *mtd, kNode *bk, int options);
 
 	// VirtualMachine
 	KModuleInfo            *VirtualMachineInfo;
@@ -943,9 +922,7 @@ struct KContextModule {
 	kFunc       *asFunc; \
 	kNameSpace  *asNameSpace;\
 	kToken      *asToken;\
-	kStmt       *asStmt;\
-	kExpr       *asExpr;\
-	kBlock      *asBlock;\
+	kNode       *asNode;\
 	kGamma      *asGamma;\
 	const struct kExceptionVar  *asException;\
 	const struct kFloatVar      *asFloat; \
@@ -1299,10 +1276,8 @@ struct kArrayVar {
 		kFunc          **FuncItems;
 		kToken         **TokenItems;
 		kTokenVar      **TokenVarItems;
-		kExpr          **ExprItems;
-		kExprVar       **ExprVarItems;
-		kStmt          **StmtItems;
-		kStmtVar       **StmtVarItems;
+		kNode          **NodeItems;
+		kNodeVar       **NodeVarItems;
 	};
 	size_t bytemax;
 };
@@ -1403,7 +1378,7 @@ struct kMethodVar {
 	kToken           *SourceToken;
 	union {
 		kNameSpace   *LazyCompileNameSpace;       // lazy compilation
-		kBlock       *CompiledBlock;
+		kNode       *CompiledNode;
 	};
 	uintptr_t         serialNumber;
 };
@@ -1684,7 +1659,7 @@ struct KonohaLibVar {
 	kMethodVar*         (*new_kMethod)(KonohaContext*, kArray *gcstack, uintptr_t, ktypeattr_t, kmethodn_t, KMethodFunc);
 	kParam*             (*kMethod_SetParam)(KonohaContext*, kMethod *, ktypeattr_t, kushort_t, const kparamtype_t *);
 	void                (*kMethod_SetFunc)(KonohaContext*, kMethod*, KMethodFunc);
-	void                (*kMethod_GenCode)(KonohaContext*, kMethod*, kBlock *, int options);
+	void                (*kMethod_GenCode)(KonohaContext*, kMethod*, kNode *, int options);
 	intptr_t            (*kMethod_indexOfField)(kMethod *);
 
 	kbool_t             (*KRuntime_setModule)(KonohaContext*, int, struct KRuntimeModule *, KTraceInfo *);

@@ -233,7 +233,7 @@ static KMETHOD TypeCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *termToken = expr->TermToken;
-	if(kExpr_IsTerm(expr) && IS_Token(termToken)) {
+	if(kNode_IsTerm(expr) && IS_Token(termToken)) {
 		DBG_P("termToken='%s'", kString_text(termToken->text));
 
 	}
@@ -241,7 +241,7 @@ static KMETHOD TypeCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t map_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_MapLiteral));
+	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_NodePattern, SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_MapLiteral));
 	return true;
 }
 

@@ -37,17 +37,17 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	size_t i;
 	kbool_t isDefined = true;
 	KParserContext *sugarContext = KGetParserContext(kctx);
-	int popIsBlockingErrorMessage = sugarContext->isBlockedErrorMessage;
-	sugarContext->isBlockedErrorMessage = true;
+	int popIsNodeingErrorMessage = sugarContext->isNodeedErrorMessage;
+	sugarContext->isNodeedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->NodeList); i++) {
-		kExpr *typedExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, i, gma, KClass_INFER, TypeCheckPolicy_ALLOWVOID);
-		if(typedExpr == K_NULLEXPR) {
+		kNode *typedNode = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, i, gma, KClass_INFER, TypeCheckPolicy_ALLOWVOID);
+		if(typedNode == K_NULLEXPR) {
 			isDefined = false;
 			break;
 		}
 	}
-	sugarContext->isBlockedErrorMessage = popIsBlockingErrorMessage;
-	KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_boolean, isDefined));
+	sugarContext->isNodeedErrorMessage = popIsNodeingErrorMessage;
+	KReturn(SUGAR kNode_SetUnboxConstValue(kctx, expr, KType_boolean, isDefined));
 }
 
 static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
@@ -70,16 +70,16 @@ static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 }
 
 
-static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Nodeession_Defined(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Expression(stmt, tokenList, beginIdx, currentIdx, endIdx);
+	VAR_Nodeession(stmt, tokenList, beginIdx, currentIdx, endIdx);
 	if(beginIdx == currentIdx && beginIdx + 1 < endIdx) {
 		kTokenVar *definedToken = tokenList->TokenVarItems[beginIdx];   // defined
 		kTokenVar *pToken = tokenList->TokenVarItems[beginIdx+1];
 		if(IS_Array(pToken->subTokenList)) {
-			kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
-			filterArrayList(kctx, Stmt_ns(stmt), pToken->subTokenList, 0, kArray_size(pToken->subTokenList));
-			KReturn(SUGAR kStmt_AddExprParam(kctx, stmt, expr, pToken->subTokenList, 0, kArray_size(pToken->subTokenList), 0/*isAllowEmpty*/));
+			kNode *expr = SUGAR new_UntypedCallStyleNode(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
+			filterArrayList(kctx, Node_ns(stmt), pToken->subTokenList, 0, kArray_size(pToken->subTokenList));
+			KReturn(SUGAR kNode_AddNodeParam(kctx, stmt, expr, pToken->subTokenList, 0, kArray_size(pToken->subTokenList), 0/*isAllowEmpty*/));
 		}
 	}
 }
@@ -87,7 +87,7 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t defined_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Expression_Defined, NULL, NULL, TypeCheck_Defined, },
+		{ KSymbol_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Nodeession_Defined, NULL, NULL, TypeCheck_Defined, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

@@ -30,7 +30,7 @@ typedef struct LLVMIRBuilder {
 	KonohaContext *kctx;
 	IRBuilder<> *builder;
 	Function *Func;
-	Block    *Current;
+	Node    *Current;
 	std::vector<Value *> *ValueTable;
 };
 
@@ -78,7 +78,7 @@ static Value *CreateConstant(IRBuilder<> *builder, void *ptr)
 	Constant *C = (sizeof(void*) == 4) ?
 		builder->getInt32((uint32_t) (uintptr_t) ptr):
 		builder->getInt64((uint64_t) (uintptr_t) ptr);
-	return ConstantExpr::getIntToPtr(C, Ty);
+	return ConstantNode::getIntToPtr(C, Ty);
 }
 
 static Value *CreateConstant(IRBuilder<> *builder, kObject *obj)
@@ -108,12 +108,12 @@ static Value *GetValue(LLVMIRBuilder *writer, INode *Node)
 	return table->at(Idx);
 }
 
-static BasicBlock *GetBlock(LLVMIRBuilder *writer, Block *Target)
+static BasicNode *GetNode(LLVMIRBuilder *writer, Node *Target)
 {
-	return (BasicBlock *) GetValue(writer, ToINode(Target));
+	return (BasicNode *) GetValue(writer, ToINode(Target));
 }
 
-static void SetBlock(LLVMIRBuilder *writer, Block *Target, BasicBlock *BB)
+static void SetNode(LLVMIRBuilder *writer, Node *Target, BasicNode *BB)
 {
 	SetValue(writer, ToINode(Target), (Value *) BB);
 }
@@ -222,7 +222,7 @@ static void CreateRet(LLVMIRBuilder *writer, INode *Node)
 static void CreateJump(LLVMIRBuilder *writer, IJump *Node)
 {
 	IRBuilder<> *builder = writer->builder;
-	BasicBlock *Target = GetBlock(writer, Node->TargetBlock);
+	BasicNode *Target = GetNode(writer, Node->TargetNode);
 	builder->CreateBr(Target);
 }
 
@@ -230,8 +230,8 @@ static void CreateBranch(LLVMIRBuilder *writer, IBranch *Node)
 {
 	IRBuilder<> *builder = writer->builder;
 	Value *Cond = GetValue(writer, Node->Cond);
-	BasicBlock *ThenBB = GetBlock(writer, Node->ThenBB);
-	BasicBlock *ElseBB = GetBlock(writer, Node->ElseBB);
+	BasicNode *ThenBB = GetNode(writer, Node->ThenBB);
+	BasicNode *ElseBB = GetNode(writer, Node->ElseBB);
 	builder->CreateCondBr(Cond, ThenBB, ElseBB);
 }
 
@@ -474,7 +474,7 @@ static Function *CreateFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Fu
 	SetName(Vctx, "kctx");
 	SetName(Vsfp, "sfp");
 
-	BasicBlock *BB = BasicBlock::Create(getGlobalContext(), "EntryBlock", FWrap);
+	BasicNode *BB = BasicNode::Create(getGlobalContext(), "EntryNode", FWrap);
 	IRBuilder<> *builder = new IRBuilder<>(BB);
 
 	kParam *params = kMethod_GetParam(mtd);
@@ -497,17 +497,17 @@ static Function *CreateFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Fu
 
 static void EmitPrologue(LLVMIRBuilder *writer, FuelIRBuilder *builder, IMethod *Mtd)
 {
-	BasicBlock *EntryBB;
+	BasicNode *EntryBB;
 	writer->Func = CreateInternalFunction(Mtd->Context, GlobalModule, Mtd->Method);
-	EntryBB = BasicBlock::Create(getGlobalContext(), "EntryBlock", writer->Func);
+	EntryBB = BasicNode::Create(getGlobalContext(), "EntryNode", writer->Func);
 	writer->builder = new IRBuilder<>(EntryBB);
 
-	BlockPtr *x, *e;
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
-		if(x == ARRAY_n(builder->Blocks, 0)) {
+	NodePtr *x, *e;
+	FOR_EACH_ARRAY(builder->Nodes, x, e) {
+		if(x == ARRAY_n(builder->Nodes, 0)) {
 			continue;
 		}
-		SetBlock(writer, *x, BasicBlock::Create(getGlobalContext(), "BB", writer->Func));
+		SetNode(writer, *x, BasicNode::Create(getGlobalContext(), "BB", writer->Func));
 	}
 }
 
@@ -530,8 +530,8 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 
 	writer.ValueTable = &ValueTable;
 
-	BlockPtr *x, *e;
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+	NodePtr *x, *e;
+	FOR_EACH_ARRAY(builder->Nodes, x, e) {
 		writer.Current = *x;
 		INodePtr *Inst, *End;
 		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
@@ -544,10 +544,10 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 	return (ByteCode *) f;
 }
 
-void FuelVM_GenerateLLVMIR(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
+void FuelVM_GenerateLLVMIR(KonohaContext *kctx, kMethod *mtd, kNode *block, int option)
 {
 	fprintf(stderr, "START LLVM IR GENERATION..\n");
-	kNameSpace *ns = block->BlockNameSpace;
+	kNameSpace *ns = block->NodeNameSpace;
 	struct KVirtualCode *vcode = ns->builderApi->GenerateKVirtualCode(kctx, mtd, block, option);
 	union { struct KVirtualCode *ptr; KMethodFunc func; } V;
 	V.ptr = vcode;

@@ -62,7 +62,7 @@ extern "C" {
 } while(0)
 
 
-static void visitBlock(Visitor *visitor, INode *Node)
+static void visitNode(Visitor *visitor, INode *Node)
 {
 }
 
@@ -152,7 +152,7 @@ static void visitITest(Visitor *visitor, INode *Node)
 		CASE(Recompilation);
 		CASE(BoundaryCheck);
 	}
-	VISIT_2(Node, Tag, (INode *)Inst->Value, (INode *) Inst->TargetBlock);
+	VISIT_2(Node, Tag, (INode *)Inst->Value, (INode *) Inst->TargetNode);
 }
 
 static void visitIReturn(Visitor *visitor, INode *Node)
@@ -164,7 +164,7 @@ static void visitIReturn(Visitor *visitor, INode *Node)
 static void visitIJump(Visitor *visitor, INode *Node)
 {
 	IJump *Inst = (IJump *) Node;
-	VISIT_1(Node, 0, &Inst->TargetBlock->base);
+	VISIT_1(Node, 0, &Inst->TargetNode->base);
 }
 
 static void visitIThrow(Visitor *visitor, INode *Node)
@@ -212,7 +212,7 @@ static void visitIBinary(Visitor *visitor, INode *Node)
 
 typedef void (*VisitFn)(Visitor *visitor, INode *Node);
 static const VisitFn Fn[] = {
-	visitBlock,
+	visitNode,
 #define IR_API_DECL(X) visit##X,
 	IR_LIST(IR_API_DECL)
 #undef IR_API_DECL

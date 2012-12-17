@@ -382,50 +382,50 @@ typedef struct OPReturnVoid {
 typedef struct OPCondBrTrue {
 	LIRHeader Header;
 	VMRegister Src;
-	Address Block;
+	Address Node;
 } PACKED OPCondBrTrue;
 
 #define OPEXEC_CondBrTrue(PC) do {\
 	VMRegister Src = ((OPCondBrTrue *)PC)->Src;\
-	Address Block = ((OPCondBrTrue *)PC)->Block;\
-	if(Reg[Src].bval) { PC = (ByteCode *)Block; DISPATCH_JUMPTO(Block); } else {}\
+	Address Node = ((OPCondBrTrue *)PC)->Node;\
+	if(Reg[Src].bval) { PC = (ByteCode *)Node; DISPATCH_JUMPTO(Node); } else {}\
 	DISPATCH_NEXT(PC);\
 } while(0)
 
 #define OPFIELDSIZE_CondBrTrue 2
-#define DUMP_CondBrTrue(OP_2) OP_2(CondBrTrue, VMRegister, Src, Address, Block)
+#define DUMP_CondBrTrue(OP_2) OP_2(CondBrTrue, VMRegister, Src, Address, Node)
 
 #define OPCODE_CondBrFalse 22
 typedef struct OPCondBrFalse {
 	LIRHeader Header;
 	VMRegister Src;
-	Address Block;
+	Address Node;
 } PACKED OPCondBrFalse;
 
 #define OPEXEC_CondBrFalse(PC) do {\
 	VMRegister Src = ((OPCondBrFalse *)PC)->Src;\
-	Address Block = ((OPCondBrFalse *)PC)->Block;\
-	if(!Reg[Src].bval) { PC = (ByteCode *)Block; DISPATCH_JUMPTO(Block); } else {}\
+	Address Node = ((OPCondBrFalse *)PC)->Node;\
+	if(!Reg[Src].bval) { PC = (ByteCode *)Node; DISPATCH_JUMPTO(Node); } else {}\
 	DISPATCH_NEXT(PC);\
 } while(0)
 
 #define OPFIELDSIZE_CondBrFalse 2
-#define DUMP_CondBrFalse(OP_2) OP_2(CondBrFalse, VMRegister, Src, Address, Block)
+#define DUMP_CondBrFalse(OP_2) OP_2(CondBrFalse, VMRegister, Src, Address, Node)
 
 #define OPCODE_Jump 23
 typedef struct OPJump {
 	LIRHeader Header;
-	Address Block;
+	Address Node;
 } PACKED OPJump;
 
 #define OPEXEC_Jump(PC) do {\
-	Address Block = ((OPJump *)PC)->Block;\
-	PC = (ByteCode *)Block;\
-	DISPATCH_JUMPTO(Block);\
+	Address Node = ((OPJump *)PC)->Node;\
+	PC = (ByteCode *)Node;\
+	DISPATCH_JUMPTO(Node);\
 } while(0)
 
 #define OPFIELDSIZE_Jump 1
-#define DUMP_Jump(OP_1) OP_1(Jump, Address, Block)
+#define DUMP_Jump(OP_1) OP_1(Jump, Address, Node)
 
 #define OPCODE_Throw 24
 typedef struct OPThrow {

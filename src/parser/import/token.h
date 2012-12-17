@@ -212,7 +212,7 @@ static int ParseLineComment(KonohaContext *kctx, kTokenVar *tk, Tokenizer *token
 	return pos-1;/*EOF*/
 }
 
-static int ParseCStyleBlockComment(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int ParseCStyleNodeComment(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	int ch, prev = 0, level = 1, pos = tok_start + 2;
 	/*@#nnnn is line number */
@@ -243,7 +243,7 @@ static int ParseSlash(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, 
 		return ParseLineComment(kctx, tk, tokenizer, tok_start);
 	}
 	if(ts[1] == '*') {
-		return ParseCStyleBlockComment(kctx, tk, tokenizer, tok_start);
+		return ParseCStyleNodeComment(kctx, tk, tokenizer, tok_start);
 	}
 	return ParseOperator(kctx, tk, tokenizer, tok_start);
 }
@@ -325,7 +325,7 @@ static int ParseUndefinedToken(KonohaContext *kctx, kTokenVar *tk, Tokenizer *to
 	return tok_start+1;
 }
 
-static int ParseLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start);
+static int ParseLazyNode(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start);
 
 static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 	ParseSkip,  /* KonohaChar_Null */
@@ -341,7 +341,7 @@ static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 	ParseSingleOperator, /* KonohaChar_CloseParenthesis */
 	ParseSingleOperator, /* KonohaChar_OpenBracket */
 	ParseSingleOperator, /* KonohaChar_CloseBracket */
-	ParseLazyBlock, /* KonohaChar_OpenBrace */
+	ParseLazyNode, /* KonohaChar_OpenBrace */
 	ParseSingleOperator, /* KonohaChar_CloseBrace */
 	ParseOperator,  /* KonohaChar_LessThan */
 	ParseOperator,  /* KonohaChar_LessThan */
@@ -448,7 +448,7 @@ static void Tokenizer_Tokenize(KonohaContext *kctx, Tokenizer *tokenizer)
 	}
 }
 
-static int ParseLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int ParseLazyNode(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	int ch, level = 1, pos = tok_start + 1;
 	while((ch = AsciiToKonohaChar(tokenizer->source[pos])) != 0) {

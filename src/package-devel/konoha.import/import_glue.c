@@ -29,13 +29,13 @@
 extern "C"{
 #endif
 
-#define makeStringConstValue(kctx, text) new_ConstValueExpr(kctx, KClass_String, UPCAST(text))
+#define makeStringConstValue(kctx, text) new_ConstValueNode(kctx, KClass_String, UPCAST(text))
 
-static kExpr *CreateImportCall(KonohaContext *kctx, KSyntaxVar *syn, kToken *tkImport, kNameSpace *ns, kString *pkgname)
+static kNode *CreateImportCall(KonohaContext *kctx, KSyntaxVar *syn, kToken *tkImport, kNameSpace *ns, kString *pkgname)
 {
-	kExpr *ePKG = makeStringConstValue(kctx, pkgname);
-	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3,
-			tkImport, new_ConstValueExpr(kctx, kObject_class(ns), UPCAST(ns)), ePKG);
+	kNode *ePKG = makeStringConstValue(kctx, pkgname);
+	kNode *expr = SUGAR new_UntypedCallStyleNode(kctx, syn, 3,
+			tkImport, new_ConstValueNode(kctx, kObject_class(ns), UPCAST(ns)), ePKG);
 	return expr;
 }
 
@@ -43,13 +43,13 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int ret = false;
 	VAR_Statement(stmt, gma);
-	kTokenArray *tokenList = (kTokenArray *) kStmt_GetObjectNULL(kctx, stmt, KSymbol_TokenPattern);
+	kTokenArray *tokenList = (kTokenArray *) kNode_GetObjectNULL(kctx, stmt, KSymbol_TokenPattern);
 	if(tokenList == NULL) {
 		KReturnUnboxValue(false);
 	}
-	kNameSpace *ns = Stmt_ns(stmt);
-	KSyntaxVar *syn = (KSyntaxVar *) KSyntax_(ns, KSymbol_ExprMethodCall);
-	kExpr *expr;
+	kNameSpace *ns = Node_ns(stmt);
+	KSyntaxVar *syn = (KSyntaxVar *) KSyntax_(ns, KSymbol_NodeMethodCall);
+	kNode *expr;
 	kTokenVar *tkImport = /*G*/new_(TokenVar, 0, OnGcStack);
 	tkImport->resolvedSymbol = KKMethodName_("import");
 	if(IS_Token(tokenList)) {
@@ -61,16 +61,16 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		else if(kArray_size(list) == 1) {
 			/* case : import("konoha.import"); */
-			kExpr *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
-			expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3,
-					tkImport, new_ConstValueExpr(kctx, kObject_class(ns), UPCAST(ns)), param0);
+			kNode *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
+			expr = SUGAR new_UntypedCallStyleNode(kctx, syn, 3,
+					tkImport, new_ConstValueNode(kctx, kObject_class(ns), UPCAST(ns)), param0);
 		}
 		else if(kArray_size(list) == 2) {
 			/* case : import("konoha.import", "import"); */
-			kExpr *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
-			kExpr *param1 = makeStringConstValue(kctx, list->TokenItems[1]->text);
-			expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 4,
-					tkImport, new_ConstValueExpr(kctx, kObject_class(ns), UPCAST(ns)),
+			kNode *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
+			kNode *param1 = makeStringConstValue(kctx, list->TokenItems[1]->text);
+			expr = SUGAR new_UntypedCallStyleNode(kctx, syn, 4,
+					tkImport, new_ConstValueNode(kctx, kObject_class(ns), UPCAST(ns)),
 					param0, param1);
 		} else {
 			KReturnUnboxValue(false);
@@ -101,10 +101,10 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 		kString *pkgname = KLIB new_kString(kctx, OnGcStack, KLIB KBuffer_text(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
 		expr = CreateImportCall(kctx, syn, tkImport, ns, pkgname);
 	}
-	KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_ExprPattern, KType_Expr, expr);
-	ret = SUGAR kStmt_TypeCheckByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_void, TypeCheckPolicy_ALLOWVOID);
+	KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_NodePattern, KType_Node, expr);
+	ret = SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_void, TypeCheckPolicy_ALLOWVOID);
 	if(ret) {
-		kStmt_typed(stmt, EXPR);
+		kNode_typed(stmt, EXPR);
 	}
 	KReturnUnboxValue(ret);
 }

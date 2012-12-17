@@ -133,8 +133,8 @@ static void ReplaceOldValueWith(INode *Node, INode *oldVal, INode *newVal)
 
 static void IRBuilder_ReplaceValueWith(FuelIRBuilder *builder, INode *oldVal, INode *newVal)
 {
-	BlockPtr *x, *e;
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+	NodePtr *x, *e;
+	FOR_EACH_ARRAY(builder->Nodes, x, e) {
 		INodePtr *Inst, *End;
 		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
 			ReplaceOldValueWith(*Inst, oldVal, newVal);
@@ -143,7 +143,7 @@ static void IRBuilder_ReplaceValueWith(FuelIRBuilder *builder, INode *oldVal, IN
 }
 
 /* ------------------------------------------------------------------------- */
-/* RemoveDuplicatedConstantInBasicBlock */
+/* RemoveDuplicatedConstantInBasicNode */
 static void AddConstantListIfNotDefined(FuelIRBuilder *builder, ARRAY(INodePtr) *ConstList, IConstant *newVal)
 {
 	INodePtr *x, *e;
@@ -160,10 +160,10 @@ static void AddConstantListIfNotDefined(FuelIRBuilder *builder, ARRAY(INodePtr) 
 
 void IRBuilder_RemoveRedundantConstants(FuelIRBuilder *builder)
 {
-	BlockPtr *x, *e;
+	NodePtr *x, *e;
 	ARRAY(INodePtr) ConstList;
 	ARRAY_init(INodePtr, &ConstList, 0);
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+	FOR_EACH_ARRAY(builder->Nodes, x, e) {
 		INodePtr *Itr, *End;
 		ARRAY_clear(ConstList);
 		FOR_EACH_ARRAY((*x)->insts, Itr, End) {
@@ -349,7 +349,7 @@ static void SchedulingReplaceValue(FuelIRBuilder *builder, INode *oldNode, INode
 	IRBuilder_ReplaceValueWith(builder, oldNode, newNode);
 }
 
-static void Block_insertNode(Block *block, ARRAY(INodePtr) *List)
+static void Node_insertNode(Node *block, ARRAY(INodePtr) *List)
 {
 	unsigned shift = ARRAYp_size(List);
 	if(shift) {
@@ -366,9 +366,9 @@ static void Block_insertNode(Block *block, ARRAY(INodePtr) *List)
 void IRBuilder_SimplifyStdCall(FuelIRBuilder *builder)
 {
 	ARRAY(INodePtr) Modified;
-	BlockPtr *x, *e;
+	NodePtr *x, *e;
 	ARRAY_init(INodePtr, &Modified, 0);
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+	FOR_EACH_ARRAY(builder->Nodes, x, e) {
 		INodePtr *Inst, *End;
 		ARRAY_clear(Modified);
 		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
@@ -378,7 +378,7 @@ void IRBuilder_SimplifyStdCall(FuelIRBuilder *builder)
 				ARRAY_add(INodePtr, &Modified, Node);
 			}
 		}
-		Block_insertNode(*x, &Modified);
+		Node_insertNode(*x, &Modified);
 	}
 	ARRAY_dispose(INodePtr, &Modified);
 }
@@ -388,8 +388,8 @@ void IRBuilder_SimplifyStdCall(FuelIRBuilder *builder)
 
 void IRBuilder_RemoveTrivialCondBranch(FuelIRBuilder *builder)
 {
-	BlockPtr *x, *e;
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+	NodePtr *x, *e;
+	FOR_EACH_ARRAY(builder->Nodes, x, e) {
 		if(ARRAY_size((*x)->insts) > 0) {
 			INode **NodePtr = ARRAY_last((*x)->insts);
 			IBranch *Br;
@@ -397,7 +397,7 @@ void IRBuilder_RemoveTrivialCondBranch(FuelIRBuilder *builder)
 				IConstant *Cond;
 				if((Cond = CHECK_KIND(Br->Cond, IConstant))) {
 					assert(ToINode(Cond)->Type == TYPE_boolean);
-					Block *TargetBB, *RemovedBB;
+					Node *TargetBB, *RemovedBB;
 					if(Cond->Value.bval) {
 						TargetBB  = Br->ThenBB;
 						RemovedBB = Br->ElseBB;

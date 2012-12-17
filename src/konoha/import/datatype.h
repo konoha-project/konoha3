@@ -991,8 +991,8 @@ static void defineDefaultKeywordSymbol(KonohaContext *kctx)
 {
 	size_t i;
 	static const char *keywords[] = {
-		"", "$Expr", "$Symbol", "$Text", "$Number", "$Type",
-		"()", "[]", "{}", "$Block", "$Param", "$TypeDecl", "$MethodDecl", "$Token",
+		"", "$Node", "$Symbol", "$Text", "$Number", "$Type",
+		"()", "[]", "{}", "$Node", "$Param", "$TypeDecl", "$MethodDecl", "$Token",
 		".", "/", "%", "*", "+", "-", "<", "<=", ">", ">=", "==", "!=",
 		"&&", "||", "!", "=", ",", "$", ":", ";", /*"@",*/
 		"true", "false", "if", "else", "return", // syn

@@ -334,26 +334,26 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 	}
 	CASE(CondBrTrue) {
 		VMRegister Src = ((OPCondBrTrue *)PC)->Src;
-		Address Block = ((OPCondBrTrue *)PC)->Block;
+		Address Node = ((OPCondBrTrue *)PC)->Node;
 		if(Reg[Src].bval) {
-			PC = (ByteCode *)Block;
+			PC = (ByteCode *)Node;
 			DISPATCH_JUMPTO(PC);
 		} else {}
 		DISPATCH_NEXT(PC);
 	}
 	CASE(CondBrFalse) {
 		VMRegister Src = ((OPCondBrFalse *)PC)->Src;
-		Address Block = ((OPCondBrFalse *)PC)->Block;
+		Address Node = ((OPCondBrFalse *)PC)->Node;
 		if(!Reg[Src].bval) {
-			PC = (ByteCode *)Block;
+			PC = (ByteCode *)Node;
 			DISPATCH_JUMPTO(PC);
 		} else {}
 		DISPATCH_NEXT(PC);
 	}
 	CASE(Jump) {
-		Address Block = ((OPJump *)PC)->Block;
-		PC = (ByteCode *)Block;
-		DISPATCH_JUMPTO(Block);
+		Address Node = ((OPJump *)PC)->Node;
+		PC = (ByteCode *)Node;
+		DISPATCH_JUMPTO(Node);
 		DISPATCH_NEXT(PC);
 	}
 	CASE(Throw) {

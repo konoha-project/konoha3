@@ -32,21 +32,21 @@ extern "C"{
 // --------------------------------------------------------------------------
 /* Decl */
 
-static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktypeattr_t ty, kExpr *termExpr)
+static void DeclVariable(KonohaContext *kctx, kNode *stmt, kGamma *gma, ktypeattr_t ty, kNode *termNode)
 {
-	DBG_ASSERT(kExpr_isSymbolTerm(termExpr));
-	kToken *termToken = termExpr->TermToken;
+	DBG_ASSERT(kNode_isSymbolTerm(termNode));
+	kToken *termToken = termNode->TermToken;
 	if(Gamma_isTopLevel(gma)) {
-		kNameSpace *ns = Stmt_ns(stmt);
+		kNameSpace *ns = Node_ns(stmt);
 		if(ns->globalObjectNULL_OnList == NULL) {
-			kStmtToken_Message(kctx, stmt, termToken, ErrTag, "unavailable global variable");
+			kNodeToken_Message(kctx, stmt, termToken, ErrTag, "unavailable global variable");
 			return;
 		}
-		kStmtToken_Message(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", KSymbol_Fmt2(termToken->resolvedSymbol), KType_text(ty));
+		kNodeToken_Message(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", KSymbol_Fmt2(termToken->resolvedSymbol), KType_text(ty));
 		KLIB KClass_AddField(kctx, kObject_class(ns->globalObjectNULL_OnList), ty, termToken->resolvedSymbol);
 	}
 	else {
-		kStmtToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", KSymbol_Fmt2(termToken->resolvedSymbol), KType_text(ty));
+		kNodeToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", KSymbol_Fmt2(termToken->resolvedSymbol), KType_text(ty));
 		SUGAR kGamma_AddLocalVariable(kctx, gma, ty, termToken->resolvedSymbol);
 	}
 }
@@ -54,17 +54,17 @@ static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktypeatt
 static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
-	kExprVar *leftHandExpr = (kExprVar *)kExpr_At(expr, 1);
-	if(kExpr_isSymbolTerm(leftHandExpr)) {
-		kExpr *texpr = SUGAR kStmt_TypeCheckVariableNULL(kctx, stmt, leftHandExpr, gma, KClass_INFER);
+	kNodeVar *leftHandNode = (kNodeVar *)kNode_At(expr, 1);
+	if(kNode_isSymbolTerm(leftHandNode)) {
+		kNode *texpr = SUGAR kNode_TypeCheckVariableNULL(kctx, stmt, leftHandNode, gma, KClass_INFER);
 		if(texpr == NULL) {
-			kExpr *rightHandExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, KClass_INFER, 0);
-			if(rightHandExpr != K_NULLEXPR) {
-				DeclVariable(kctx, stmt, gma, rightHandExpr->attrTypeId, leftHandExpr);
+			kNode *rightHandNode = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 2, gma, KClass_INFER, 0);
+			if(rightHandNode != K_NULLEXPR) {
+				DeclVariable(kctx, stmt, gma, rightHandNode->attrTypeId, leftHandNode);
 			}
 		}
 		else {
-			KFieldSet(expr->NodeList, expr->NodeList->ExprItems[1], texpr);
+			KFieldSet(expr->NodeList, expr->NodeList->NodeItems[1], texpr);
 		}
 	}
 }

@@ -914,26 +914,26 @@ static KMETHOD KvirConnectDomainXMLToNative(KonohaContext *kctx,  KonohaStack *s
 	RETURNcharPtr(ret);
 }
 
-// ["virDomainBlockStats", "int", "virDomainPtr", "const char *", "virDomainBlockStatsPtr", "size_t"]
-static KMETHOD KvirDomainBlockStats(KonohaContext *kctx,  KonohaStack *sfp)
+// ["virDomainNodeStats", "int", "virDomainPtr", "const char *", "virDomainNodeStatsPtr", "size_t"]
+static KMETHOD KvirDomainNodeStats(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	virDomainPtr arg0 = To_virDomainPtr(sfp[0]);
 	charPtr arg1 = To_charPtr(sfp[1]);
-	virDomainBlockStatsPtr arg2 = To_virDomainBlockStatsPtr(sfp[2]);
+	virDomainNodeStatsPtr arg2 = To_virDomainNodeStatsPtr(sfp[2]);
 	size_t arg3 = To_size_t(sfp[3]);
-	int ret = virDomainBlockStats (arg0, arg1, arg2, arg3);
+	int ret = virDomainNodeStats (arg0, arg1, arg2, arg3);
 	RETURNint(ret);
 }
 
-// ["virDomainBlockStatsFlags", "int", "virDomainPtr", "const char *", "virTypedParameterPtr", "int *", "unsigned int"]
-static KMETHOD KvirDomainBlockStatsFlags(KonohaContext *kctx,  KonohaStack *sfp)
+// ["virDomainNodeStatsFlags", "int", "virDomainPtr", "const char *", "virTypedParameterPtr", "int *", "unsigned int"]
+static KMETHOD KvirDomainNodeStatsFlags(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	virDomainPtr arg0 = To_virDomainPtr(sfp[0]);
 	charPtr arg1 = To_charPtr(sfp[1]);
 	virTypedParameterPtr arg2 = To_virTypedParameterPtr(sfp[2]);
 	intPtr arg3 = To_intPtr(sfp[3]);
 	unsigned_int arg4 = To_unsigned_int(sfp[4]);
-	int ret = virDomainBlockStatsFlags (arg0, arg1, arg2, arg3, arg4);
+	int ret = virDomainNodeStatsFlags (arg0, arg1, arg2, arg3, arg4);
 	RETURNint(ret);
 }
 
@@ -972,8 +972,8 @@ static KMETHOD KvirDomainGetInterfaceParameters(KonohaContext *kctx,  KonohaStac
 	RETURNint(ret);
 }
 
-// ["virDomainBlockPeek", "int", "virDomainPtr", "const char *", "unsigned long long", "size_t", "void *", "unsigned int"]
-static KMETHOD KvirDomainBlockPeek(KonohaContext *kctx,  KonohaStack *sfp)
+// ["virDomainNodePeek", "int", "virDomainPtr", "const char *", "unsigned long long", "size_t", "void *", "unsigned int"]
+static KMETHOD KvirDomainNodePeek(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	virDomainPtr arg0 = To_virDomainPtr(sfp[0]);
 	charPtr arg1 = To_charPtr(sfp[1]);
@@ -981,29 +981,29 @@ static KMETHOD KvirDomainBlockPeek(KonohaContext *kctx,  KonohaStack *sfp)
 	size_t arg3 = To_size_t(sfp[3]);
 	voidPtr arg4 = To_voidPtr(sfp[4]);
 	unsigned_int arg5 = To_unsigned_int(sfp[5]);
-	int ret = virDomainBlockPeek (arg0, arg1, arg2, arg3, arg4, arg5);
+	int ret = virDomainNodePeek (arg0, arg1, arg2, arg3, arg4, arg5);
 	RETURNint(ret);
 }
 
-// ["virDomainBlockResize", "int", "virDomainPtr", "const char *", "unsigned long long", "unsigned int"]
-static KMETHOD KvirDomainBlockResize(KonohaContext *kctx,  KonohaStack *sfp)
+// ["virDomainNodeResize", "int", "virDomainPtr", "const char *", "unsigned long long", "unsigned int"]
+static KMETHOD KvirDomainNodeResize(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	virDomainPtr arg0 = To_virDomainPtr(sfp[0]);
 	charPtr arg1 = To_charPtr(sfp[1]);
 	unsigned_long_long arg2 = To_unsigned_long_long(sfp[2]);
 	unsigned_int arg3 = To_unsigned_int(sfp[3]);
-	int ret = virDomainBlockResize (arg0, arg1, arg2, arg3);
+	int ret = virDomainNodeResize (arg0, arg1, arg2, arg3);
 	RETURNint(ret);
 }
 
-// ["virDomainGetBlockInfo", "int", "virDomainPtr", "const char *", "virDomainBlockInfoPtr", "unsigned int"]
-static KMETHOD KvirDomainGetBlockInfo(KonohaContext *kctx,  KonohaStack *sfp)
+// ["virDomainGetNodeInfo", "int", "virDomainPtr", "const char *", "virDomainNodeInfoPtr", "unsigned int"]
+static KMETHOD KvirDomainGetNodeInfo(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	virDomainPtr arg0 = To_virDomainPtr(sfp[0]);
 	charPtr arg1 = To_charPtr(sfp[1]);
-	virDomainBlockInfoPtr arg2 = To_virDomainBlockInfoPtr(sfp[2]);
+	virDomainNodeInfoPtr arg2 = To_virDomainNodeInfoPtr(sfp[2]);
 	unsigned_int arg3 = To_unsigned_int(sfp[3]);
-	int ret = virDomainGetBlockInfo (arg0, arg1, arg2, arg3);
+	int ret = virDomainGetNodeInfo (arg0, arg1, arg2, arg3);
 	RETURNint(ret);
 }
 
@@ -1264,63 +1264,63 @@ static KMETHOD KvirDomainUpdateDeviceFlags(KonohaContext *kctx,  KonohaStack *sf
 	RETURNint(ret);
 }
 
-// ["virDomainBlockJobAbort", "int", "virDomainPtr", "const char *", "unsigned int"]
-static KMETHOD KvirDomainBlockJobAbort(KonohaContext *kctx,  KonohaStack *sfp)
+// ["virDomainNodeJobAbort", "int", "virDomainPtr", "const char *", "unsigned int"]
+static KMETHOD KvirDomainNodeJobAbort(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	virDomainPtr arg0 = To_virDomainPtr(sfp[0]);
 	charPtr arg1 = To_charPtr(sfp[1]);
 	unsigned_int arg2 = To_unsigned_int(sfp[2]);
-	int ret = virDomainBlockJobAbort (arg0, arg1, arg2);
+	int ret = virDomainNodeJobAbort (arg0, arg1, arg2);
 	RETURNint(ret);
 }
 
-// ["virDomainGetBlockJobInfo", "int", "virDomainPtr", "const char *", "virDomainBlockJobInfoPtr", "unsigned int"]
-static KMETHOD KvirDomainGetBlockJobInfo(KonohaContext *kctx,  KonohaStack *sfp)
+// ["virDomainGetNodeJobInfo", "int", "virDomainPtr", "const char *", "virDomainNodeJobInfoPtr", "unsigned int"]
+static KMETHOD KvirDomainGetNodeJobInfo(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	virDomainPtr arg0 = To_virDomainPtr(sfp[0]);
 	charPtr arg1 = To_charPtr(sfp[1]);
-	virDomainBlockJobInfoPtr arg2 = To_virDomainBlockJobInfoPtr(sfp[2]);
+	virDomainNodeJobInfoPtr arg2 = To_virDomainNodeJobInfoPtr(sfp[2]);
 	unsigned_int arg3 = To_unsigned_int(sfp[3]);
-	int ret = virDomainGetBlockJobInfo (arg0, arg1, arg2, arg3);
+	int ret = virDomainGetNodeJobInfo (arg0, arg1, arg2, arg3);
 	RETURNint(ret);
 }
 
-// ["virDomainBlockJobSetSpeed", "int", "virDomainPtr", "const char *", "unsigned long", "unsigned int"]
-static KMETHOD KvirDomainBlockJobSetSpeed(KonohaContext *kctx,  KonohaStack *sfp)
-{
-	virDomainPtr arg0 = To_virDomainPtr(sfp[0]);
-	charPtr arg1 = To_charPtr(sfp[1]);
-	unsigned_long arg2 = To_unsigned_long(sfp[2]);
-	unsigned_int arg3 = To_unsigned_int(sfp[3]);
-	int ret = virDomainBlockJobSetSpeed (arg0, arg1, arg2, arg3);
-	RETURNint(ret);
-}
-
-// ["virDomainBlockPull", "int", "virDomainPtr", "const char *", "unsigned long", "unsigned int"]
-static KMETHOD KvirDomainBlockPull(KonohaContext *kctx,  KonohaStack *sfp)
+// ["virDomainNodeJobSetSpeed", "int", "virDomainPtr", "const char *", "unsigned long", "unsigned int"]
+static KMETHOD KvirDomainNodeJobSetSpeed(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	virDomainPtr arg0 = To_virDomainPtr(sfp[0]);
 	charPtr arg1 = To_charPtr(sfp[1]);
 	unsigned_long arg2 = To_unsigned_long(sfp[2]);
 	unsigned_int arg3 = To_unsigned_int(sfp[3]);
-	int ret = virDomainBlockPull (arg0, arg1, arg2, arg3);
+	int ret = virDomainNodeJobSetSpeed (arg0, arg1, arg2, arg3);
 	RETURNint(ret);
 }
 
-// ["virDomainBlockRebase", "int", "virDomainPtr", "const char *", "const char *", "unsigned long", "unsigned int"]
-static KMETHOD KvirDomainBlockRebase(KonohaContext *kctx,  KonohaStack *sfp)
+// ["virDomainNodePull", "int", "virDomainPtr", "const char *", "unsigned long", "unsigned int"]
+static KMETHOD KvirDomainNodePull(KonohaContext *kctx,  KonohaStack *sfp)
+{
+	virDomainPtr arg0 = To_virDomainPtr(sfp[0]);
+	charPtr arg1 = To_charPtr(sfp[1]);
+	unsigned_long arg2 = To_unsigned_long(sfp[2]);
+	unsigned_int arg3 = To_unsigned_int(sfp[3]);
+	int ret = virDomainNodePull (arg0, arg1, arg2, arg3);
+	RETURNint(ret);
+}
+
+// ["virDomainNodeRebase", "int", "virDomainPtr", "const char *", "const char *", "unsigned long", "unsigned int"]
+static KMETHOD KvirDomainNodeRebase(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	virDomainPtr arg0 = To_virDomainPtr(sfp[0]);
 	charPtr arg1 = To_charPtr(sfp[1]);
 	charPtr arg2 = To_charPtr(sfp[2]);
 	unsigned_long arg3 = To_unsigned_long(sfp[3]);
 	unsigned_int arg4 = To_unsigned_int(sfp[4]);
-	int ret = virDomainBlockRebase (arg0, arg1, arg2, arg3, arg4);
+	int ret = virDomainNodeRebase (arg0, arg1, arg2, arg3, arg4);
 	RETURNint(ret);
 }
 
-// ["virDomainBlockCommit", "int", "virDomainPtr", "const char *", "const char *", "const char *", "unsigned long", "unsigned int"]
-static KMETHOD KvirDomainBlockCommit(KonohaContext *kctx,  KonohaStack *sfp)
+// ["virDomainNodeCommit", "int", "virDomainPtr", "const char *", "const char *", "const char *", "unsigned long", "unsigned int"]
+static KMETHOD KvirDomainNodeCommit(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	virDomainPtr arg0 = To_virDomainPtr(sfp[0]);
 	charPtr arg1 = To_charPtr(sfp[1]);
@@ -1328,31 +1328,31 @@ static KMETHOD KvirDomainBlockCommit(KonohaContext *kctx,  KonohaStack *sfp)
 	charPtr arg3 = To_charPtr(sfp[3]);
 	unsigned_long arg4 = To_unsigned_long(sfp[4]);
 	unsigned_int arg5 = To_unsigned_int(sfp[5]);
-	int ret = virDomainBlockCommit (arg0, arg1, arg2, arg3, arg4, arg5);
+	int ret = virDomainNodeCommit (arg0, arg1, arg2, arg3, arg4, arg5);
 	RETURNint(ret);
 }
 
-// ["virDomainSetBlockIoTune", "int", "virDomainPtr", "const char *", "virTypedParameterPtr", "int", "unsigned int"]
-static KMETHOD KvirDomainSetBlockIoTune(KonohaContext *kctx,  KonohaStack *sfp)
+// ["virDomainSetNodeIoTune", "int", "virDomainPtr", "const char *", "virTypedParameterPtr", "int", "unsigned int"]
+static KMETHOD KvirDomainSetNodeIoTune(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	virDomainPtr arg0 = To_virDomainPtr(sfp[0]);
 	charPtr arg1 = To_charPtr(sfp[1]);
 	virTypedParameterPtr arg2 = To_virTypedParameterPtr(sfp[2]);
 	int arg3 = To_int(sfp[3]);
 	unsigned_int arg4 = To_unsigned_int(sfp[4]);
-	int ret = virDomainSetBlockIoTune (arg0, arg1, arg2, arg3, arg4);
+	int ret = virDomainSetNodeIoTune (arg0, arg1, arg2, arg3, arg4);
 	RETURNint(ret);
 }
 
-// ["virDomainGetBlockIoTune", "int", "virDomainPtr", "const char *", "virTypedParameterPtr", "int *", "unsigned int"]
-static KMETHOD KvirDomainGetBlockIoTune(KonohaContext *kctx,  KonohaStack *sfp)
+// ["virDomainGetNodeIoTune", "int", "virDomainPtr", "const char *", "virTypedParameterPtr", "int *", "unsigned int"]
+static KMETHOD KvirDomainGetNodeIoTune(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	virDomainPtr arg0 = To_virDomainPtr(sfp[0]);
 	charPtr arg1 = To_charPtr(sfp[1]);
 	virTypedParameterPtr arg2 = To_virTypedParameterPtr(sfp[2]);
 	intPtr arg3 = To_intPtr(sfp[3]);
 	unsigned_int arg4 = To_unsigned_int(sfp[4]);
-	int ret = virDomainGetBlockIoTune (arg0, arg1, arg2, arg3, arg4);
+	int ret = virDomainGetNodeIoTune (arg0, arg1, arg2, arg3, arg4);
 	RETURNint(ret);
 }
 
@@ -3386,14 +3386,14 @@ static kbool_t PACKAGE_INIT_PKG(LIBVIRT_PACKAGE_NAME)(KonohaContext *kctx, kName
 		_Public, _F(KvirDomainGetXMLDesc), KType_charPtr, 2, KType_virDomainPtr, FN_0, KType_unsigned_int, FN_1,
 		_Public, _F(KvirConnectDomainXMLFromNative), KType_charPtr, 4, KType_virConnectPtr, FN_0, KType_charPtr, FN_1,KType_charPtr, FN_2,KType_unsigned_int, FN_3,
 		_Public, _F(KvirConnectDomainXMLToNative), KType_charPtr, 4, KType_virConnectPtr, FN_0, KType_charPtr, FN_1,KType_charPtr, FN_2,KType_unsigned_int, FN_3,
-		_Public, _F(KvirDomainBlockStats), KType_int, 4, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_virDomainBlockStatsPtr, FN_2,KType_size_t, FN_3,
-		_Public, _F(KvirDomainBlockStatsFlags), KType_int, 5, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_virTypedParameterPtr, FN_2,KType_intPtr, FN_3,KType_unsigned_int, FN_4,
+		_Public, _F(KvirDomainNodeStats), KType_int, 4, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_virDomainNodeStatsPtr, FN_2,KType_size_t, FN_3,
+		_Public, _F(KvirDomainNodeStatsFlags), KType_int, 5, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_virTypedParameterPtr, FN_2,KType_intPtr, FN_3,KType_unsigned_int, FN_4,
 		_Public, _F(KvirDomainInterfaceStats), KType_int, 4, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_virDomainInterfaceStatsPtr, FN_2,KType_size_t, FN_3,
 		_Public, _F(KvirDomainSetInterfaceParameters), KType_int, 5, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_virTypedParameterPtr, FN_2,KType_int, FN_3,KType_unsigned_int, FN_4,
 		_Public, _F(KvirDomainGetInterfaceParameters), KType_int, 5, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_virTypedParameterPtr, FN_2,KType_intPtr, FN_3,KType_unsigned_int, FN_4,
-		_Public, _F(KvirDomainBlockPeek), KType_int, 6, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_unsigned_long_long, FN_2,KType_size_t, FN_3,KType_voidPtr, FN_4,KType_unsigned_int, FN_5,
-		_Public, _F(KvirDomainBlockResize), KType_int, 4, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_unsigned_long_long, FN_2,KType_unsigned_int, FN_3,
-		_Public, _F(KvirDomainGetBlockInfo), KType_int, 4, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_virDomainBlockInfoPtr, FN_2,KType_unsigned_int, FN_3,
+		_Public, _F(KvirDomainNodePeek), KType_int, 6, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_unsigned_long_long, FN_2,KType_size_t, FN_3,KType_voidPtr, FN_4,KType_unsigned_int, FN_5,
+		_Public, _F(KvirDomainNodeResize), KType_int, 4, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_unsigned_long_long, FN_2,KType_unsigned_int, FN_3,
+		_Public, _F(KvirDomainGetNodeInfo), KType_int, 4, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_virDomainNodeInfoPtr, FN_2,KType_unsigned_int, FN_3,
 		_Public, _F(KvirDomainMemoryStats), KType_int, 4, KType_virDomainPtr, FN_0, KType_virDomainMemoryStatPtr, FN_1,KType_unsigned_int, FN_2,KType_unsigned_int, FN_3,
 		_Public, _F(KvirDomainMemoryPeek), KType_int, 5, KType_virDomainPtr, FN_0, KType_unsigned_long_long, FN_1,KType_size_t, FN_2,KType_voidPtr, FN_3,KType_unsigned_int, FN_4,
 		_Public, _F(KvirDomainDefineXML), KType_virDomainPtr, 2, KType_virConnectPtr, FN_0, KType_charPtr, FN_1,
@@ -3420,14 +3420,14 @@ static kbool_t PACKAGE_INIT_PKG(LIBVIRT_PACKAGE_NAME)(KonohaContext *kctx, kName
 		_Public, _F(KvirDomainAttachDeviceFlags), KType_int, 3, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_unsigned_int, FN_2,
 		_Public, _F(KvirDomainDetachDeviceFlags), KType_int, 3, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_unsigned_int, FN_2,
 		_Public, _F(KvirDomainUpdateDeviceFlags), KType_int, 3, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_unsigned_int, FN_2,
-		_Public, _F(KvirDomainBlockJobAbort), KType_int, 3, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_unsigned_int, FN_2,
-		_Public, _F(KvirDomainGetBlockJobInfo), KType_int, 4, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_virDomainBlockJobInfoPtr, FN_2,KType_unsigned_int, FN_3,
-		_Public, _F(KvirDomainBlockJobSetSpeed), KType_int, 4, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_unsigned_long, FN_2,KType_unsigned_int, FN_3,
-		_Public, _F(KvirDomainBlockPull), KType_int, 4, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_unsigned_long, FN_2,KType_unsigned_int, FN_3,
-		_Public, _F(KvirDomainBlockRebase), KType_int, 5, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_charPtr, FN_2,KType_unsigned_long, FN_3,KType_unsigned_int, FN_4,
-		_Public, _F(KvirDomainBlockCommit), KType_int, 6, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_charPtr, FN_2,KType_charPtr, FN_3,KType_unsigned_long, FN_4,KType_unsigned_int, FN_5,
-		_Public, _F(KvirDomainSetBlockIoTune), KType_int, 5, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_virTypedParameterPtr, FN_2,KType_int, FN_3,KType_unsigned_int, FN_4,
-		_Public, _F(KvirDomainGetBlockIoTune), KType_int, 5, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_virTypedParameterPtr, FN_2,KType_intPtr, FN_3,KType_unsigned_int, FN_4,
+		_Public, _F(KvirDomainNodeJobAbort), KType_int, 3, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_unsigned_int, FN_2,
+		_Public, _F(KvirDomainGetNodeJobInfo), KType_int, 4, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_virDomainNodeJobInfoPtr, FN_2,KType_unsigned_int, FN_3,
+		_Public, _F(KvirDomainNodeJobSetSpeed), KType_int, 4, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_unsigned_long, FN_2,KType_unsigned_int, FN_3,
+		_Public, _F(KvirDomainNodePull), KType_int, 4, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_unsigned_long, FN_2,KType_unsigned_int, FN_3,
+		_Public, _F(KvirDomainNodeRebase), KType_int, 5, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_charPtr, FN_2,KType_unsigned_long, FN_3,KType_unsigned_int, FN_4,
+		_Public, _F(KvirDomainNodeCommit), KType_int, 6, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_charPtr, FN_2,KType_charPtr, FN_3,KType_unsigned_long, FN_4,KType_unsigned_int, FN_5,
+		_Public, _F(KvirDomainSetNodeIoTune), KType_int, 5, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_virTypedParameterPtr, FN_2,KType_int, FN_3,KType_unsigned_int, FN_4,
+		_Public, _F(KvirDomainGetNodeIoTune), KType_int, 5, KType_virDomainPtr, FN_0, KType_charPtr, FN_1,KType_virTypedParameterPtr, FN_2,KType_intPtr, FN_3,KType_unsigned_int, FN_4,
 		_Public, _F(KvirDomainGetDiskErrors), KType_int, 4, KType_virDomainPtr, FN_0, KType_virDomainDiskErrorPtr, FN_1,KType_unsigned_int, FN_2,KType_unsigned_int, FN_3,
 		_Public, _F(KvirNodeGetCellsFreeMemory), KType_int, 4, KType_virConnectPtr, FN_0, KType_unsigned_long_long_Ptr, FN_1,KType_int, FN_2,KType_int, FN_3,
 		_Public, _F(KvirNetworkGetConnect), KType_virConnectPtr, 1, KType_virNetworkPtr, FN_0, 

@@ -25,7 +25,7 @@
 #ifndef MINISHELL_H_
 #define MINISHELL_H_
 
-static int CheckStmt(const char *t, size_t len)
+static int CheckNode(const char *t, size_t len)
 {
 	size_t i = 0;
 	int ch, quote = 0, nest = 0;
@@ -56,7 +56,7 @@ static int CheckStmt(const char *t, size_t len)
 	return 1;
 }
 
-static kstatus_t ReadStmt(KonohaContext *kctx, KBuffer *wb, kfileline_t *uline)
+static kstatus_t ReadNode(KonohaContext *kctx, KBuffer *wb, kfileline_t *uline)
 {
 	int line = 1;
 	kstatus_t status = K_CONTINUE;
@@ -74,7 +74,7 @@ static kstatus_t ReadStmt(KonohaContext *kctx, KBuffer *wb, kfileline_t *uline)
 		}
 		KLIB KBuffer_Write(kctx, wb, ln, strlen(ln));
 		free(ln);
-		if((check = CheckStmt(KLIB KBuffer_text(kctx, wb, NonZero), KBuffer_bytesize(wb))) > 0) {
+		if((check = CheckNode(KLIB KBuffer_text(kctx, wb, NonZero), KBuffer_bytesize(wb))) > 0) {
 			uline[0]++;
 			line++;
 			continue;
@@ -117,7 +117,7 @@ static void RunShell(KonohaContext *kctx)
 	kfileline_t uline = FILEID_("(shell)") | 1;
 	while(1) {
 		kfileline_t inc = 0;
-		kstatus_t status = ReadStmt(kctx, &wb, &inc);
+		kstatus_t status = ReadNode(kctx, &wb, &inc);
 		if(status == K_BREAK) break;
 		if(status == K_CONTINUE && KBuffer_bytesize(&wb) > 0) {
 			status = (kstatus_t)Konoha_Eval((KonohaContext *)kctx, KLIB KBuffer_text(kctx, &wb, EnsureZero), uline);
