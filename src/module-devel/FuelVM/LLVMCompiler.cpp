@@ -8,10 +8,8 @@
 #include <llvm/DataLayout.h>
 #include <llvm/Pass.h>
 #include <llvm/PassManager.h>
-
 #include <llvm/Analysis/Verifier.h>
 #include <llvm/Analysis/Passes.h>
-
 #include <llvm/Transforms/Scalar.h>
 #include <llvm/Transforms/IPO.h>
 #include <vector>
@@ -34,6 +32,9 @@ typedef struct LLVMIRBuilder {
 	IRBuilder<> *builder;
 	Function *Func;
 	Block    *Current;
+	Value    *Vsfp;
+	Value    *VsfpRef;
+	Value    *Vstack_top;
 	std::vector<Value *> *ValueTable;
 };
 
@@ -59,12 +60,26 @@ static void InitLLVM()
 	LLVMType_Init();
 }
 
+static const char *ConstructMethodName(KonohaContext *kctx, kMethod *mtd, KBuffer *wb, const char *suffix)
+{
+	KClass *kclass = KClass_(mtd->typeId);
+	KLIB KBuffer_printf(kctx, wb, "%s_%s%s%s",
+			KClass_text(kclass), KMethodName_Fmt2(mtd->mn), suffix);
+	return KLIB KBuffer_text(kctx, wb, EnsureZero);
+}
+
+
 static Value *EmitConstant(IRBuilder<> *builder, bool bval)
 {
 	return builder->getInt1(bval);
 }
 
 static Value *EmitConstant(IRBuilder<> *builder, int64_t ival)
+{
+	return builder->getInt64(ival);
+}
+
+static Value *EmitConstant(IRBuilder<> *builder, uint64_t ival)
 {
 	return builder->getInt64(ival);
 }
@@ -83,6 +98,29 @@ static Value *EmitConstant(IRBuilder<> *builder, void *ptr)
 		builder->getInt64((uint64_t) (uintptr_t) ptr);
 	return ConstantExpr::getIntToPtr(C, Ty);
 }
+
+static Value *EmitGlobalVariable(Type *Ty, const char *Name, void *addr)
+{
+	GlobalVariable *G;
+	if((G = GlobalModule->getNamedGlobal(Name)) == 0) {
+		G = new GlobalVariable(*GlobalModule, Ty, true, GlobalValue::ExternalLinkage, NULL, Name);
+	}
+	GlobalEngine->addGlobalMapping(G, addr);
+	return G;
+}
+
+static Value *EmitGlobalVariable(KonohaContext *kctx, Type *Ty, kMethod *mtd)
+{
+	KBuffer wb;
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+	const char *name = ConstructMethodName(kctx, mtd, &wb, "_Native");
+	union { void *ptr; KMethodFunc func; } Val;
+	Val.func = mtd->invokeKMethodFunc;
+	Value *G = EmitGlobalVariable(Ty, name, Val.ptr);
+	KLIB KBuffer_Free(&wb);
+	return G;
+}
+
 
 static Value *EmitConstant(IRBuilder<> *builder, kObject *obj)
 {
@@ -150,7 +188,8 @@ static void SetArgument(LLVMIRBuilder *writer, INode *Node, unsigned Index)
 {
 	Function *F = writer->Func;
 	Function::arg_iterator args = F->arg_begin();
-	for(unsigned i = 1; i < Index; i++) {
+	args++; /* Skip Context */
+	for(unsigned i = 0; i < Index; i++) {
 		args++;
 	}
 	Value *Val = args;
@@ -163,21 +202,35 @@ static Value *GetContext(LLVMIRBuilder *writer)
 	return F->arg_begin();
 }
 
+static Value *GetVsfpRef(LLVMIRBuilder *writer)
+{
+	Value *VsfpRef = writer->VsfpRef;
+	if(VsfpRef == 0) {
+		IRBuilder<> *builder = writer->builder;
+		Value *Vctx = GetContext(writer);
+		VsfpRef = builder->CreateStructGEP(Vctx, KonohaContextVar_esp);
+		writer->VsfpRef = VsfpRef;
+	}
+	return VsfpRef;
+}
+
 static Value *GetStackTop(LLVMIRBuilder *writer)
 {
-	IRBuilder<> *builder = writer->builder;
-	Value *Vctx = GetContext(writer);
-	Value *Vsfp = builder->CreateStructGEP(Vctx, KonohaContextVar_esp);
-	Vsfp = builder->CreateLoad(Vsfp);
+	Value *Vsfp = writer->Vsfp;
+	if(Vsfp == 0) {
+		IRBuilder<> *builder = writer->builder;
+		Value *VsfpRef = GetVsfpRef(writer);
+		Vsfp = builder->CreateLoad(VsfpRef);
+		writer->Vsfp = Vsfp;
+	}
 	return Vsfp;
 }
 
 static void RestoreStackTop(LLVMIRBuilder *writer, Value *newVal)
 {
 	IRBuilder<> *builder = writer->builder;
-	Value *Vctx = GetContext(writer);
-	Value *Vsfp = builder->CreateStructGEP(Vctx, KonohaContextVar_esp);
-	builder->CreateStore(newVal, Vsfp, false);
+	Value *VsfpRef = GetVsfpRef(writer);
+	builder->CreateStore(newVal, VsfpRef, false);
 }
 
 static Value *ShiftStack(LLVMIRBuilder *writer, Value *Vsfp, unsigned Shift)
@@ -188,14 +241,19 @@ static Value *ShiftStack(LLVMIRBuilder *writer, Value *Vsfp, unsigned Shift)
 
 static Value *PrepareCallStack(LLVMIRBuilder *writer, Value *Vsfp)
 {
-	return ShiftStack(writer, Vsfp, K_CALLDELTA);
+	Value *Vstack_top = writer->Vstack_top;
+	if(Vstack_top == 0) {
+		writer->Vstack_top = ShiftStack(writer, Vsfp, K_CALLDELTA);
+		Vstack_top = writer->Vstack_top;
+	}
+	return Vstack_top;
 }
 
-static void StoreValueToStack(IRBuilder<> *builder, KClass *ct, int Idx, Value *Vsfp, Value *V)
+static void StoreValueToStack(IRBuilder<> *builder, KClass *ct, int Idx, Value *Vsfp, Value *V, const char *Name = "")
 {
 	int fieldIdx = KClass_Is(UnboxType, ct) ?
 		KonohaValueVar_unboxValue : KonohaValueVar_asObject;
-	Value *Dst = builder->CreateConstInBoundsGEP2_32(Vsfp, Idx, fieldIdx);
+	Value *Dst = builder->CreateConstInBoundsGEP2_32(Vsfp, Idx, fieldIdx, Name);
 	if(V->getType() == Type::getInt1Ty(LLVM_CONTEXT())) {
 		V = builder->CreateZExt(V, GetLLVMType(ID_long));
 	}
@@ -216,7 +274,6 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 	IRBuilder<> *builder = writer->builder;
 	kMethod *method = (kMethod *) Mtd->Value.ptr;
 	Value *MtdPtr  = EmitConstant(builder, method);
-	Value *FuncPtr = builder->CreateStructGEP(MtdPtr, kMethodVar_invokeKMethodFunc);
 
 	Value *Vctx = GetContext(writer);
 	Value *Vsfp = GetStackTop(writer);
@@ -224,18 +281,31 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 
 	kParam *params = kMethod_GetParam(method);
 
-	int64_t uline = Inst->uline;
-	StoreValueToStack(builder, KClass_Int, K_RTNIDX, Vsfp, EmitConstant(builder, uline));
-	StoreValueToStack(builder, KClass_(method->typeId), 0, Vsfp, List[0]); /* this object */
+	uint64_t uline = Inst->uline;
+	StoreValueToStack(builder, KClass_Int, K_RTNIDX, Vtop, EmitConstant(builder, uline), "uline");
+	StoreValueToStack(builder, KClass_Int, K_MTDIDX, Vtop,
+			builder->CreateBitCast(MtdPtr, GetLLVMType(ID_long), "Method"));
+	StoreValueToStack(builder, KClass_(method->typeId), 0, Vtop, List[0], "receiver");
 	for(unsigned i = 1; i < params->psize+1; ++i) {
 		ktypeattr_t type = params->paramtypeItems[i-1].attrTypeId;
 		Value *V = List[i];
-		StoreValueToStack(builder, KClass_(type), i, Vsfp, V);
+		StoreValueToStack(builder, KClass_(type), i, Vtop, V);
 	}
 
-	FuncPtr = builder->CreateLoad(FuncPtr);
+
+	Value *FuncPtr;
+	if(method->SourceToken->text == 0) {/* method is maybe 'Native' Method. */
+		Type *FnTy = GetLLVMType(ID_KMethodFunc);
+		FuncPtr = EmitGlobalVariable(kctx, FnTy, method);
+	} else {
+		FuncPtr = builder->CreateStructGEP(MtdPtr, kMethodVar_invokeKMethodFunc);
+		FuncPtr = builder->CreateLoad(FuncPtr);
+	}
 	RestoreStackTop(writer, Vtop);
-	Value *Ret = builder->CreateCall2(FuncPtr, Vctx, Vtop);
+	builder->CreateCall2(FuncPtr, Vctx, Vtop);
+
+	KClass *RetTy = kMethod_GetReturnType(method);
+	Value *Ret = LoadValueFromStack(builder, RetTy, K_RTNIDX, Vtop);
 	RestoreStackTop(writer, Vsfp);
 	SetValue(writer, ToINode(Inst), Ret);
 }
@@ -347,7 +417,8 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 			FOR_EACH_ARRAY(Inst->Params, x, e) {
 				if(*x == 0)
 					continue;
-				List.push_back(GetValue(writer, *x));
+				Value *V = GetValue(writer, *x);
+				List.push_back(V);
 			}
 			EmitCall(writer, Inst, Mtd, List);
 			break;
@@ -468,16 +539,6 @@ static void LLVMIRBuilder_visitValue(Visitor *visitor, INode *Node, const char *
 	}
 }
 
-static const char *ConstructMethodName(KonohaContext *kctx, kMethod *mtd, const char *suffix)
-{
-	KClass *kclass = KClass_(mtd->typeId);
-	KBuffer wb;
-	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	KLIB KBuffer_printf(kctx, &wb, "%s_%s%s%s",
-			KClass_text(kclass), KMethodName_Fmt2(mtd->mn), suffix);
-	return KLIB KBuffer_text(kctx, &wb, EnsureZero);
-}
-
 /* Emit Method Specific interface */
 static Function *EmitInternalFunction(KonohaContext *kctx, Module *M, kMethod *mtd)
 {
@@ -485,31 +546,42 @@ static Function *EmitInternalFunction(KonohaContext *kctx, Module *M, kMethod *m
 	std::vector<Type *> ParamTy;
 	kParam *params = kMethod_GetParam(mtd);
 
+	KBuffer wb;
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+
 	ParamTy.push_back(GetLLVMType(ID_PtrKonohaContextVar));
+	ParamTy.push_back(convert_type(kctx, mtd->typeId));
 	for(unsigned i = 0; i < params->psize; ++i) {
 		Type *Ty = convert_type(kctx, params->paramtypeItems[i].attrTypeId);
 		ParamTy.push_back(Ty);
 	}
-	const char *name = ConstructMethodName(kctx, mtd, "Impl");
+	const char *name = ConstructMethodName(kctx, mtd, &wb, "Impl");
 	FunctionType *FnTy = FunctionType::get(convert_type(kctx, RetTy), ParamTy, false);
 	Function *F = Function::Create(FnTy, GlobalValue::ExternalLinkage, name, M);
 	Function::arg_iterator args = F->arg_begin();
+	SetName(args++, "kctx");
+	SetName(args++, "this");
 
 	for(unsigned i = 0; i < params->psize; ++i) {
 		const char *name = KSymbol_text(params->paramtypeItems[i].name);
 		SetName(args++, name);
 	}
+
+	KLIB KBuffer_Free(&wb);
 	return F;
 }
 
 /* Emit KMETHOD interface */
 static Function *EmitFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Function *Func)
 {
+	KBuffer wb;
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+
 	std::vector<Type *> ParamTy;
 	ParamTy.push_back(GetLLVMType(ID_PtrKonohaContextVar));
 	ParamTy.push_back(GetLLVMType(ID_PtrKonohaValueVar));
 
-	const char *name = ConstructMethodName(kctx, mtd, "");
+	const char *name = ConstructMethodName(kctx, mtd, &wb, "");
 	FunctionType *FnTy = FunctionType::get(GetLLVMType(ID_void), ParamTy, false);
 	Function *FWrap = Function::Create(FnTy, GlobalValue::ExternalLinkage, name, M);
 	Function::arg_iterator args = FWrap->arg_begin();
@@ -525,9 +597,10 @@ static Function *EmitFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Func
 
 	std::vector<Value *> Params;
 	Params.push_back(Vctx);
+	Params.push_back(LoadValueFromStack(builder, KClass_(mtd->typeId), 0, Vsfp));
 	for(unsigned i = 0; i < params->psize; ++i) {
 		ktypeattr_t type = params->paramtypeItems[i].attrTypeId;
-		Value *V = LoadValueFromStack(builder, KClass_(type), i, Vsfp);
+		Value *V = LoadValueFromStack(builder, KClass_(type), i+1, Vsfp);
 		Params.push_back(V);
 	}
 	KClass *RetTy = kMethod_GetReturnType(mtd);
@@ -536,6 +609,7 @@ static Function *EmitFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Func
 		StoreValueToStack(builder, RetTy, K_RTNIDX, Vsfp, Ret);
 	}
 	builder->CreateRetVoid();
+	KLIB KBuffer_Free(&wb);
 	return FWrap;
 }
 
@@ -562,11 +636,11 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 	InitLLVM();
 	LLVMIRBuilder writer = {{
 		0,
-			visitElement,
-			LLVMIRBuilder_visitList,
-			LLVMIRBuilder_visitValue},
-				Mtd->Context,
-				0, 0, 0, 0
+		visitElement,
+		LLVMIRBuilder_visitList,
+		LLVMIRBuilder_visitValue},
+		Mtd->Context,
+		0, 0, 0, 0, 0, 0, 0
 	};
 	EmitPrologue(&writer, builder, Mtd);
 
@@ -597,20 +671,9 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 	pm.run(*Wrapper);
 	pm.run(*writer.Func);
 
-	GlobalModule->dump();
+	writer.Func->dump();
 	void *f = GlobalEngine->getPointerToFunction(Wrapper);
 	return (ByteCode *) f;
-}
-
-void FuelVM_GenerateLLVMIR(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
-{
-	fprintf(stderr, "START LLVM IR GENERATION..\n");
-	kNameSpace *ns = block->BlockNameSpace;
-	struct KVirtualCode *vcode = ns->builderApi->GenerateKVirtualCode(kctx, mtd, block, option);
-	union { struct KVirtualCode *ptr; KMethodFunc func; } V;
-	V.ptr = vcode;
-	((kMethodVar *)mtd)->invokeKMethodFunc = V.func;
-	((kMethodVar *)mtd)->vcode_start = 0;
 }
 
 } /* extern "C" */
