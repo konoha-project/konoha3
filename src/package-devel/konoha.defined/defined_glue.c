@@ -41,7 +41,7 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	sugarContext->isNodeedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->NodeList); i++) {
 		kNode *typedNode = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, i, gma, KClass_INFER, TypeCheckPolicy_ALLOWVOID);
-		if(typedNode == K_NULLEXPR) {
+		if(typedNode == K_NULLNODE) {
 			isDefined = false;
 			break;
 		}

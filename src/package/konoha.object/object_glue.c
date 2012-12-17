@@ -78,7 +78,7 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kNode *selfNode   = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 1, gma, KClass_INFER, 0);
 	kNode *targetNode = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 2, gma, KClass_INFER, 0);
-	if(selfNode != K_NULLEXPR && targetNode != K_NULLEXPR) {
+	if(selfNode != K_NULLNODE && targetNode != K_NULLNODE) {
 		KClass *selfClass = KClass_(selfNode->attrTypeId), *targetClass = KClass_(targetNode->attrTypeId);
 		if(KClass_Is(Final, selfClass)) {
 			kbool_t staticSubType = (selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
@@ -99,7 +99,7 @@ static KMETHOD TypeCheck_as(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kNode *targetNode = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 2, gma, KClass_INFER, 0);
 	kNode *selfNode   = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 1, gma, KClass_(targetNode->attrTypeId), TypeCheckPolicy_NOCHECK);
-	if(selfNode != K_NULLEXPR && targetNode != K_NULLEXPR) {
+	if(selfNode != K_NULLNODE && targetNode != K_NULLNODE) {
 		KClass *selfClass = KClass_(selfNode->attrTypeId), *targetClass = KClass_(targetNode->attrTypeId);
 		if(selfClass->typeId == targetClass->typeId || selfClass->isSubType(kctx, selfClass, targetClass)) {
 			KReturn(selfNode);
@@ -119,7 +119,7 @@ static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kNode *targetNode = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 2, gma, KClass_INFER, 0);
 	kNode *selfNode   = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 1, gma, KClass_(targetNode->attrTypeId), TypeCheckPolicy_NOCHECK);
-	if(selfNode != K_NULLEXPR && targetNode != K_NULLEXPR) {
+	if(selfNode != K_NULLNODE && targetNode != K_NULLNODE) {
 		KClass *selfClass = KClass_(selfNode->attrTypeId), *targetClass = KClass_(targetNode->attrTypeId);
 		if(selfNode->attrTypeId == targetNode->attrTypeId || selfClass->isSubType(kctx, selfClass, targetClass)) {
 			kNodeNode_Message(kctx, stmt, selfNode, InfoTag, "no need: %s to %s", KType_text(selfNode->attrTypeId), KType_text(targetNode->attrTypeId));

@@ -24,7 +24,7 @@
 
 /* ************************************************************************ */
 
-//#define USE_NODE  1
+#define USE_NODE  1
 
 #define USING_SUGAR_AS_BUILTIN 1
 #define USE_AsciiToKonohaChar
@@ -248,8 +248,8 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kArray_AddSyntaxRule       = kArray_AddSyntaxPattern;
 //	mod->kNameSpace_SetSugarFunc    = kNameSpace_SetSugarFunc;
 	mod->kNameSpace_AddSugarFunc    = kNameSpace_AddSugarFunc;
-	mod->new_kNode                 = new_kNode;
-	mod->new_kNode                  = new_kNode;
+	mod->new_BlockNode                 = new_BlockNode;
+	mod->new_BlockNode                  = new_BlockNode;
 	mod->kNode_InsertAfter         = kNode_InsertAfter;
 	mod->new_TermNode        = new_TermNode;
 	mod->new_UntypedCallStyleNode   = new_UntypedCallStyleNode;

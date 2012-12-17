@@ -300,7 +300,7 @@
 //
 //	if(catchNode != K_NULLBLOCK && parentNode != NULL) {
 //		ret = SUGAR kNode_TypeCheckAll(kctx, catchNode, gma);
-//		kNode *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, K_NULLEXPR);
+//		kNode *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, K_NULLNODE);
 //		KLIB kObjectProto_SetObject(kctx, parentNode, KSymbol_NodePattern, KType_Exception, expr);
 //		KLIB kObjectProto_SetObject(kctx, parentNode, KSymbol_("catch"), KType_Node, stmt);
 //		kNode_done(kctx, stmt);

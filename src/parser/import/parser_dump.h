@@ -106,7 +106,7 @@ static void dumpNode(KonohaContext *kctx, int n, int nest, kNode *expr)
 	DBG_ASSERT(IS_Node(expr));
 	if(verbose_sugar) {
 		dumpIndent(kctx, nest);
-		if(expr == K_NULLEXPR) {
+		if(expr == K_NULLNODE) {
 			DUMP_P("[%d] NullObject", n);
 		}
 		else if(kNode_IsTerm(expr)) {

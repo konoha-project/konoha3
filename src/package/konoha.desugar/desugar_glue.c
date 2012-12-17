@@ -294,7 +294,7 @@ static KMETHOD Node_newNode(KonohaContext *kctx, KonohaStack *sfp)
 	int endIdx   = (int)sfp[3].intValue;
 	KTokenSeq source = {Node_ns(stmt), tokenList, beginIdx, endIdx};
 //	SUGAR KTokenSeq_Tokenize(kctx, &source, kString_text(macro), 0);
-	KReturn(SUGAR new_kNode(kctx, stmt, NULL/*nameSpace*/, &source));
+	KReturn(SUGAR new_BlockNode(kctx, stmt, NULL/*nameSpace*/, &source));
 }
 
 //## boolean Node.TypeCheckAll(Gamma gma);
@@ -813,7 +813,7 @@ static void desugar_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 //	else {
 //		SUGAR p(kctx, ErrTag, tk->uline, tk->lpos, "syntax error");
 //	}
-//	KReturn(K_NULLEXPR);
+//	KReturn(K_NULLNODE);
 //}
 
 ////## Node Node.newNode(Token[] tokenList, int s, int e);
@@ -823,7 +823,7 @@ static void desugar_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 //	kNode *stmt  = sfp[0].asNode;
 //	kArray *tokenList  = sfp[1].asArray;
 //	int s = sfp[2].intValue, e = sfp[3].intValue;
-//	KReturn(SUGAR new_kNode(kctx, Node_ns(stmt), stmt, tokenList, s, e, ';'));
+//	KReturn(SUGAR new_BlockNode(kctx, Node_ns(stmt), stmt, tokenList, s, e, ';'));
 //}
 
 ////## Node Node.newMethodCallNode(Token key, Token self);
@@ -1247,27 +1247,27 @@ static kbool_t desugar_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 		DEFINE_KEYWORD(NoticeTag),
 		DEFINE_KEYWORD(InfoTag),
 		DEFINE_KEYWORD(DebugTag),
-		DEFINE_KEYWORD(TSTMT_ERR),
-		DEFINE_KEYWORD(TSTMT_EXPR),
-		DEFINE_KEYWORD(TSTMT_BLOCK),
-		DEFINE_KEYWORD(TSTMT_RETURN),
-		DEFINE_KEYWORD(TSTMT_IF),
-		DEFINE_KEYWORD(TSTMT_LOOP),
-		DEFINE_KEYWORD(TSTMT_JUMP),
-		DEFINE_KEYWORD(TEXPR_CONST),
-		DEFINE_KEYWORD(TEXPR_NEW),
-		DEFINE_KEYWORD(TEXPR_NULL),
-		DEFINE_KEYWORD(TEXPR_NCONST),
-		DEFINE_KEYWORD(TEXPR_LOCAL),
-		DEFINE_KEYWORD(TEXPR_BLOCK),
-		DEFINE_KEYWORD(TEXPR_FIELD),
-//		DEFINE_KEYWORD(TEXPR_BOX),
-//		DEFINE_KEYWORD(TEXPR_UNBOX),
-		DEFINE_KEYWORD(TEXPR_CALL),
-		DEFINE_KEYWORD(TEXPR_AND),
-		DEFINE_KEYWORD(TEXPR_OR),
-		DEFINE_KEYWORD(TEXPR_LET),
-		DEFINE_KEYWORD(TEXPR_STACKTOP),
+		DEFINE_KEYWORD(kNode_Error),
+		DEFINE_KEYWORD(KNode_EXPR),
+		DEFINE_KEYWORD(KNode_BLOCK),
+		DEFINE_KEYWORD(KNode_RETURN),
+		DEFINE_KEYWORD(KNode_IF),
+		DEFINE_KEYWORD(KNode_LOOP),
+		DEFINE_KEYWORD(KNode_JUMP),
+		DEFINE_KEYWORD(KNode_CONST),
+		DEFINE_KEYWORD(KNode_NEW),
+		DEFINE_KEYWORD(KNode_NULL),
+		DEFINE_KEYWORD(KNode_NCONST),
+		DEFINE_KEYWORD(KNode_LOCAL),
+		DEFINE_KEYWORD(KNode_BLOCK),
+		DEFINE_KEYWORD(KNode_FIELD),
+//		DEFINE_KEYWORD(KNode_BOX),
+//		DEFINE_KEYWORD(KNode_UNBOX),
+		DEFINE_KEYWORD(KNode_CALL),
+		DEFINE_KEYWORD(KNode_AND),
+		DEFINE_KEYWORD(KNode_OR),
+		DEFINE_KEYWORD(KNode_LET),
+		DEFINE_KEYWORD(KNode_STACKTOP),
 		DEFINE_KEYWORD(TypeCheckPolicy_NOCHECK),
 		DEFINE_KEYWORD(TypeCheckPolicy_ALLOWVOID),
 		DEFINE_KEYWORD(TypeCheckPolicy_COERCION),

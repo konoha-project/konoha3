@@ -696,7 +696,7 @@ static void KBuilder_VisitConstNode(KonohaContext *kctx, KBuilder *builder, kNod
 	int a = builder->common.a;
 	kObject *v = expr->ObjectConstValue;
 	DBG_ASSERT(!KType_Is(UnboxType, expr->attrTypeId));
-	DBG_ASSERT(kNode_HasObjectConstValue(expr));
+	DBG_ASSERT(KNode_Is(ObjectConst, (expr));
 	v = KBuilder_AddConstPool(kctx, builder, v);
 	ASM(NSET, OC_(a), (uintptr_t)v, KClass_(expr->attrTypeId));
 }
@@ -832,7 +832,7 @@ static void KBuilder_VisitLetNode(KonohaContext *kctx, KBuilder *builder, kNode 
 	kNode *leftHandNode = kNode_At(expr, 1);
 	kNode *rightHandNode = kNode_At(expr, 2);
 	//DBG_P("LET (%s) a=%d, shift=%d, espidx=%d", KType_text(expr->attrTypeId), a, shift, espidx);
-	if(leftHandNode->node == TEXPR_LOCAL) {
+	if(leftHandNode->node == KNode_LOCAL) {
 		builder->common.a = leftHandNode->index;
 		SUGAR VisitNode(kctx, builder, stmt, rightHandNode);
 		builder->common.a = a;
@@ -840,8 +840,8 @@ static void KBuilder_VisitLetNode(KonohaContext *kctx, KBuilder *builder, kNode 
 			KBuilder_AsmNMOV(kctx, builder, a, KClass_(leftHandNode->attrTypeId), leftHandNode->index);
 		}
 	}
-	else if(leftHandNode->node == TEXPR_STACKTOP) {
-		//DBG_P("LET TEXPR_STACKTOP a=%d, leftHandNode->index=%d, espidx=%d", a, leftHandNode->index, espidx);
+	else if(leftHandNode->node == KNode_STACKTOP) {
+		//DBG_P("LET KNode_STACKTOP a=%d, leftHandNode->index=%d, espidx=%d", a, leftHandNode->index, espidx);
 		builder->common.a = leftHandNode->index + shift;
 		SUGAR VisitNode(kctx, builder, stmt, rightHandNode);
 		builder->common.a = a;
@@ -850,7 +850,7 @@ static void KBuilder_VisitLetNode(KonohaContext *kctx, KBuilder *builder, kNode 
 		}
 	}
 	else{
-		assert(leftHandNode->node == TEXPR_FIELD);
+		assert(leftHandNode->node == KNode_FIELD);
 		builder->common.a = espidx;
 		SUGAR VisitNode(kctx, builder, stmt, rightHandNode);
 		builder->common.a = a;

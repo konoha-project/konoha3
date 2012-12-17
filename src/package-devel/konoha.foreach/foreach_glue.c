@@ -94,7 +94,7 @@ static kNode *new_MacroNode(KonohaContext *kctx, kNode *stmt, kToken *IteratorTy
 	else {
 		KMacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", TypeToken, VariableToken, NULL);
 	}
-	kNode *bk = SUGAR new_kNode(kctx, stmt, macroSet, &source);
+	kNode *bk = SUGAR new_BlockNode(kctx, stmt, macroSet, &source);
 	KTokenSeq_Pop(kctx, source);
 	return bk;
 }

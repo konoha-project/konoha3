@@ -121,7 +121,7 @@ static void kNode_toERR(KonohaContext *kctx, kNode *stmt, kString *errmsg)
 {
 	if(errmsg != NULL) { // not in case of isNodeedErrorMessage
 		((kNodeVar *)stmt)->syn   = KSyntax_(Node_ns(stmt), KSymbol_ERR);
-		((kNodeVar *)stmt)->node = TSTMT_ERR;
+		((kNodeVar *)stmt)->node = kNode_Error;
 		KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_ERR, KType_String, errmsg);
 	}
 }
@@ -169,7 +169,7 @@ static kNode* kNode_Message2(KonohaContext *kctx, kNode *stmt, kToken *tk, kinfo
 		kNode_toERR(kctx, stmt, errmsg);
 	}
 	va_end(ap);
-	return K_NULLEXPR;
+	return K_NULLNODE;
 }
 
 int verbose_debug;

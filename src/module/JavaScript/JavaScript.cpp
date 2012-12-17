@@ -223,8 +223,8 @@ static kbool_t JSBuilder_VisitErrNode(KonohaContext *kctx, KBuilder *builder, kN
 static kbool_t JSBuilder_VisitNodeNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 {
 	kNode *expr = Node_getFirstNode(kctx, stmt);
-	if(expr->node == TEXPR_LET) {
-		if(kNode_At(expr, 1)->node == TEXPR_FIELD){
+	if(expr->node == KNode_LET) {
+		if(kNode_At(expr, 1)->node == KNode_FIELD){
 			JSBuilder_EmitString(kctx, builder, "this.", "", "");
 		}else{
 			JSBuilder_EmitString(kctx, builder, "var ", "", "");
@@ -414,7 +414,7 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 		JSBuilder_EmitString(kctx, builder, "new Array", "", "");
 	}else{
 		if(!isGlobal) {
-			if(receiver->node == TEXPR_NULL) {
+			if(receiver->node == KNode_NULL) {
 				JSBuilder_EmitString(kctx, builder, KClass_text(KClass_(receiver->attrTypeId)), "", "");
 			}
 			else{

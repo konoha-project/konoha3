@@ -43,7 +43,7 @@ static kNode *CallNodeessionFunc(KonohaContext *kctx, KSyntax *syn, kFunc *fo, i
 	lsfp[4].intValue = operatorIdx;
 	lsfp[5].intValue = endIdx;
 	countRef[0] += 1;
-	CallSugarMethod(kctx, lsfp, fo, 5, UPCAST(K_NULLEXPR));
+	CallSugarMethod(kctx, lsfp, fo, 5, UPCAST(K_NULLNODE));
 	END_UnusedStack();
 	DBG_ASSERT(IS_Node(lsfp[K_RTNIDX].asObject));
 	return lsfp[K_RTNIDX].asNode;
@@ -59,15 +59,15 @@ static kNode *kNode_ParseOperatorNode(KonohaContext *kctx, kNode *stmt, KSyntax 
 		for(index = size - 1; index >= 0; index--) {
 			DBG_ASSERT(IS_Func(funcItems[index]));
 			kNode *texpr = CallNodeessionFunc(kctx, exprSyntax, funcItems[index], &callCount, stmt, tokenList, beginIdx, operatorIdx, endIdx);
-			if(kNode_IsERR(stmt)) return K_NULLEXPR;
-			if(texpr != K_NULLEXPR) return texpr;
+			if(kNode_IsERR(stmt)) return K_NULLNODE;
+			if(texpr != K_NULLNODE) return texpr;
 		}
 		if(currentSyntax->parentSyntaxNULL == NULL) break;
 		currentSyntax = currentSyntax->parentSyntaxNULL;
 	}
 	const char *emesg = (callCount > 0) ? "syntax error: expression %s" : "undefined expression: %s";
 	kNode_Message(kctx, stmt, ErrTag, emesg, KToken_t(tokenList->TokenItems[operatorIdx]));
-	return K_NULLEXPR;
+	return K_NULLNODE;
 }
 
 static int kNode_FindOperator(KonohaContext *kctx, kNode *stmt, kArray *tokenList, int beginIdx, int endIdx)
@@ -113,7 +113,7 @@ static kNode* kNode_ParseNode(KonohaContext *kctx, kNode *stmt, kArray *tokenLis
 			kNode_Message(kctx, stmt, ErrTag, "expected expression after %s", hintBeforeText);
 		}
 	}
-	return K_NULLEXPR;
+	return K_NULLNODE;
 }
 
 static int kTokenArray_RemoveIndent(KonohaContext *kctx, kArray *tokenList, int s, int e)
@@ -152,14 +152,14 @@ static kNode *kNode_AddNodeParam(KonohaContext *kctx, kNode *stmt, kNode *expr, 
 
 static kNode *kNode_RightJoinNode(KonohaContext *kctx, kNode *stmt, kNode *expr, kArray *tokenList, int c, int e)
 {
-	if(c < e && expr != K_NULLEXPR && !kNode_IsERR(stmt)) {
+	if(c < e && expr != K_NULLNODE && !kNode_IsERR(stmt)) {
 		kToken *tk = tokenList->TokenItems[c];
 		if(tk->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern || tk->resolvedSyntaxInfo->sugarFuncTable[SugarFunc_Nodeession] == NULL) {
 			DBG_ASSERT(c >= 1);
 			kToken *previousToken = tokenList->TokenItems[c-1];
 			const char *white = kToken_Is(BeforeWhiteSpace, previousToken) ? " " : "";
 			kNodeToken_Message(kctx, stmt, tk, ErrTag, "undefined syntax: %s%s%s ...", KToken_t(previousToken), white, KToken_t(tk));
-			return K_NULLEXPR;
+			return K_NULLNODE;
 		}
 		kNodeToken_Message(kctx, stmt, tk, WarnTag, "ignored term: %s...", KToken_t(tk));
 	}
@@ -868,7 +868,7 @@ static kbool_t kNode_AddNewNode(KonohaContext *kctx, kNode *bk, KTokenSeq *token
 	return true;
 }
 
-static kNode *new_kNode(KonohaContext *kctx, kNode *parent, KMacroSet *macro, KTokenSeq *source)
+static kNode *new_BlockNode(KonohaContext *kctx, kNode *parent, KMacroSet *macro, KTokenSeq *source)
 {
 #ifdef USE_NODE
 	kNodeVar *bk = new_NodeNode(kctx, source->ns);
@@ -903,7 +903,7 @@ static kNode* kNode_GetNode(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ks
 		}
 		if(tk->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
 			KTokenSeq range = {ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
-			bk = new_kNode(kctx, stmt, NULL, &range);
+			bk = new_BlockNode(kctx, stmt, NULL, &range);
 			KLIB kObjectProto_SetObject(kctx, stmt, kw, kObject_typeId(bk), bk);
 		}
 	}

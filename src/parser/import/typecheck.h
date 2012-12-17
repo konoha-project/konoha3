@@ -39,7 +39,7 @@ static kNode *CallTypeCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 	KUnsafeFieldSet(lsfp[3].asGamma, gma);
 	lsfp[4].intValue = reqty;
 	countRef[0] += 1;
-	CallSugarMethod(kctx, lsfp, fo, 5, UPCAST(K_NULLEXPR));
+	CallSugarMethod(kctx, lsfp, fo, 5, UPCAST(K_NULLNODE));
 	END_UnusedStack();
 	RESET_GCSTACK();
 	DBG_ASSERT(IS_Node(lsfp[K_RTNIDX].asObject));
@@ -56,7 +56,7 @@ static kNode *TypeCheck(KonohaContext *kctx, kNode *expr, kGamma *gma, KClass* r
 		kFunc **FuncItems = KSyntax_funcTable(kctx, syn, SugarFunc_TypeCheck, &size);
 		for(index = size - 1; index >= 0; index--) {
 			kNode *texpr = CallTypeCheckFunc(kctx, FuncItems[index], &callCount, stmt, expr, gma, reqtc->typeId);
-			if(kNode_IsERR(stmt)) return K_NULLEXPR;
+			if(kNode_IsERR(stmt)) return K_NULLNODE;
 			if(texpr->attrTypeId != KType_var) {
 				DBG_ASSERT(texpr->node != -1);
 				return texpr;
@@ -74,7 +74,7 @@ static kNode *TypeCheck(KonohaContext *kctx, kNode *expr, kGamma *gma, KClass* r
 			return kNode_Message(kctx, stmt, ErrTag, "undefined operator: %s%s",  KSymbol_Fmt2(expr->syn->keyword));
 		}
 	}
-	return K_NULLEXPR;
+	return K_NULLNODE;
 }
 
 static void kNode_PutConstValue(KonohaContext *kctx, kNode *expr, KonohaStack *sfp)
@@ -113,7 +113,7 @@ static kNode *CallTypeCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 	KUnsafeFieldSet(lsfp[3].asGamma, gma);
 	lsfp[4].intValue = reqty;
 	countRef[0] += 1;
-	CallSugarMethod(kctx, lsfp, fo, 5, UPCAST(K_NULLEXPR));
+	CallSugarMethod(kctx, lsfp, fo, 5, UPCAST(K_NULLNODE));
 	END_UnusedStack();
 	RESET_GCSTACK();
 	DBG_ASSERT(IS_Node(lsfp[K_RTNIDX].asObject));
@@ -130,7 +130,7 @@ static kNode *TypeCheck(KonohaContext *kctx, kNode *stmt, kNode *expr, kGamma *g
 		kFunc **FuncItems = KSyntax_funcTable(kctx, syn, SugarFunc_TypeCheck, &size);
 		for(index = size - 1; index >= 0; index--) {
 			kNode *texpr = CallTypeCheckFunc(kctx, FuncItems[index], &callCount, stmt, expr, gma, reqtc->typeId);
-			if(kNode_IsERR(stmt)) return K_NULLEXPR;
+			if(kNode_IsERR(stmt)) return K_NULLNODE;
 			if(texpr->attrTypeId != KType_var) {
 				DBG_ASSERT(texpr->node != -1);
 				return texpr;
@@ -148,19 +148,19 @@ static kNode *TypeCheck(KonohaContext *kctx, kNode *stmt, kNode *expr, kGamma *g
 			return kNode_Message(kctx, stmt, ErrTag, "undefined operator: %s%s",  KSymbol_Fmt2(expr->syn->keyword));
 		}
 	}
-	return K_NULLEXPR;
+	return K_NULLNODE;
 }
 
 static void kNode_PutConstValue(KonohaContext *kctx, kNode *expr, KonohaStack *sfp)
 {
-	if((kvisit_t)expr->node == TEXPR_CONST) {
+	if((kvisit_t)expr->node == KNode_CONST) {
 		KUnsafeFieldSet(sfp[0].asObject, expr->ObjectConstValue);
 		sfp[0].unboxValue = kObject_Unbox(expr->ObjectConstValue);
-	} else if(expr->node == TEXPR_NCONST) {
+	} else if(expr->node == KNode_NCONST) {
 		sfp[0].unboxValue = expr->unboxConstValue;
-	} else if(expr->node == TEXPR_NEW) {
+	} else if(expr->node == KNode_NEW) {
 		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->attrTypeId), 0));
-	} else if(expr->node == TEXPR_CALL) {
+	} else if(expr->node == KNode_CALL) {
 		/* case Object Object.boxing(UnboxType Val) */
 		kMethod *mtd = expr->NodeList->MethodItems[0];
 		kNode *texpr = expr->NodeList->NodeItems[1];
@@ -168,7 +168,7 @@ static void kNode_PutConstValue(KonohaContext *kctx, kNode *expr, KonohaStack *s
 		assert(KType_Is(UnboxType, expr->attrTypeId) == true);
 		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->attrTypeId), texpr->unboxConstValue));
 	} else {
-		assert((kvisit_t)expr->node == TEXPR_NULL);
+		assert((kvisit_t)expr->node == KNode_NULL);
 		KUnsafeFieldSet(sfp[0].asObject, KLIB Knull(kctx, KClass_(expr->attrTypeId)));
 		sfp[0].unboxValue = 0;
 	}
@@ -209,15 +209,15 @@ static kNode *kNodeNode_ToBox(KonohaContext *kctx, kNode *stmt, kNode *texpr, kG
 static kNode *kNode_TypeCheck(KonohaContext *kctx, kNode *stmt, kNode *expr, kGamma *gma, KClass* reqClass, int pol)
 {
 	kNode *texpr = expr;
-	if(kNode_IsERR(stmt)) texpr = K_NULLEXPR;
-	if(KTypeAttr_Unmask(expr->attrTypeId) == KType_var && expr != K_NULLEXPR) {
+	if(kNode_IsERR(stmt)) texpr = K_NULLNODE;
+	if(KTypeAttr_Unmask(expr->attrTypeId) == KType_var && expr != K_NULLNODE) {
 		if(!IS_Node(expr)) {
 			expr = new_ConstValueNode(kctx, NULL, UPCAST(expr));
 		}
 		texpr = TypeCheck(kctx, stmt, expr, gma, reqClass);
-		if(kNode_IsERR(stmt)) texpr = K_NULLEXPR;
+		if(kNode_IsERR(stmt)) texpr = K_NULLNODE;
 	}
-	if(texpr != K_NULLEXPR) {
+	if(texpr != K_NULLNODE) {
 		kNameSpace *ns = Node_ns(stmt);
 		KClass *typedClass = KClass_(texpr->attrTypeId);
 		if(typedClass->typeId == KType_void) {
@@ -262,7 +262,7 @@ static kNode* kNode_TypeCheckNodeAt(KonohaContext *kctx, kNode *stmt, kNode *exp
 		KFieldSet(exprP->NodeList, exprP->NodeList->NodeItems[pos], expr);
 		return expr;
 	}
-	return K_NULLEXPR;
+	return K_NULLNODE;
 }
 
 static kbool_t kNode_TypeCheckByName(KonohaContext *kctx, kNode *stmt, ksymbol_t symbol, kGamma *gma, KClass *reqClass, int pol)
@@ -271,7 +271,7 @@ static kbool_t kNode_TypeCheckByName(KonohaContext *kctx, kNode *stmt, ksymbol_t
 	DBG_ASSERT(expr != NULL);
 	if(IS_Node(expr)) {
 		kNode *texpr = kNode_TypeCheck(kctx, stmt, expr, gma, reqClass, pol);
-		if(texpr != K_NULLEXPR && texpr != expr) {
+		if(texpr != K_NULLNODE && texpr != expr) {
 			KLIB kObjectProto_SetObject(kctx, stmt, symbol, KType_Node, texpr);
 		}
 	}
@@ -303,7 +303,7 @@ static kbool_t KSyntax_TypeCheckNode(KonohaContext *kctx, KSyntax *syn, kNode *s
 			CallStatementFunc(kctx, FuncItems[index], &callCount, stmt, gma);
 			if(Node_isDone(stmt)) return true;
 			if(kNode_IsERR(stmt)) return false;
-			if(stmt->node != TSTMT_UNDEFINED) {
+			if(stmt->node != KNode_UNDEFINED) {
 				return true;
 			}
 		}
@@ -315,7 +315,7 @@ static kbool_t KSyntax_TypeCheckNode(KonohaContext *kctx, KSyntax *syn, kNode *s
 		kNode_Message(kctx, stmt, ErrTag, "%s%s is not available %s", KWSTMT_t(stmt->syn->keyword), location);
 		return false;
 	}
-	if(stmt->node != TSTMT_ERR) {
+	if(stmt->node != kNode_Error) {
 		kNode_Message(kctx, stmt, ErrTag, "statement typecheck error: %s%s", KWSTMT_t(syn->keyword));
 	}
 	return false;
@@ -337,7 +337,7 @@ static kbool_t kNode_TypeCheckAll(KonohaContext *kctx, kNode *bk, kGamma *gma)
 		}
 	}
 	if(bk != K_NULLBLOCK) {
-		SUGAR kNode_SetVariable(kctx, (kNodeVar *)bk->esp, gma, TEXPR_LOCAL, KType_void, gma->genv->localScope.varsize);
+		SUGAR kNode_SetVariable(kctx, (kNodeVar *)bk->esp, gma, KNode_LOCAL, KType_void, gma->genv->localScope.varsize);
 	}
 	if(lvarsize < gma->genv->localScope.varsize) {
 		gma->genv->localScope.varsize = lvarsize;
@@ -381,7 +381,7 @@ static kNode* kMethod_newNode(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns,
 	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList, 0};
 	KTokenSeq_Push(kctx, tokens);
 	KTokenSeq_Tokenize(kctx, &tokens, script, uline);
-	kNode *bk = new_kNode(kctx, NULL/*parentNode*/, NULL/*macro*/, &tokens);
+	kNode *bk = new_BlockNode(kctx, NULL/*parentNode*/, NULL/*macro*/, &tokens);
 	KTokenSeq_Pop(kctx, tokens);
 	return bk;
 }
@@ -523,10 +523,10 @@ static kstatus_t kNode_EvalAtTopLevel(KonohaContext *kctx, kNode *bk, kMethod *m
 				}
 			}
 #else
-			if(stmt->node == TSTMT_EXPR) {
+			if(stmt->node == KNode_EXPR) {
 				kNode *expr = kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
 				DBG_ASSERT(expr != NULL);
-				if(expr->node == TEXPR_CALL) {  // Check NameSpace method
+				if(expr->node == KNode_CALL) {  // Check NameSpace method
 					kMethod *callMethod = expr->NodeList->MethodItems[0];
 					if(callMethod->typeId == KType_NameSpace && kMethod_Is(Public, callMethod) && !kMethod_Is(Static, callMethod)) {
 						isTryEval = true;

@@ -567,7 +567,7 @@ static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	KClass *paramType = (requestClass->baseTypeId == KType_Array) ? KClass_(requestClass->p0) : KClass_INFER;
 	for(i = 2; i < kArray_size(expr->NodeList); i++) {
 		kNode *typedNode = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, i, gma, paramType, 0);
-		if(typedNode == K_NULLEXPR) {
+		if(typedNode == K_NULLNODE) {
 			KReturn(typedNode);
 		}
 		if(paramType->typeId == KType_var) {
@@ -580,8 +580,8 @@ static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Node_ns(stmt), KClass_Array, KKMethodName_("[]"), -1, KMethodMatch_NoOption);
 	DBG_ASSERT(mtd != NULL);
 	KFieldSet(expr, expr->NodeList->MethodItems[0], mtd);
-	KFieldSet(expr, expr->NodeList->NodeItems[1], SUGAR kNode_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, kArray_size(expr->NodeList) - 2));
-	KReturn(Node_typed(expr, TEXPR_CALL, requestClass->typeId));
+	KFieldSet(expr, expr->NodeList->NodeItems[1], SUGAR kNode_SetVariable(kctx, NULL, gma, KNode_NEW, requestClass->typeId, kArray_size(expr->NodeList) - 2));
+	KReturn(Node_typed(expr, KNode_CALL, requestClass->typeId));
 }
 
 static KMETHOD Nodeession_Bracket(KonohaContext *kctx, KonohaStack *sfp)
@@ -602,7 +602,7 @@ static KMETHOD Nodeession_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else {
 		kNode *leftNode = SUGAR kNode_ParseNode(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
-		if(leftNode == K_NULLEXPR) {
+		if(leftNode == K_NULLNODE) {
 			KReturn(leftNode);
 		}
 		if(leftNode->syn->keyword == KSymbol_("new")) {  // new int[100], new int[]();

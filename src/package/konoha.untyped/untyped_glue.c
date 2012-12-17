@@ -59,7 +59,7 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 		kNode *texpr = SUGAR kNode_TypeCheckVariableNULL(kctx, stmt, leftHandNode, gma, KClass_INFER);
 		if(texpr == NULL) {
 			kNode *rightHandNode = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 2, gma, KClass_INFER, 0);
-			if(rightHandNode != K_NULLEXPR) {
+			if(rightHandNode != K_NULLNODE) {
 				DeclVariable(kctx, stmt, gma, rightHandNode->attrTypeId, leftHandNode);
 			}
 		}

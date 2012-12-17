@@ -186,14 +186,14 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 	kString *text = remove_escapes(kctx, tk);
 	if(text == NULL) {
 		kString_Set(Literal, ((kStringVar *)text), true);
-		KReturnWith(K_NULLEXPR, RESET_GCSTACK());
+		KReturnWith(K_NULLNODE, RESET_GCSTACK());
 	}
 
 	const char *end = NULL;
 	const char *str = kString_text(text);
 	const char *start = strstr(str, "${");
 	if(start == NULL) {
-		KReturnWith(K_NULLEXPR, RESET_GCSTACK());
+		KReturnWith(K_NULLNODE, RESET_GCSTACK());
 	}
 	expr = (kNodeVar *) SUGAR kNode_SetConstValue(kctx, expr, NULL, UPCAST(text));
 	kNameSpace *ns = Node_ns(stmt);

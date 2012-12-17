@@ -209,7 +209,7 @@ static kNode* kNode_ParseClassNodeNULL(KonohaContext *kctx, kNode *stmt, kToken 
 				prevToken = tk;
 			}
 			KTokenSeq_End(kctx, (&sourceRange));
-			bk = SUGAR new_kNode(kctx, stmt/*parent*/, NULL, &sourceRange);
+			bk = SUGAR new_BlockNode(kctx, stmt/*parent*/, NULL, &sourceRange);
 			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_NodePattern, KType_Node, bk);
 		}
 		KTokenSeq_Pop(kctx, range);
@@ -252,16 +252,16 @@ static kbool_t kNode_AddClassField(KonohaContext *kctx, kNode *stmt, kGamma *gma
 			kString *name = lexpr->TermToken->text;
 			ksymbol_t symbol = KAsciiSymbol(kString_text(name), kString_size(name), KSymbol_NewId);
 			kNode *vexpr =  SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 2, gma, KClass_(ty), 0);
-			if(vexpr == K_NULLEXPR) return false;
-			if(vexpr->node == TEXPR_CONST) {
+			if(vexpr == K_NULLNODE) return false;
+			if(vexpr->node == KNode_CONST) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 				KClass_setClassFieldObjectValue(kctx, definedClass, symbol, vexpr->ObjectConstValue);
 			}
-			else if(vexpr->node == TEXPR_NCONST) {
+			else if(vexpr->node == KNode_NCONST) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 				KClass_setClassFieldUnboxValue(kctx, definedClass, symbol, vexpr->unboxConstValue);
 			}
-			else if(vexpr->node == TEXPR_NULL) {
+			else if(vexpr->node == KNode_NULL) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 			}
 			else {

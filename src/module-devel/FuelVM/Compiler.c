@@ -365,14 +365,14 @@ static void FuelVM_VisitConstNode(KonohaContext *kctx, KBuilder *builder, kNode 
 {
 	kObject *v = expr->ObjectConstValue;
 	DBG_ASSERT(!KType_Is(UnboxType, expr->attrTypeId));
-	DBG_ASSERT(kNode_HasObjectConstValue(expr));
+	DBG_ASSERT(KNode_Is(ObjectConst, (expr));
 	builder->Value = CreateObject(BLD(builder), expr->attrTypeId, (void *)v);
 }
 
 static void FuelVM_VisitNConstNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr)
 {
 	DBG_ASSERT(KType_Is(UnboxType, expr->attrTypeId));
-	DBG_ASSERT(!kNode_HasObjectConstValue(expr));
+	DBG_ASSERT(!KNode_Is(ObjectConst, (expr));
 
 	SValue Val = {};
 	Val.bits = expr->unboxConstValue;
@@ -532,7 +532,7 @@ static void FuelVM_VisitLetNode(KonohaContext *kctx, KBuilder *builder, kNode *s
 	kNode *leftHandNode = kNode_At(expr, 1);
 	kNode *rightHandNode = kNode_At(expr, 2);
 	INode *Node;
-	if(leftHandNode->node == TEXPR_LOCAL) {
+	if(leftHandNode->node == KNode_LOCAL) {
 		enum TypeId type = ConvertToTypeId(kctx, leftHandNode->attrTypeId);
 		if((Node = IRBuilder_FindLocalVarByHash(BLD(builder), type, leftHandNode->index)) == 0) {
 			Node = CreateLocal(BLD(builder), type);
@@ -541,12 +541,12 @@ static void FuelVM_VisitLetNode(KonohaContext *kctx, KBuilder *builder, kNode *s
 		SUGAR VisitNode(kctx, builder, stmt, rightHandNode);
 		CreateUpdate(BLD(builder), Node, FuelVM_getNodeession(builder));
 	}
-	else if(leftHandNode->node == TEXPR_STACKTOP) {
+	else if(leftHandNode->node == KNode_STACKTOP) {
 		assert(0 && "TODO");
 		SUGAR VisitNode(kctx, builder, stmt, rightHandNode);
 	}
 	else{
-		assert(leftHandNode->node == TEXPR_FIELD);
+		assert(leftHandNode->node == KNode_FIELD);
 		SUGAR VisitNode(kctx, builder, stmt, rightHandNode);
 		kshort_t index  = (kshort_t)leftHandNode->index;
 		kshort_t xindex = (kshort_t)(leftHandNode->index >> (sizeof(kshort_t)*8));

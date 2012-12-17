@@ -36,7 +36,7 @@ static kNode* NewNode(KonohaContext *kctx, KSyntax *syn, kToken *tk, ktypeattr_t
 	kNodeVar *expr = new_(NodeVar, syn, OnGcStack);
 	KFieldSet(expr, expr->TermToken, tk);
 	kNode_SetTerm(expr, 1);
-	expr->node = TEXPR_NEW;
+	expr->node = KNode_NEW;
 	expr->attrTypeId = ty;
 	return (kNode *)expr;
 }

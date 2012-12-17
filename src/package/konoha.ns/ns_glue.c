@@ -123,16 +123,16 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
 		result = false;
-		if(constNode->node == TEXPR_NULL) {   // const C = String
+		if(constNode->node == KNode_NULL) {   // const C = String
 			type = VirtualType_KClass;
 			unboxValue = (uintptr_t)constClass;
 			result = true;
 		}
-		else if(constNode->node == TEXPR_CONST) {   // const C = "1"
+		else if(constNode->node == KNode_CONST) {   // const C = "1"
 			unboxValue = (uintptr_t)constNode->ObjectConstValue;
 			result = true;
 		}
-		else if(constNode->node == TEXPR_NCONST) {  // const c = 1
+		else if(constNode->node == KNode_NCONST) {  // const c = 1
 			unboxValue = constNode->unboxConstValue;
 			result = true;
 		}
@@ -160,7 +160,7 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	sugarContext->isNodeedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->NodeList); i++) {
 		kNode *typedNode = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, i, gma, KClass_INFER, TypeCheckPolicy_ALLOWVOID);
-		if(typedNode == K_NULLEXPR) {
+		if(typedNode == K_NULLNODE) {
 			isDefined = false;
 			break;
 		}

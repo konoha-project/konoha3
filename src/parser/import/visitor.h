@@ -27,14 +27,14 @@ static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 	kbool_t ret = false;
 	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
 	switch(stmt->node) {
-		case TSTMT_ERR:   ret = cbuilder->api->visitErrNode(kctx, builder, stmt); break;
-		case TSTMT_EXPR:  ret = cbuilder->api->visitNodeNode(kctx, builder, stmt);   break;
-		case TSTMT_BLOCK: ret = cbuilder->api->visitNodeNode(kctx, builder, stmt);  break;
-		case TSTMT_RETURN: ret = cbuilder->api->visitReturnNode(kctx, builder, stmt); break;
-		case TSTMT_IF:    ret = cbuilder->api->visitIfNode(kctx, builder, stmt);     break;
-		case TSTMT_LOOP:  ret = cbuilder->api->visitLoopNode(kctx, builder, stmt);   break;
-		case TSTMT_JUMP:  ret = cbuilder->api->visitJumpNode(kctx, builder, stmt);   break;
-		case TSTMT_TRY:   ret = cbuilder->api->visitTryNode(kctx, builder, stmt);    break;
+		case kNode_Error:   ret = cbuilder->api->visitErrNode(kctx, builder, stmt); break;
+		case KNode_EXPR:  ret = cbuilder->api->visitNodeNode(kctx, builder, stmt);   break;
+		case KNode_BLOCK: ret = cbuilder->api->visitNodeNode(kctx, builder, stmt);  break;
+		case KNode_RETURN: ret = cbuilder->api->visitReturnNode(kctx, builder, stmt); break;
+		case KNode_IF:    ret = cbuilder->api->visitIfNode(kctx, builder, stmt);     break;
+		case KNode_LOOP:  ret = cbuilder->api->visitLoopNode(kctx, builder, stmt);   break;
+		case KNode_JUMP:  ret = cbuilder->api->visitJumpNode(kctx, builder, stmt);   break;
+		case KNode_TRY:   ret = cbuilder->api->visitTryNode(kctx, builder, stmt);    break;
 		default: cbuilder->api->visitUndefinedNode(kctx, builder, stmt);        break;
 	}
 	return ret;
@@ -47,18 +47,18 @@ static void VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode
 	int espidx = cbuilder->espidx;
 	int shift = cbuilder->shift;
 	switch(expr->node) {
-		case TEXPR_CONST:    cbuilder->api->visitConstNode(kctx, builder, stmt, expr);  break;
-		case TEXPR_NEW:      cbuilder->api->visitNewNode(kctx, builder, stmt, expr);    break;
-		case TEXPR_NULL:     cbuilder->api->visitNullNode(kctx, builder, stmt, expr);   break;
-		case TEXPR_NCONST:   cbuilder->api->visitNConstNode(kctx, builder, stmt, expr); break;
-		case TEXPR_LOCAL:    cbuilder->api->visitLocalNode(kctx, builder, stmt, expr);  break;
-		case TEXPR_BLOCK:    cbuilder->api->visitNodeNode(kctx, builder, stmt, expr);  break;
-		case TEXPR_FIELD:    cbuilder->api->visitFieldNode(kctx, builder, stmt, expr);  break;
-		case TEXPR_CALL:     cbuilder->api->visitCallNode(kctx, builder, stmt, expr);   break;
-		case TEXPR_AND:      cbuilder->api->visitAndNode(kctx, builder, stmt, expr);    break;
-		case TEXPR_OR:       cbuilder->api->visitOrNode(kctx, builder, stmt, expr);     break;
-		case TEXPR_LET:      cbuilder->api->visitLetNode(kctx, builder, stmt, expr);    break;
-		case TEXPR_STACKTOP: cbuilder->api->visitStackTopNode(kctx, builder, stmt, expr);break;
+		case KNode_CONST:    cbuilder->api->visitConstNode(kctx, builder, stmt, expr);  break;
+		case KNode_NEW:      cbuilder->api->visitNewNode(kctx, builder, stmt, expr);    break;
+		case KNode_NULL:     cbuilder->api->visitNullNode(kctx, builder, stmt, expr);   break;
+		case KNode_NCONST:   cbuilder->api->visitNConstNode(kctx, builder, stmt, expr); break;
+		case KNode_LOCAL:    cbuilder->api->visitLocalNode(kctx, builder, stmt, expr);  break;
+		case KNode_BLOCK:    cbuilder->api->visitNodeNode(kctx, builder, stmt, expr);  break;
+		case KNode_FIELD:    cbuilder->api->visitFieldNode(kctx, builder, stmt, expr);  break;
+		case KNode_CALL:     cbuilder->api->visitCallNode(kctx, builder, stmt, expr);   break;
+		case KNode_AND:      cbuilder->api->visitAndNode(kctx, builder, stmt, expr);    break;
+		case KNode_OR:       cbuilder->api->visitOrNode(kctx, builder, stmt, expr);     break;
+		case KNode_LET:      cbuilder->api->visitLetNode(kctx, builder, stmt, expr);    break;
+		case KNode_STACKTOP: cbuilder->api->visitStackTopNode(kctx, builder, stmt, expr);break;
 		default: DBG_ABORT("unknown expr=%d", expr->node);
 	}
 	cbuilder->a = a;
@@ -72,7 +72,7 @@ static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *block)
 	int a = cbuilder->a;
 	int espidx = cbuilder->espidx;
 	int shift = cbuilder->shift;
-	cbuilder->espidx = (block->esp->node == TEXPR_STACKTOP) ? shift + block->esp->index : block->esp->index;
+	cbuilder->espidx = (block->esp->node == KNode_STACKTOP) ? shift + block->esp->index : block->esp->index;
 	kbool_t ret = true;
 	size_t i;
 	for (i = 0; i < kArray_size(block->NodeList); i++) {
