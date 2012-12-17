@@ -35,7 +35,7 @@
 #include <minikonoha/klib.h>
 #include <minikonoha/platform.h>
 #include <minikonoha/platform_posix.h>
-#include "../../package/apache/apache_glue.h"
+#include "../../package-devel/apache/apache_glue.h"
 
 #ifndef K_PREFIX
 #define K_PREFIX  "/usr/local"
@@ -286,7 +286,7 @@ static int konoha_handler(request_rec *r)
 
 	KonohaContext *kctx = konoha;
 	kNameSpace *ns = KNULL(NameSpace);
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KType_System, KKMethodName_("handler"), -1);  // fixme
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_System, KKMethodName_("handler"), -1, KMethodMatch_NoOption);  // fixme
 	if(mtd == NULL) {
 		ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "System.handler() not found");
 		return -1;
@@ -294,12 +294,12 @@ static int konoha_handler(request_rec *r)
 
 	/* XXX: We assume Request Object may not be freed by GC */
 	kObject *req_obj = KLIB new_kObject(kctx, OnStack, cRequest, (uintptr_t)r);
-	BEGIN_UnusedStack(lsfp, K_CALLDELTA + 1);
+	BEGIN_UnusedStack(lsfp);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, req_obj);
 	{
 		KonohaStack *sfp = lsfp + K_CALLDELTA;
-		KStackSetMethodAll(sfp, 0/*UL*/, mtd, 1, KLIB Knull(kctx, KClass_Int));
+		KStackSetMethodAll(sfp, KLIB Knull(kctx, KClass_Int), 0/*UL*/, mtd, 1);
 		KStackCall(sfp);
 	}
 	END_UnusedStack();
