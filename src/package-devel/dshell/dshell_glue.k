@@ -25,7 +25,6 @@
 import("cstyle", "while");
 import("cstyle", "break");
 import("cstyle", "null");
-import("cstyle", "float");
 import("konoha.array");
 import("konoha.console");
 import("konoha.ns");  // konoha.defined is obsolete
@@ -316,10 +315,10 @@ Expr expressionAsk(Stmt stmt, Token[] tokenList, int beginIdx, int operatorIdx, 
 	}
 }
 
-int tokenFuncDollar(Token tk, String source) {
-	int ch, pos    = 1;
-	int openParenthesis  = 40/*(*/;
-	int closeParenthesis = 41/*)*/;
+int tokenFuncCommandReplace(Token tk, String source) {
+	int pos = 1;
+	int openParenthesis  = 40/*'('*/;
+	int closeParenthesis = 41/*')'*/;
 	if(source.charCodeAt(pos) != openParenthesis) {
 		if(defined(DEBUG)) {
 			System.p("skip dollar");
@@ -327,10 +326,9 @@ int tokenFuncDollar(Token tk, String source) {
 		return 0;
 	}
 	while(pos < source.getSize()) {
-		ch = source.charCodeAt(pos);
-		if(ch == closeParenthesis) {
+		if(source.charCodeAt(pos) == closeParenthesis) {
 			if(tk.isNotNull() && pos > 2) {
-				tk.setText("$CommandReplace", source, 2, pos);
+				tk.setText("$DollarCommandReplace", source, 2, pos);
 			}
 			return pos + 1;
 		}
@@ -367,6 +365,62 @@ Expr expressionCommandReplace(Stmt stmt, Token[] tokenList, int beginIdx, int op
 	return expr;
 }
 
+boolean isSymbol(String s) {
+	String[] noSymbolList = [" ", "(", ")"];
+	int i = 0;
+	while(i < noSymbolList.getSize()) {
+		if(s.indexOf(noSymbolList[i]) >= 0) {
+			return false;
+		}
+		i = i + 1;
+	}
+	return true;
+}
+
+int tokenFuncEnvironment(Token tk, String source) {
+	int pos = 1;
+	if(tk.isNull() || !isSymbol(source[pos])) {
+		if(defined(DEBUG)) {
+			System.p("skip dollar");
+		}
+		return 0;
+	}
+	if(source.indexOf("{") == 1) {
+		pos = source.indexOf("}");
+		if(pos > 2) {
+			tk.setText("$DollarEnvironment", source, 2, pos);
+			return pos + 1;
+		}
+		return 0;
+	}
+	while(pos < source.getSize()) {
+		if(!isSymbol(source[pos])) {
+			break;
+		}
+		pos = pos + 1;
+	}
+	tk.setText("$DollarEnvironment", source, 1, pos);
+	return pos;
+}
+
+Expr expressionEnvironment(Stmt stmt, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
+	if(defined(DEBUG)) {
+		int i = beginIdx;
+		while(i < endIdx) {
+			System.p(tokenList[i].getText());
+			System.p(tokenList[i].getText().getSize());
+			System.p(tokenList[i].is("$Symbol"));
+			System.p(tokenList[i].is("()"));
+			i = i + 1;
+		}
+	}
+	Token methodToken = new Token("getenv");
+	Expr classExpr = new Expr(System);
+	Expr arg1 = new Expr(tokenList[beginIdx].getText());
+	Expr expr = stmt.newUntypedCallStyleExpr(methodToken, classExpr, arg1);
+	return expr;
+}
+
 AddPatternMatch("$Shell", patternMatchShell);
 AddStatement("$Shell", statementShell);
 AddTopLevelStatement("$Shell", statementShell);
@@ -374,5 +428,8 @@ AddExpression("ask", expressionAsk);
 
 syntax $Shell $Token*
 
-AddTokenizer("$CommandReplace", 36/*KonohaChar_Dollar*/, tokenFuncDollar);
-AddExpression("$CommandReplace", expressionCommandReplace);
+AddTokenizer("$DollarCommandReplace", 36/*KonohaChar_Dollar*/, tokenFuncCommandReplace);
+AddExpression("$DollarCommandReplace", expressionCommandReplace);
+
+AddTokenizer("$DollarEnvironment", 36/*KonohaChar_Dollar*/, tokenFuncEnvironment);
+AddExpression("$DollarEnvironment", expressionEnvironment);
