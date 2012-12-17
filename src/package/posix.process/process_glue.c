@@ -291,6 +291,17 @@ static KMETHOD System_system(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
+//## String System.getenv(String name)
+static KMETHOD System_getenv(KonohaContext *kctx, KonohaStack *sfp)
+{
+	const char *name = kString_text(sfp[1].asString);
+	char *ret = getenv(name);
+	if(ret == NULL) {
+		KReturn(KNULL(String));
+	}
+	KReturn(KLIB new_kString(kctx, OnStack, ret, strlen(ret), 0));
+}
+
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
@@ -332,6 +343,7 @@ static kbool_t process_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 		_Public|_Static, _F(System_sleep), KType_int, KType_System, KKMethodName_("sleep"), 1, KType_int, KFieldName_("sec"),
 		_Public|_Static, _F(System_usleep), KType_boolean, KType_System, KKMethodName_("usleep"), 1, KType_int, KFieldName_("usec"),
 		_Public|_Static, _F(System_system), KType_int, KType_System, KKMethodName_("system"), 1, KType_String, KFieldName_("command"),
+		_Public|_Static, _F(System_getenv), KType_String, KType_System, KKMethodName_("getenv"), 1, KType_String, KFieldName_("name"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
