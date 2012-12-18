@@ -69,7 +69,7 @@ void main() {
 	MPIData a = MPIData.newFloatArray(np * nn);
 	MPIData b = MPIData.newFloatArray(np * nn);
 	MPIData c = MPIData.newFloatArray(np * nn);
-	
+
 	/* ---------- matrix generation ---------- */
 	int j = 0;
 	while(j < np) {

@@ -7,7 +7,7 @@ void test() {
 	System.p( true  &&  false );
 	System.p( true  &&  btrue );
 	System.p( true  &&  bfalse);
-	
+
 	System.p( btrue  &&  true  );
         System.p( btrue  &&  false );
         System.p( btrue  &&  btrue );

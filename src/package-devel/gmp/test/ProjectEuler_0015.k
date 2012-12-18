@@ -36,7 +36,7 @@ Mpz routes(int w, int h){
 
 void main() {
 	assert(routes(2, 2) == 6);
-	assert(routes(20, 20) == "137846528820".toMpz()); 
+	assert(routes(20, 20) == "137846528820".toMpz());
 }
 
 main();

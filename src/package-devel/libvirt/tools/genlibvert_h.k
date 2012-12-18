@@ -17,7 +17,7 @@ String2 generate(String type) {
 	String type_defs = "";
 	String konohaclass_defs = "";
 
-	if (type.endsWith("PtrPtr")) {
+	if(type.endsWith("PtrPtr")) {
 		type_defs = type_defs + "typedef struct " + type.substr(0, type.length-3) + " *" + type + ";\n";
 	}
 	type_defs = type_defs + "typedef struct k" + type + " {\n";
@@ -54,7 +54,7 @@ void main() {
 	String konohaclass_defs = "static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)\n{\n";
     //stdout.println("#include \"libvirt_glue.h\"\n");
     while ((line = file.readLine()) != null) {
-        if (line == "###") {
+        if(line == "###") {
             break;
         }
 		res = generate(line);

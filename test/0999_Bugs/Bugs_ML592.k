@@ -6,7 +6,7 @@ import("konoha.array");
 import("java2.string");
 
 int test(String src) {
-    if (false) {
+    if(false) {
         return 1;
     }
     String nouns = "abcd";

@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
 
-import("cstyle"); 
+import("cstyle");
 
 void test() {
 	int a = 4;

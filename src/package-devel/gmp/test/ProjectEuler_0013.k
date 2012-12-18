@@ -112,7 +112,7 @@ void main() {
 	sum = sum + "20849603980134001723930671666823555245252804609722".toMpz();
 	sum = sum + "53503534226472524250874054075591789781264330331690".toMpz();
 
-	String answer = sum.toString().substr(0, 10); 
+	String answer = sum.toString().substr(0, 10);
 	assert(answer == "5537376230");
 }
 

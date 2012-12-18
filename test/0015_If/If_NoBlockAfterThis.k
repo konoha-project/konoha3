@@ -8,4 +8,4 @@ void f(int n) {
 }
 
 f(1);
-	
+

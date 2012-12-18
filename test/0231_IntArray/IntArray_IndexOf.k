@@ -8,7 +8,7 @@ void test() {
 	assert(ia.indexOf(2) == 1);
 	assert(ia.indexOf(3) == 2);
 	assert(ia.indexOf(5) == -1);
-	
+
 }
 
 test();

@@ -5,10 +5,10 @@
  */
 
 @Public boolean String.equals(String anObject) {
-    if (this.hashCode() != anObject.hashCode()) {
+    if(this.hashCode() != anObject.hashCode()) {
         return false;
     }
-    if (this.length() != anObject.length()) {
+    if(this.length() != anObject.length()) {
         return false;
     }
 }
@@ -96,13 +96,13 @@
 }
 
 @Public String String.slice(int beginIndex, int endIndex) {
-    if (beginIndex < 0) {
+    if(beginIndex < 0) {
         beginIndex = beginIndex + this.length();
     }
-    if (endIndex < 0) {
+    if(endIndex < 0) {
         endIndex = endIndex + this.length();
     }
-    if (beginIndex > endIndex) {
+    if(beginIndex > endIndex) {
         return "";
     } else {
         return this.substring(beginIndex, endIndex);
@@ -119,7 +119,7 @@
 
 @Public String String.substr(int index, int length) {
     assert(length >= 0);
-    if (index >= 0) {
+    if(index >= 0) {
         return this.substring(index, index + length);
     } else {
         int beginIndex = this.length() + index;
@@ -128,7 +128,7 @@
 }
 
 @Public String String.substr(int index) {
-    if (index >= 0) {
+    if(index >= 0) {
         return this.substring(index, this.length());
     } else {
         return this.substring(this.length() + index, this.length());

@@ -21,4 +21,4 @@ void test() {
 	System.p(!isTrue());
 	System.p(!isFalse());
 }
-	
+

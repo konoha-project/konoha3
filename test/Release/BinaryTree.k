@@ -19,14 +19,14 @@ class TreeNode {
 	TreeNode left, right;
 	int item;
 	boolean isNull;
-	
+
 	TreeNode(TreeNode left0, TreeNode right0, int item0, boolean isnull0) {
 		left = left0;
 		right = right0;
 		item = item0;
 		isNull = isnull0;
 	}
-	
+
 	int itemCheck(){
 		// if necessary deallocate here
 		if(isNull) { return item; }

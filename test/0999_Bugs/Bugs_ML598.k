@@ -6,7 +6,7 @@ import("konoha.array");
 import("java2.string");
 
 String[] extractNoun() {
-    if (false) {
+    if(false) {
         return null;
     }
     String[] nouns = null;

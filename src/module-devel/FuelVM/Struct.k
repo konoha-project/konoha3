@@ -39,7 +39,7 @@ String readFile(String path) {
     String tmp = "";
     while (true) {
         int ch = file.getc();
-        if (ch == -1) {
+        if(ch == -1) {
             break;
         }
         tmp = tmp + String.fromCharCode(ch);
@@ -56,7 +56,7 @@ void parseStruct(String[] lines, int i) {
     Param[] data = [];
     while (i < lines.length) {
         String s = lines.get(i);
-        if (s == "};") {
+        if(s == "};") {
             break;
         }
         s = s.replace(";", "").trim();
