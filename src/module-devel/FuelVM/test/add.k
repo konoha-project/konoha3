@@ -79,7 +79,7 @@ System.p(add7(10));
 //@@ const + local with branch
 int add9(int n) {
     int m = 2;
-    if (true) {
+    if(true) {
         m = 100;
     } else {
         m = 10;
@@ -92,11 +92,11 @@ System.p(add9(10));
 //@@ const + local with nested branch
 int add10(int n) {
     int m = 1;
-    if (false) {
+    if(false) {
         m = 1000000;
     } else {
         m = 10000000;
-        if (false) {
+        if(false) {
             m = 10000;
         } else {
             m = 100;

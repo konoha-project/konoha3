@@ -39,7 +39,7 @@ String readFile(String path) {
     String tmp = "";
     while (true) {
         int ch = file.getc();
-        if (ch == -1) {
+        if(ch == -1) {
             break;
         }
         tmp = tmp + String.fromCharCode(ch);
@@ -65,7 +65,7 @@ IR parse(String line) {
     String opname = a.get(0);
     String[] args = a.get(1).split(",");
 
-    if (args[0] == "") {
+    if(args[0] == "") {
         args.clear();
     }
     IR ir = new IR();
@@ -89,12 +89,12 @@ void parseFile(IR[] irs, String data) {
     int i, len = defs.getlength();
     IR current;
     while (i < len) {
-        if (defs[i].startsWith("def")) {
+        if(defs[i].startsWith("def")) {
             IR parsedIR = parse(defs[i]);
             current = parsedIR;
             irs.add(parsedIR);
         }
-        else if (defs[i] != "") {
+        else if(defs[i] != "") {
             assert(current.name != "");
             current.ops = current.ops + defs[i] + "\\\n";
         }
@@ -169,7 +169,7 @@ void main (String[] args) {
     while (i < irs.length) {
         IR ir = irs[i];
         oplist = oplist + "\tOP(${ir.name})";
-        if (i + 1 != irs.length) {
+        if(i + 1 != irs.length) {
             oplist = oplist + "\\";
         }
         oplist = oplist + "\n";

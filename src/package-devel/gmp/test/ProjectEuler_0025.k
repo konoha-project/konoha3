@@ -25,7 +25,7 @@ import("cstyle");
 import("gmp")
 
 void main() {
-	Mpz fa  = null; 
+	Mpz fa  = null;
 	Mpz fb  = new Mpz("1");
 	Mpz fc  = new Mpz("2");
 	Mpz ret = null;

@@ -9,16 +9,16 @@ import("konoha.class");
 
 String varid_type(String orig) {
     String type = orig;
-    if (type.indexOf("const") >= 0) {
+    if(type.indexOf("const") >= 0) {
         type = type.replace("const", "");
     }
-    if (type.indexOf("*") >= 0) {
+    if(type.indexOf("*") >= 0) {
         type = type.replace("*", "Ptr");
     }
-    if (type.indexOf("unsigned") >= 0) {
+    if(type.indexOf("unsigned") >= 0) {
         type = type.replace("unsigned ", "unsigned_");
     }
-    if (type.indexOf("long ") >= 0) {
+    if(type.indexOf("long ") >= 0) {
         type = type.replace("long ", "long_");
     }
     String[] tmp = type.split(" ");
@@ -48,19 +48,19 @@ void generate_function(String[] data, FunctionInfo info) {
     }
     i = 0;
     stdout.print("\t");
-    if (info.returnType != "void") {
+    if(info.returnType != "void") {
         stdout.print("${info.returnType} ret = ");
     }
     stdout.print("${info.name} (");
     while (i < args.getSize()) {
-        if (i != 0) {
+        if(i != 0) {
             stdout.print(", ");
         }
         stdout.print("arg${i}");
         i = i + 1;
     }
     stdout.println(");");
-    if (info.returnType == "void") {
+    if(info.returnType == "void") {
         stdout.println("\treturnvoid(${info.name});");
     } else {
         stdout.println("\tRETURN${info.returnType}(ret);");
@@ -72,7 +72,7 @@ String generate_signature(FunctionInfo info) {
     String[] args = info.argumentsType;
     String tmp = "_Public, _F(K${info.name}), TY_${info.returnType}, ";
     tmp = tmp + args.getSize() + ", ";
-    if (args.getSize() > 0) {
+    if(args.getSize() > 0) {
         tmp = tmp + "TY_${args.get(0)}, FN_${0}, ";
     }
     int i = 1;
@@ -90,7 +90,7 @@ void main() {
     Array[String] func_info = [];
     stdout.println("#include \"libvirt_glue.h\"\n");
     while ((line = file.readLine()) != null) {
-        if (line == "") {
+        if(line == "") {
             break;
         }
         String[] data = line.split(", ");
@@ -100,7 +100,7 @@ void main() {
         FunctionInfo info = new FunctionInfo();
         info.name = data.get(0);
         info.returnType = retType;
-        if (data.get(data.getSize() - 1) == "") {
+        if(data.get(data.getSize() - 1) == "") {
             data.pop();
         }
         int i = 2;

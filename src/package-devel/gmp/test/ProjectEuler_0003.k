@@ -15,7 +15,7 @@ import("gmp");
 int divid() {
 	int i = 2, max = 0, tmp, counter = 0;
 	Mpz number = "600851475143".toMpz();
-	
+
 	int r = Math.sqrt(number.toint());
 
 	while(i != r) {

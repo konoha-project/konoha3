@@ -7,13 +7,13 @@ void main() {
 	while (reader.read()) {
 		String type = reader.nodeType().toString();
 		System.p(type);
-		if (reader.hasAttributes() && reader.getAttributeCount() > 0) {
+		if(reader.hasAttributes() && reader.getAttributeCount() > 0) {
 			while (reader.moveToNextAttribute()) {
 				System.p(reader.constName() + "=" + reader.constValue());
 			}
 		}
-		if (type == XML_READER_TYPE_ELEMENT.toString() && reader.constName() == "title"){
-			//if (type == TYPE_ELEMENT && reader.constName() == "title"){
+		if(type == XML_READER_TYPE_ELEMENT.toString() && reader.constName() == "title"){
+			//if(type == TYPE_ELEMENT && reader.constName() == "title"){
 			reader.read();
 			if(reader.nodeType() == XML_READER_TYPE_TEXT){
 				System.p(reader.constValue());

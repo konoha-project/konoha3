@@ -40,11 +40,11 @@ void emit(String path, String data) {
     file.print("#endif /* end of include guard */");
 }
 String field(String ty) {
-    if (ty == "int") {
+    if(ty == "int") {
         return "ival";
-    } else if (ty == "float") {
+    } else if(ty == "float") {
         return "fval";
-    } else if (ty == "bool") {
+    } else if(ty == "bool") {
         return "bval";
     }
 }

@@ -25,7 +25,7 @@ void main() {
 	int sum = 0;
 	while(f100 > 0){
 		sum += f100 % 10;
-		f100 /= 10;	
+		f100 /= 10;
 	}
     assert(sum == 648);
 }

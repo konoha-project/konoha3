@@ -38,7 +38,7 @@ String readFile(String path) {
     String tmp = "";
     while (true) {
         int ch = file.getc();
-        if (ch == -1) {
+        if(ch == -1) {
             break;
         }
         tmp = tmp + String.fromCharCode(ch);
@@ -57,7 +57,7 @@ String[] String[].filter(String pattern) {
     String[] ret = [];
     int i = 0;
     while (i < this.length) {
-        if (this.get(i).startsWith(pattern)) {
+        if(this.get(i).startsWith(pattern)) {
             ret.add(this.get(i));
         }
         i = i + 1;

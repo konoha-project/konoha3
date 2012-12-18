@@ -9,7 +9,7 @@ Node addNode(GraphDatabaseService db, Node from, int i) {
 	Node node = db.createNode();
 	node.setPropertyString("title", "Goal");
 	node.setPropertyString("sentence", "hoge");
-	
+
 	//p(node.idx);
 	Relationship rel = node.relationshipFrom(from, "referTo");
 	addNode(db, node, i+1);
