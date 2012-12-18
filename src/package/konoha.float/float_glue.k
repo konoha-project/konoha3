@@ -5,7 +5,7 @@
 
 // int floatToken(Token tk, String source) {
 //     int i = 0;
-//     int len = source.getSize();
+//     int len = source.getlength();
 //     boolean negative = false;
 //     int ch0 = "0".charCodeAt(0);
 //     int ch1 = "1".charCodeAt(0);

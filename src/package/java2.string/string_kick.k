@@ -182,13 +182,13 @@ import("konoha.object");
 
 //## @Public String String.replace(char oldChar, char newChar)
 //## Tests if two string regions are equal.
-//TODO
-//@Public String String.replace(char oldChar, char newChar) {
-//}
+//@Native @Public String String.replace(char oldChar, char newChar)
 
 ////## @Public String String.replace(CharSequence target, CharSequence replacement)
 ////## Returns a new string resulting from replacing all occurrences of oldChar in this string with newChar.
-//@Public String String.replace(CharSequence target, CharSequence replacement)
+@Public String String.replace(String target, String replacement) {
+    return this.replaceAll(target, replacement);
+}
 
 //## @Public String String.replaceAll(String regex, String replacement)
 //## Replaces each substring of this string that matches the literal target sequence with the specified literal replacement sequence.

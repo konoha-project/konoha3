@@ -27,7 +27,7 @@ void main() {
 	String str = m.toString();
 	int i = 0;
 	int ans = 0;
-	while(i < str.size) {
+	while(i < str.length) {
 		ans += str.charCodeAt(i) - 48;
 		i   += 1;
 	}

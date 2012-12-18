@@ -1,9 +1,9 @@
 import("konoha.sql");
 import("cstyle", "while");
-
+import("konoha.file");
 
 void main() {
-	Connection con = new Connection("sqlite://" + "./konoha.sqlite");
+	Connection con = new Connection("sqlite://" + FILE.scriptPath("./konoha.sqlite"));
 	ResultSet r = con.query("SELECT * FROM people");
 	while(r.next()) {
 		System.p(" ----------------------- ");

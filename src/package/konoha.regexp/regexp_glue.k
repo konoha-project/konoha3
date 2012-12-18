@@ -10,7 +10,7 @@
 //        return 0;
 //    }
 //    int i = 1;
-//    int len = source.getSize();
+//    int len = source.getlength();
 //    while (i < len) {
 //        if(source.get(i) == "\n") {
 //            "* must close with '/' *"

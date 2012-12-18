@@ -20,8 +20,12 @@ String readFile(String path) {
         len = len + 1;
     }
     file.close();
-    Bytes buf = new Bytes(len);
 
+    if (len == 0) {
+        return "";
+    }
+
+    Bytes buf = new Bytes(len);
     file = new FILE(path, "r");
     file.read(buf, 0, len);
     file.close();
