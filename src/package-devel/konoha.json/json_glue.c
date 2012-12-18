@@ -139,7 +139,7 @@ static KMETHOD Json_toString(KonohaContext *kctx, KonohaStack *sfp)
 		const char *text = PLATAPI JsonToNewText(kctx, &jo->jsonbuf);
 		DBG_ASSERT(text != NULL);
 		kString *ret = KLIB new_kString(kctx, OnStack, text, strlen(text), 0);
-		free(text);
+		free((char *) text);
 		KReturn(ret);
 	}
 }
@@ -262,7 +262,7 @@ static KMETHOD Json_setJson(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo  = (kJson *)sfp[0].asObject;
 	kJson *val = (kJson *)sfp[2].asObject;
-	if(!PLATAPI SetJsonKeyValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), val)) {
+	if(!PLATAPI SetJsonKeyValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), &val->jsonbuf)) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();
@@ -273,7 +273,7 @@ static KMETHOD Json_setJson_index(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo  = (kJson *)sfp[0].asObject;
 	kJson *val = (kJson *)sfp[2].asObject;
-	if(!PLATAPI SetJsonArrayAt(kctx, &jo->jsonbuf, sfp[1].unboxValue, val)) {
+	if(!PLATAPI SetJsonArrayAt(kctx, &jo->jsonbuf, sfp[1].unboxValue, &val->jsonbuf)) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();
@@ -284,7 +284,7 @@ static KMETHOD Json_AddJson(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo  = (kJson *)sfp[0].asObject;
 	kJson *val = (kJson *)sfp[1].asObject;
-	if(!PLATAPI AppendJsonArray(kctx, &jo->jsonbuf, val)) {
+	if(!PLATAPI AppendJsonArray(kctx, &jo->jsonbuf, &val->jsonbuf)) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();
@@ -358,7 +358,7 @@ static kbool_t json_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		_Public,            _F(Json_new),       KType_Json,       KType_Json, KKMethodName_("new"),        0,
 		_Public|_Static|_Const|_Im, _F(Json_Parse), KType_Json,   KType_Json, KKMethodName_("parse"),      1, KType_String, FN_v,
 		_Public,            _F(Json_setJson),   KType_void,       KType_Json, KKMethodName_("set"),        2, KType_String, FN_k, KType_Json, FN_v,
-		_Public,            _F(Json_setJson),   KType_void,       KType_Json, KKMethodName_("set"),        2, KType_int,    FN_k, KType_Json, FN_v,
+		_Public,            _F(Json_setJson_index),   KType_void,       KType_Json, KKMethodName_("set"),        2, KType_int,    FN_k, KType_Json, FN_v,
 		_Public,            _F(Json_AddJson),   KType_void,       KType_Json, KKMethodName_("add"),        1, KType_Json,   FN_v,
 		_Public,            _F(Json_setBool),   KType_void,       KType_Json, KKMethodName_("setBool"),    2, KType_String, FN_k, KType_boolean, FN_v,
 		_Public,            _F(Json_setFloat),  KType_void,       KType_Json, KKMethodName_("setFloat"),   2, KType_String, FN_k, KType_float, FN_v,
