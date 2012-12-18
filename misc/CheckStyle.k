@@ -2,12 +2,12 @@ import("konoha.regexp");
 import("konoha.new");
 import("konoha.string");
 import("konoha.foreach");
-import("konoha.ns");  // konoha.const is obsolete
+import("konoha.ns");
 import("konoha.array");
 import("konoha.file");
+import("konoha.bytes");
 import("cstyle");
 
-const dest = "./minikonoha/";
 String readFile(String path) {
     FILE file = new FILE(path, "r");
     int len = 0;
@@ -17,11 +17,15 @@ String readFile(String path) {
         if (ch == -1) {
             break;
         }
-        tmp = tmp + String.fromCharCode(ch);
         len = len + 1;
     }
     file.close();
-    return tmp;
+    Bytes buf = new Bytes(len);
+
+    file = new FILE(path, "r");
+    file.read(buf, 0, len);
+    file.close();
+    return new String(buf);
 }
 
 String replace(String path, String data, String pattern, String before, String after) {
