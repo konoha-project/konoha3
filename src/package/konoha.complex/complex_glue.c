@@ -28,6 +28,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/konoha_common.h>
+#include <minikonoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -643,10 +644,6 @@ static KMETHOD Complex_conjl(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(ret);
 }
 
-/* You can attach the following annotations to each methods. */
-#define _Public   kMethod_Public
-#define _F(F)     (intptr_t)(F)
-
 static kbool_t Complex_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("konoha.float", trace);
@@ -657,7 +654,6 @@ static kbool_t Complex_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	defComplex.free      = Complex_Free;
 	KClass *ComplexClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defComplex, trace);
 
-	/* You can define methods with the following procedures. */
 	int KType_Complex = ComplexClass->typeId;
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Complex_new),     KType_Complex, KType_Complex, KKMethodName_("new"),   2, KType_float, KFieldName_("real"), KType_float, KFieldName_("imaginary"),

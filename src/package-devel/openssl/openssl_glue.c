@@ -23,7 +23,7 @@ static void RawPtr_Init(KonohaContext *kctx, kObject *po, void *conf)
 static KMETHOD kMD5_Init(KonohaContext *kctx, KonohaStack *sfp)
 {
 	MD5state_st *c = malloc(sizeof(*c));
-	int ret_ = MD5_Init(c);
+	int ret_ = MD5_Init(c); (void)ret_;
 	RawPtr_Init(kctx, sfp[0].asObject, c);
 	KReturn(sfp[0].asObject);
 }
@@ -39,7 +39,7 @@ static KMETHOD kMD5_Final(KonohaContext *kctx, KonohaStack *sfp)
 {
 	unsigned char MD[MD5_DIGEST_LENGTH];
 	MD5state_st *c = RawPtr(sfp[0].asObject);
-	int ret_ = MD5_Final(MD, c);
+	int ret_ = MD5_Final(MD, c); (void)ret_;
 	int i;
 	char MD_S[MD5_DIGEST_LENGTH*2+1];
 	for (i = 0; i < MD5_DIGEST_LENGTH; i++) {
@@ -50,7 +50,7 @@ static KMETHOD kMD5_Final(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD kSHA1_Init(KonohaContext *kctx, KonohaStack *sfp)
 {
 	SHAstate_st *c = malloc(sizeof(*c));
-	int ret_ = SHA1_Init(c);
+	int ret_ = SHA1_Init(c); (void)ret_;
 	RawPtr_Init(kctx, sfp[0].asObject, c);
 	KReturn(sfp[0].asObject);
 }
@@ -66,7 +66,7 @@ static KMETHOD kSHA1_Final(KonohaContext *kctx, KonohaStack *sfp)
 {
 	unsigned char SHA[SHA_DIGEST_LENGTH];
 	SHAstate_st *c = RawPtr(sfp[0].asObject);
-	int ret_ = SHA1_Final(SHA, c);
+	int ret_ = SHA1_Final(SHA, c); (void)ret_;
 	int i;
 	char SHA_S[SHA_DIGEST_LENGTH*2+1];
 	for (i = 0; i < SHA_DIGEST_LENGTH; i++) {
@@ -76,12 +76,8 @@ static KMETHOD kSHA1_Final(KonohaContext *kctx, KonohaStack *sfp)
 }
 // --------------------------------------------------------------------------
 
-#define _P kMethod_Public
-#define _C kMethod_Const
-#define _S kMethod_Static
-#define _F(F)   (intptr_t)(F)
-#define KType_openssl  (ct0->typeId)
-#define KType_Log      (ct1->typeId)
+//#define KType_openssl  (ct0->typeId)
+//#define KType_Log      (ct1->typeId)
 
 static kbool_t openssl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
@@ -106,12 +102,12 @@ static kbool_t openssl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 
 	int FN_x = KFieldName_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_P, _F(kMD5_Init),   KType_SHA1,   KType_MD5, KKMethodName_("new"), 0,
-		_P, _F(kMD5_Update), KType_int,   KType_MD5, KKMethodName_("update"), 1, KType_String, FN_x,
-		_P, _F(kMD5_Final),  KType_String, KType_MD5, KKMethodName_("final"), 0,
-		_P, _F(kSHA1_Init),   KType_SHA1,   KType_SHA1, KKMethodName_("new"), 0,
-		_P, _F(kSHA1_Update), KType_int,   KType_SHA1, KKMethodName_("update"), 1, KType_String, FN_x,
-		_P, _F(kSHA1_Final),  KType_String, KType_SHA1, KKMethodName_("final"), 0,
+		_Public, _F(kMD5_Init),   KType_SHA1,   KType_MD5, KKMethodName_("new"), 0,
+		_Public, _F(kMD5_Update), KType_int,   KType_MD5, KKMethodName_("update"), 1, KType_String, FN_x,
+		_Public, _F(kMD5_Final),  KType_String, KType_MD5, KKMethodName_("final"), 0,
+		_Public, _F(kSHA1_Init),   KType_SHA1,   KType_SHA1, KKMethodName_("new"), 0,
+		_Public, _F(kSHA1_Update), KType_int,   KType_SHA1, KKMethodName_("update"), 1, KType_String, FN_x,
+		_Public, _F(kSHA1_Final),  KType_String, KType_SHA1, KKMethodName_("final"), 0,
 
 		DEND,
 	};

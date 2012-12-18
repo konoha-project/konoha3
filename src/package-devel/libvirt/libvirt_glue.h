@@ -3,6 +3,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/import/methoddecl.h>
 #include "libvirt/libvirt.h"
 #include "libvirt/libvirt.h"
 

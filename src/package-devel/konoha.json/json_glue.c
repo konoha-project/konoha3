@@ -25,6 +25,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/klib.h>
 #include <minikonoha/konoha_common.h>
+#include <minikonoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -320,12 +321,6 @@ static KMETHOD Json_setInt(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 /* ------------------------------------------------------------------------ */
-
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Static   kMethod_Static
-#define _Im kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
 
 #define KType_Json   (cJson->typeId)
 

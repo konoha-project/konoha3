@@ -24,6 +24,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -62,9 +63,6 @@ static KMETHOD NameSpace_Eval(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 // --------------------------------------------------------------------------
-
-#define _Public   kMethod_Public
-#define _F(F)   (intptr_t)(F)
 
 static void eval_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {

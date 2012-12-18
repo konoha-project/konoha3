@@ -25,6 +25,9 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/import/methoddecl.h>
+
+#define _Ignored  kMethod_IgnoredOverride
 
 #ifdef __cplusplus
 extern "C"{
@@ -39,11 +42,6 @@ static KMETHOD NameSpace_AllowImplicitField(KonohaContext *kctx, KonohaStack *sf
 	kNameSpaceVar *ns = (kNameSpaceVar *)sfp[0].asNameSpace;
 	kNameSpace_Set(ImplicitField, ns, sfp[1].boolValue);
 }
-
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Ignored  kMethod_IgnoredOverride
-#define _F(F)   (intptr_t)(F)
 
 static void class_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {

@@ -33,7 +33,9 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-//#include <minikonoha/konoha_common.h>
+#include <minikonoha/import/methoddecl.h>
+#define _Iter  kMethod_Iterative
+#define _C     kMethod_CCompatible
 
 #ifdef __cplusplus
 extern "C"{
@@ -495,12 +497,6 @@ static KMETHOD DIR_readPath(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	KReturn(KNULL(String));
 }
-
-#define _Public   kMethod_Public
-#define _Static   kMethod_Static
-#define _C        kMethod_CCompatible
-#define _F(F)   (intptr_t)(F)
-#define _Iter     kMethod_Iterative
 
 static void path_defineDIR(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {

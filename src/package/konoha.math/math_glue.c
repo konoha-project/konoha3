@@ -28,10 +28,11 @@
 
 #include <math.h>
 
+#include "mt19937ar.h"
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/konoha_common.h>
-#include "mt19937ar.h"
+#include <minikonoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -199,10 +200,6 @@ static KMETHOD Math_random(KonohaContext *kctx, KonohaStack *sfp)
 
 // --------------------------------------------------------------------------
 
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Static   kMethod_Static
-#define _F(F)   (intptr_t)(F)
 #define MATH_(T) "MATH_" #T, KType_float, M_##T
 #define KType_Math  (cMath->typeId)
 

@@ -25,6 +25,7 @@
 //#include <minikonoha/minikonoha.h>
 //#include <minikonoha/sugar.h>
 //#include <minikonoha/konoha_common.h>
+//#include <minikonoha/import/methoddecl.h>
 //
 //#ifdef __cplusplus
 //extern "C" {
@@ -155,14 +156,6 @@
 //{
 //	KReturn(sfp[0].asObject);
 //}
-//
-//// --------------------------------------------------------------------------
-//
-//#define _Public   kMethod_Public
-//#define _Const    kMethod_Const
-//#define _Coercion kMethod_Coercion
-//#define _Hidden   kMethod_Hidden
-//#define _F(F)     (intptr_t)(F)
 //
 //// --------------------------------------------------------------------------
 //

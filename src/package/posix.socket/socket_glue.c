@@ -22,10 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/konoha_common.h>
-
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -38,7 +34,12 @@
 #if defined(__NetBSD__)
 #include <sys/time.h>
 #include <sys/select.h>
-#endif	//__NetBSD__
+#endif //__NetBSD__
+
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <minikonoha/konoha_common.h>
+#include <minikonoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C" {

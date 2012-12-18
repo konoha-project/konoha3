@@ -3278,7 +3278,6 @@ static KMETHOD KvirNodeSetMemoryParameters(KonohaContext *kctx,  KonohaStack *sf
 	RETURNint(ret);
 }
 
-#define _Public   kMethod_Public
 static kbool_t PACKAGE_INIT_PKG(LIBVIRT_PACKAGE_NAME)(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	virt_loadStructData(kctx, ns, trace);

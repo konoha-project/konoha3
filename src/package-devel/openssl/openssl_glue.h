@@ -1,5 +1,6 @@
-#include "minikonoha/minikonoha.h"
-#include "minikonoha/sugar.h"
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <minikonoha/import/methoddecl.h>
 #include "openssl/ssl.h"
 #ifndef OPENSSL_GLUE_H_
 #define OPENSSL_GLUE_H_

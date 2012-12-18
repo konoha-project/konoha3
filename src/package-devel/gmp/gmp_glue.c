@@ -25,6 +25,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/konoha_common.h>
+#include <minikonoha/import/methoddecl.h>
 #include <gmp.h>
 
 #ifdef __cplusplus
@@ -924,19 +925,10 @@ static KMETHOD Float_opNEQ_mpf(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(kFloat_cmp_mpf(kctx, sfp) != 0);
 }
 
-
-
 /* ------------------------------------------------------------------------ */
-
-#define _Public   kMethod_Public
-#define _Im       kMethod_Immutable
-#define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
-#define _F(F)   (intptr_t)(F)
 
 #define KType_Mpz     cMpz->typeId
 #define KType_Mpf     cMpf->typeId
-
 
 static kbool_t gmp_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {

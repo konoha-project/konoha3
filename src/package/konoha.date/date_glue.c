@@ -22,10 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/konoha_common.h>
-
 #include <stdio.h>
 #include <time.h>
 #ifdef _MSC_VER
@@ -33,6 +29,11 @@
 #else
 #include <sys/time.h>
 #endif
+
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <minikonoha/konoha_common.h>
+#include <minikonoha/import/methoddecl.h>
 
 #if defined(__MINGW32__) || defined(_MSC_VER)
 
@@ -586,9 +587,6 @@ static KMETHOD Date_toLocaleString(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-#define _Public   kMethod_Public
-#define _Im       kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
 #define KType_Date     cDate->typeId
 
 static kbool_t date_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)

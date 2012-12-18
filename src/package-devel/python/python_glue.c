@@ -26,6 +26,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/konoha_common.h>
+#include <minikonoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -475,12 +476,6 @@ static KMETHOD PyObject_(KonohaContext *kctx, KonohaStack *sfp)
 // --------------------------------------------------------------------------
 
 static int python_Init_count = 0;
-
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
-#define _Im       kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
 
 static kbool_t python_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {

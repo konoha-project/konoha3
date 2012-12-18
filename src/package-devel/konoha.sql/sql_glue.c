@@ -27,6 +27,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/konoha_common.h>
 #include <minikonoha/klib.h>
+#include <minikonoha/import/methoddecl.h>
 #include <stdio.h> /* for strtoll, strtod */
 
 #ifdef HAVE_KONOHA_SQL_CONFIG_H
@@ -475,9 +476,6 @@ static KMETHOD ResultSet_get(KonohaContext *kctx, KonohaStack *sfp)
 		KReturn(returnValue);
 	}
 }
-
-#define _Public   kMethod_Public
-#define _F(F)   (intptr_t)(F)
 
 static kbool_t sql_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {

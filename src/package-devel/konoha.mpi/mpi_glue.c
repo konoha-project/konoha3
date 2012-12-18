@@ -25,7 +25,8 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/konoha_common.h>
-#include <stdio.h>
+#include <minikonoha/import/methoddecl.h>
+
 #define TRACE(POLICY, ...) OLDTRACE_SWITCH_TO_KTrace(POLICY, __VA_ARGS__);
 
 #ifdef __cplusplus
@@ -504,11 +505,6 @@ static KMETHOD MPIData_seti(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 /* ------------------------------------------------------------------------ */
-#define _Public   kMethod_Public
-#define _Static   kMethod_Static
-//#define _Const    kMethod_Const
-//#define _Coercion kMethod_Coercion
-#define _F(F)   (intptr_t)(F)
 
 typedef struct {
 	KRuntimeModule h;
@@ -518,11 +514,6 @@ typedef struct {
 static void MpiModule_Setup(KonohaContext *kctx, struct KRuntimeModule *def, int newctx)
 {
 	(void)kctx;(void)def;(void)newctx;
-}
-
-static void kmodmpi_Reftrace(KonohaContext *kctx, struct KRuntimeModule *baseh, KObjectVisitor *visitor)
-{
-	(void)kctx;(void)baseh;
 }
 
 static void MpiModule_Free(KonohaContext *kctx, struct KRuntimeModule *baseh)

@@ -22,9 +22,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#include <mecab.h>
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#include <mecab.h>
+#include <minikonoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,14 +63,8 @@ static void Tagger_Free(KonohaContext *kctx, kObject *o)
 	mecab_destroy(mecab->mecab);
 }
 
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _F(F)   (intptr_t)(F)
-
 #define KType_Tagger     cTagger->typeId
-
-#define KType_MecabNode     cMecabNode->typeId
-
+#define KType_MecabNode  cMecabNode->typeId
 #define KDefineConstInt(T)  #T, KType_int, T
 
 /* ------------------------------------------------------------------------ */

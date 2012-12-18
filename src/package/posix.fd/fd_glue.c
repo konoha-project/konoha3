@@ -22,8 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -31,6 +29,10 @@
 #include <errno.h>
 #include <stdio.h>
 #include <dirent.h>
+
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <minikonoha/import/methoddecl.h>
 
 //#ifndef PATHMAX
 //#define PATHMAX 256
@@ -269,13 +271,6 @@ static KMETHOD System_ttyname(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 // --------------------------------------------------------------------------
-
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Static   kMethod_Static
-//#define _Coercion kMethod_Coercion
-#define _Im kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
 
 //#define KClass_Stat         cStat
 //#define KType_Stat         cStat->typeId

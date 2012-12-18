@@ -27,6 +27,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/konoha_common.h>
+#include <minikonoha/import/methoddecl.h>
 
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
@@ -35,9 +36,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define _Public   kMethod_Public
-#define _F(F)   (intptr_t)(F)
 
 #define KType_Xml     cXml->typeId
 

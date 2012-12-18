@@ -22,8 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
 #include <unistd.h>
 #include <signal.h>
 #include <sys/types.h>
@@ -34,6 +32,10 @@
 #ifdef __linux__
 #include <sys/wait.h>
 #endif
+
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <minikonoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -303,10 +305,6 @@ static KMETHOD System_getenv(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 /* ------------------------------------------------------------------------ */
-
-#define _Public   kMethod_Public
-#define _Static   kMethod_Static
-#define _F(F)   (intptr_t)(F)
 
 #define KDefineConstInt(T) #T, KType_int, T
 

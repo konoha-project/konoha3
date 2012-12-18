@@ -32,6 +32,8 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/import/methoddecl.h>
+#define _Iter     kMethod_Iterative
 
 #ifdef __cplusplus
 extern "C"{
@@ -278,15 +280,6 @@ static KMETHOD Stat_getbirthtime(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(stat->stat->st_birthtime);
 }
 #endif /* HAVE_STRUKClass_STAT_ST_BIRTHTIME */
-
-
-#define _Public   kMethod_Public
-#define _Static   kMethod_Static
-#define _C        kMethod_CCompatible
-#define _Im       kMethod_Immutable
-#define _Const    kMethod_Const
-#define _F(F)   (intptr_t)(F)
-#define _Iter     kMethod_Iterative
 
 static void stat_defineClassAndMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {

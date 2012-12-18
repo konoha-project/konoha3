@@ -24,18 +24,12 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/import/methoddecl.h>
 #include <stdio.h>
 
 #ifdef __cplusplus
 extern "C"{
 #endif
-
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Im       kMethod_Immutable
-#define _Coercion kMethod_Coercion
-#define _F(F)   (intptr_t)(F)
-
 
 // --------------------------------------------------------------------------
 /* Symbol class */

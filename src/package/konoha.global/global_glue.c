@@ -24,6 +24,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -35,9 +36,6 @@ static KMETHOD NameSpace_AllowImplicitGlobalVariable_(KonohaContext *kctx, Konoh
 {
 	kNameSpace_Set(ImplicitGlobalVariable, sfp[0].asNameSpace, sfp[1].boolValue);
 }
-
-#define _Public   kMethod_Public
-#define _F(F)   (intptr_t)(F)
 
 typedef const struct _kGlobalObject kGlobalObject;
 struct _kGlobalObject {

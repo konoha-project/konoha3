@@ -29,13 +29,8 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
-
-#define _Public kMethod_Public
-#define _Static kMethod_Static
-#define _Const  kMethod_Const
+#include <minikonoha/import/methoddecl.h>
 #define _JS     kMethod_JSCompatible
-#define _Im     kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
 
 #include "string_api.h"
 #include "rope_string.h"

@@ -34,6 +34,7 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
 #include <minikonoha/platform.h>
+#include <minikonoha/import/methoddecl.h>
 #include "../../package-devel/apache/apache_glue.h"
 
 #ifndef K_PREFIX
@@ -231,8 +232,6 @@ KonohaContext* konoha_create(KClass **cRequest)
 	kNameSpace *ns = KNULL(NameSpace);
 	KImportPackage(ns, "apache", trace);
 	*cRequest = KClass_Request;
-#define _P    kMethod_Public
-#define _F(F) (intptr_t)(F)
 #define KType_Req  (KClass_Request->typeId)
 #define KType_Tbl  (KClass_AprTable->typeId)
 #define KType_TblEntry  (KClass_AprTableEntry->typeId)

@@ -33,6 +33,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/konoha_common.h>
+#include <minikonoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -440,13 +441,6 @@ static KMETHOD File_scriptPath(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 // --------------------------------------------------------------------------
-
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Static   kMethod_Static
-//#define _Coercion kMethod_Coercion
-#define _Im kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
 
 static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {

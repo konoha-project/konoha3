@@ -28,6 +28,7 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
 #include <minikonoha/konoha_common.h>
+#include <minikonoha/import/methoddecl.h>
 #include <jansson.h>
 
 #ifdef __cplusplus
@@ -405,12 +406,6 @@ static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp)
 //}
 
 /* ------------------------------------------------------------------------ */
-
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Static   kMethod_Static
-#define _Im kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
 
 static kbool_t jansson_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {

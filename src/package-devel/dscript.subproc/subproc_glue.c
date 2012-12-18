@@ -34,6 +34,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/konoha_common.h>
+#include <minikonoha/import/methoddecl.h>
 
 #if defined(__linux__)
 #include <linux/version.h>
@@ -687,11 +688,6 @@ static KMETHOD SubProc_isCommand(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	KReturnUnboxValue(false);
 }
-
-#define _Public   kMethod_Public
-#define _Static   kMethod_Static
-#define _Im kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
 
 static kbool_t subproc_InitSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {

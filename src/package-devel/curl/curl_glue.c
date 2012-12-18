@@ -22,11 +22,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#include <curl/curl.h>
+
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/konoha_common.h>
-
-#include <curl/curl.h>
+#include <minikonoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -740,10 +741,6 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 /* ------------------------------------------------------------------------ */
-
-#define _Public   kMethod_Public
-#define _Im kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
 
 #define KType_Curl     cCurl->typeId
 

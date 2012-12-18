@@ -109,6 +109,7 @@
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/sugar.h"
 #include "minikonoha/konoha_common.h"
+#include "minikonoha/import/methoddecl.h"
 #include <stdio.h>
 
 struct kRawPtr {
@@ -4615,13 +4616,6 @@ static void kmodllvm_free(KonohaContext *kctx, struct KRuntimeModule *baseh)
 {
 	KFree(baseh, sizeof(kmodllvm_t));
 }
-
-#define _Public   kMethod_Public
-#define _Static   kMethod_Static
-#define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
-#define _Im       kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
 
 static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int argc, KTraceInfo *trace)
 {

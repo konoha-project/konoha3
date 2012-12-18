@@ -26,6 +26,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/import/methoddecl.h>
 #include <pthread.h>
 
 #ifdef __cplusplus
@@ -256,10 +257,6 @@ static KMETHOD Cond_broadcast(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 // --------------------------------------------------------------------------
-
-#define _Public   kMethod_Public
-#define _Static   kMethod_Static
-#define _F(F)   (intptr_t)(F)
 
 #define KType_Thread cThread->typeId
 #define KType_Mutex  cMutex->typeId

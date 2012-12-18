@@ -24,6 +24,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/import/methoddecl.h>
 
 #include <unistd.h>
 #include <pthread.h>
@@ -544,12 +545,6 @@ static void MODEVENT_Init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace
 }
 
 /* ------------------------------------------------------------------------ */
-
-#define _Public   kMethod_Public
-#define _Static   kMethod_Static
-#define _Const    kMethod_Const
-#define _Im       kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
 
 #define KType_Event cEvent->typeId
 #define KType_HttpEventListener cHttpEventListener->typeId
