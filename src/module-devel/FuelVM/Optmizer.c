@@ -132,6 +132,7 @@ static void ReplaceOldValueWith(INode *Node, INode *oldVal, INode *newVal)
 
 static void IRBuilder_ReplaceValueWith(FuelIRBuilder *builder, INode *oldVal, INode *newVal)
 {
+	oldVal->Unused = 1;
 	BlockPtr *x, *e;
 	FOR_EACH_ARRAY(builder->Blocks, x, e) {
 		INodePtr *Inst, *End;
@@ -223,6 +224,7 @@ static INode *SimplifyIBinary(FuelIRBuilder *builder, enum BinaryOp Op, IConstan
 								SoftwareFault, NULL, trace->baseStack);
 					}
 					ret = Div_int_int(LHS->Value, RHS->Value);
+					break;
 				}
 				CASE(Mod);
 				CASE(LShift); CASE(RShift); CASE(And); CASE(Or); CASE(Xor);
@@ -233,6 +235,30 @@ static INode *SimplifyIBinary(FuelIRBuilder *builder, enum BinaryOp Op, IConstan
 				break;
 			}
 			return (INode *) builder->API->newConstant(builder, TYPE_int, ret);
+		}
+	}
+	if(ToINode(LHS)->Type == TYPE_float) {
+		if(ToINode(RHS)->Type == TYPE_float) {
+			switch(Op) {
+#define CASE(X) case X: ret = X##_float_float(LHS->Value, RHS->Value); break
+				CASE(Add); CASE(Sub); CASE(Mul);
+				case Div: {
+					if(unlikely(RHS->Value.ival == 0)) {
+						KonohaContext *kctx = builder->Context;
+						KBaseTrace(trace);
+						KLIB KRuntime_raise(kctx, KException_("ZeroDivided"),
+								SoftwareFault, NULL, trace->baseStack);
+					}
+					ret = Div_float_float(LHS->Value, RHS->Value);
+					break;
+				}
+				CASE(Eq); CASE(Nq); CASE(Gt); CASE(Ge); CASE(Lt); CASE(Le);
+#undef CASE
+				default:
+				assert(0 && "unreachable");
+				break;
+			}
+			return (INode *) builder->API->newConstant(builder, TYPE_float, ret);
 		}
 	}
 	return NULL;

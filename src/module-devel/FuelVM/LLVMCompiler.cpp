@@ -24,6 +24,7 @@
 #include "FuelVM.h"
 #include "LLVMType.h"
 
+#define USE_LLVMIR_DUMP 1
 using namespace llvm;
 
 typedef struct LLVMIRBuilder {
@@ -67,7 +68,6 @@ static const char *ConstructMethodName(KonohaContext *kctx, kMethod *mtd, KBuffe
 			KClass_text(kclass), KMethodName_Fmt2(mtd->mn), suffix);
 	return KLIB KBuffer_text(kctx, wb, EnsureZero);
 }
-
 
 static Value *EmitConstant(IRBuilder<> *builder, bool bval)
 {
@@ -164,7 +164,6 @@ static void SetBlock(LLVMIRBuilder *writer, Block *Target, BasicBlock *BB)
 static void SetConstant(LLVMIRBuilder *writer, INode *Node, SValue Val)
 {
 	enum TypeId Type = Node->Type;
-	//unsigned Id = NODE_ID(Node);
 
 	IRBuilder<> *builder = writer->builder;
 	switch(Type) {
@@ -249,24 +248,53 @@ static Value *PrepareCallStack(LLVMIRBuilder *writer, Value *Vsfp)
 	return Vstack_top;
 }
 
-static void StoreValueToStack(IRBuilder<> *builder, KClass *ct, int Idx, Value *Vsfp, Value *V, const char *Name = "")
+static Value *PrepareCallStack(LLVMIRBuilder *writer, Value *Vsfp, unsigned ParamSize)
 {
-	int fieldIdx = KClass_Is(UnboxType, ct) ?
+	Value *Vstack_top = PrepareCallStack(writer, Vsfp);
+	Vstack_top = ShiftStack(writer, Vstack_top, ParamSize);
+	return Vstack_top;
+}
+
+static bool IsUnboxType(KClass *ct, Type *Type)
+{
+	if(KClass_Is(UnboxType, ct)) {
+		if(ct->typeId == KType_0 && Type->isPointerTy())
+			return false;
+		return true;
+	}
+	return false;
+}
+
+static void StoreValueToStack(IRBuilder<> *builder, KClass *ct, Type *ReqTy, int Idx, Value *Vsfp, Value *V, const char *Name = "")
+{
+	int fieldIdx = IsUnboxType(ct, ReqTy) ?
 		KonohaValueVar_unboxValue : KonohaValueVar_asObject;
 	Value *Dst = builder->CreateConstInBoundsGEP2_32(Vsfp, Idx, fieldIdx, Name);
-	if(V->getType() == Type::getInt1Ty(LLVM_CONTEXT())) {
+	if(V->getType() == builder->getInt1Ty()) {
 		V = builder->CreateZExt(V, GetLLVMType(ID_long));
+	} else if(V->getType() == builder->getDoubleTy()) {
+		Type *Ty = PointerType::get(builder->getDoubleTy(), 0);
+		Dst = builder->CreateBitCast(Dst, Ty);
 	}
 	builder->CreateStore(V, Dst, false);
 }
 
-static Value *LoadValueFromStack(IRBuilder<> *builder, KClass *ct, int Idx, Value *Vsfp)
+static Value *LoadValueFromStack(IRBuilder<> *builder, KClass *ct, Type *ReqTy, int Idx, Value *Vsfp)
 {
-	int fieldIdx = KClass_Is(UnboxType, ct) ?
+	int fieldIdx = IsUnboxType(ct, ReqTy) ?
 		KonohaValueVar_unboxValue : KonohaValueVar_asObject;
 	Value *Src = builder->CreateConstInBoundsGEP2_32(Vsfp, Idx, fieldIdx);
+	if(ReqTy == builder->getDoubleTy()) {
+		Type *Ty = PointerType::get(builder->getDoubleTy(), 0);
+		Src = builder->CreateBitCast(Src, Ty);
+	}
 	return builder->CreateLoad(Src);
 }
+
+//static void check(KonohaStack *sfp, KonohaStack *top)
+//{
+//	asm volatile("int3");
+//}
 
 static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::vector<Value *> &List)
 {
@@ -281,17 +309,30 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 
 	kParam *params = kMethod_GetParam(method);
 
+	/* stack_top[-4].uline */
 	uint64_t uline = Inst->uline;
-	StoreValueToStack(builder, KClass_Int, K_RTNIDX, Vtop, EmitConstant(builder, uline), "uline");
-	StoreValueToStack(builder, KClass_Int, K_MTDIDX, Vtop,
+	StoreValueToStack(builder, KClass_Int, getLongTy(), K_RTNIDX, Vtop,
+			EmitConstant(builder, uline), "uline");
+
+	/* stack_top[-4].defaultObject */
+	KClass *NullType = KClass_(Inst->base.Type);
+	kObject *DefObj  = KLIB Knull(kctx, NullType);
+	Value *DefObjPtr = EmitConstant(builder, DefObj);
+	StoreValueToStack(builder, KClass_Object, convert_type(kctx, KClass_Object),
+			K_RTNIDX, Vtop, DefObjPtr, "default");
+
+	/* stack_top[-2].calledMethod */
+	StoreValueToStack(builder, KClass_Int, getLongTy(), K_MTDIDX, Vtop,
 			builder->CreateBitCast(MtdPtr, GetLLVMType(ID_long), "Method"));
-	StoreValueToStack(builder, KClass_(method->typeId), 0, Vtop, List[0], "receiver");
+
+	/* stack_top[0..List.size()] */
+	StoreValueToStack(builder, KClass_(method->typeId), List[0]->getType(),
+			0, Vtop, List[0], "receiver");
 	for(unsigned i = 1; i < params->psize+1; ++i) {
 		ktypeattr_t type = params->paramtypeItems[i-1].attrTypeId;
 		Value *V = List[i];
-		StoreValueToStack(builder, KClass_(type), i, Vtop, V);
+		StoreValueToStack(builder, KClass_(type), V->getType(), i, Vtop, V);
 	}
-
 
 	Value *FuncPtr;
 	if(method->SourceToken->text == 0) {/* method is maybe 'Native' Method. */
@@ -301,11 +342,29 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 		FuncPtr = builder->CreateStructGEP(MtdPtr, kMethodVar_invokeKMethodFunc);
 		FuncPtr = builder->CreateLoad(FuncPtr);
 	}
-	RestoreStackTop(writer, Vtop);
+
+	RestoreStackTop(writer, PrepareCallStack(writer, Vsfp, List.size()));
+
+#if 0
+	{
+		GlobalVariable *G;
+		if((G = GlobalModule->getNamedGlobal("check")) == 0) {
+			std::vector<Type *> Fields;
+			Fields.push_back(GetLLVMType(ID_PtrKonohaValueVar));
+			Fields.push_back(GetLLVMType(ID_PtrKonohaValueVar));
+			FunctionType *FnTy = FunctionType::get(Type::getVoidTy(LLVM_CONTEXT()), Fields, false);
+			G = new GlobalVariable(*GlobalModule, FnTy, true,
+					GlobalValue::ExternalLinkage, NULL, "check");
+		}
+		GlobalEngine->addGlobalMapping(G, (void *) check);
+		builder->CreateCall2(G, Vsfp, Vtop);
+	}
+#endif
+
 	builder->CreateCall2(FuncPtr, Vctx, Vtop);
 
 	KClass *RetTy = kMethod_GetReturnType(method);
-	Value *Ret = LoadValueFromStack(builder, RetTy, K_RTNIDX, Vtop);
+	Value *Ret = LoadValueFromStack(builder, RetTy, ToLLVMType(ToINode(Inst)->Type), K_RTNIDX, Vtop);
 	RestoreStackTop(writer, Vsfp);
 	SetValue(writer, ToINode(Inst), Ret);
 }
@@ -337,23 +396,52 @@ static void EmitBranch(LLVMIRBuilder *writer, IBranch *Node)
 	builder->CreateCondBr(Cond, ThenBB, ElseBB);
 }
 
+static void EmitNewInst(LLVMIRBuilder *writer, INew *Node)
+{
+	enum TypeId type = Node->base.Type;
+	uintptr_t conf   = Node->Conf;
+	KonohaContext *kctx = writer->kctx;
+	IRBuilder<> *builder = writer->builder;
+
+	GlobalVariable *G;
+	if((G = GlobalModule->getNamedGlobal("new_kObject")) == 0) {
+		std::vector<Type *> Fields;
+		Fields.push_back(GetLLVMType(ID_PtrKonohaContextVar));
+		Fields.push_back(builder->getInt64Ty());
+		Fields.push_back(builder->getInt8PtrTy());
+		Fields.push_back(builder->getInt64Ty());
+		FunctionType *FnTy = FunctionType::get(GetLLVMType(ID_PtrkObjectVar), Fields, false);
+		G = new GlobalVariable(*GlobalModule, FnTy, true,
+				GlobalValue::ExternalLinkage, NULL, "new_kObject");
+		GlobalEngine->addGlobalMapping(G, (void *) KLIB new_kObject);
+	}
+
+	/* kObject *new_kObject(KonohaContext *, uint64_t, void *, uint64_t); */
+	Value *Vctx = GetContext(writer);
+	Value *Arg1 = EmitConstant(builder, (int64_t)0UL);
+	Value *Arg2 = EmitConstant(builder, (void *) KClass_(type));
+	Value *Arg3 = EmitConstant(builder, (uint64_t)conf);
+	Value *Ret = builder->CreateCall4(G, Vctx, Arg1, Arg2, Arg3);
+	SetValue(writer, (INode *)Node, Ret);
+}
+
 static void EmitUnaryInst(LLVMIRBuilder *writer, IUnary *Node)
 {
 	Value *Val = GetValue(writer, Node->Node);
 #define VSET(WRITER, NODE, FUNC) SetValue(WRITER, (INode *)NODE, (WRITER)->builder->FUNC)
 
 	enum TypeId Type = Node->base.Type;
-	assert(Type == TYPE_int);
 #define CASE(X, OP) case X: VSET(writer, Node, Create##OP(Val, #X));return
 	if(Type == TYPE_int) {
-		switch(Op) {
+		switch(Node->Op) {
 			CASE(Not, Not); CASE(Neg, Neg);
 			default:
 				assert(0 && "unreachable");
 				break;
 		}
 	} else if(Type == TYPE_float) {
-		switch(Op) {
+		switch(Node->Op) {
+			CASE(Neg, FNeg);
 			default:
 			assert(0 && "unreachable");
 			break;
@@ -394,6 +482,12 @@ static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 #undef CASE
 }
 
+static void EmitThrowInst(LLVMIRBuilder *writer, IThrow *Node)
+{
+	assert(0 && "TODO");
+}
+
+
 #define CASE(KIND) case IR_TYPE_##KIND:
 
 static void EmitNode(LLVMIRBuilder *writer, INode *Node)
@@ -404,7 +498,7 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 			break;
 		}
 		CASE(INew) {
-			assert(0 && "TODO");
+			EmitNewInst(writer, (INew *) Node);
 			break;
 		}
 		CASE(ICall) {
@@ -463,7 +557,7 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 			break;
 		}
 		CASE(IThrow) {
-			assert(0 && "TODO");
+			EmitThrowInst(writer, (IThrow *) Node);
 			break;
 		}
 		CASE(ITry) {
@@ -597,16 +691,18 @@ static Function *EmitFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Func
 
 	std::vector<Value *> Params;
 	Params.push_back(Vctx);
-	Params.push_back(LoadValueFromStack(builder, KClass_(mtd->typeId), 0, Vsfp));
+	KClass *kclass = KClass_(mtd->typeId);
+	Params.push_back(LoadValueFromStack(builder, kclass, convert_type(kctx, kclass), 0, Vsfp));
 	for(unsigned i = 0; i < params->psize; ++i) {
 		ktypeattr_t type = params->paramtypeItems[i].attrTypeId;
-		Value *V = LoadValueFromStack(builder, KClass_(type), i+1, Vsfp);
+		kclass = KClass_(type);
+		Value *V = LoadValueFromStack(builder, kclass, convert_type(kctx, kclass), i+1, Vsfp);
 		Params.push_back(V);
 	}
 	KClass *RetTy = kMethod_GetReturnType(mtd);
 	Value *Ret = builder->CreateCall(Func, Params);
 	if(RetTy != KClass_void) {
-		StoreValueToStack(builder, RetTy, K_RTNIDX, Vsfp, Ret);
+		StoreValueToStack(builder, RetTy, convert_type(kctx, RetTy), K_RTNIDX, Vsfp, Ret);
 	}
 	builder->CreateRetVoid();
 	KLIB KBuffer_Free(&wb);
@@ -671,7 +767,10 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 	pm.run(*Wrapper);
 	pm.run(*writer.Func);
 
+#ifdef USE_LLVMIR_DUMP
 	writer.Func->dump();
+	//Wrapper->dump();
+#endif
 	void *f = GlobalEngine->getPointerToFunction(Wrapper);
 	return (ByteCode *) f;
 }

@@ -100,8 +100,9 @@ enum IRType {
 struct INode {
 	enum IRType Kind;
 	enum TypeId Type;
-	unsigned Id:31;
+	unsigned Id:30;
 	unsigned Marked:1;
+	unsigned Unused:1;
 	intptr_t range_begin;
 	intptr_t range_end;
 };

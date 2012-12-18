@@ -2,6 +2,7 @@
 #include <llvm/Module.h>
 #include <llvm/Type.h>
 #include <llvm/DerivedTypes.h>
+#include "vmcommon.h"
 
 #ifndef LLVMTYPE_H
 #define LLVMTYPE_H
@@ -206,6 +207,18 @@ static llvm::Type *convert_type(KonohaContext *kctx, ktypeattr_t type)
 	}
 	if(FloatIsDefined() && type == KType_float)
 		return llvm::Type::getDoubleTy(LLVM_CONTEXT());
+	return LLVMTYPE_ObjectPtr;
+}
+
+static llvm::Type *ToLLVMType(enum TypeId type)
+{
+	switch (type) {
+		case TYPE_void:    return llvm::Type::getVoidTy(LLVM_CONTEXT());
+		case TYPE_boolean: return getLongTy();
+		case TYPE_int:     return getLongTy();
+		case TYPE_float:   return llvm::Type::getDoubleTy(LLVM_CONTEXT());
+		default: break;
+	}
 	return LLVMTYPE_ObjectPtr;
 }
 

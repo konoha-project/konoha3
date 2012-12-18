@@ -258,6 +258,9 @@ static inline bool INode_IsMarked(INode *Node)
 
 static void TraceNode1(INode *Node)
 {
+	if(Node->Unused) {
+		return;
+	}
 #define CASE(KIND) case IR_TYPE_##KIND:
 	switch(Node->Kind) {
 		case IR_TYPE_IConstant:
@@ -371,6 +374,9 @@ static void TraceNode1(INode *Node)
 static void TraceNode2(INode *Node)
 {
 	IUpdate *Inst;
+	if(Node->Unused) {
+		return;
+	}
 	if(INode_IsMarked(Node)) {
 		return;
 	}
