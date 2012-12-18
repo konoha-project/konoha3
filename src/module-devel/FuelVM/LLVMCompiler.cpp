@@ -717,6 +717,7 @@ static void EmitPrologue(LLVMIRBuilder *writer, FuelIRBuilder *builder, IMethod 
 	EntryBB = BasicBlock::Create(getGlobalContext(), "EntryBlock", writer->Func);
 	writer->builder = new IRBuilder<>(EntryBB);
 
+	SetBlock(writer, Mtd->EntryBlock, EntryBB);
 	BlockPtr *x, *e;
 	FOR_EACH_ARRAY(builder->Blocks, x, e) {
 		if(x == ARRAY_n(builder->Blocks, 0)) {
@@ -739,15 +740,17 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 		Mtd->Context,
 		0, 0, 0, 0, 0, 0, 0
 	};
-	EmitPrologue(&writer, builder, Mtd);
 
 	std::vector<Value *> ValueTable(builder->LastNodeId);
 
 	writer.ValueTable = &ValueTable;
 
+	EmitPrologue(&writer, builder, Mtd);
 	BlockPtr *x, *e;
 	FOR_EACH_ARRAY(builder->Blocks, x, e) {
 		writer.Current = *x;
+		BasicBlock *BB = GetBlock(&writer, *x);
+		writer.builder->SetInsertPoint(BB);
 		INodePtr *Inst, *End;
 		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
 			visitINode(&writer.visitor, *Inst);
