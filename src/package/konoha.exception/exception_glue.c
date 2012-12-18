@@ -239,7 +239,7 @@
 //static kStmt *Stmt_LookupTryOrCatchStmtNULL(KonohaContext *kctx, kStmt *stmt)
 //{
 //	int i;
-//	kArray *bka = stmt->parentBlockNULL->StmtList;
+//	kArray *bka = stmt->parentBlockNULL->NodeList;
 //	ksymbol_t trySym = KSymbol_("try");
 //	ksymbol_t catchSym = KSymbol_("catch");
 //	for(i = 0; kArray_size(bka); i++) {

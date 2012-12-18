@@ -104,8 +104,8 @@ static void kStmt_appendBlock(KonohaContext *kctx, kStmt *stmt, kBlock *bk)
 	if(bk != NULL) {
 		kBlock *block = SUGAR kStmt_GetBlock(kctx, stmt, Stmt_ns(stmt), KSymbol_BlockPattern, NULL);
 		size_t i;
-		for(i = 0; i < kArray_size(bk->StmtList); i++) {
-			KLIB kArray_Add(kctx, block->StmtList, bk->StmtList->StmtItems[i]);
+		for(i = 0; i < kArray_size(bk->NodeList); i++) {
+			KLIB kArray_Add(kctx, block->NodeList, bk->NodeList->StmtItems[i]);
 		}
 	}
 }
@@ -131,7 +131,7 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 			kStmt_SetObject(kctx, stmt, KSymbol_ExprPattern, IteratorExpr);
 		}
 		kBlock *block = new_MacroBlock(kctx, stmt, new_TypeToken(kctx, ns, KClass_(IteratorExpr->attrTypeId)), new_ParsedExprToken(kctx, ns, IteratorExpr), TypeToken, VariableToken);
-		kStmt *IfStmt = block->StmtList->StmtItems[1]; // @see macro;
+		kStmt *IfStmt = block->NodeList->StmtItems[1]; // @see macro;
 		kStmt_appendBlock(kctx, IfStmt, SUGAR kStmt_GetBlock(kctx, stmt, ns, KSymbol_BlockPattern, NULL));
 		kStmt_Set(CatchBreak, IfStmt, true);
 		kStmt_Set(CatchContinue, IfStmt, true);

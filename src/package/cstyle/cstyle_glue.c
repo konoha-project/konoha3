@@ -26,6 +26,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/klib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -268,7 +269,7 @@ static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
-	kToken *termToken = expr->termToken;
+	kToken *termToken = expr->TermToken;
 	DBG_ASSERT(kExpr_IsTerm(expr) && IS_Token(termToken));
 	if(termToken->unresolvedTokenType == TokenType_CODE) {
 		SUGAR kToken_ToBraceGroup(kctx, (kTokenVar *)termToken, Stmt_ns(stmt), NULL);
@@ -285,7 +286,7 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 		else {
 			requestClass = NULL; // undefined
 		}
-		for(i = 2; i < kArray_size(arrayExpr->cons); i++) {
+		for(i = 2; i < kArray_size(arrayExpr->NodeList); i++) {
 			kExpr *typedExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, arrayExpr, i, gma, paramType, 0);
 			if(typedExpr == K_NULLEXPR) {
 				KReturn(typedExpr);
@@ -300,8 +301,8 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), KClass_Array, KKMethodName_("{}"), -1, KMethodMatch_NoOption);
 		DBG_ASSERT(mtd != NULL);
-		KFieldSet(arrayExpr, arrayExpr->cons->MethodItems[0], mtd);
-		KFieldSet(arrayExpr, arrayExpr->cons->ExprItems[1], SUGAR kExpr_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, kArray_size(arrayExpr->cons) - 2));
+		KFieldSet(arrayExpr, arrayExpr->NodeList->MethodItems[0], mtd);
+		KFieldSet(arrayExpr, arrayExpr->NodeList->ExprItems[1], SUGAR kExpr_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, kArray_size(arrayExpr->NodeList) - 2));
 		KReturn(Expr_typed(arrayExpr, TEXPR_CALL, requestClass->typeId));
 	}
 }
@@ -348,7 +349,7 @@ static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
-	kToken *tk = expr->termToken;
+	kToken *tk = expr->TermToken;
 	if(kString_size(tk->text) == 1) {
 		int ch = kString_text(tk->text)[0];
 		KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_int, ch));
@@ -648,7 +649,7 @@ static kint_t kstrtoll(const char *p)
 static KMETHOD TypeCheck_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
-	kToken *tk = expr->termToken;
+	kToken *tk = expr->TermToken;
 	long long n = kstrtoll(kString_text(tk->text));
 	KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_int, (uintptr_t)n));
 }

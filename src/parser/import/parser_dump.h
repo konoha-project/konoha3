@@ -111,19 +111,19 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 		}
 		else if(kExpr_IsTerm(expr)) {
 			DUMP_P("[%d] TermToken: ", n);
-			dumpToken(kctx, expr->termToken, -1);
+			dumpToken(kctx, expr->TermToken, -1);
 		}
 		else {
 			if(expr->syn == NULL) {
-				DUMP_P("[%d] Expr: kw=NULL, size=%ld", n, kArray_size(expr->cons));
-				DBG_ASSERT(IS_Array(expr->cons));
+				DUMP_P("[%d] Expr: kw=NULL, size=%ld", n, kArray_size(expr->NodeList));
+				DBG_ASSERT(IS_Array(expr->NodeList));
 			}
 			else {
-				DUMP_P("[%d] Expr: kw='%s%s', syn=%p, size=%ld", n, KSymbol_Fmt2(expr->syn->keyword), expr->syn, kArray_size(expr->cons));
+				DUMP_P("[%d] Expr: kw='%s%s', syn=%p, size=%ld", n, KSymbol_Fmt2(expr->syn->keyword), expr->syn, kArray_size(expr->NodeList));
 				DUMP_P("\n");
 				size_t i;
-				for(i=0; i < kArray_size(expr->cons); i++) {
-					kObject *o = expr->cons->ObjectItems[i];
+				for(i=0; i < kArray_size(expr->NodeList); i++) {
+					kObject *o = expr->NodeList->ObjectItems[i];
 					if(IS_Expr(o)) {
 						dumpExpr(kctx, i, nest+1, (kExpr *)o);
 					}

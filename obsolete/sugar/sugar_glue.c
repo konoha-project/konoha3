@@ -565,14 +565,14 @@ static KMETHOD Stmt_Message2rintError(KonohaContext *kctx, KonohaStack *sfp)
 //## int Stmt.getBuild();
 static KMETHOD Stmt_getBuild(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturnUnboxValue(sfp[0].asStmt->build);
+	KReturnUnboxValue(sfp[0].asStmt->node);
 }
 
 //## void Stmt.setBuild(int buildid);
 static KMETHOD Stmt_setBuild(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStmtVar *stmt = (kStmtVar *) sfp[0].asStmt;
-	stmt->build = sfp[1].intValue;
+	stmt->node = sfp[1].intValue;
 }
 
 //## Block Stmt.getBlock(symbol key, Block def);
@@ -800,7 +800,7 @@ static KMETHOD Stmt_newBlock(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Expr_getTermToken(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kExpr *expr = sfp[0].asExpr;
-	KReturn(expr->termToken);
+	KReturn(expr->TermToken);
 }
 
 //## Expr Expr.setConstValue(Object value);
@@ -819,7 +819,7 @@ static KMETHOD Expr_setVariable(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kExprVar *expr = (kExprVar *) sfp[0].asExpr;
 	kGamma *gma    = sfp[1].asGamma;
-	kexpr_t build  = (kexpr_t)sfp[2].intValue;
+	knode_t build  = (knode_t)sfp[2].intValue;
 	ktypeattr_t cid    = (ktypeattr_t)sfp[3].intValue;
 	intptr_t index = sfp[4].unboxValue;
 	KReturn(SUGAR kExpr_SetVariable(kctx, expr, gma, build, cid, index));
@@ -829,7 +829,7 @@ static KMETHOD Expr_setVariable(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Expr_newVariableExpr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kGamma *gma    = sfp[1].asGamma;
-	kexpr_t build  = (kexpr_t)sfp[2].intValue;
+	knode_t build  = (knode_t)sfp[2].intValue;
 	ktypeattr_t cid    = (ktypeattr_t)sfp[3].intValue;
 	intptr_t index = sfp[4].unboxValue;
 	KReturn(new_VariableExpr(kctx, gma, build, cid, index));
@@ -849,9 +849,9 @@ static KMETHOD Expr_new(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Expr_setType(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kExprVar *expr = (kExprVar *)sfp[0].asExpr;
-	kexpr_t build  = (kexpr_t)sfp[1].intValue;
+	knode_t build  = (knode_t)sfp[1].intValue;
 	ktypeattr_t cid    = (ktypeattr_t)sfp[2].intValue;
-	expr->build = build;
+	expr->node = build;
 	expr->attrTypeId = cid;
 	KReturnVoid();
 }
@@ -922,7 +922,7 @@ static KMETHOD Gamma_declareLocalVariable(KonohaContext *kctx, KonohaStack *sfp)
 //	assert(tk->keyword != 0);
 //	kExprVar *expr = /*G*/new_(ExprVar, KSyntax_(Stmt_ns(stmt), tk->keyword));
 //	KFieldSet(expr, expr->tk, tk);
-//	KFieldSet(expr, expr->cons, new_(Array, 8));
+//	KFieldSet(expr, expr->NodeList, new_(Array, 8));
 //	KReturn(expr);
 //}
 
@@ -949,11 +949,11 @@ static KMETHOD kExpr_AddExpr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kExpr *expr  = sfp[0].asExpr;
 	kExpr *o     = sfp[1].asExpr;
-	if(IS_NULL(o) && IS_Array(expr->cons)) {
+	if(IS_NULL(o) && IS_Array(expr->NodeList)) {
 		kObject_Set(NullObject, expr, 1);
 	}
 	if(IS_NOTNULL(expr)) {
-		KLIB kArray_Add(kctx, expr->cons, o);
+		KLIB kArray_Add(kctx, expr->NodeList, o);
 	}
 	KReturn(expr);
 }

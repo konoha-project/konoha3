@@ -57,12 +57,12 @@ static kStmt *kStmt_GetStmt(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw)
 
 static kMethod *CallExpr_getMethod(kExpr *expr)
 {
-	return expr->cons->MethodItems[0];
+	return expr->NodeList->MethodItems[0];
 }
 
 static int CallExpr_getArgCount(kExpr *expr)
 {
-	return kArray_size(expr->cons) - 2;
+	return kArray_size(expr->NodeList) - 2;
 }
 
 static kString *Stmt_getErrorMessage(KonohaContext *kctx, kStmt *stmt)
@@ -363,7 +363,7 @@ static bool FuelVM_VisitUndefinedStmt(KonohaContext *kctx, KBuilder *builder, kS
 
 static void FuelVM_VisitConstExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
-	kObject *v = expr->objectConstValue;
+	kObject *v = expr->ObjectConstValue;
 	DBG_ASSERT(!KType_Is(UnboxType, expr->attrTypeId));
 	DBG_ASSERT(kExpr_HasObjectConstValue(expr));
 	builder->Value = CreateObject(BLD(builder), expr->attrTypeId, (void *)v);
@@ -437,7 +437,7 @@ static void FuelVM_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt *
 
 	/*
 	 * [CallExpr] := this.method(arg1, arg2, ...)
-	 * expr->cons = [method, this, arg1, arg2, ...]
+	 * expr->NodeList = [method, this, arg1, arg2, ...]
 	 **/
 	INode *Inst;
 	if((Inst = CreateSpecialInstruction(kctx, builder, mtd, stmt, expr)) != 0) {
@@ -526,13 +526,13 @@ static void FuelVM_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt *s
 {
 	/*
 	 * [LetExpr] := lhs = rhs
-	 * expr->cons = [NULL, lhs, rhs]
+	 * expr->NodeList = [NULL, lhs, rhs]
 	 **/
 
 	kExpr *leftHandExpr = kExpr_At(expr, 1);
 	kExpr *rightHandExpr = kExpr_At(expr, 2);
 	INode *Node;
-	if(leftHandExpr->build == TEXPR_LOCAL) {
+	if(leftHandExpr->node == TEXPR_LOCAL) {
 		enum TypeId type = ConvertToTypeId(kctx, leftHandExpr->attrTypeId);
 		if((Node = IRBuilder_FindLocalVarByHash(BLD(builder), type, leftHandExpr->index)) == 0) {
 			Node = CreateLocal(BLD(builder), type);
@@ -541,12 +541,12 @@ static void FuelVM_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt *s
 		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
 		CreateUpdate(BLD(builder), Node, FuelVM_getExpression(builder));
 	}
-	else if(leftHandExpr->build == TEXPR_STACKTOP) {
+	else if(leftHandExpr->node == TEXPR_STACKTOP) {
 		assert(0 && "TODO");
 		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
 	}
 	else{
-		assert(leftHandExpr->build == TEXPR_FIELD);
+		assert(leftHandExpr->node == TEXPR_FIELD);
 		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
 		kshort_t index  = (kshort_t)leftHandExpr->index;
 		kshort_t xindex = (kshort_t)(leftHandExpr->index >> (sizeof(kshort_t)*8));

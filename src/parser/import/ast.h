@@ -30,7 +30,6 @@
 extern "C" {
 #endif
 
-
 /* ------------------------------------------------------------------------ */
 
 static kExpr *CallExpressionFunc(KonohaContext *kctx, KSyntax *syn, kFunc *fo, int *countRef, kStmt *stmt, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx)
@@ -847,8 +846,13 @@ static kbool_t kBlock_AddNewStmt(KonohaContext *kctx, kBlock *bk, KTokenSeq *tok
 	currentIdx = KTokenSeq_SkipAnnotation(kctx, tokens, currentIdx);
 	if(currentIdx < tokens->endIdx) {
 		int indent = 0;
-		kStmtVar *stmt = new_(StmtVar, 0, bk->StmtList);
+#ifdef USE_NODE
+		kStmtVar *stmt = new_StmtNode(kctx, NULL/*FIXME*/);
+		KFieldInit(stmt, stmt->parentNULL, bk);
+#else
+		kStmtVar *stmt = new_(StmtVar, 0, bk->NodeList);
 		KFieldInit(stmt, stmt->parentBlockNULL, bk);
+#endif
 		kStmt_AddAnnotation(kctx, stmt, tokens, tokens->beginIdx, &indent);
 		if(stmt->uline == 0) {
 			stmt->uline = tokens->tokenList->TokenItems[currentIdx]->uline;
@@ -866,10 +870,17 @@ static kbool_t kBlock_AddNewStmt(KonohaContext *kctx, kBlock *bk, KTokenSeq *tok
 
 static kBlock *new_kBlock(KonohaContext *kctx, kStmt *parent, KMacroSet *macro, KTokenSeq *source)
 {
+#ifdef USE_NODE
+	kBlockVar *bk = new_BlockNode(kctx, source->ns);
+	if(parent != NULL) {
+		KFieldInit(bk, bk->parentNULL, parent);
+	}
+#else
 	kBlockVar *bk = /*G*/new_(BlockVar, source->ns, OnGcStack);
 	if(parent != NULL) {
 		KFieldInit(bk, bk->parentStmtNULL, parent);
 	}
+#endif
 	KTokenSeq tokens = {source->ns, source->tokenList, kArray_size(source->tokenList)};
 	source->SourceConfig.openToken = NULL;
 	source->SourceConfig.stopChar = 0;
@@ -893,7 +904,7 @@ static kBlock* kStmt_GetBlock(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, 
 		if(tk->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
 			KTokenSeq range = {ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
 			bk = new_kBlock(kctx, stmt, NULL, &range);
-			KLIB kObjectProto_SetObject(kctx, stmt, kw, KType_Block, bk);
+			KLIB kObjectProto_SetObject(kctx, stmt, kw, kObject_typeId(bk), bk);
 		}
 	}
 	return (IS_Block(bk)) ? bk : def;

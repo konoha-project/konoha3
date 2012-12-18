@@ -232,7 +232,7 @@ static kbool_t map_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 static KMETHOD TypeCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
-	kToken *termToken = expr->termToken;
+	kToken *termToken = expr->TermToken;
 	if(kExpr_IsTerm(expr) && IS_Token(termToken)) {
 		DBG_P("termToken='%s'", kString_text(termToken->text));
 

@@ -43,16 +43,16 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
 		result = false;
-		if(constExpr->build == TEXPR_NULL) {   // const C = String
+		if(constExpr->node == TEXPR_NULL) {   // const C = String
 			type = VirtualType_KClass;
 			unboxValue = (uintptr_t)constClass;
 			result = true;
 		}
-		else if(constExpr->build == TEXPR_CONST) {   // const C = "1"
-			unboxValue = (uintptr_t)constExpr->objectConstValue;
+		else if(constExpr->node == TEXPR_CONST) {   // const C = "1"
+			unboxValue = (uintptr_t)constExpr->ObjectConstValue;
 			result = true;
 		}
-		else if(constExpr->build == TEXPR_NCONST) {  // const c = 1
+		else if(constExpr->node == TEXPR_NCONST) {  // const c = 1
 			unboxValue = constExpr->unboxConstValue;
 			result = true;
 		}

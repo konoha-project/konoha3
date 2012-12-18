@@ -24,9 +24,14 @@
 
 /* ************************************************************************ */
 
+//#define USE_NODE  1
+
 #define USING_SUGAR_AS_BUILTIN 1
 #define USE_AsciiToKonohaChar
+
+#include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/klib.h>
 
 /* ************************************************************************ */
 
@@ -148,6 +153,13 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	defToken.reftrace = kToken_Reftrace;
 	defToken.p = kToken_p;
 
+#ifdef USE_NODE
+	KDEFINE_CLASS defNode = {0};
+	SETSTRUCTNAME(defNode, Node);
+	defNode.init = kNode_Init;
+	defNode.reftrace = kNode_Reftrace;
+	defNode.p        = kNode_p;
+#else
 	KDEFINE_CLASS defExpr = {0};
 	SETSTRUCTNAME(defExpr, Expr);
 	defExpr.init = kExpr_Init;
@@ -164,6 +176,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	SETSTRUCTNAME(defBlock, Block);
 	defBlock.init = kBlock_Init;
 	defBlock.reftrace = kBlock_Reftrace;
+#endif
 
 	KDEFINE_CLASS defGamma = {0};
 	SETSTRUCTNAME(defGamma, Gamma);
@@ -171,17 +184,24 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 
 	mod->cSymbol =    KLIB KClass_define(kctx, PackageId_sugar, NULL, &defSymbol, 0);
 	mod->cToken =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defToken, 0);
+#ifdef USE_NODE
+	mod->cNode  =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defNode, 0);
+#else
 	mod->cExpr  =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defExpr, 0);
 	mod->cStmt  =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defStmt, 0);
 	mod->cBlock =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defBlock, 0);
+#endif
 	mod->cGamma =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defGamma, 0);
 	mod->cTokenArray = KClass_p0(kctx, KClass_Array, mod->cToken->typeId);
 
 	KLIB Knull(kctx, mod->cToken);
+#ifdef USE_NODE
+	KLIB Knull(kctx, mod->cNode);
+#else
 	KLIB Knull(kctx, mod->cExpr);
 	kStmtVar *NullStmt = (kStmtVar *)KLIB Knull(kctx, mod->cStmt);
 	KFieldSet(NullStmt, NullStmt->parentBlockNULL, (kBlock *)KLIB Knull(kctx, mod->cBlock));
-
+#endif
 	SugarModule_Setup(kctx, &mod->h, 0);
 
 	KDEFINE_INT_CONST ClassData[] = {   // minikonoha defined class

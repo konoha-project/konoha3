@@ -35,7 +35,7 @@ extern "C"{
 static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktypeattr_t ty, kExpr *termExpr)
 {
 	DBG_ASSERT(kExpr_isSymbolTerm(termExpr));
-	kToken *termToken = termExpr->termToken;
+	kToken *termToken = termExpr->TermToken;
 	if(Gamma_isTopLevel(gma)) {
 		kNameSpace *ns = Stmt_ns(stmt);
 		if(ns->globalObjectNULL_OnList == NULL) {
@@ -64,7 +64,7 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 		else {
-			KFieldSet(expr->cons, expr->cons->ExprItems[1], texpr);
+			KFieldSet(expr->NodeList, expr->NodeList->ExprItems[1], texpr);
 		}
 	}
 }

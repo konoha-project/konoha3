@@ -468,8 +468,25 @@ typedef struct kNameSpaceVar            kNameSpace;
 typedef struct kNameSpaceVar            kNameSpaceVar;
 
 /* sugar.h */
+
 typedef const struct kTokenVar          kToken;
 typedef struct kTokenVar                kTokenVar;
+
+#ifdef USE_NODE
+typedef const struct kNodeVar           kNode;
+typedef struct kNodeVar                 kNodeVar;
+typedef struct kUNode                   kUNode;
+
+typedef const struct kNodeVar           kExpr;
+typedef struct kNodeVar                 kExprVar;
+typedef const struct kNodeVar           kStmt;
+typedef const struct kNodeVar           kStmtNULL;  // Nullable
+typedef struct kNodeVar                 kStmtVar;
+typedef const struct kNodeVar          kBlock;
+typedef struct kNodeVar                kBlockVar;
+#endif
+
+#ifndef USE_NODE
 typedef const struct kExprVar           kExpr;
 typedef struct kExprVar                 kExprVar;
 typedef const struct kStmtVar           kStmt;
@@ -477,6 +494,8 @@ typedef const struct kStmtVar           kStmtNULL;  // Nullable
 typedef struct kStmtVar                 kStmtVar;
 typedef const struct kBlockVar          kBlock;
 typedef struct kBlockVar                kBlockVar;
+#endif
+
 typedef struct kGammaVar                kGamma;
 typedef struct kGammaVar                kGammaVar;
 
@@ -1961,6 +1980,8 @@ typedef struct {
 extern kbool_t Konoha_LoadScript(KonohaContext* konoha, const char *scriptfile);
 extern kbool_t Konoha_Eval(KonohaContext* konoha, const char *script, kfileline_t uline);
 extern kbool_t Konoha_Run(KonohaContext* konoha);  // TODO
+
+#include"klib.h"
 
 #ifdef __cplusplus
 } /* extern "C" */

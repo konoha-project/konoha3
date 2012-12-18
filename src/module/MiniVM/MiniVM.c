@@ -556,12 +556,12 @@ static kStmt *kStmt_GetStmt(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw)
 
 static kMethod* CallExpr_getMethod(kExpr *expr)
 {
-	return expr->cons->MethodItems[0];
+	return expr->NodeList->MethodItems[0];
 }
 
 static int CallExpr_getArgCount(kExpr *expr)
 {
-	return kArray_size(expr->cons) - 2;
+	return kArray_size(expr->NodeList) - 2;
 }
 
 static kString* Stmt_getErrorMessage(KonohaContext *kctx, kStmt *stmt)
@@ -694,7 +694,7 @@ static kbool_t KBuilder_VisitUndefinedStmt(KonohaContext *kctx, KBuilder *builde
 static void KBuilder_VisitConstExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
 	int a = builder->common.a;
-	kObject *v = expr->objectConstValue;
+	kObject *v = expr->ObjectConstValue;
 	DBG_ASSERT(!KType_Is(UnboxType, expr->attrTypeId));
 	DBG_ASSERT(kExpr_HasObjectConstValue(expr));
 	v = KBuilder_AddConstPool(kctx, builder, v);
@@ -758,7 +758,7 @@ static void KBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 
 	/*
 	 * [CallExpr] := this.method(arg1, arg2, ...)
-	 * expr->cons = [method, this, arg1, arg2, ...]
+	 * expr->NodeList = [method, this, arg1, arg2, ...]
 	 **/
 	int i, a = builder->common.a;
 	int s = kMethod_Is(Static, mtd) ? 2 : 1;
@@ -826,13 +826,13 @@ static void KBuilder_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 
 	/*
 	 * [LetExpr] := lhs = rhs
-	 * expr->cons = [NULL, lhs, rhs]
+	 * expr->NodeList = [NULL, lhs, rhs]
 	 **/
 
 	kExpr *leftHandExpr = kExpr_At(expr, 1);
 	kExpr *rightHandExpr = kExpr_At(expr, 2);
 	//DBG_P("LET (%s) a=%d, shift=%d, espidx=%d", KType_text(expr->attrTypeId), a, shift, espidx);
-	if(leftHandExpr->build == TEXPR_LOCAL) {
+	if(leftHandExpr->node == TEXPR_LOCAL) {
 		builder->common.a = leftHandExpr->index;
 		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
 		builder->common.a = a;
@@ -840,7 +840,7 @@ static void KBuilder_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 			KBuilder_AsmNMOV(kctx, builder, a, KClass_(leftHandExpr->attrTypeId), leftHandExpr->index);
 		}
 	}
-	else if(leftHandExpr->build == TEXPR_STACKTOP) {
+	else if(leftHandExpr->node == TEXPR_STACKTOP) {
 		//DBG_P("LET TEXPR_STACKTOP a=%d, leftHandExpr->index=%d, espidx=%d", a, leftHandExpr->index, espidx);
 		builder->common.a = leftHandExpr->index + shift;
 		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
@@ -850,7 +850,7 @@ static void KBuilder_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 		}
 	}
 	else{
-		assert(leftHandExpr->build == TEXPR_FIELD);
+		assert(leftHandExpr->node == TEXPR_FIELD);
 		builder->common.a = espidx;
 		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
 		builder->common.a = a;

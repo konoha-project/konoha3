@@ -98,23 +98,42 @@ static void kToken_ToError(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglev
 
 static KSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t kw, int isnew);
 
+#ifdef USE_NODE
+static void kStmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
+{
+	if(errmsg != NULL) { // not in case of isBlockedErrorMessage
+		kNodeVar *node = (kNodeVar*)stmt;
+		node->node = KNode_Error;
+		KFieldSet(node, node->ErrorMessage, errmsg);
+		kNode_Set(ObjectConst, node, true);
+		//KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_ERR, KType_String, errmsg);
+	}
+}
+
+static kfileline_t kExpr_uline(KonohaContext *kctx, kExpr *expr, kfileline_t uline)
+{
+	return expr->uline;
+}
+
+#else
+
 static void kStmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {
 	if(errmsg != NULL) { // not in case of isBlockedErrorMessage
 		((kStmtVar *)stmt)->syn   = KSyntax_(Stmt_ns(stmt), KSymbol_ERR);
-		((kStmtVar *)stmt)->build = TSTMT_ERR;
+		((kStmtVar *)stmt)->node = TSTMT_ERR;
 		KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_ERR, KType_String, errmsg);
 	}
 }
 
 static kfileline_t kExpr_uline(KonohaContext *kctx, kExpr *expr, kfileline_t uline)
 {
-	kToken *tk = expr->termToken;
+	kToken *tk = expr->TermToken;
 	DBG_ASSERT(IS_Expr(expr));
 	if(IS_Token(tk) && tk != K_NULLTOKEN && tk->uline >= uline) {
 		return tk->uline;
 	}
-	kArray *a = expr->cons;
+	kArray *a = expr->NodeList;
 	if(a != NULL && IS_Array(a)) {
 		size_t i;
 		for(i=0; i < kArray_size(a); i++) {
@@ -130,6 +149,8 @@ static kfileline_t kExpr_uline(KonohaContext *kctx, kExpr *expr, kfileline_t uli
 	return uline;
 }
 
+#endif
+
 static kExpr* kStmt_Message2(KonohaContext *kctx, kStmt *stmt, kToken *tk, kinfotag_t taglevel, const char *fmt, ...)
 {
 	va_list ap;
@@ -139,9 +160,9 @@ static kExpr* kStmt_Message2(KonohaContext *kctx, kStmt *stmt, kToken *tk, kinfo
 		if(IS_Token(tk)) {
 			uline = tk->uline;
 		}
-		else if(IS_Expr(tk)) {
-			uline = kExpr_uline(kctx, (kExpr *)tk, uline);
-		}
+//		else if(IS_Expr(tk)) {
+//			uline = kExpr_uline(kctx, (kExpr *)tk, uline);
+//		}
 	}
 	kString *errmsg = KParserContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
 	if(taglevel <= ErrTag && !kStmt_IsERR(stmt)) {
