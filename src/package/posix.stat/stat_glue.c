@@ -33,7 +33,6 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/import/methoddecl.h>
-#define _Iter     kMethod_Iterative
 
 #ifdef __cplusplus
 extern "C"{
@@ -43,11 +42,11 @@ extern "C"{
 #define K_PATHMAX 1024
 #endif
 
-#define LogFileName(S)     LogText("filename", S)
-#define LogFileName2(S)    LogText("filename2", S)  // adhoc..
-#define LogMode(mode)      LogUint("mode", mode)
-#define LogOwner(o)        LogUint("owner", o)
-#define LogGroup(o)        LogUint("group", o)
+//#define LogFileName(S)     LogText("filename", S)
+//#define LogFileName2(S)    LogText("filename2", S)  // adhoc..
+//#define LogMode(mode)      LogUint("mode", mode)
+//#define LogOwner(o)        LogUint("owner", o)
+//#define LogGroup(o)        LogUint("group", o)
 
 /* ------------------------------------------------------------------------ */
 /* stat */

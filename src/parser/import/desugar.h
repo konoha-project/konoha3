@@ -482,7 +482,7 @@ static kExpr* kStmtExpr_ToSetter(KonohaContext *kctx, kStmt *stmt, kExprVar *exp
 	kNameSpace *ns = Stmt_ns(stmt);  // leftHandExpr = rightHandExpr
 	KClass *c = KClass_(mtd->typeId);
 	kParam *pa = kMethod_GetParam(mtd);
-	int i, psize = pa->psize + 1;
+	kushort_t i, psize = pa->psize + 1;
 	kparamtype_t p[psize];
 	for(i = 0; i < pa->psize; i++) {
 		p[i].attrTypeId = pa->paramtypeItems[i].attrTypeId;

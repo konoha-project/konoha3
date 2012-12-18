@@ -22,7 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#define USE_FILE 1
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>

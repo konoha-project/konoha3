@@ -346,7 +346,7 @@ static void SetKeyValue(KonohaContext *kctx, KKeyValue *kv, ksymbol_t key, ktype
 	}
 }
 
-static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t key, ktypeattr_t ty, uintptr_t unboxValue)
+static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t key, ktypeattr_t ty, uintptr_t unboxValue, int isOverride, KTraceInfo *trace)
 {
 	KKeyValue kvs;
 	SetKeyValue(kctx, &kvs, key, ty, unboxValue);
@@ -434,24 +434,24 @@ static KClass *kNameSpace_DefineClass(KonohaContext *kctx, kNameSpace *ns, kStri
 // ---------------------------------------------------------------------------
 /* Method Management */
 
-static inline long Method_id(kMethod *mtd)
+static inline intptr_t Method_id(kMethod *mtd)
 {
-	long id = mtd->typeId;
+	intptr_t id = mtd->typeId;
 	return (id << (sizeof(kshort_t)*8)) | mtd->mn;
 }
 
 static int comprMethod(const void *a, const void *b)
 {
-	long aid = Method_id(((kMethod**)a)[0]);
-	long bid = Method_id(((kMethod**)b)[0]);
+	intptr_t aid = Method_id(((kMethod**)a)[0]);
+	intptr_t bid = Method_id(((kMethod**)b)[0]);
 	if(aid == bid) return 0;
 	return aid < bid ? -1 : 1;
 }
 
-static void kMethodList_MatchMethod(KonohaContext *kctx, kArray *methodList, const size_t *sorted, ktypeattr_t typeId, KMethodMatchFunc MatchMethod, KMethodMatch *option)
+static void kMethodList_MatchMethod(KonohaContext *kctx, kArray *methodList, const intptr_t *sorted, ktypeattr_t typeId, KMethodMatchFunc MatchMethod, KMethodMatch *option)
 {
-	long i, min = 0, max = sorted[0];
-	long optkey = ((long)typeId << (sizeof(kshort_t)*8)) | option->mn;
+	intptr_t i, min = 0, max = sorted[0];
+	intptr_t optkey = ((intptr_t)typeId << (sizeof(kshort_t)*8)) | option->mn;
 	if(kArray_size(methodList) - max > 8) {
 		max = kArray_size(methodList);
 		PLATAPI qsort_i(methodList->MethodItems, max, sizeof(kMethod *), comprMethod);
@@ -460,7 +460,7 @@ static void kMethodList_MatchMethod(KonohaContext *kctx, kArray *methodList, con
 	while(min < max) {
 		size_t p = (max + min) / 2;
 		kMethod *mtd = methodList->MethodItems[p];
-		long key = Method_id(mtd);
+		intptr_t key = Method_id(mtd);
 		if(key == optkey) {
 			MatchMethod(kctx, mtd, option);
 			i = p - 1;
@@ -486,9 +486,9 @@ static void kMethodList_MatchMethod(KonohaContext *kctx, kArray *methodList, con
 			max = p;
 		}
 	}
-	for(i = sorted[0]; i < kArray_size(methodList); i++) {
+	for(i = sorted[0]; i < (intptr_t) kArray_size(methodList); i++) {
 		kMethod *mtd = methodList->MethodItems[i];
-		long key = Method_id(mtd);
+		intptr_t key = Method_id(mtd);
 		if(key == optkey) {
 			MatchMethod(kctx, mtd, option);
 		}
@@ -500,13 +500,13 @@ static kMethod* kNameSpace_MatchMethodNULL(KonohaContext *kctx, kNameSpace *star
 	while(ct != NULL) {
 		kNameSpace *ns = startNameSpace;
 		while(ns != NULL) {
-			kMethodList_MatchMethod(kctx, ns->methodList_OnList, &ns->sortedMethodList, ct->typeId, MatchMethod, option);
+			kMethodList_MatchMethod(kctx, ns->methodList_OnList, (intptr_t *) &ns->sortedMethodList, ct->typeId, MatchMethod, option);
 			if(option->isBreak) {
 				return option->foundMethodNULL;
 			}
 			ns = ns->parentNULL;
 		}
-		kMethodList_MatchMethod(kctx, ct->classMethodList, &ct->sortedMethodList, ct->typeId, MatchMethod, option);
+		kMethodList_MatchMethod(kctx, ct->classMethodList, (intptr_t *) &ct->sortedMethodList, ct->typeId, MatchMethod, option);
 		if(option->isBreak) {
 			return option->foundMethodNULL;
 		}
@@ -1014,7 +1014,7 @@ static kbool_t kNameSpace_ImportAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 			}
 		}
 		// record imported
-		return kNameSpace_SetConstData(kctx, ns, packageNS->packageId | KSymbolAttr_Pattern, KType_int, packageNS->packageId);
+		return kNameSpace_SetConstData(kctx, ns, packageNS->packageId | KSymbolAttr_Pattern, KType_int, packageNS->packageId, false/*isOverride*/, trace);
 	}
 	return false;
 }

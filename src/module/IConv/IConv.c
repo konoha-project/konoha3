@@ -44,21 +44,6 @@ static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset,
 	return (uintptr_t)ic;
 }
 
-static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, ICONV_INBUF_CONST char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
-{
-	DBG_ASSERT(ic != ICONV_NULL);
-	size_t iconv_ret = iconv((iconv_t)ic, inbuf, inBytesLeft, outbuf, outBytesLeft);
-	if(iconv_ret == ((size_t)-1)) {
-		if(errno == E2BIG) {   // input is too big.
-			isTooBigSourceRef[0] = true;
-			return iconv_ret;
-		}
-		KTraceApi(trace, UserFault, "iconv", LogErrno);
-	}
-	isTooBigSourceRef[0] = false;
-	return iconv_ret;
-}
-
 static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, ICONV_INBUF_CONST char **inbuf, size_t *inBytesLeft, char **outbuf, size_t *outBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
 {
 	DBG_ASSERT(ic != ICONV_NULL);
@@ -95,15 +80,15 @@ static uintptr_t I18N_iconvUTF8ToSystemCharset(KonohaContext *kctx, KTraceInfo *
 	return PLATAPI iconv_open_i(kctx, PLATAPI systemCharset, "UTF-8", trace);
 }
 
-static const char* I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
+static const char *I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
 {
 	size_t newsize;
 	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
 		uintptr_t ic = PLATAPI iconvUTF8ToSystemCharset(kctx, trace);
 		int isTooBig;
 		ICONV_INBUF_CONST char *presentPtrFrom = (ICONV_INBUF_CONST char *)path;	// too dirty?
-		ICONV_INBUF_CONST char ** inbuf = &presentPtrFrom;
-		char ** outbuf = &buf;
+		ICONV_INBUF_CONST char **inbuf = &presentPtrFrom;
+		char **outbuf = &buf;
 		size_t inBytesLeft = pathsize, outBytesLeft = bufsiz - 1;
 		PLATAPI iconv_i(kctx, ic, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
 		newsize = (bufsiz - 1) - outBytesLeft;
@@ -114,18 +99,18 @@ static const char* I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t 
 		newsize = pathsize;
 	}
 	buf[newsize] = 0;
-	return (const char *)buf;  // stub (in case of no conversion)
+	return (const char *)buf;
 }
 
-static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
+static const char *I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
 {
 	size_t newsize;
 	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
 		uintptr_t ic = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
 		int isTooBig;
 		ICONV_INBUF_CONST char *presentPtrFrom = (ICONV_INBUF_CONST char *)path;	// too dirty?
-		ICONV_INBUF_CONST char ** inbuf = &presentPtrFrom;
-		char ** outbuf = &buf;
+		ICONV_INBUF_CONST char **inbuf = &presentPtrFrom;
+		char **outbuf = &buf;
 		size_t inBytesLeft = pathsize, outBytesLeft = bufsiz - 1;
 		PLATAPI iconv_i(kctx, ic, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
 		newsize = (bufsiz - 1) - outBytesLeft;
@@ -136,7 +121,7 @@ static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t 
 		newsize = pathsize;
 	}
 	buf[newsize] = 0;
-	return (const char *)buf;  // stub (in case of no conversion)
+	return (const char *)buf;
 }
 
 // -------------------------------------------------------------------------
