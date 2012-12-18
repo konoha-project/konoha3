@@ -1,11 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
 
-# Add path for custom modules
-set(CMAKE_MODULE_PATH
-  ${CMAKE_MODULE_PATH}
-  "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-
 set(PACKAGE_EXTRA_LIBRARY)
 set(PACKAGE_SCRIPT_CODE sql_glue.k)
 set(PACKAGE_SOURCE_CODE sql_glue.c)

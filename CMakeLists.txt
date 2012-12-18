@@ -6,6 +6,7 @@ include(CheckLibraryExists)
 cmake_minimum_required(VERSION 2.6)
 
 project(minikonoha)
+
 set(VERSION_MAJOR "0")
 set(VERSION_MINOR "2")
 set(VERSION_PATCH "0")
@@ -46,6 +47,10 @@ set(K_CONFIG_ARCH ${CMAKE_SYSTEM})
 set(K_CONFIG_OS   ${CMAKE_SYSTEM_NAME})
 set(K_CONFIG_CPU  ${CMAKE_SYSTEM_PROCESSOR})
 set(K_PREFIX ${CMAKE_INSTALL_PREFIX})
+
+set(CMAKE_MODULE_PATH
+	${CMAKE_MODULE_PATH}
+	"${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 set(INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR})
@@ -254,14 +259,6 @@ add_clib_test(test_string  ./test/Clib/test_string.c)
 add_clib_test(test_cpp     ./test/Clib/test_cpp.cpp)
 add_clib_test(test_proto   ./test/Clib/test_proto.c)
 
-#macro(add_builtin_test test_name)
-#	add_test_with_property(Builtin/${test_name} ${ARGN})
-#endmacro(add_builtin_test test_name)
-
-#add_builtin_test(Release/Logger  --builtin-test=test_logger)
-#add_builtin_test(Release/Kwb     --builtin-test=test_kwb)
-#add_builtin_test(Release/Kvproto --builtin-test=test_kvproto)
-
 macro(set_package_path test_name)
 set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
 	"KONOHA_HOME=${PARENT_BINARY_DIR}")
@@ -292,11 +289,8 @@ foreach(f ${test_files})
 		"KONOHA_HOME=${PARENT_BINARY_DIR}")
 endforeach(f ${test_files})
 
-#add_subdirectory(platform/dse)
 add_subdirectory(src/exec/apache)
-#add_subdirectory(platform/logger-shell)
-
-include(${CMAKE_CURRENT_SOURCE_DIR}/cpack.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpack.cmake)
 
 # for konoha command
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/exec/command/konoha.sh.cmake
@@ -332,11 +326,6 @@ MESSAGE(STATUS "----------------------------------------------------------------
 MESSAGE(STATUS)
 IF(WARNINGS)
 	SET(MSG_STATUS STATUS)
-	#IF(TEST_COVERAGE)
-	#	SET(MSG_STATUS SEND_ERROR)
-	#ELSE(TEST_COVERAGE)
-	#	SET(MSG_STATUS STATUS)
-	#ENDIF(TEST_COVERAGE)
 	FOREACH(WARN ${WARNINGS})
 		MESSAGE(${MSG_STATUS} "[WARNING] " ${WARN})
 	ENDFOREACH(WARN ${WARNINGS})

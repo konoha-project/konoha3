@@ -1,4 +1,4 @@
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
+# DScriptConsole Module
 set(MODULE_SOURCE_CODE DScriptConsole.c)
 
 message(STATUS "${EVENT_INCLUDE_DIR}")

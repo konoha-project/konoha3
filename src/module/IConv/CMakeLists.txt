@@ -1,5 +1,4 @@
 include(CheckFunctionExists)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(MODULE_SOURCE_CODE IConv.c)
 
