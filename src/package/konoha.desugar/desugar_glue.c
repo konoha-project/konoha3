@@ -33,7 +33,7 @@
 extern "C"{
 #endif
 
-#include<minikonoha/import/methoddecl.h>
+#include <minikonoha/import/methoddecl.h>
 
 #define TP_kw           KType_Symbol,     KFieldName_("keyword")
 #define TP_source       KType_String,     KFieldName_("source")
@@ -1280,7 +1280,7 @@ static kbool_t desugar_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 	return true;
 }
 
-KDEFINE_PACKAGE* desugar_Init(void)
+KDEFINE_PACKAGE *desugar_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);

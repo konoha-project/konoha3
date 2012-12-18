@@ -287,4 +287,3 @@ kbool_t LoadSyslogModule(KonohaFactory *factory, ModuleType type)
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-

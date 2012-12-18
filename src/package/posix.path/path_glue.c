@@ -572,7 +572,7 @@ static kbool_t path_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* path_Init(void)
+KDEFINE_PACKAGE *path_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("posix", "1.0"),

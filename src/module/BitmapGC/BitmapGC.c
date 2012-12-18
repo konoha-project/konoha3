@@ -22,16 +22,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-/* ************************************************************************ */
+#include "minikonoha/minikonoha.h"
+#include "bmgc.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "minikonoha/minikonoha.h"
-
-//static int verbose_gc = 0;
-
-#include "bmgc.h"
 
 /* ------------------------------------------------------------------------ */
 

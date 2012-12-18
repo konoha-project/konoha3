@@ -93,7 +93,7 @@ static kbool_t dollar_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* dollar_Init(void)
+KDEFINE_PACKAGE *dollar_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "dscript", "1.0");

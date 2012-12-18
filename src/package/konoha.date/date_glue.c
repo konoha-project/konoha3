@@ -81,24 +81,16 @@ static int gettimeofday(struct timeval *tv, void *tz)
 extern "C" {
 #endif
 
-#ifdef _MSC_VER
-#define kDate const struct kDateVar
-#else
-typedef const struct kDateVar kDate;
-#endif
-
-struct kDateVar {
+typedef struct kDateVar {
 	kObjectHeader h;
 	struct timeval tv;
-};
+} kDate;
 
 /* ------------------------------------------------------------------------ */
 //## Date Date.new();
 
 static KMETHOD Date_new0(KonohaContext *kctx, KonohaStack *sfp)
 {
-	//It isn't necessary?
-	//struct kDateVar *d = (struct kDateVar *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	struct kDateVar *d = (struct kDateVar *)sfp[0].asDate;
 	struct tm lt;
 	gettimeofday((struct timeval *)&(d->tv), NULL);
@@ -109,7 +101,6 @@ static KMETHOD Date_new0(KonohaContext *kctx, KonohaStack *sfp)
 //## Date Date.new(int milliseconds);
 static KMETHOD Date_new1(KonohaContext *kctx, KonohaStack *sfp)
 {
-	//struct kDateVar *d = (struct kDateVar *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	struct kDateVar *d = (struct kDateVar *)sfp[0].asDate;
 	d->tv.tv_sec = sfp[1].intValue / 1000;
 	d->tv.tv_usec = sfp[1].intValue % 1000 * 1000;
@@ -119,14 +110,13 @@ static KMETHOD Date_new1(KonohaContext *kctx, KonohaStack *sfp)
 //## Date Date.new(String dateString); Not implemented
 //static KMETHOD Date_new2(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	struct kDateVar *d = (struct kDateVar *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
+//	struct kDateVar *d = (struct kDateVar *)sfp[0].asDate;
 //	KReturn((kObject *)d);
 //}
 
 //## Date Date.new(int year, int month, int day, int hours, int minutes, int seconds, int milliseconds);
 static KMETHOD Date_new3(KonohaContext *kctx, KonohaStack *sfp)
 {
-	//struct kDateVar *d = (struct kDateVar *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	struct kDateVar *d = (struct kDateVar *)sfp[0].asDate;
 	struct tm lt = {};
 	if(sfp[1].intValue < 100) {
@@ -672,7 +662,7 @@ static kbool_t date_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE* date_Init(void)
+KDEFINE_PACKAGE *date_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "date", "1.0");

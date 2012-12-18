@@ -407,11 +407,8 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 	} else {
-		//TODO: Need to implement Object compareTo;
 		kObject *o = sfp[1].asObject;
 		for(i = kArray_size(a)- 1; i != 0; i--) {
-//			KMakeTrace(trace, sfp);
-//			KLIB KRuntime_raise(kctx, KException_("NotImplemented"), NULL, trace);
 			if(kObject_class(o)->compareObject(a->ObjectItems[i], o) == 0) {
 				break;
 			}
@@ -420,48 +417,6 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 	res = i;
 	KReturnUnboxValue(res);
 }
-
-//## method String Array.toString();
-//static KMETHOD Array_toString(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kArray *a = sfp[0].asArray;
-//	size_t i = 0;
-//	KBuffer wb;
-//	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-//	if(kArray_size(a) < 1) {
-//		KReturn(KNULL(String));
-//	}
-//	if(kArray_Is(UnboxData, a)) {
-//		uintptr_t uv = a->unboxItems[i];
-//		for (i = 0; i < kArray_size(a) - 1; i++) {
-//			uv = a->unboxItems[i];
-//			KLIB KBuffer_printf(kctx, &wb, "%ld,", uv);
-//		}
-//		uv = a->unboxItems[i];
-//		KLIB KBuffer_printf(kctx, &wb, "%ld", uv);
-//	} else {
-//		kObject *obj;
-//		BEGIN_UnusedStack(lsfp, 1);
-//		for (i = 0; i < kArray_size(a) - 1; i++) {
-//			obj = a->ObjectItems[i];
-//			DBG_ASSERT(kObject_class(obj)->p);
-//			// before call system.p, push variables
-//			KUnsafeFieldSet(lsfp[0].asObject, obj);
-//			kObject_class(obj)->p(kctx, lsfp, 0, &wb, 0);
-//			KLIB KBuffer_printf(kctx, &wb, ",");
-//		}
-//		obj = a->ObjectItems[i];
-//		KUnsafeFieldSet(lsfp[0].asObject, obj);
-//		kObject_class(obj)->p(kctx, lsfp, 0, &wb, 0);
-//		END_UnusedStack();
-//
-//	}
-//	const char *KBufferTopChar = KLIB KBuffer_text(kctx, &wb, 0);
-//	size_t strsize = strlen(KBufferTopChar);
-//	kString *ret = KLIB new_kString(kctx, KBufferTopChar, strsize, 0);
-//	KLIB KBuffer_Free(&wb);
-//	KReturn(ret);
-//}
 
 static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -545,7 +500,6 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		_Public,        _F(Array_concat), KType_ArrayT0, KType_Array, KKMethodName_("concat"), 1, KType_ArrayT0, KFieldName_("a1"),
 		_Public,        _F(Array_indexOf), KType_int, KType_Array, KKMethodName_("indexOf"), 1, KType_0, KFieldName_("value"),
 		_Public,        _F(Array_lastIndexOf), KType_int, KType_Array, KKMethodName_("lastIndexOf"), 1, KType_0, KFieldName_("value"),
-//		_Public,        _F(Array_toString), KType_String, KType_Array, KKMethodName_("toString"), 0,
 		_Public|_Im,    _F(Array_new), KType_void, KType_Array, KKMethodName_("new"), 1, KType_int, KFieldName_("size"),
 		_Public,        _F(Array_newArray), KType_Array, KType_Array, KKMethodName_("newArray"), 1, KType_int, KFieldName_("size"),
 		_Public|kMethod_Hidden, _F(Array_newList), KType_Array, KType_Array, KKMethodName_("[]"), 0,
@@ -660,7 +614,7 @@ static kbool_t array_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 	return true;
 }
 
-KDEFINE_PACKAGE* array_Init(void)
+KDEFINE_PACKAGE *array_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);

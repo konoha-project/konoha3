@@ -346,7 +346,7 @@ static kbool_t float_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 }
 
 
-KDEFINE_PACKAGE* float_Init(void)
+KDEFINE_PACKAGE *float_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "float", "1.0");

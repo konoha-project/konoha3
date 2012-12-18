@@ -521,4 +521,3 @@ kbool_t LoadSignalModule(KonohaFactory *factory, ModuleType type)
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-

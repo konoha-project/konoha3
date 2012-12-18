@@ -920,7 +920,7 @@ static inline kNameSpace *kStmt_ns(kStmt *stmt)
 
 static inline kNode* kNode_Type(kNode *node, knode_t nodeType, ktypeattr_t ty)
 {
-	kNodeVar *vnode = (kNodeVar*)node;
+	kNodeVar *vnode = (kNodeVar *)node;
 	vnode->node = nodeType;
 	vnode->attrTypeId = ty;
 	return node;

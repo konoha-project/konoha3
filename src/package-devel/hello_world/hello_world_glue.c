@@ -143,7 +143,7 @@ static kbool_t HelloWorld_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, k
 	return true;
 }
 
-KDEFINE_PACKAGE* hello_world_Init(void)
+KDEFINE_PACKAGE *hello_world_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "/* SET LIBRARY NAME */", "/* SET LIBRARY VERSION */");

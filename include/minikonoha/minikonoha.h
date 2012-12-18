@@ -41,7 +41,7 @@ extern "C" {
 #define K_MINOR_VERSION 2
 #define K_PATCH_LEVEL   0
 
-#include<minikonoha/stardate.h>
+#include <minikonoha/stardate.h>
 #define K_DATE      ((K_YEAR - 2006) * (12 * 24 * 32) + (K_MONTH * (24 * 32) + ((K_DAY * 24) + K_HOUR)))
 
 #ifndef K_REVISION
@@ -620,7 +620,6 @@ struct KonohaFactory {
 	KModuleInfo *I18NInfo;
 	uintptr_t   (*iconv_open_i)(KonohaContext *, const char* tocode, const char* fromcode, KTraceInfo *);
 	size_t      (*iconv_i)(KonohaContext *, uintptr_t iconv, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft, int *isTooBigRef, KTraceInfo *trace);
-	size_t      (*iconv_i_memcpyStyle)(KonohaContext *, uintptr_t iconv, char **outbuf, size_t *outbytesleft, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, int *isTooBigRef, KTraceInfo *trace);
 	int         (*iconv_close_i)(KonohaContext *, uintptr_t iconv);
 	const char* systemCharset;
 	kbool_t     (*isSystemCharsetUTF8)(KonohaContext *);
@@ -636,7 +635,6 @@ struct KonohaFactory {
 
 	// VirtualMachine
 	KModuleInfo            *VirtualMachineInfo;
-	kbool_t               (*IsSupportedKVirtualCode)(int opcode);
 //	struct KVirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
 //	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
 //	void *                (*GetVirtualMachineKMethodFunc)(void);
@@ -1981,7 +1979,7 @@ extern kbool_t Konoha_LoadScript(KonohaContext* konoha, const char *scriptfile);
 extern kbool_t Konoha_Eval(KonohaContext* konoha, const char *script, kfileline_t uline);
 extern kbool_t Konoha_Run(KonohaContext* konoha);  // TODO
 
-#include"klib.h"
+#include "klib.h"
 
 #ifdef __cplusplus
 } /* extern "C" */

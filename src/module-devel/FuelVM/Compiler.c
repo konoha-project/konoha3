@@ -647,7 +647,7 @@ static KMETHOD FuelVM_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMethodFunc FuelVM_GenerateKMethodFunc(KonohaContext *kctx, struct KVirtualCode *vcode)
 {
-	unsigned *magic = (unsigned *)(((ByteCode*)vcode)-1);
+	unsigned *magic = (unsigned *)(((ByteCode *)vcode)-1);
 	if(*magic == FUELVM_BYTECODE_MAGICNUMBER)
 		return FuelVM_RunVirtualMachine;
 	else

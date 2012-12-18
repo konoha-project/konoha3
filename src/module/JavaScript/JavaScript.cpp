@@ -765,7 +765,6 @@ kbool_t LoadJavaScriptModule(KonohaFactory *factory, ModuleType type)
 		"JavaScript", K_VERSION, 0, "JavaScript",
 	};
 	factory->VirtualMachineInfo            = &ModuleInfo;
-	//factory->IsSupportedKVirtualCode        = IsSupportedKVirtualCode;
 	factory->GetDefaultBootCode            = GetDefaultBootCode;
 	factory->GetDefaultBuilderAPI          = GetDefaultBuilderAPI;
 #ifdef HAVE_LIBV8
@@ -776,4 +775,3 @@ kbool_t LoadJavaScriptModule(KonohaFactory *factory, ModuleType type)
 }
 
 } /* extern "C" */
-

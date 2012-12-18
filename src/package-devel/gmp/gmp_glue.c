@@ -1087,7 +1087,7 @@ static kbool_t gmp_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpa
 
 /* ======================================================================== */
 
-KDEFINE_PACKAGE* gmp_Init(void)
+KDEFINE_PACKAGE *gmp_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "gmp", "1.0");

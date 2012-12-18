@@ -53,7 +53,6 @@ extern "C" {
 
 typedef void kregexp_t;
 
-/* REGEXP_SPI */
 #ifndef KREGEXP_MATCHSIZE
 #define KREGEXP_MATCHSIZE    16
 #endif
@@ -724,7 +723,7 @@ static kbool_t regexp_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* regexp_Init(void)
+KDEFINE_PACKAGE *regexp_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("konoha", "1.0"),

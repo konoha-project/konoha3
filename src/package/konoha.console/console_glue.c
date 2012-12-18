@@ -23,7 +23,6 @@
  ***************************************************************************/
 
 #include <minikonoha/minikonoha.h>
-//#include <minikonoha/sugar.h>
 #include <minikonoha/konoha_common.h>
 
 typedef struct kConsoleVar kConsole;
@@ -121,7 +120,7 @@ static kbool_t console_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 	return true;
 }
 
-KDEFINE_PACKAGE* console_Init(void)
+KDEFINE_PACKAGE *console_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");

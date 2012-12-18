@@ -31,7 +31,7 @@
 extern "C" {
 #endif
 
-#include<minikonoha/import/methoddecl.h>
+#include <minikonoha/import/methoddecl.h>
 #define TP_name         KType_String,     KFieldName_("name")
 #define TP_paramsize    KType_int,        KFieldName_("paramsize")
 #define TP_source       KType_String,     KFieldName_("source")
@@ -79,12 +79,6 @@ static void namespace_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
-//	KDEFINE_INT_CONST IntData[] = {
-//		{"INT_MAX", KType_int, KINT_MAX},
-//		{"INT_MIN", KType_int, KINT_MIN},
-//		{NULL},
-//	};
-//	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
 }
 
 
@@ -230,7 +224,7 @@ static kbool_t namespace_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kN
 	return true;
 }
 
-KDEFINE_PACKAGE* ns_Init(void)
+KDEFINE_PACKAGE *ns_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);

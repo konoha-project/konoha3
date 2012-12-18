@@ -424,24 +424,14 @@ static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
 	return BasicBlock_id(kctx, bb);
 }
 
-#if defined(USE_DIRECT_THREADED_CODE)
 #define ASM(T, ...) do {\
 	OP##T op_ = {OP_(T), ## __VA_ARGS__};\
 	union { KVirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	KBuilder_Asm(kctx, builder, &tmp_.op, sizeof(OP##T));\
 } while(0)
 
-#else
-#define ASM(T, ...) do {\
-	OP##T op_ = {OP_(T), ## __VA_ARGS__};\
-	union { KVirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
-	KBuilder_Asm(kctx, builder, &tmp_.op, sizeof(OP##T));\
-} while(0)
-
-#endif/*USE_DIRECT_THREADED_CODE*/
-
-#define NC_(sfpidx)       (((sfpidx) * 2) + 1)
-#define OC_(sfpidx)       ((sfpidx) * 2)
+#define NC_(sfpidx)    ((sfpidx) * 2 + 1)
+#define OC_(sfpidx)    ((sfpidx) * 2 + 0)
 #define TC_(sfpidx, C) ((KClass_Is(UnboxType, C)) ? NC_(sfpidx) : OC_(sfpidx))
 #define SFP_(sfpidx)   ((sfpidx) * 2)
 
@@ -989,11 +979,6 @@ static void SetUpBootCode(void)
 	}
 }
 
-static kbool_t IsSupportedKVirtualCode(int opcode)
-{
-	return (((size_t)opcode) < OPCODE_MAX);
-}
-
 static KMETHOD KMethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
 	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].calledMethod));
@@ -1046,7 +1031,6 @@ kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
 	};
 	SetUpBootCode();
 	factory->VirtualMachineInfo            = &ModuleInfo;
-	factory->IsSupportedKVirtualCode        = IsSupportedKVirtualCode;
 	factory->GetDefaultBootCode            = GetDefaultBootCode;
 	factory->GetDefaultBuilderAPI          = GetDefaultBuilderAPI;
 	return true;

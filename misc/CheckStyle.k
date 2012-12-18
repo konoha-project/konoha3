@@ -53,6 +53,10 @@ void main() {
         System.p("Fix " + args[i]);
         data = replace(args[i], data, "[a-zA-Z]+\\*\\)", "*)", " *)");
         data = replace(args[i], data, "if \\(", "if (", "if(");
+        data = replace(args[i], data, "KDEFINE_PACKAGE\\* ", "KDEFINE_PACKAGE* ", "KDEFINE_PACKAGE *");
+        data = replace(args[i], data, "^static\tkbool_t", "static\tkbool_t", "static kbool_t");
+        data = replace(args[i], data, "#include<", "#include<", "#include <");
+        data = replace(args[i], data, "#include\"", "#include\"", "#include \"");
         data = replace(args[i], data, "while \\(", "while (", "while(");
         data = replace(args[i], data, "\n\t\n", "\n\t\n", "\n\n");
         data = replace(args[i], data, ";\t\n", ";\t\n", ";\n");

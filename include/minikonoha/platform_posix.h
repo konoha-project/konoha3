@@ -166,11 +166,6 @@ static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset,
 	return ICONV_NULL;
 }
 
-static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, ICONV_INBUF_CONST char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
-{
-	return -1;
-}
-
 static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, ICONV_INBUF_CONST char **inbuf, size_t *inBytesLeft, char **outbuf, size_t *outBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
 {
 	return -1;
@@ -211,7 +206,6 @@ static void loadI18N(KonohaFactory *plat, const char *defaultCharSet)
 	plat->systemCharset  = (defaultCharSet == NULL) ? "UTF-8" : defaultCharSet;
 	plat->iconv_open_i   = I18N_iconv_open;
 	plat->iconv_i        = I18N_iconv;
-	plat->iconv_i_memcpyStyle = I18N_iconv_memcpyStyle;
 	plat->iconv_close_i  = I18N_iconv_close;
 	plat->isSystemCharsetUTF8 = I18N_isSystemCharsetUTF8;
 	plat->iconvSystemCharsetToUTF8 = I18N_iconvSystemCharsetToUTF8;
@@ -224,9 +218,6 @@ static void loadI18N(KonohaFactory *plat, const char *defaultCharSet)
 
 static unsigned long long getTimeMilliSecond(void)
 {
-//#if defined(K_USING_WINDOWS)
-//	DWORD tickCount = GetTickCount();
-//	return (knh_int64_t)tickCount;
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	return tv.tv_sec * 1000 + tv.tv_usec / 1000;

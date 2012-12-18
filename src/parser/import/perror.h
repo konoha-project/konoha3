@@ -102,7 +102,7 @@ static KSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymb
 static void kStmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {
 	if(errmsg != NULL) { // not in case of isBlockedErrorMessage
-		kNodeVar *node = (kNodeVar*)stmt;
+		kNodeVar *node = (kNodeVar *)stmt;
 		node->node = KNode_Error;
 		KFieldSet(node, node->ErrorMessage, errmsg);
 		kNode_Set(ObjectConst, node, true);

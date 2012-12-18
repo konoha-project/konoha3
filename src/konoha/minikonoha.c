@@ -104,8 +104,8 @@ static kbool_t KRuntime_setModule(KonohaContext *kctx, int x, KRuntimeModule *d,
 
 static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx);
 static void ReftraceAll(KonohaContext *kctx, KObjectVisitor *visitor);
-KonohaContext*    KonohaFactory_CreateKonoha(KonohaFactory *factory);
-int               Konoha_Destroy(KonohaContext *kctx);
+KonohaContext *KonohaFactory_CreateKonoha(KonohaFactory *factory);
+int            Konoha_Destroy(KonohaContext *kctx);
 
 static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformApi *platApi)
 {
@@ -142,7 +142,6 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 	}
 	KRuntimeContext_Init(kctx, newctx, platApi->stacksize);
 	if(IS_RootKonohaContext(newctx)) {
-//		MODCODE_Init(kctx, newctx);
 		MODSUGAR_Init(kctx, newctx);
 		LoadDefaultMethod(kctx, KNULL(NameSpace));
 		LoadDefaultSugarMethod(kctx, KNULL(NameSpace));

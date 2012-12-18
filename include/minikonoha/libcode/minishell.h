@@ -167,5 +167,4 @@ static kbool_t konoha_shell(KonohaContext* konoha)
 	return true;
 }
 
-
 #endif /* MINISHELL_H_ */

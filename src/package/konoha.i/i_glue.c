@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include<stdio.h>
+#include <stdio.h>
 #define  USE_MethodFlagData
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
@@ -134,7 +134,7 @@ static kbool_t i_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace
 	return true;
 }
 
-KDEFINE_PACKAGE* i_Init(void)
+KDEFINE_PACKAGE *i_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);

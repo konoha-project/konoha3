@@ -40,17 +40,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
-////#include <sys/time.h>
-//
-//#ifdef HAVE_DLFCN_H
-//#include <dlfcn.h>
-//#endif
-////#include <sys/stat.h>
 #include <errno.h>
-//
-//#ifdef HAVE_ICONV_H
-//#include <iconv.h>
-//#endif /* HAVE_ICONV_H */
 
 #include <windows.h>
 

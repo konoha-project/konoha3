@@ -170,8 +170,7 @@ KLIBDECL kbool_t KBuffer_iconv(KonohaContext *kctx, KBuffer* wb, uintptr_t ic, c
 	while(inBytesLeft > 0) {
 		int isTooBig;
 		memset(convBuf, '\0', K_PAGESIZE);
-//		size_t iconv_ret = PLATAPI iconv_i(kctx, iconv, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
-		size_t iconv_ret = PLATAPI iconv_i_memcpyStyle(kctx, ic, outbuf, &outBytesLeft, inbuf, &inBytesLeft, &isTooBig, trace);
+		size_t iconv_ret = PLATAPI iconv_i(kctx, ic, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
 		size_t processedSize = K_PAGESIZE - outBytesLeft;
 		KLIB KBuffer_Write(kctx, wb, convBuf, processedSize);
 		if(isTooBig) {   // input is too big. reset convbuf

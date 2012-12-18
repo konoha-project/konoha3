@@ -24,17 +24,6 @@
 
 /* ************************************************************************ */
 #include "minikonoha/minikonoha.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-//static int verbose_gc = 0;
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
-
 #include "../BitmapGC/bmgc.h"
 
 #ifdef __cplusplus

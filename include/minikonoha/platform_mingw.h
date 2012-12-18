@@ -118,9 +118,6 @@ static void loadIconv(KonohaFactory *plat)
 
 static unsigned long long getTimeMilliSecond(void)
 {
-//#if defined(K_USING_WINDOWS)
-//	DWORD tickCount = GetTickCount();
-//	return (knh_int64_t)tickCount;
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	return tv.tv_sec * 1000 + tv.tv_usec / 1000;

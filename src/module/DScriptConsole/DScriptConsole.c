@@ -31,6 +31,16 @@ extern "C" {
 //#include <asm/termbits.h>
 #include <syslog.h>
 #include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <unistd.h>
+
+#include <event.h>
+#include <evhttp.h>
+
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/klib.h>
 
@@ -99,9 +109,6 @@ static void ReportDebugMessage(const char *file, const char *func, int line, con
 	// TODO
 }
 
-#include <event.h>
-#include <evhttp.h>
-
 typedef struct {
 	struct event_base *base;
 	char *buff;
@@ -151,13 +158,6 @@ static char *getUserInput(KonohaContext *kctx, char *buff, const char *cid, cons
 
 	return buff;
 }
-
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <unistd.h>
 
 static int InputUserApproval(KonohaContext *kctx, const char *message, const char *yes, const char *no, int defval)
 {

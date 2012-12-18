@@ -257,7 +257,7 @@ static kbool_t map_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpa
 	return true;
 }
 
-KDEFINE_PACKAGE* map_Init(void)
+KDEFINE_PACKAGE *map_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "map", "1.0");

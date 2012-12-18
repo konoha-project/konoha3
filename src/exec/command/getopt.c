@@ -22,3 +22,77 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#include <string.h>
+#include <ctype.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+char *optarg = 0;
+int optind   = 1;
+int optopt   = 0;
+int opterr   = 0;
+int optreset = 0;
+
+struct option {
+	char *name;
+	int has_arg;
+	int *flag;
+	int val;
+};
+
+/* The has_arg field should be one of: */
+enum {
+	no_argument,       /* no argument to the option is expect        */
+	required_argument, /* an argument to the option is required      */
+	optional_argument, /* an argument to the option may be presented */
+};
+
+static int getopt_long(int argc, char * const *argv, const char *optstring, const struct option *longopts, int *longindex)
+{
+	if(optind < argc) {
+		char *arg = argv[optind];
+		if(arg == 0)
+			return -1;
+		if(arg[0] == '-' && arg[1] == '-') {
+			const struct option *opt = longopts;
+			arg += 2;
+			while(opt->name) {
+				char *end = strchr(arg, '=');
+				if(end == 0 && opt->has_arg == no_argument) {
+					if(strcmp(arg, opt->name) == 0)
+						*longindex = opt - longopts;
+					optind++;
+					return opt->val;
+				}
+				if(strncmp(arg, opt->name, end - arg) == 0) {
+					*longindex = opt - longopts;
+					optarg = end+1;
+					optind++;
+					return opt->val;
+				}
+				opt++;
+			}
+		}
+		else if(arg[0] == '-') {
+			arg += 1;
+			const char *c = optstring;
+			while(*c != 0) {
+				if(*c == arg[0]) {
+					if(*(c+1) == ':' && arg[1] == '=') {
+						optarg = arg+2;
+					}
+					optind++;
+					return arg[0];
+				}
+				c++;
+			}
+		}
+	}
+	return -1;
+}
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif

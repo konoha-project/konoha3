@@ -201,4 +201,3 @@ kbool_t LoadOutputTestModule(KonohaFactory *factory, ModuleType type)
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-

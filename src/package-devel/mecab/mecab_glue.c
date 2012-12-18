@@ -398,7 +398,7 @@ static kbool_t mecab_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 
 /* ======================================================================== */
 
-KDEFINE_PACKAGE* mecab_Init(void)
+KDEFINE_PACKAGE *mecab_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("mecab", "1.0"),

@@ -176,7 +176,7 @@ static kbool_t minikonoha_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, k
 	return true;
 }
 
-KDEFINE_PACKAGE* minikonoha_Init(void)
+KDEFINE_PACKAGE *minikonoha_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "minikonoha", K_VERSION);

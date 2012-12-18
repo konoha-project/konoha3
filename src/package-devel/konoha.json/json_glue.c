@@ -381,7 +381,7 @@ static kbool_t json_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE* json_Init(void)
+KDEFINE_PACKAGE *json_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("json", "1.0"),

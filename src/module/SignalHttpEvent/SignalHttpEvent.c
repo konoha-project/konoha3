@@ -100,4 +100,3 @@ kbool_t LoadSignalHttpEventModule(KonohaFactory *factory, ModuleType type)
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-

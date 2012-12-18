@@ -22,13 +22,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-/* ************************************************************************ */
+#include "minikonoha/minikonoha.h"
+#include "minikonoha/local.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "minikonoha/minikonoha.h"
-#include "minikonoha/local.h"
 
 #ifdef K_USE_PTHREAD
 

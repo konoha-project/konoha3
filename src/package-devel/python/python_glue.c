@@ -31,7 +31,7 @@
 extern "C"{
 #endif
 
-#//define OB_TYPE(obj) (((PyObject *)obj->self)->ob_type)
+//#define OB_TYPE(obj) (((PyObject *)obj->self)->ob_type)
 
 typedef const struct kPyObjectVar kPyObject;
 struct kPyObjectVar {

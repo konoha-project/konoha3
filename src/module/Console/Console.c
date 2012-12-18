@@ -282,4 +282,3 @@ kbool_t LoadConsoleModule(KonohaFactory *factory, ModuleType type)
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-

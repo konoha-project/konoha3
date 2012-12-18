@@ -89,7 +89,7 @@ static kbool_t const_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 	return true;
 }
 
-KDEFINE_PACKAGE* const_Init(void)
+KDEFINE_PACKAGE *const_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "const", "1.0");

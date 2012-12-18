@@ -48,7 +48,7 @@ static void Complex_Free(KonohaContext *kctx, kObject *o)
 {
 }
 
-//==========================================================<<< KMETHOD >>>=====================================================================
+// METHOD =====================================================================
 
 //## Complex Complex.new(z);
 static KMETHOD Complex_new(KonohaContext *kctx, KonohaStack *sfp)
@@ -728,12 +728,6 @@ static kbool_t Complex_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
-//	/* You can define constant variable with the following procedures. */
-//	KDEFINE_FLOAT_CONST FloatData[] = {
-//		{"FLOAT_EPSILON", KType_float, DBL_EPSILON},
-//		{NULL} /* <= sentinel */
-//	};
-//	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(FloatData), false/*isOverride*/, trace);
 	return true;
 }
 
@@ -742,7 +736,7 @@ static kbool_t Complex_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 	return true;
 }
 
-KDEFINE_PACKAGE* complex_Init(void)
+KDEFINE_PACKAGE *complex_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");

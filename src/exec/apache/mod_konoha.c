@@ -1,4 +1,4 @@
-/* 
+/*
  * mod_konoha
  *
  * This is a konoha module for Apache HTTP Server.
@@ -34,7 +34,6 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
 #include <minikonoha/platform.h>
-#include <minikonoha/platform_posix.h>
 #include "../../package-devel/apache/apache_glue.h"
 
 #ifndef K_PREFIX
@@ -86,7 +85,9 @@ static void ApacheFactory(KonohaFactory *factory)
 	factory->LoadPackageHandler = apache_LoadPackageHandler;
 }
 
-// class methodList start ==============================================================================================
+// class methodList start
+// ==============================================================================================
+
 // ## void Request.puts(String s)
 static KMETHOD Request_puts(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -270,10 +271,10 @@ static int konoha_handler(request_rec *r)
 	if(strcmp(r->handler, "konoha-script")) {
 		return DECLINED;
 	}
-	// if(r->method_number != M_GET) {
-	// 	 TODO 
-	// 	return HTTP_METHOD_NOT_ALLOWED;
-	// }
+	//if(r->method_number != M_GET) {
+	//	 TODO
+	//	return HTTP_METHOD_NOT_ALLOWED;
+	//}
 	KClass *cRequest;
 	verbose_debug = 1;
 	KonohaContext* konoha = konoha_create(&cRequest);

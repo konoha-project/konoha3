@@ -34,8 +34,6 @@ extern "C" {
 
 #define IS_RootKonohaContext(o)   (kctx == (KonohaContext *)o)
 
-//void MODCODE_Init(KonohaContext *kctx, KonohaContextVar *ctx);
-
 void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx);
 void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns);
 
