@@ -27,12 +27,12 @@ import("cstyle", "break");
 import("cstyle", "null");
 import("konoha.array");
 import("konoha.console");
-import("konoha.ns");  // konoha.defined is obsolete
+import("konoha.ns");
 import("konoha.eval");
 import("konoha.file");
 import("konoha.math");
 import("konoha.object");
-import("java2.string");
+import("js4.string");
 import("dscript.subproc");
 import("konoha.desugar");
 
@@ -46,7 +46,7 @@ import("konoha.desugar");
 	if(ret == "") {
 		return ret;
 	}
-	return ret.substr(0, ret.getSize() - 1);
+	return ret.substr(0, ret.getlength() - 1);
 }
 
 String[] concatTokenList(Token[] tokenList) {
@@ -73,8 +73,8 @@ String[] concatTokenList(Token[] tokenList) {
 String getVarName() {
 	String rand = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	String ret = "__s";
-	while(ret.getSize() < 10) {
-		ret = ret + rand[(Math.random() * (rand.getSize() - 1)).toint()];
+	while(ret.getlength() < 10) {
+		ret = ret + rand[(Math.random() * (rand.getlength() - 1)).toint()];
 	}
 	return ret;
 }
@@ -82,8 +82,8 @@ String getVarName() {
 String getFuncName() {
 	String rand = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	String ret = "__f";
-	while(ret.getSize() < 10) {
-		ret = ret + rand[(Math.random() * (rand.getSize() - 1)).toint()];
+	while(ret.getlength() < 10) {
+		ret = ret + rand[(Math.random() * (rand.getlength() - 1)).toint()];
 	}
 	return ret;
 }
@@ -325,7 +325,7 @@ int tokenFuncCommandReplace(Token tk, String source) {
 		}
 		return 0;
 	}
-	while(pos < source.getSize()) {
+	while(pos < source.getlength()) {
 		if(source.charCodeAt(pos) == closeParenthesis) {
 			if(tk.isNotNull() && pos > 2) {
 				tk.setText("$DollarCommandReplace", source, 2, pos);
@@ -345,7 +345,7 @@ Expr expressionCommandReplace(Stmt stmt, Token[] tokenList, int beginIdx, int op
 		int i = beginIdx;
 		while(i < endIdx) {
 			System.p(tokenList[i].getText());
-			System.p(tokenList[i].getText().getSize());
+			System.p(tokenList[i].getText().getlength());
 			System.p(tokenList[i].is("$Symbol"));
 			System.p(tokenList[i].is("()"));
 			i = i + 1;
@@ -393,7 +393,7 @@ int tokenFuncEnvironment(Token tk, String source) {
 		}
 		return 0;
 	}
-	while(pos < source.getSize()) {
+	while(pos < source.getlength()) {
 		if(!isSymbol(source[pos])) {
 			break;
 		}
@@ -408,7 +408,7 @@ Expr expressionEnvironment(Stmt stmt, Token[] tokenList, int beginIdx, int opera
 		int i = beginIdx;
 		while(i < endIdx) {
 			System.p(tokenList[i].getText());
-			System.p(tokenList[i].getText().getSize());
+			System.p(tokenList[i].getText().getlength());
 			System.p(tokenList[i].is("$Symbol"));
 			System.p(tokenList[i].is("()"));
 			i = i + 1;
