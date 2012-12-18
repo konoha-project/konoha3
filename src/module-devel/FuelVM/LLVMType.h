@@ -2,6 +2,7 @@
 #include <llvm/Module.h>
 #include <llvm/Type.h>
 #include <llvm/DerivedTypes.h>
+#include "vmcommon.h"
 
 #ifndef LLVMTYPE_H
 #define LLVMTYPE_H
@@ -17,6 +18,7 @@ enum STRUCT_TYPE_ID {
 	ID_PtrkObjectVar,
 	ID_PtrPtrkObjectVar,
 	ID_PtrKonohaValueVar,
+	ID_KMethodFunc,
 	ID_PtrKMethodFunc,
 	ID_PtrkMethodVar,
 	ID_MAX,
@@ -127,6 +129,7 @@ static llvm::Type *LLVMTYPE_ObjectPtr = NULL;
 static llvm::Type *LLVMTYPE_KonohaValuePtr = NULL;
 static llvm::Type *LLVMTYPE_MethodPtr = NULL;
 static llvm::Type *LLVMTYPE_KMethodFunc = NULL;
+static llvm::Type *LLVMTYPE_KMethodFuncPtr = NULL;
 
 static llvm::Type *ToType(enum STRUCT_TYPE_ID ID)
 {
@@ -145,7 +148,8 @@ static llvm::Type *ToType(enum STRUCT_TYPE_ID ID)
 		else
 			return llvm::PointerType::get(getLongTy(), 0);
 	case ID_PtrKonohaValueVar: return LLVMTYPE_KonohaValuePtr;
-	case ID_PtrKMethodFunc:     return LLVMTYPE_KMethodFunc;
+	case ID_KMethodFunc:       return LLVMTYPE_KMethodFunc;
+	case ID_PtrKMethodFunc:    return LLVMTYPE_KMethodFuncPtr;
 	case ID_PtrkMethodVar:     return LLVMTYPE_MethodPtr;
 	default:
 		return getLongTy();
@@ -164,7 +168,7 @@ static llvm::Type *CreateType(const struct TypeInfo &Info)
 	if(Info.IsFunction) {
 		llvm::Type *RetTy = ToType(Info.ReturnTypeId);
 		llvm::FunctionType *FnTy = llvm::FunctionType::get(RetTy, Fields, false);
-		return llvm::PointerType::get(FnTy, 0);
+		return FnTy;
 	}
 	else {
 		llvm::StructType *structTy = llvm::StructType::create(llvm::getGlobalContext(), Info.Name);
@@ -187,6 +191,8 @@ static void LLVMType_Init()
 	LLVMTYPE_ContextPtr = llvm::PointerType::get(ContextTy, 0);
 
 	LLVMTYPE_KMethodFunc = CreateType(KMethodFuncType);
+	LLVMTYPE_KMethodFuncPtr = llvm::PointerType::get(LLVMTYPE_KMethodFunc, 0);
+
 
 	llvm::Type *MethodTy = CreateType(kMethodVarType);
 	LLVMTYPE_MethodPtr = llvm::PointerType::get(MethodTy, 0);
@@ -196,11 +202,23 @@ static llvm::Type *convert_type(KonohaContext *kctx, ktypeattr_t type)
 {
 	switch (type) {
 		case KType_void:    return llvm::Type::getVoidTy(LLVM_CONTEXT());
-		case KType_boolean: return llvm::Type::getInt64Ty(LLVM_CONTEXT());
-		case KType_int:     return llvm::Type::getInt64Ty(LLVM_CONTEXT());
+		case KType_boolean: return getLongTy();
+		case KType_int:     return getLongTy();
 	}
-	if(KDefinedKonohaCommonModule() && type == KType_float)
+	if(FloatIsDefined() && type == KType_float)
 		return llvm::Type::getDoubleTy(LLVM_CONTEXT());
+	return LLVMTYPE_ObjectPtr;
+}
+
+static llvm::Type *ToLLVMType(enum TypeId type)
+{
+	switch (type) {
+		case TYPE_void:    return llvm::Type::getVoidTy(LLVM_CONTEXT());
+		case TYPE_boolean: return getLongTy();
+		case TYPE_int:     return getLongTy();
+		case TYPE_float:   return llvm::Type::getDoubleTy(LLVM_CONTEXT());
+		default: break;
+	}
 	return LLVMTYPE_ObjectPtr;
 }
 

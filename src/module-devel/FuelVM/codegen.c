@@ -315,6 +315,7 @@ static INode *newINode(struct FuelIRBuilder *builder, enum IRType Kind)
 	Node->Kind = Kind;
 	Node->Id   = builder->LastNodeId++;
 	Node->Marked = 0;
+	Node->Unused = 0;
 	INode_setRange(Node, INTPTR_MIN, INTPTR_MAX);
 	return (Node);
 }
