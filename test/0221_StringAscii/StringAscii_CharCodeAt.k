@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("konoha.string");
+import("java2.string");
 
 void test() {
 	assert("HELLO WORLD".charCodeAt(0) == 72);

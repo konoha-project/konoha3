@@ -32,7 +32,7 @@ import("konoha.eval");
 import("konoha.file");
 import("konoha.math");
 import("konoha.object");
-import("konoha.string");
+import("java2.string");
 import("dscript.subproc");
 import("konoha.desugar");
 

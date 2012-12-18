@@ -1,7 +1,7 @@
 // written by Joseph
 // modified by chenji
 
-import("konoha.string");
+import("java2.string");
 
 void test() {
 	//NOTE: The length of "こんにちは、世界!" is 9.

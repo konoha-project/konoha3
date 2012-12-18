@@ -1,7 +1,7 @@
 import("cstyle");
 import("konoha.null");
 import("konoha.file");
-import("konoha.string");
+import("java2.string");
 import("konoha.new");
 import("konoha.array");
 import("konoha.foreach");

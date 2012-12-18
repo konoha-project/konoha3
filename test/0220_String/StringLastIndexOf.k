@@ -1,6 +1,6 @@
 //written by takeo onoda
 
-import("konoha.string");
+import("java2.string");
 
 void test() {
 	assert("foobar".lastIndexOf("f") == 0);

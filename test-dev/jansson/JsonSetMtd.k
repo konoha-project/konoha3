@@ -2,7 +2,7 @@ import("konoha.new");
 import("cstyle", "while");
 import("cstyle"); // konoha.int was obsolete
 import("konoha.float");
-import("konoha.string");
+import("java2.string");
 import("konoha.array");
 // //import("konoha.assign"); Don't use any more
 import("jansson");

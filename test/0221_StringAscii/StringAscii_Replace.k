@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("konoha.string");
+import("java2.string");
 
 void test() {
 	assert("Hello World, hello world.".replace("world", "Japan") == "Hello World, hello Japan.");

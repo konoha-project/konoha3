@@ -1,6 +1,6 @@
 //Written by Joseph
 
-import("konoha.string");
+import("java2.string");
 import("posix.path");
 
 void test() {

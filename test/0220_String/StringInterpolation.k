@@ -1,6 +1,6 @@
 // written by ide
 
-import("konoha.string");
+import("java2.string");
 
 int add(int n) {
     return n + 1;

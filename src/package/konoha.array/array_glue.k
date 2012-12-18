@@ -1,6 +1,6 @@
 // import("konoha.desugar")
 // import("konoha.while")
-// import("konoha.string")
+// import("java2.string")
 // import("konoha.assign")
 
 // Expr squareBracketExpression (Stmt stmt, Array[Token] tokenList, int s, int c,	int e) {

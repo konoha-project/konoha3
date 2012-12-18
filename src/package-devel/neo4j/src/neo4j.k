@@ -4,7 +4,7 @@
 
 import("jansson");
 import("konoha");
-import("konoha.string");
+import("java2.string");
 import("konoha.curl");
 
 load("rest.k");

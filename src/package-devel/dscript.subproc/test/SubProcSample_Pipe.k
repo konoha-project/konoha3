@@ -2,7 +2,7 @@
 
 import("dscript.subproc");
 import("konoha.file");
-import("konoha.string");
+import("java2.string");
 
 void test() {
 	// ls -la | cat -n

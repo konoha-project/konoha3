@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("konoha.string");
+import("java2.string");
 
 void test() {
 	assert("こんにちは、".concat("世界") == "こんにちは、世界");

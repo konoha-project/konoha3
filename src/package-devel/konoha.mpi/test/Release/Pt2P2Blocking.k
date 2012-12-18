@@ -1,7 +1,7 @@
 // written by wakamatsu
 import("konoha.bytes");
 import("konoha.float");
-import("konoha.string");
+import("java2.string");
 import("konoha.mpi");
 
 void test_bytes() {

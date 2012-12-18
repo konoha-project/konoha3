@@ -1,6 +1,6 @@
 // written by okamoto
 
-import("konoha.string");
+import("java2.string");
 import("konoha.regexp");
 import("konoha.date");
 

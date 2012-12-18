@@ -2,7 +2,7 @@
 // added by kimio
 
 import("cstyle");
-import("konoha.string");
+import("java2.string");
 
 void f() {
 	int i = 0;

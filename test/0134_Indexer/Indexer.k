@@ -1,6 +1,6 @@
 // written by kimio
 
-import("konoha.string");
+import("java2.string");
 import("cstyle");
 
 void test() {

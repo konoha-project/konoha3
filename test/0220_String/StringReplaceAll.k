@@ -1,4 +1,4 @@
-import("konoha.string")
+import("java2.string")
 
 void f() {
     String x = "あいうえああ";

@@ -2,7 +2,7 @@
 //Modified by Joseph
 
 import("konoha.bytes");
-import("konoha.string");
+import("java2.string");
 import("posix.file");
 
 void test() {

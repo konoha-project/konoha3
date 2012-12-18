@@ -1,6 +1,6 @@
 // import("konoha.desugar");
 // import("cstyle"); // use cstyle
-// import("konoha.string");
+// import("java2.string");
 // // //import("konoha.assign"); Don't use any more
 
 // int singleQuoteToken (Token tk, String source) {

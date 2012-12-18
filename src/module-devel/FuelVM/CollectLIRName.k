@@ -24,7 +24,7 @@
 
 import("konoha.regexp");
 import("konoha.new");
-import("konoha.string");
+import("java2.string");
 import("konoha.foreach");
 import("konoha.ns");  // konoha.const is obsolete
 import("konoha.array");

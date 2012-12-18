@@ -1,7 +1,7 @@
 //written by Joseph
 
 import("konoha.array");
-import("konoha.string");
+import("java2.string");
 
 void test() {
 	String[] ma = "How are you doing today?".split(" ");
