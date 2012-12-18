@@ -667,6 +667,7 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 	//}
 	while((ch = source[pos++]) != 0) {
 		if(ch == '\n') {
+			KReturnUnboxValue(-1);
 			break;
 		}
 		if(ch == '/' && prev != '\\') {
