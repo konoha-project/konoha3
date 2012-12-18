@@ -53,9 +53,9 @@ typedef struct {
 
 	KClass *cBytes;
 	KClass *cFile;
-	struct kFileVar       *fileStdIn_OnGlobalConstList;
-	struct kFileVar       *fileStdOut_OnGlobalConstList;
-	struct kFileVar       *fileStdErr_OnGlobalConstList;
+	struct kFileVar *fileStdIn_OnGlobalConstList;
+	struct kFileVar *fileStdOut_OnGlobalConstList;
+	struct kFileVar *fileStdErr_OnGlobalConstList;
 } KonohaCommonModule;
 
 
@@ -70,37 +70,35 @@ static inline void KonohaCommonModule_Init(KonohaContext *kctx, KTraceInfo *trac
 /* ------------------------------------------------------------------------ */
 /* Bytes */
 
-#define KClass_Bytes         (KGetKonohaCommonModule()->cBytes)
-#define KType_Bytes         ((KClass_Bytes)->typeId)
+#define KClass_Bytes     (KGetKonohaCommonModule()->cBytes)
+#define KType_Bytes      ((KClass_Bytes)->typeId)
 #define IS_Bytes(O)      (kObject_class(O) == KClass_Bytes)
 
 /* ------------------------------------------------------------------------ */
 /* RegExp */
 
-#define KClass_RegExp         (KGetKonohaCommonModule()->cRegExp)
-#define KType_RegExp         ((KClass_RegExp)->typeId)
+#define KClass_RegExp     (KGetKonohaCommonModule()->cRegExp)
+#define KType_RegExp      ((KClass_RegExp)->typeId)
 #define IS_RegExp(O)      (kObject_class(O) == KClass_RegExp)
 
 
 /* ------------------------------------------------------------------------ */
 /* Prototype */
 
-#define KClass_Prototype          (KGetKonohaCommonModule()->cPrototype)
-#define KType_Prototype          ((KClass_Prototype)->typeId)
+#define KClass_Prototype      (KGetKonohaCommonModule()->cPrototype)
+#define KType_Prototype       ((KClass_Prototype)->typeId)
 #define IS_Prototype(O)       (kObject_class(O)->baseTypeId == KType_Prototype)
-//#define KFLOAT_FMT        "%.4f"  // NEVER CHANGE THIS
 
 typedef const struct kPrototypeVar kPrototype;
 struct kPrototypeVar {
 	kObjectHeader h;
-//	kfloat_t floatValue;
 };
 
 /* ------------------------------------------------------------------------ */
 /* Float */
 
-#define KClass_Float          (KGetKonohaCommonModule()->cFloat)
-#define KType_float          ((KClass_Float)->typeId)
+#define KClass_Float      (KGetKonohaCommonModule()->cFloat)
+#define KType_float       ((KClass_Float)->typeId)
 #define IS_Float(O)       (kObject_class(O) == KClass_Float)
 #define KFLOAT_FMT        "%.4f"  // NEVER CHANGE THIS
 
@@ -113,13 +111,13 @@ struct kFloatVar {
 /* ------- */
 /* Iterator */
 
-#define KClassFlag_Iterator         KClassFlag_Final
-#define KClass_Iterator            KGetKonohaCommonModule()->cIterator
-#define KType_Iterator            KGetKonohaCommonModule()->cIterator->typeId
-#define KClass_StringIterator      KGetKonohaCommonModule()->cStringIterator
-#define KType_StringIterator      KGetKonohaCommonModule()->cStringIterator->typeId
-#define KClass_GenericIterator      KGetKonohaCommonModule()->cGenericIterator
-#define KType_GenericIterator      KGetKonohaCommonModule()->cGenericIterator->typeId
+#define KClassFlag_Iterator     KClassFlag_Final
+#define KClass_Iterator         KGetKonohaCommonModule()->cIterator
+#define KType_Iterator          KGetKonohaCommonModule()->cIterator->typeId
+#define KClass_StringIterator   KGetKonohaCommonModule()->cStringIterator
+#define KType_StringIterator    KGetKonohaCommonModule()->cStringIterator->typeId
+#define KClass_GenericIterator  KGetKonohaCommonModule()->cGenericIterator
+#define KType_GenericIterator   KGetKonohaCommonModule()->cGenericIterator->typeId
 
 #define IS_Iterator(O)         (kObject_class(O)->baseTypeId == KType_Iterator)
 
@@ -139,14 +137,14 @@ struct kIteratorVar {
 
 /* .... */
 
-#define KClass_File         KGetKonohaCommonModule()->cFile
-#define KType_File         (KClass_File)->typeId
+#define KClass_File     (KGetKonohaCommonModule()->cFile)
+#define KType_File      ((KClass_File)->typeId)
 #define IS_File(O)      (kObject_class(O) == KClass_File)
-#define KClass_FILE         KGetKonohaCommonModule()->cFile
-#define KType_FILE         (KClass_File)->typeId
-#define KFileStdIn       KGetKonohaCommonModule()->fileStdIn_OnGlobalConstList
-#define KFileStdOut      KGetKonohaCommonModule()->fileStdOut_OnGlobalConstList
-#define KFileStdErr      KGetKonohaCommonModule()->fileStdErr_OnGlobalConstList
+#define KClass_FILE     (KGetKonohaCommonModule()->cFile)
+#define KType_FILE      ((KClass_File)->typeId)
+#define KFileStdIn      KGetKonohaCommonModule()->fileStdIn_OnGlobalConstList
+#define KFileStdOut     KGetKonohaCommonModule()->fileStdOut_OnGlobalConstList
+#define KFileStdErr     KGetKonohaCommonModule()->fileStdErr_OnGlobalConstList
 
 
 #define kFileFlag_ChangeLessStream    kObjectFlag_Local1

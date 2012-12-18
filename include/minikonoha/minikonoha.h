@@ -124,9 +124,9 @@ typedef long long ssize_t;
  */
 
 #if defined(__NetBSD__)
-#define	ICONV_INBUF_CONST	const
+#define ICONV_INBUF_CONST const
 #else
-#define	ICONV_INBUF_CONST
+#define ICONV_INBUF_CONST
 #endif
 
 /* ------------------------------------------------------------------------ */
@@ -426,15 +426,15 @@ typedef uint64_t KJson_t;
 struct JsonBuf;
 
 typedef enum {
-    KJSON_OBJECT,
-    KJSON_ARRAY,
-    KJSON_STRING,
-    KJSON_INT,
-    KJSON_DOUBLE,
-    KJSON_BOOLEAN,
-    KJSON_NULL,
-    KJSON_INT64,
-    KJSON_LONG
+	KJSON_OBJECT,
+	KJSON_ARRAY,
+	KJSON_STRING,
+	KJSON_INT,
+	KJSON_DOUBLE,
+	KJSON_BOOLEAN,
+	KJSON_NULL,
+	KJSON_INT64,
+	KJSON_LONG
 } KJSONTYPE;
 
 typedef enum {
@@ -722,10 +722,10 @@ typedef struct {
 	ksymbol_t key;
 	ktypeattr_t   attrTypeId;
 	union {
-		uintptr_t                unboxValue;  //unboxValue
-		kObject                 *ObjectValue;  //ObjectValue
-		kString                 *StringValue;  //stringValue
-		kFunc                   *FuncValue;
+		uintptr_t   unboxValue;
+		kObject    *ObjectValue;
+		kString    *StringValue;
+		kFunc      *FuncValue;
 	};
 } KKeyValue;
 
@@ -744,10 +744,10 @@ typedef struct {
 typedef struct KGrowingArray {
 	size_t bytesize;
 	union {
-		char                              *bytebuf;
+		char                         *bytebuf;
 		const struct KClassVar      **classItems;
-		KKeyValue                         *keyValueItems;
-		kObject                          **ObjectItems;
+		KKeyValue                    *keyValueItems;
+		kObject                     **ObjectItems;
 	};
 	size_t bytemax;
 } KGrowingArray;
@@ -888,7 +888,6 @@ struct KRuntimeContextVar {
 // module
 #define KRuntimeModule_MAXSIZE    32
 #define MOD_gc         1
-//#define MOD_code       2
 #define MOD_sugar      3
 #define MOD_konoha     6
 
@@ -897,7 +896,6 @@ struct KRuntimeContextVar {
 //#define MOD_iterator   12
 //#define MOD_iconv      13
 //#define MOD_IO         14
-//#define MOD_llvm       15
 #define MOD_REGEXP     16
 #define MOD_APACHE     17
 #define MOD_EVENT      18
@@ -1225,9 +1223,9 @@ struct kIntVar /* extends kNumber */ {
 /* String */
 
 typedef enum {
-	VirtualType_Text                  =   KType_void,    /*special use for const char*/
-	VirtualType_KClass           =   KType_var,     /*special use for KClass*/
-	VirtualType_StaticMethod          =   KType_0        /*special use for Method*/
+	VirtualType_Text          =   KType_void, /*special use for const char*/
+	VirtualType_KClass        =   KType_var,  /*special use for KClass*/
+	VirtualType_StaticMethod  =   KType_0     /*special use for Method*/
 } VirtualType;
 
 #define IS_String(o)              (kObject_typeId(o) == KType_String)
@@ -1268,9 +1266,9 @@ typedef enum {
 
 typedef enum { NonZero, EnsureZero } StringfyPolicy;
 
-#define K_NULLTEXT                "null"
-#define kString_text(s)           ((const char *) (kObject_class(s)->unbox(kctx, (kObject *)s)))
-#define kString_size(s)           ((s)->bytesize)
+#define K_NULLTEXT         "null"
+#define kString_text(s)    ((const char *) (kObject_class(s)->unbox(kctx, (kObject *)s)))
+#define kString_size(s)    ((s)->bytesize)
 
 /* ------------------------------------------------------------------------ */
 //## class Array   Object;
@@ -1424,6 +1422,10 @@ typedef enum {
 
 typedef kbool_t (*KMethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, KMethodMatch *m);
 
+/* Stack Layout
+ * sfp |StackIdx       |   -4    |   -3    |   -2    |   -1    |    0    |    1    | ...
+ *     |Boxed |Unboxed |    |    |    |Shft|    | PC |    |Mtd |    |    |    |    |
+ */
 #define K_CALLDELTA   4
 #define K_RTNIDX    (-4)
 #define K_SHIFTIDX  (-3)
@@ -1457,20 +1459,20 @@ struct kFuncVar {
 
 struct kNameSpaceVar {
 	kObjectHeader h;
-	kpackageId_t packageId;  	       kshortflag_t syntaxOption;
-	kArray                            *NameSpaceConstList;
-	kNameSpace                        *parentNULL;
-	KDict                              constTable;
-	kObject                           *globalObjectNULL_OnList;
-	kArray                            *methodList_OnList;   // default K_EMPTYARRAY
-	size_t                             sortedMethodList;
+	kpackageId_t packageId; kshortflag_t syntaxOption;
+	kArray                  *NameSpaceConstList;
+	kNameSpace              *parentNULL;
+	KDict                    constTable;
+	kObject                 *globalObjectNULL_OnList;
+	kArray                  *methodList_OnList;   // default K_EMPTYARRAY
+	size_t                   sortedMethodList;
 	// the below references are defined in sugar
-	void                              *tokenMatrix;
-	KHashMap                          *syntaxMapNN;
-	kArray                            *stmtPatternListNULL_OnList;
-	struct KBuilderAPI                *builderApi;
-	KKeyValue                         *typeVariableItems;
-	size_t                             typesize;
+	void                    *tokenMatrix;
+	KHashMap                *syntaxMapNN;
+	kArray                  *stmtPatternListNULL_OnList;
+	struct KBuilderAPI      *builderApi;
+	KKeyValue               *typeVariableItems;
+	size_t                   typesize;
 };
 
 // NameSpace_syntaxOption
@@ -1569,8 +1571,8 @@ struct KPackageHandlerVar {
 	const char *version;
 	const char *libname;
 	const char *libversion;
-	kbool_t (*PackupNameSpace)    (KonohaContext *kctx, kNameSpace *, int, KTraceInfo *);
-	kbool_t (*ExportNameSpace)    (KonohaContext *kctx, kNameSpace *, kNameSpace *, int, KTraceInfo *);
+	kbool_t (*PackupNameSpace) (KonohaContext *kctx, kNameSpace *, int, KTraceInfo *);
+	kbool_t (*ExportNameSpace) (KonohaContext *kctx, kNameSpace *, kNameSpace *, int, KTraceInfo *);
 };
 
 typedef struct KPackageVar KPackage;
@@ -1735,7 +1737,6 @@ struct KonohaLibVar {
 #define KCalloc_UNTRACE(size, item)    PLATAPI Kzmalloc(kctx, ((size) * (item)), NULL)
 #define KFree(p, size)                 PLATAPI Kfree(kctx, p, size)
 
-//#define KLIB KBuffer_Write(W,...)          KLIB KBuffer_putc(kctx,W, ## __VA_ARGS__, -1)
 #define KBuffer_bytesize(W)                 (((W)->m)->bytesize - (W)->pos)
 
 #define kclass(CID, UL)           KLIB Kclass(kctx, CID, UL)
