@@ -185,7 +185,6 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 	INIT_GCSTACK();
 	kString *text = remove_escapes(kctx, tk);
 	if(text == NULL) {
-		kString_Set(Literal, ((kStringVar *)text), true);
 		KReturnWith(K_NULLEXPR, RESET_GCSTACK());
 	}
 
