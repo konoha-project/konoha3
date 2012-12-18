@@ -51,7 +51,7 @@ extern "C" {
 //
 //static void XmlDoc_free(KonohaContext *kctx, kRawPtr *po)
 //{
-//	if (po->rawptr != NULL) {
+//	if(po->rawptr != NULL) {
 //		xmlFreeDoc((xmlDocPtr)po->rawptr);
 //		po->rawptr = NULL;
 //	}
@@ -120,14 +120,14 @@ extern "C" {
 //    xmlDocPtr doc = Glue_to(xmlDocPtr, sfp[0]);
 //    xmlChar *name = String_to(xmlChar*, sfp[1]);
 //    doc->children = xmlNewDocNode(doc, NULL, name , NULL);
-//    KReturn(new_Glue(kctx,(char*)"libxml2.XmlNode",doc->children,NULL));
+//    KReturn(new_Glue(kctx,(char *)"libxml2.XmlNode",doc->children,NULL));
 //}
 //
 //static KMETHOD Xml_getRoot(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //    xmlDocPtr doc = Glue_to(xmlDocPtr, sfp[0]);
 //    xmlNodePtr node = xmlDocGetRootElement(doc);
-//    KReturn(new_Glue(kctx,(char*)"libxml2.XmlNode",node,NULL));
+//    KReturn(new_Glue(kctx,(char *)"libxml2.XmlNode",node,NULL));
 //}
 //
 //static KMETHOD Xml_dump(KonohaContext *kctx, KonohaStack *sfp)
@@ -136,7 +136,7 @@ extern "C" {
 //    xmlChar* ret;
 //    int   size;
 //    xmlDocDumpMemory(doc,&ret,&size);
-//    KNH_RETURN(kctx, sfp, new_String(kctx, B((char*)ret), NULL));
+//    KNH_RETURN(kctx, sfp, new_String(kctx, B((char *)ret), NULL));
 //}
 //
 //static KMETHOD Xml_dumpEnc(KonohaContext *kctx, KonohaStack *sfp)
@@ -146,7 +146,7 @@ extern "C" {
 //    xmlChar* ret;
 //    int   size;
 //    xmlDocDumpMemoryEnc(doc,&ret,&size,enc);
-//    KNH_RETURN(kctx, sfp, new_String(kctx, B((char*)ret), NULL));
+//    KNH_RETURN(kctx, sfp, new_String(kctx, B((char *)ret), NULL));
 //}
 //
 ///* XmlNode */
@@ -157,7 +157,7 @@ extern "C" {
 //    xmlChar *val  = String_to(xmlChar*, sfp[2]);
 //
 //    xmlNodePtr node = xmlNewChild(parent, NULL, name, val);
-//    KReturn(new_Glue(kctx,(char*)"libxml2.XmlNode",node,NULL));
+//    KReturn(new_Glue(kctx,(char *)"libxml2.XmlNode",node,NULL));
 //}
 //
 //static KMETHOD XmlNode_addChild(KonohaContext *kctx, KonohaStack *sfp)
@@ -183,9 +183,9 @@ extern "C" {
 //    xmlChar* ret = (xmlChar *)"";
 //    if(node->content){
 //        ret = node->content;
-//        fprintf(stdout,"[%s]\n",(char*)node->content);
+//        fprintf(stdout,"[%s]\n",(char *)node->content);
 //    }
-//    KNH_RETURN(kctx, sfp, new_String(kctx, B((char*)ret), NULL));
+//    KNH_RETURN(kctx, sfp, new_String(kctx, B((char *)ret), NULL));
 //}
 //
 //static KMETHOD XmlNode_getName(KonohaContext *kctx, KonohaStack *sfp)
@@ -195,7 +195,7 @@ extern "C" {
 //    if(node->name){
 //        ret = (xmlChar *)node->name;
 //    }
-//    KNH_RETURN(kctx, sfp, new_String(kctx, B((char*)ret), NULL));
+//    KNH_RETURN(kctx, sfp, new_String(kctx, B((char *)ret), NULL));
 //}
 //
 //static KMETHOD XmlNode_getAttr(KonohaContext *kctx, KonohaStack *sfp)
@@ -206,7 +206,7 @@ extern "C" {
 //    if(node->properties){
 //        ret  = xmlGetProp(node,name);
 //    }
-//    KNH_RETURN(kctx, sfp, new_String(kctx, B((char*)ret), NULL));
+//    KNH_RETURN(kctx, sfp, new_String(kctx, B((char *)ret), NULL));
 //}
 //
 //
@@ -217,7 +217,7 @@ extern "C" {
 //    if(child == NULL){
 //        KNH_THROW__T(kctx, "XmlNode: dont have child!");
 //    }
-//    KReturn(new_Glue(kctx,(char*)"libxml2.XmlNode",child,NULL));
+//    KReturn(new_Glue(kctx,(char *)"libxml2.XmlNode",child,NULL));
 //}
 //
 //static KMETHOD XmlNode_getNext(KonohaContext *kctx, KonohaStack *sfp)
@@ -227,7 +227,7 @@ extern "C" {
 //    if(next == NULL){
 //        KNH_THROW__T(kctx, "XmlNode: dont have next!");
 //    }
-//    KReturn(new_Glue(kctx,(char*)"libxml2.XmlNode",next,NULL));
+//    KReturn(new_Glue(kctx,(char *)"libxml2.XmlNode",next,NULL));
 //}
 //
 //static KMETHOD XmlNode_hasChild(KonohaContext *kctx, KonohaStack *sfp)
@@ -270,7 +270,7 @@ extern "C" {
 //{
 //    xmlDocPtr doc = (xmlDocPtr) p_cptr(sfp[1]);
 //    xmlXPathContextPtr xctx;
-//    if (!(xctx = xmlXPathNewContext(doc))) {
+//    if(!(xctx = xmlXPathNewContext(doc))) {
 //        KNH_THROW__T(kctx, "XPATH: cant create xmlXPathContext");
 //    }
 //    knh_Glue_init(kctx,sfp[0].glue,xctx,knh_xpath_gfree);
@@ -283,15 +283,15 @@ extern "C" {
 //    xmlChar *xpath = String_to(xmlChar *, sfp[1]);
 //    xmlNodePtr node = NULL;
 //    xmlXPathObjectPtr xpobj;
-//    if (!(xpobj = xmlXPathEvalExpression( xpath, xctx))) {
-//        fprintf(stderr,"xpath:%s",(char*)xpath);
+//    if(!(xpobj = xmlXPathEvalExpression( xpath, xctx))) {
+//        fprintf(stderr,"xpath:%s",(char *)xpath);
 //        KNH_THROW__T(kctx, "XPATH: cant execute xmlXPathEvalExpression");
 //    }
-//    if (!xmlXPathNodeSetIsEmpty(xpobj->nodesetval)) {
+//    if(!xmlXPathNodeSetIsEmpty(xpobj->nodesetval)) {
 //        node = xmlXPathNodeSetItem(xpobj->nodesetval, 0);
 //    }
 //    xmlXPathFreeObject(xpobj);
-//    KReturn(new_Glue(kctx,(char*)"libxml2.XmlNode",node,NULL));
+//    KReturn(new_Glue(kctx,(char *)"libxml2.XmlNode",node,NULL));
 //}
 
 /* ------------------------------------------------------------------------ */
@@ -306,15 +306,15 @@ typedef struct kXmlReaderVar kXmlReader;
 
 static void XmlReader_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	//kXmlReaderVar* xml = (kXmlReaderVar*)o;
-	struct kXmlReaderVar* xml = (struct kXmlReaderVar*)o;
+	//kXmlReaderVar* xml = (kXmlReaderVar *)o;
+	struct kXmlReaderVar* xml = (struct kXmlReaderVar *)o;
 	xml->reader = NULL;
 }
 
 static void XmlReader_free(KonohaContext *kctx, kObject *o)
 {
-	struct kXmlReaderVar* xml = (struct kXmlReaderVar*)o;
-	if (xml->reader != NULL) {
+	struct kXmlReaderVar* xml = (struct kXmlReaderVar *)o;
+	if(xml->reader != NULL) {
 		xmlFreeTextReader((xmlTextReaderPtr)xml->reader);
 		xml->reader = NULL;
 	}
@@ -324,7 +324,7 @@ static void XmlReader_reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor *
 {
 }
 
-#define getRawXmlReader(obj) ((struct kXmlReaderVar*)(obj.asObject))->reader
+#define getRawXmlReader(obj) ((struct kXmlReaderVar *)(obj.asObject))->reader
 
 //## @Native XmlReader XmlReader.new(String path);
 static KMETHOD XmlReader_new(KonohaContext *kctx, KonohaStack *sfp)
@@ -342,7 +342,7 @@ static KMETHOD XmlReader_new(KonohaContext *kctx, KonohaStack *sfp)
 //## @Native XmlReader String.convertToXml();
 static KMETHOD String_convertToXml(KonohaContext *kctx, KonohaStack *sfp)
 {
-	xmlChar* input = (xmlChar*)kString_text(sfp[0].asString);
+	xmlChar* input = (xmlChar *)kString_text(sfp[0].asString);
 	xmlTextReaderPtr r = xmlReaderForDoc(input, NULL, NULL, 1);
 	//xmlTextReaderPtr r = xmlReaderForDoc(input, NULL, "UTF-8", 1);
 	struct kXmlReaderVar *xml = (struct kXmlReaderVar *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
@@ -372,7 +372,7 @@ static KMETHOD XmlReader_getQuoteChar(KonohaContext *kctx, KonohaStack *sfp)
 	if(reader != NULL) {
 		int ch = xmlTextReaderQuoteChar(reader);
 		buf[0] = ch;
-		ret = (const char*)buf;
+		ret = (const char *)buf;
 	}
 	KReturn(KLIB new_kString(kctx, GcUnsafe, ret, strlen(ret), 0));
 }
@@ -480,7 +480,7 @@ static KMETHOD XmlReader_moveToElement(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD XmlReader_constBaseUri(KonohaContext *kctx, KonohaStack *sfp)
 {
 	xmlTextReaderPtr reader = getRawXmlReader(sfp[0]);
-	char* ret = (reader != NULL) ? (char*) xmlTextReaderConstBaseUri(reader) : NULL;
+	char* ret = (reader != NULL) ? (char *) xmlTextReaderConstBaseUri(reader) : NULL;
 	KReturn(KLIB new_kString(kctx, GcUnsafe, ret, strlen(ret), 0));
 }
 
@@ -488,7 +488,7 @@ static KMETHOD XmlReader_constBaseUri(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD XmlReader_constEncoding(KonohaContext *kctx, KonohaStack *sfp)
 {
 	xmlTextReaderPtr reader = getRawXmlReader(sfp[0]);
-	char* ret = (reader != NULL) ? (char*)xmlTextReaderConstEncoding(reader) : NULL;
+	char* ret = (reader != NULL) ? (char *)xmlTextReaderConstEncoding(reader) : NULL;
 	KReturn(KLIB new_kString(kctx, GcUnsafe, ret, strlen(ret), 0));
 }
 
@@ -496,7 +496,7 @@ static KMETHOD XmlReader_constEncoding(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD XmlReader_constValue(KonohaContext *kctx, KonohaStack *sfp)
 {
 	xmlTextReaderPtr reader = getRawXmlReader(sfp[0]);
-	char* ret = (reader != NULL) ? (char*) xmlTextReaderConstValue(reader) : NULL;
+	char* ret = (reader != NULL) ? (char *) xmlTextReaderConstValue(reader) : NULL;
 	KReturn(KLIB new_kString(kctx, GcUnsafe, ret, strlen(ret), 0));
 }
 
@@ -504,7 +504,7 @@ static KMETHOD XmlReader_constValue(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD XmlReader_constNamespaceUri(KonohaContext *kctx, KonohaStack *sfp)
 {
 	xmlTextReaderPtr reader = getRawXmlReader(sfp[0]);
-	char* ret = (reader != NULL) ? (char*) xmlTextReaderConstNamespaceUri(reader) : NULL;
+	char* ret = (reader != NULL) ? (char *) xmlTextReaderConstNamespaceUri(reader) : NULL;
 	KReturn(KLIB new_kString(kctx, GcUnsafe, ret, strlen(ret), 0));
 }
 
@@ -512,7 +512,7 @@ static KMETHOD XmlReader_constNamespaceUri(KonohaContext *kctx, KonohaStack *sfp
 static KMETHOD XmlReader_constLocalName(KonohaContext *kctx, KonohaStack *sfp)
 {
 	xmlTextReaderPtr reader = getRawXmlReader(sfp[0]);
-	char* ret = (reader != NULL) ? (char*) xmlTextReaderConstLocalName(reader) : NULL;
+	char* ret = (reader != NULL) ? (char *) xmlTextReaderConstLocalName(reader) : NULL;
 	KReturn(KLIB new_kString(kctx, GcUnsafe, ret, strlen(ret), 0));
 }
 
@@ -520,7 +520,7 @@ static KMETHOD XmlReader_constLocalName(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD XmlReader_constName(KonohaContext *kctx, KonohaStack *sfp)
 {
 	xmlTextReaderPtr reader = getRawXmlReader(sfp[0]);
-	char* ret = (reader != NULL) ? (char*) xmlTextReaderConstName(reader) : NULL;
+	char* ret = (reader != NULL) ? (char *) xmlTextReaderConstName(reader) : NULL;
 	KReturn(KLIB new_kString(kctx, GcUnsafe, ret, strlen(ret), 0));
 }
 
@@ -528,7 +528,7 @@ static KMETHOD XmlReader_constName(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD XmlReader_constXmlLang(KonohaContext *kctx, KonohaStack *sfp)
 {
 	xmlTextReaderPtr reader = getRawXmlReader(sfp[0]);
-	char* ret = (reader != NULL) ? (char*) xmlTextReaderConstXmlLang(reader) : NULL;
+	char* ret = (reader != NULL) ? (char *) xmlTextReaderConstXmlLang(reader) : NULL;
 	KReturn(KLIB new_kString(kctx, GcUnsafe, ret, strlen(ret), 0));
 }
 
@@ -536,7 +536,7 @@ static KMETHOD XmlReader_constXmlLang(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD XmlReader_constPrefix(KonohaContext *kctx, KonohaStack *sfp)
 {
 	xmlTextReaderPtr reader = getRawXmlReader(sfp[0]);
-	char* ret = (reader != NULL) ? (char*) xmlTextReaderConstPrefix(reader) : NULL;
+	char* ret = (reader != NULL) ? (char *) xmlTextReaderConstPrefix(reader) : NULL;
 	KReturn(KLIB new_kString(kctx, GcUnsafe, ret, strlen(ret), 0));
 }
 
@@ -545,8 +545,8 @@ static KMETHOD XmlReader_constPrefix(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD XmlReader_getAttribute(KonohaContext *kctx, KonohaStack *sfp)
 {
 	xmlTextReaderPtr reader = getRawXmlReader(sfp[0]);
-	xmlChar* ns = (xmlChar*)kString_text(sfp[1].asString);
-	char* ret = (reader != NULL) ? (char*) xmlTextReaderGetAttribute(reader,ns) : NULL;
+	xmlChar* ns = (xmlChar *)kString_text(sfp[1].asString);
+	char* ret = (reader != NULL) ? (char *) xmlTextReaderGetAttribute(reader,ns) : NULL;
 	KReturn(KLIB new_kString(kctx, GcUnsafe, ret, strlen(ret), 0));
 }
 
@@ -555,7 +555,7 @@ static KMETHOD XmlReader_getAttributeNo(KonohaContext *kctx, KonohaStack *sfp)
 {
 	xmlTextReaderPtr reader = getRawXmlReader(sfp[0]);
 	int num = (int)(sfp[1].intValue);
-	char* ret = (reader != NULL) ? (char*) xmlTextReaderGetAttributeNo(reader, num) : NULL;
+	char* ret = (reader != NULL) ? (char *) xmlTextReaderGetAttributeNo(reader, num) : NULL;
 	KReturn(KLIB new_kString(kctx, GcUnsafe, ret, strlen(ret), 0));
 }
 
@@ -563,9 +563,9 @@ static KMETHOD XmlReader_getAttributeNo(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD XmlReader_getAttributeNs(KonohaContext *kctx, KonohaStack *sfp)
 {
 	xmlTextReaderPtr reader = getRawXmlReader(sfp[0]);
-	xmlChar* ns = (xmlChar*)kString_text(sfp[1].asString);
-	xmlChar* name = (xmlChar*)kString_text(sfp[2].asString);
-	char* ret = (reader != NULL) ? (char*) xmlTextReaderGetAttributeNs(reader,ns,name) : NULL;
+	xmlChar* ns = (xmlChar *)kString_text(sfp[1].asString);
+	xmlChar* name = (xmlChar *)kString_text(sfp[2].asString);
+	char* ret = (reader != NULL) ? (char *) xmlTextReaderGetAttributeNs(reader,ns,name) : NULL;
 	KReturn(KLIB new_kString(kctx, GcUnsafe, ret, strlen(ret), 0));
 }
 
@@ -573,8 +573,8 @@ static KMETHOD XmlReader_getAttributeNs(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD XmlReader_lookupNameSpace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	xmlTextReaderPtr reader = getRawXmlReader(sfp[0]);
-	xmlChar* ns = (xmlChar*)kString_text(sfp[1].asString);
-	char* ret = (reader != NULL) ? (char*) xmlTextReaderLookupNamespace(reader,ns) : NULL;
+	xmlChar* ns = (xmlChar *)kString_text(sfp[1].asString);
+	char* ret = (reader != NULL) ? (char *) xmlTextReaderLookupNamespace(reader,ns) : NULL;
 	KReturn(KLIB new_kString(kctx, GcUnsafe, ret, strlen(ret), 0));
 }
 
@@ -680,7 +680,7 @@ static kbool_t xml_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpa
 
 struct KonohaContextVar *ctx;
 
-KDEFINE_PACKAGE* xml_Init(void)
+KDEFINE_PACKAGE *xml_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);
