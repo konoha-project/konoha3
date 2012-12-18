@@ -1,6 +1,6 @@
 import("konoha.regexp");
 import("konoha.new");
-import("konoha.string");
+import("js4.string");
 import("konoha.foreach");
 import("konoha.ns");
 import("konoha.array");
