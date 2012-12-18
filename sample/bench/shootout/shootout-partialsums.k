@@ -6,11 +6,9 @@
 
 import("cstyle");
 import("konoha.float");
-// //import("konoha.assign"); Don't use any more
-import("konoha.ns");  // konoha.const is obsolete
+import("konoha.ns");
 import("konoha.math");
 const N=2500000;
-//N=2_500_000;
 
 void partial(int n) {
 	float twothirds = 2.0/3.0;

@@ -5,13 +5,12 @@
  */
 
 import("cstyle");
-import("konoha.ns");  // konoha.const is obsolete
+import("konoha.ns");
 import("konoha.float");
 import("konoha.global");
 import("konoha.class");
 import("konoha.array");
 import("konoha.new");
-// //import("konoha.assign"); Don't use any more
 import("konoha.string");
 import("konoha.bytes");
 import("konoha.file");

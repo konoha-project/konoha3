@@ -4,7 +4,7 @@ import("konoha");
    contributed by Kimio Kuramitsu
 */
 
-int c_MINDEPTH = 4;
+const c_MINDEPTH = 4;
 
 class TreeNode {
 	TreeNode left, right;

@@ -6,10 +6,9 @@
  */
 
 import("cstyle");
-import("konoha.ns");  // konoha.const is obsolete
+import("konoha.ns");
 import("konoha.float");
 import("konoha.class");
-// //import("konoha.assign"); Don't use any more
 import("konoha.array");
 import("konoha.math");
 
@@ -91,22 +90,18 @@ class NBodySystem {
 		float py = 0.0;
 		float pz = 0.0;
 		bodies = [Body.sun(), Body.jupiter(), Body.saturn(), Body.uranus(), Body.neptune()];
-		//for(int i=0; i < bodies.size; ++i) {
-		int i=0; while(i<bodies.size) {
+		for(int i=0; i < bodies.size; ++i) {
 			px = px + bodies[i].vx * bodies[i].mass;
 			py = py + bodies[i].vy * bodies[i].mass;
 			pz = pz + bodies[i].vz * bodies[i].mass;
-			i = i + 1;
 		}
 		bodies[0].offsetMomentum(px,py,pz);
 	}
 
 	void advance(float dt) {
-		//for(int i=0; i < bodies.size; ++i) {
-		int i=0; while(i<bodies.size) {
+		for(int i=0; i < bodies.size; ++i) {
 			Body iBody = bodies[i];
-			//for(int j=i+1; j < bodies.size; ++j) {
-			int j=i+1; while(j<bodies.size) {
+			for(int j=i+1; j < bodies.size; ++j) {
 				float dx = iBody.x - bodies[j].x;
 				float dy = iBody.y - bodies[j].y;
 				float dz = iBody.z - bodies[j].z;
@@ -121,18 +116,14 @@ class NBodySystem {
 				bodies[j].vx = bodies[j].vx + dx * iBody.mass * mag;
 				bodies[j].vy = bodies[j].vy + dy * iBody.mass * mag;
 				bodies[j].vz = bodies[j].vz + dz * iBody.mass * mag;
-				j = j + 1;
 			}
-			i = i + 1;
 		}
 
-		//for(int i=0; i < bodies.size; ++i) {
-		int i=0; while(i<bodies.size) {
+		for(int i=0; i < bodies.size; ++i) {
 			Body body = bodies[i];
 			body.x = body.x + dt * body.vx;
 			body.y = body.y + dt * body.vy;
 			body.z = body.z + dt * body.vz;
-			i = i + 1;
 		}
 	}
 
@@ -140,13 +131,11 @@ class NBodySystem {
 		float dx, dy, dz, distance;
 		float e = 0.0;
 
-		//for (int i=0; i < bodies.size; ++i) {
-		int i=0; while(i<bodies.size) {
+		for (int i=0; i < bodies.size; ++i) {
 			Body iBody = bodies[i];
 			e = e + (0.5 * iBody.mass * ( iBody.vx * iBody.vx + iBody.vy * iBody.vy + iBody.vz * iBody.vz ));
 
-			//for (int j=i+1; j < bodies.size; ++j) {
-			int j=i+1; while(j<bodies.size) {
+			for (int j=i+1; j < bodies.size; ++j) {
 				Body jBody = bodies[j];
 				dx = iBody.x - jBody.x;
 				dy = iBody.y - jBody.y;
@@ -154,9 +143,7 @@ class NBodySystem {
 
 				distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
 				e = e - (iBody.mass * jBody.mass) / distance;
-				j = j + 1;
 			}
-			i = i + 1;
 		}
 		return e;
 	}
@@ -166,10 +153,8 @@ void run() {
 	int n = N;
 	NBodySystem bodies = new NBodySystem();
 	System.p("energy:"+ bodies.energy());
-	//for (int i = 0; i < n; i++) {
-	int i=0; while(i<n) {
+	for (int i = 0; i < n; i++) {
 		bodies.advance(0.01);
-		i = i + 1;
 	}
 	System.p("energy:"+ bodies.energy());
 }

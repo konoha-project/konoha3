@@ -5,18 +5,17 @@
  */
 
 import("cstyle");
-import("konoha.ns");  // konoha.const is obsolete
+import("konoha.ns");
 import("konoha.global");
 import("konoha.class");
 import("konoha.float");
 import("konoha.array");
-// //import("konoha.assign"); Don't use any more
 import("konoha.bytes");
 import("konoha.file");
 
 AllowImplicitGlobalVariable(true);
 
-const N=250000; /*25000000*/
+const N=250000;
 const EOL = "\n";
 
 const ALU = ("GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGG" + 

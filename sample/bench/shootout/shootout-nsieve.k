@@ -5,11 +5,10 @@
  */
 
 import("cstyle");
-import("cstyle"); // konoha.int was obsolete
 import("konoha.new");
 import("konoha.array");
 import("konoha.class");
-import("konoha.ns");  // konoha.const is obsolete
+import("konoha.ns");
 import("konoha.string");
 
 const N=8;

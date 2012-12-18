@@ -5,14 +5,13 @@
  */
 
 import("cstyle");
-import("konoha.ns");  // konoha.const is obsolete
+import("konoha.ns");
 import("konoha.class");
 import("konoha.array");
 import("konoha.new");
 import("konoha.float");
 import("konoha.math");
 const N=550;
-//const N=5500;
 
 class Spectralnorm {
 	/* return element i,j of infinite matrix A */
