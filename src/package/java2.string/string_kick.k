@@ -200,7 +200,9 @@ import("konoha.object");
 
 //## @Public String[] String.split(String regex)
 //## Replaces the first substring of this string that matches the given regular expression with the given replacement.
-//@Public String[] String.split(String regex)
+@Public String[] String.split(String regex) {
+    return this.split(regex, -1);
+}
 
 //## @Public String[] String.split(String regex, int limit)
 //## Splits this string around matches of the given regular expression.
@@ -224,7 +226,7 @@ import("konoha.object");
 //## @Public String String.substring(int beginIndex)
 //## Returns a new character sequence that is a subsequence of this sequence.
 @Public String String.substring(int beginIndex) {
-    return this.substring(beginIndex, this.length() - beginIndex);
+    return this.substring(beginIndex, this.length());
 }
 
 //## @Public String String.substring(int beginIndex, int endIndex)

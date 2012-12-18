@@ -1,7 +1,7 @@
 //written by Joseph
 
 import("konoha.array");
-import("java2.string");
+import("js4.string");
 
 void test() {
 	String[] ma = "こんにちは、世界、日本は?".split("、");

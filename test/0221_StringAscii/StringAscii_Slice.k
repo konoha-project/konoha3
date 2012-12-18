@@ -1,7 +1,7 @@
 // written by Joseph
 // modified by chenji
 
-import("java2.string");
+import("js4.string");
 
 void test() {
 	assert("Hello, world!".slice(1, 5) == "ello");

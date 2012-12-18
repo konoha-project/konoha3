@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("java2.string");
+import("js4.string");
 
 void test() {
 	assert("こんにちは、世界!".substr(2) == "にちは、世界!");

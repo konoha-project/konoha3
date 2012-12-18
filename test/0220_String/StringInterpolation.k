@@ -20,9 +20,9 @@ interpolation();
 
 void literal() {
     //assert("abcd efgh".isNotNull());
-    assert("abcd efgh".getSize() == 9);
+    assert("abcd efgh".getlength() == 9);
     //assert("${".isNotNull());
-    assert("${".getSize() == 2);
+    assert("${".getlength() == 2);
 }
 
 literal();
