@@ -26,7 +26,7 @@
 #define KJSON_H_
 
 #include "kmemory_pool.h"
-#include "numbox.h"
+#include "knumbox.h"
 #include "kmap.h"
 
 #ifdef __cplusplus
@@ -169,7 +169,7 @@ static inline JSON *JSON_getArray(JSON json, const char *key, size_t *len)
 KJSON_API void JSONObject_setObject(JSONMemoryPool *jm, JSON obj, JSON key, JSON value);
 KJSON_API void JSONObject_set(JSONMemoryPool *jm, JSON obj, const char *key, size_t len, JSON value);
 KJSON_API void JSONArray_append(JSONMemoryPool *jm, JSON ary, JSON o);
-KJSON_API void JSON_Free(JSON o);
+KJSON_API void JSON_free(JSON o);
 
 KJSON_API JSON parseJSON(JSONMemoryPool *jm, const char *s, const char *e);
 KJSON_API char *JSON_toStringWithLength(JSON json, size_t *len);
@@ -201,7 +201,7 @@ typedef struct JSONObject_iterator {
 
 #define JSON_OBJECT_EACH(O, ITR, KEY, VAL)\
     if(!JSON_TYPE_CHECK(Object, O)) {} else\
-    if(!(JSONObject_iterator_Init(&ITR, O))) {}\
+    if(!(JSONObject_iterator_init(&ITR, O))) {}\
     else\
     for(KEY = JSONObject_iterator_next(&ITR, &VAL); KEY.bits;\
             KEY = JSONObject_iterator_next(&ITR, &VAL))
@@ -232,7 +232,7 @@ static inline JSON toJSON(Value v) {
 #define INT32_MIN        (-INT32_MAX-1)
 #endif
 
-static inline JSON JSON_Parse(JSONMemoryPool *jm, const char *str)
+static inline JSON JSON_parse(JSONMemoryPool *jm, const char *str)
 {
     const char *end = str + strlen(str);
     return parseJSON(jm, str, end);
@@ -272,7 +272,7 @@ static inline int JSONBool_get(JSON json)
     return toBool(json.val);
 }
 
-static inline JSONString *JSONString_Init(JSONString *buffer, const char *str, size_t length)
+static inline JSONString *JSONString_init(JSONString *buffer, const char *str, size_t length)
 {
     buffer->str      = str;
     buffer->length   = length;
@@ -287,7 +287,7 @@ static inline JSON JSONString_new(JSONMemoryPool *jm, const char *s, size_t len)
     JSONString *o = (JSONString *) JSONMemoryPool_Alloc(jm, sizeof(*o), &malloced);
     char *str = (len > JSONSTRING_INLINE_SIZE) ? (char *) malloc(len) : o->text;
     memcpy(str, s, len);
-    JSONString_Init(o, (const char *)str, len);
+    JSONString_init(o, (const char *)str, len);
     return toJSON(ValueS(o));
 }
 
@@ -300,7 +300,7 @@ static inline JSON JSONObject_new(JSONMemoryPool *jm, unsigned map_size)
 {
     bool malloced;
     JSONObject *o = (JSONObject *) JSONMemoryPool_Alloc(jm, sizeof(*o), &malloced);
-    kmap_Init(&(o->child), map_size);
+    kmap_init(&(o->child), map_size);
     return toJSON(ValueO(o));
 }
 
@@ -308,7 +308,7 @@ static inline JSON JSONArray_new(JSONMemoryPool *jm, unsigned elm_size)
 {
     bool malloced;
     JSONArray *o = (JSONArray *) JSONMemoryPool_Alloc(jm, sizeof(*o), &malloced);
-    ARRAY_Init(JSON, &o->array, elm_size);
+    ARRAY_init(JSON, &o->array, elm_size);
     return toJSON(ValueA(o));
 }
 
@@ -337,8 +337,9 @@ static inline JSON JSONBool_new(bool val)
 static inline unsigned JSON_length(JSON json)
 {
     assert((JSON_type(json) & 0x3) == 0x1);
-    JSONArray *a = toAry(json.val);
-    return ARRAY_size(a->array);
+    return JSON_type(json) == JSON_Object ?
+        kmap_size(&toObj(json.val)->child):
+        ARRAY_size(toAry(json.val)->array);
 }
 
 static inline const char *JSONError_get(JSON json)
@@ -365,7 +366,7 @@ static inline bool JSONArray_set(JSON json, unsigned index, JSON val)
     return false;
 }
 
-static inline int JSONObject_iterator_Init(JSONObject_iterator *itr, JSON json)
+static inline int JSONObject_iterator_init(JSONObject_iterator *itr, JSON json)
 {
     if(!JSON_TYPE_CHECK(Object, json))
         return 0;

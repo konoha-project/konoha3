@@ -61,7 +61,7 @@ static JSON JSONUString_new(JSONMemoryPool *jm, string_builder *builder)
         memcpy(o->text, s, len-1);
         s = o->text;
     }
-    JSONString_Init(o, s, len-1);
+    JSONString_init(o, s, len-1);
     return toJSON(ValueU(o));
 }
 
@@ -83,40 +83,40 @@ static int JSONString_equal(JSONString *k0, JSONString *k1)
     return strncmp(k0->str, k1->str, k0->length) == 0;
 }
 
-static void _JSON_Free(JSON o);
-static void JSONNOP_Free(JSON o) {}
+static void _JSON_free(JSON o);
+static void JSONNOP_free(JSON o) {}
 
-KJSON_API void JSON_Free(JSON o)
+KJSON_API void JSON_free(JSON o)
 {
-    _JSON_Free(o);
+    _JSON_free(o);
 }
 
-static void JSONObject_Free(JSON json)
+static void JSONObject_free(JSON json)
 {
     JSONObject *o = toObj(json.val);
     kmap_dispose(&o->child);
 }
 
-static void _JSONString_Free(JSONString *obj)
+static void _JSONString_free(JSONString *obj)
 {
     if(obj->length > JSONSTRING_INLINE_SIZE) {
         free((char *)obj->str);
     }
 }
 
-static void JSONString_Free(JSON json)
+static void JSONString_free(JSON json)
 {
     JSONString *o = toStr(json.val);
-    _JSONString_Free(o);
+    _JSONString_free(o);
 }
 
-static void JSONArray_Free(JSON json)
+static void JSONArray_free(JSON json)
 {
     JSONArray *a = toAry(json.val);
     JSON *s, *e;
 
     FOR_EACH_ARRAY(a->array, s, e) {
-        _JSON_Free(*s);
+        _JSON_free(*s);
     }
 
     ARRAY_dispose(JSON, &a->array);
@@ -140,28 +140,28 @@ static void JSONArray_Free(JSON json)
     OP(/* 14 */JSONNOP)\
     OP(/* 15 */JSONNOP)
 
-#define JSONInt64_Free   JSONNOP_Free
-#define JSONDouble_Free  JSONNOP_Free
-#define JSONInt32_Free   JSONNOP_Free
-#define JSONBool_Free    JSONNOP_Free
-#define JSONNull_Free    JSONNOP_Free
-#define JSONUString_Free JSONString_Free
+#define JSONInt64_free   JSONNOP_free
+#define JSONDouble_free  JSONNOP_free
+#define JSONInt32_free   JSONNOP_free
+#define JSONBool_free    JSONNOP_free
+#define JSONNull_free    JSONNOP_free
+#define JSONUString_free JSONString_free
 
-static void _JSON_Free(JSON o)
+static void _JSON_free(JSON o)
 {
     kjson_type type = JSON_type(o);
     typedef void (*freeJSON)(JSON);
-    static const freeJSON dispatch_Free[] = {
-#define JSON_FREE(T) T##_Free,
+    static const freeJSON dispatch_free[] = {
+#define JSON_FREE(T) T##_free,
         JSON_OP(JSON_FREE)
 #undef JSON_FREE
     };
-    dispatch_Free[type](o);
+    dispatch_free[type](o);
 }
 
 static void _JSONArray_append(JSONArray *a, JSON o)
 {
-    ARRAY_Add(JSON, &a->array, o);
+    ARRAY_add(JSON, &a->array, o);
 }
 
 KJSON_API void JSONArray_append(JSONMemoryPool *jm, JSON json, JSON o)
@@ -353,19 +353,19 @@ static unsigned toHex(input_stream *ins, uint8_t c)
 static void writeUnicode(unsigned data, string_builder *sb)
 {
     if(data <= 0x7f) {
-        string_builder_Add(sb, (char)data);
+        string_builder_add(sb, (char)data);
     } else if(data <= 0x7ff) {
-        string_builder_Add(sb, (char)(0xc0 | (data >> 6)));
-        string_builder_Add(sb, (char)(0x80 | (0x3f & data)));
+        string_builder_add(sb, (char)(0xc0 | (data >> 6)));
+        string_builder_add(sb, (char)(0x80 | (0x3f & data)));
     } else if(data <= 0xffff) {
-        string_builder_Add(sb, (char)(0xe0 | (data >> 12)));
-        string_builder_Add(sb, (char)(0x80 | (0x3f & (data >> 6))));
-        string_builder_Add(sb, (char)(0x80 | (0x3f & data)));
+        string_builder_add(sb, (char)(0xe0 | (data >> 12)));
+        string_builder_add(sb, (char)(0x80 | (0x3f & (data >> 6))));
+        string_builder_add(sb, (char)(0x80 | (0x3f & data)));
     } else if(data <= 0x10FFFF) {
-        string_builder_Add(sb, (char)(0xf0 | (data >> 18)));
-        string_builder_Add(sb, (char)(0x80 | (0x3f & (data >> 12))));
-        string_builder_Add(sb, (char)(0x80 | (0x3f & (data >>  6))));
-        string_builder_Add(sb, (char)(0x80 | (0x3f & data)));
+        string_builder_add(sb, (char)(0xf0 | (data >> 18)));
+        string_builder_add(sb, (char)(0x80 | (0x3f & (data >> 12))));
+        string_builder_add(sb, (char)(0x80 | (0x3f & (data >>  6))));
+        string_builder_add(sb, (char)(0x80 | (0x3f & data)));
     }
 }
 
@@ -393,7 +393,7 @@ static void parseEscape(input_stream *ins, string_builder *sb, uint8_t c)
         case 'u': parseUnicode(ins, sb); return;
         default: THROW(&ins->exception, PARSER_EXCEPTION, "Illegal escape token");
     }
-    string_builder_Add(sb, c);
+    string_builder_add(sb, c);
 }
 
 static JSON parseString(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
@@ -407,9 +407,9 @@ static JSON parseString(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
     if(c == '"') {/* fast path */
         return JSONString_new(jm, (char *)state1, length);
     }
-    string_builder sb; string_builder_Init(&sb);
+    string_builder sb; string_builder_init(&sb);
     if(length > 0) {
-        string_builder_Add_string(&sb, (const char *) state1, length);
+        string_builder_add_string(&sb, (const char *) state1, length);
     }
     THROW_IF(c != '\\', ins->exception, "Unexpected Token at middle of JSONString");
     parseEscape(ins, &sb, NEXT(ins));
@@ -424,7 +424,7 @@ static JSON parseString(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
             default:
                 break;
         }
-        string_builder_Add(&sb, c);
+        string_builder_add(&sb, c);
     }
     L_end:;
     return JSONUString_new(jm, &sb);
@@ -459,12 +459,12 @@ static JSON parseObject(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
         JSON key = parseString(jm, ins, c);
         THROW_IF(key.bits == 0, ins->exception, "JSONObject with extra comma");
         JSONString_hashCode(toStr(key.val));
-        kstack_Push(&ins->stack, key);
+        kstack_push(&ins->stack, key);
         c = skip_space(ins, NEXT(ins));
         THROW_IF(c != ':', ins->exception, "Missing ':' after key in object");
 
         JSON val = parseChild(jm, ins, NEXT(ins));
-        kstack_Push(&ins->stack, val);
+        kstack_push(&ins->stack, val);
         c = skip_space(ins, NEXT(ins));
         if(c == '}') {
             break;
@@ -477,8 +477,8 @@ static JSON parseObject(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
     while(field_size-- > 0) {
         JSONString *key;
         JSON val;
-        val = kstack_Pop(&ins->stack);
-        key = toStr(kstack_Pop(&ins->stack).val);
+        val = kstack_pop(&ins->stack);
+        key = toStr(kstack_pop(&ins->stack).val);
         assert(val.bits != 0 && key);
         _JSONObject_set(obj, key, val);
     }
@@ -498,7 +498,7 @@ static JSON parseArray(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
     for(; EOS(ins); c = skip_space(ins, NEXT(ins))) {
         JSON val = parseChild(jm, ins, c);
         THROW_IF(val.bits == 0, ins->exception, "JSONArray with extra comma");
-        kstack_Push(&ins->stack, val);
+        kstack_push(&ins->stack, val);
         c = skip_space(ins, NEXT(ins));
         if(c == ']') {
             break;
@@ -646,7 +646,7 @@ KJSON_API JSON parseJSON(JSONMemoryPool *jm, const char *s, const char *e)
 {
     input_stream insbuf;
     input_stream *ins = new_string_input_stream(&insbuf, s, e - s);
-    kexception_handler_Init(&ins->exception);
+    kexception_handler_init(&ins->exception);
     JSON json;
     TRY(ins->exception) {
         json = parseJSON_stream(jm, ins);
@@ -678,9 +678,9 @@ KJSON_API JSON JSON_get(JSON json, const char *key, size_t len)
 static void _JSONString_toString(string_builder *sb, JSONString *o)
 {
     string_builder_ensure_size(sb, o->length+2);
-    string_builder_Add_no_Check(sb, '"');
-    string_builder_Add_string_no_Check(sb, o->str, o->length);
-    string_builder_Add_no_Check(sb, '"');
+    string_builder_add_no_check(sb, '"');
+    string_builder_add_string_no_check(sb, o->str, o->length);
+    string_builder_add_no_check(sb, '"');
 }
 
 static void _JSON_toString(string_builder *sb, JSON json);
@@ -688,7 +688,7 @@ static void _JSON_toString(string_builder *sb, JSON json);
 static void JSONObjectElement_toString(string_builder *sb, map_record_t *r)
 {
     _JSONString_toString(sb, r->k);
-    string_builder_Add(sb, ':');
+    string_builder_add(sb, ':');
     _JSON_toString(sb, toJSON(ValueP(r->v)));
 }
 
@@ -696,33 +696,33 @@ static void JSONObject_toString(string_builder *sb, JSON json)
 {
     map_record_t *r;
     kmap_iterator itr = {0};
-    string_builder_Add(sb, '{');
+    string_builder_add(sb, '{');
     JSONObject *o = toObj(json.val);
     if((r = kmap_next(&o->child, &itr)) != NULL) {
         JSONObjectElement_toString(sb, r);
         while((r = kmap_next(&o->child, &itr)) != NULL) {
-            string_builder_Add(sb, ',');
+            string_builder_add(sb, ',');
             JSONObjectElement_toString(sb, r);
         }
     }
-    string_builder_Add(sb, '}');
+    string_builder_add(sb, '}');
 }
 
 static void JSONArray_toString(string_builder *sb, JSON json)
 {
     JSON *s, *e;
     JSONArray *a = toAry(json.val);
-    string_builder_Add(sb, '[');
+    string_builder_add(sb, '[');
     s = ARRAY_BEGIN(a->array);
     e = ARRAY_END(a->array);
     if(s < e) {
         _JSON_toString(sb, *s++);
         for(; s != e; ++s) {
-            string_builder_Add(sb, ',');
+            string_builder_add(sb, ',');
             _JSON_toString(sb, *s);
         }
     }
-    string_builder_Add(sb, ']');
+    string_builder_add(sb, ']');
 }
 
 static void JSONString_toString(string_builder *sb, JSON json)
@@ -731,7 +731,7 @@ static void JSONString_toString(string_builder *sb, JSON json)
     _JSONString_toString(sb, o);
 }
 
-static int utf8_Check_size(uint8_t s)
+static int utf8_check_size(uint8_t s)
 {
     uint8_t u = (uint8_t) s;
     assert (u >= 0x80);
@@ -748,7 +748,7 @@ static int utf8_Check_size(uint8_t s)
 static const char *toUTF8(string_builder *sb, const char *s, const char *e)
 {
     uint32_t v = 0;
-    int i, length = utf8_Check_size((uint8_t) (*s));
+    int i, length = utf8_check_size((uint8_t) (*s));
     if(length == 2) v = *s++ & 0x1f;
     else if(length == 3) v = *s++ & 0xf;
     else if(length == 4) v = *s++ & 0x7;
@@ -759,7 +759,7 @@ static const char *toUTF8(string_builder *sb, const char *s, const char *e)
         }
         v = (v << 6) | (tmp & 0x3f);
     }
-    string_builder_Add_hex_no_Check(sb, v);
+    string_builder_add_hex_no_check(sb, v);
     return s;
 }
 
@@ -769,40 +769,40 @@ static void JSONUString_toString(string_builder *sb, JSON json)
     const char *s = o->str;
     const char *e = o->str + o->length;
     string_builder_ensure_size(sb, o->length+2/* = strlen("\"\") */);
-    string_builder_Add_no_Check(sb, '"');
+    string_builder_add_no_check(sb, '"');
     while(s < e) {
         uint8_t c = *s;
         string_builder_ensure_size(sb, 8);
         if(c & 0x80) {
-            string_builder_Add_string_no_Check(sb, "\\u", 2);
+            string_builder_add_string_no_check(sb, "\\u", 2);
             s = toUTF8(sb, s, e);
             continue;
         }
         c = *s++;
         switch (c) {
-            case '"':  string_builder_Add_string_no_Check(sb, "\\\"", 2); break;
-            case '\\': string_builder_Add_string_no_Check(sb, "\\\\", 2); break;
-            case '/':  string_builder_Add_string_no_Check(sb, "\\/" , 2); break;
-            case '\b': string_builder_Add_string_no_Check(sb, "\\b", 2); break;
-            case '\f': string_builder_Add_string_no_Check(sb, "\\f", 2); break;
-            case '\n': string_builder_Add_string_no_Check(sb, "\\n", 2); break;
-            case '\r': string_builder_Add_string_no_Check(sb, "\\r", 2); break;
-            case '\t': string_builder_Add_string_no_Check(sb, "\\t", 2); break;
-            default:   string_builder_Add_no_Check(sb, c);
+            case '"':  string_builder_add_string_no_check(sb, "\\\"", 2); break;
+            case '\\': string_builder_add_string_no_check(sb, "\\\\", 2); break;
+            case '/':  string_builder_add_string_no_check(sb, "\\/" , 2); break;
+            case '\b': string_builder_add_string_no_check(sb, "\\b", 2); break;
+            case '\f': string_builder_add_string_no_check(sb, "\\f", 2); break;
+            case '\n': string_builder_add_string_no_check(sb, "\\n", 2); break;
+            case '\r': string_builder_add_string_no_check(sb, "\\r", 2); break;
+            case '\t': string_builder_add_string_no_check(sb, "\\t", 2); break;
+            default:   string_builder_add_no_check(sb, c);
         }
     }
-    string_builder_Add_no_Check(sb, '"');
+    string_builder_add_no_check(sb, '"');
 }
 
 static void JSONInt32_toString(string_builder *sb, JSON json)
 {
     int32_t i = toInt32(json.val);
-    string_builder_Add_int(sb, i);
+    string_builder_add_int(sb, i);
 }
 static void JSONInt64_toString(string_builder *sb, JSON json)
 {
     JSONInt64 *o = toInt64(json.val);
-    string_builder_Add_int(sb, o->val);
+    string_builder_add_int(sb, o->val);
 }
 
 static void JSONDouble_toString(string_builder *sb, JSON json)
@@ -810,22 +810,22 @@ static void JSONDouble_toString(string_builder *sb, JSON json)
     double d = toDouble(json.val);
     char buf[64];
     int len = snprintf(buf, 64, "%g", d);
-    string_builder_Add_string(sb, buf, len);
+    string_builder_add_string(sb, buf, len);
 }
 
 static void JSONBool_toString(string_builder *sb, JSON json)
 {
     string_builder_ensure_size(sb, 5);
     if(toBool(json.val)) {
-        string_builder_Add_string_no_Check(sb, "true", 4);
+        string_builder_add_string_no_check(sb, "true", 4);
     } else {
-        string_builder_Add_string_no_Check(sb, "false", 5);
+        string_builder_add_string_no_check(sb, "false", 5);
     }
 }
 
 static void JSONNull_toString(string_builder *sb, JSON json)
 {
-    string_builder_Add_string(sb, "null", 4);
+    string_builder_add_string(sb, "null", 4);
 }
 
 static void JSONNOP_toString(string_builder *sb, JSON json)
@@ -851,7 +851,7 @@ KJSON_API char *JSON_toStringWithLength(JSON json, size_t *len)
     size_t length;
     string_builder sb;
 
-    string_builder_Init(&sb);
+    string_builder_init(&sb);
     _JSON_toString(&sb, json);
     str = string_builder_tostring(&sb, &length, 1);
     if(len) {

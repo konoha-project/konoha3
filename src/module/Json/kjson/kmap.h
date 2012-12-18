@@ -78,8 +78,8 @@ struct map_api {
     map_record_t *(*_get)(kmap_t *m, struct JSONString *key);
     map_status_t  (*_set)(kmap_t *m, struct JSONString *key, uint64_t val);
     map_record_t *(*_next)(kmap_t *m, kmap_iterator *itr);
-    void (*_Remove)(kmap_t *m, struct JSONString *key);
-    void (*_Init)(kmap_t *m, unsigned init);
+    void (*_remove)(kmap_t *m, struct JSONString *key);
+    void (*_init)(kmap_t *m, unsigned init);
     void (*_dispose)(kmap_t *m);
 };
 
@@ -100,9 +100,9 @@ static inline map_status_t kmap_set(kmap_t *m, struct JSONString *key, uint64_t 
     return m->h.base.api->_set(m, key, val);
 }
 
-static inline void kmap_Remove(kmap_t *m, struct JSONString *key)
+static inline void kmap_remove(kmap_t *m, struct JSONString *key)
 {
-    return m->h.base.api->_Remove(m, key);
+    return m->h.base.api->_remove(m, key);
 }
 
 static inline map_record_t *kmap_next(kmap_t *m, kmap_iterator *itr)
@@ -115,13 +115,13 @@ static inline unsigned kmap_size(kmap_t *m)
     return m->h.used_size;
 }
 
-extern const kmap_api_t DIKClass_API;
+extern const kmap_api_t DICT_API;
 extern const kmap_api_t HASH_API;
-static inline void kmap_Init(kmap_t *m, unsigned init)
+static inline void kmap_init(kmap_t *m, unsigned init)
 {
-    const kmap_api_t *api = (init > DICTMAP_THRESHOLD) ? &HASH_API:&DIKClass_API;
+    const kmap_api_t *api = (init > DICTMAP_THRESHOLD) ? &HASH_API:&DICT_API;
     m->h.base.api = api;
-    api->_Init(m, init);
+    api->_init(m, init);
 }
 
 #ifdef __cplusplus

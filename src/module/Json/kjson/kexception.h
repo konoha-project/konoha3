@@ -52,17 +52,17 @@ typedef struct kexception_handler {
     int has_error;
 } kexception_handler_t;
 
-static void kexception_handler_reset(kexception_handler_t *eh)
+static inline void kexception_handler_reset(kexception_handler_t *eh)
 {
     memset(eh->handler, 0, sizeof(jmp_buf));
 }
 
-static void kexception_handler_Init(kexception_handler_t *eh)
+static inline void kexception_handler_init(kexception_handler_t *eh)
 {
     kexception_handler_reset(eh);
 }
 
-static int kexception_handler_deinit(kexception_handler_t *eh)
+static inline int kexception_handler_deinit(kexception_handler_t *eh)
 {
     kexception_handler_reset(eh);
     return 0;
