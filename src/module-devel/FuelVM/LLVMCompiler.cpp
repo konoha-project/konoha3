@@ -802,6 +802,10 @@ static void EmitPrologue(LLVMIRBuilder *writer, FuelIRBuilder *builder, IMethod 
 		}
 		SetBlock(writer, *x, BasicBlock::Create(getGlobalContext(), "BB", writer->Func));
 	}
+
+	writer->builder->SetInsertPoint(EntryBB);
+	Value *Vsfp = GetStackTop(writer);
+	PrepareCallStack(writer, Vsfp);
 }
 
 } /* namespace FuelVM */
