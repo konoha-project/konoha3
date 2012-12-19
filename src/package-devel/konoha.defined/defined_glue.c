@@ -70,9 +70,9 @@ static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 }
 
 
-static KMETHOD Nodeession_Defined(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Nodeession(stmt, tokenList, beginIdx, currentIdx, endIdx);
+	VAR_Expression(stmt, tokenList, beginIdx, currentIdx, endIdx);
 	if(beginIdx == currentIdx && beginIdx + 1 < endIdx) {
 		kTokenVar *definedToken = tokenList->TokenVarItems[beginIdx];   // defined
 		kTokenVar *pToken = tokenList->TokenVarItems[beginIdx+1];
@@ -87,7 +87,7 @@ static KMETHOD Nodeession_Defined(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t defined_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Nodeession_Defined, NULL, NULL, TypeCheck_Defined, },
+		{ KSymbol_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Expression_Defined, NULL, NULL, TypeCheck_Defined, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

@@ -265,23 +265,23 @@
 //	int ret = false;
 //	kNode *tryNode, *catchNode, *finallyNode;
 //	tryNode     = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
-//	ret = SUGAR kNode_TypeCheckAll(kctx, tryNode,   gma);
+//	ret = SUGAR TypeCheckBlock(kctx, tryNode,   gma);
 //	if(ret == false) {
 //		KReturnUnboxValue(ret);
 //	}
 //
 //	catchNode   = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_("catch"),   K_NULLBLOCK);
 //	finallyNode = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_("finally"), K_NULLBLOCK);
-//	ret = SUGAR kNode_TypeCheckAll(kctx, tryNode,   gma);
-//	ret = SUGAR kNode_TypeCheckAll(kctx, catchNode, gma);
+//	ret = SUGAR TypeCheckBlock(kctx, tryNode,   gma);
+//	ret = SUGAR TypeCheckBlock(kctx, catchNode, gma);
 //	if(ret == false) {
 //		KReturnUnboxValue(ret);
 //	}
 //	if(finallyNode) {
-//		ret = SUGAR kNode_TypeCheckAll(kctx, finallyNode, gma);
+//		ret = SUGAR TypeCheckBlock(kctx, finallyNode, gma);
 //	}
 //	if(ret) {
-//		kNode_typed(stmt, TRY);
+//		kNode_Type(kctx, stmt, TRY);
 //	}
 //	KReturnUnboxValue(ret);
 //}
@@ -299,7 +299,7 @@
 //	kNode *parentNode = Node_LookupTryOrCatchNodeNULL(kctx, stmt);
 //
 //	if(catchNode != K_NULLBLOCK && parentNode != NULL) {
-//		ret = SUGAR kNode_TypeCheckAll(kctx, catchNode, gma);
+//		ret = SUGAR TypeCheckBlock(kctx, catchNode, gma);
 //		kNode *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, K_NULLNODE);
 //		KLIB kObjectProto_SetObject(kctx, parentNode, KSymbol_NodePattern, KType_Exception, expr);
 //		KLIB kObjectProto_SetObject(kctx, parentNode, KSymbol_("catch"), KType_Node, stmt);
@@ -321,7 +321,7 @@
 //	if(finallyNode != K_NULLBLOCK) {
 //		kNode *tryNode = Node_LookupTryOrCatchNodeNULL(kctx, stmt);
 //		if(tryNode != NULL) {
-//			ret = SUGAR kNode_TypeCheckAll(kctx, finallyNode, gma);
+//			ret = SUGAR TypeCheckBlock(kctx, finallyNode, gma);
 //			KLIB kObjectProto_SetObject(kctx, tryNode, KSymbol_("finally"), KType_Node, finallyNode);
 //			kNode_done(kctx, stmt);
 //		}

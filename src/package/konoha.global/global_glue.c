@@ -80,7 +80,7 @@ static kNode* TypeDeclAndMakeSetter(KonohaContext *kctx, kNode *stmt, kGamma *gm
 	if(mtd != NULL) {
 		kNode *recvNode =  new_ConstValueNode(kctx, NULL, scr);
 		kNode *setterNode = SUGAR new_TypedCallNode(kctx, stmt, gma, KType_void, mtd,  2, recvNode, valueNode);
-		kNode *newstmt = new_(Node, stmt->uline, OnGcStack);
+		kNode *newstmt = new_(Node, kNode_uline(stmt), OnGcStack);
 		kNode_Setsyn(newstmt, KSyntax_(ns, KSymbol_NodePattern));
 		KLIB kObjectProto_SetObject(kctx, newstmt, KSymbol_NodePattern, KType_Node, setterNode);
 		return newstmt;
@@ -109,7 +109,7 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 	kbool_t result = false;
 	kNameSpace *ns = Node_ns(stmt);
 	KMakeTrace(trace, sfp);
-	trace->pline = stmt->uline;
+	trace->pline = kNode_uline(stmt);
 	if(kNameSpace_InitGlobalObject(kctx, ns, trace)) {
 		kToken *tk  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
 		kNode  *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);

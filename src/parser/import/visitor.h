@@ -27,7 +27,7 @@ static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 	kbool_t ret = false;
 	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
 	switch(stmt->node) {
-		case kNode_Error:   ret = cbuilder->api->visitErrNode(kctx, builder, stmt); break;
+		case KNode_Error:   ret = cbuilder->api->visitErrNode(kctx, builder, stmt); break;
 		case KNode_EXPR:  ret = cbuilder->api->visitNodeNode(kctx, builder, stmt);   break;
 		case KNode_BLOCK: ret = cbuilder->api->visitNodeNode(kctx, builder, stmt);  break;
 		case KNode_RETURN: ret = cbuilder->api->visitReturnNode(kctx, builder, stmt); break;
@@ -47,17 +47,17 @@ static void VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode
 	int espidx = cbuilder->espidx;
 	int shift = cbuilder->shift;
 	switch(expr->node) {
-		case KNode_CONST:    cbuilder->api->visitConstNode(kctx, builder, stmt, expr);  break;
-		case KNode_NEW:      cbuilder->api->visitNewNode(kctx, builder, stmt, expr);    break;
-		case KNode_NULL:     cbuilder->api->visitNullNode(kctx, builder, stmt, expr);   break;
-		case KNode_NCONST:   cbuilder->api->visitNConstNode(kctx, builder, stmt, expr); break;
-		case KNode_LOCAL:    cbuilder->api->visitLocalNode(kctx, builder, stmt, expr);  break;
+		case KNode_Const:    cbuilder->api->visitConstNode(kctx, builder, stmt, expr);  break;
+		case KNode_New:      cbuilder->api->visitNewNode(kctx, builder, stmt, expr);    break;
+		case KNode_Null:     cbuilder->api->visitNullNode(kctx, builder, stmt, expr);   break;
+		case KNode_UnboxConst:   cbuilder->api->visitNConstNode(kctx, builder, stmt, expr); break;
+		case KNode_Local:    cbuilder->api->visitLocalNode(kctx, builder, stmt, expr);  break;
 		case KNode_BLOCK:    cbuilder->api->visitNodeNode(kctx, builder, stmt, expr);  break;
-		case KNode_FIELD:    cbuilder->api->visitFieldNode(kctx, builder, stmt, expr);  break;
-		case KNode_CALL:     cbuilder->api->visitCallNode(kctx, builder, stmt, expr);   break;
+		case KNode_Field:    cbuilder->api->visitFieldNode(kctx, builder, stmt, expr);  break;
+		case KNode_MethodCall:     cbuilder->api->visitCallNode(kctx, builder, stmt, expr);   break;
 		case KNode_AND:      cbuilder->api->visitAndNode(kctx, builder, stmt, expr);    break;
 		case KNode_OR:       cbuilder->api->visitOrNode(kctx, builder, stmt, expr);     break;
-		case KNode_LET:      cbuilder->api->visitLetNode(kctx, builder, stmt, expr);    break;
+		case KNode_Assign:      cbuilder->api->visitLetNode(kctx, builder, stmt, expr);    break;
 		case KNode_STACKTOP: cbuilder->api->visitStackTopNode(kctx, builder, stmt, expr);break;
 		default: DBG_ABORT("unknown expr=%d", expr->node);
 	}
@@ -78,7 +78,7 @@ static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *block)
 	for (i = 0; i < kArray_size(block->NodeList); i++) {
 		kNode *stmt = block->NodeList->NodeItems[i];
 		if(stmt->syn == NULL) continue;
-		cbuilder->uline = stmt->uline;
+		cbuilder->uline = kNode_uline(stmt);
 		if(!VisitNode(kctx, builder, stmt)) {
 			ret = false;
 			break;

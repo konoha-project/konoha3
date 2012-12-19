@@ -135,11 +135,11 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 		kNode_appendNode(kctx, IfNode, SUGAR kNode_GetNode(kctx, stmt, ns, KSymbol_NodePattern, NULL));
 		kNode_Set(CatchBreak, IfNode, true);
 		kNode_Set(CatchContinue, IfNode, true);
-		isOkay = SUGAR kNode_TypeCheckAll(kctx, block, gma);
+		isOkay = SUGAR TypeCheckBlock(kctx, block, gma);
 		if(isOkay) {
-			kNode_typed(IfNode, LOOP);
+			kNode_Type(kctx, IfNode, LOOP);
 			kNode_SetObject(kctx, stmt, KSymbol_NodePattern, block);
-			kNode_typed(stmt, BLOCK);
+			kNode_Type(kctx, stmt, BLOCK);
 		}
 	}
 	KReturnUnboxValue(isOkay);

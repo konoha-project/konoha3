@@ -580,13 +580,13 @@ static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Node_ns(stmt), KClass_Array, KKMethodName_("[]"), -1, KMethodMatch_NoOption);
 	DBG_ASSERT(mtd != NULL);
 	KFieldSet(expr, expr->NodeList->MethodItems[0], mtd);
-	KFieldSet(expr, expr->NodeList->NodeItems[1], SUGAR kNode_SetVariable(kctx, NULL, gma, KNode_NEW, requestClass->typeId, kArray_size(expr->NodeList) - 2));
-	KReturn(Node_typed(expr, KNode_CALL, requestClass->typeId));
+	KFieldSet(expr, expr->NodeList->NodeItems[1], SUGAR kNode_SetVariable(kctx, NULL, gma, KNode_New, requestClass->typeId, kArray_size(expr->NodeList) - 2));
+	KReturn(Node_typed(expr, KNode_MethodCall, requestClass->typeId));
 }
 
-static KMETHOD Nodeession_Bracket(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Nodeession(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	KClass *genericsClass = NULL;
 	kNameSpace *ns = Node_ns(stmt);
 	int nextIdx = SUGAR TokenUtils_ParseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, &genericsClass);
@@ -641,7 +641,7 @@ static KMETHOD Nodeession_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t array_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_BracketGroup, SYNFLAG_NodePostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, Nodeession_Bracket, NULL, NULL, TypeCheck_Bracket, },
+		{ KSymbol_BracketGroup, SYNFLAG_NodePostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, Expression_Bracket, NULL, NULL, TypeCheck_Bracket, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

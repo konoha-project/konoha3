@@ -123,21 +123,21 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
 		result = false;
-		if(constNode->node == KNode_NULL) {   // const C = String
+		if(constNode->node == KNode_Null) {   // const C = String
 			type = VirtualType_KClass;
 			unboxValue = (uintptr_t)constClass;
 			result = true;
 		}
-		else if(constNode->node == KNode_CONST) {   // const C = "1"
+		else if(constNode->node == KNode_Const) {   // const C = "1"
 			unboxValue = (uintptr_t)constNode->ObjectConstValue;
 			result = true;
 		}
-		else if(constNode->node == KNode_NCONST) {  // const c = 1
+		else if(constNode->node == KNode_UnboxConst) {  // const c = 1
 			unboxValue = constNode->unboxConstValue;
 			result = true;
 		}
 		if(result) {
-			KMakeTraceUL(trace, sfp, stmt->uline);
+			KMakeTraceUL(trace, sfp, kNode_uline(stmt));
 			result = KLIB kNameSpace_SetConstData(kctx, ns, unboxKey, type, unboxValue, false/*isOverride*/, trace);
 		}
 		else {
@@ -189,9 +189,9 @@ static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 }
 
 
-static KMETHOD Nodeession_Defined(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Nodeession(stmt, tokenList, beginIdx, currentIdx, endIdx);
+	VAR_Expression(stmt, tokenList, beginIdx, currentIdx, endIdx);
 	if(beginIdx == currentIdx && beginIdx + 1 < endIdx) {
 		kTokenVar *definedToken = tokenList->TokenVarItems[beginIdx];   // defined
 		kTokenVar *pToken = tokenList->TokenVarItems[beginIdx+1];
@@ -208,7 +208,7 @@ static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTrac
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ KSymbol_("namespace"), 0, "\"namespace\" $Node", 0, 0, NULL, NULL, Statement_namespace, NULL, NULL, },
 		{ KSymbol_("const"), 0, "\"const\" $Symbol \"=\" $Node", 0, 0, NULL, NULL, Statement_ConstDecl, NULL, NULL, },
-		{ KSymbol_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Nodeession_Defined, NULL, NULL, TypeCheck_Defined, },
+		{ KSymbol_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Expression_Defined, NULL, NULL, TypeCheck_Defined, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

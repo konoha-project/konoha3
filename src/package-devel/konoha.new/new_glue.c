@@ -36,14 +36,14 @@ static kNode* NewNode(KonohaContext *kctx, KSyntax *syn, kToken *tk, ktypeattr_t
 	kNodeVar *expr = new_(NodeVar, syn, OnGcStack);
 	KFieldSet(expr, expr->TermToken, tk);
 	kNode_SetTerm(expr, 1);
-	expr->node = KNode_NEW;
+	expr->node = KNode_New;
 	expr->attrTypeId = ty;
 	return (kNode *)expr;
 }
 
-static KMETHOD Nodeession_new(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Nodeession(stmt, tokenList, beginIdx, currentIdx, endIdx);
+	VAR_Expression(stmt, tokenList, beginIdx, currentIdx, endIdx);
 	DBG_ASSERT(beginIdx == currentIdx);
 	if(beginIdx + 1 < endIdx) {
 		kTokenVar *newToken = tokenList->TokenVarItems[beginIdx];
@@ -94,7 +94,7 @@ static KMETHOD Nodeession_new(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t new_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("new"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Nodeession_new, NULL, NULL, NULL, },
+		{ KSymbol_("new"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Expression_new, NULL, NULL, NULL, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

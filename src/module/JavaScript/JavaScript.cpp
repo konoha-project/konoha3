@@ -85,7 +85,7 @@ typedef struct JSBuilder {
 } JSBuilder;
 
 /* ------------------------------------------------------------------------ */
-/* [Statement/Nodeession API] */
+/* [Statement/Expression API] */
 static kNode* Node_getFirstNode(KonohaContext *kctx, kNode *stmt)
 {
 	return SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
@@ -223,8 +223,8 @@ static kbool_t JSBuilder_VisitErrNode(KonohaContext *kctx, KBuilder *builder, kN
 static kbool_t JSBuilder_VisitNodeNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 {
 	kNode *expr = Node_getFirstNode(kctx, stmt);
-	if(expr->node == KNode_LET) {
-		if(kNode_At(expr, 1)->node == KNode_FIELD){
+	if(expr->node == KNode_Assign) {
+		if(kNode_At(expr, 1)->node == KNode_Field){
 			JSBuilder_EmitString(kctx, builder, "this.", "", "");
 		}else{
 			JSBuilder_EmitString(kctx, builder, "var ", "", "");
@@ -414,7 +414,7 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 		JSBuilder_EmitString(kctx, builder, "new Array", "", "");
 	}else{
 		if(!isGlobal) {
-			if(receiver->node == KNode_NULL) {
+			if(receiver->node == KNode_Null) {
 				JSBuilder_EmitString(kctx, builder, KClass_text(KClass_(receiver->attrTypeId)), "", "");
 			}
 			else{

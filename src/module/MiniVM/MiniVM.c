@@ -575,7 +575,7 @@ static kString* Node_getErrorMessage(KonohaContext *kctx, kNode *stmt)
 
 static kbool_t KBuilder_VisitErrNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 {
-	ASM(ERROR, stmt->uline, Node_getErrorMessage(kctx, stmt));
+	ASM(ERROR, kNode_uline(stmt), Node_getErrorMessage(kctx, stmt));
 	return false;
 }
 
@@ -641,7 +641,7 @@ static kbool_t KBuilder_VisitLoopNode(KonohaContext *kctx, KBuilder *builder, kN
 		ASM_JMP(kctx, builder, lbENTRY);
 	}
 	ASM_LABEL(kctx, builder, lbCONTINUE);
-	KBuilder_AsmSAFEPOINT(kctx, builder, stmt->uline, espidx);
+	KBuilder_AsmSAFEPOINT(kctx, builder, kNode_uline(stmt), espidx);
 	kNode *iterNode = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_("Iterator"), NULL);
 	if(iterNode != NULL) {
 		SUGAR VisitNode(kctx, builder, iterNode);
@@ -832,7 +832,7 @@ static void KBuilder_VisitLetNode(KonohaContext *kctx, KBuilder *builder, kNode 
 	kNode *leftHandNode = kNode_At(expr, 1);
 	kNode *rightHandNode = kNode_At(expr, 2);
 	//DBG_P("LET (%s) a=%d, shift=%d, espidx=%d", KType_text(expr->attrTypeId), a, shift, espidx);
-	if(leftHandNode->node == KNode_LOCAL) {
+	if(leftHandNode->node == KNode_Local) {
 		builder->common.a = leftHandNode->index;
 		SUGAR VisitNode(kctx, builder, stmt, rightHandNode);
 		builder->common.a = a;
@@ -850,7 +850,7 @@ static void KBuilder_VisitLetNode(KonohaContext *kctx, KBuilder *builder, kNode 
 		}
 	}
 	else{
-		assert(leftHandNode->node == KNode_FIELD);
+		assert(leftHandNode->node == KNode_Field);
 		builder->common.a = espidx;
 		SUGAR VisitNode(kctx, builder, stmt, rightHandNode);
 		builder->common.a = a;

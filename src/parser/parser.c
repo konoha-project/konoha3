@@ -236,7 +236,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kNode_SetVariable          = kNode_SetVariable;
 	mod->kNode_TypeCheckNodeAt        = kNode_TypeCheckNodeAt;
 	mod->kNode_TypeCheckByName        = kNode_TypeCheckByName;
-	mod->kNode_TypeCheckAll          = kNode_TypeCheckAll;
+	mod->TypeCheckBlock          = TypeCheckBlock;
 	mod->kNodekNode_TypeCheckCallParam = kNodekNode_TypeCheckCallParam;
 	mod->new_TypedCallNode          = new_TypedCallNode;
 	mod->kGamma_AddLocalVariable = kGamma_AddLocalVariable;

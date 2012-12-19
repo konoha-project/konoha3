@@ -253,15 +253,15 @@ static kbool_t kNode_AddClassField(KonohaContext *kctx, kNode *stmt, kGamma *gma
 			ksymbol_t symbol = KAsciiSymbol(kString_text(name), kString_size(name), KSymbol_NewId);
 			kNode *vexpr =  SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 2, gma, KClass_(ty), 0);
 			if(vexpr == K_NULLNODE) return false;
-			if(vexpr->node == KNode_CONST) {
+			if(vexpr->node == KNode_Const) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 				KClass_setClassFieldObjectValue(kctx, definedClass, symbol, vexpr->ObjectConstValue);
 			}
-			else if(vexpr->node == KNode_NCONST) {
+			else if(vexpr->node == KNode_UnboxConst) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 				KClass_setClassFieldUnboxValue(kctx, definedClass, symbol, vexpr->unboxConstValue);
 			}
-			else if(vexpr->node == KNode_NULL) {
+			else if(vexpr->node == KNode_Null) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 			}
 			else {
@@ -332,7 +332,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	KClassVar *definedClass = (KClassVar *)KLIB kNameSpace_GetClassByFullName(kctx, ns, kString_text(tokenClassName->text), kString_size(tokenClassName->text), NULL);
 	if(definedClass == NULL) {   // Already defined
 		kshortflag_t cflag = kNode_ParseClassFlag(kctx, stmt, KClassFlag_Virtual);
-		KMakeTraceUL(trace, sfp, stmt->uline);
+		KMakeTraceUL(trace, sfp, kNode_uline(stmt));
 		definedClass = kNameSpace_DefineClassName(kctx, ns, cflag, tokenClassName->text, trace);
 		isNewlyDefinedClass = true;
 	}

@@ -362,8 +362,8 @@ static KMETHOD NameSpace_DefinedStatement(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(KSyntax_hasSyntaxPatternList(syn) && KSyntax_hasSugarFunc(syn, SugarFunc_Statement));
 }
 
-//## boolean NameSpace.definedNodeession(symbol keyword);
-static KMETHOD NameSpace_DefinedNodeession(KonohaContext *kctx, KonohaStack *sfp)
+//## boolean NameSpace.definedExpression(symbol keyword);
+static KMETHOD NameSpace_DefinedExpression(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
 	KSyntax* syn = KSyntax_(sfp[0].asNameSpace, keyword);
@@ -400,11 +400,11 @@ static KMETHOD NameSpace_AddPatternMatch(KonohaContext *kctx, KonohaStack *sfp)
 	SUGAR kNameSpace_AddSugarFunc(kctx, sfp[0].asNameSpace, keyword, SugarFunc_PatternMatch, sfp[2].asFunc);
 }
 
-//## void NameSpace.addNodeession(symbol keyword, Func f);
-static KMETHOD NameSpace_AddNodeession(KonohaContext *kctx, KonohaStack *sfp)
+//## void NameSpace.addExpression(symbol keyword, Func f);
+static KMETHOD NameSpace_AddExpression(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
-	SUGAR kNameSpace_AddSugarFunc(kctx, sfp[0].asNameSpace, keyword, SugarFunc_Nodeession, sfp[2].asFunc);
+	SUGAR kNameSpace_AddSugarFunc(kctx, sfp[0].asNameSpace, keyword, SugarFunc_Expression, sfp[2].asFunc);
 }
 
 //## void NameSpace.addStatement(symbol keyword, Func f);
@@ -440,8 +440,8 @@ static void LoadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, KTraceI
 	kparamtype_t P_FuncPatternMatch[] = {{KType_Node}, {KType_int}, {KType_TokenArray}, {KType_int}, {KType_int}};
 	int KType_FuncPatternMatch = (KLIB KClass_Generics(kctx, KClass_Func, KType_int, 5, P_FuncPatternMatch))->typeId;
 	/* Func[Node, Node, Token[], Int, Int, Int] */
-	kparamtype_t P_FuncNodeession[] = {{KType_Node}, {KType_TokenArray}, {KType_int}, {KType_int}, {KType_int}};
-	int KType_FuncNodeession = (KLIB KClass_Generics(kctx, KClass_Func, KType_Node, 5, P_FuncNodeession))->typeId;
+	kparamtype_t P_FuncExpression[] = {{KType_Node}, {KType_TokenArray}, {KType_int}, {KType_int}, {KType_int}};
+	int KType_FuncExpression = (KLIB KClass_Generics(kctx, KClass_Func, KType_Node, 5, P_FuncExpression))->typeId;
 	/* Func[Boolean, Node, Gamma] */
 	kparamtype_t P_FuncStatement[] = {{KType_Node}, {KType_Gamma}};
 	int KType_FuncStatement = (KLIB KClass_Generics(kctx, KClass_Func, KType_boolean, 2, P_FuncStatement))->typeId;
@@ -454,12 +454,12 @@ static void LoadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, KTraceI
 		_Public|_Im, _F(NameSpace_DefinedSyntax), KType_boolean, KType_NameSpace, KKMethodName_("definedSyntax"), 1, KType_Symbol, FN_keyword,
 		_Public|_Im, _F(NameSpace_DefinedLiteral), KType_boolean, KType_NameSpace, KKMethodName_("definedLiteral"), 1, KType_Symbol, FN_keyword,
 		_Public|_Im, _F(NameSpace_DefinedStatement), KType_boolean, KType_NameSpace, KKMethodName_("definedStatement"), 1, KType_Symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_DefinedNodeession), KType_boolean, KType_NameSpace, KKMethodName_("definedNodeession"), 1, KType_Symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_DefinedExpression), KType_boolean, KType_NameSpace, KKMethodName_("definedExpression"), 1, KType_Symbol, FN_keyword,
 		_Public|_Im, _F(NameSpace_DefinedBinaryOperator), KType_boolean, KType_NameSpace, KKMethodName_("definedBinaryOperator"), 1, KType_Symbol, FN_keyword,
 //		_Public, _F(NameSpace_compileAllDefinedMethods), KType_void, KType_NameSpace, KKMethodName_("compileAllDefinedMethods"), 0,
 		_Public, _F(NameSpace_setTokenFunc), KType_void, KType_NameSpace, KKMethodName_("setTokenFunc"), 3, KType_Symbol, FN_keyword, KType_int, KFieldName_("kchar"), KType_FuncToken, FN_func,
 		_Public, _F(NameSpace_AddPatternMatch), KType_void, KType_NameSpace, KKMethodName_("addPatternMatch"), 2, KType_Symbol, FN_keyword, KType_FuncPatternMatch, FN_func,
-		_Public, _F(NameSpace_AddNodeession), KType_void, KType_NameSpace, KKMethodName_("addNodeession"), 2, KType_Symbol, FN_keyword, KType_FuncNodeession, FN_func,
+		_Public, _F(NameSpace_AddExpression), KType_void, KType_NameSpace, KKMethodName_("addExpression"), 2, KType_Symbol, FN_keyword, KType_FuncExpression, FN_func,
 		_Public, _F(NameSpace_AddTopLevelStatement), KType_void, KType_NameSpace, KKMethodName_("addTopLevelStatement"), 2, KType_Symbol, FN_keyword, KType_FuncStatement, FN_func,
 		_Public, _F(NameSpace_AddStatement), KType_void, KType_NameSpace, KKMethodName_("addStatement"), 2, KType_Symbol, FN_keyword, KType_FuncStatement, FN_func,
 		_Public, _F(NameSpace_AddTypeCheck), KType_void, KType_NameSpace, KKMethodName_("addTypeCheck"), 2, KType_Symbol, FN_keyword, KType_FuncTypeCheck, FN_func,
@@ -863,7 +863,7 @@ static KMETHOD Node_setType(KonohaContext *kctx, KonohaStack *sfp)
 //## boolean Blook.TypeCheckAll(Gamma gma);
 static KMETHOD Node_TypeCheckAll(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturnUnboxValue(SUGAR kNode_TypeCheckAll(kctx, sfp[0].asNode, sfp[1].asGamma));
+	KReturnUnboxValue(SUGAR TypeCheckBlock(kctx, sfp[0].asNode, sfp[1].asGamma));
 }
 
 //## int Gamma.declareLocalVariable(cid typeId, symbol keyword);
@@ -1165,26 +1165,26 @@ static kbool_t RENAMEME_InitNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 		DEFINE_KEYWORD(KSymbol_ParamPattern),
 		DEFINE_KEYWORD(KSymbol_TokenPattern),
 		DEFINE_KEYWORD(KNode_UNDEFINED),
-		DEFINE_KEYWORD(kNode_Error),
+		DEFINE_KEYWORD(KNode_Error),
 		DEFINE_KEYWORD(KNode_EXPR),
 		DEFINE_KEYWORD(KNode_BLOCK),
 		DEFINE_KEYWORD(KNode_RETURN),
 		DEFINE_KEYWORD(KNode_IF),
 		DEFINE_KEYWORD(KNode_LOOP),
 		DEFINE_KEYWORD(KNode_JUMP),
-		DEFINE_KEYWORD(KNode_CONST),
-		DEFINE_KEYWORD(KNode_NEW),
-		DEFINE_KEYWORD(KNode_NULL),
-		DEFINE_KEYWORD(KNode_NCONST),
-		DEFINE_KEYWORD(KNode_LOCAL),
+		DEFINE_KEYWORD(KNode_Const),
+		DEFINE_KEYWORD(KNode_New),
+		DEFINE_KEYWORD(KNode_Null),
+		DEFINE_KEYWORD(KNode_UnboxConst),
+		DEFINE_KEYWORD(KNode_Local),
 		DEFINE_KEYWORD(KNode_BLOCK),
-		DEFINE_KEYWORD(KNode_FIELD),
+		DEFINE_KEYWORD(KNode_Field),
 //		DEFINE_KEYWORD(KNode_BOX),
 //		DEFINE_KEYWORD(KNode_UNBOX),
-		DEFINE_KEYWORD(KNode_CALL),
+		DEFINE_KEYWORD(KNode_MethodCall),
 		DEFINE_KEYWORD(KNode_AND),
 		DEFINE_KEYWORD(KNode_OR),
-		DEFINE_KEYWORD(KNode_LET),
+		DEFINE_KEYWORD(KNode_Assign),
 		DEFINE_KEYWORD(KNode_STACKTOP),
 		DEFINE_KEYWORD(TypeCheckPolicy_NOCHECK),
 		DEFINE_KEYWORD(TypeCheckPolicy_ALLOWVOID),

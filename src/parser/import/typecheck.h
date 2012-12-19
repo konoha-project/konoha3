@@ -22,41 +22,34 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* ------------------------------------------------------------------------ */
-
-#ifdef USE_NODE
-static kNode *CallTypeCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kNameSpace *ns, kNode *expr, kGamma *gma, int reqty)
+static kNode *CallTypeCheckFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kGamma *gma, kObject *reqType)
 {
 	INIT_GCSTACK();
 	BEGIN_UnusedStack(lsfp);
 //	KUnsafeFieldSet(lsfp[0].asNameSpace, Node_ns(stmt));
-	KUnsafeFieldSet(lsfp[1].asNameSpace, ns);
-	KUnsafeFieldSet(lsfp[2].asNode, expr);
-	KUnsafeFieldSet(lsfp[3].asGamma, gma);
-	lsfp[4].intValue = reqty;
-	countRef[0] += 1;
-	CallSugarMethod(kctx, lsfp, fo, 5, UPCAST(K_NULLNODE));
+	KUnsafeFieldSet(lsfp[1].asNode, expr);
+	KUnsafeFieldSet(lsfp[2].asGamma, gma);
+	KUnsafeFieldSet(lsfp[3].asObject, reqType);
+	CallSugarMethod(kctx, lsfp, fo, 4, UPCAST(K_NULLNODE));
 	END_UnusedStack();
 	RESET_GCSTACK();
 	DBG_ASSERT(IS_Node(lsfp[K_RTNIDX].asObject));
 	return (kNode *)lsfp[K_RTNIDX].asObject;
 }
 
-static kNode *TypeCheck(KonohaContext *kctx, kNode *expr, kGamma *gma, KClass* reqtc)
+static kNode *TypeCheck(KonohaContext *kctx, kNode *stmt, kNode *expr, kGamma *gma, KClass* reqtc)
 {
 	int callCount = 0;
 	KSyntax *syn = expr->syn;
 	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, KSymbol_Fmt2(syn->keyword));
+	kObject *reqType = KLIB Knull(kctx, reqtc);
 	while(true) {
 		int index, size;
 		kFunc **FuncItems = KSyntax_funcTable(kctx, syn, SugarFunc_TypeCheck, &size);
 		for(index = size - 1; index >= 0; index--) {
-			kNode *texpr = CallTypeCheckFunc(kctx, FuncItems[index], &callCount, stmt, expr, gma, reqtc->typeId);
-			if(kNode_IsERR(stmt)) return K_NULLNODE;
+			kNode *texpr = CallTypeCheckFunc(kctx, FuncItems[index], expr, gma, reqType);
+			callCount++;
+			if(kNode_IsERR(expr)) return K_NULLNODE;
 			if(texpr->attrTypeId != KType_var) {
 				DBG_ASSERT(texpr->node != -1);
 				return texpr;
@@ -65,14 +58,15 @@ static kNode *TypeCheck(KonohaContext *kctx, kNode *expr, kGamma *gma, KClass* r
 		if(syn->parentSyntaxNULL == NULL) break;
 		syn = syn->parentSyntaxNULL;
 	}
-	if(callCount == 0 || !kNode_IsERR(stmt)) {
-		if(kNode_IsTerm(expr)) {
-			return kNodeToken_Message(kctx, stmt, expr->TermToken, ErrTag, "undefined term: %s", KToken_t(expr->TermToken));
-		}
-		else {
-			DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", expr->syn, expr->syn->parentSyntaxNULL, KSymbol_Fmt2(syn->keyword));
-			return kNode_Message(kctx, stmt, ErrTag, "undefined operator: %s%s",  KSymbol_Fmt2(expr->syn->keyword));
-		}
+	if(/*callCount == 0 || */!kNode_IsERR(expr)) {
+		return kNode_Message(kctx, expr, ErrTag, "undefined typing: %s", KToken_t(expr->KeyOperatorToken));
+//		if(kNode_IsTerm(expr)) {
+//			return kNode_Message(kctx, stmt, expr->TermToken, ErrTag, "undefined typing: %s", KToken_t(expr->TermToken));
+//		}
+//		else {
+//			DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", expr->syn, expr->syn->parentSyntaxNULL, KSymbol_Fmt2(syn->keyword));
+//			return kNode_Message(kctx, stmt, ErrTag, "undefined operator: %s%s",  KSymbol_Fmt2(expr->syn->keyword));
+//		}
 	}
 	return K_NULLNODE;
 }
@@ -100,84 +94,6 @@ static void kNode_PutConstValue(KonohaContext *kctx, kNode *expr, KonohaStack *s
 	}
 }
 
-#endif
-
-#ifndef USE_NODE
-static kNode *CallTypeCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kNode *stmt, kNode *expr, kGamma *gma, int reqty)
-{
-	INIT_GCSTACK();
-	BEGIN_UnusedStack(lsfp);
-	KUnsafeFieldSet(lsfp[0].asNameSpace, Node_ns(stmt));
-	KUnsafeFieldSet(lsfp[1].asNode, stmt);
-	KUnsafeFieldSet(lsfp[2].asNode, expr);
-	KUnsafeFieldSet(lsfp[3].asGamma, gma);
-	lsfp[4].intValue = reqty;
-	countRef[0] += 1;
-	CallSugarMethod(kctx, lsfp, fo, 5, UPCAST(K_NULLNODE));
-	END_UnusedStack();
-	RESET_GCSTACK();
-	DBG_ASSERT(IS_Node(lsfp[K_RTNIDX].asObject));
-	return (kNode *)lsfp[K_RTNIDX].asObject;
-}
-
-static kNode *TypeCheck(KonohaContext *kctx, kNode *stmt, kNode *expr, kGamma *gma, KClass* reqtc)
-{
-	int callCount = 0;
-	KSyntax *syn = expr->syn;
-	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, KSymbol_Fmt2(syn->keyword));
-	while(true) {
-		int index, size;
-		kFunc **FuncItems = KSyntax_funcTable(kctx, syn, SugarFunc_TypeCheck, &size);
-		for(index = size - 1; index >= 0; index--) {
-			kNode *texpr = CallTypeCheckFunc(kctx, FuncItems[index], &callCount, stmt, expr, gma, reqtc->typeId);
-			if(kNode_IsERR(stmt)) return K_NULLNODE;
-			if(texpr->attrTypeId != KType_var) {
-				DBG_ASSERT(texpr->node != -1);
-				return texpr;
-			}
-		}
-		if(syn->parentSyntaxNULL == NULL) break;
-		syn = syn->parentSyntaxNULL;
-	}
-	if(callCount == 0 || !kNode_IsERR(stmt)) {
-		if(kNode_IsTerm(expr)) {
-			return kNodeToken_Message(kctx, stmt, expr->TermToken, ErrTag, "undefined term: %s", KToken_t(expr->TermToken));
-		}
-		else {
-			DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", expr->syn, expr->syn->parentSyntaxNULL, KSymbol_Fmt2(syn->keyword));
-			return kNode_Message(kctx, stmt, ErrTag, "undefined operator: %s%s",  KSymbol_Fmt2(expr->syn->keyword));
-		}
-	}
-	return K_NULLNODE;
-}
-
-static void kNode_PutConstValue(KonohaContext *kctx, kNode *expr, KonohaStack *sfp)
-{
-	if((kvisit_t)expr->node == KNode_CONST) {
-		KUnsafeFieldSet(sfp[0].asObject, expr->ObjectConstValue);
-		sfp[0].unboxValue = kObject_Unbox(expr->ObjectConstValue);
-	} else if(expr->node == KNode_NCONST) {
-		sfp[0].unboxValue = expr->unboxConstValue;
-	} else if(expr->node == KNode_NEW) {
-		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->attrTypeId), 0));
-	} else if(expr->node == KNode_CALL) {
-		/* case Object Object.boxing(UnboxType Val) */
-		kMethod *mtd = expr->NodeList->MethodItems[0];
-		kNode *texpr = expr->NodeList->NodeItems[1];
-		assert(mtd->mn == MN_box && kArray_size(expr->NodeList) == 2);
-		assert(KType_Is(UnboxType, expr->attrTypeId) == true);
-		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->attrTypeId), texpr->unboxConstValue));
-	} else {
-		assert((kvisit_t)expr->node == KNode_NULL);
-		KUnsafeFieldSet(sfp[0].asObject, KLIB Knull(kctx, KClass_(expr->attrTypeId)));
-		sfp[0].unboxValue = 0;
-	}
-}
-
-#endif
-
-
-
 static kNode* kNodeNode_ToConstValue(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kArray *cons, KClass *rtype)
 {
 	size_t i, size = kArray_size(cons), psize = size - 2;
@@ -186,7 +102,7 @@ static kNode* kNodeNode_ToConstValue(KonohaContext *kctx, kNode *stmt, kNodeVar 
 	for(i = 1; i < size; i++) {
 		kNode_PutConstValue(kctx, cons->NodeItems[i], lsfp + i - 1);
 	}
-	KStackSetMethodAll(lsfp, KLIB Knull(kctx, KClass_(expr->attrTypeId)), stmt->uline, mtd, psize);
+	KStackSetMethodAll(lsfp, KLIB Knull(kctx, KClass_(expr->attrTypeId)), kNode_uline(stmt), mtd, psize);
 	KStackCall(lsfp);
 	END_UnusedStack();
 	if(KClass_Is(UnboxType, rtype) /* || rtype->typeId == KType_void*/) {
@@ -199,11 +115,11 @@ static kNode *kNodeNode_ToBox(KonohaContext *kctx, kNode *stmt, kNode *texpr, kG
 {
 	KClass *c = KClass_(texpr->attrTypeId);
 	if(c->typeId != KType_boolean) c = KClass_Int;
-	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, kNode_ns(stmt), c, MN_box, 0, KMethodMatch_CamelStyle);
+	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, Node_ns(stmt), c, MN_box, 0, KMethodMatch_CamelStyle);
 	DBG_ASSERT(mtd != NULL);
 	//return new_TypedCallNode(kctx, stmt, gma, reqClass, mtd, 1, texpr);
 	kNodeVar *expr = new_UntypedCallStyleNode(kctx, KSyntax_(Node_ns(stmt), KSymbol_NodeMethodCall), 2, mtd, texpr);
-	return kNode_typed(expr, CALL, c->typeId/*reqClass->typeId*/);
+	return kNode_Type(kctx, expr, KNode_MethodCall, c->typeId/*reqClass->typeId*/);
 }
 
 static kNode *kNode_TypeCheck(KonohaContext *kctx, kNode *stmt, kNode *expr, kGamma *gma, KClass* reqClass, int pol)
@@ -280,69 +196,86 @@ static kbool_t kNode_TypeCheckByName(KonohaContext *kctx, kNode *stmt, ksymbol_t
 
 /* ------------------------------------------------------------------------ */
 
-static kbool_t CallStatementFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kNode *stmt, kGamma *gma)
+//static kbool_t CallStatementFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kNode *stmt, kGamma *gma)
+//{
+//	BEGIN_UnusedStack(lsfp);
+//	KUnsafeFieldSet(lsfp[0].asNameSpace, Node_ns(stmt));
+//	KUnsafeFieldSet(lsfp[1].asNode,  stmt);
+//	KUnsafeFieldSet(lsfp[2].asGamma, gma);
+//	countRef[0] += 1;
+//	CallSugarMethod(kctx, lsfp, fo, 3, UPCAST(K_FALSE));
+//	END_UnusedStack();
+//	return lsfp[K_RTNIDX].boolValue;
+//}
+//
+//static kbool_t KSyntax_TypeCheckNode(KonohaContext *kctx, KSyntax *syn, kNode *stmt, kGamma *gma)
+//{
+//	int SugarFunc_index = Gamma_isTopLevel(gma) ? SugarFunc_TopLevelStatement : SugarFunc_Statement;
+//	int callCount = 0;
+//	while(true) {
+//		int index, size;
+//		kFunc **FuncItems = KSyntax_funcTable(kctx, syn, SugarFunc_index, &size);
+//		for(index = size - 1; index >= 0; index--) {
+//			CallStatementFunc(kctx, FuncItems[index], &callCount, stmt, gma);
+//			if(Node_isDone(stmt)) return true;
+//			if(kNode_IsERR(stmt)) return false;
+//			if(stmt->node != KNode_Done) {
+//				return true;
+//			}
+//		}
+//		if(syn->parentSyntaxNULL == NULL) break;
+//		syn = syn->parentSyntaxNULL;
+//	}
+//	if(callCount == 0) {
+//		const char *location = Gamma_isTopLevel(gma) ? "at the top level" : "inside the function";
+//		kNode_Message(kctx, stmt, ErrTag, "%s%s is not available %s", KWSTMT_t(stmt->syn->keyword), location);
+//		return false;
+//	}
+//	if(stmt->node != KNode_Error) {
+//		kNode_Message(kctx, stmt, ErrTag, "statement typecheck error: %s%s", KWSTMT_t(syn->keyword));
+//	}
+//	return false;
+//}
+
+static kNode* TypeCheckNodeList(KonohaContext *kctx, kArray *nodeList, size_t n, kGamma *gma, KClass *reqc)
 {
-	BEGIN_UnusedStack(lsfp);
-	KUnsafeFieldSet(lsfp[0].asNameSpace, Node_ns(stmt));
-	KUnsafeFieldSet(lsfp[1].asNode,  stmt);
-	KUnsafeFieldSet(lsfp[2].asGamma, gma);
-	countRef[0] += 1;
-	CallSugarMethod(kctx, lsfp, fo, 3, UPCAST(K_FALSE));
-	END_UnusedStack();
-	return lsfp[K_RTNIDX].boolValue;
+	kNode *stmt = nodeList->NodeItems[n];
+	if(Node_isDone(stmt)) return stmt;
+	if(!kNode_IsERR(stmt)) {
+		stmt = TypeCheck(kctx, stmt, stmt, gma, reqc);
+		KFieldSet(nodeList, nodeList->NodeItems[n], stmt);
+	}
+	return stmt;
 }
 
-static kbool_t KSyntax_TypeCheckNode(KonohaContext *kctx, KSyntax *syn, kNode *stmt, kGamma *gma)
+static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kGamma *gma, KClass *reqc)
 {
-	int SugarFunc_index = Gamma_isTopLevel(gma) ? SugarFunc_TopLevelStatement : SugarFunc_Statement;
-	int callCount = 0;
-	while(true) {
-		int index, size;
-		kFunc **FuncItems = KSyntax_funcTable(kctx, syn, SugarFunc_index, &size);
-		for(index = size - 1; index >= 0; index--) {
-			CallStatementFunc(kctx, FuncItems[index], &callCount, stmt, gma);
-			if(Node_isDone(stmt)) return true;
-			if(kNode_IsERR(stmt)) return false;
-			if(stmt->node != KNode_UNDEFINED) {
-				return true;
-			}
-		}
-		if(syn->parentSyntaxNULL == NULL) break;
-		syn = syn->parentSyntaxNULL;
+	size_t lvarsize = gma->genv->localScope.varsize;
+	if(block != K_NULLBLOCK) {
+		block->stacktop = lvarsize;
 	}
-	if(callCount == 0) {
-		const char *location = Gamma_isTopLevel(gma) ? "at the top level" : "inside the function";
-		kNode_Message(kctx, stmt, ErrTag, "%s%s is not available %s", KWSTMT_t(stmt->syn->keyword), location);
-		return false;
-	}
-	if(stmt->node != kNode_Error) {
-		kNode_Message(kctx, stmt, ErrTag, "statement typecheck error: %s%s", KWSTMT_t(syn->keyword));
-	}
-	return false;
-}
-
-static kbool_t kNode_TypeCheckAll(KonohaContext *kctx, kNode *bk, kGamma *gma)
-{
-	size_t i, lvarsize = gma->genv->localScope.varsize;
-	int result = true;
-	for(i = 0; i < kArray_size(bk->NodeList); i++) {
-		kNode *stmt = (kNode *)bk->NodeList->ObjectItems[i];
-		if(Node_isDone(stmt)) continue;
-		KDump(stmt);
-		if(kNode_IsERR(stmt) || !KSyntax_TypeCheckNode(kctx, stmt->syn, stmt, gma)) {
-			DBG_ASSERT(kNode_IsERR(stmt));
-			Gamma_setERROR(gma, 1);
-			result = false;
-			break;
+	int i, size = kArray_size(block->NodeList) - 1;
+	for(i = 0; i < size; i++) {
+		kNode *stmt = TypeCheckNodeList(kctx, block->NodeList, i, gma, KClass_void);
+		if(kNode_IsERR(stmt)) {
+//			Gamma_setERROR(gma, 1);
+			return block;  // untyped
 		}
 	}
-	if(bk != K_NULLBLOCK) {
-		SUGAR kNode_SetVariable(kctx, (kNodeVar *)bk->esp, gma, KNode_LOCAL, KType_void, gma->genv->localScope.varsize);
+	if(size >= 0) {
+		kNode *stmt = TypeCheckNodeList(kctx, block->NodeList, size, gma, reqc);
+		if(!kNode_IsERR(stmt)) {
+//			Gamma_setERROR(gma, 1);
+			kNode_Type(kctx, block, KNode_Block, stmt->attrTypeId);
+		}
+	}
+	else {
+		kNode_Type(kctx, block, KNode_Block, KType_void);
 	}
 	if(lvarsize < gma->genv->localScope.varsize) {
 		gma->genv->localScope.varsize = lvarsize;
 	}
-	return result;
+	return block;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -421,7 +354,7 @@ static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t 
 
 	GAMMA_PUSH(gma, &newgma);
 	kGamma_InitParam(kctx, &newgma, param, callparamNULL);
-	kNode_TypeCheckAll(kctx, bk, gma);
+	TypeCheckBlock(kctx, bk, gma, KClass_void);
 	KLIB kMethod_GenCode(kctx, mtd, bk, options);
 	GAMMA_POP(gma, &newgma);
 	RESET_GCSTACK();
@@ -449,11 +382,7 @@ static ktypeattr_t kNode_CheckReturnType(KonohaContext *kctx, kNode *stmt)
 		DBG_ASSERT(expr != NULL);
 		if(expr->attrTypeId != KType_void) {
 			kNode_Setsyn(stmt, KSyntax_(Node_ns(stmt), KSymbol_return));
-#ifdef USE_NODE
-			kNode_Type(stmt, KNode_Return, KType_void);
-#else
-			kNode_typed(stmt, RETURN);
-#endif
+			kNode_Type(kctx, stmt, KNode_Return, KType_void);
 			return expr->attrTypeId;
 		}
 	}
@@ -497,7 +426,7 @@ static kstatus_t kNode_EvalAtTopLevel(KonohaContext *kctx, kNode *bk, kMethod *m
 
 	GAMMA_PUSH(gma, &newgma);
 	kGamma_InitIt(kctx, &newgma, kMethod_GetParam(mtd));
-	kNode_TypeCheckAll(kctx, bk, gma);
+	TypeCheckBlock(kctx, bk, gma, KClass_void);
 	GAMMA_POP(gma, &newgma);
 
 	kNode *stmt = bk->NodeList->NodeItems[0];
@@ -514,33 +443,19 @@ static kstatus_t kNode_EvalAtTopLevel(KonohaContext *kctx, kNode *bk, kMethod *m
 		isTryEval = false;
 		for(i = 0; i < kArray_size(bk->NodeList); i++) {
 			kNode *stmt = bk->NodeList->NodeItems[0];
-#ifdef USE_NODE
-			if(stmt->node == KNode_Call) {
-				kMethod *callMethod = expr->NodeList->MethodItems[0];
+			if(stmt->node == KNode_MethodCall) {
+				kMethod *callMethod = stmt->NodeList->MethodItems[0];
 				if(callMethod->typeId == KType_NameSpace && kMethod_Is(Public, callMethod) && !kMethod_Is(Static, callMethod)) {
 					isTryEval = true;
 					break;
 				}
 			}
-#else
-			if(stmt->node == KNode_EXPR) {
-				kNode *expr = kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
-				DBG_ASSERT(expr != NULL);
-				if(expr->node == KNode_CALL) {  // Check NameSpace method
-					kMethod *callMethod = expr->NodeList->MethodItems[0];
-					if(callMethod->typeId == KType_NameSpace && kMethod_Is(Public, callMethod) && !kMethod_Is(Static, callMethod)) {
-						isTryEval = true;
-						break;
-					}
-				}
-			}
-#endif
 		}
 	}
 	if(isTryEval) {
 		ktypeattr_t rtype = kNode_CheckReturnType(kctx, stmt);
 		KLIB kMethod_GenCode(kctx, mtd, bk, DefaultCompileOption);
-		return kMethod_RunEval(kctx, mtd, rtype, stmt->uline, trace);
+		return kMethod_RunEval(kctx, mtd, rtype, kNode_uline(stmt), trace);
 	}
 	return K_CONTINUE;
 }
@@ -602,7 +517,3 @@ static kstatus_t KTokenSeq_Eval(KonohaContext *kctx, KTokenSeq *source, KTraceIn
 }
 
 /* ------------------------------------------------------------------------ */
-
-#ifdef __cplusplus
-}
-#endif

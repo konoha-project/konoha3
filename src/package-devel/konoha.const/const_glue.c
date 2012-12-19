@@ -43,21 +43,21 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
 		result = false;
-		if(constNode->node == KNode_NULL) {   // const C = String
+		if(constNode->node == KNode_Null) {   // const C = String
 			type = VirtualType_KClass;
 			unboxValue = (uintptr_t)constClass;
 			result = true;
 		}
-		else if(constNode->node == KNode_CONST) {   // const C = "1"
+		else if(constNode->node == KNode_Const) {   // const C = "1"
 			unboxValue = (uintptr_t)constNode->ObjectConstValue;
 			result = true;
 		}
-		else if(constNode->node == KNode_NCONST) {  // const c = 1
+		else if(constNode->node == KNode_UnboxConst) {  // const c = 1
 			unboxValue = constNode->unboxConstValue;
 			result = true;
 		}
 		if(result) {
-			KMakeTraceUL(trace, sfp, stmt->uline);
+			KMakeTraceUL(trace, sfp, kNode_uline(stmt));
 			result = KLIB kNameSpace_SetConstData(kctx, ns, unboxKey, type, unboxValue, false/*isOverride*/, trace);
 		}
 		else {

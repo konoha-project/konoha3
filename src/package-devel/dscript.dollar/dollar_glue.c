@@ -32,15 +32,15 @@ extern "C" {
 
 // --------------------------------------------------------------------------
 
-static KMETHOD Nodeession_dollar(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Nodeession(stmt, tokenList, beginIdx, currentIdx, endIdx);
+	VAR_Expression(stmt, tokenList, beginIdx, currentIdx, endIdx);
 	DBG_ASSERT(beginIdx == currentIdx);
 	if(currentIdx + 1 < endIdx) {
 		kToken *nextToken = tokenList->TokenItems[currentIdx+1];
 		DBG_P("nextToken='%s'", kString_text(nextToken->text));
 //		if(nextToken->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern) {
-//			KReturn(Nodeession_DollarSymbol(kctx, stmt, nextToken));
+//			KReturn(Expression_DollarSymbol(kctx, stmt, nextToken));
 //		}
 
 	}
@@ -75,7 +75,7 @@ static KMETHOD Nodeession_dollar(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t dollar_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("$"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Nodeession_dollar, NULL, NULL, NULL, },
+		{ KSymbol_("$"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Expression_dollar, NULL, NULL, NULL, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

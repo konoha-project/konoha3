@@ -121,7 +121,7 @@ static void kNode_toERR(KonohaContext *kctx, kNode *stmt, kString *errmsg)
 {
 	if(errmsg != NULL) { // not in case of isNodeedErrorMessage
 		((kNodeVar *)stmt)->syn   = KSyntax_(Node_ns(stmt), KSymbol_ERR);
-		((kNodeVar *)stmt)->node = kNode_Error;
+		((kNodeVar *)stmt)->node = KNode_Error;
 		KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_ERR, KType_String, errmsg);
 	}
 }
@@ -155,7 +155,7 @@ static kNode* kNode_Message2(KonohaContext *kctx, kNode *stmt, kToken *tk, kinfo
 {
 	va_list ap;
 	va_start(ap, fmt);
-	kfileline_t uline = stmt->uline;
+	kfileline_t uline = kNode_uline(stmt);
 	if(tk != NULL && taglevel <= ErrTag ) {
 		if(IS_Token(tk)) {
 			uline = tk->uline;
@@ -181,7 +181,7 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 	va_start(ap, fmt);
 	if(trace != NULL && IS_Node(trace->baseStack[1].asNode)) {  // Static Compiler Message
 		kNode *stmt = trace->baseStack[1].asNode;
-		kfileline_t uline = stmt->uline;
+		kfileline_t uline = kNode_uline(stmt);
 		kString *emsg = KParserContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
 		va_end(ap);
 		if(taglevel <= ErrTag && !kNode_IsERR(stmt)) {

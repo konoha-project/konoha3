@@ -428,7 +428,7 @@ static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Node_getUline(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNode *stmt = (kNode *) sfp[0].asObject;
-	KReturnUnboxValue(stmt->uline);
+	KReturnUnboxValue(kNode_uline(stmt));
 }
 //## boolean Node.hasSyntax();
 static KMETHOD Node_hasSyntax(KonohaContext *kctx, KonohaStack *sfp)

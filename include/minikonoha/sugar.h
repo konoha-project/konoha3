@@ -226,8 +226,8 @@ struct Tokenizer {
 		int E = (int)sfp[5].intValue;\
 		VAR_TRACE; (void)STMT; (void)NAME; (void)TLS; (void)S; (void)E
 
-// Node Nodeession(Node stmt, Token[] tokenList, int s, int c, int e)
-#define VAR_Nodeession(STMT, TLS, S, C, E)\
+// Node Expression(Node stmt, Token[] tokenList, int s, int c, int e)
+#define VAR_Expression(STMT, TLS, S, C, E)\
 		KSyntax *syn = (KSyntax *)sfp[0].unboxValue;\
 		kNode *STMT = (kNode *)sfp[1].asObject;\
 		kArray *TLS = (kArray *)sfp[2].asObject;\
@@ -256,7 +256,7 @@ typedef struct KSyntaxVar         KSyntaxVar;
 typedef enum {
 	SugarFunc_TokenFunc         = 0,
 	SugarFunc_PatternMatch      = 1,
-	SugarFunc_Nodeession        = 2,
+	SugarFunc_Expression        = 2,
 	SugarFunc_TopLevelStatement = 3,
 	SugarFunc_Statement         = 4,
 	SugarFunc_TypeCheck         = 5,
@@ -292,7 +292,7 @@ struct KSyntaxVar {
 };
 
 #define PatternMatch_(NAME)       .PatternMatch   = PatternMatch_##NAME
-#define Nodeession_(NAME)         .Nodeession      = Nodeession_##NAME
+#define Expression_(NAME)         .Expression      = Expression_##NAME
 #define TopLevelStatement_(NAME)  .TopLevelStatement = Statement_##NAME
 #define Statement_(NAME)          .Statement    = Statement_##NAME
 #define TypeCheck_(NAME)          .TypeCheck    = TypeCheck_##NAME
@@ -326,7 +326,7 @@ typedef struct KDEFINE_SYNTAX {
 	int precedence_op2;
 	int precedence_op1;
 	KMethodFunc PatternMatch;
-	KMethodFunc Nodeession;
+	KMethodFunc Expression;
 	KMethodFunc TopLevelStatement;
 	KMethodFunc Statement;
 	KMethodFunc TypeCheck;
@@ -430,41 +430,47 @@ typedef enum {
 	KNode_And,
 	KNode_Or,
 	KNode_Assign,
-	KNode_Node,
+	KNode_Block,
 	KNode_If,
 	KNode_While,
+	KNode_DoWhile,
 	KNode_Return,
-	KNode_Jump,
+	KNode_Break,
+	KNode_Continue,
 	KNode_Try,
 	KNode_Throw,
 	KNode_Error,
-//	KNode_BLOCK,
-//	KNode_STACKTOP,
 } KNode_;
 
 struct kNodeVar {
 	kObjectHeader h;
-	kfileline_t        uline;
 	union {
 		struct kNodeVar   *Parent;   /* if parent is a NameSpace, it is a root node */
-		kNameSpace *RootNodeNameSpace;
+		kNameSpace        *RootNodeNameSpace;
 	};
 	union {
-		kToken        *TermToken;     // Node
+		kToken        *KeyOperatorToken;     // Node
+		kToken        *TermToken;            // Term
+	};
+	union {
 		kArray        *NodeList;      // Node
-		kString       *ErrorMessage;
 		kNameSpace    *StmtNameSpace;  // Statement
 	};
 	union {
+		KSyntax       *syn;  /* untyped */
 		uintptr_t      unboxConstValue;
 		intptr_t       index;
 		kObject*       ObjectConstValue;
-		KSyntax       *syn;  /* untyped */
+		intptr_t       stacktop;
+		kString       *ErrorMessage;
 	};
 	knode_t node; 	   ktypeattr_t attrTypeId;
 };
 
+#define kNode_uline(O)   (O)->KeyOperatorToken->uline
+
 #define kNode_IsRootNode(O)       IS_NameSpace(O->RootNodeNameSpace)
+#define Node_ns(O)                kNode_GetNameSpace(kctx, O)
 static inline kNameSpace *kNode_GetNameSpace(KonohaContext *kctx, kNode *node)
 {
 	kNameSpace *ns = node->StmtNameSpace;
@@ -479,16 +485,23 @@ static inline kNameSpace *kNode_GetNameSpace(KonohaContext *kctx, kNode *node)
 	return ns;
 }
 
+static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeType, ktypeattr_t attrTypeId)
+{
+	kNodeVar *vnode = (kNodeVar *)node;
+	vnode->node = nodeType;
+	vnode->attrTypeId = attrTypeId;
+	return node;
+}
+
 #define kNode_IsTerm(N)           IS_Token((N)->TermToken)
 
 #define kNode_IsConstValue(o)     (KNode_Const <= (o)->node && (o)->node <= KNode_UnboxConst)
 
-#define kNodeFlag_StackIndex  kObjectFlag_Local1
-#define kNodeFlag_ObjectConst kObjectFlag_Local2
+#define kNodeFlag_StackIndex         kObjectFlag_Local1
+#define kNodeFlag_ObjectConst        kObjectFlag_Local2
 
-#define kNodeFlag_RedoLoop           kObjectFlag_Local1   /* stmt */
-#define kNodeFlag_CatchContinue      kObjectFlag_Local2
-#define kNodeFlag_CatchBreak         kObjectFlag_Local3
+#define kNodeFlag_CatchContinue      kObjectFlag_Local3
+#define kNodeFlag_CatchBreak         kObjectFlag_Local4
 
 #define kNode_Is(P, O)      (KFlag_Is(uintptr_t,(O)->h.magicflag, kNodeFlag_##P))
 #define kNode_Set(P, O, B)   KFlag_Set(uintptr_t,(O)->h.magicflag, kNodeFlag_##P, B)
@@ -621,7 +634,7 @@ typedef struct {
 	kNode*       (*kNode_SetVariable)(KonohaContext *, kNodeVar *, kGamma *, knode_t build, ktypeattr_t, intptr_t index);
 	kNode *      (*new_TypedCallNode)(KonohaContext *, kNode *, kGamma *, KClass *, kMethod *mtd, int n, ...);
 
-	kbool_t     (*kNode_TypeCheckAll)(KonohaContext *, kNode *, kGamma *);
+	kbool_t     (*TypeCheckBlock)(KonohaContext *, kNode *, kGamma *);
 	kbool_t     (*kNode_TypeCheckByName)(KonohaContext *, kNode*, ksymbol_t, kGamma *, KClass *, int);
 	kNode*      (*kNode_TypeCheckNodeAt)(KonohaContext *, kNode *, kNode *, size_t, kGamma *, KClass *, int);
 	kNode *     (*kNodekNode_TypeCheckCallParam)(KonohaContext *, kNode *, kNodeVar *, kMethod *, kGamma *, KClass *);
@@ -747,7 +760,7 @@ struct KBuilderAPI2 {
 	KMethodFunc            (*GenerateKMethodFunc)(KonohaContext *, struct KVirtualCode *);
 	struct KVirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
 
-	KNodeVisitFunc visitErrNode;
+	KNodeVisitFunc visitErrNode;  // FIXME
 	KNodeVisitFunc visitNodeNode;
 	KNodeVisitFunc visitExprNode;
 	KNodeVisitFunc visitReturnNode;
@@ -803,71 +816,11 @@ static inline void kToken_SetTypeId(KonohaContext *kctx, kToken *tk, kNameSpace 
 	((kTokenVar *)tk)->resolvedSyntaxInfo = KPARSERM->kNameSpace_GetSyntax(kctx, ns, KSymbol_TypePattern, 0);
 }
 
-#ifdef USE_NODE
-
-#define Node_ns(STMT)   kNode_ns(STMT)
-static inline kNameSpace *kNode_ns(kNode *stmt)
-{
-	return NULL;  /*FIXME*/;
-}
-
-static inline kNode* kNode_Type(kNode *node, knode_t nodeType, ktypeattr_t ty)
-{
-	kNodeVar *vnode = (kNodeVar*)node;
-	vnode->node = nodeType;
-	vnode->attrTypeId = ty;
-	return node;
-}
-
-#else
-#define Node_ns(STMT)   kNode_ns(STMT)
-static inline kNameSpace *kNode_ns(kNode *stmt)
-{
-	return stmt->parentNodeNULL->NodeNameSpace;
-}
-
-#define kNode_Setsyn(STMT, S)  Node_setsyn(kctx, STMT, S)
-#define kNode_done(kctx, STMT) Node_setsyn(kctx, STMT, NULL)
-static inline void Node_setsyn(KonohaContext *kctx, kNode *stmt, KSyntax *syn)
-{
-	//if(syn == NULL && stmt->syn != NULL) {
-	//	DBG_P("DONE: STMT='%s'", KSymbol_Fmt2(syn->keyword));
-	//}
-	((kNodeVar *)stmt)->syn = syn;
-	(void)kctx;
-}
-static inline kbool_t Node_isDone(kNode *stmt)
-{
-	return (stmt->syn == NULL);
-}
-
-#define kNode_typed(STMT, T)  Node_typed(STMT, KNode_##T)
-static inline void Node_typed(kNode *stmt, int build)
-{
-	if(stmt->node != kNode_Error) {
-		((kNodeVar *)stmt)->node = build;
-	}
-}
-
-static inline kbool_t kNode_isSymbolTerm(kNode *expr)
+static inline kbool_t kNode_isSymbolTerm(KonohaContext *kctx, kNode *expr)
 {
 	return (kNode_IsTerm(expr) && (expr->TermToken->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern));
 }
 
-static inline void kNode_Setsyn(kNode *expr, KSyntax *syn)
-{
-	((kNodeVar *)expr)->syn = syn;
-}
-
-#define kNode_typed(E, B, TY)   Node_typed(E, KNode_##B, TY)
-static inline kNode *Node_typed(kNodeVar *expr, int build, ktypeattr_t ty)
-{
-	expr->node = build;
-	expr->attrTypeId = ty;
-	return expr;
-}
-
-#endif
 
 #ifdef __cplusplus
 }
