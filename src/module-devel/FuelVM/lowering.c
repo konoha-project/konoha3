@@ -637,7 +637,16 @@ static void EmitUnaryInst(ByteCodeWriter *writer, enum UnaryOp Op, unsigned Dst,
 
 static void EmitBinaryInst(ByteCodeWriter *writer, enum BinaryOp Op, enum TypeId Type, unsigned Dst, unsigned Left, unsigned Right)
 {
-	if(Type == TYPE_int) {
+	if(Type == TYPE_boolean) {
+		switch(Op) {
+#define CASE(X) case X: EMIT_LIR(writer, X, Dst, Left, Right); return
+			CASE(Eq); CASE(Nq);
+			default:
+			assert(0 && "unreachable");
+			break;
+#undef CASE
+		}
+	} else if(Type == TYPE_int) {
 		switch(Op) {
 #define CASE(X) case X: EMIT_LIR(writer, X, Dst, Left, Right); return
 			CASE(Add); CASE(Sub); CASE(Mul); CASE(Div); CASE(Mod);

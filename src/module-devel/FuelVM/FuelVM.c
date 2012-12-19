@@ -285,14 +285,14 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 		VMRegister Dst = ((OPLAnd *)PC)->Dst;
 		VMRegister LHS = ((OPLAnd *)PC)->LHS;
 		VMRegister RHS = ((OPLAnd *)PC)->RHS;
-		Reg[Dst].bval = Reg[LHS].bval && Reg[RHS].bval;
+		Reg[Dst].ival = Reg[LHS].bval && Reg[RHS].bval;
 		DISPATCH_NEXT(PC);
 	}
 	CASE(LOr) {
 		VMRegister Dst = ((OPLOr *)PC)->Dst;
 		VMRegister LHS = ((OPLOr *)PC)->LHS;
 		VMRegister RHS = ((OPLOr *)PC)->RHS;
-		Reg[Dst].bval = Reg[LHS].bval || Reg[RHS].bval;
+		Reg[Dst].ival = Reg[LHS].bval || Reg[RHS].bval;
 		DISPATCH_NEXT(PC);
 	}
 	CASE(New) {

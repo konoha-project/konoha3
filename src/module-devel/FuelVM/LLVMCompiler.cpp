@@ -514,7 +514,14 @@ static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 
 	enum TypeId Type = Node->LHS->Type;
 #define CASE(X, OP) case X: VSET(writer, Node, Create##OP(LHS, RHS, #X));return
-	if(Type == TYPE_int) {
+	if(Type == TYPE_boolean) {
+		switch(Node->Op) {
+			CASE(Eq, ICmpEQ); CASE(Nq, ICmpNE);
+			default:
+				assert(0 && "unreachable");
+				break;
+		}
+	} else if(Type == TYPE_int) {
 		switch(Node->Op) {
 			CASE(Add, Add); CASE(Sub, Sub); CASE(Mul, Mul); CASE(Div, SDiv); CASE(Mod, SRem);
 			CASE(LShift, Shl); CASE(RShift, AShr); CASE(And, And); CASE(Or, Or); CASE(Xor, Xor);

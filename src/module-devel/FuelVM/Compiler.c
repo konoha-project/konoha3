@@ -172,7 +172,28 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 	kmethodn_t  mn     = mtd->mn;
 	ktypeattr_t retTy  = kMethod_GetReturnType(mtd)->typeId;
 	kParam     *params = kMethod_GetParam(mtd);
-	if(thisTy == KType_int) {
+	if(thisTy == KType_boolean) {
+		if(params->psize == 0) { /* UnaryOperator */
+			if(retTy == KType_boolean) {
+				/* booleaen booleaen.opSUB() */
+				enum UnaryOp Op = KMethodName_toUnaryOperator(kctx, mn);
+				INode *Param = FetchINode(kctx, builder, stmt, expr, 1, KType_boolean);
+				return CreateUnaryInst(BLD(builder), Op, Param);
+			}
+		}
+		else if(params->psize == 1) { /* BinaryOperator */
+			ktypeattr_t ptype = params->paramtypeItems[0].attrTypeId;
+			if(retTy == KType_boolean && ptype == KType_boolean) {
+				/* boolean booleaen.(opEQ|opNE) (booleaen x) */
+				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
+				assert(Op == Eq || Op == Nq);
+				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, KType_boolean);
+				INode *RHS = FetchINode(kctx, builder, stmt, expr, 2, KType_boolean);
+				return CreateBinaryInst(BLD(builder), Op, LHS, RHS);
+			}
+		}
+	}
+	else if(thisTy == KType_int) {
 		if(params->psize == 0) { /* UnaryOperator */
 			if(retTy == KType_int) {
 				/* int int.opSUB() */

@@ -133,7 +133,7 @@ static void visitIBranch(Visitor *visitor, INode *Node)
 static void visitITest(Visitor *visitor, INode *Node)
 {
 	ITest *Inst = (ITest *) Node;
-	const char *Tag;
+	const char *Tag = "";
 	switch(Inst->Op) {
 		CASE(TypeCheck);
 		CASE(TypeGuard);
