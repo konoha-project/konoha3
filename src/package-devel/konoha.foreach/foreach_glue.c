@@ -89,7 +89,7 @@ static kBlock *new_MacroBlock(KonohaContext *kctx, kStmt *stmt, kToken *Iterator
 	KMacroSet_setTokenAt(kctx, macroSet, 0, source.tokenList, "T", IteratorTypeToken, NULL);
 	KMacroSet_setTokenAt(kctx, macroSet, 1, source.tokenList, "E", IteratorExprToken, NULL);
 	if(TypeToken == NULL) {
-		KMacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", VariableToken, NULL);
+		KMacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", new_TypeToken(kctx, ns, KClass_INFER), VariableToken, NULL);
 	}
 	else {
 		KMacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", TypeToken, VariableToken, NULL);
