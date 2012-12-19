@@ -78,7 +78,7 @@ static void visitIArgument(Visitor *visitor, INode *Node)
 static void visitIField(Visitor *visitor, INode *Node)
 {
 	IField *Inst = (IField *) Node;
-	const char *Tag;
+	const char *Tag = "";
 	switch(Inst->Op) {
 		CASE(GlobalScope);
 		CASE(EnvScope);
@@ -92,7 +92,7 @@ static void visitIField(Visitor *visitor, INode *Node)
 static void visitICond(Visitor *visitor, INode *Node)
 {
 	ICond *Inst = (ICond *) Node;
-	const char *Tag;
+	const char *Tag = "";
 	switch(Inst->Op) {
 		CASE(LogicalOr);
 		CASE(LogicalAnd);
@@ -189,7 +189,7 @@ static void visitIUnary(Visitor *visitor, INode *Node)
 static void visitIBinary(Visitor *visitor, INode *Node)
 {
 	IBinary *Inst = (IBinary *) Node;
-	const char *Tag;
+	const char *Tag = "";
 	switch(Inst->Op) {
 		CASE(Add); CASE(Sub); CASE(Mul); CASE(Div); CASE(Mod);
 		CASE(LShift); CASE(RShift); CASE(And); CASE(Or); CASE(Xor);

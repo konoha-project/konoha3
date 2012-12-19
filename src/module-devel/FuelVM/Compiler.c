@@ -579,7 +579,7 @@ static INode *SetUpArguments(KonohaContext *kctx, FuelIRBuilder *builder, kMetho
 	unsigned i;
 	INode *Arg;
 	INode *Val;
-	INode *Arg0;
+	INode *Arg0 = NULL;
 	if(mtd->typeId != TYPE_void) {
 		Arg = CreateArgument(builder, 0);
 		Val = CreateLocal(builder, mtd->typeId);

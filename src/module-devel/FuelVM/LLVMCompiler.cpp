@@ -28,6 +28,7 @@
 #define USE_LLVMIR_DUMP 1
 using namespace llvm;
 
+namespace FuelVM {
 typedef struct LLVMIRBuilder {
 	Visitor visitor;
 	KonohaContext *kctx;
@@ -375,6 +376,12 @@ static void EmitRet(LLVMIRBuilder *writer, INode *Node)
 	IRBuilder<> *builder = writer->builder;
 	if(Node) {
 		Value *Ret = GetValue(writer, Node);
+		Type *RetTy = Ret->getType();
+		if(!RetTy->isPointerTy()) {
+			if(RetTy == builder->getInt1Ty()) {
+				Ret = builder->CreateZExt(Ret, GetLLVMType(ID_long));
+			}
+		}
 		builder->CreateRet(Ret);
 	} else {
 		builder->CreateRetVoid();
@@ -388,13 +395,56 @@ static void EmitJump(LLVMIRBuilder *writer, IJump *Node)
 	builder->CreateBr(Target);
 }
 
+static void EmitCondBranch(LLVMIRBuilder *writer, IBranch *Inst, ICond *Cond, int IsTopDecl)
+{
+	INodePtr *x, *e;
+	BasicBlock *ThenBB;
+	BasicBlock *ElseBB;
+	if(Cond->Op == LogicalOr) {
+		ThenBB = GetBlock(writer, Inst->ThenBB); ElseBB = GetBlock(writer, Inst->ElseBB);
+	} else {
+		ThenBB = GetBlock(writer, Inst->ElseBB); ElseBB = GetBlock(writer, Inst->ThenBB);
+	}
+
+	IRBuilder<> *builder = writer->builder;
+	FOR_EACH_ARRAY(Cond->Insts, x, e) {
+		if(CHECK_KIND(*x, ICond) != 0) {
+			EmitCondBranch(writer, Inst, (ICond *) *x, 0);
+			continue;
+		}
+
+		BasicBlock *BB = BasicBlock::Create(getGlobalContext(), "BB", writer->Func);
+
+		Value *Val = GetValue(writer, *x);
+		if(Val->getType() != builder->getInt1Ty()) {
+			Val = builder->CreateTrunc(Val, builder->getInt1Ty());
+		}
+
+		if(Cond->Op == LogicalOr) {
+			builder->CreateCondBr(Val, ThenBB, BB);
+		} else {
+			builder->CreateCondBr(Val, BB, ThenBB);
+		}
+		builder->SetInsertPoint(BB);
+	}
+
+	if(IsTopDecl == true) {
+		builder->CreateBr(ElseBB);
+	}
+}
+
 static void EmitBranch(LLVMIRBuilder *writer, IBranch *Node)
 {
 	IRBuilder<> *builder = writer->builder;
-	Value *Cond = GetValue(writer, Node->Cond);
-	BasicBlock *ThenBB = GetBlock(writer, Node->ThenBB);
-	BasicBlock *ElseBB = GetBlock(writer, Node->ElseBB);
-	builder->CreateCondBr(Cond, ThenBB, ElseBB);
+	if(ICond *Cond = CHECK_KIND(Node->Cond, ICond)) {
+		assert(Cond->Branch != 0);
+		EmitCondBranch(writer, Node, Cond, true);
+	} else {
+		Value *Val = GetValue(writer, Node->Cond);
+		BasicBlock *ThenBB = GetBlock(writer, Node->ThenBB);
+		BasicBlock *ElseBB = GetBlock(writer, Node->ElseBB);
+		builder->CreateCondBr(Val, ThenBB, ElseBB);
+	}
 }
 
 static void EmitNewInst(LLVMIRBuilder *writer, INew *Node)
@@ -499,7 +549,30 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 {
 	switch(Node->Kind) {
 		CASE(ICond) {
-			assert(0 && "TODO");
+			ICond *Inst = (ICond *) Node;
+			if(Inst->Branch == NULL) {
+				INodePtr *x, *e;
+				Value *LHS, *RHS;
+				INodePtr *Inst0 = ARRAY_n(Inst->Insts, 0);
+				IRBuilder<> *builder = writer->builder;
+				LHS = GetValue(writer, *Inst0);
+				if(LHS->getType() != builder->getInt1Ty()) {
+					LHS = builder->CreateTrunc(LHS, builder->getInt1Ty());
+				}
+				FOR_EACH_ARRAY(Inst->Insts, x, e) {
+					if(x == Inst0) continue;
+					RHS = GetValue(writer, *x);
+					if(RHS->getType() != builder->getInt1Ty()) {
+						RHS = builder->CreateTrunc(RHS, builder->getInt1Ty());
+					}
+					if(Inst->Op == LogicalOr) {
+						LHS = builder->CreateOr(LHS, RHS);
+					} else {
+						LHS = builder->CreateAnd(LHS, RHS);
+					}
+				}
+				SetValue(writer, Node, LHS);
+			}
 			break;
 		}
 		CASE(INew) {
@@ -731,10 +804,13 @@ static void EmitPrologue(LLVMIRBuilder *writer, FuelIRBuilder *builder, IMethod 
 	}
 }
 
+} /* namespace FuelVM */
+
 extern "C" {
 
 ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 {
+	using namespace FuelVM;
 	InitLLVM();
 	LLVMIRBuilder writer = {{
 		0,
