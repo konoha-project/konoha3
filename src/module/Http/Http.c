@@ -224,7 +224,7 @@ static void StartEventHandler(KonohaContext *kctx, void *args)
 	pthread_create(&t, NULL, HttpEventListener, (void *)eventContext);
 }
 
-static void StopEventHandler(KonohaContext *kctx)
+static void StopEventHandler(KonohaContext *kctx, void *args)
 {
 	KonohaFactory *factory = (KonohaFactory *)kctx->platApi;
 	struct EventContext *eventContext = factory->eventContext;
@@ -241,12 +241,12 @@ static void StopEventHandler(KonohaContext *kctx)
 	}
 }
 
-static void EnterEventContext(KonohaContext *kctx)
+static void EnterEventContext(KonohaContext *kctx, void *args)
 {
 	EnterHttpContext(kctx);
 }
 
-static void ExitEventContext(KonohaContext *kctx)
+static void ExitEventContext(KonohaContext *kctx, void *args)
 {
 	ExitHttpContext(kctx);
 }

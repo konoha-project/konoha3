@@ -376,19 +376,19 @@ static KMETHOD MPIRequest_cancel(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-/* ------------------------------------------------------------------------ */
-//## MPIData MPIData.fromBytes(Bytes b)
-static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kMPIData *d = newMPIData(kctx);
-	d->type = MPI_CHAR;
-	d->b = sfp[1].asBytes;
-	d->size = sfp[1].asBytes->bytesize;
-	d->offset = 0;
-	d->typeId = KMPI_BYTES;
-	KReturn(new_ReturnCppObject(kctx, sfp, WRAP(d)));
-}
-
+///* ------------------------------------------------------------------------ */
+////## MPIData MPIData.fromBytes(Bytes b)
+//static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	kMPIData *d = newMPIData(kctx);
+//	d->type = MPI_CHAR;
+//	d->b = sfp[1].asBytes;
+//	d->size = sfp[1].asBytes->bytesize;
+//	d->offset = 0;
+//	d->typeId = KMPI_BYTES;
+//	KReturn(new_ReturnCppObject(kctx, sfp, WRAP(d)));
+//}
+//
 ////## MPIData MPIData.fromIntArray(Array[int] a)
 //static KMETHOD MPIData_fromIntArray(KonohaContext *kctx, KonohaStack *sfp)
 //{

@@ -169,7 +169,8 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD PatternMatch_Inc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
-	int i, SYM_Inc = KSymbol_("++"), SYM_Dec = KSymbol_("--");
+	int i;
+	ksymbol_t SYM_Inc = KSymbol_("++"), SYM_Dec = KSymbol_("--");
 	for(i = beginIdx; i < endIdx; i++) {
 		kTokenVar *tk = tokenList->TokenVarItems[i];
 		if(tk->resolvedSymbol == SYM_Inc || tk->resolvedSymbol == SYM_Dec) {
@@ -185,7 +186,8 @@ static KMETHOD PatternMatch_Inc(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD PatternMatch_IncExpr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
-	int i, SYM_Inc = KSymbol_("++"), SYM_Dec = KSymbol_("--"), start, end;
+	int i, start, end;
+	ksymbol_t SYM_Inc = KSymbol_("++"), SYM_Dec = KSymbol_("--");
 	for(i = beginIdx; i < endIdx; i++) {
 		kToken *tk = tokenList->TokenItems[i];
 		if(tk->resolvedSymbol == SYM_Inc || tk->resolvedSymbol == SYM_Dec) {

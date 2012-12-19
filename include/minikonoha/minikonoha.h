@@ -609,9 +609,9 @@ struct KonohaFactory {
 	KModuleInfo *EventInfo;
 	struct EventContext *eventContext;
 	void (*StartEventHandler)(KonohaContext *kctx, void *args);
-	void (*StopEventHandler)(KonohaContext *kctx);
-	void (*EnterEventContext)(KonohaContext *kctx);
-	void (*ExitEventContext)(KonohaContext *kctx);
+	void (*StopEventHandler)(KonohaContext *kctx, void *args);
+	void (*EnterEventContext)(KonohaContext *kctx, void *args);
+	void (*ExitEventContext)(KonohaContext *kctx, void *args);
 	kbool_t (*EmitEvent)(KonohaContext *kctx, struct JsonBuf *json, KTraceInfo *);
 	void (*DispatchEvent)(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo *), KTraceInfo *);
 	void (*WaitEvent)(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo *), KTraceInfo *);

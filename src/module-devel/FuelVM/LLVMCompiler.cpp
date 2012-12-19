@@ -414,7 +414,12 @@ static void EmitNewInst(LLVMIRBuilder *writer, INew *Node)
 		FunctionType *FnTy = FunctionType::get(GetLLVMType(ID_PtrkObjectVar), Fields, false);
 		G = new GlobalVariable(*GlobalModule, FnTy, true,
 				GlobalValue::ExternalLinkage, NULL, "new_kObject");
-		GlobalEngine->addGlobalMapping(G, (void *) KLIB new_kObject);
+		typedef kObject *(*NewFunc)(KonohaContext *, kArray *, KClass *, uintptr_t);
+		union {
+			void *ptr;
+			NewFunc f;
+		} Val; Val.f = KLIB new_kObject;
+		GlobalEngine->addGlobalMapping(G, Val.ptr);
 	}
 
 	/* kObject *new_kObject(KonohaContext *, uint64_t, void *, uint64_t); */
@@ -487,7 +492,6 @@ static void EmitThrowInst(LLVMIRBuilder *writer, IThrow *Node)
 {
 	assert(0 && "TODO");
 }
-
 
 #define CASE(KIND) case IR_TYPE_##KIND:
 

@@ -315,9 +315,9 @@ static kbool_t KTokenSeq_ApplyMacro(KonohaContext *kctx, KTokenSeq *tokens, kArr
 	return true;
 }
 
-static void KTokenSeq_ApplyMacroGroup(KonohaContext *kctx, KTokenSeq *tokens, kArray *macroTokenList, int paramsize, kToken *groupToken)
+static void KTokenSeq_ApplyMacroGroup(KonohaContext *kctx, KTokenSeq *tokens, kArray *macroTokenList, unsigned paramsize, kToken *groupToken)
 {
-	int i;
+	unsigned i;
 	KMacroSet* mp = ALLOCA(KMacroSet, paramsize+1);
 	DBG_ASSERT(paramsize < kArray_size(macroTokenList));
 	for(i = 0; i < paramsize; i++) {
@@ -326,7 +326,7 @@ static void KTokenSeq_ApplyMacroGroup(KonohaContext *kctx, KTokenSeq *tokens, kA
 	}
 	mp[paramsize].symbol = 0; /* sentinel */
 
-	int p = 0, start = 0;
+	unsigned p = 0, start = 0;
 	for(i = 0; i < kArray_size(groupToken->subTokenList); i++) {
 		kToken *tk = groupToken->subTokenList->TokenItems[i];
 		if(tk->hintChar == ',') {

@@ -57,7 +57,7 @@ extern "C" {
 
 /* ------------------------------------------------------------------------ */
 #define ShiftPointer(p, size)   ((char *)p + (size))
-#define MemorySize(p, p2)      (((char *)p) - ((char *)p2))
+#define MemorySize(p, p2)      ((size_t)(((char *)p) - ((char *)p2)))
 
 #define PageObjectSize(i) (K_PAGESIZE / sizeof(kGCObject##i))
 
@@ -66,7 +66,7 @@ extern "C" {
 #define Object_unsetMark(o) KFlag_Set0(uintptr_t,(o)->h.magicflag,kObjectFlag_GCFlag)
 #define Object_setMark(o)   KFlag_Set1(uintptr_t,(o)->h.magicflag,kObjectFlag_GCFlag)
 #define Object_isMark(o)   (KFlag_Is(uintptr_t,(o)->h.magicflag, kObjectFlag_GCFlag))
-static int verbose_gc = 0;
+//static int verbose_gc = 0;
 static inline void *do_malloc(size_t size);
 static inline void *do_calloc(size_t count, size_t size);
 static inline void *do_realloc(void *ptr, size_t oldSize, size_t newSize);

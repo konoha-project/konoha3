@@ -35,10 +35,6 @@ extern "C" {
 	visitor->VisitValue(visitor, NODE, TAG, VAL);\
 } while(0)
 
-#define VISIT_0(NODE, TAG) do {\
-	visitor->Visit(NODE, TAG, 0);\
-} while(0)
-
 #define VISIT_1(NODE, TAG, NODE1) do {\
 	INode *_N1 = (NODE1);\
 	visitor->Visit(visitor, NODE, TAG, 1, _N1);\

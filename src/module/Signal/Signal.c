@@ -287,7 +287,7 @@ static void StartEventHandler(KonohaContext *kctx, void *args)
 	SetSignal(kctx);
 }
 
-static void StopEventHandler(KonohaContext *kctx)
+static void StopEventHandler(KonohaContext *kctx, void *args)
 {
 	ResetSignal(kctx);
 	struct EventContext *eventContext = ((KonohaFactory *)kctx->platApi)->eventContext;
@@ -295,12 +295,12 @@ static void StopEventHandler(KonohaContext *kctx)
 	PLATAPI free_i(eventContext);
 }
 
-static void EnterEventContext(KonohaContext *kctx)
+static void EnterEventContext(KonohaContext *kctx, void *args)
 {
 	EnterSignalContext(kctx);
 }
 
-static void ExitEventContext(KonohaContext *kctx)
+static void ExitEventContext(KonohaContext *kctx, void *args)
 {
 	ExitSignalContext(kctx);
 }

@@ -437,8 +437,9 @@ static KMETHOD Stmt_getToken(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Stmt_TypeCheckExpr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t key = (ksymbol_t)sfp[1].intValue;
-	ktypeattr_t typeId = kObject_typeId(sfp[3].asObject);
-	KReturnUnboxValue(SUGAR kStmt_TypeCheckByName(kctx, sfp[0].asStmt, key, sfp[2].asGamma, typeId, sfp[4].intValue));
+	KClass *kclass = kObject_class(sfp[3].asObject);
+	KReturnUnboxValue(SUGAR kStmt_TypeCheckByName(kctx, sfp[0].asStmt, key, sfp[2].asGamma,
+				kclass, sfp[4].intValue));
 }
 
 ////## Expr Stmt.newExpr(Token[] tokenList, int s, int e);
@@ -607,7 +608,10 @@ static KMETHOD Stmt_LookupStmt(KonohaContext *kctx, KonohaStack *sfp)
 	kStmt *stmt = sfp[0].asStmt;
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
 	kStmt *ret = kStmt_LookupStmtNULL(kctx, stmt, keyword);
-	KReturn(ret ? ret : K_NULL);
+	if(ret == NULL) {
+		ret = (kStmt *) KLIB Knull(kctx, kObject_class(KGetReturnObject(sfp)));
+	}
+	KReturn(ret);
 }
 
 //## void Stmt.done();

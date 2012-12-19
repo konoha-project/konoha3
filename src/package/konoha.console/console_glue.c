@@ -88,8 +88,6 @@ static KMETHOD Console_inputUserPassword0(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-#define KType_Date     cDate->typeId
-
 static kbool_t console_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defConsole = {0};

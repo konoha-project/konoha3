@@ -471,11 +471,11 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 	KClass *KClass_ArrayT0 = KClass_p0(kctx, KClass_Array, KType_0);
 	ktypeattr_t KType_ArrayT0 = KClass_ArrayT0->typeId;
 
-	kparamtype_t p[] = {{KType_0}};
-	ktypeattr_t KType_FuncMap = (KLIB KClass_Generics(kctx, KClass_Func, KType_0 , 1, p))->typeId;
+	//kparamtype_t p[] = {{KType_0}};
+	//ktypeattr_t KType_FuncMap = (KLIB KClass_Generics(kctx, KClass_Func, KType_0 , 1, p))->typeId;
 
-	kparamtype_t P_inject[] = {{KType_0},{KType_0}};
-	ktypeattr_t KType_FuncInject = (KLIB KClass_Generics(kctx, KClass_Func, KType_0 , 2, P_inject))->typeId;
+	//kparamtype_t P_inject[] = {{KType_0},{KType_0}};
+	//ktypeattr_t KType_FuncInject = (KLIB KClass_Generics(kctx, KClass_Func, KType_0 , 2, P_inject))->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im,    _F(Array_get), KType_0,   KType_Array, KKMethodName_("get"), 1, KType_int, KFieldName_("index"),

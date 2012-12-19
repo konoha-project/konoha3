@@ -73,7 +73,7 @@ static void SockAddr_Free(KonohaContext *kctx, kObject *o)
 // [private functions]
 
 // <String, int, int> => sockaddr_in*
-void toSockaddr(struct sockaddr_in *addr, char *ip, const int port, const int family)
+void toSockaddr(struct sockaddr_in *addr, const char *ip, const int port, const int family)
 {
 	memset(addr, 0, sizeof(*addr));
 	addr->sin_addr.s_addr = (*ip==0) ? 0 : inet_addr(ip);
@@ -84,77 +84,77 @@ void toSockaddr(struct sockaddr_in *addr, char *ip, const int port, const int fa
 // sockaddr_in* => Map
 //void fromSockaddr(KonohaContext *kctx, struct kMap* info, struct sockaddr_in addr)
 //{
-//	if(info != NULL ) {
+//	if(info != NULL) {
 //		knh_DataMap_setString(kctx, info, "addr", inet_ntoa(addr.sin_Addr));
 //		knh_DataMap_setInt(kctx, info, "port", ntohs(addr.sin_port));
 //		knh_DataMap_setInt(kctx, info, "family", addr.sin_family);
 //	}
 //}
 
-// for select :: kArray* => fd_set*
-static fd_set* toFd(fd_set* s, kArray *a )
-{
-	if(s == NULL || kArray_size(a) <= 0) {
-		return NULL;
-	}
-	FD_ZERO(s);
-	size_t indx;
-	int fd;
-	for(indx = 0; indx < kArray_size(a); indx++ ) {
-		fd = WORD2INT(a->kintItems[indx]);
-		if((fd >= 0) && (fd < FD_SETSIZE)) {
-			FD_SET(fd, s);
-		}
-	}
-	return s;
-}
-
-// for select :: fd_set* => kArray*
-static void fromFd(KonohaContext *kctx, fd_set* s, kArray *a )
-{
-	if(s != NULL && kArray_size(a) > 0 ) {
-		size_t indx;
-		for(indx = 0; indx < kArray_size(a); indx++ ) {
-			if(!FD_ISSET(WORD2INT(a->kintItems[indx]), s) ) {
-//				kArray_Remove(a, indx);
-			}
-		}
-	}
-}
-
-// for select
-static int getArrayMax(kArray *a)
-{
-	int ret = -1;
-	if(kArray_size(a) > 0) {
-		size_t cnt;
-		int fd;
-		for(cnt = 0; cnt < kArray_size(a); cnt++) {
-			if((fd = WORD2INT(a->kintItems[cnt])) > ret) {
-				ret = fd;
-			}
-		}
-	}
-	return ret;
-}
-
-// for select
-static int getNfd(kArray *a1, kArray *a2, kArray *a3)
-{
-	int ret = -1;
-	int tmp;
-
-	if((tmp=getArrayMax(a1)) > ret) {
-		ret = tmp;
-	}
-	if((tmp=getArrayMax(a2)) > ret) {
-		ret = tmp;
-	}
-	if((tmp=getArrayMax(a3)) > ret) {
-		ret = tmp;
-	}
-	return ret;
-}
+//// for select :: kArray* => fd_set*
+//static fd_set *toFd(fd_set* s, kArray *a )
+//{
+//	if(s == NULL || kArray_size(a) <= 0) {
+//		return NULL;
+//	}
+//	FD_ZERO(s);
+//	size_t indx;
+//	int fd;
+//	for(indx = 0; indx < kArray_size(a); indx++) {
+//		fd = WORD2INT(a->kintItems[indx]);
+//		if((fd >= 0) && (fd < FD_SETSIZE)) {
+//			FD_SET(fd, s);
+//		}
+//	}
+//	return s;
+//}
+//
+//// for select :: fd_set* => kArray*
+//static void fromFd(KonohaContext *kctx, fd_set *s, kArray *a)
+//{
+//	if(s != NULL && kArray_size(a) > 0) {
+//		size_t indx;
+//		for(indx = 0; indx < kArray_size(a); indx++) {
+//			if(!FD_ISSET(WORD2INT(a->kintItems[indx]), s)) {
+////				kArray_Remove(a, indx);
+//			}
+//		}
+//	}
+//}
+//
+//// for select
+//static int getArrayMax(kArray *a)
+//{
+//	int ret = -1;
+//	if(kArray_size(a) > 0) {
+//		size_t cnt;
+//		int fd;
+//		for(cnt = 0; cnt < kArray_size(a); cnt++) {
+//			if((fd = WORD2INT(a->kintItems[cnt])) > ret) {
+//				ret = fd;
+//			}
+//		}
+//	}
+//	return ret;
+//}
+//
+//// for select
+//static int getNfd(kArray *a1, kArray *a2, kArray *a3)
+//{
+//	int ret = -1;
+//	int tmp;
+//
+//	if((tmp=getArrayMax(a1)) > ret) {
+//		ret = tmp;
+//	}
+//	if((tmp=getArrayMax(a2)) > ret) {
+//		ret = tmp;
+//	}
+//	if((tmp=getArrayMax(a3)) > ret) {
+//		ret = tmp;
+//	}
+//	return ret;
+//}
 
 /* ======================================================================== */
 // [KMETHODS]
@@ -171,7 +171,7 @@ static int getNfd(kArray *a1, kArray *a2, kArray *a3)
 //			(struct sockaddr *)&addr,
 //			(socklen_t *)&addrLen
 //	);
-//	if(ret >= 0 ) {
+//	if(ret >= 0) {
 //		 fromSockaddr(kctx, sfp[2].m, addr);
 //	} else {
 //		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
@@ -196,7 +196,7 @@ KMETHOD System_accept(KonohaContext *kctx, KonohaStack* sfp)
 			(socklen_t *)&addrLen
 	);
 	if(ret >= 0) {
-//		fromSockaddr(kctx, sa, addr);
+		//fromSockaddr(kctx, sa, addr);
 	}
 	else {
 		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
@@ -212,6 +212,7 @@ KMETHOD System_accept(KonohaContext *kctx, KonohaStack* sfp)
 KMETHOD System_bind(KonohaContext *kctx, KonohaStack* sfp)
 {
 	struct sockaddr_in addr;
+
 	toSockaddr(&addr,
 			kString_text(sfp[2].asString),
 			WORD2INT(sfp[3].intValue),
@@ -234,9 +235,9 @@ KMETHOD System_bind(KonohaContext *kctx, KonohaStack* sfp)
 //## int System.close(int fd);
 KMETHOD System_close(KonohaContext *kctx, KonohaStack* sfp)
 {
-	int ret = close(WORD2INT(sfp[1].intValue) );
+	int ret = close(WORD2INT(sfp[1].intValue));
 
-	if(ret != 0 ) {
+	if(ret != 0) {
 		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			LogText("@", "close"),
 			LogUint("errno", errno),
@@ -294,7 +295,7 @@ KMETHOD System_listen(KonohaContext *kctx, KonohaStack* sfp)
 //	kMap *ret_s = KNH_TNULL(Map);
 //	if(getsockname(WORD2INT(sfp[1].intValue),
 //					   (struct sockaddr *)&addr,
-//					   (socklen_t *)&addrLen ) == 0 ) {
+//					   (socklen_t *)&addrLen ) == 0) {
 //		ret_s = new_DataMap(ctx);
 //		fromSockaddr(kctx, ret_s, addr);
 //	} else {
@@ -359,14 +360,14 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 //	kMap *ret_s = KNH_TNULL(Map);
 //	if(getpeername(WORD2INT(sfp[1].intValue),
 //					   (struct sockaddr *)&addr,
-//					   (socklen_t *)&addrLen ) == 0 ) {
+//					   (socklen_t *)&addrLen ) == 0) {
 //		ret_s = new_DataMap(ctx);
 //		fromSockaddr(kctx, ret_s, addr);
 //	} else {
 //		KNH_NTRACE2(kctx, "konoha.socket.peername ", K_PERROR, KNH_LDATA0);
 //	}
 //
-//	KReturn(ret_s );
+//	KReturn(ret_s);
 //}
 
 ////## int System.recv(int socket, byte[] buffer, int flags);
@@ -376,8 +377,8 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 //	int ret = recv(WORD2INT(sfp[1].intValue),
 //					  ba->buf,
 //					  ba->bytesize,
-//					  (int)sfp[3].intValue );
-//	if(ret < 0 ) {
+//					  (int)sfp[3].intValue);
+//	if(ret < 0) {
 //		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 //				LogText("@", "recv"),
 //				LogText("perror", strerror(errno))
@@ -399,8 +400,8 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 //			  	  	  	   ba->bytesize,
 //			  	  	  	   (int)sfp[3].intValue,
 //			  	  	  	   (struct sockaddr *)&addr,
-//			  	  	  	   (socklen_t *)&addrLen );
-//	if(ret >= 0 ) {
+//			  	  	  	   (socklen_t *)&addrLen);
+//	if(ret >= 0) {
 //		fromSockaddr(kctx, sfp[4].m, addr);
 //	} else {
 //		KNH_NTRACE2(kctx, "konoha.socket.recvfrom ", K_PERROR, KNH_LDATA0);
@@ -414,25 +415,25 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 //	kArray *a1 = sfp[1].asArray;
 //	kArray *a2 = sfp[2].asArray;
 //	kArray *a3 = sfp[3].asArray;
-//	int nfd = getNfd(a1, a2, a3 );
+//	int nfd = getNfd(a1, a2, a3);
 //
 //	fd_set rfds, wfds, efds;
-//	fd_set *rfd = toFd(&rfds, a1 );
-//	fd_set *wfd = toFd(&wfds, a2 );
-//	fd_set *efd = toFd(&efds, a3 );
+//	fd_set *rfd = toFd(&rfds, a1);
+//	fd_set *wfd = toFd(&wfds, a2);
+//	fd_set *efd = toFd(&efds, a3);
 //
 //	struct timeval tv;
 //	tv.tv_sec  = (long)sfp[4].intValue;
 //	tv.tv_usec = (long)sfp[5].intValue;
 //
-//	int ret = select(nfd+1, rfd, wfd, efd, &tv );
+//	int ret = select(nfd+1, rfd, wfd, efd, &tv);
 //	if(ret > 0) {
-//		fromFd(kctx, rfd, a1 );
-//		fromFd(kctx, wfd, a2 );
-//		fromFd(kctx, efd, a3 );
+//		fromFd(kctx, rfd, a1);
+//		fromFd(kctx, wfd, a2);
+//		fromFd(kctx, efd, a3);
 //	}
 //	else {
-//		if(ret < 0 ) {
+//		if(ret < 0) {
 //			OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 //					LogText("@", "select"),
 //					LogText("perror", strerror(errno))
@@ -467,7 +468,7 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 //	int ret = send(WORD2INT(sfp[1].intValue),
 //					  ba->buf,
 //					  ba->bytesize,
-//					  (int)sfp[3].intValue );
+//					  (int)sfp[3].intValue);
 //	if(ret < 0) {
 //		OLDTRACE_SWITCH_TO_KTrace(_UserFault,
 //				LogText("@", "send"),
@@ -492,7 +493,7 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 //	kBytes *ba = sfp[2].asBytes;
 //	struct sockaddr_in addr;
 //	kString* s = sfp[4].asString;
-//	toSockaddr(&addr, (char *)kString_text(s), WORD2INT(sfp[5].intValue), WORD2INT(sfp[6].intValue));
+//	toSockaddr(&addr, kString_text(s), WORD2INT(sfp[5].intValue), WORD2INT(sfp[6].intValue));
 //	// Broken Pipe Signal Mask
 //#if defined(__linux__)
 //	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
@@ -607,12 +608,6 @@ static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 }
 
 // --------------------------------------------------------------------------
-
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Static   kMethod_Static
-#define _Im kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
 
 #define KType_SockAddr         cSockAddr->typeId
 
