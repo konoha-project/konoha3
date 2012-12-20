@@ -53,7 +53,7 @@ String[] concatTokenList(Token[] tokenList) {
 	int i = 0;
 	String[] ret = [];
 	String buf = "";
-	while(i < tokenList.getSize()) {
+	while(i < tokenList.getlength()) {
 		Token tk = tokenList[i];
 		if(tk.isBeforeWhiteSpace()) {
 			ret.add(buf + tk.getText());
@@ -90,7 +90,7 @@ String getFuncName() {
 
 int indexOf(String[] a, String s, int startIdx) {
 	int i = startIdx;
-	while(i < a.getSize()) {
+	while(i < a.getlength()) {
 		if(a[i] == s) {
 			return i;
 		}
@@ -100,7 +100,10 @@ int indexOf(String[] a, String s, int startIdx) {
 }
 
 String expandDollar(String arg) {
-	if(arg.startsWith("$")) {
+	if(arg.startsWith("${") && arg.endsWith("}")) {
+		return arg.substring(2, arg.getlength() -1) + ".toString()";
+	}
+	else if(arg.startsWith("$")) {
 		return arg.substr(1) + ".toString()";
 	}
 	return "\"" + arg + "\"";
@@ -109,12 +112,12 @@ String expandDollar(String arg) {
 String expandArgs(String[] args) {
 	String ret = "[";
 	int i = 0;
-	while(i < args.getSize() - 1) {
+	while(i < args.getlength() - 1) {
 		ret = ret + expandDollar(args[i]) + ", ";
 		i = i + 1;
 	}
-	if(args.getSize() >= 1) {
-		ret = ret + expandDollar(args[args.getSize() - 1]);
+	if(args.getlength() >= 1) {
+		ret = ret + expandDollar(args[args.getlength() - 1]);
 	}
 	ret = ret + "]";
 	return ret;
@@ -141,12 +144,12 @@ boolean isCommandUseTty(String cmd) {
 String join(String[] a, String separator) {
 	String ret = "";
 	int i = 0;
-	while(i < a.getSize() - 1) {
+	while(i < a.getlength() - 1) {
 		ret = ret + a[i] + separator;
 		i = i + 1;
 	}
-	if(a.getSize() >= 1) {
-		ret = ret + a[a.getSize() - 1];
+	if(a.getlength() >= 1) {
+		ret = ret + a[a.getlength() - 1];
 	}
 	return ret;
 }
@@ -223,7 +226,7 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 					argsize = redirectindex - startindex - 1;
 				}
 				else {
-					argsize = args.getSize() - startindex - 1;
+					argsize = args.getlength() - startindex - 1;
 				}
 			}
 		}
@@ -275,7 +278,7 @@ boolean statementShell(Stmt stmt, Gamma gma) {
 	}
 	String[] args = concatTokenList(tokenList);
 	Token[] subprocTokens = tokenize(generateSubProcSequence(args, true));
-	Block block = stmt.newBlock(subprocTokens, 0, subprocTokens.getSize());
+	Block block = stmt.newBlock(subprocTokens, 0, subprocTokens.getlength());
 	boolean ret = block.TypeCheckAll(gma);
 	if(!ret) {
 		return false;
@@ -315,95 +318,43 @@ Expr expressionAsk(Stmt stmt, Token[] tokenList, int beginIdx, int operatorIdx, 
 	}
 }
 
-int tokenFuncCommandReplace(Token tk, String source) {
-	int pos = 1;
-	int openParenthesis  = 40/*'('*/;
-	int closeParenthesis = 41/*')'*/;
-	if(source.charCodeAt(pos) != openParenthesis) {
-		if(defined(DEBUG)) {
-			System.p("skip dollar");
-		}
-		return 0;
-	}
-	while(pos < source.getlength()) {
-		if(source.charCodeAt(pos) == closeParenthesis) {
-			if(tk.isNotNull() && pos > 2) {
-				tk.setText("$DollarCommandReplace", source, 2, pos);
-			}
-			return pos + 1;
-		}
-		pos = pos + 1;
-	}
-	if(defined(DEBUG)) {
-		System.p("skip dollar");
-	}
-	return 0;
-}
-
-Expr expressionCommandReplace(Stmt stmt, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
-	if(defined(DEBUG)) {
-		int i = beginIdx;
-		while(i < endIdx) {
-			System.p(tokenList[i].getText());
-			System.p(tokenList[i].getText().getlength());
-			System.p(tokenList[i].is("$Symbol"));
-			System.p(tokenList[i].is("()"));
-			i = i + 1;
-		}
-	}
-	String[] args = tokenList[operatorIdx].getText().trim().split(" ");
-	String funcName = getFuncName();
-	String evaltext = "@Public String " + funcName + "() { ";
-	evaltext = evaltext + generateSubProcSequence(args, false).replace("\n", " ");
-	if(defined(DEBUG)) {
-		System.p(evaltext);
-	}
-	eval(evaltext);
-	Token methodToken = new Token(funcName);
-	Expr classExpr = new Expr(NameSpace);
-	Expr expr = stmt.newUntypedCallStyleExpr(methodToken, classExpr);
-	return expr;
-}
-
-boolean isSymbol(String s) {
-	String[] noSymbolList = [" ", "(", ")"];
+int getLastIndex(String source) {
 	int i = 0;
-	while(i < noSymbolList.getSize()) {
-		if(s.indexOf(noSymbolList[i]) >= 0) {
-			return false;
+	String endSymbol = " )}";
+	while(i < source.getlength()) {
+		if(endSymbol.indexOf(source[i]) >= 0) {
+			return i;
 		}
 		i = i + 1;
 	}
-	return true;
+	return -1;
 }
 
-int tokenFuncEnvironment(Token tk, String source) {
+int tokenFuncDollarVariable(Token tk, String source) {
 	int pos = 1;
-	if(tk.isNull() || !isSymbol(source[pos])) {
-		if(defined(DEBUG)) {
-			System.p("skip dollar");
-		}
-		return 0;
-	}
 	if(source.indexOf("{") == 1) {
 		pos = source.indexOf("}");
 		if(pos > 2) {
-			tk.setText("$DollarEnvironment", source, 2, pos);
-			return pos + 1;
+			tk.setText("$DollarVariable", source, 0, pos + 1);
 		}
-		return 0;
+		return pos + 1;
 	}
-	while(pos < source.getlength()) {
-		if(!isSymbol(source[pos])) {
-			break;
+	else if(source.indexOf("(") == 1) {
+		pos = source.indexOf(")");
+		if(pos > 2) {
+			tk.setText("$DollarVariable", source, 0, pos + 1);
 		}
-		pos = pos + 1;
+		return pos + 1;
 	}
-	tk.setText("$DollarEnvironment", source, 1, pos);
+	pos = getLastIndex(source);
+	if(pos < 0) {
+		pos = source.getlength();
+	}
+	tk.setText("$DollarVariable", source, 0, pos);
 	return pos;
 }
 
-Expr expressionEnvironment(Stmt stmt, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
+Expr expressionDollarVariable(Stmt stmt, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
 	if(defined(DEBUG)) {
 		int i = beginIdx;
 		while(i < endIdx) {
@@ -414,9 +365,30 @@ Expr expressionEnvironment(Stmt stmt, Token[] tokenList, int beginIdx, int opera
 			i = i + 1;
 		}
 	}
+	String text = tokenList[operatorIdx].getText();
+	if(text.startsWith("$(") && text.endsWith(")")) {
+		String[] args = text.substring(2, text.getlength() - 1).split(" ");
+		String funcName = getFuncName();
+		String evaltext = "@Public String " + funcName + "() { ";
+		evaltext = evaltext + generateSubProcSequence(args, false).replace("\n", " ");
+		if(defined(DEBUG)) {
+			System.p(evaltext);
+		}
+		eval(evaltext);
+		Token methodToken = new Token(funcName);
+		Expr classExpr = new Expr(NameSpace);
+		Expr expr = stmt.newUntypedCallStyleExpr(methodToken, classExpr);
+		return expr;
+	}
+	else if(text.startsWith("${") && text.endsWith("}")) {
+		text = text.substring(2, text.getlength() - 1);
+	}
+	else if(text.startsWith("$")) {
+		text = text.substring(1, text.getlength());
+	}
 	Token methodToken = new Token("getenv");
 	Expr classExpr = new Expr(System);
-	Expr arg1 = new Expr(tokenList[beginIdx].getText());
+	Expr arg1 = new Expr(text);
 	Expr expr = stmt.newUntypedCallStyleExpr(methodToken, classExpr, arg1);
 	return expr;
 }
@@ -428,8 +400,5 @@ AddExpression("ask", expressionAsk);
 
 syntax $Shell $Token*
 
-AddTokenizer("$DollarCommandReplace", 36/*KonohaChar_Dollar*/, tokenFuncCommandReplace);
-AddExpression("$DollarCommandReplace", expressionCommandReplace);
-
-AddTokenizer("$DollarEnvironment", 36/*KonohaChar_Dollar*/, tokenFuncEnvironment);
-AddExpression("$DollarEnvironment", expressionEnvironment);
+AddTokenizer("$DollarVariable", 36/*KonohaChar_Dollar*/, tokenFuncDollarVariable);
+AddExpression("$DollarVariable", expressionDollarVariable);
