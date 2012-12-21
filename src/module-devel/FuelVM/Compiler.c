@@ -258,7 +258,7 @@ static bool FuelVM_VisitReturnNode(KonohaContext *kctx, KBuilder *builder, kNode
 {
 	kNode *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
 	if(expr != NULL && IS_Node(expr) && expr->attrTypeId != KType_void) {
-		SUGAR VisitNode(kctx, builder, stmt, expr);
+		SUGAR VisitNode(kctx, builder, expr);
 		INode *Ret  = FuelVM_getExpression(builder);
 		INode *Inst = CreateReturn(BLD(builder), Ret);
 		INode_setType(Inst, ConvertToTypeId(kctx, expr->attrTypeId));
@@ -275,7 +275,7 @@ static bool FuelVM_VisitIfNode(KonohaContext *kctx, KBuilder *builder, kNode *st
 	Node *ElseBB  = CreateNode(BLD(builder));
 	Node *MergeBB = CreateNode(BLD(builder));
 	/* if */
-	SUGAR VisitNode(kctx, builder, stmt, expr);
+	SUGAR VisitNode(kctx, builder, expr);
 	CreateBranch(BLD(builder), FuelVM_getExpression(builder), ThenBB, ElseBB);
 	/* then */
 	IRBuilder_setNode(BLD(builder), ThenBB);

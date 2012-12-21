@@ -182,7 +182,7 @@ static void JSBuilder_VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *b
 static void JSBuilder_VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr, const char* prefix, const char* suffix)
 {
 	JSBuilder_EmitString(kctx, builder, prefix, "", "");
-	SUGAR VisitNode(kctx, builder, stmt, expr);
+	SUGAR VisitNode(kctx, builder, expr);
 	JSBuilder_EmitString(kctx, builder, suffix, "", "");
 }
 
@@ -230,7 +230,7 @@ static kbool_t JSBuilder_VisitNodeNode(KonohaContext *kctx, KBuilder *builder, k
 			JSBuilder_EmitString(kctx, builder, "var ", "", "");
 		}
 	}
-	SUGAR VisitNode(kctx, builder, stmt, expr);
+	SUGAR VisitNode(kctx, builder, expr);
 	JSBuilder_EmitNewLineWith(kctx, builder, ";");
 	return true;
 }
@@ -248,7 +248,7 @@ static kbool_t JSBuilder_VisitReturnNode(KonohaContext *kctx, KBuilder *builder,
 	}
 	kNode* expr = Node_getFirstNode(kctx, stmt);
 	if(expr != NULL && IS_Node(expr)) {
-		SUGAR VisitNode(kctx, builder, stmt, expr);
+		SUGAR VisitNode(kctx, builder, expr);
 	}
 	JSBuilder_EmitNewLineWith(kctx, builder, ";");
 	return true;

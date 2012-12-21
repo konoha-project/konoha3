@@ -511,7 +511,7 @@ static bblock_t KBuilder_AsmJMPF(KonohaContext *kctx, KBuilder *builder, int flo
 static bblock_t KBuilder_asmJMPIF(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr, int isTRUE, bblock_t labelId)
 {
 	int a = builder->common.a;
-	SUGAR VisitNode(kctx, builder, stmt, expr);
+	SUGAR VisitNode(kctx, builder, expr);
 	return KBuilder_AsmJMPF(kctx, builder, a, labelId);
 }
 
@@ -534,19 +534,19 @@ static void KBuilder_AsmNMOV(KonohaContext *kctx, KBuilder *builder, int a, KCla
 
 //----------------------------------------------------------------------------
 
-static kNode* Node_getFirstNode(KonohaContext *kctx, kNode *stmt)
+static kNode* Node_getFirstBlock(KonohaContext *kctx, kNode *stmt)
 {
-	return SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
+	return SUGAR kNode_GetBlock(kctx, stmt, NULL, KSymbol_BlockPattern, K_NULLBLOCK);
 }
 
 static kNode* Node_getElseNode(KonohaContext *kctx, kNode *stmt)
 {
-	return SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_else, K_NULLBLOCK);
+	return SUGAR kNode_GetBlock(kctx, stmt, NULL, KSymbol_else, K_NULLBLOCK);
 }
 
-static kNode* Node_getFirstNode(KonohaContext *kctx, kNode *stmt)
+static kNode* Node_getFirstExpr(KonohaContext *kctx, kNode *stmt)
 {
-	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
+	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
 }
 
 static kNode *kNode_GetNode(KonohaContext *kctx, kNode *stmt, ksymbol_t kw)
@@ -579,27 +579,27 @@ static kbool_t KBuilder_VisitErrNode(KonohaContext *kctx, KBuilder *builder, kNo
 	return false;
 }
 
-static kbool_t KBuilder_VisitNodeNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
-{
-	int a = builder->common.a;
-	builder->common.a = builder->common.espidx;
-	SUGAR VisitNode(kctx, builder, stmt, Node_getFirstNode(kctx, stmt));
-	builder->common.a = a;
-	return true;
-}
+//static kbool_t KBuilder_VisitNodeNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
+//{
+//	int a = builder->common.a;
+//	builder->common.a = builder->common.espidx;
+//	SUGAR VisitNode(kctx, builder, stmt, Node_getFirstNode(kctx, stmt));
+//	builder->common.a = a;
+//	return true;
+//}
 
-static kbool_t KBuilder_VisitNodeNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
+static kbool_t KBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 {
 	return SUGAR VisitNode(kctx, builder, Node_getFirstNode(kctx, stmt));
 }
 
 static kbool_t KBuilder_VisitReturnNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 {
-	kNode *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
+	kNode *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
 	if(expr != NULL && IS_Node(expr) && expr->attrTypeId != KType_void) {
 		int a = builder->common.a;
 		builder->common.a = K_RTNIDX;
-		SUGAR VisitNode(kctx, builder, stmt, expr);
+		SUGAR VisitNode(kctx, builder, expr);
 		builder->common.a = a;
 	}
 	ASM_JMP(kctx, builder, builder->bbReturnId); // RET
@@ -628,7 +628,41 @@ static kbool_t KBuilder_VisitIfNode(KonohaContext *kctx, KBuilder *builder, kNod
 	return true;
 }
 
-static kbool_t KBuilder_VisitLoopNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
+static kbool_t KBuilder_VisitWhileNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
+{
+	int espidx = builder->common.espidx;
+	int a = builder->common.a;
+	bblock_t lbCONTINUE = new_BasicNodeLABEL(kctx);
+	bblock_t lbENTRY    = new_BasicNodeLABEL(kctx);
+	bblock_t lbBREAK    = new_BasicNodeLABEL(kctx);
+	kNode_SetLabelNode(kctx, stmt, KSymbol_("continue"), lbCONTINUE);
+	kNode_SetLabelNode(kctx, stmt, KSymbol_("break"),    lbBREAK);
+	if(kNode_Is(RedoLoop, stmt)) {
+		ASM_JMP(kctx, builder, lbENTRY);
+	}
+	ASM_LABEL(kctx, builder, lbCONTINUE);
+	KBuilder_AsmSAFEPOINT(kctx, builder, kNode_uline(stmt), espidx);
+	kNode *iterNode = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_("Iterator"), NULL);
+	if(iterNode != NULL) {
+		SUGAR VisitNode(kctx, builder, iterNode);
+		ASM_LABEL(kctx, builder, lbENTRY);
+		builder->common.a = espidx;
+		KBuilder_asmJMPIF(kctx, builder, stmt, Node_getFirstNode(kctx, stmt), 0/*FALSE*/, lbBREAK);
+		builder->common.a = a;
+	}
+	else {
+		builder->common.a = espidx;
+		KBuilder_asmJMPIF(kctx, builder, stmt, Node_getFirstNode(kctx, stmt), 0/*FALSE*/, lbBREAK);
+		builder->common.a = a;
+		ASM_LABEL(kctx, builder, lbENTRY);
+	}
+	SUGAR VisitNode(kctx, builder, Node_getFirstNode(kctx, stmt));
+	ASM_JMP(kctx, builder, lbCONTINUE);
+	ASM_LABEL(kctx, builder, lbBREAK);
+	return true;
+}
+
+static kbool_t KBuilder_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
 {
 	int espidx = builder->common.espidx;
 	int a = builder->common.a;
