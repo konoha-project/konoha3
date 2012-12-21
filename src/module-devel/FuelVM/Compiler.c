@@ -470,7 +470,7 @@ static void FuelVM_VisitCallNode(KonohaContext *kctx, KBuilder *builder, kNode *
 		if(kMethod_Is(Virtual, mtd)) {
 			Inst = CreateCall(BLD(builder), VirtualCall, kNode_uline(stmt));
 			/* set namespace to enable method lookups */
-			INode *Node = CreateObject(BLD(builder), KType_NameSpace, (void *) Node_ns(stmt));
+			INode *Node = CreateObject(BLD(builder), KType_NameSpace, (void *) kNode_ns(stmt));
 			CallInst_addParam((ICall *)Inst, MtdObj);
 			CallInst_addParam((ICall *)Inst, Node);
 			DBG_P("TODO VirtualCall");
@@ -685,7 +685,7 @@ static void InitStaticBuilderApi(struct KBuilderAPI2 *builderApi)
 {
 	builderApi->target = "FuelVM";
 #define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME = FuelVM_Visit##NAME;
-	VISITOR_LIST(DEFINE_BUILDER_API);
+	KNodeList(DEFINE_BUILDER_API);
 #undef DEFINE_BUILDER_API
 	builderApi->GenerateKVirtualCode = FuelVM_GenerateKVirtualCode;
 	builderApi->GenerateKMethodFunc  = FuelVM_GenerateKMethodFunc;

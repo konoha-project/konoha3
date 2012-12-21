@@ -92,18 +92,18 @@ static void namespace_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Statement(stmt, gma);
+	VAR_TypeCheck(stmt, gma, reqc);
 	kstatus_t result = K_CONTINUE;
 	kToken *tk = SUGAR kNode_GetToken(kctx, stmt, KSymbol_NodePattern, NULL);
 	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		INIT_GCSTACK();
-		kNameSpace *ns = new_(NameSpace, Node_ns(stmt), _GcStack);
+		kNameSpace *ns = new_(NameSpace, kNode_ns(stmt), _GcStack);
 		kArray *a = KGetParserContext(kctx)->preparedTokenList;
 		KTokenSeq range = {ns, a, kArray_size(a), kArray_size(a)};
 		SUGAR KTokenSeq_Tokenize(kctx, &range, kString_text(tk->text), tk->uline);
 		result = SUGAR KTokenSeq_Eval(kctx, &range, NULL/*trace*/);
 		RESET_GCSTACK();
-		kNode_done(kctx, stmt);
+		kNode_Type(kctx, stmt, KNode_Done, KType_void);
 	}
 	KReturnUnboxValue(result == K_CONTINUE);
 }
@@ -112,8 +112,8 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Statement(stmt, gma);
-	kNameSpace *ns = Node_ns(stmt);
+	VAR_TypeCheck(stmt, gma, reqc);
+	kNameSpace *ns = kNode_ns(stmt);
 	kToken *symbolToken = SUGAR kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 	ksymbol_t unboxKey = symbolToken->resolvedSymbol;
 	kbool_t result = SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
@@ -144,7 +144,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 			kNode_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", KSymbol_Fmt2(unboxKey));
 		}
 	}
-	kNode_done(kctx, stmt);
+	kNode_Type(kctx, stmt, KNode_Done, KType_void);
 	KReturnUnboxValue(result);
 }
 
@@ -152,7 +152,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck2(stmt, expr, gma, reqc);
 	size_t i;
 	kbool_t isDefined = true;
 	KParserContext *sugarContext = KGetParserContext(kctx);
@@ -196,9 +196,9 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *definedToken = tokenList->TokenVarItems[beginIdx];   // defined
 		kTokenVar *pToken = tokenList->TokenVarItems[beginIdx+1];
 		if(IS_Array(pToken->subTokenList)) {
-			kNode *expr = SUGAR new_UntypedCallStyleNode(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
-			filterArrayList(kctx, Node_ns(stmt), pToken->subTokenList, 0, kArray_size(pToken->subTokenList));
-			KReturn(SUGAR kNode_AddNodeParam(kctx, stmt, expr, pToken->subTokenList, 0, kArray_size(pToken->subTokenList), 0/*isAllowEmpty*/));
+			kNode *expr = SUGAR new_UntypedOperatorNode(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
+			filterArrayList(kctx, kNode_ns(stmt), pToken->subTokenList, 0, kArray_size(pToken->subTokenList));
+			KReturn(SUGAR AddParamNode(kctx, stmt, expr, pToken->subTokenList, 0, kArray_size(pToken->subTokenList), 0/*isAllowEmpty*/));
 		}
 	}
 }

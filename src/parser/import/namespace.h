@@ -81,7 +81,7 @@ static void kNameSpace_SetTokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns, i
 // ---------------------------------------------------------------------------
 // Syntax Management
 
-#define kToken_IsFirstPattern(tk)   (KSymbol_IsPattern(tk->resolvedSymbol) && tk->stmtEntryKey != KSymbol_NodePattern)
+#define kToken_IsFirstPattern(tk)   (KSymbol_IsPattern(tk->resolvedSymbol) && tk->stmtEntryKey != KSymbol_ExprPattern)
 static void kNameSpace_ParseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t uline, kArray *ruleList);
 
 static KSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, KSyntax *parentSyntax, ksymbol_t keyword)
@@ -243,21 +243,19 @@ static KSyntaxVar *kNameSpace_SetTokenFunc(KonohaContext *kctx, kNameSpace *ns, 
 	return syn;
 }
 
-static void KSyntax_setKMethodFunc(KonohaContext *kctx, kNameSpace *ns, KSyntaxVar *syn, KMethodFunc definedKMethodFunc, size_t index, KMethodFunc *previousDefinedFuncRef, kFunc **cachedFuncRef)
-{
-	if(definedKMethodFunc != NULL) {
-		if(definedKMethodFunc != previousDefinedFuncRef[0]) {
-			previousDefinedFuncRef[0] = definedKMethodFunc;
-			cachedFuncRef[0] = new_SugarFunc(ns, definedKMethodFunc);
-		}
-		KFieldInit(ns, syn->sugarFuncTable[index], cachedFuncRef[0]);
-	}
-}
+//static void KSyntax_setKMethodFunc(KonohaContext *kctx, kNameSpace *ns, KSyntaxVar *syn, KMethodFunc definedKMethodFunc, size_t index, KMethodFunc *previousDefinedFuncRef, kFunc **cachedFuncRef)
+//{
+//	if(definedKMethodFunc != NULL) {
+//		if(definedKMethodFunc != previousDefinedFuncRef[0]) {
+//			previousDefinedFuncRef[0] = definedKMethodFunc;
+//			cachedFuncRef[0] = KSugarFunc(ns, definedKMethodFunc);
+//		}
+//		KFieldInit(ns, syn->sugarFuncTable[index], cachedFuncRef[0]);
+//	}
+//}
 
 static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef, KTraceInfo *trace)
 {
-	KMethodFunc pPatternMatch = NULL, pExpression = NULL, pStatement = NULL, pTypeCheck = NULL;
-	kFunc *mPatternMatch = NULL, *mExpression = NULL, *mStatement = NULL, *mTypeCheck = NULL;
 	while(syndef->keyword != KSymbol_END) {
 		KSyntaxVar* syn = (KSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, syndef->keyword, 1/*isnew*/);
 		DBG_ASSERT(syn != NULL);
@@ -269,28 +267,31 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 		if(syndef->precedence_op2 > 0) {
 			syn->precedence_op2 = syndef->precedence_op2;
 		}
-		if(syndef->rule != NULL) {
-			syn->syntaxPatternListNULL = new_(TokenArray, 0, ns->NameSpaceConstList);
-			kNameSpace_ParseSyntaxPattern(kctx, ns, syndef->rule, 0, syn->syntaxPatternListNULL);
+//		if(syndef->rule != NULL) {
+//			syn->syntaxPatternListNULL = new_(TokenArray, 0, ns->NameSpaceConstList);
+//			kNameSpace_ParseSyntaxPattern(kctx, ns, syndef->rule, 0, syn->syntaxPatternListNULL);
+//		}
+		if(syndef->parseFunc != NULL) {
+			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CParseFunc)) ? KSugarFunc(ns, syndef->parseMethodFunc) : syndef->parseFunc;
+			KFieldInit(ns, syn->sugarFuncTable[KSugarParseFunc], fo);
 		}
-		KSyntax_setKMethodFunc(kctx, ns, syn, syndef->PatternMatch,   SugarFunc_PatternMatch,   &pPatternMatch, &mPatternMatch);
-		KSyntax_setKMethodFunc(kctx, ns, syn, syndef->Expression,      SugarFunc_Expression,      &pExpression, &mExpression);
-		KSyntax_setKMethodFunc(kctx, ns, syn, syndef->TopLevelStatement, SugarFunc_TopLevelStatement, &pStatement, &mStatement);
-		KSyntax_setKMethodFunc(kctx, ns, syn, syndef->Statement,    SugarFunc_Statement,    &pStatement, &mStatement);
-		KSyntax_setKMethodFunc(kctx, ns, syn, syndef->TypeCheck,    SugarFunc_TypeCheck,    &pTypeCheck, &mTypeCheck);
-		// set default function
-		if(syn->parentSyntaxNULL == NULL && syn->sugarFuncTable[SugarFunc_Expression] == NULL) {
-			if(syn->precedence_op2 > 0 || syn->precedence_op1 > 0) {
-				kFunc *fo = KSyntax_(ns, KSymbol_NodeOperator)->sugarFuncTable[SugarFunc_Expression];
-				DBG_ASSERT(fo != NULL);
-				KFieldInit(ns, syn->sugarFuncTable[SugarFunc_Expression], fo);
-			}
-			else if(syn->sugarFuncTable[SugarFunc_TypeCheck] != NULL) {
-				kFunc *fo = KSyntax_(ns, KSymbol_NodeTerm)->sugarFuncTable[SugarFunc_Expression];
-				DBG_ASSERT(fo != NULL);
-				KFieldInit(ns, syn->sugarFuncTable[SugarFunc_Expression], fo);
-			}
+		if(syndef->typeCheckFunc != NULL) {
+			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CTypeCheckFunc)) ? KSugarFunc(ns, syndef->typeCheckMethodFunc) : syndef->typeCheckFunc;
+			KFieldInit(ns, syn->sugarFuncTable[KSugarTypeCheckFunc], fo);
 		}
+//		// set default function
+//		if(syn->parentSyntaxNULL == NULL && syn->sugarFuncTable[KSugarParseFunc] == NULL) {
+//			if(syn->precedence_op2 > 0 || syn->precedence_op1 > 0) {
+//				kFunc *fo = KSyntax_(ns, KSymbol_NodeOperator)->sugarFuncTable[KSugarParseFunc];
+//				DBG_ASSERT(fo != NULL);
+//				KFieldInit(ns, syn->sugarFuncTable[KSugarParseFunc], fo);
+//			}
+//			else if(syn->sugarFuncTable[KSugarTypeCheckFunc] != NULL) {
+//				kFunc *fo = KSyntax_(ns, KSymbol_NodeTerm)->sugarFuncTable[KSugarParseFunc];
+//				DBG_ASSERT(fo != NULL);
+//				KFieldInit(ns, syn->sugarFuncTable[KSugarParseFunc], fo);
+//			}
+//		}
 		DBG_ASSERT(syn == KSyntax_(ns, syndef->keyword));
 		KLIB ReportScriptMessage(kctx, trace, DebugTag, "@%s new syntax %s%s", KPackage_text(ns->packageId), KSymbol_Fmt2(syn->keyword));
 		syndef++;

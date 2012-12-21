@@ -22,78 +22,52 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt)
+#define DefineVisitCase(NAME)  case KNode_##NAME:   ret = cbuilder->api->visit##NAME##Node(kctx, builder, node); break;
+
+static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *node)
 {
 	kbool_t ret = false;
 	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
-	switch(stmt->node) {
-		case KNode_Error:   ret = cbuilder->api->visitErrNode(kctx, builder, stmt); break;
-		case KNode_EXPR:  ret = cbuilder->api->visitNodeNode(kctx, builder, stmt);   break;
-		case KNode_BLOCK: ret = cbuilder->api->visitNodeNode(kctx, builder, stmt);  break;
-		case KNode_RETURN: ret = cbuilder->api->visitReturnNode(kctx, builder, stmt); break;
-		case KNode_IF:    ret = cbuilder->api->visitIfNode(kctx, builder, stmt);     break;
-		case KNode_LOOP:  ret = cbuilder->api->visitLoopNode(kctx, builder, stmt);   break;
-		case KNode_JUMP:  ret = cbuilder->api->visitJumpNode(kctx, builder, stmt);   break;
-		case KNode_TRY:   ret = cbuilder->api->visitTryNode(kctx, builder, stmt);    break;
-		default: cbuilder->api->visitUndefinedNode(kctx, builder, stmt);        break;
-	}
-	return ret;
-}
-
-static void VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr)
-{
-	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
 	int a = cbuilder->a;
 	int espidx = cbuilder->espidx;
 	int shift = cbuilder->shift;
-	switch(expr->node) {
-		case KNode_Const:    cbuilder->api->visitConstNode(kctx, builder, stmt, expr);  break;
-		case KNode_New:      cbuilder->api->visitNewNode(kctx, builder, stmt, expr);    break;
-		case KNode_Null:     cbuilder->api->visitNullNode(kctx, builder, stmt, expr);   break;
-		case KNode_UnboxConst:   cbuilder->api->visitNConstNode(kctx, builder, stmt, expr); break;
-		case KNode_Local:    cbuilder->api->visitLocalNode(kctx, builder, stmt, expr);  break;
-		case KNode_BLOCK:    cbuilder->api->visitNodeNode(kctx, builder, stmt, expr);  break;
-		case KNode_Field:    cbuilder->api->visitFieldNode(kctx, builder, stmt, expr);  break;
-		case KNode_MethodCall:     cbuilder->api->visitCallNode(kctx, builder, stmt, expr);   break;
-		case KNode_AND:      cbuilder->api->visitAndNode(kctx, builder, stmt, expr);    break;
-		case KNode_OR:       cbuilder->api->visitOrNode(kctx, builder, stmt, expr);     break;
-		case KNode_Assign:      cbuilder->api->visitLetNode(kctx, builder, stmt, expr);    break;
-		case KNode_STACKTOP: cbuilder->api->visitStackTopNode(kctx, builder, stmt, expr);break;
-		default: DBG_ABORT("unknown expr=%d", expr->node);
-	}
-	cbuilder->a = a;
-	cbuilder->espidx = espidx;
-	cbuilder->shift = shift;
-}
-
-static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *block)
-{
-	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
-	int a = cbuilder->a;
-	int espidx = cbuilder->espidx;
-	int shift = cbuilder->shift;
-	cbuilder->espidx = (block->esp->node == KNode_STACKTOP) ? shift + block->esp->index : block->esp->index;
-	kbool_t ret = true;
-	size_t i;
-	for (i = 0; i < kArray_size(block->NodeList); i++) {
-		kNode *stmt = block->NodeList->NodeItems[i];
-		if(stmt->syn == NULL) continue;
-		cbuilder->uline = kNode_uline(stmt);
-		if(!VisitNode(kctx, builder, stmt)) {
-			ret = false;
-			break;
-		}
+	switch(node->node) {
+		KNodeList(DefineVisitCase)
 	}
 	cbuilder->a = a;
 	cbuilder->espidx = espidx;
 	cbuilder->shift = shift;
 	return ret;
 }
+
+//static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *block)
+//{
+//	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
+//	int a = cbuilder->a;
+//	int espidx = cbuilder->espidx;
+//	int shift = cbuilder->shift;
+//	cbuilder->espidx = (block->esp->node == KNode_STACKTOP) ? shift + block->esp->index : block->esp->index;
+//	kbool_t ret = true;
+//	size_t i;
+//	for (i = 0; i < kArray_size(block->NodeList); i++) {
+//		kNode *stmt = block->NodeList->NodeItems[i];
+//		if(stmt->syn == NULL) continue;
+//		cbuilder->uline = kNode_uline(stmt);
+//		if(!VisitNode(kctx, builder, stmt)) {
+//			ret = false;
+//			break;
+//		}
+//	}
+//	cbuilder->a = a;
+//	cbuilder->espidx = espidx;
+//	cbuilder->shift = shift;
+//	return ret;
+//}
 
 static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kNode *block, int option)
 {
 	DBG_P("START CODE GENERATION..");
-	kNameSpace *ns = block->NodeNameSpace;
+	kNameSpace *ns = kNode_ns(block);
 	struct KVirtualCode *vcode = ns->builderApi->GenerateKVirtualCode(kctx, mtd, block, option);
 	KMethodFunc func = ns->builderApi->GenerateKMethodFunc(kctx, vcode);
 	((kMethodVar *)mtd)->invokeKMethodFunc = func;

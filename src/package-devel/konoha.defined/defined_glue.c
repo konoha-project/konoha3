@@ -33,7 +33,7 @@ extern "C" {
 
 static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck2(stmt, expr, gma, reqc);
 	size_t i;
 	kbool_t isDefined = true;
 	KParserContext *sugarContext = KGetParserContext(kctx);
@@ -77,9 +77,9 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *definedToken = tokenList->TokenVarItems[beginIdx];   // defined
 		kTokenVar *pToken = tokenList->TokenVarItems[beginIdx+1];
 		if(IS_Array(pToken->subTokenList)) {
-			kNode *expr = SUGAR new_UntypedCallStyleNode(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
-			filterArrayList(kctx, Node_ns(stmt), pToken->subTokenList, 0, kArray_size(pToken->subTokenList));
-			KReturn(SUGAR kNode_AddNodeParam(kctx, stmt, expr, pToken->subTokenList, 0, kArray_size(pToken->subTokenList), 0/*isAllowEmpty*/));
+			kNode *expr = SUGAR new_UntypedOperatorNode(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
+			filterArrayList(kctx, kNode_ns(stmt), pToken->subTokenList, 0, kArray_size(pToken->subTokenList));
+			KReturn(SUGAR AddParamNode(kctx, stmt, expr, pToken->subTokenList, 0, kArray_size(pToken->subTokenList), 0/*isAllowEmpty*/));
 		}
 	}
 }

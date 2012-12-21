@@ -1067,6 +1067,7 @@ struct KClassField {
 #define KClass_Func                 KClass_(KType_Func)
 #define KClass_NameSpace            KClass_(KType_NameSpace)
 #define KClass_System               KClass_(KType_System)
+#define KClass_var                  KClass_(KType_var)
 
 #define KClass_StringArray          KClass_Array
 #define kStringArray                kArray

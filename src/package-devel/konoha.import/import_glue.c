@@ -34,7 +34,7 @@ extern "C"{
 static kNode *CreateImportCall(KonohaContext *kctx, KSyntaxVar *syn, kToken *tkImport, kNameSpace *ns, kString *pkgname)
 {
 	kNode *ePKG = makeStringConstValue(kctx, pkgname);
-	kNode *expr = SUGAR new_UntypedCallStyleNode(kctx, syn, 3,
+	kNode *expr = SUGAR new_UntypedOperatorNode(kctx, syn, 3,
 			tkImport, new_ConstValueNode(kctx, kObject_class(ns), UPCAST(ns)), ePKG);
 	return expr;
 }
@@ -42,12 +42,12 @@ static kNode *CreateImportCall(KonohaContext *kctx, KSyntaxVar *syn, kToken *tkI
 static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int ret = false;
-	VAR_Statement(stmt, gma);
+	VAR_TypeCheck(stmt, gma, reqc);
 	kTokenArray *tokenList = (kTokenArray *) kNode_GetObjectNULL(kctx, stmt, KSymbol_TokenPattern);
 	if(tokenList == NULL) {
 		KReturnUnboxValue(false);
 	}
-	kNameSpace *ns = Node_ns(stmt);
+	kNameSpace *ns = kNode_ns(stmt);
 	KSyntaxVar *syn = (KSyntaxVar *) KSyntax_(ns, KSymbol_NodeMethodCall);
 	kNode *expr;
 	kTokenVar *tkImport = /*G*/new_(TokenVar, 0, OnGcStack);
@@ -62,14 +62,14 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 		else if(kArray_size(list) == 1) {
 			/* case : import("konoha.import"); */
 			kNode *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
-			expr = SUGAR new_UntypedCallStyleNode(kctx, syn, 3,
+			expr = SUGAR new_UntypedOperatorNode(kctx, syn, 3,
 					tkImport, new_ConstValueNode(kctx, kObject_class(ns), UPCAST(ns)), param0);
 		}
 		else if(kArray_size(list) == 2) {
 			/* case : import("konoha.import", "import"); */
 			kNode *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
 			kNode *param1 = makeStringConstValue(kctx, list->TokenItems[1]->text);
-			expr = SUGAR new_UntypedCallStyleNode(kctx, syn, 4,
+			expr = SUGAR new_UntypedOperatorNode(kctx, syn, 4,
 					tkImport, new_ConstValueNode(kctx, kObject_class(ns), UPCAST(ns)),
 					param0, param1);
 		} else {

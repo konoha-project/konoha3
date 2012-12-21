@@ -260,7 +260,7 @@
 //
 //static KMETHOD Statement_try(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_Statement(stmt, gma);
+//	VAR_TypeCheck(stmt, gma, reqc);
 //	DBG_P("try statement .. \n");
 //	int ret = false;
 //	kNode *tryNode, *catchNode, *finallyNode;
@@ -288,7 +288,7 @@
 //
 //static KMETHOD Statement_catch(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_Statement(stmt, gma);
+//	VAR_TypeCheck(stmt, gma, reqc);
 //	DBG_P("catch statement .. \n");
 //	int ret = false;
 //
@@ -303,7 +303,7 @@
 //		kNode *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, K_NULLNODE);
 //		KLIB kObjectProto_SetObject(kctx, parentNode, KSymbol_NodePattern, KType_Exception, expr);
 //		KLIB kObjectProto_SetObject(kctx, parentNode, KSymbol_("catch"), KType_Node, stmt);
-//		kNode_done(kctx, stmt);
+//		kNode_Type(kctx, stmt, KNode_Done, KType_void);
 //	} else {
 //		kNode_Message(kctx, stmt, ErrTag, "upper stmt is not try/catch");
 //		KReturnUnboxValue(false);
@@ -313,7 +313,7 @@
 //
 //static KMETHOD Statement_finally(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_Statement(stmt, gma);
+//	VAR_TypeCheck(stmt, gma, reqc);
 //	DBG_P("finally statement .. \n");
 //	int ret = false;
 //	kNode *finallyNode = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
@@ -323,7 +323,7 @@
 //		if(tryNode != NULL) {
 //			ret = SUGAR TypeCheckBlock(kctx, finallyNode, gma);
 //			KLIB kObjectProto_SetObject(kctx, tryNode, KSymbol_("finally"), KType_Node, finallyNode);
-//			kNode_done(kctx, stmt);
+//			kNode_Type(kctx, stmt, KNode_Done, KType_void);
 //		}
 //	}
 //

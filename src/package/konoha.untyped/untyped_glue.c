@@ -37,7 +37,7 @@ static void DeclVariable(KonohaContext *kctx, kNode *stmt, kGamma *gma, ktypeatt
 	DBG_ASSERT(kNode_isSymbolTerm(termNode));
 	kToken *termToken = termNode->TermToken;
 	if(Gamma_isTopLevel(gma)) {
-		kNameSpace *ns = Node_ns(stmt);
+		kNameSpace *ns = kNode_ns(stmt);
 		if(ns->globalObjectNULL_OnList == NULL) {
 			kNodeToken_Message(kctx, stmt, termToken, ErrTag, "unavailable global variable");
 			return;
@@ -53,7 +53,7 @@ static void DeclVariable(KonohaContext *kctx, kNode *stmt, kGamma *gma, ktypeatt
 
 static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck2(stmt, expr, gma, reqc);
 	kNodeVar *leftHandNode = (kNodeVar *)kNode_At(expr, 1);
 	if(kNode_isSymbolTerm(leftHandNode)) {
 		kNode *texpr = SUGAR kNode_TypeCheckVariableNULL(kctx, stmt, leftHandNode, gma, KClass_INFER);
@@ -72,7 +72,7 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t untyped_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("konoha.var", trace);
-	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_("="), SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_UntypedAssign));
+	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_("="), KSugarTypeCheckFunc, KSugarFunc(ns, TypeCheck_UntypedAssign));
 	return true;
 }
 

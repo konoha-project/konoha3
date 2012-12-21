@@ -98,7 +98,6 @@ static void kToken_ToError(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglev
 
 static KSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t kw, int isnew);
 
-#ifdef USE_NODE
 static void kNode_toERR(KonohaContext *kctx, kNode *stmt, kString *errmsg)
 {
 	if(errmsg != NULL) { // not in case of isNodeedErrorMessage
@@ -106,50 +105,8 @@ static void kNode_toERR(KonohaContext *kctx, kNode *stmt, kString *errmsg)
 		node->node = KNode_Error;
 		KFieldSet(node, node->ErrorMessage, errmsg);
 		kNode_Set(ObjectConst, node, true);
-		//KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_ERR, KType_String, errmsg);
 	}
 }
-
-static kfileline_t kNode_uline(KonohaContext *kctx, kNode *expr, kfileline_t uline)
-{
-	return expr->uline;
-}
-
-#else
-
-static void kNode_toERR(KonohaContext *kctx, kNode *stmt, kString *errmsg)
-{
-	if(errmsg != NULL) { // not in case of isNodeedErrorMessage
-		((kNodeVar *)stmt)->syn   = KSyntax_(Node_ns(stmt), KSymbol_ERR);
-		((kNodeVar *)stmt)->node = KNode_Error;
-		KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_ERR, KType_String, errmsg);
-	}
-}
-
-static kfileline_t kNode_uline(KonohaContext *kctx, kNode *expr, kfileline_t uline)
-{
-	kToken *tk = expr->TermToken;
-	DBG_ASSERT(IS_Node(expr));
-	if(IS_Token(tk) && tk != K_NULLTOKEN && tk->uline >= uline) {
-		return tk->uline;
-	}
-	kArray *a = expr->NodeList;
-	if(a != NULL && IS_Array(a)) {
-		size_t i;
-		for(i=0; i < kArray_size(a); i++) {
-			tk = a->TokenItems[i];
-			if(IS_Token(tk) && tk->uline >= uline) {
-				return tk->uline;
-			}
-			if(IS_Node(tk)) {
-				return kNode_uline(kctx, a->NodeItems[i], uline);
-			}
-		}
-	}
-	return uline;
-}
-
-#endif
 
 static kNode* kNode_Message2(KonohaContext *kctx, kNode *stmt, kToken *tk, kinfotag_t taglevel, const char *fmt, ...)
 {

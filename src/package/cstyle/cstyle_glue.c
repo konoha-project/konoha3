@@ -42,7 +42,7 @@ extern "C" {
 
 static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Statement(stmt, gma);
+	VAR_TypeCheck(stmt, gma, reqc);
 	DBG_P("while statement .. ");
 	int ret = false;
 	if(SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_Boolean, 0)) {
@@ -59,7 +59,7 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Statement_do(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Statement(stmt, gma);
+	VAR_TypeCheck(stmt, gma, reqc);
 	DBG_P("do statement .. ");
 	int ret = false;
 	if(SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_Boolean, 0)) {
@@ -87,7 +87,7 @@ static KMETHOD PatternMatch_ForNode(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	if(beginIdx < i) {
-		KTokenSeq tokens = {Node_ns(stmt), tokenList, beginIdx, i};
+		KTokenSeq tokens = {kNode_ns(stmt), tokenList, beginIdx, i};
 		kNode *bk = SUGAR new_BlockNode(kctx, stmt, NULL, &tokens);
 		SUGAR kNode_AddParsedObject(kctx, stmt, name, UPCAST(bk));
 	}
@@ -104,7 +104,7 @@ static void kNode_copy(KonohaContext *kctx, kNodeVar *dNode, ksymbol_t kw, kNode
 
 static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Statement(stmt, gma);
+	VAR_TypeCheck(stmt, gma, reqc);
 	int ret = true;
 	int KSymbol_InitNode = KSymbol_("init"), KSymbol_IteratorNode = KSymbol_("Iterator");
 	kNode *initNode = SUGAR kNode_GetNode(kctx, stmt, NULL/*defaultNS*/, KSymbol_InitNode, NULL);
@@ -145,7 +145,7 @@ static inline kNode* kNode_GetParentNULL(kNode *stmt)
 
 static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Statement(stmt, gma);
+	VAR_TypeCheck(stmt, gma, reqc);
 	kNode *p = stmt;
 	while((p = kNode_GetParentNULL(p)) != NULL) {
 		if(kNode_Is(CatchBreak, p)) {
@@ -159,7 +159,7 @@ static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Statement(stmt, gma);
+	VAR_TypeCheck(stmt, gma, reqc);
 	kNode *p = stmt;
 	while((p = kNode_GetParentNULL(p)) != NULL) {
 		if(kNode_Is(CatchContinue, p)) {
@@ -199,7 +199,7 @@ static KMETHOD PatternMatch_IncNode(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	if(beginIdx == i) {
 		start = beginIdx + 1;
-		end = SUGAR kNameSpace_FindEndOfStatement(kctx, Node_ns(stmt), tokenList, i, endIdx);
+		end = SUGAR FindEndOfStatement(kctx, kNode_ns(stmt), tokenList, i, endIdx);
 	}
 	else {
 		start = beginIdx;
@@ -208,7 +208,7 @@ static KMETHOD PatternMatch_IncNode(KonohaContext *kctx, KonohaStack *sfp)
 	if(start < end) {
 		kToken *opToken = tokenList->TokenItems[i];
 		KSyntax *opSyntax = opToken->resolvedSyntaxInfo;
-		KTokenSeq macro = {Node_ns(stmt), tokenList};
+		KTokenSeq macro = {kNode_ns(stmt), tokenList};
 		KTokenSeq_Push(kctx, macro);
 		KMacroSet macroParam[] = {
 			{KSymbol_("X"), tokenList, start, end},
@@ -216,13 +216,13 @@ static KMETHOD PatternMatch_IncNode(KonohaContext *kctx, KonohaStack *sfp)
 		};
 		macro.TargetPolicy.RemovingIndent = true;
 		SUGAR KTokenSeq_ApplyMacro(kctx, &macro, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam);
-		kNode *expr = SUGAR kNode_ParseNode(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, NULL);
+		kNode *expr = SUGAR ParseNewNode(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, NULL);
 		if(expr != K_NULLNODE) {
 			SUGAR kNode_AddParsedObject(kctx, stmt, KSymbol_NodePattern, UPCAST(expr));
-			((kNodeVar *)stmt)->syn = KSyntax_(Node_ns(stmt), KSymbol_NodePattern);
+			((kNodeVar *)stmt)->syn = KSyntax_(kNode_ns(stmt), KSymbol_NodePattern);
 		}
 		KTokenSeq_Pop(kctx, macro);
-		end = SUGAR kNameSpace_FindEndOfStatement(kctx, Node_ns(stmt), tokenList, end+1, endIdx);
+		end = SUGAR FindEndOfStatement(kctx, kNode_ns(stmt), tokenList, end+1, endIdx);
 		KReturnUnboxValue(end);
 	}
 	KReturnUnboxValue(-1);
@@ -268,15 +268,15 @@ static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck2(stmt, expr, gma, reqc);
 	kToken *termToken = expr->TermToken;
 	DBG_ASSERT(kNode_IsTerm(expr) && IS_Token(termToken));
 	if(termToken->unresolvedTokenType == TokenType_CODE) {
-		SUGAR kToken_ToBraceGroup(kctx, (kTokenVar *)termToken, Node_ns(stmt), NULL);
+		SUGAR kToken_ToBraceGroup(kctx, (kTokenVar *)termToken, kNode_ns(stmt), NULL);
 	}
 	if(termToken->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
-		kNodeVar *arrayNode = SUGAR new_UntypedCallStyleNode(kctx, stmt->syn/*DUMMY*/, 2, K_NULL, K_NULL);
-		SUGAR kNode_AddNodeParam(kctx, stmt, arrayNode, termToken->subTokenList, 0, kArray_size(termToken->subTokenList), NULL);
+		kNodeVar *arrayNode = SUGAR new_UntypedOperatorNode(kctx, stmt->syn/*DUMMY*/, 2, K_NULL, K_NULL);
+		SUGAR AddParamNode(kctx, stmt, arrayNode, termToken->subTokenList, 0, kArray_size(termToken->subTokenList), NULL);
 		size_t i;
 		KClass *requestClass = KClass_(reqty);
 		KClass *paramType = KClass_INFER;
@@ -299,7 +299,7 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 		if(requestClass == NULL) {
 			requestClass = (paramType->typeId == KType_var) ? KClass_Array : KClass_p0(kctx, KClass_Array, paramType->typeId);
 		}
-		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Node_ns(stmt), KClass_Array, KKMethodName_("{}"), -1, KMethodMatch_NoOption);
+		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, kNode_ns(stmt), KClass_Array, KKMethodName_("{}"), -1, KMethodMatch_NoOption);
 		DBG_ASSERT(mtd != NULL);
 		KFieldSet(arrayNode, arrayNode->NodeList->MethodItems[0], mtd);
 		KFieldSet(arrayNode, arrayNode->NodeList->NodeItems[1], SUGAR kNode_SetVariable(kctx, NULL, gma, KNode_New, requestClass->typeId, kArray_size(arrayNode->NodeList) - 2));
@@ -309,7 +309,7 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t cstyle_defineArrayLiteral(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_NodePattern, SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_ArrayLiteral));
+	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_NodePattern, KSugarTypeCheckFunc, KSugarFunc(ns, TypeCheck_ArrayLiteral));
 	KDEFINE_METHOD MethodData[] = {
 		_Public|kMethod_Hidden, _F(Array_newList), KType_Array, KType_Array, KKMethodName_("{}"), 0,
 		DEND,
@@ -348,7 +348,7 @@ static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck2(stmt, expr, gma, reqc);
 	kToken *tk = expr->TermToken;
 	if(kString_size(tk->text) == 1) {
 		int ch = kString_text(tk->text)[0];
@@ -381,15 +381,15 @@ static KMETHOD Expression_Indexer(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	KClass *genericsClass = NULL;
-	kNameSpace *ns = Node_ns(stmt);
-	int nextIdx = SUGAR TokenUtils_ParseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, &genericsClass);
+	kNameSpace *ns = kNode_ns(stmt);
+	int nextIdx = SUGAR ParseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, &genericsClass);
 	if(nextIdx != -1) {  // to avoid Func[T]
 		KReturn(SUGAR kNode_ParseOperatorNode(kctx, stmt, tokenList->TokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
 	}
 	DBG_P("beginIdx=%d, endIdx=%d", beginIdx, endIdx);
 	kToken *currentToken = tokenList->TokenItems[operatorIdx];
 	if(beginIdx < operatorIdx) {
-		kNode *leftNode = SUGAR kNode_ParseNode(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
+		kNode *leftNode = SUGAR ParseNewNode(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
 		if(leftNode == K_NULLNODE) {
 			KReturn(leftNode);
 		}
@@ -397,9 +397,9 @@ static KMETHOD Expression_Indexer(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *tkN = new_(TokenVar, 0, OnGcStack);
 		tkN->resolvedSymbol= KMethodName_ToGetter(0);
 		tkN->uline = currentToken->uline;
-		KSyntax *syn = KSyntax_(Node_ns(stmt), KSymbol_NodeMethodCall);
-		leftNode  = SUGAR new_UntypedCallStyleNode(kctx, syn, 2, tkN, leftNode);
-		leftNode = SUGAR kNode_AddNodeParam(kctx, stmt, leftNode, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), "[");
+		KSyntax *syn = KSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall);
+		leftNode  = SUGAR new_UntypedOperatorNode(kctx, syn, 2, tkN, leftNode);
+		leftNode = SUGAR AddParamNode(kctx, stmt, leftNode, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), "[");
 		KReturn(SUGAR kNode_RightJoinNode(kctx, stmt, leftNode, tokenList, operatorIdx + 1, endIdx));
 	}
 	DBG_P("nothing");
@@ -648,7 +648,7 @@ static kint_t kstrtoll(const char *p)
 
 static KMETHOD TypeCheck_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck2(stmt, expr, gma, reqc);
 	kToken *tk = expr->TermToken;
 	long long n = kstrtoll(kString_text(tk->text));
 	KReturn(SUGAR kNode_SetUnboxConstValue(kctx, expr, KType_int, (uintptr_t)n));
@@ -667,7 +667,7 @@ static kbool_t int_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_NumberPattern, KonohaChar_Digit, new_SugarFunc(ns, TokenFunc_ExtendedIntLiteral));
+	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_NumberPattern, KonohaChar_Digit, KSugarFunc(ns, TokenFunc_ExtendedIntLiteral));
 
 	KSyntaxVar *syn = (KSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, KSymbol_("+"), 0);
 	if(syn != NULL) {
@@ -685,7 +685,7 @@ static KMETHOD Expression_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *opToken = tokenList->TokenItems[operatorIdx];
 	KSyntax *opSyntax = opToken->resolvedSyntaxInfo;
 	if(opSyntax->macroParamSize == 2) {
-		KTokenSeq macro = {Node_ns(stmt), tokenList};
+		KTokenSeq macro = {kNode_ns(stmt), tokenList};
 		KTokenSeq_Push(kctx, macro);
 		KMacroSet macroParam[] = {
 			{KSymbol_("X"), tokenList, beginIdx, operatorIdx},
@@ -694,7 +694,7 @@ static KMETHOD Expression_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
 		};
 		macro.TargetPolicy.RemovingIndent = true;
 		SUGAR KTokenSeq_ApplyMacro(kctx, &macro, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam);
-		kNode *expr = SUGAR kNode_ParseNode(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, NULL);
+		kNode *expr = SUGAR ParseNewNode(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, NULL);
 		KTokenSeq_Pop(kctx, macro);
 		KReturn(expr);
 	}
@@ -768,7 +768,7 @@ static kbool_t null_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo
 
 static KMETHOD TypeCheck_null(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck2(stmt, expr, gma, reqc);
 	if(reqty == KType_var) reqty = KType_Object;
 	KReturn(SUGAR kNode_SetVariable(kctx, expr, gma, KNode_Null, reqty, 0));
 }
@@ -780,9 +780,9 @@ static KMETHOD Expression_isNull(KonohaContext *kctx, KonohaStack *sfp)
 		DBG_P("checking .. x == null");
 		kTokenVar *tk = tokenList->TokenVarItems[operatorIdx+1];
 		if(tk->resolvedSymbol == KSymbol_("null")) {
-			kNode *leftHandNode = SUGAR kNode_ParseNode(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
+			kNode *leftHandNode = SUGAR ParseNewNode(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
 			tk->resolvedSymbol = KSymbol_("isNull");
-			KReturn(SUGAR new_UntypedCallStyleNode(kctx, KSyntax_(Node_ns(stmt), KSymbol_NodeMethodCall), 2, tk, leftHandNode));
+			KReturn(SUGAR new_UntypedOperatorNode(kctx, KSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall), 2, tk, leftHandNode));
 		}
 	}
 	DBG_P("checking parent .. == ..");
@@ -795,9 +795,9 @@ static KMETHOD Expression_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 		DBG_P("checking .. x != null");
 		kTokenVar *tk = tokenList->TokenVarItems[operatorIdx+1];
 		if(tk->resolvedSymbol == KSymbol_("null")) {
-			kNode *leftHandNode = SUGAR kNode_ParseNode(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
+			kNode *leftHandNode = SUGAR ParseNewNode(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
 			tk->resolvedSymbol = KSymbol_("isNotNull");
-			KReturn(SUGAR new_UntypedCallStyleNode(kctx, KSyntax_(Node_ns(stmt), KSymbol_NodeMethodCall), 2, tk, leftHandNode));
+			KReturn(SUGAR new_UntypedOperatorNode(kctx, KSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall), 2, tk, leftHandNode));
 		}
 	}
 	DBG_P("checking parent .. != ..");
@@ -811,8 +811,8 @@ static kbool_t null_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_("=="), SugarFunc_Expression, new_SugarFunc(ns, Expression_isNull));
-	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_("!="), SugarFunc_Expression, new_SugarFunc(ns, Expression_isNotNull));
+	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_("=="), KSugarParseFunc, KSugarFunc(ns, Expression_isNull));
+	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_("!="), KSugarParseFunc, KSugarFunc(ns, Expression_isNotNull));
 	return true;
 }
 
@@ -834,7 +834,7 @@ static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		{ KSymbol_END, }, /* sentinental */
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, defLiteral, trace);
-	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(ns, TokenFunc_SingleQuotedChar));
+	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_("$SingleQuotedChar"), KonohaChar_Quote, KSugarFunc(ns, TokenFunc_SingleQuotedChar));
 
 	cstyle_defineExpression(kctx, ns, option, trace);
 	cstyle_defineArrayLiteral(kctx, ns, trace);

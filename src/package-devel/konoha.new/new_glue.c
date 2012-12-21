@@ -48,13 +48,13 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 	if(beginIdx + 1 < endIdx) {
 		kTokenVar *newToken = tokenList->TokenVarItems[beginIdx];
 		KClass *foundClass = NULL;
-		kNameSpace *ns = Node_ns(stmt);
-		int nextIdx = SUGAR TokenUtils_ParseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
+		kNameSpace *ns = kNode_ns(stmt);
+		int nextIdx = SUGAR ParseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
 		if((size_t)nextIdx < kArray_size(tokenList)) {
 			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
 			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // new C (...)
 				KSyntax *syn = KSyntax_(ns, KSymbol_NodeMethodCall);
-				kNode *expr = SUGAR new_UntypedCallStyleNode(kctx, syn, 2, newToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
+				kNode *expr = SUGAR new_UntypedOperatorNode(kctx, syn, 2, newToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
 				newToken->resolvedSymbol = MN_new;
 				KReturn(expr);
 			}
@@ -65,7 +65,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 				kNode *expr;
 				int hasGenerics = -1;
 				if(kArray_size(subTokenList) > 0) {
-					hasGenerics = SUGAR TokenUtils_ParseTypePattern(kctx, ns, subTokenList, 0, kArray_size(subTokenList), &classT0);
+					hasGenerics = SUGAR ParseTypePattern(kctx, ns, subTokenList, 0, kArray_size(subTokenList), &classT0);
 				}
 				if(hasGenerics != -1) {
 					/* new Type1[Type2[]] => Type1<Type2>.new Or Type1<Type2>.newList */
@@ -73,13 +73,13 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 					KSyntax *syn;// = (realType->baseTypeId != KType_Array) ? KSyntax_(ns, KSymbol_NodeMethodCall) : newsyn;
 					syn = newsyn;
 					newToken->resolvedSymbol = (realType->baseTypeId != KType_Array) ? MN_new : KKMethodName_("newArray");
-					expr = SUGAR new_UntypedCallStyleNode(kctx, syn, 2, newToken,
+					expr = SUGAR new_UntypedOperatorNode(kctx, syn, 2, newToken,
 							NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], realType->typeId));
 				} else {
 					/* new Type1[] => Array<Type1>.newList */
 					KClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
 					newToken->resolvedSymbol = KKMethodName_("newArray");
-					expr = SUGAR new_UntypedCallStyleNode(kctx, newsyn, 2, newToken,
+					expr = SUGAR new_UntypedOperatorNode(kctx, newsyn, 2, newToken,
 							NewNode(kctx, newsyn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));
 				}
 				KReturn(expr);

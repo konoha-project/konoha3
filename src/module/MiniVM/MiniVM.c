@@ -778,12 +778,12 @@ static void KBuilder_VisitCallNode(KonohaContext *kctx, KBuilder *builder, kNode
 		ASM(NSET, NC_(thisidx-1), (intptr_t)mtd, KClass_Method);
 		if(kMethod_Is(Virtual, mtd)) {
 			// set namespace to enable method lookups
-			ASM(NSET, OC_(thisidx-2), (intptr_t)Node_ns(stmt), KClass_NameSpace);
+			ASM(NSET, OC_(thisidx-2), (intptr_t)kNode_ns(stmt), KClass_NameSpace);
 		}
 	}
 	else {
-		ASM(NSET, OC_(thisidx-2), (intptr_t)Node_ns(stmt), KClass_NameSpace);
-		ASM(LOOKUP, SFP_(thisidx), Node_ns(stmt), mtd);
+		ASM(NSET, OC_(thisidx-2), (intptr_t)kNode_ns(stmt), KClass_NameSpace);
+		ASM(LOOKUP, SFP_(thisidx), kNode_ns(stmt), mtd);
 	}
 
 	int esp_ = SFP_(espidx + argc + K_CALLDELTA + 1);
@@ -1013,8 +1013,8 @@ static struct KVirtualCode* GetDefaultBootCode(void)
 static void InitStaticBuilderApi(struct KBuilderAPI2 *builderApi)
 {
 	builderApi->target = "minivm";
-#define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME = KBuilder_Visit##NAME;
-	VISITOR_LIST(DEFINE_BUILDER_API);
+#define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME##Node = KBuilder_Visit##NAME##Node;
+	KNodeList(DEFINE_BUILDER_API);
 #undef DEFINE_BUILDER_API
 	builderApi->GenerateKVirtualCode = MiniVM_GenerateKVirtualCode;
 	builderApi->GenerateKMethodFunc = MiniVM_GenerateKMethodFunc;

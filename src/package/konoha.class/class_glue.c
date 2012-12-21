@@ -192,7 +192,7 @@ static kNode* kNode_ParseClassNodeNULL(KonohaContext *kctx, kNode *stmt, kToken 
 	kToken *blockToken = (kToken *)kNode_GetObject(kctx, stmt, KSymbol_NodePattern, NULL);
 	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KSymbol_NodePattern) {
 		const char *cname = kString_text(tokenClassName->text);
-		KTokenSeq range = {Node_ns(stmt), KGetParserContext(kctx)->preparedTokenList};
+		KTokenSeq range = {kNode_ns(stmt), KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, range);
 		SUGAR KTokenSeq_Tokenize(kctx, &range,  kString_text(blockToken->text), blockToken->uline);
 		{
@@ -325,9 +325,9 @@ static inline size_t initFieldSizeOfVirtualClass(KClass *superClass)
 
 static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Statement(stmt, gma);
+	VAR_TypeCheck(stmt, gma, reqc);
 	kToken *tokenClassName = SUGAR kNode_GetToken(kctx, stmt, KSymbol_("$ClassName"), NULL);
-	kNameSpace *ns = Node_ns(stmt);
+	kNameSpace *ns = kNode_ns(stmt);
 	int isNewlyDefinedClass = false;
 	KClassVar *definedClass = (KClassVar *)KLIB kNameSpace_GetClassByFullName(kctx, ns, kString_text(tokenClassName->text), kString_size(tokenClassName->text), NULL);
 	if(definedClass == NULL) {   // Already defined
@@ -370,7 +370,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	kToken_SetTypeId(kctx, tokenClassName, ns, definedClass->typeId);
 	kNode_AddMethodDeclNode(kctx, bk, tokenClassName, stmt);
-	kNode_done(kctx, stmt);
+	kNode_Type(kctx, stmt, KNode_Done, KType_void);
 	KReturnUnboxValue(true);
 }
 

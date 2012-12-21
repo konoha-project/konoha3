@@ -76,7 +76,7 @@ static void KMacroSet_setTokenAt(KonohaContext *kctx, KMacroSet *macroSet, int i
 
 static kNode *new_MacroNode(KonohaContext *kctx, kNode *stmt, kToken *IteratorTypeToken, kToken *IteratorNodeToken, kToken *TypeToken, kToken *VariableToken)
 {
-	kNameSpace *ns = Node_ns(stmt);
+	kNameSpace *ns = kNode_ns(stmt);
 	KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
 	KTokenSeq_Push(kctx, source);
 	/* FIXME(imasahiro)
@@ -102,7 +102,7 @@ static kNode *new_MacroNode(KonohaContext *kctx, kNode *stmt, kToken *IteratorTy
 static void kNode_appendNode(KonohaContext *kctx, kNode *stmt, kNode *bk)
 {
 	if(bk != NULL) {
-		kNode *block = SUGAR kNode_GetNode(kctx, stmt, Node_ns(stmt), KSymbol_NodePattern, NULL);
+		kNode *block = SUGAR kNode_GetNode(kctx, stmt, kNode_ns(stmt), KSymbol_NodePattern, NULL);
 		size_t i;
 		for(i = 0; i < kArray_size(bk->NodeList); i++) {
 			KLIB kArray_Add(kctx, block->NodeList, bk->NodeList->NodeItems[i]);
@@ -112,11 +112,11 @@ static void kNode_appendNode(KonohaContext *kctx, kNode *stmt, kNode *bk)
 
 static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Statement(stmt, gma);
+	VAR_TypeCheck(stmt, gma, reqc);
 	DBG_P("for statement .. ");
 	int isOkay = false;
 	if(SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_INFER, 0)) {
-		kNameSpace *ns = Node_ns(stmt);
+		kNameSpace *ns = kNode_ns(stmt);
 		kToken *TypeToken = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
 		kToken *VariableToken  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 		DBG_P("typeToken=%p, varToken=%p", TypeToken, VariableToken);

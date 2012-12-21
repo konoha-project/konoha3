@@ -393,7 +393,7 @@ static void JSBuilder_VisitNodeParams(KonohaContext *kctx, KBuilder *builder, kN
 
 static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr, kNode *receiver, kMethod *mtd)
 {
-	KClass *globalObjectClass = KLIB kNameSpace_GetClassByFullName(kctx, Node_ns(stmt), "GlobalObject", 12, NULL);
+	KClass *globalObjectClass = KLIB kNameSpace_GetClassByFullName(kctx, kNode_ns(stmt), "GlobalObject", 12, NULL);
 	kbool_t isGlobal = (KClass_(receiver->attrTypeId) == globalObjectClass || receiver->attrTypeId == KType_NameSpace);
 	const char *methodName = KSymbol_text(mtd->mn);
 	if(receiver->attrTypeId == KType_NameSpace) {
@@ -736,7 +736,7 @@ static void InitStaticBuilderApi(struct KBuilderAPI2 *builderApi)
 {
 	builderApi->target = "JavaScript";
 #define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME = JSBuilder_Visit##NAME;
-	VISITOR_LIST(DEFINE_BUILDER_API);
+	KNodeList(DEFINE_BUILDER_API);
 #undef DEFINE_BUILDER_API
 	builderApi->GenerateKVirtualCode = V8_GenerateKVirtualCode;
 	builderApi->GenerateKMethodFunc  = V8_GenerateKMethodFunc;

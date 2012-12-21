@@ -692,7 +692,7 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD TypeCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck2(stmt, expr, gma, reqc);
 	kToken *tk = expr->TermToken;
 	kRegExp *r = new_(RegExp, NULL, OnGcStack);
 	DBG_ASSERT(kArray_size(tk->subTokenList) == 2);
@@ -707,7 +707,7 @@ static kbool_t regexp_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		{ .keyword = KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_("$RegExp"), KonohaChar_Slash, new_SugarFunc(ns, TokenFunc_JavaScriptRegExp));
+	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_("$RegExp"), KonohaChar_Slash, KSugarFunc(ns, TokenFunc_JavaScriptRegExp));
 	return true;
 }
 

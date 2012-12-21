@@ -58,7 +58,7 @@ static	kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kNode *stmt, kObject *o, ktypeattr_t ty, ksymbol_t symbol)
 {
-	kNameSpace *ns = Node_ns(stmt);
+	kNameSpace *ns = kNode_ns(stmt);
 	kMethod *mtd = KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, kObject_class(o), symbol, KType_var);
 	if(mtd != NULL) {
 		SUGAR kNode_Message2(kctx, stmt, NULL, ErrTag, "already defined name: %s", KSymbol_text(symbol));
@@ -75,7 +75,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kNode *stmt, kObj
 
 static kNode* TypeDeclAndMakeSetter(KonohaContext *kctx, kNode *stmt, kGamma *gma, ktypeattr_t ty, kNode *termNode, kNode *valueNode, kObject *scr)
 {
-	kNameSpace *ns = Node_ns(stmt);
+	kNameSpace *ns = kNode_ns(stmt);
 	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termNode->TermToken->resolvedSymbol);
 	if(mtd != NULL) {
 		kNode *recvNode =  new_ConstValueNode(kctx, NULL, scr);
@@ -105,9 +105,9 @@ static kbool_t kNameSpace_InitGlobalObject(KonohaContext *kctx, kNameSpace *ns, 
 
 static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Statement(stmt, gma);
+	VAR_TypeCheck(stmt, gma, reqc);
 	kbool_t result = false;
-	kNameSpace *ns = Node_ns(stmt);
+	kNameSpace *ns = kNode_ns(stmt);
 	KMakeTrace(trace, sfp);
 	trace->pline = kNode_uline(stmt);
 	if(kNameSpace_InitGlobalObject(kctx, ns, trace)) {
@@ -116,13 +116,13 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 		kNode *lastNode = stmt;
 		result = SUGAR kNode_DeclType(kctx, stmt, gma, tk->resolvedTypeId, expr, ns->globalObjectNULL_OnList, TypeDeclAndMakeSetter, &lastNode);
 	}
-	kNode_done(kctx, stmt);
+	kNode_Type(kctx, stmt, KNode_Done, KType_void);
 	KReturnUnboxValue(result);
 }
 
 static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_TypeDeclPattern, SugarFunc_TopLevelStatement, new_SugarFunc(ns, Statement_GlobalTypeDecl));
+	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_TypeDeclPattern, SugarFunc_TopLevelStatement, KSugarFunc(ns, Statement_GlobalTypeDecl));
 	return true;
 }
 

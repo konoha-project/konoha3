@@ -32,8 +32,8 @@ extern "C"{
 
 static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Statement(stmt, gma);
-	kNameSpace *ns = Node_ns(stmt);
+	VAR_TypeCheck(stmt, gma, reqc);
+	kNameSpace *ns = kNode_ns(stmt);
 	kToken *symbolToken = SUGAR kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 	ksymbol_t unboxKey = symbolToken->resolvedSymbol;
 	kbool_t result = SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
@@ -64,7 +64,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 			kNode_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", KSymbol_Fmt2(unboxKey));
 		}
 	}
-	kNode_done(kctx, stmt);
+	kNode_Type(kctx, stmt, KNode_Done, KType_void);
 	KReturnUnboxValue(result);
 }
 
