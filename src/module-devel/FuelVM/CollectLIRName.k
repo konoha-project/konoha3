@@ -27,7 +27,7 @@ import("konoha.new");
 import("java2.string");
 import("konoha.foreach");
 import("konoha.ns");  // konoha.const is obsolete
-import("konoha.array");
+import("js4.array");
 import("konoha.file");
 import("konoha.class");
 import("cstyle");

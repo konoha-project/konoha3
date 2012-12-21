@@ -1,6 +1,6 @@
 // written by shinpei
 
-import("konoha.array")
+import("js4.array")
 
 void test() {
 	int[] ia = [1,2,3];

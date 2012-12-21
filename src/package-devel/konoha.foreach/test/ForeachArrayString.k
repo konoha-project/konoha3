@@ -1,7 +1,7 @@
 // written by chenji
 
 import("konoha.foreach");
-import("konoha.array");
+import("js4.array");
 
 void test() {
 	String[] slist = ["a", "b", "c", "d"];

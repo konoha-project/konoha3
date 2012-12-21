@@ -25,7 +25,7 @@
 import("cstyle", "while");
 import("cstyle", "break");
 import("cstyle", "null");
-import("konoha.array");
+import("js4.array");
 import("konoha.console");
 import("konoha.ns");
 import("konoha.eval");

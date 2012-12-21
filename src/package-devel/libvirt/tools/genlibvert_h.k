@@ -3,7 +3,7 @@ import("konoha.null");
 import("konoha.file");
 import("java2.string");
 import("konoha.new");
-import("konoha.array");
+import("js4.array");
 import("konoha.foreach");
 import("konoha.class");
 

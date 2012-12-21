@@ -2,7 +2,7 @@
 //import("cstyle"); // use cstyle
 //import("java2.string");
 //// //import("konoha.assign"); Don't use any more
-//import("konoha.array");
+//import("js4.array");
 //import("konoha.class");
 //
 //int regexToken(Token tk, String source) {

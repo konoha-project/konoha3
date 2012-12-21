@@ -1,6 +1,6 @@
 // written by Tetsuro Matsumura
 
-import("konoha.array");
+import("js4.array");
 
 void test() {
 	int[] a = [1, 2, 9];

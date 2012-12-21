@@ -1,4 +1,4 @@
-import("konoha.array");
+import("js4.array");
 
 void test() {
 	String[] sa = ["hello", "new", "world"];

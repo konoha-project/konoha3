@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 import("konoha.new")
 import("konoha.class")
-import("konoha.array");
+import("js4.array");
 
 class Person {
 	String name;

@@ -25,7 +25,7 @@
 import("java2.string");
 import("konoha.foreach");
 import("konoha.ns");
-import("konoha.array");
+import("js4.array");
 import("konoha.file");
 import("konoha.class");
 import("cstyle");

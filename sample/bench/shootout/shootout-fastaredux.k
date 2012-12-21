@@ -9,7 +9,7 @@ import("konoha.ns");
 import("konoha.float");
 import("konoha.global");
 import("konoha.class");
-import("konoha.array");
+import("js4.array");
 import("konoha.new");
 import("konoha.string");
 import("konoha.bytes");
