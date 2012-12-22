@@ -268,6 +268,8 @@ typedef enum {
 	SugarFunc_SIZE              = 3
 } SugerFunc;
 
+#define SUGARFUNC   (kFunc *)
+
 #define SYNFLAG_Macro               ((kshortflag_t)1)
 #define SYNFLAG_CFunc               (SYNFLAG_CParseFunc|SYNFLAG_CTypeCheckFunc)
 #define SYNFLAG_CParseFunc          ((kshortflag_t)1 << 3)
@@ -317,6 +319,7 @@ typedef enum {
 	Precedence_CStyleTRINARY  = 1400,  /* ? : */
 	Precedence_CStyleASSIGN   = 1500,
 	Precedence_CStyleCOMMA    = 1600,
+	Precedence_Statement      = 1900,
 	Precedence_CStyleStatementEnd    = 2000
 } Precedence;
 
@@ -499,9 +502,10 @@ static inline kNameSpace *kNode_GetNameSpace(KonohaContext *kctx, kNode *node)
 
 static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeType, ktypeattr_t attrTypeId)
 {
-	kNodeVar *vnode = (kNodeVar *)node;
-	vnode->node = nodeType;
-	vnode->attrTypeId = attrTypeId;
+	if(node->node != KNode_Error) {
+		node->node = nodeType;
+		node->attrTypeId = attrTypeId;
+	}
 	return node;
 }
 
@@ -604,13 +608,18 @@ typedef struct {
 	KClass *cNode;
 	KClass *cGamma;
 	KClass *cTokenArray;
-
-	KSyntax*    (*kNameSpace_GetSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
-	void            (*kNameSpace_DefineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *, KTraceInfo *);
-	kbool_t         (*kArray_AddSyntaxRule)(KonohaContext *, kArray *ruleList, KTokenSeq *sourceRange);
-	KSyntaxVar* (*kNameSpace_SetTokenFunc)(KonohaContext *, kNameSpace *, ksymbol_t, int ch, kFunc *);
-	KSyntaxVar* (*kNameSpace_AddSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
-	kbool_t         (*kNameSpace_SetMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *, int optionMacro);
+	//
+	kFunc  *termParseFunc;
+	kFunc  *opParseFunc;
+	kFunc  *patternParseFunc;
+	kFunc  *callTypeCheckFunc;
+	//
+	KSyntax*      (*kNameSpace_GetSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
+	void          (*kNameSpace_DefineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *, KTraceInfo *);
+	void          (*kNameSpace_AddSyntaxPattern)(KonohaContext *, kNameSpace *, ksymbol_t, const char *rule, kfileline_t uline, KTraceInfo *);
+	KSyntaxVar*   (*kNameSpace_SetTokenFunc)(KonohaContext *, kNameSpace *, ksymbol_t, int ch, kFunc *);
+	KSyntaxVar*   (*kNameSpace_AddSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
+	kbool_t       (*kNameSpace_SetMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *, int optionMacro);
 
 	void        (*KTokenSeq_Tokenize)(KonohaContext *, KTokenSeq *, const char *, kfileline_t);
 	kbool_t     (*KTokenSeq_ApplyMacro)(KonohaContext *, KTokenSeq *, kArray *, int, int, size_t, KMacroSet *);
@@ -657,8 +666,6 @@ typedef struct {
 	kNode *    (*kNode_Message2)(KonohaContext *, kNode *, kToken *, kinfotag_t, const char *fmt, ...);
 
 	kbool_t (*VisitNode)(KonohaContext *, struct KBuilder *, kNode *node, void *thunk);
-//	kbool_t (*VisitNode)(KonohaContext *, struct KBuilder *, kNode *stmt);
-//	void    (*VisitNode)(KonohaContext *, struct KBuilder *, kNode *stmt, kNode *expr);
 
 	void (*dumpToken)(KonohaContext *kctx, kToken *tk, int n);
 	void (*dumpTokenArray)(KonohaContext *kctx, int nest, kArray *a, int s, int e);

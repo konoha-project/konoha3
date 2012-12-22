@@ -189,8 +189,8 @@ static void KClass_InitField(KonohaContext *kctx, KClassVar *definedClass, KClas
 static kNode* kNode_ParseClassNodeNULL(KonohaContext *kctx, kNode *stmt, kToken *tokenClassName)
 {
 	kNode *bk = NULL;
-	kToken *blockToken = (kToken *)kNode_GetObject(kctx, stmt, KSymbol_NodePattern, NULL);
-	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KSymbol_NodePattern) {
+	kToken *blockToken = (kToken *)kNode_GetObject(kctx, stmt, KSymbol_BlockPattern, NULL);
+	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KSymbol_BlockPattern) {
 		const char *cname = kString_text(tokenClassName->text);
 		KTokenSeq range = {kNode_ns(stmt), KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, range);
@@ -210,7 +210,7 @@ static kNode* kNode_ParseClassNodeNULL(KonohaContext *kctx, kNode *stmt, kToken 
 			}
 			KTokenSeq_End(kctx, (&sourceRange));
 			bk = SUGAR new_BlockNode(kctx, stmt/*parent*/, NULL, &sourceRange);
-			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_NodePattern, KType_Node, bk);
+			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_BlockPattern, KType_Node, bk);
 		}
 		KTokenSeq_Pop(kctx, range);
 	}
@@ -225,7 +225,7 @@ static size_t kNode_countFieldSize(KonohaContext *kctx, kNode *bk)
 			kNode *stmt = bk->NodeList->NodeItems[i];
 			DBG_P("stmt->keyword=%s%s", KSymbol_Fmt2(stmt->syn->keyword));
 			if(stmt->syn->keyword == KSymbol_TypeDeclPattern) {
-				kNode *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
+				kNode *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
 				if(expr->syn->keyword == KSymbol_COMMA) {
 					c += (kArray_size(expr->NodeList) - 1);
 				}
@@ -289,7 +289,7 @@ static kbool_t kNode_declClassField(KonohaContext *kctx, kNode *bk, kGamma *gma,
 		kNode *stmt = bk->NodeList->NodeItems[i];
 		if(stmt->syn->keyword == KSymbol_TypeDeclPattern) {
 			kToken *tk  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
-			kNode *expr = SUGAR kNode_GetNode(kctx, stmt,  KSymbol_NodePattern, NULL);
+			kNode *expr = SUGAR kNode_GetNode(kctx, stmt,  KSymbol_ExprPattern, NULL);
 			if(!kNode_AddClassField(kctx, stmt, gma, ct, Token_typeLiteral(tk), expr)) {
 				failedOnce = true;
 			}
@@ -308,7 +308,7 @@ static void kNode_AddMethodDeclNode(KonohaContext *kctx, kNode *bk, kToken *toke
 			if(stmt->syn->keyword == KSymbol_MethodDeclPattern) {
 				kNode *lastNode = classNode;
 				KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_("ClassName"), KType_Token, tokenClassName);
-				SUGAR kNode_InsertAfter(kctx, lastNode->parentNodeNULL, lastNode, stmt);
+				SUGAR kNode_InsertAfter(kctx, lastNode->Parent, lastNode, stmt);
 				lastNode = stmt;
 			}
 			else {
@@ -391,11 +391,12 @@ static KMETHOD PatternMatch_ClassName(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t class_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("$ClassName"), 0, NULL, 0, 0, PatternMatch_ClassName, NULL, NULL, NULL, NULL, },
-		{ KSymbol_("class"), 0, "\"class\" $ClassName [\"extends\" extends: $Type] [$Node]", 0, 0, NULL, NULL, Statement_class, NULL, NULL, },
+		{ KSymbol_("$ClassName"), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_ClassName}, {NULL}},
+		{ KSymbol_("class"), SYNFLAG_CTypeCheckFunc, 0, Precedence_Statement, {SUGAR patternParseFunc}, {SUGARFUNC Statement_class}},
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("class"), "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", 0, trace);
 	return true;
 }
 

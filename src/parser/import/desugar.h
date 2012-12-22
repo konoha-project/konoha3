@@ -1207,7 +1207,6 @@ static KMETHOD Statement_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 #define PATTERN(T)  KSymbol_##T##Pattern
 #define GROUP(T)    KSymbol_##T##Group
 #define TOKEN(T)    KSymbol_##T
-#define SUGARFUNC   (kFunc *)
 
 static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 {
@@ -1257,8 +1256,6 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 //		{ PATTERN(Expr),  0, "$Expr", 0, 0, PatternMatch_Expression, Expression_ParsedNode, Statement_Expression, Statement_Expression, NULL, },
 		{ PATTERN(Expr),  SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_Expression}, {NULL}, },
 		{ PATTERN(Type),  SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_Type}, {SUGARFUNC TypeCheck_Type}, },
-//		{ PATTERN(TypeDecl),   0, "$TypeDecl $Type $Node", 0, 0, PatternMatch_TypeDecl, NULL, NULL, Statement_TypeDecl, },
-//		{ PATTERN(MethodDecl), 0, "$MethodDecl $Type [ClassName: $Type \".\"] $Symbol $Param [$Node]", 0, 0, PatternMatch_MethodDecl, NULL, Statement_MethodDecl, NULL, NULL, },
 //		{ TOKEN(if),     0, "\"if\" \"(\" $Node \")\" $Node [\"else\" else: $Node]", 0, 0, NULL, NULL, NULL, Statement_if, NULL, },
 //		{ TOKEN(else),   0,  "\"else\" $Node", 0, 0, NULL, NULL, /*Statement_else*/NULL, Statement_else, NULL, },
 //		{ TOKEN(return), SYNFLAG_NodeBreakExec, "\"return\" [$Node]", 0, 0, NULL, NULL, NULL, Statement_return, NULL, },
@@ -1270,5 +1267,14 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ KSymbol_END, },
 	};
 	kNameSpace_DefineSyntax(kctx, ns, SYNTAX, NULL);
+	KPARSERM->termParseFunc = TermFunc;
+	KPARSERM->opParseFunc = OperatorFunc;
+	KPARSERM->callTypeCheckFunc = MethodCallFunc;
+	// Syntax Rule
+//	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(Expr), "$Expr", 0, NULL);
+	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(TypeDecl), "$TypeDecl $Type $Expr", 0, NULL);
+	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(MethodDecl), "$MethodDecl $Type [ClassName: $Type \".\"] $Symbol $Param [$Expr]", 0, NULL);
+	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(if), "\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Expr]", 0, NULL);
+	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(return), "\"return\" [$Expr]", 0, NULL);
 }
 

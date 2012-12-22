@@ -22,6 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#ifdef REMOVE_THIS_WHEN_FIXED
 #include <stdio.h>
 #include <iconv.h>
 #include <errno.h>
@@ -770,4 +771,4 @@ kbool_t LoadJavaScriptModule(KonohaFactory *factory, ModuleType type)
 }
 
 } /* extern "C" */
-
+#endif

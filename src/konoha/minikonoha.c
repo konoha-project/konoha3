@@ -236,7 +236,7 @@ void konoha_close(KonohaContext* konoha)
 // -------------------------------------------------------------------------
 // Default Platform Module API
 
-static void DefaultEventHandler(KonohaContext *kctx, void *argv)
+static void DefaultEventHandler(KonohaContext *kctx/*, void *argv*/)
 {
 }
 static kbool_t DefaultEmitEvent(KonohaContext *kctx, struct JsonBuf *json, KTraceInfo *trace)

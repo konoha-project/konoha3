@@ -939,7 +939,7 @@ static KMETHOD Gamma_declareLocalVariable(KonohaContext *kctx, KonohaStack *sfp)
 //	}
 //	if(IS_NOTNULL(expr)) {
 //		assert(IS_Array(tk->subTokenList));
-//		expr = SUGAR AddParamNode(kctx, stmt, expr, tk->subTokenList, 0, kArray_size(tk->subTokenList), 1/*allowEmpty*/);
+//		expr = SUGAR AddParamNode(kctx, ns, expr, tk->subTokenList, 0, kArray_size(tk->subTokenList), 1/*allowEmpty*/);
 //	}
 //	KReturn(expr);
 //}

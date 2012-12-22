@@ -94,7 +94,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, gma, reqc);
 	kstatus_t result = K_CONTINUE;
-	kToken *tk = SUGAR kNode_GetToken(kctx, stmt, KSymbol_NodePattern, NULL);
+	kToken *tk = SUGAR kNode_GetToken(kctx, stmt, KSymbol_BlockPattern, NULL);
 	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		INIT_GCSTACK();
 		kNameSpace *ns = new_(NameSpace, kNode_ns(stmt), _GcStack);
@@ -116,9 +116,9 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = kNode_ns(stmt);
 	kToken *symbolToken = SUGAR kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 	ksymbol_t unboxKey = symbolToken->resolvedSymbol;
-	kbool_t result = SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
+	kbool_t result = SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
 	if(result) {
-		kNode *constNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
+		kNode *constNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
 		KClass *constClass = KClass_(constNode->attrTypeId);
 		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
@@ -192,13 +192,14 @@ static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, currentIdx, endIdx);
+	kNameSpace *ns = kNode_ns(stmt);
 	if(beginIdx == currentIdx && beginIdx + 1 < endIdx) {
 		kTokenVar *definedToken = tokenList->TokenVarItems[beginIdx];   // defined
 		kTokenVar *pToken = tokenList->TokenVarItems[beginIdx+1];
 		if(IS_Array(pToken->subTokenList)) {
 			kNode *expr = SUGAR new_UntypedOperatorNode(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
-			filterArrayList(kctx, kNode_ns(stmt), pToken->subTokenList, 0, kArray_size(pToken->subTokenList));
-			KReturn(SUGAR AddParamNode(kctx, stmt, expr, pToken->subTokenList, 0, kArray_size(pToken->subTokenList), 0/*isAllowEmpty*/));
+			filterArrayList(kctx, ns, pToken->subTokenList, 0, kArray_size(pToken->subTokenList));
+			KReturn(SUGAR AddParamNode(kctx, ns, expr, pToken->subTokenList, 0, kArray_size(pToken->subTokenList), 0/*isAllowEmpty*/));
 		}
 	}
 }
@@ -206,12 +207,14 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("namespace"), 0, "\"namespace\" $Node", 0, 0, NULL, NULL, Statement_namespace, NULL, NULL, },
-		{ KSymbol_("const"), 0, "\"const\" $Symbol \"=\" $Node", 0, 0, NULL, NULL, Statement_ConstDecl, NULL, NULL, },
-		{ KSymbol_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Expression_Defined, NULL, NULL, TypeCheck_Defined, },
+		{ KSymbol_("namespace"), SYNFLAG_CTypeCheckFunc, 0, Precedence_Statement, {NULL}, {SUGARFUNC Statement_namespace}},
+		{ KSymbol_("const"), SYNFLAG_CTypeCheckFunc, 0, Precedence_Statement, {NULL}, {SUGARFUNC Statement_ConstDecl}},
+		{ KSymbol_("defined"), 0,0, Precedence_CStylePREUNARY, {SUGARFUNC Expression_Defined}, {SUGARFUNC TypeCheck_Defined},},
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("namespace"), "\"namespace\" $Expr", 0, trace);
+	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("const"), "\"const\" $Symbol \"=\" $Expr", 0, trace);
 	return true;
 }
 

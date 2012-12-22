@@ -1322,19 +1322,23 @@ static kbool_t kArray_AddSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 	return true;
 }
 
-static void kNameSpace_ParseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, const char *ruleSource, kfileline_t uline, kArray *patternList)
+static void kNameSpace_AddSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, ksymbol_t kw, const char *ruleSource, kfileline_t uline, KTraceInfo *trace)
 {
+	KSyntaxVar *syn = (KSyntaxVar*)kNameSpace_GetSyntax(kctx, ns, kw, 1);
+	if(syn->syntaxPatternListNULL == NULL) {
+		syn->syntaxPatternListNULL = new_(TokenArray, 0, ns->NameSpaceConstList);
+	}
 	KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
 	KTokenSeq_Push(kctx, source);
 	KTokenSeq_Tokenize(kctx, &source, ruleSource, uline);
 	KTokenSeq patterns = {ns, source.tokenList, source.endIdx};
 	patterns.TargetPolicy.RemovingIndent = true;
 	KTokenSeq_Preprocess(kctx, &patterns, NULL, &source, source.beginIdx);
-	KLIB kArray_Add(kctx, patternList, K_NULLTOKEN);  // delim
-	size_t firstPatternIdx = kArray_size(patternList);
-	kArray_AddSyntaxPattern(kctx, patternList, &patterns);
-	if(firstPatternIdx < kArray_size(patternList)) {
-		kToken *firstPattern = patternList->TokenItems[firstPatternIdx];
+	KLIB kArray_Add(kctx, syn->syntaxPatternListNULL, K_NULLTOKEN);  // delim
+	size_t firstPatternIdx = kArray_size(syn->syntaxPatternListNULL);
+	kArray_AddSyntaxPattern(kctx, syn->syntaxPatternListNULL, &patterns);
+	if(firstPatternIdx < kArray_size(syn->syntaxPatternListNULL)) {
+		kToken *firstPattern = syn->syntaxPatternListNULL->TokenItems[firstPatternIdx];
 		//DBG_P(">>>>>> firstPattern=%d", kToken_IsFirstPattern(firstPattern));
 		if(kToken_IsFirstPattern(firstPattern)) {
 			kNameSpace_AppendArrayRef(kctx, ns, &((kNameSpaceVar *)ns)->stmtPatternListNULL_OnList, UPCAST(firstPattern));

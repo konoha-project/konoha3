@@ -703,8 +703,8 @@ static KMETHOD TypeCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t regexp_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = KSymbol_("$RegExp"),  TypeCheck_(RegExp), },
-		{ .keyword = KSymbol_END, },
+		{ KSymbol_("$RegExp"), SYNFLAG_CTypeCheckFunc, 0, 0, {SUGAR termParseFunc}, {SUGARFUNC TypeCheck_RegExp}},
+		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_("$RegExp"), KonohaChar_Slash, KSugarFunc(ns, TokenFunc_JavaScriptRegExp));

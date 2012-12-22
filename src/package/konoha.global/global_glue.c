@@ -75,15 +75,10 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kNode *stmt, kObj
 
 static kNode* TypeDeclAndMakeSetter(KonohaContext *kctx, kNode *stmt, kGamma *gma, ktypeattr_t ty, kNode *termNode, kNode *valueNode, kObject *scr)
 {
-	kNameSpace *ns = kNode_ns(stmt);
 	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termNode->TermToken->resolvedSymbol);
 	if(mtd != NULL) {
 		kNode *recvNode =  new_ConstValueNode(kctx, NULL, scr);
-		kNode *setterNode = SUGAR new_TypedCallNode(kctx, stmt, gma, KType_void, mtd,  2, recvNode, valueNode);
-		kNode *newstmt = new_(Node, kNode_uline(stmt), OnGcStack);
-		kNode_Setsyn(newstmt, KSyntax_(ns, KSymbol_NodePattern));
-		KLIB kObjectProto_SetObject(kctx, newstmt, KSymbol_NodePattern, KType_Node, setterNode);
-		return newstmt;
+		return SUGAR new_TypedCallNode(kctx, stmt, gma, KType_void, mtd,  2, recvNode, valueNode);
 	}
 	return NULL;
 }
@@ -106,23 +101,22 @@ static kbool_t kNameSpace_InitGlobalObject(KonohaContext *kctx, kNameSpace *ns, 
 static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, gma, reqc);
-	kbool_t result = false;
-	kNameSpace *ns = kNode_ns(stmt);
-	KMakeTrace(trace, sfp);
-	trace->pline = kNode_uline(stmt);
-	if(kNameSpace_InitGlobalObject(kctx, ns, trace)) {
-		kToken *tk  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
-		kNode  *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
-		kNode *lastNode = stmt;
-		result = SUGAR kNode_DeclType(kctx, stmt, gma, tk->resolvedTypeId, expr, ns->globalObjectNULL_OnList, TypeDeclAndMakeSetter, &lastNode);
+	if(Gamma_isTopLevel(gma)) {
+		kNameSpace *ns = kNode_ns(stmt);
+		KMakeTrace(trace, sfp);
+		trace->pline = kNode_uline(stmt);
+		if(kNameSpace_InitGlobalObject(kctx, ns, trace)) {
+			kToken *tk  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
+			kNode  *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
+			SUGAR kNode_DeclType(kctx, stmt, gma, tk->resolvedTypeId, expr, ns->globalObjectNULL_OnList, TypeDeclAndMakeSetter);
+		}
+		KReturn(kNode_Type(kctx, stmt, KNode_Done, KType_void));
 	}
-	kNode_Type(kctx, stmt, KNode_Done, KType_void);
-	KReturnUnboxValue(result);
 }
 
 static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_TypeDeclPattern, SugarFunc_TopLevelStatement, KSugarFunc(ns, Statement_GlobalTypeDecl));
+	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_TypeDeclPattern, KSugarTypeCheckFunc, KSugarFunc(ns, Statement_GlobalTypeDecl));
 	return true;
 }
 

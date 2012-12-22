@@ -587,7 +587,7 @@ struct KonohaFactory {
 	/* Event Handler API */
 	KModuleInfo *EventInfo;
 	struct EventContext *eventContext;
-	void (*StartEventHandler)(KonohaContext *kctx, void *args);
+	void (*StartEventHandler)(KonohaContext *kctx/*, void *args*/);
 	void (*StopEventHandler)(KonohaContext *kctx);
 	void (*EnterEventContext)(KonohaContext *kctx);
 	void (*ExitEventContext)(KonohaContext *kctx);

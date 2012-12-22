@@ -163,7 +163,8 @@ static void kNameSpace_LookupMethodWithInlineCache(KonohaContext *kctx, KonohaSt
 	ktypeattr_t typeId = kObject_typeId(sfp[0].asObject);
 	kMethod *mtd = cache[0];
 	if(mtd->typeId != typeId) {
-		mtd = KLIB kNameSpace_GetMethodBySignatrueNULL(kctx, ns, kObject_class(sfp[0].asObject), mtd->mn, mtd->paramdom, 0, NULL);
+		//FIXME: Node unknown error
+		//mtd = KLIB kNameSpace_GetMethodBySignatrueNULL(kctx, ns, kObject_class(sfp[0].asObject), mtd->mn, mtd->paramdom, 0, NULL);
 		cache[0] = mtd;
 	}
 	sfp[0].unboxValue = kObject_Unbox(sfp[0].asObject);
@@ -725,33 +726,33 @@ static kbool_t KBuilder_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder,
 	return true;
 }
 
-static kbool_t KBuilder_VisitForNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
-{
-	intptr_t espidx = stmt->stacktop;
-	bblock_t lbCONTINUE = new_BasicNodeLABEL(kctx);
-	bblock_t lbENTRY    = new_BasicNodeLABEL(kctx);
-	bblock_t lbBREAK    = new_BasicNodeLABEL(kctx);
-	kNode_SetLabelNode(kctx, stmt, KSymbol_("continue"), lbCONTINUE);
-	kNode_SetLabelNode(kctx, stmt, KSymbol_("break"),    lbBREAK);
-	ASM_JMP(kctx, builder, lbENTRY);
-	ASM_LABEL(kctx, builder, lbCONTINUE);
-	KBuilder_AsmSAFEPOINT(kctx, builder, kNode_uline(stmt), espidx);
-	kNode *iterNode = SUGAR kNode_GetBlock(kctx, stmt, NULL, KSymbol_("Iterator"), NULL);
-	if(iterNode != NULL) {
-		SUGAR VisitNode(kctx, builder, iterNode, &espidx);
-		ASM_LABEL(kctx, builder, lbENTRY);
-		KBuilder_asmJMPIF(kctx, builder, Node_getFirstExpr(kctx, stmt), &espidx, 0/*FALSE*/, lbBREAK);
-	}
-	else {
-		KBuilder_asmJMPIF(kctx, builder, Node_getFirstExpr(kctx, stmt), &espidx, 0/*FALSE*/, lbBREAK);
-		ASM_LABEL(kctx, builder, lbENTRY);
-	}
-	SUGAR VisitNode(kctx, builder, Node_getFirstBlock(kctx, stmt), &espidx);
-	ASM_JMP(kctx, builder, lbCONTINUE);
-	ASM_LABEL(kctx, builder, lbBREAK);
-	AssignLocal(kctx, builder, stmt, thunk);
-	return true;
-}
+//static kbool_t KBuilder_VisitForNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
+//{
+//	intptr_t espidx = stmt->stacktop;
+//	bblock_t lbCONTINUE = new_BasicNodeLABEL(kctx);
+//	bblock_t lbENTRY    = new_BasicNodeLABEL(kctx);
+//	bblock_t lbBREAK    = new_BasicNodeLABEL(kctx);
+//	kNode_SetLabelNode(kctx, stmt, KSymbol_("continue"), lbCONTINUE);
+//	kNode_SetLabelNode(kctx, stmt, KSymbol_("break"),    lbBREAK);
+//	ASM_JMP(kctx, builder, lbENTRY);
+//	ASM_LABEL(kctx, builder, lbCONTINUE);
+//	KBuilder_AsmSAFEPOINT(kctx, builder, kNode_uline(stmt), espidx);
+//	kNode *iterNode = SUGAR kNode_GetBlock(kctx, stmt, NULL, KSymbol_("Iterator"), NULL);
+//	if(iterNode != NULL) {
+//		SUGAR VisitNode(kctx, builder, iterNode, &espidx);
+//		ASM_LABEL(kctx, builder, lbENTRY);
+//		KBuilder_asmJMPIF(kctx, builder, Node_getFirstExpr(kctx, stmt), &espidx, 0/*FALSE*/, lbBREAK);
+//	}
+//	else {
+//		KBuilder_asmJMPIF(kctx, builder, Node_getFirstExpr(kctx, stmt), &espidx, 0/*FALSE*/, lbBREAK);
+//		ASM_LABEL(kctx, builder, lbENTRY);
+//	}
+//	SUGAR VisitNode(kctx, builder, Node_getFirstBlock(kctx, stmt), &espidx);
+//	ASM_JMP(kctx, builder, lbCONTINUE);
+//	ASM_LABEL(kctx, builder, lbBREAK);
+//	AssignLocal(kctx, builder, stmt, thunk);
+//	return true;
+//}
 
 #define KBuilder_VisitContinueNode KBuilder_VisitJumpNode
 #define KBuilder_VisitBreakNode    KBuilder_VisitJumpNode

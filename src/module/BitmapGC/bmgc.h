@@ -1143,6 +1143,7 @@ static void *tryAlloc(HeapManager *mng, SubHeap *h)
 			h->total > h->total_limit && mng->phase != GCPHASE_MARK_CONC);
 	KonohaContext *kctx = mng->kctx;
 	PLATAPI WriteBarrier(kctx, temp);
+	(void)isEmpty;
 #else
 	(void)isEmpty;
 #endif
@@ -1533,12 +1534,12 @@ static void b0_final_sweep(KonohaContext *kctx, bitmap_t bm, size_t idx, Segment
 
 static void HeapManager_final_Free(HeapManager *mng)
 {
-	size_t i, j;
+	size_t j;
 	SubHeap *h;
 	KonohaContext *kctx = mng->kctx;
 	for_each_heap(h, j, mng->heaps) {
-#ifdef USE_CONCURRENT_GC
 		size_t i;
+#ifdef USE_CONCURRENT_GC
 		for (i = 0; i < h->seglist_size; i++) {
 			Segment *seg = h->seglist[i];
 			ClearBitMap(seg->base[0], h->heap_klass);

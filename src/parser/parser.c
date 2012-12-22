@@ -224,21 +224,20 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kNode_DeclType               = kNode_DeclType;
 	mod->kNode_TypeCheckVariableNULL  = kNode_TypeCheckVariableNULL;
 
-	mod->kNameSpace_DefineSyntax    = kNameSpace_DefineSyntax;
-	mod->kNameSpace_GetSyntax       = kNameSpace_GetSyntax;
-	mod->kArray_AddSyntaxRule       = kArray_AddSyntaxPattern;
-//	mod->kNameSpace_SetSugarFunc    = kNameSpace_SetSugarFunc;
-	mod->kNameSpace_AddSugarFunc    = kNameSpace_AddSugarFunc;
-	mod->new_BlockNode              = new_BlockNode2;
-	mod->kNode_InsertAfter          = kNode_InsertAfter;
+	mod->kNameSpace_DefineSyntax      = kNameSpace_DefineSyntax;
+	mod->kNameSpace_GetSyntax         = kNameSpace_GetSyntax;
+	mod->kNameSpace_AddSyntaxPattern  = kNameSpace_AddSyntaxPattern;
+	mod->kNameSpace_AddSugarFunc      = kNameSpace_AddSugarFunc;
+	mod->new_BlockNode                = new_BlockNode2;
+	mod->kNode_InsertAfter            = kNode_InsertAfter;
 //	mod->kNode_Termnize               = kNode_Termnize;
-	mod->new_UntypedOperatorNode    = new_UntypedOperatorNode;
+	mod->new_UntypedOperatorNode      = new_UntypedOperatorNode;
 //	mod->kNode_ParseOperatorNode    = kNode_ParseOperatorNode;
-	mod->ParseNewNode               = ParseNewNode;
-	mod->AddParamNode               = AddParamNode;
-	mod->kNode_RightJoinNode        = kNode_RightJoinNode;
-	mod->kToken_ToError        = kToken_ToError;
-	mod->kNode_Message2        = kNode_Message2;
+	mod->ParseNewNode                 = ParseNewNode;
+	mod->AddParamNode                 = AddParamNode;
+	mod->kNode_RightJoinNode          = kNode_RightJoinNode;
+	mod->kToken_ToError               = kToken_ToError;
+	mod->kNode_Message2               = kNode_Message2;
 
 	mod->VisitNode                  = VisitNode;
 

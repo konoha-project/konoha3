@@ -82,7 +82,6 @@ static void kNameSpace_SetTokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns, i
 // Syntax Management
 
 #define kToken_IsFirstPattern(tk)   (KSymbol_IsPattern(tk->resolvedSymbol) && tk->stmtEntryKey != KSymbol_ExprPattern)
-static void kNameSpace_ParseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t uline, kArray *ruleList);
 
 static KSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, KSyntax *parentSyntax, ksymbol_t keyword)
 {
@@ -242,17 +241,6 @@ static KSyntaxVar *kNameSpace_SetTokenFunc(KonohaContext *kctx, kNameSpace *ns, 
 	syn->lastLoadedPackageId = ns->packageId;
 	return syn;
 }
-
-//static void KSyntax_setKMethodFunc(KonohaContext *kctx, kNameSpace *ns, KSyntaxVar *syn, KMethodFunc definedKMethodFunc, size_t index, KMethodFunc *previousDefinedFuncRef, kFunc **cachedFuncRef)
-//{
-//	if(definedKMethodFunc != NULL) {
-//		if(definedKMethodFunc != previousDefinedFuncRef[0]) {
-//			previousDefinedFuncRef[0] = definedKMethodFunc;
-//			cachedFuncRef[0] = KSugarFunc(ns, definedKMethodFunc);
-//		}
-//		KFieldInit(ns, syn->sugarFuncTable[index], cachedFuncRef[0]);
-//	}
-//}
 
 static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef, KTraceInfo *trace)
 {
