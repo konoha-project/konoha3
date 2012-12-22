@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.array"); // if Ok
+import("js4.array"); // if Ok
 import("cstyle");
 
 void test() {

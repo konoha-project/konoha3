@@ -1,4 +1,4 @@
-import("konoha.array");
+import("js4.array");
 
 int func(int num) {
 	return num*2;

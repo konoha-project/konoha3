@@ -2,7 +2,7 @@
 
 import ("konoha.new");
 import( "dscript.subproc");
-import ("konoha.array");
+import ("js4.array");
 
 void test () {
 	Subproc p = new Subproc("echo helloworld", false);

@@ -31,7 +31,7 @@ import("konoha.global");
 import("konoha.ns");
 import("java2.string");
 import("konoha.regexp");
-import("konoha.array");
+import("js4.array");
 import("konoha.map");
 import("konoha.iterator");
 

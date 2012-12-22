@@ -1,4 +1,4 @@
-import("konoha.array");
+import("js4.array");
 import("konoha.regexp");
 
 void test() {

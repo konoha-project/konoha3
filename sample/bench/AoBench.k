@@ -5,7 +5,7 @@ import("konoha.string");
 import("konoha.global");
 import("konoha.ns");
 import("konoha.class");
-import("konoha.array");
+import("js4.array");
 import("konoha.file");
 import("cstyle", "while");
 import("cstyle", "+=");

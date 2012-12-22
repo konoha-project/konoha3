@@ -1,5 +1,5 @@
 import("cstyle", "while");
-import("konoha.array");
+import("js4.array");
 import("apache");
 
 @Public int System.handler(Request req) {

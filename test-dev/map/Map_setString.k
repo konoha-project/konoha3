@@ -2,7 +2,7 @@
 
 import("konoha.map");
 import("konoha.new");
-import("konoha.array");
+import("js4.array");
 
 void test() {
 	Map[String] m = new Map[String]();

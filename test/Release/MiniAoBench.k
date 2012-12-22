@@ -8,7 +8,7 @@ import("java2.string");
 import("konoha.global");
 import("konoha.ns");  // konoha.const is obsolete
 import("konoha.class");
-import("konoha.array");
+import("js4.array");
 import("cstyle", "while");
 import("cstyle", "+=");
 import("konoha.new");

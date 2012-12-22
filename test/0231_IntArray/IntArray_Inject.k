@@ -1,4 +1,4 @@
-import("konoha.array");
+import("js4.array");
 
 int add(int a, int b) {
 	return a+b;
