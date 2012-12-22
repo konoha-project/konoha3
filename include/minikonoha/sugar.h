@@ -760,9 +760,6 @@ struct KBuilderCommon {
 	struct KBuilderAPI2* api;
 	int option;
 	kfileline_t uline;
-	int a; /* whatis a ? */
-	int shift;
-	int espidx;
 };
 
 #define DefineVisitFunc(NAME) KNodeVisitFunc visit##NAME##Node;
