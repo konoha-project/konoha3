@@ -399,6 +399,7 @@ typedef kshort_t       knode_t;
 
 typedef enum {
 	KNodeList(DEFINE_KNode)
+	KNode_MAX
 } KNode_;
 
 #define kNode_IsConstValue(o)     (KNode_Const <= (o)->node && (o)->node <= KNode_UnboxConst)
