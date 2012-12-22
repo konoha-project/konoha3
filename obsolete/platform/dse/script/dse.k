@@ -3,7 +3,7 @@
 
 import("jansson"); // Replace to konoha.json
 import("konoha.class");
-import("konoha.array");
+import("js4.array");
 import("konoha.ns");  // konoha.const is obsolete
 import("konoha.string");
 import("konoha.bytes");

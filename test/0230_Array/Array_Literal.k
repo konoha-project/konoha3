@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.array");
+import("js4.array");
 
 void test() {
 	Array a = [];

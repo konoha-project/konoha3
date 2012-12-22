@@ -1,6 +1,6 @@
 // written by imasahiro
 
-import("konoha.array");
+import("js4.array");
 
 int f(int x) { return x + 1; }
 int g(int x) { return x - 1; }

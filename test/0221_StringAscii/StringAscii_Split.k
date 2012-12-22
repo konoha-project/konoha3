@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("konoha.array");
+import("js4.array");
 import("js4.string");
 
 void test() {

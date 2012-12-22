@@ -9,7 +9,7 @@ import("cstyle");
 import("konoha.ns");
 import("konoha.float");
 import("konoha.class");
-import("konoha.array");
+import("js4.array");
 import("konoha.math");
 
 const PI = 3.141592653589793;

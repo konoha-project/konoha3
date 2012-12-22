@@ -1,6 +1,6 @@
 // written by shinpei
 
-import("konoha.array");
+import("js4.array");
 import("konoha.class");
 import("konoha.new");
 void f () {

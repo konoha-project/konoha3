@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.array");
+import("js4.array");
 import("konoha.object");
 
 void test() {

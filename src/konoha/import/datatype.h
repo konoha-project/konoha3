@@ -650,6 +650,14 @@ static kObject* DEFAULT_fnullinit(KonohaContext *kctx, KClass *ct)
 	return ct->defaultNullValue;
 }
 
+static int DEFAULT_compareObject(kObject *o1, kObject *o2) {
+	return (int)(o1 - o2);
+}
+
+static int DEFAULT_compareUnboxValue(uintptr_t v1, uintptr_t v2) {
+	return v1 - v2;
+}
+
 static kObject *Knull(KonohaContext *kctx, KClass *ct)
 {
 	return ct->fnull(kctx, ct);
@@ -696,6 +704,8 @@ static KClassVar* new_KClass(KonohaContext *kctx, KClass *bct, KDEFINE_CLASS *s,
 		ct->init = (s->init != NULL) ? s->init : DEFAULT_Init;
 		ct->reftrace = (s->reftrace != NULL) ? s->reftrace : DEFAULT_Reftrace;
 		ct->p     = (s->p != NULL) ? s->p : DEFAULT_p;
+		ct->compareObject     = (s->compareObject != NULL) ? s->compareObject : DEFAULT_compareObject;
+		ct->compareUnboxValue = (s->compareUnboxValue != NULL) ? s->compareUnboxValue : DEFAULT_compareUnboxValue;
 		ct->unbox = (s->unbox != NULL) ? s->unbox : DEFAULT_unbox;
 		ct->free = (s->free != NULL) ? s->free : DEFAULT_Free;
 		ct->fnull = (s->fnull != NULL) ? s->fnull : DEFAULT_fnullinit;

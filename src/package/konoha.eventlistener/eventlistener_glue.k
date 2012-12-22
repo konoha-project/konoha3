@@ -1,6 +1,6 @@
 import("konoha.new");
 import("konoha.class");
-import("konoha.array");
+import("js4.array");
 import("konoha.map");
 import("konoha.global");
 import("konoha.ns");  // konoha.const is obsolete
