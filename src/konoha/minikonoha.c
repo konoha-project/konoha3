@@ -22,10 +22,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "minikonoha/minikonoha.h"
-#include "minikonoha/klib.h"
-#include "minikonoha/local.h"
-#include "minikonoha/sugar.h"
+#define USE_KEYWORD_LIST 1
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/klib.h>
+#include <minikonoha/local.h>
+#include <minikonoha/sugar.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,7 +38,7 @@ extern "C" {
 
 // -------------------------------------------------------------------------
 
-static void konoha_Init(void)
+static void InitKonoha(void)
 {
 	static int isInit = 0;
 	if(isInit == 0) {
@@ -223,7 +224,7 @@ static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 KonohaContext* konoha_open(const PlatformApi *platform)
 {
 	assert(0);  // obsolate
-	konoha_Init();
+	InitKonoha();
 	return (KonohaContext *)new_KonohaContext(NULL, platform);
 }
 
@@ -386,7 +387,7 @@ KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory)
 	KonohaFactory *platapi = (KonohaFactory *)factory->malloc_i(sizeof(KonohaFactory));
 	KonohaFactory_Check(factory);
 	memcpy(platapi, factory, sizeof(KonohaFactory));
-	konoha_Init();
+	InitKonoha();
 	return (KonohaContext *)new_KonohaContext(NULL, (PlatformApi *)platapi);
 }
 

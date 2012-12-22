@@ -987,25 +987,17 @@ static void loadInitStructData(KonohaContext *kctx)
 	ct->p0 = KType_Object;    // don't move (ide)
 }
 
-static void defineDefaultKeywordSymbol(KonohaContext *kctx)
+static void DefineDefaultKeywordSymbol(KonohaContext *kctx)
 {
 	size_t i;
-	static const char *keywords[] = {
-		"", "$Node", "$Symbol", "$Text", "$Number", "$Type",
-		"()", "[]", "{}", "$Node", "$Param", "$TypeDecl", "$MethodDecl", "$Token",
-		".", "/", "%", "*", "+", "-", "<", "<=", ">", ">=", "==", "!=",
-		"&&", "||", "!", "=", ",", "$", ":", ";", /*"@",*/
-		"true", "false", "if", "else", "return", // syn
-		"new", "void"
-	};
-	for(i = 0; i < sizeof(keywords) / sizeof(const char *); i++) {
-		ksymbolSPOL(keywords[i], strlen(keywords[i]), StringPolicy_TEXT|StringPolicy_ASCII, KSymbol_NewId);
+	for(i = 0; i < sizeof(KEYWORD_LIST) / sizeof(const char *); i++) {
+		ksymbolSPOL(KEYWORD_LIST[i], strlen(KEYWORD_LIST[i]), StringPolicy_TEXT|StringPolicy_ASCII, KSymbol_NewId);
 		//ksymbol_t sym = ksymbolSPOL(keywords[i], strlen(keywords[i]), StringPolicy_TEXT|StringPolicy_ASCII, KSymbol_NewId);
 		//fprintf(stdout, "#define KSymbol_%s (((ksymbol_t)%d)|0) /*%s*/\n", KSymbol_text(sym), KSymbol_Unmask(sym), keywords[i]);
 	}
 }
 
-static void initStructData(KonohaContext *kctx)
+static void InitStructData(KonohaContext *kctx)
 {
 	KClass **ctt = (KClass**)kctx->share->classTable.classItems;
 	size_t i;//, size = kctx->share->classTable.bytesize/sizeof(KClassVar *);
@@ -1083,8 +1075,8 @@ static void KRuntime_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	FILEID_("(konoha.c)");
 	PN_("konoha");                   // PN_konoha
 	PN_("sugar");                    // PKG_sugar
-	defineDefaultKeywordSymbol(kctx);
-	initStructData(kctx);
+	DefineDefaultKeywordSymbol(kctx);
+	InitStructData(kctx);
 }
 
 static void KRuntime_Reftrace(KonohaContext *kctx, KonohaContextVar *ctx, KObjectVisitor *visitor)
