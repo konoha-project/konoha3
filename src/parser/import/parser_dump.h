@@ -101,7 +101,7 @@ static void dumpTokenArray(KonohaContext *kctx, int nest, kArray *a, int s, int 
 	}
 }
 
-static void dumpNode(KonohaContext *kctx, int n, int nest, kNode *expr)
+static void dumpExpr(KonohaContext *kctx, int n, int nest, kNode *expr)
 {
 	DBG_ASSERT(IS_Node(expr));
 	if(verbose_sugar) {
@@ -125,7 +125,7 @@ static void dumpNode(KonohaContext *kctx, int n, int nest, kNode *expr)
 				for(i=0; i < kArray_size(expr->NodeList); i++) {
 					kObject *o = expr->NodeList->ObjectItems[i];
 					if(IS_Node(o)) {
-						dumpNode(kctx, i, nest+1, (kNode *)o);
+						dumpExpr(kctx, i, nest+1, (kNode *)o);
 					}
 					else {
 						dumpIndent(kctx, nest+1);

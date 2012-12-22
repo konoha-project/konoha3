@@ -178,7 +178,6 @@ static kNode* ParseNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int
 	return node;
 }
 
-
 static kNode* ParseNewNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int *beginIdx, int endIdx, int option, const char *hintBeforeText)
 {
 	kNode *node = new_UntypedNode(kctx, OnGcStack, ns);
@@ -200,14 +199,14 @@ static kNode *AddParamNode(KonohaContext *kctx, kNameSpace *ns, kNode *node, kAr
 		kToken *tk = tokenList->TokenItems[i];
 		if(tk->resolvedSyntaxInfo->keyword == KSymbol_COMMA) {
 			if(start < i || hintBeforeText != NULL) {
-				kNode_Add(kctx, node, ParseNewNode(kctx, ns, tokenList, &start, i, ParseExpressionOption, hintBeforeText));
+				kNode_AddNode(kctx, node, ParseNewNode(kctx, ns, tokenList, &start, i, ParseExpressionOption, hintBeforeText));
 				if(hintBeforeText != NULL) hintBeforeText = ",";
 			}
 			start = i + 1;
 		}
 	}
 	if(start < i || hintBeforeText != NULL) {
-		kNode_Add(kctx, node, ParseNewNode(kctx, ns, tokenList, &start, i, ParseExpressionOption, hintBeforeText));
+		kNode_AddNode(kctx, node, ParseNewNode(kctx, ns, tokenList, &start, i, ParseExpressionOption, hintBeforeText));
 	}
 	return node;
 }
@@ -1112,43 +1111,43 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 //	}
 //	return -1;
 //}
-
-static int KTokenSeq_SkipStatementSeparator(KTokenSeq *tokens, int currentIdx)
-{
-	for(; currentIdx < tokens->endIdx; currentIdx++) {
-		kToken *tk = tokens->tokenList->TokenItems[currentIdx];
-		if(!kToken_Is(StatementSeparator, tk)) {
-			break;
-		}
-	}
-	tokens->beginIdx = currentIdx;
-	return currentIdx;
-}
-
-static int KTokenSeq_SkipAnnotation(KonohaContext *kctx, KTokenSeq *tokens, int currentIdx)
-{
-	int count = 0;
-	for(; currentIdx < tokens->endIdx; currentIdx++) {
-		kToken *tk = tokens->tokenList->TokenItems[currentIdx];
-		if(kToken_IsIndent(tk)) continue;
-		if(KSymbol_IsAnnotation(tk->resolvedSymbol)) {
-			count++;
-			if(currentIdx + 1 < tokens->endIdx) {
-				kToken *nextToken = tokens->tokenList->TokenItems[currentIdx+1];
-				if(nextToken->resolvedSyntaxInfo != NULL && nextToken->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {
-					currentIdx++;
-				}
-			}
-			continue;
-		}
-		if(kToken_Is(StatementSeparator, tk)) {
-			tokens->beginIdx = currentIdx+1;
-			continue;
-		}
-		break;
-	}
-	return currentIdx;
-}
+//
+//static int KTokenSeq_SkipStatementSeparator(KTokenSeq *tokens, int currentIdx)
+//{
+//	for(; currentIdx < tokens->endIdx; currentIdx++) {
+//		kToken *tk = tokens->tokenList->TokenItems[currentIdx];
+//		if(!kToken_Is(StatementSeparator, tk)) {
+//			break;
+//		}
+//	}
+//	tokens->beginIdx = currentIdx;
+//	return currentIdx;
+//}
+//
+//static int KTokenSeq_SkipAnnotation(KonohaContext *kctx, KTokenSeq *tokens, int currentIdx)
+//{
+//	int count = 0;
+//	for(; currentIdx < tokens->endIdx; currentIdx++) {
+//		kToken *tk = tokens->tokenList->TokenItems[currentIdx];
+//		if(kToken_IsIndent(tk)) continue;
+//		if(KSymbol_IsAnnotation(tk->resolvedSymbol)) {
+//			count++;
+//			if(currentIdx + 1 < tokens->endIdx) {
+//				kToken *nextToken = tokens->tokenList->TokenItems[currentIdx+1];
+//				if(nextToken->resolvedSyntaxInfo != NULL && nextToken->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {
+//					currentIdx++;
+//				}
+//			}
+//			continue;
+//		}
+//		if(kToken_Is(StatementSeparator, tk)) {
+//			tokens->beginIdx = currentIdx+1;
+//			continue;
+//		}
+//		break;
+//	}
+//	return currentIdx;
+//}
 
 //static int kNode_AddAnnotation(KonohaContext *kctx, kNodeVar *stmt, KTokenSeq *range, int currentIdx, int *indentRef)
 //{

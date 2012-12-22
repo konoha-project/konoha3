@@ -261,16 +261,6 @@ struct Tokenizer {
 typedef const struct KSyntaxVar   KSyntax;
 typedef struct KSyntaxVar         KSyntaxVar;
 
-//typedef enum {
-//	SugarFunc_TokenFunc         = 0,
-//	KSugarParseFunc      = 1,
-//	KSugarParseFunc        = 2,
-//	SugarFunc_TopLevelStatement = 3,
-//	SugarFunc_Statement         = 4,
-//	KSugarTypeCheckFunc         = 5,
-//	SugarFunc_SIZE              = 6
-//} SugerFunc;
-
 typedef enum {
 	SugarFunc_TokenFunc         = 0,
 	KSugarParseFunc             = 1,
@@ -307,14 +297,6 @@ struct KSyntaxVar {
 	kshort_t macroParamSize;
 	kArray                            *macroDataNULL;
 };
-
-//#define PatternMatch_(NAME)       .PatternMatch   = PatternMatch_##NAME
-//#define Expression_(NAME)         .Expression      = Expression_##NAME
-//#define TopLevelStatement_(NAME)  .TopLevelStatement = Statement_##NAME
-//#define Statement_(NAME)          .Statement    = Statement_##NAME
-//#define TypeCheck_(NAME)          .TypeCheck    = TypeCheck_##NAME
-
-//#define _OPLeft   .flag = (SYNFLAG_NodeLeftJoinOp2)
 
 // operator prcedence
 
@@ -422,7 +404,6 @@ typedef struct KTokenSeq {
 	};
 } KTokenSeq;
 
-
 #define KTokenSeq_Push(kctx, tokens) \
 	size_t _PopCheckIdx = kArray_size(tokens.tokenList);\
 	tokens.beginIdx      = kArray_size(tokens.tokenList);\
@@ -469,6 +450,9 @@ typedef enum {
 	KNodeList(DEFINE_KNode)
 } KNode_;
 
+#define kNode_IsConstValue(o)     (KNode_Const <= (o)->node && (o)->node <= KNode_UnboxConst)
+#define kNode_IsValue(o)          (KNode_Const <= (o)->node && (o)->node <= KNode_Field)
+
 struct kNodeVar {
 	kObjectHeader h;
 	union {
@@ -480,8 +464,9 @@ struct kNodeVar {
 		kToken        *TermToken;            // Term
 	};
 	union {
-		kArray        *NodeList;      // Node
+		kArray        *NodeList;       // Node
 		kNameSpace    *StmtNameSpace;  // Statement
+		struct kNodeVar *NodeToPush;   // KNode_Push
 	};
 	union {
 		KSyntax       *syn;  /* untyped */
@@ -521,8 +506,6 @@ static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeTy
 }
 
 #define kNode_IsTerm(N)           IS_Token((N)->TermToken)
-
-#define kNode_IsConstValue(o)     (KNode_Const <= (o)->node && (o)->node <= KNode_UnboxConst)
 
 #define kNodeFlag_StackIndex         kObjectFlag_Local1
 #define kNodeFlag_ObjectConst        kObjectFlag_Local2
@@ -653,27 +636,27 @@ typedef struct {
 	kNode*       (*kNode_Termnize)(KonohaContext *, kNode *, kToken *);
 	kNodeVar*    (*new_UntypedOperatorNode)(KonohaContext *, KSyntax *syn, int n, ...);
 	kNode*       (*kNode_ParseOperatorNode)(KonohaContext *, kNode *, KSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
-	kNode*       (*ParseNewNode)(KonohaContext *, kNameSpace *, kArray *tokenList, int s, int e, int option, const char *hintBeforeText);
+	kNode*       (*ParseNewNode)(KonohaContext *, kNameSpace *, kArray *tokenList, int* s, int e, int option, const char *hintBeforeText);
 	kNode*       (*AddParamNode)(KonohaContext *, kNameSpace *, kNode *, kArray *tokenList, int, int, const char *hintBeforeText);
 	kNode*       (*kNode_RightJoinNode)(KonohaContext *, kNode *, kNode *, kArray *, int, int);
 
 	kNode*       (*kNode_SetConstValue)(KonohaContext *, kNodeVar *, KClass *, kObject *o);
 	kNode*       (*kNode_SetUnboxConstValue)(KonohaContext *, kNodeVar *, ktypeattr_t, uintptr_t unboxValue);
 	kNode*       (*kNode_SetVariable)(KonohaContext *, kNodeVar *, kGamma *, knode_t build, ktypeattr_t, intptr_t index);
-	kNode *      (*new_TypedCallNode)(KonohaContext *, kNode *, kGamma *, KClass *, kMethod *mtd, int n, ...);
+	kNode*      (*new_TypedCallNode)(KonohaContext *, kNode *, kGamma *, KClass *, kMethod *mtd, int n, ...);
 
-	kbool_t     (*TypeCheckBlock)(KonohaContext *, kNode *, kGamma *);
+	kNode*      (*TypeCheckBlock)(KonohaContext *, kNode *, kGamma *, KClass *);
 	kbool_t     (*kNode_TypeCheckByName)(KonohaContext *, kNode*, ksymbol_t, kGamma *, KClass *, int);
 	kNode*      (*kNode_TypeCheckNodeAt)(KonohaContext *, kNode *, kNode *, size_t, kGamma *, KClass *, int);
 	kNode *     (*TypeCheckCallParam)(KonohaContext *, kNode *, kNodeVar *, kMethod *, kGamma *, KClass *);
 	int         (*kGamma_AddLocalVariable)(KonohaContext *, kGamma *, ktypeattr_t, ksymbol_t);
-	kbool_t     (*kNode_DeclType)(KonohaContext *, kNode *, kGamma *, ktypeattr_t, kNode *, kObject *, KTypeDeclFunc, kNode **);
+	kbool_t     (*kNode_DeclType)(KonohaContext *, kNode *, kGamma *, ktypeattr_t, kNode *, kObject *, KTypeDeclFunc);
 	kNode*      (*kNode_TypeCheckVariableNULL)(KonohaContext *, kNode *, kNodeVar *, kGamma *, KClass *);
 
 	void       (*kToken_ToError)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
 	kNode *    (*kNode_Message2)(KonohaContext *, kNode *, kToken *, kinfotag_t, const char *fmt, ...);
 
-	kbool_t (*VisitNode)(KonohaContext *, struct KBuilder *, kNode *block);
+	kbool_t (*VisitNode)(KonohaContext *, struct KBuilder *, kNode *node, void *thunk);
 //	kbool_t (*VisitNode)(KonohaContext *, struct KBuilder *, kNode *stmt);
 //	void    (*VisitNode)(KonohaContext *, struct KBuilder *, kNode *stmt, kNode *expr);
 
@@ -770,7 +753,7 @@ typedef enum {
 struct KBuilder;
 typedef struct KBuilder KBuilder;
 
-typedef kbool_t (*KNodeVisitFunc)(KonohaContext *kctx, KBuilder *builder, kNode *stmt);
+typedef kbool_t (*KNodeVisitFunc)(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk);
 //typedef void (*KNodeVisitFunc)(KonohaContext *kctx, KBuilder *builder, kNode *stmt, kNode *expr);
 
 struct KBuilderCommon {

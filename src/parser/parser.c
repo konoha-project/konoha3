@@ -234,7 +234,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 //	mod->kNode_Termnize               = kNode_Termnize;
 	mod->new_UntypedOperatorNode    = new_UntypedOperatorNode;
 //	mod->kNode_ParseOperatorNode    = kNode_ParseOperatorNode;
-	mod->ParseNewNode                  = ParseNewNode;
+	mod->ParseNewNode               = ParseNewNode;
 	mod->AddParamNode               = AddParamNode;
 	mod->kNode_RightJoinNode        = kNode_RightJoinNode;
 	mod->kToken_ToError        = kToken_ToError;
@@ -245,7 +245,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 #ifndef USE_SMALLBUILD
 	mod->dumpToken      = dumpToken;
 	mod->dumpTokenArray = dumpTokenArray;
-	mod->dumpNode       = dumpNode;
+//	mod->dumpNode       = dumpNode;
 #endif
 
 	DefineDefaultSyntax(kctx, KNULL(NameSpace));

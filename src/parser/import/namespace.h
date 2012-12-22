@@ -347,7 +347,7 @@ static void SetKeyValue(KonohaContext *kctx, KKeyValue *kv, ksymbol_t key, ktype
 	}
 }
 
-static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t key, ktypeattr_t ty, uintptr_t unboxValue)
+static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t key, ktypeattr_t ty, uintptr_t unboxValue, int isOverride, KTraceInfo *trace)
 {
 	KKeyValue kvs;
 	SetKeyValue(kctx, &kvs, key, ty, unboxValue);
@@ -1015,7 +1015,7 @@ static kbool_t kNameSpace_ImportAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 			}
 		}
 		// record imported
-		return kNameSpace_SetConstData(kctx, ns, packageNS->packageId | KSymbolAttr_Pattern, KType_int, packageNS->packageId);
+		return kNameSpace_SetConstData(kctx, ns, packageNS->packageId | KSymbolAttr_Pattern, KType_int, packageNS->packageId, 0, trace);
 	}
 	return false;
 }

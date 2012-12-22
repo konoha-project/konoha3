@@ -37,10 +37,9 @@ static kNode *CallTypeCheckFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kGa
 	return (kNode *)lsfp[K_RTNIDX].asObject;
 }
 
-static kNode *TypeCheck(KonohaContext *kctx, kNode *stmt, kNode *expr, kGamma *gma, KClass* reqtc)
+static kNode *TypeCheck(KonohaContext *kctx, KSyntax *syn, kNode *expr, kGamma *gma, KClass* reqtc)
 {
 	int callCount = 0;
-	KSyntax *syn = expr->syn;
 	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, KSymbol_Fmt2(syn->keyword));
 	kObject *reqType = KLIB Knull(kctx, reqtc);
 	while(true) {
@@ -129,7 +128,7 @@ static kNode *kNode_TypeCheck(KonohaContext *kctx, kNode *stmt, kNode *expr, kGa
 		if(!IS_Node(expr)) {
 			expr = new_ConstValueNode(kctx, NULL, UPCAST(expr));
 		}
-		texpr = TypeCheck(kctx, stmt, expr, gma, reqClass);
+		texpr = TypeCheck(kctx, expr->syn, expr, gma, reqClass);
 		if(kNode_IsERR(stmt)) texpr = K_NULLNODE;
 	}
 	if(texpr != K_NULLNODE) {
@@ -241,7 +240,7 @@ static kNode* TypeCheckNodeList(KonohaContext *kctx, kArray *nodeList, size_t n,
 	kNode *stmt = nodeList->NodeItems[n];
 	if(stmt->node == KNode_Done) return stmt;
 	if(!kNode_IsERR(stmt)) {
-		stmt = TypeCheck(kctx, stmt, stmt, gma, reqc);
+		stmt = TypeCheck(kctx, stmt->syn, stmt, gma, reqc);
 		KFieldSet(nodeList, nodeList->NodeItems[n], stmt);
 	}
 	return stmt;
@@ -367,7 +366,8 @@ static kNode* kNode_CheckReturnType(KonohaContext *kctx, kNode *node)
 {
 	if(node->attrTypeId != KType_void) {
 		kNode *stmt = new_TypedNode(kctx, kNode_ns(node), KNode_Return, KType_void, 0);
-		kNode_AddParsedObject(kctx, stmt, KSymbol_ExprPattern, node);
+		kNode_AddParsedObject(kctx, stmt, KSymbol_ExprPattern, UPCAST(node));
+		DBG_ASSERT(stmt->stacktop == 0);
 		return stmt;
 	}
 	return node;
@@ -482,8 +482,8 @@ static kstatus_t kNode_Eval(KonohaContext *kctx, kNode *stmt, kMethod *mtd, KTra
 	newgma.localScope.allocsize = 0;
 
 	KPushGammaStack(gma, &newgma);
-	kGamma_InitIt(kctx, &newgma, kMethod_GetParam(mtd));
-	stmt = TypeCheck(kctx, stmt, stmt, gma, KClass_void);
+//	kGamma_InitIt(kctx, &newgma, kMethod_GetParam(mtd));
+	stmt = TypeCheck(kctx, stmt->syn, stmt, gma, KClass_void);
 	KPopGammaStack(gma, &newgma);
 //	if(kNode_IsERR(stmt)) {
 //		return K_BREAK;

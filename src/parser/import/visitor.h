@@ -22,21 +22,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#define DefineVisitCase(NAME)  case KNode_##NAME:   ret = cbuilder->api->visit##NAME##Node(kctx, builder, node); break;
+#define DefineVisitCase(NAME)  case KNode_##NAME:   ret = cbuilder->api->visit##NAME##Node(kctx, builder, node, thunk); break;
 
-static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *node)
+static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
 	kbool_t ret = false;
 	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
-	int a = cbuilder->a;
-	int espidx = cbuilder->espidx;
-	int shift = cbuilder->shift;
 	switch(node->node) {
 		KNodeList(DefineVisitCase)
 	}
-	cbuilder->a = a;
-	cbuilder->espidx = espidx;
-	cbuilder->shift = shift;
 	return ret;
 }
 

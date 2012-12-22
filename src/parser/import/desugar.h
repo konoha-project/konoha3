@@ -167,15 +167,15 @@ static KMETHOD PatternMatch_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD Expression_ParsedNode(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
-	if(beginIdx == operatorIdx) {
-		kToken *tk = tokenList->TokenItems[operatorIdx];
-		DBG_ASSERT(IS_Node(tk->parsedNode));
-		KReturn(tk->parsedNode);
-	}
-}
+//static KMETHOD Expression_ParsedNode(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+//	if(beginIdx == operatorIdx) {
+//		kToken *tk = tokenList->TokenItems[operatorIdx];
+//		DBG_ASSERT(IS_Node(tk->parsedNode));
+//		KReturn(tk->parsedNode);
+//	}
+//}
 
 static KMETHOD Expression_Term(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -695,7 +695,7 @@ static kNode* TypeCheckDynamicCallParams(KonohaContext *kctx, kNode *stmt, kNode
 		kNode *texpr = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, i, gma, ptype, 0);
 		if(texpr == K_NULLNODE) return texpr;
 	}
-	kNode_Add(kctx, expr, new_ConstValueNode(kctx, NULL, UPCAST(name)));
+	kNode_AddNode(kctx, expr, new_ConstValueNode(kctx, NULL, UPCAST(name)));
 	return TypeMethodCallNode(kctx, expr, mtd, reqClass);
 }
 
@@ -1098,7 +1098,7 @@ static kParam *kNode_newMethodParamNULL(KonohaContext *kctx, kNode *stmt, kGamma
 	kParam *pa = (kParam *)kNode_GetObjectNULL(kctx, stmt, KSymbol_ParamPattern);
 	if(pa == NULL || !IS_Param(pa)) {
 		KSyntax *syn = KSyntax_(kNode_ns(stmt), KSymbol_ParamPattern);
-		if(!KSyntax_TypeCheckNode(kctx, syn, stmt, gma)) {
+		if(!TypeCheck(kctx, syn, stmt, gma, KClass_void)) {
 			return NULL;
 		}
 	}
