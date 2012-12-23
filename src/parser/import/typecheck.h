@@ -26,7 +26,6 @@ static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kGamma *
 {
 	INIT_GCSTACK();
 	BEGIN_UnusedStack(lsfp);
-//	KUnsafeFieldSet(lsfp[0].asNameSpace, kNode_ns(stmt));
 	KUnsafeFieldSet(lsfp[1].asNode, expr);
 	KUnsafeFieldSet(lsfp[2].asGamma, gma);
 	KUnsafeFieldSet(lsfp[3].asObject, reqType);
@@ -74,12 +73,12 @@ static void PutConstNode(KonohaContext *kctx, kNode *expr, KonohaStack *sfp)
 		sfp[0].unboxValue = expr->unboxConstValue;
 	} else if(expr->node == KNode_New) {
 		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->attrTypeId), 0));
-	} else if(expr->node == KNode_MethodCall) {   /* case Object Object.boxing(UnboxType Val) */
-		kMethod *mtd = expr->NodeList->MethodItems[0];
-		kNode *texpr = expr->NodeList->NodeItems[1];
-		assert(mtd->mn == MN_box && kArray_size(expr->NodeList) == 2);
-		assert(KType_Is(UnboxType, expr->attrTypeId) == true);
-		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->attrTypeId), texpr->unboxConstValue));
+//	} else if(expr->node == KNode_MethodCall) {   /* case Object Object.boxing(UnboxType Val) */
+//		kMethod *mtd = expr->NodeList->MethodItems[0];
+//		kNode *texpr = expr->NodeList->NodeItems[1];
+//		assert(mtd->mn == MN_box && kArray_size(expr->NodeList) == 2);
+//		assert(KType_Is(UnboxType, expr->attrTypeId) == true);
+//		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->attrTypeId), texpr->unboxConstValue));
 	} else {
 		assert(expr->node == KNode_Null);
 		KUnsafeFieldSet(sfp[0].asObject, KLIB Knull(kctx, KClass_(expr->attrTypeId)));
@@ -145,6 +144,8 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClas
 		return expr;
 	}
 	if(KClass_Is(TypeVar, typedClass)) {
+		DBG_P("typedClass=%s", KClass_text(typedClass));
+		DBG_ASSERT(kctx == NULL);
 		return SUGAR MessageNode(kctx, expr, NULL, gma, ErrTag, "not type variable %s", KClass_text(typedClass));
 	}
 	if(reqClass->typeId == KType_var || typedClass == reqClass || FLAG_is(pol, TypeCheckPolicy_NoCheck)) {

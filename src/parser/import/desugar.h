@@ -185,6 +185,15 @@ static KMETHOD PatternMatch_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 //	}
 //}
 
+static KMETHOD Parse_Pattern(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_Parse(node, name, tokenList, beginIdx, operatorIdx, endIdx);
+	if(beginIdx == operatorIdx) {
+		KReturnUnboxValue(ParseSyntaxPattern(kctx, kNode_ns(node), node, node->syn, tokenList, beginIdx, endIdx));
+	}
+	KReturnUnboxValue(-1);
+}
+
 static KMETHOD Expression_Term(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(node, tokenList, beginIdx, operatorIdx, endIdx);
@@ -1229,6 +1238,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	kFunc *TermFunc = KSugarFunc(ns, Expression_Term);
 	kFunc *OperatorFunc = KSugarFunc(ns, Expression_Operator);
 	kFunc *MethodCallFunc = KSugarFunc(ns, TypeCheck_MethodCall);
+	kFunc *patternParseFunc = KSugarFunc(ns, Parse_Pattern);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ PATTERN(Indent)},
 //		{ PATTERN(Symbol),  0, 0, 0, PatternMatch_MethodName, Expression_Term, NULL, NULL, TypeCheck_Symbol,},
@@ -1260,8 +1270,8 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(COLON), 0, Precedence_CStyleTRINARY, },  // colon
 		{ TOKEN(COMMA), SYNFLAG_CFunc, Precedence_CStyleCOMMA, 0, {SUGARFUNC Expression_COMMA}, {NULL}},
 //		{ TOKEN(DOLLAR),  0, 0, 0, NULL, Expression_DOLLAR, },
-		{ TOKEN(true),    SYNFLAG_CFunc, 0, 0, {NULL}, {SUGARFUNC TypeCheck_true}, },
-		{ TOKEN(false),   SYNFLAG_CFunc, 0, 0, {NULL}, {SUGARFUNC TypeCheck_false}, },
+		{ TOKEN(true),    SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_true}, },
+		{ TOKEN(false),   SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_false}, },
 //		{ PATTERN(Expr),  0, "$Expr", 0, 0, PatternMatch_Expression, Expression_ParsedNode, Statement_Expression, Statement_Expression, NULL, },
 		{ PATTERN(Expr),  SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_Expression}, {NULL}, },
 		{ PATTERN(Type),  SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_Type}, {SUGARFUNC TypeCheck_Type}, },
@@ -1270,14 +1280,15 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 //		{ TOKEN(return), SYNFLAG_NodeBreakExec, "\"return\" [$Node]", 0, 0, NULL, NULL, NULL, Statement_return, NULL, },
 		{ PATTERN(TypeDecl),   SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_TypeDecl}, {SUGARFUNC Statement_TypeDecl}},
 		{ PATTERN(MethodDecl), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_MethodDecl}, {SUGARFUNC Statement_MethodDecl}},
-		{ TOKEN(if),           SYNFLAG_CFunc, 0, Precedence_Statement, {NULL}, {SUGARFUNC Statement_if}},
-		{ TOKEN(return), SYNFLAG_CFunc|SYNFLAG_NodeBreakExec, 0, Precedence_Statement, {NULL}, {SUGARFUNC Statement_return} },
+		{ TOKEN(if),           SYNFLAG_CTypeFunc, 0, Precedence_Statement, {patternParseFunc}, {SUGARFUNC Statement_if}},
+		{ TOKEN(return), SYNFLAG_CTypeFunc|SYNFLAG_NodeBreakExec, 0, Precedence_Statement, {patternParseFunc}, {SUGARFUNC Statement_return} },
 		{ TOKEN(new), SYNFLAG_CFunc, 0, Precedence_CStyleCALL, {SUGARFUNC Expression_new}, },
 		{ KSymbol_END, },
 	};
 	kNameSpace_DefineSyntax(kctx, ns, SYNTAX, NULL);
-	KPARSERM->termParseFunc = TermFunc;
-	KPARSERM->opParseFunc = OperatorFunc;
+	KPARSERM->termParseFunc     = TermFunc;
+	KPARSERM->opParseFunc       = OperatorFunc;
+	KPARSERM->patternParseFunc  = patternParseFunc;
 	KPARSERM->callTypeCheckFunc = MethodCallFunc;
 	// Syntax Rule
 //	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(Expr), "$Expr", 0, NULL);
