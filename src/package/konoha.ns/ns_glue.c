@@ -166,7 +166,7 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	sugarContext->isNodeedErrorMessage = popIsNodeingErrorMessage;
-	KReturn(SUGAR kNode_SetUnboxConstValue(kctx, expr, KType_boolean, isDefined));
+	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_boolean, isDefined));
 }
 
 static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)

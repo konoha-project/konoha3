@@ -78,7 +78,7 @@ static kNode* TypeDeclAndMakeSetter(KonohaContext *kctx, kNode *stmt, kGamma *gm
 	kNameSpace *ns = kNode_ns(stmt);
 	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termNode->TermToken->resolvedSymbol);
 	if(mtd != NULL) {
-		kNode *recvNode =  new_ConstValueNode(kctx, NULL, scr);
+		kNode *recvNode =  new_ConstNode(kctx, ns, NULL, scr);
 		return SUGAR new_MethodNode(kctx, ns, gma, KClass_void, mtd, 2, recvNode, valueNode);
 	}
 	return NULL;

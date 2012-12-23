@@ -809,9 +809,9 @@ static KMETHOD Node_SetConstValue(KonohaContext *kctx, KonohaStack *sfp)
 	kNodeVar *expr = (kNodeVar *) sfp[0].asNode;
 	KClass *ct = kObject_class(sfp[1].asObject);
 	if(KClass_Is(UnboxType, (ct)) {
-		KReturn(SUGAR kNode_SetUnboxConstValue(kctx, expr, ct->typeId, sfp[1].unboxValue));
+		KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, ct->typeId, sfp[1].unboxValue));
 	}
-	KReturn(SUGAR kNode_SetConstValue(kctx, expr, ct, sfp[1].asObject));
+	KReturn(SUGAR kNode_SetConst(kctx, expr, ct, sfp[1].asObject));
 }
 
 //## Node Node.setVariable(Gamma gma, int build, cid typeid, int index);
@@ -822,7 +822,7 @@ static KMETHOD Node_SetVariable(KonohaContext *kctx, KonohaStack *sfp)
 	knode_t build  = (knode_t)sfp[2].intValue;
 	ktypeattr_t cid    = (ktypeattr_t)sfp[3].intValue;
 	intptr_t index = sfp[4].unboxValue;
-	KReturn(SUGAR kNode_SetVariable(kctx, expr, gma, build, cid, index));
+	KReturn(SUGAR kNode_SetVariable(kctx, expr, build, cid, index));
 }
 
 //## Node Node.new(Gamma gma, int build, cid typeid, int index);
@@ -840,9 +840,9 @@ static KMETHOD Node_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KClass *ct = kObject_class(sfp[1].asObject);
 	if(KClass_Is(UnboxType, (ct)) {
-		KReturn(new_UnboxConstValueNode(kctx, ct->typeId, sfp[1].unboxValue));
+		KReturn(new_UnboxConstNode(kctx, ns, ct->typeId, sfp[1].unboxValue));
 	}
-	KReturn(new_ConstValueNode(kctx, ct, sfp[1].asObject));
+	KReturn(new_ConstNode(kctx, ns, ct, sfp[1].asObject));
 }
 
 //## void Node.setType(int build, cid typeid);

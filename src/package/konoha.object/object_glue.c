@@ -82,15 +82,14 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 		KClass *selfClass = KClass_(selfNode->attrTypeId), *targetClass = KClass_(targetNode->attrTypeId);
 		if(KClass_Is(Final, selfClass)) {
 			kbool_t staticSubType = (selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
-			KReturn(SUGAR kNode_SetUnboxConstValue(kctx, expr, KType_boolean, staticSubType));
+			KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_boolean, staticSubType));
 		}
 		kNameSpace *ns = kNode_ns(stmt);
 		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, KKMethodName_("<:"), 1, KMethodMatch_NoOption);
 		DBG_ASSERT(mtd != NULL);
-		kNode *classValue = SUGAR kNode_SetConstValue(kctx, expr->NodeList->NodeVarItems[2], NULL, KLIB Knull(kctx, targetClass));
-		KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], mtd);
+		kNode *classValue = SUGAR kNode_SetConst(kctx, expr->NodeList->NodeVarItems[2], NULL, KLIB Knull(kctx, targetClass));
 		KFieldSet(expr->NodeList, expr->NodeList->NodeItems[2], classValue);
-		KReturn(SUGAR TypeCheckMethodParam(kctx, expr, gma, KClass_Boolean));
+		KReturn(SUGAR TypeCheckMethodParam(kctx, mtd, expr, gma, KClass_Boolean));
 	}
 }
 
@@ -107,9 +106,8 @@ static KMETHOD TypeCheck_as(KonohaContext *kctx, KonohaStack *sfp)
 		if(selfClass->isSubType(kctx, targetClass, selfClass)) {
 			kNameSpace *ns = kNode_ns(stmt);
 			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, KKMethodName_("as"), 0, KMethodMatch_CamelStyle);
-			KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], mtd);
 			DBG_ASSERT(mtd != NULL);
-			KReturn(SUGAR TypeCheckMethodParam(kctx, expr, gma, targetClass));
+			KReturn(SUGAR TypeCheckMethodParam(kctx, mtd, expr, gma, targetClass));
 		}
 		KReturn(kNodeNode_Message(kctx, stmt, selfNode, ErrTag, "unable to downcast: %s as %s", KType_text(selfNode->attrTypeId), KType_text(targetNode->attrTypeId)));
 	}
@@ -135,8 +133,7 @@ static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 				KReturn(kNodeNode_Message(kctx, stmt, selfNode, ErrTag, "undefined coercion: %s to %s", KClass_text(selfClass), KClass_text(targetClass)));
 			}
 		}
-		KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], mtd);
-		KReturn(SUGAR TypeCheckMethodParam(kctx, expr, gma, targetClass));
+		KReturn(SUGAR TypeCheckMethodParam(kctx, mtd, expr, gma, targetClass));
 	}
 }
 
@@ -178,7 +175,7 @@ static kbool_t object_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 KDEFINE_PACKAGE* object_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "konoha", "1.0");
+	KSetPackageName(d, "konoha", K_VERSION);
 	d.PackupNameSpace    = object_PackupNameSpace;
 	d.ExportNameSpace   = object_ExportNameSpace;
 	return &d;

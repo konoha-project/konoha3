@@ -309,7 +309,7 @@ static KMETHOD TypeCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck2(stmt, expr, gma, reqc);
 	kToken *tk = expr->TermToken;
 	sfp[4].floatValue = strtod(kString_text(tk->text), NULL);   // just using tramsformation float
-	KReturn(SUGAR kNode_SetUnboxConstValue(kctx, expr, KType_float, sfp[4].unboxValue));
+	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_float, sfp[4].unboxValue));
 }
 
 static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
@@ -349,7 +349,7 @@ static kbool_t float_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 KDEFINE_PACKAGE* float_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "float", "1.0");
+	KSetPackageName(d, "konoha", K_VERSION);
 	d.PackupNameSpace    = float_PackupNameSpace;
 	d.ExportNameSpace   = float_ExportNameSpace;
 	return &d;

@@ -104,9 +104,9 @@ static kNode* MakeNodeConst(KonohaContext *kctx, kNode *expr, KClass *rtype)
 	KStackCall(lsfp);
 	END_UnusedStack();
 	if(KClass_Is(UnboxType, rtype) /* || rtype->typeId == KType_void*/) {
-		return SUGAR kNode_SetUnboxConstValue(kctx, expr, rtype->typeId, lsfp[K_RTNIDX].unboxValue);
+		return SUGAR kNode_SetUnboxConst(kctx, expr, rtype->typeId, lsfp[K_RTNIDX].unboxValue);
 	}
-	return SUGAR kNode_SetConstValue(kctx, expr, NULL, lsfp[K_RTNIDX].asObject);
+	return SUGAR kNode_SetConst(kctx, expr, NULL, lsfp[K_RTNIDX].asObject);
 }
 
 static kNode *BoxNode(KonohaContext *kctx, kNode *node, kGamma *gma, KClass* reqClass)
@@ -128,7 +128,7 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClas
 	kNameSpace *ns = kNode_ns(expr);
 	if(KTypeAttr_Unmask(expr->attrTypeId) == KType_var) {
 //		if(!IS_Node(expr)) {
-//			expr = new_ConstValueNode(kctx, NULL, UPCAST(expr));
+//			expr = new_ConstNode(kctx, ns, NULL, UPCAST(expr));
 //		}
 		expr = TypeNode(kctx, expr->syn, expr, gma, reqClass);
 		if(!kNode_IsValue(expr)) {
@@ -203,47 +203,6 @@ static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t sy
 }
 
 /* ------------------------------------------------------------------------ */
-
-//static kbool_t CallStatementFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kNode *stmt, kGamma *gma)
-//{
-//	BEGIN_UnusedStack(lsfp);
-//	KUnsafeFieldSet(lsfp[0].asNameSpace, kNode_ns(stmt));
-//	KUnsafeFieldSet(lsfp[1].asNode,  stmt);
-//	KUnsafeFieldSet(lsfp[2].asGamma, gma);
-//	countRef[0] += 1;
-//	CallSugarMethod(kctx, lsfp, fo, 3, UPCAST(K_FALSE));
-//	END_UnusedStack();
-//	return lsfp[K_RTNIDX].boolValue;
-//}
-//
-//static kbool_t KSyntax_TypeCheckNode(KonohaContext *kctx, KSyntax *syn, kNode *stmt, kGamma *gma)
-//{
-//	int SugarFunc_index = Gamma_isTopLevel(gma) ? SugarFunc_TopLevelStatement : SugarFunc_Statement;
-//	int callCount = 0;
-//	while(true) {
-//		int index, size;
-//		kFunc **FuncItems = KSyntax_funcTable(kctx, syn, SugarFunc_index, &size);
-//		for(index = size - 1; index >= 0; index--) {
-//			CallStatementFunc(kctx, FuncItems[index], &callCount, stmt, gma);
-//			if(stmt->node == KNode_Done) return true;
-//			if(kNode_IsError(stmt)) return false;
-//			if(stmt->node != KNode_Done) {
-//				return true;
-//			}
-//		}
-//		if(syn->parentSyntaxNULL == NULL) break;
-//		syn = syn->parentSyntaxNULL;
-//	}
-//	if(callCount == 0) {
-//		const char *location = Gamma_isTopLevel(gma) ? "at the top level" : "inside the function";
-//		kNode_Message(kctx, stmt, ErrTag, "%s%s is not available %s", KWSTMT_t(stmt->syn->keyword), location);
-//		return false;
-//	}
-//	if(stmt->node != KNode_Error) {
-//		kNode_Message(kctx, stmt, ErrTag, "statement typecheck error: %s%s", KWSTMT_t(syn->keyword));
-//	}
-//	return false;
-//}
 
 static kNode* TypeCheckNodeList(KonohaContext *kctx, kArray *nodeList, size_t n, kGamma *gma, KClass *reqc)
 {

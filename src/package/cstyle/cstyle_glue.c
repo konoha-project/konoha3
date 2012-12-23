@@ -352,7 +352,7 @@
 //	kToken *tk = expr->TermToken;
 //	if(kString_size(tk->text) == 1) {
 //		int ch = kString_text(tk->text)[0];
-//		KReturn(SUGAR kNode_SetUnboxConstValue(kctx, expr, KType_int, ch));
+//		KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_int, ch));
 //	}
 //	else if(kString_size(tk->text) == 2) {
 //		int ch = kString_text(tk->text)[0];
@@ -369,7 +369,7 @@
 //			default:
 //				KReturn(K_NULLNODE);
 //			}
-//			KReturn(SUGAR kNode_SetUnboxConstValue(kctx, expr, KType_int, ch));
+//			KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_int, ch));
 //		}
 //	}
 //	KReturn(K_NULLNODE);
@@ -651,7 +651,7 @@
 //	VAR_TypeCheck2(stmt, expr, gma, reqc);
 //	kToken *tk = expr->TermToken;
 //	long long n = kstrtoll(kString_text(tk->text));
-//	KReturn(SUGAR kNode_SetUnboxConstValue(kctx, expr, KType_int, (uintptr_t)n));
+//	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_int, (uintptr_t)n));
 //}
 //
 //static kbool_t int_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
@@ -770,7 +770,7 @@
 //{
 //	VAR_TypeCheck2(stmt, expr, gma, reqc);
 //	if(reqty == KType_var) reqty = KType_Object;
-//	KReturn(SUGAR kNode_SetVariable(kctx, expr, gma, KNode_Null, reqty, 0));
+//	KReturn(SUGAR kNode_SetVariable(kctx, expr, KNode_Null, reqty, 0));
 //}
 //
 //static KMETHOD Expression_isNull(KonohaContext *kctx, KonohaStack *sfp)

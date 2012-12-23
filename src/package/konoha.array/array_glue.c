@@ -561,6 +561,7 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, gma, reqc);
+	kNameSpace *ns = kNode_ns(stmt);
 	// [0] currentToken, [1] NULL, [2] ....
 	size_t i;
 	KClass *requestClass = reqc;
@@ -577,10 +578,10 @@ static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	if(requestClass->baseTypeId != KType_Array) {
 		requestClass = (paramType->typeId == KType_var) ? KClass_Array : KClass_p0(kctx, KClass_Array, paramType->typeId);
 	}
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, kNode_ns(stmt), KClass_Array, KKMethodName_("[]"), -1, KMethodMatch_NoOption);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Array, KKMethodName_("[]"), -1, KMethodMatch_NoOption);
 	DBG_ASSERT(mtd != NULL);
 	KFieldSet(expr, expr->NodeList->MethodItems[0], mtd);
-	KFieldSet(expr, expr->NodeList->NodeItems[1], SUGAR kNode_SetVariable(kctx, NULL, gma, KNode_New, requestClass->typeId, kArray_size(expr->NodeList) - 2));
+	KFieldSet(expr, expr->NodeList->NodeItems[1], SUGAR kNode_SetVariable(kctx, KNewNode(ns), KNode_New, requestClass->typeId, kArray_size(expr->NodeList) - 2));
 	KReturn(kNode_Type(kctx, expr, KNode_MethodCall, requestClass->typeId));
 }
 

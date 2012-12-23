@@ -263,7 +263,7 @@ static kNode* new_UntypedNode(KonohaContext *kctx, kArray *gcstack, kNameSpace *
 
 static kNode* new_BlockNode(KonohaContext *kctx, kNameSpace *ns)
 {
-	kNode *unode = (kNode *)new_(Node, ns, OnGcStack);
+	kNode *unode = new_(Node, ns, OnGcStack);
 	KFieldSet(unode, unode->NodeList, new_(Array, 0, OnField));
 	return unode;
 }
@@ -391,7 +391,7 @@ static kNode* new_TypedNode(KonohaContext *kctx, kNameSpace *ns, int build, KCla
 	return (kNode *)node;
 }
 
-static kNode *TypeCheckMethodParam(KonohaContext *kctx, kNode *expr, kGamma *gma, KClass* reqc);
+static kNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kNode *expr, kGamma *gma, KClass* reqc);
 
 static kNode* new_MethodNode(KonohaContext *kctx, kNameSpace *ns, kGamma *gma, KClass *reqc, kMethod *mtd, int n, ...)
 {
@@ -402,12 +402,11 @@ static kNode* new_MethodNode(KonohaContext *kctx, kNameSpace *ns, kGamma *gma, K
 	expr = kNode_AddSeveral(kctx, expr, n, ap);
 	va_end(ap);
 	expr->node = KNode_MethodCall;
-	return TypeCheckMethodParam(kctx, expr, gma, reqc);
+	return TypeCheckMethodParam(kctx, mtd, expr, gma, reqc);
 }
 
-static kNode* kNode_SetConstValue(KonohaContext *kctx, kNodeVar *expr, KClass *typedClass, kObject *o)
+static kNode* kNode_SetConst(KonohaContext *kctx, kNode *expr, KClass *typedClass, kObject *o)
 {
-	expr = (expr == NULL) ? new_(NodeVar, 0, OnGcStack) : expr;
 	if(typedClass == NULL) typedClass = kObject_class(o);
 	expr->attrTypeId = typedClass->typeId;
 	if(KClass_Is(UnboxType, typedClass)) {
@@ -419,29 +418,25 @@ static kNode* kNode_SetConstValue(KonohaContext *kctx, kNodeVar *expr, KClass *t
 		KFieldInit(expr, expr->ObjectConstValue, o);
 		kNode_Set(ObjectConst, expr, true);
 	}
-	return (kNode *)expr;
+	return expr;
 }
 
-static kNode* kNode_SetUnboxConstValue(KonohaContext *kctx, kNodeVar *expr, ktypeattr_t attrTypeId, uintptr_t unboxValue)
+static kNode* kNode_SetUnboxConst(KonohaContext *kctx, kNode *expr, ktypeattr_t attrTypeId, uintptr_t unboxValue)
 {
-	expr = (expr == NULL) ? new_(NodeVar, 0, OnGcStack) : (kNodeVar *)expr;
 	expr->node = KNode_UnboxConst;
 	expr->unboxConstValue = unboxValue;
 	expr->attrTypeId = attrTypeId;
-	return (kNode *)expr;
+	kNode_Set(ObjectConst, expr, false);
+	return expr;
 }
 
-static kNode* kNode_SetVariable(KonohaContext *kctx, kNodeVar *expr, kGamma *gma, knode_t build, ktypeattr_t attrTypeId, intptr_t index)
+static kNode* kNode_SetVariable(KonohaContext *kctx, kNode *expr, knode_t build, ktypeattr_t attrTypeId, intptr_t index)
 {
-	expr = (expr == NULL) ? new_(NodeVar, 0, OnGcStack) : (kNodeVar *)expr;
 	expr->node = build;
 	expr->attrTypeId = attrTypeId;
 	expr->index = index;
-//	if(build == KNode_Local && gma->genv->blockScopeShiftSize > 0 && index >= gma->genv->blockScopeShiftSize) {
-//		expr->node = KNode_STACKTOP;
-//		expr->index -= gma->genv->blockScopeShiftSize;
-//	}
-	return (kNode *)expr;
+	kNode_Set(ObjectConst, expr, false);
+	return expr;
 }
 
 static uintptr_t kNode_ParseFlag(KonohaContext *kctx, kNode *stmt, KFlagSymbolData *flagData, uintptr_t flag)

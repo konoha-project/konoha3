@@ -29,13 +29,13 @@
 //extern "C"{
 //#endif
 //
-//#define makeStringConstValue(kctx, text) new_ConstValueNode(kctx, KClass_String, UPCAST(text))
+//#define makeStringConstValue(kctx, text) new_ConstNode(kctx, ns, KClass_String, UPCAST(text))
 //
 //static kNode *CreateImportCall(KonohaContext *kctx, KSyntaxVar *syn, kToken *tkImport, kNameSpace *ns, kString *pkgname)
 //{
 //	kNode *ePKG = makeStringConstValue(kctx, pkgname);
 //	kNode *expr = SUGAR new_UntypedOperatorNode(kctx, syn, 3,
-//			tkImport, new_ConstValueNode(kctx, kObject_class(ns), UPCAST(ns)), ePKG);
+//			tkImport, new_ConstNode(kctx, ns, kObject_class(ns), UPCAST(ns)), ePKG);
 //	return expr;
 //}
 //
@@ -63,14 +63,14 @@
 //			/* case : import("konoha.import"); */
 //			kNode *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
 //			expr = SUGAR new_UntypedOperatorNode(kctx, syn, 3,
-//					tkImport, new_ConstValueNode(kctx, kObject_class(ns), UPCAST(ns)), param0);
+//					tkImport, new_ConstNode(kctx, ns, kObject_class(ns), UPCAST(ns)), param0);
 //		}
 //		else if(kArray_size(list) == 2) {
 //			/* case : import("konoha.import", "import"); */
 //			kNode *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
 //			kNode *param1 = makeStringConstValue(kctx, list->TokenItems[1]->text);
 //			expr = SUGAR new_UntypedOperatorNode(kctx, syn, 4,
-//					tkImport, new_ConstValueNode(kctx, kObject_class(ns), UPCAST(ns)),
+//					tkImport, new_ConstNode(kctx, ns, kObject_class(ns), UPCAST(ns)),
 //					param0, param1);
 //		} else {
 //			KReturnUnboxValue(false);

@@ -109,6 +109,7 @@
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/sugar.h"
 #include "minikonoha/konoha_common.h"
+#include "minikonoha/import/methoddecl.h"
 #include <stdio.h>
 
 struct kRawPtr {
@@ -442,10 +443,10 @@ static KMETHOD PointerType_get(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(p);
 }
 
-//## IRBuilder IRBuilder.new(BasicNode bb);
+//## IRBuilder IRBuilder.new(BasicBlock bb);
 static KMETHOD IRBuilder_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	BasicNode *bb = konoha::object_cast<BasicNode *>(sfp[1].asObject);
+	BasicBlock *bb = konoha::object_cast<BasicBlock *>(sfp[1].asObject);
 	IRBuilder<> *self = new IRBuilder<>(bb);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(self));
 	KReturn(p);
@@ -482,34 +483,34 @@ static KMETHOD IRBuilder_createRet(KonohaContext *kctx, KonohaStack *sfp)
 //	//KReturn(p);
 //}
 
-//## BranchInst IRBuilder.CreateBr(BasicNode Dest);
+//## BranchInst IRBuilder.CreateBr(BasicBlock Dest);
 static KMETHOD IRBuilder_createBr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
-	BasicNode *Dest = konoha::object_cast<BasicNode *>(sfp[1].asObject);
+	BasicBlock *Dest = konoha::object_cast<BasicBlock *>(sfp[1].asObject);
 	BranchInst *ptr = self->CreateBr(Dest);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## BranchInst IRBuilder.CreateCondBr(Value Cond, BasicNode True, BasicNode False);
+//## BranchInst IRBuilder.CreateCondBr(Value Cond, BasicBlock True, BasicBlock False);
 static KMETHOD IRBuilder_createCondBr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Cond = konoha::object_cast<Value *>(sfp[1].asObject);
-	BasicNode *True = konoha::object_cast<BasicNode *>(sfp[2].asObject);
-	BasicNode *False = konoha::object_cast<BasicNode *>(sfp[3].asObject);
+	BasicBlock *True = konoha::object_cast<BasicBlock *>(sfp[2].asObject);
+	BasicBlock *False = konoha::object_cast<BasicBlock *>(sfp[3].asObject);
 	BranchInst *ptr = self->CreateCondBr(Cond, True, False);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## SwitchInst IRBuilder.CreateSwitch(Value V, BasicNode Dest);
+//## SwitchInst IRBuilder.CreateSwitch(Value V, BasicBlock Dest);
 static KMETHOD IRBuilder_createSwitch(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	BasicNode *Dest = konoha::object_cast<BasicNode *>(sfp[2].asObject);
+	BasicBlock *Dest = konoha::object_cast<BasicBlock *>(sfp[2].asObject);
 	SwitchInst *ptr = self->CreateSwitch(V, Dest);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
@@ -525,38 +526,38 @@ static KMETHOD IRBuilder_createIndirectBr(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(p);
 }
 
-//## InvokeInst IRBuilder.CreateInvoke0(Value Callee, BasicNode NormalDest, BasicNode UnwindDest);
+//## InvokeInst IRBuilder.CreateInvoke0(Value Callee, BasicBlock NormalDest, BasicBlock UnwindDest);
 static KMETHOD IRBuilder_createInvoke0(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Callee = konoha::object_cast<Value *>(sfp[1].asObject);
-	BasicNode *NormalDest = konoha::object_cast<BasicNode *>(sfp[2].asObject);
-	BasicNode *UnwindDest = konoha::object_cast<BasicNode *>(sfp[3].asObject);
+	BasicBlock *NormalDest = konoha::object_cast<BasicBlock *>(sfp[2].asObject);
+	BasicBlock *UnwindDest = konoha::object_cast<BasicBlock *>(sfp[3].asObject);
 	InvokeInst *ptr = self->CreateInvoke(Callee, NormalDest, UnwindDest);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## InvokeInst IRBuilder.CreateInvoke1(Value Callee, BasicNode NormalDest, BasicNode UnwindDest, Value Arg1);
+//## InvokeInst IRBuilder.CreateInvoke1(Value Callee, BasicBlock NormalDest, BasicBlock UnwindDest, Value Arg1);
 static KMETHOD IRBuilder_createInvoke1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Callee = konoha::object_cast<Value *>(sfp[1].asObject);
-	BasicNode *NormalDest = konoha::object_cast<BasicNode *>(sfp[2].asObject);
-	BasicNode *UnwindDest = konoha::object_cast<BasicNode *>(sfp[3].asObject);
+	BasicBlock *NormalDest = konoha::object_cast<BasicBlock *>(sfp[2].asObject);
+	BasicBlock *UnwindDest = konoha::object_cast<BasicBlock *>(sfp[3].asObject);
 	Value *Arg1 = konoha::object_cast<Value *>(sfp[4].asObject);
 	InvokeInst *ptr = self->CreateInvoke(Callee, NormalDest, UnwindDest, Arg1);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## InvokeInst IRBuilder.CreateInvoke3(Value Callee, BasicNode NormalDest, BasicNode UnwindDest, Value Arg1, Value Arg2, Value Arg3);
+//## InvokeInst IRBuilder.CreateInvoke3(Value Callee, BasicBlock NormalDest, BasicBlock UnwindDest, Value Arg1, Value Arg2, Value Arg3);
 static KMETHOD IRBuilder_createInvoke3(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Callee = konoha::object_cast<Value *>(sfp[1].asObject);
-	BasicNode *NormalDest = konoha::object_cast<BasicNode *>(sfp[2].asObject);
-	BasicNode *UnwindDest = konoha::object_cast<BasicNode *>(sfp[3].asObject);
+	BasicBlock *NormalDest = konoha::object_cast<BasicBlock *>(sfp[2].asObject);
+	BasicBlock *UnwindDest = konoha::object_cast<BasicBlock *>(sfp[3].asObject);
 	Value *Arg1 = konoha::object_cast<Value *>(sfp[4].asObject);
 	Value *Arg2 = konoha::object_cast<Value *>(sfp[5].asObject);
 	Value *Arg3 = konoha::object_cast<Value *>(sfp[6].asObject);
@@ -565,13 +566,13 @@ static KMETHOD IRBuilder_createInvoke3(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(p);
 }
 
-////## InvokeInst IRBuilder.CreateInvoke(Value Callee, BasicNode NormalDest, BasicNode UnwindDest, ArrayRef<Value> Args);
+////## InvokeInst IRBuilder.CreateInvoke(Value Callee, BasicBlock NormalDest, BasicBlock UnwindDest, ArrayRef<Value> Args);
 //KMETHOD IRBuilder_createInvoke(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 //	Value *Callee = konoha::object_cast<Value *>(sfp[1].asObject);
-//	BasicNode *NormalDest = konoha::object_cast<BasicNode *>(sfp[2].asObject);
-//	BasicNode *UnwindDest = konoha::object_cast<BasicNode *>(sfp[3].asObject);
+//	BasicBlock *NormalDest = konoha::object_cast<BasicBlock *>(sfp[2].asObject);
+//	BasicBlock *UnwindDest = konoha::object_cast<BasicBlock *>(sfp[3].asObject);
 //	kArray *Args = (sfp[4].asArray);
 //	std::vector<Value*> List;
 //	konoha::convert_array(List, Args);
@@ -1704,12 +1705,12 @@ static KMETHOD IRBuilder_createPHI(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(p);
 }
 
-//## void IRBuilder.addIncoming(Type Ty, BasicNode bb);
+//## void IRBuilder.addIncoming(Type Ty, BasicBlock bb);
 static KMETHOD PHINode_addIncoming(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
 	PHINode *self = konoha::object_cast<PHINode *>(sfp[0].asObject);
 	Value *v = konoha::object_cast<Value *>(sfp[1].asObject);
-	BasicNode *bb = konoha::object_cast<BasicNode *>(sfp[2].asObject);
+	BasicBlock *bb = konoha::object_cast<BasicBlock *>(sfp[2].asObject);
 	self->addIncoming(v, bb);
 	KReturnVoid();
 }
@@ -1908,37 +1909,42 @@ static KMETHOD IRBuilder_createPtrDiff(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(p);
 }
 
+<<<<<<< HEAD
 //## void IRBuilder.SetInsertPoint(BasicNode BB);
 static KMETHOD IRBuilder_SetInsertPoint(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
+=======
+//## void IRBuilder.SetInsertPoint(BasicBlock BB);
+static KMETHOD IRBuilder_setInsertPoint(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
+>>>>>>> 8d7b2b4ac54185eca7baa1c2ccb2a0d7ced18da1
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
-	BasicNode * BB = konoha::object_cast<BasicNode *>(sfp[1].asObject);
+	BasicBlock * BB = konoha::object_cast<BasicBlock *>(sfp[1].asObject);
 	self->SetInsertPoint(BB);
 	KReturnVoid();
 }
 
-//## BasicNode IRBuilder.GetInsertNode();
-static KMETHOD IRBuilder_getInsertNode(KonohaContext *kctx, KonohaStack *sfp)
+//## BasicBlock IRBuilder.GetInsertBlock();
+static KMETHOD IRBuilder_getInsertBlock(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
-	BasicNode *BB = self->GetInsertNode();
+	BasicBlock *BB = self->GetInsertBlock();
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(BB));
 	KReturn(p);
 }
 
-//## Function BasicNode.getParent();
-static KMETHOD BasicNode_getParent(KonohaContext *kctx, KonohaStack *sfp)
+//## Function BasicBlock.getParent();
+static KMETHOD BasicBlock_getParent(KonohaContext *kctx, KonohaStack *sfp)
 {
-	BasicNode *self = konoha::object_cast<BasicNode *>(sfp[0].asObject);
+	BasicBlock *self = konoha::object_cast<BasicBlock *>(sfp[0].asObject);
 	Function *ptr = self->getParent();
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Instruction BasicNode.getTerminator();
-static KMETHOD BasicNode_getTerminator(KonohaContext *kctx, KonohaStack *sfp)
+//## Instruction BasicBlock.getTerminator();
+static KMETHOD BasicBlock_getTerminator(KonohaContext *kctx, KonohaStack *sfp)
 {
-	BasicNode *self = konoha::object_cast<BasicNode *>(sfp[0].asObject);
+	BasicBlock *self = konoha::object_cast<BasicBlock *>(sfp[0].asObject);
 	TerminatorInst *ptr = self->getTerminator();
 	if (ptr) {
 		kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -1949,29 +1955,29 @@ static KMETHOD BasicNode_getTerminator(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 
-////## iterator BasicNode.begin();
-//KMETHOD BasicNode_begin(KonohaContext *kctx, KonohaStack *sfp)
+////## iterator BasicBlock.begin();
+//KMETHOD BasicBlock_begin(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	BasicNode *self = konoha::object_cast<BasicNode *>(sfp[0].asObject);
+//	BasicBlock *self = konoha::object_cast<BasicBlock *>(sfp[0].asObject);
 //	*ptr = self->Create();
 //	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 //	KReturn(K_NULL);
 //}
 //
-////## iterator BasicNode.end();
-//KMETHOD BasicNode_end(KonohaContext *kctx, KonohaStack *sfp)
+////## iterator BasicBlock.end();
+//KMETHOD BasicBlock_end(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	BasicNode *self = konoha::object_cast<BasicNode *>(sfp[0].asObject);
+//	BasicBlock *self = konoha::object_cast<BasicBlock *>(sfp[0].asObject);
 //	*ptr = self->Create();
 //	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 //	KReturn(K_NULL);
 //}
 
-//## Instruction BasicNode.getLastInst();
-static KMETHOD BasicNode_getLastInst(KonohaContext *kctx, KonohaStack *sfp)
+//## Instruction BasicBlock.getLastInst();
+static KMETHOD BasicBlock_getLastInst(KonohaContext *kctx, KonohaStack *sfp)
 {
-	BasicNode *self = konoha::object_cast<BasicNode *>(sfp[0].asObject);
-	BasicNode::iterator I = self->end();
+	BasicBlock *self = konoha::object_cast<BasicBlock *>(sfp[0].asObject);
+	BasicBlock::iterator I = self->end();
 	Instruction *ptr;
 	if (self->size() > 0)
 		--I;
@@ -1980,28 +1986,28 @@ static KMETHOD BasicNode_getLastInst(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(p);
 }
 
-//## Instruction BasicNode.insertBefore(Instruction before, Instruction inst);
-static KMETHOD BasicNode_insertBefore(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
+//## Instruction BasicBlock.insertBefore(Instruction before, Instruction inst);
+static KMETHOD BasicBlock_insertBefore(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
-	BasicNode *self = konoha::object_cast<BasicNode *>(sfp[0].asObject);
+	BasicBlock *self = konoha::object_cast<BasicBlock *>(sfp[0].asObject);
 	Instruction *inst0 = konoha::object_cast<Instruction *>(sfp[1].asObject);
 	Instruction *inst1 = konoha::object_cast<Instruction *>(sfp[2].asObject);
 	self->getInstList().insert(inst0, inst1);
 	KReturnVoid();
 }
 
-//## int BasicNode.size();
-static KMETHOD BasicNode_size(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
+//## int BasicBlock.size();
+static KMETHOD BasicBlock_size(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
-	BasicNode *self = konoha::object_cast<BasicNode *>(sfp[0].asObject);
+	BasicBlock *self = konoha::object_cast<BasicBlock *>(sfp[0].asObject);
 	int ret = self->size();
 	KReturnUnboxValue(ret);
 }
 
-//## boolean BasicNode.empty();
-static KMETHOD BasicNode_empty(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
+//## boolean BasicBlock.empty();
+static KMETHOD BasicBlock_empty(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
-	BasicNode *self = konoha::object_cast<BasicNode *>(sfp[0].asObject);
+	BasicBlock *self = konoha::object_cast<BasicBlock *>(sfp[0].asObject);
 	bool isEmpty = self->empty();
 	KReturnUnboxValue(isEmpty);
 }
@@ -2071,10 +2077,10 @@ static KMETHOD Module_getTypeByName(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(p);
 }
 
-//## void BasicNode.dump();
-static KMETHOD BasicNode_dump(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
+//## void BasicBlock.dump();
+static KMETHOD BasicBlock_dump(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
-	BasicNode *self = konoha::object_cast<BasicNode *>(sfp[0].asObject);
+	BasicBlock *self = konoha::object_cast<BasicBlock *>(sfp[0].asObject);
 	(*self).dump();
 	KReturnVoid();
 }
@@ -2142,21 +2148,21 @@ static KMETHOD Module_createExecutionEngine(KonohaContext *kctx, KonohaStack *sf
 	KReturn(p);
 }
 
-static int BasicNode_compareTo(kObject *p1, kObject *p2)
+static int BasicBlock_compareTo(kObject *p1, kObject *p2)
 {
-	BasicNode *bb1 = konoha::object_cast<BasicNode*>(p1);
-	BasicNode *bb2 = konoha::object_cast<BasicNode*>(p2);
+	BasicBlock *bb1 = konoha::object_cast<BasicBlock*>(p1);
+	BasicBlock *bb2 = konoha::object_cast<BasicBlock*>(p2);
 	return (bb1 != bb2);
 }
 
-//void defBasicNode(KonohaContext *kctx _UNUSED_, ktypeattr_t cid _UNUSED_, kclassdef_t *cdef)
+//void defBasicBlock(KonohaContext *kctx _UNUSED_, ktypeattr_t cid _UNUSED_, kclassdef_t *cdef)
 //{
-//	cdef->name = "llvm::BasicNode";
-//	cdef->compareTo = BasicNode_compareTo;
+//	cdef->name = "llvm::BasicBlock";
+//	cdef->compareTo = BasicBlock_compareTo;
 //}
 
-//## @Static BasicNode BasicNode.create(Function parent, String name);
-static KMETHOD BasicNode_create(KonohaContext *kctx, KonohaStack *sfp)
+//## @Static BasicBlock BasicBlock.create(Function parent, String name);
+static KMETHOD BasicBlock_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Function * parent = konoha::object_cast<Function *>(sfp[1].asObject);
 	kString *name = sfp[2].asString;
@@ -2164,7 +2170,7 @@ static KMETHOD BasicNode_create(KonohaContext *kctx, KonohaStack *sfp)
 	if (IS_NOTNULL(name)) {
 		bbname = kString_text(name);
 	}
-	BasicNode *ptr = BasicNode::Create(getGlobalContext(), bbname, parent);
+	BasicBlock *ptr = BasicBlock::Create(getGlobalContext(), bbname, parent);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
@@ -2829,510 +2835,510 @@ static KMETHOD LLVM_createRegionInfoPass(KonohaContext *kctx, KonohaStack *sfp)
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
-//## Constant* ConstantNode::getAlignOf(Type* ty);
-static KMETHOD ConstantNode_getAlignOf(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getAlignOf(Type* ty);
+static KMETHOD ConstantExpr_getAlignOf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Type* ty = konoha::object_cast<Type*>(sfp[1].asObject);
-	Constant* ptr = ConstantNode::getAlignOf(ty);
+	Constant* ptr = ConstantExpr::getAlignOf(ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getSizeOf(Type* ty);
-static KMETHOD ConstantNode_getSizeOf(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getSizeOf(Type* ty);
+static KMETHOD ConstantExpr_getSizeOf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Type* ty = konoha::object_cast<Type*>(sfp[1].asObject);
-	Constant* ptr = ConstantNode::getSizeOf(ty);
+	Constant* ptr = ConstantExpr::getSizeOf(ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getOffsetOf(StructType* sTy, unsigned fieldNo);
-static KMETHOD ConstantNode_getOffsetOf(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getOffsetOf(StructType* sTy, unsigned fieldNo);
+static KMETHOD ConstantExpr_getOffsetOf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	StructType* sTy = konoha::object_cast<StructType*>(sfp[1].asObject);
 	unsigned fieldNo = (sfp[2].intValue);
-	Constant* ptr = ConstantNode::getOffsetOf(sTy, fieldNo);
+	Constant* ptr = ConstantExpr::getOffsetOf(sTy, fieldNo);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-////## Constant* ConstantNode::getOffsetOf(Type* ty, Constant* fieldNo);
-//static KMETHOD ConstantNode_getOffsetOf(KonohaContext *kctx, KonohaStack *sfp)
+////## Constant* ConstantExpr::getOffsetOf(Type* ty, Constant* fieldNo);
+//static KMETHOD ConstantExpr_getOffsetOf(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	Type* ty = konoha::object_cast<Type*>(sfp[1].asObject);
 //	Constant* fieldNo = konoha::object_cast<Constant*>(sfp[2].asObject);
-//	Constant* ptr = ConstantNode::getOffsetOf(ty, fieldNo);
+//	Constant* ptr = ConstantExpr::getOffsetOf(ty, fieldNo);
 //	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 //	KReturn(p);
 //}
 
-//## Constant* ConstantNode::getNeg(Constant* c, bool hasNUW, bool hasNSW);
-static KMETHOD ConstantNode_getNeg(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getNeg(Constant* c, bool hasNUW, bool hasNSW);
+static KMETHOD ConstantExpr_getNeg(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
-	ptr = ConstantNode::getNeg(c);
+	ptr = ConstantExpr::getNeg(c);
 #else
 	bool hasNUW = sfp[2].boolValue;
 	bool hasNSW = sfp[3].boolValue;
-	ptr = ConstantNode::getNeg(c, hasNUW, hasNSW);
+	ptr = ConstantExpr::getNeg(c, hasNUW, hasNSW);
 #endif
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getFNeg(Constant* c);
-static KMETHOD ConstantNode_getFNeg(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getFNeg(Constant* c);
+static KMETHOD ConstantExpr_getFNeg(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* ptr = ConstantNode::getFNeg(c);
+	Constant* ptr = ConstantExpr::getFNeg(c);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getNot(Constant* c);
-static KMETHOD ConstantNode_getNot(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getNot(Constant* c);
+static KMETHOD ConstantExpr_getNot(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* ptr = ConstantNode::getNot(c);
+	Constant* ptr = ConstantExpr::getNot(c);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getAdd(Constant* c1, Constant* c2, bool hasNUW, bool hasNSW);
-static KMETHOD ConstantNode_getAdd(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getAdd(Constant* c1, Constant* c2, bool hasNUW, bool hasNSW);
+static KMETHOD ConstantExpr_getAdd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
-	ptr = ConstantNode::getAdd(c1, c2);
+	ptr = ConstantExpr::getAdd(c1, c2);
 #else
 	bool hasNUW = sfp[3].boolValue;
 	bool hasNSW = sfp[4].boolValue;
-	ptr = ConstantNode::getAdd(c1, c2, hasNUW, hasNSW);
+	ptr = ConstantExpr::getAdd(c1, c2, hasNUW, hasNSW);
 #endif
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getFAdd(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getFAdd(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getFAdd(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getFAdd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getFAdd(c1, c2);
+	Constant* ptr = ConstantExpr::getFAdd(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getSub(Constant* c1, Constant* c2, bool hasNUW, bool hasNSW);
-static KMETHOD ConstantNode_getSub(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getSub(Constant* c1, Constant* c2, bool hasNUW, bool hasNSW);
+static KMETHOD ConstantExpr_getSub(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
-	ptr = ConstantNode::getSub(c1, c2);
+	ptr = ConstantExpr::getSub(c1, c2);
 #else
 	bool hasNUW = sfp[3].boolValue;
 	bool hasNSW = sfp[4].boolValue;
-	ptr = ConstantNode::getSub(c1, c2, hasNUW, hasNSW);
+	ptr = ConstantExpr::getSub(c1, c2, hasNUW, hasNSW);
 #endif
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getFSub(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getFSub(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getFSub(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getFSub(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getFSub(c1, c2);
+	Constant* ptr = ConstantExpr::getFSub(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getMul(Constant* c1, Constant* c2, bool hasNUW, bool hasNSW);
-static KMETHOD ConstantNode_getMul(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getMul(Constant* c1, Constant* c2, bool hasNUW, bool hasNSW);
+static KMETHOD ConstantExpr_getMul(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
-	ptr = ConstantNode::getMul(c1, c2);
+	ptr = ConstantExpr::getMul(c1, c2);
 #else
 	bool hasNUW = sfp[3].boolValue;
 	bool hasNSW = sfp[4].boolValue;
-	ptr = ConstantNode::getMul(c1, c2, hasNUW, hasNSW);
+	ptr = ConstantExpr::getMul(c1, c2, hasNUW, hasNSW);
 #endif
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getFMul(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getFMul(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getFMul(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getFMul(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getFMul(c1, c2);
+	Constant* ptr = ConstantExpr::getFMul(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getUDiv(Constant* c1, Constant* c2, bool isExact);
-static KMETHOD ConstantNode_getUDiv(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getUDiv(Constant* c1, Constant* c2, bool isExact);
+static KMETHOD ConstantExpr_getUDiv(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
-	ptr = ConstantNode::getUDiv(c1, c2);
+	ptr = ConstantExpr::getUDiv(c1, c2);
 #else
 	bool isExact = sfp[3].boolValue;
-	ptr = ConstantNode::getUDiv(c1, c2, isExact);
+	ptr = ConstantExpr::getUDiv(c1, c2, isExact);
 #endif
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getSDiv(Constant* c1, Constant* c2, bool isExact);
-static KMETHOD ConstantNode_getSDiv(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getSDiv(Constant* c1, Constant* c2, bool isExact);
+static KMETHOD ConstantExpr_getSDiv(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
-	ptr = ConstantNode::getSDiv(c1, c2);
+	ptr = ConstantExpr::getSDiv(c1, c2);
 #else
 	bool isExact = sfp[3].boolValue;
-	ptr = ConstantNode::getSDiv(c1, c2, isExact);
+	ptr = ConstantExpr::getSDiv(c1, c2, isExact);
 #endif
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getFDiv(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getFDiv(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getFDiv(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getFDiv(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getFDiv(c1, c2);
+	Constant* ptr = ConstantExpr::getFDiv(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getURem(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getURem(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getURem(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getURem(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getURem(c1, c2);
+	Constant* ptr = ConstantExpr::getURem(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getSRem(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getSRem(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getSRem(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getSRem(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getSRem(c1, c2);
+	Constant* ptr = ConstantExpr::getSRem(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getFRem(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getFRem(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getFRem(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getFRem(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getFRem(c1, c2);
+	Constant* ptr = ConstantExpr::getFRem(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getAnd(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getAnd(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getAnd(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getAnd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getAnd(c1, c2);
+	Constant* ptr = ConstantExpr::getAnd(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getOr(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getOr(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getOr(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getOr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getOr(c1, c2);
+	Constant* ptr = ConstantExpr::getOr(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getXor(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getXor(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getXor(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getXor(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getXor(c1, c2);
+	Constant* ptr = ConstantExpr::getXor(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getShl(Constant* c1, Constant* c2, bool hasNUW, bool hasNSW);
-static KMETHOD ConstantNode_getShl(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getShl(Constant* c1, Constant* c2, bool hasNUW, bool hasNSW);
+static KMETHOD ConstantExpr_getShl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
-	ptr = ConstantNode::getShl(c1, c2);
+	ptr = ConstantExpr::getShl(c1, c2);
 #else
 	bool hasNUW = sfp[3].boolValue;
 	bool hasNSW = sfp[4].boolValue;
-	ptr = ConstantNode::getShl(c1, c2, hasNUW, hasNSW);
+	ptr = ConstantExpr::getShl(c1, c2, hasNUW, hasNSW);
 #endif
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getLShr(Constant* c1, Constant* c2, bool isExact);
-static KMETHOD ConstantNode_getLShr(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getLShr(Constant* c1, Constant* c2, bool isExact);
+static KMETHOD ConstantExpr_getLShr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
-	ptr = ConstantNode::getLShr(c1, c2);
+	ptr = ConstantExpr::getLShr(c1, c2);
 #else
 	bool isExact = sfp[3].boolValue;
-	ptr = ConstantNode::getLShr(c1, c2, isExact);
+	ptr = ConstantExpr::getLShr(c1, c2, isExact);
 #endif
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getAShr(Constant* c1, Constant* c2, bool isExact);
-static KMETHOD ConstantNode_getAShr(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getAShr(Constant* c1, Constant* c2, bool isExact);
+static KMETHOD ConstantExpr_getAShr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
-	ptr = ConstantNode::getAShr(c1, c2);
+	ptr = ConstantExpr::getAShr(c1, c2);
 #else
 	bool isExact = sfp[3].boolValue;
-	ptr = ConstantNode::getAShr(c1, c2, isExact);
+	ptr = ConstantExpr::getAShr(c1, c2, isExact);
 #endif
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getTrunc(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getTrunc(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getTrunc(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getTrunc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getTrunc(c, ty);
+	Constant* ptr = ConstantExpr::getTrunc(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getSExt(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getSExt(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getSExt(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getSExt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getSExt(c, ty);
+	Constant* ptr = ConstantExpr::getSExt(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getZExt(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getZExt(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getZExt(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getZExt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getZExt(c, ty);
+	Constant* ptr = ConstantExpr::getZExt(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getFPTrunc(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getFPTrunc(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getFPTrunc(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getFPTrunc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getFPTrunc(c, ty);
+	Constant* ptr = ConstantExpr::getFPTrunc(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getFPExtend(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getFPExtend(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getFPExtend(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getFPExtend(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getFPExtend(c, ty);
+	Constant* ptr = ConstantExpr::getFPExtend(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getUIToFP(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getUIToFP(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getUIToFP(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getUIToFP(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getUIToFP(c, ty);
+	Constant* ptr = ConstantExpr::getUIToFP(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getSIToFP(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getSIToFP(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getSIToFP(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getSIToFP(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getSIToFP(c, ty);
+	Constant* ptr = ConstantExpr::getSIToFP(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getFPToUI(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getFPToUI(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getFPToUI(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getFPToUI(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getFPToUI(c, ty);
+	Constant* ptr = ConstantExpr::getFPToUI(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getFPToSI(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getFPToSI(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getFPToSI(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getFPToSI(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getFPToSI(c, ty);
+	Constant* ptr = ConstantExpr::getFPToSI(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getPtrToInt(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getPtrToInt(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getPtrToInt(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getPtrToInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getPtrToInt(c, ty);
+	Constant* ptr = ConstantExpr::getPtrToInt(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getIntToPtr(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getIntToPtr(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getIntToPtr(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getIntToPtr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getIntToPtr(c, ty);
+	Constant* ptr = ConstantExpr::getIntToPtr(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getBitCast(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getBitCast(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getBitCast(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getBitCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getBitCast(c, ty);
+	Constant* ptr = ConstantExpr::getBitCast(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getNSWNeg(Constant* c);
-static KMETHOD ConstantNode_getNSWNeg(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getNSWNeg(Constant* c);
+static KMETHOD ConstantExpr_getNSWNeg(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* ptr = ConstantNode::getNSWNeg(c);
+	Constant* ptr = ConstantExpr::getNSWNeg(c);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getNUWNeg(Constant* c);
-static KMETHOD ConstantNode_getNUWNeg(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getNUWNeg(Constant* c);
+static KMETHOD ConstantExpr_getNUWNeg(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* ptr = ConstantNode::getNUWNeg(c);
+	Constant* ptr = ConstantExpr::getNUWNeg(c);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getNSWAdd(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getNSWAdd(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getNSWAdd(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getNSWAdd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getNSWAdd(c1, c2);
+	Constant* ptr = ConstantExpr::getNSWAdd(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getNUWAdd(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getNUWAdd(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getNUWAdd(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getNUWAdd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getNUWAdd(c1, c2);
+	Constant* ptr = ConstantExpr::getNUWAdd(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getNSWSub(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getNSWSub(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getNSWSub(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getNSWSub(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getNSWSub(c1, c2);
+	Constant* ptr = ConstantExpr::getNSWSub(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getNUWSub(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getNUWSub(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getNUWSub(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getNUWSub(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getNUWSub(c1, c2);
+	Constant* ptr = ConstantExpr::getNUWSub(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getNSWMul(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getNSWMul(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getNSWMul(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getNSWMul(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getNSWMul(c1, c2);
+	Constant* ptr = ConstantExpr::getNSWMul(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getNUWMul(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getNUWMul(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getNUWMul(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getNUWMul(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getNUWMul(c1, c2);
+	Constant* ptr = ConstantExpr::getNUWMul(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getNSWShl(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getNSWShl(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getNSWShl(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getNSWShl(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
 	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
@@ -3340,14 +3346,14 @@ static KMETHOD ConstantNode_getNSWShl(KonohaContext *kctx, KonohaStack *sfp)
 #else
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getNSWShl(c1, c2);
+	Constant* ptr = ConstantExpr::getNSWShl(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 #endif
 }
 
-//## Constant* ConstantNode::getNUWShl(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getNUWShl(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getNUWShl(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getNUWShl(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
 	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
@@ -3355,24 +3361,24 @@ static KMETHOD ConstantNode_getNUWShl(KonohaContext *kctx, KonohaStack *sfp)
 #else
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getNUWShl(c1, c2);
+	Constant* ptr = ConstantExpr::getNUWShl(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 #endif
 }
 
-//## Constant* ConstantNode::getExactSDiv(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getExactSDiv(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getExactSDiv(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getExactSDiv(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getExactSDiv(c1, c2);
+	Constant* ptr = ConstantExpr::getExactSDiv(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getExactUDiv(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getExactUDiv(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getExactUDiv(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getExactUDiv(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
 	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
@@ -3380,14 +3386,14 @@ static KMETHOD ConstantNode_getExactUDiv(KonohaContext *kctx, KonohaStack *sfp)
 #else
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getExactUDiv(c1, c2);
+	Constant* ptr = ConstantExpr::getExactUDiv(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 #endif
 }
 
-//## Constant* ConstantNode::getExactAShr(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getExactAShr(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getExactAShr(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getExactAShr(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
 	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
@@ -3395,14 +3401,14 @@ static KMETHOD ConstantNode_getExactAShr(KonohaContext *kctx, KonohaStack *sfp)
 #else
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getExactAShr(c1, c2);
+	Constant* ptr = ConstantExpr::getExactAShr(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 #endif
 }
 
-//## Constant* ConstantNode::getExactLShr(Constant* c1, Constant* c2);
-static KMETHOD ConstantNode_getExactLShr(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getExactLShr(Constant* c1, Constant* c2);
+static KMETHOD ConstantExpr_getExactLShr(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
 	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
@@ -3410,116 +3416,116 @@ static KMETHOD ConstantNode_getExactLShr(KonohaContext *kctx, KonohaStack *sfp)
 #else
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getExactLShr(c1, c2);
+	Constant* ptr = ConstantExpr::getExactLShr(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 #endif
 }
 
-//## Constant* ConstantNode::getZExtOrBitCast(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getZExtOrBitCast(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getZExtOrBitCast(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getZExtOrBitCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getZExtOrBitCast(c, ty);
+	Constant* ptr = ConstantExpr::getZExtOrBitCast(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getSExtOrBitCast(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getSExtOrBitCast(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getSExtOrBitCast(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getSExtOrBitCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getSExtOrBitCast(c, ty);
+	Constant* ptr = ConstantExpr::getSExtOrBitCast(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getTruncOrBitCast(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getTruncOrBitCast(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getTruncOrBitCast(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getTruncOrBitCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getTruncOrBitCast(c, ty);
+	Constant* ptr = ConstantExpr::getTruncOrBitCast(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getPointerCast(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getPointerCast(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getPointerCast(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getPointerCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getPointerCast(c, ty);
+	Constant* ptr = ConstantExpr::getPointerCast(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getIntegerCast(Constant* c, Type* ty, bool isSigned);
-static KMETHOD ConstantNode_getIntegerCast(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getIntegerCast(Constant* c, Type* ty, bool isSigned);
+static KMETHOD ConstantExpr_getIntegerCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	bool isSigned = sfp[3].boolValue;
-	Constant* ptr = ConstantNode::getIntegerCast(c, ty, isSigned);
+	Constant* ptr = ConstantExpr::getIntegerCast(c, ty, isSigned);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getFPCast(Constant* c, Type* ty);
-static KMETHOD ConstantNode_getFPCast(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getFPCast(Constant* c, Type* ty);
+static KMETHOD ConstantExpr_getFPCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getFPCast(c, ty);
+	Constant* ptr = ConstantExpr::getFPCast(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getSelect(Constant* c, Constant* v1, Constant* v2);
-static KMETHOD ConstantNode_getSelect(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getSelect(Constant* c, Constant* v1, Constant* v2);
+static KMETHOD ConstantExpr_getSelect(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* v1 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* v2 = konoha::object_cast<Constant*>(sfp[3].asObject);
-	Constant* ptr = ConstantNode::getSelect(c, v1, v2);
+	Constant* ptr = ConstantExpr::getSelect(c, v1, v2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-////## Constant* ConstantNode::getElementPtr(Constant* c, ArrayRef<Constant*> IdxList, bool InBounds);
-//static KMETHOD ConstantNode_getElementPtr(KonohaContext *kctx, KonohaStack *sfp)
+////## Constant* ConstantExpr::getElementPtr(Constant* c, ArrayRef<Constant*> IdxList, bool InBounds);
+//static KMETHOD ConstantExpr_getElementPtr(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 //	kArray* _list = sfp[2].asArray;
 //	std::vector<Constant*> IdxList;
 //	konoha::convert_array(IdxList, _list);
 //	bool InBounds = sfp[3].boolValue;
-//	Constant* ptr = ConstantNode::getElementPtr(c, IdxList, InBounds);
+//	Constant* ptr = ConstantExpr::getElementPtr(c, IdxList, InBounds);
 //	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 //	KReturn(p);
 //}
 
-//## Constant* ConstantNode::getElementPtr(Constant* c, Constant* idx, bool InBounds);
-static KMETHOD ConstantNode_getElementPtr0(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getElementPtr(Constant* c, Constant* idx, bool InBounds);
+static KMETHOD ConstantExpr_getElementPtr0(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* idx = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
 	Constant *IdxList[] = {idx};
-	ptr = ConstantNode::getGetElementPtr(c, IdxList, 0);
+	ptr = ConstantExpr::getGetElementPtr(c, IdxList, 0);
 #else
 	bool InBounds = sfp[3].boolValue;
-	ptr = ConstantNode::getGetElementPtr(c, idx, InBounds);
+	ptr = ConstantExpr::getGetElementPtr(c, idx, InBounds);
 #endif
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getElementPtr(Constant* c, ArrayRef<Value*> IdxList, bool InBounds);
-static KMETHOD ConstantNode_getElementPtr(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getElementPtr(Constant* c, ArrayRef<Value*> IdxList, bool InBounds);
+static KMETHOD ConstantExpr_getElementPtr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	kArray* _list = sfp[2].asArray;
@@ -3528,46 +3534,46 @@ static KMETHOD ConstantNode_getElementPtr(KonohaContext *kctx, KonohaStack *sfp)
 	Constant* ptr;
 #if LLVM_VERSION <= 209
 	Value *const *List = &IdxList[0];
-	ptr = ConstantNode::getGetElementPtr(c, List, 0);
+	ptr = ConstantExpr::getGetElementPtr(c, List, 0);
 	fprintf(stderr, "WARN: TEST ME\n");
 #else
 	bool InBounds = sfp[3].boolValue;
-	ptr = ConstantNode::getGetElementPtr(c, IdxList, InBounds);
+	ptr = ConstantExpr::getGetElementPtr(c, IdxList, InBounds);
 #endif
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-////## Constant* ConstantNode::getInBoundsGetElementPtr(Constant* c, ArrayRef<Constant*> IdxList);
-//static KMETHOD ConstantNode_getInBoundsGetElementPtr(KonohaContext *kctx, KonohaStack *sfp)
+////## Constant* ConstantExpr::getInBoundsGetElementPtr(Constant* c, ArrayRef<Constant*> IdxList);
+//static KMETHOD ConstantExpr_getInBoundsGetElementPtr(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 //	kArray* _list = sfp[2].asArray;
 //	std::vector<Constant*> IdxList;
 //	konoha::convert_array(IdxList, _list);
-//	Constant* ptr = ConstantNode::getInBoundsGetElementPtr(c, IdxList);
+//	Constant* ptr = ConstantExpr::getInBoundsGetElementPtr(c, IdxList);
 //	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 //	KReturn(p);
 //}
 
-//## Constant* ConstantNode::getInBoundsGetElementPtr(Constant* c, Constant* idx);
-static KMETHOD ConstantNode_getInBoundsGetElementPtr0(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getInBoundsGetElementPtr(Constant* c, Constant* idx);
+static KMETHOD ConstantExpr_getInBoundsGetElementPtr0(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* ptr;
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* idx = konoha::object_cast<Constant*>(sfp[2].asObject);
 #if LLVM_VERSION <= 209
 	Constant *IdxList[] = {idx};
-	ptr = ConstantNode::getInBoundsGetElementPtr(c, IdxList, 0);
+	ptr = ConstantExpr::getInBoundsGetElementPtr(c, IdxList, 0);
 #else
-	ptr = ConstantNode::getInBoundsGetElementPtr(c, idx);
+	ptr = ConstantExpr::getInBoundsGetElementPtr(c, idx);
 #endif
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getInBoundsGetElementPtr(Constant* c, ArrayRef<Value*> idxList);
-static KMETHOD ConstantNode_getInBoundsGetElementPtr(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getInBoundsGetElementPtr(Constant* c, ArrayRef<Value*> idxList);
+static KMETHOD ConstantExpr_getInBoundsGetElementPtr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
 	kArray* _list = sfp[2].asArray;
@@ -3576,66 +3582,66 @@ static KMETHOD ConstantNode_getInBoundsGetElementPtr(KonohaContext *kctx, Konoha
 	Constant* ptr;
 #if LLVM_VERSION <= 209
 	Value *const *List = &idxList[0];
-	ptr = ConstantNode::getGetElementPtr(c, List, 0);
+	ptr = ConstantExpr::getGetElementPtr(c, List, 0);
 	fprintf(stderr, "WARN: TEST ME\n");
 #else
-	ptr = ConstantNode::getInBoundsGetElementPtr(c, idxList);
+	ptr = ConstantExpr::getInBoundsGetElementPtr(c, idxList);
 #endif
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getExtractElement(Constant* vec, Constant* idx);
-static KMETHOD ConstantNode_getExtractElement(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getExtractElement(Constant* vec, Constant* idx);
+static KMETHOD ConstantExpr_getExtractElement(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* vec = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* idx = konoha::object_cast<Constant*>(sfp[2].asObject);
-	Constant* ptr = ConstantNode::getExtractElement(vec, idx);
+	Constant* ptr = ConstantExpr::getExtractElement(vec, idx);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getInsertElement(Constant* vec, Constant* elt,Constant* idx);
-static KMETHOD ConstantNode_getInsertElement(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getInsertElement(Constant* vec, Constant* elt,Constant* idx);
+static KMETHOD ConstantExpr_getInsertElement(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* vec = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* elt = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* idx = konoha::object_cast<Constant*>(sfp[3].asObject);
-	Constant* ptr = ConstantNode::getInsertElement(vec, elt, idx);
+	Constant* ptr = ConstantExpr::getInsertElement(vec, elt, idx);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getShuffleVector(Constant* v1, Constant* v2, Constant* mask);
-static KMETHOD ConstantNode_getShuffleVector(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getShuffleVector(Constant* v1, Constant* v2, Constant* mask);
+static KMETHOD ConstantExpr_getShuffleVector(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* v1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* v2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* mask = konoha::object_cast<Constant*>(sfp[3].asObject);
-	Constant* ptr = ConstantNode::getShuffleVector(v1, v2, mask);
+	Constant* ptr = ConstantExpr::getShuffleVector(v1, v2, mask);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getExtractValue(Constant* Agg, ArrayRef<unsigned> idxs);
-static KMETHOD ConstantNode_getExtractValue(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getExtractValue(Constant* Agg, ArrayRef<unsigned> idxs);
+static KMETHOD ConstantExpr_getExtractValue(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* Agg = konoha::object_cast<Constant*>(sfp[1].asObject);
 	kArray* _list = sfp[2].asArray;
 	std::vector<unsigned> idxs(_list->kintItems, _list->kintItems+kArray_size(_list));
 	Constant* ptr;
 #if LLVM_VERSION <= 209
-	ptr = ConstantNode::getExtractValue(Agg, (const unsigned *) &idxs[0], 0);
+	ptr = ConstantExpr::getExtractValue(Agg, (const unsigned *) &idxs[0], 0);
 	fprintf(stderr, "WARN: TEST ME\n");
 #else
-	ptr = ConstantNode::getExtractValue(Agg, idxs);
+	ptr = ConstantExpr::getExtractValue(Agg, idxs);
 #endif
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
 
-//## Constant* ConstantNode::getInsertValue(Constant* Agg, Constant* val, ArrayRef<unsigned> idxs);
-static KMETHOD ConstantNode_getInsertValue(KonohaContext *kctx, KonohaStack *sfp)
+//## Constant* ConstantExpr::getInsertValue(Constant* Agg, Constant* val, ArrayRef<unsigned> idxs);
+static KMETHOD ConstantExpr_getInsertValue(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* Agg = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* val = konoha::object_cast<Constant*>(sfp[2].asObject);
@@ -3643,10 +3649,10 @@ static KMETHOD ConstantNode_getInsertValue(KonohaContext *kctx, KonohaStack *sfp
 	std::vector<unsigned> idxs(_list->kintItems, _list->kintItems+kArray_size(_list));
 	Constant* ptr;
 #if LLVM_VERSION <= 209
-	ptr = ConstantNode::getInsertValue(Agg, val, (const unsigned *) &idxs[0], 0);
+	ptr = ConstantExpr::getInsertValue(Agg, val, (const unsigned *) &idxs[0], 0);
 	fprintf(stderr, "WARN: TEST ME\n");
 #else
-	ptr = ConstantNode::getInsertValue(Agg, val, idxs);
+	ptr = ConstantExpr::getInsertValue(Agg, val, idxs);
 #endif
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
@@ -3917,10 +3923,10 @@ static KMETHOD LLVM_createSingleLoopExtractorPass(KonohaContext *kctx, KonohaSta
 	KReturn(p);
 }
 
-//## ModulePass LLVM.createNodeExtractorPass();
-static KMETHOD LLVM_createNodeExtractorPass(KonohaContext *kctx, KonohaStack *sfp)
+//## ModulePass LLVM.createBlockExtractorPass();
+static KMETHOD LLVM_createBlockExtractorPass(KonohaContext *kctx, KonohaStack *sfp)
 {
-	ModulePass *ptr = createNodeExtractorPass();
+	ModulePass *ptr = createBlockExtractorPass();
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
@@ -4169,10 +4175,10 @@ static KMETHOD LLVM_createLowerSwitchPass(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(p);
 }
 
-//## FunctionPass LLVM.createNodePlacementPass();
-static KMETHOD LLVM_createNodePlacementPass(KonohaContext *kctx, KonohaStack *sfp)
+//## FunctionPass LLVM.createBlockPlacementPass();
+static KMETHOD LLVM_createBlockPlacementPass(KonohaContext *kctx, KonohaStack *sfp)
 {
-	FunctionPass *ptr = createNodePlacementPass();
+	FunctionPass *ptr = createBlockPlacementPass();
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
@@ -4345,10 +4351,10 @@ static KMETHOD LLVM_createVerifierPass(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 #if LLVM_VERSION >= 301
-//## BasicNodePass LLVM.createBBVectorizePass();
+//## BasicBlockPass LLVM.createBBVectorizePass();
 static KMETHOD LLVM_createBBVectorizePass(KonohaContext *kctx, KonohaStack *sfp)
 {
-	BasicNodePass *ptr = createBBVectorizePass();
+	BasicBlockPass *ptr = createBBVectorizePass();
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
@@ -4492,7 +4498,7 @@ static KMETHOD Object_asFunctionType(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //FIXME TODO stupid down cast
-static KMETHOD Object_toLLVMBasicNode(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Object_toLLVMBasicBlock(KonohaContext *kctx, KonohaStack *sfp)
 {
 	(void)kctx;
 	KReturn(sfp[0].asObject);
@@ -4616,13 +4622,6 @@ static void kmodllvm_free(KonohaContext *kctx, struct KRuntimeModule *baseh)
 	KFree(baseh, sizeof(kmodllvm_t));
 }
 
-#define _Public   kMethod_Public
-#define _Static   kMethod_Static
-#define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
-#define _Im       kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
-
 static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int argc, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace)
@@ -4721,8 +4720,8 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		"StructType"
 	};
 	KClass *KClass_TypeTBL[6];
-	KClass *KClass_BasicNode, *KClass_IRBuilder;
-#define KType_BasicNode  (KClass_BasicNode)->typeId
+	KClass *KClass_BasicBlock, *KClass_IRBuilder;
+#define KType_BasicBlock  (KClass_BasicBlock)->typeId
 #define KType_IRBuilder   (KClass_IRBuilder)->typeId
 #define KType_Type         (KClass_TypeTBL[0])->typeId
 //#define KType_integerType  (KClass_TypeTBL[1])->typeId
@@ -4741,8 +4740,8 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 			KClass_TypeTBL[i] = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &TypeDef, 0);
 		}
 	}
-	static KDEFINE_CLASS BasicNodeDef = DEFINE_CLASS_0("LLVMBasicNode",0, 0, BasicNode_compareTo);
-	KClass_BasicNode = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &BasicNodeDef, trace);
+	static KDEFINE_CLASS BasicBlockDef = DEFINE_CLASS_0("LLVMBasicBlock",0, 0, BasicBlock_compareTo);
+	KClass_BasicBlock = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &BasicBlockDef, trace);
 
 	static KDEFINE_CLASS IRBuilderDef = DEFINE_CLASS_0("IRBuilder", 0, 0, 0);
 	KClass_IRBuilder = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &IRBuilderDef, trace);
@@ -4777,7 +4776,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 			"ConstantFP",
 			"ConstantStruct",
 			"ConstantPointerNull",
-			"ConstantNode",
+			"ConstantExpr",
 			"LLVM",
 			"LibCallInfo",
 			"DynamicLibrary",
@@ -4812,7 +4811,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 #define KType_ConstantFP          (KClass_InstTBL[13])->typeId
 #define KType_ConstantStruct      (KClass_InstTBL[14])->typeId
 #define KType_ConstantPointerNull (KClass_InstTBL[15])->typeId
-#define KType_ConstantNode        (KClass_InstTBL[16])->typeId
+#define KType_ConstantExpr        (KClass_InstTBL[16])->typeId
 #define KType_LLVM                (KClass_InstTBL[17])->typeId
 #define KType_LibCallInfo         (KClass_InstTBL[18])->typeId
 #define KType_DynamicLibrary      (KClass_InstTBL[19])->typeId
@@ -4883,16 +4882,16 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public|_Static, _F(Type_getInt16PtrTy), KType_Type, KType_Type, KKMethodName_("getInt16PtrTy"), 0,
 		_Public|_Static, _F(Type_getInt32PtrTy), KType_Type, KType_Type, KKMethodName_("getInt32PtrTy"), 0,
 		_Public|_Static, _F(Type_getInt64PtrTy), KType_Type, KType_Type, KKMethodName_("getInt64PtrTy"), 0,
-		_Public, _F(IRBuilder_new), KType_IRBuilder, KType_IRBuilder, KKMethodName_("new"), 1, KType_BasicNode, KFieldName_("bb"),
+		_Public, _F(IRBuilder_new), KType_IRBuilder, KType_IRBuilder, KKMethodName_("new"), 1, KType_BasicBlock, KFieldName_("bb"),
 		_Public, _F(IRBuilder_createRetVoid), KType_Value, KType_IRBuilder, KKMethodName_("createRetVoid"), 0,
 		_Public, _F(IRBuilder_createRet),     KType_Value, KType_IRBuilder, KKMethodName_("createRet"), 1, KType_Value, KFieldName_("v"),
-		_Public, _F(IRBuilder_createBr),      KType_Value, KType_IRBuilder, KKMethodName_("createBr"), 1, KType_BasicNode, KFieldName_("dest"),
-		_Public, _F(IRBuilder_createCondBr),  KType_Value, KType_IRBuilder, KKMethodName_("createCondBr"), 3, KType_Value, KFieldName_("cond"),KType_BasicNode, KFieldName_("trueBB"),KType_BasicNode, KFieldName_("falseBB"),
-		_Public, _F(IRBuilder_createSwitch),  KType_Value, KType_IRBuilder, KKMethodName_("createSwitch"), 2, KType_Value, KFieldName_("v"),KType_BasicNode, KFieldName_("dest"),
+		_Public, _F(IRBuilder_createBr),      KType_Value, KType_IRBuilder, KKMethodName_("createBr"), 1, KType_BasicBlock, KFieldName_("dest"),
+		_Public, _F(IRBuilder_createCondBr),  KType_Value, KType_IRBuilder, KKMethodName_("createCondBr"), 3, KType_Value, KFieldName_("cond"),KType_BasicBlock, KFieldName_("trueBB"),KType_BasicBlock, KFieldName_("falseBB"),
+		_Public, _F(IRBuilder_createSwitch),  KType_Value, KType_IRBuilder, KKMethodName_("createSwitch"), 2, KType_Value, KFieldName_("v"),KType_BasicBlock, KFieldName_("dest"),
 		_Public, _F(IRBuilder_createIndirectBr), KType_Value, KType_IRBuilder, KKMethodName_("createIndirectBr"), 1, KType_Value, KFieldName_("addr"),
-		_Public, _F(IRBuilder_createInvoke0), KType_Value, KType_IRBuilder, KKMethodName_("createInvoke0"), 3, KType_Value, KFieldName_("callee"),KType_BasicNode, KFieldName_("normalDest"),KType_BasicNode, KFieldName_("unwindDest"),
-		_Public, _F(IRBuilder_createInvoke1), KType_Value, KType_IRBuilder, KKMethodName_("createInvoke1"), 4, KType_Value, KFieldName_("callee"),KType_BasicNode, KFieldName_("normalDest"),KType_BasicNode, KFieldName_("unwindDest"),KType_Value, KFieldName_("arg1"),
-		_Public, _F(IRBuilder_createInvoke3), KType_Value, KType_IRBuilder, KKMethodName_("createInvoke3"), 6, KType_Value, KFieldName_("callee"),KType_BasicNode, KFieldName_("normalDest"),KType_BasicNode, KFieldName_("unwindDest"),KType_Value, KFieldName_("arg1"),KType_Value, KFieldName_("arg2"),KType_Value, KFieldName_("arg3"),
+		_Public, _F(IRBuilder_createInvoke0), KType_Value, KType_IRBuilder, KKMethodName_("createInvoke0"), 3, KType_Value, KFieldName_("callee"),KType_BasicBlock, KFieldName_("normalDest"),KType_BasicBlock, KFieldName_("unwindDest"),
+		_Public, _F(IRBuilder_createInvoke1), KType_Value, KType_IRBuilder, KKMethodName_("createInvoke1"), 4, KType_Value, KFieldName_("callee"),KType_BasicBlock, KFieldName_("normalDest"),KType_BasicBlock, KFieldName_("unwindDest"),KType_Value, KFieldName_("arg1"),
+		_Public, _F(IRBuilder_createInvoke3), KType_Value, KType_IRBuilder, KKMethodName_("createInvoke3"), 6, KType_Value, KFieldName_("callee"),KType_BasicBlock, KFieldName_("normalDest"),KType_BasicBlock, KFieldName_("unwindDest"),KType_Value, KFieldName_("arg1"),KType_Value, KFieldName_("arg2"),KType_Value, KFieldName_("arg3"),
 		_Public, _F(IRBuilder_createUnreachable), KType_Value, KType_IRBuilder, KKMethodName_("createUnreachable"), 0,
 		_Public, _F(IRBuilder_createAdd),    KType_Value, KType_IRBuilder, KKMethodName_("createAdd"), 2, KType_Value, KFieldName_("lhs"),KType_Value, KFieldName_("rhs"),
 		_Public, _F(IRBuilder_createNSWAdd), KType_Value, KType_IRBuilder, KKMethodName_("createNSWAdd"), 2, KType_Value, KFieldName_("lhs"),KType_Value, KFieldName_("rhs"),
@@ -4991,7 +4990,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public, _F(IRBuilder_createFCmpULE), KType_Value, KType_IRBuilder, KKMethodName_("createFCmpULE"), 2, KType_Value, KFieldName_("lhs"),KType_Value, KFieldName_("rhs"),
 		_Public, _F(IRBuilder_createFCmpUNE), KType_Value, KType_IRBuilder, KKMethodName_("createFCmpUNE"), 2, KType_Value, KFieldName_("lhs"),KType_Value, KFieldName_("rhs"),
 		_Public, _F(IRBuilder_createPHI),   KType_PHINode, KType_IRBuilder, KKMethodName_("createPHI"), 2, KType_Type, KFieldName_("ty"),KType_int, KFieldName_("numReservedValues"),
-		_Public, _F(PHINode_addIncoming),   KType_void, KType_PHINode, KKMethodName_("addIncoming"), 2, KType_Value, KFieldName_("v"),KType_BasicNode, KFieldName_("bb"),
+		_Public, _F(PHINode_addIncoming),   KType_void, KType_PHINode, KKMethodName_("addIncoming"), 2, KType_Value, KFieldName_("v"),KType_BasicBlock, KFieldName_("bb"),
 		_Public, _F(IRBuilder_createCall1), KType_Value, KType_IRBuilder, KKMethodName_("createCall1"), 2, KType_Value, KFieldName_("callee"),KType_Value, KFieldName_("arg"),
 		_Public, _F(IRBuilder_createCall2), KType_Value, KType_IRBuilder, KKMethodName_("createCall2"), 3, KType_Value, KFieldName_("callee"),KType_Value, KFieldName_("arg1"),KType_Value, KFieldName_("arg2"),
 		_Public, _F(IRBuilder_createCall3), KType_Value, KType_IRBuilder, KKMethodName_("createCall3"), 4, KType_Value, KFieldName_("callee"),KType_Value, KFieldName_("arg1"),KType_Value, KFieldName_("arg2"),KType_Value, KFieldName_("arg3"),
@@ -5006,6 +5005,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public, _F(IRBuilder_createIsNull),    KType_Value, KType_IRBuilder, KKMethodName_("createIsNull"), 1, KType_Value, KFieldName_("arg"),
 		_Public, _F(IRBuilder_createIsNotNull), KType_Value, KType_IRBuilder, KKMethodName_("createIsNotNull"), 1, KType_Value, KFieldName_("arg"),
 		_Public, _F(IRBuilder_createPtrDiff),   KType_Value, KType_IRBuilder, KKMethodName_("createPtrDiff"), 2, KType_Value, KFieldName_("lhs"),KType_Value, KFieldName_("rhs"),
+<<<<<<< HEAD
 		_Public, _F(IRBuilder_SetInsertPoint),  KType_Value, KType_IRBuilder, KKMethodName_("setInsertPoint"), 1, KType_BasicNode, KFieldName_("bb"),
 		_Public, _F(IRBuilder_getInsertNode),  KType_BasicNode, KType_IRBuilder, KKMethodName_("getInsertNode"), 0,
 		_Public, _F(BasicNode_getParent), KType_Function, KType_BasicNode, KKMethodName_("getParent"), 0,
@@ -5013,20 +5013,29 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public, _F(BasicNode_getLastInst),  KType_Value/*TODO*/, KType_BasicNode, KKMethodName_("getLastInst"), 0,
 		_Public, _F(BasicNode_getTerminator), KType_Value/*TODO*/, KType_BasicNode, KKMethodName_("getTerminator"), 0,
 		_Public, _F(Instruction_SetMetadata), KType_void, KType_Instruction, KKMethodName_("setMetadata"), 3, KType_Module, KFieldName_("m"),KType_String, KFieldName_("name"),KType_int, KFieldName_("value"),
+=======
+		_Public, _F(IRBuilder_setInsertPoint),  KType_Value, KType_IRBuilder, KKMethodName_("setInsertPoint"), 1, KType_BasicBlock, KFieldName_("bb"),
+		_Public, _F(IRBuilder_getInsertBlock),  KType_BasicBlock, KType_IRBuilder, KKMethodName_("getInsertBlock"), 0,
+		_Public, _F(BasicBlock_getParent), KType_Function, KType_BasicBlock, KKMethodName_("getParent"), 0,
+		_Public, _F(BasicBlock_insertBefore), KType_void, KType_BasicBlock, KKMethodName_("insertBefore"), 2, KType_Instruction, KFieldName_("before"),KType_Instruction, KFieldName_("inst"),
+		_Public, _F(BasicBlock_getLastInst),  KType_Value/*TODO*/, KType_BasicBlock, KKMethodName_("getLastInst"), 0,
+		_Public, _F(BasicBlock_getTerminator), KType_Value/*TODO*/, KType_BasicBlock, KKMethodName_("getTerminator"), 0,
+		_Public, _F(Instruction_setMetadata), KType_void, KType_Instruction, KKMethodName_("setMetadata"), 3, KType_Module, KFieldName_("m"),KType_String, KFieldName_("name"),KType_int, KFieldName_("value"),
+>>>>>>> 8d7b2b4ac54185eca7baa1c2ccb2a0d7ced18da1
 		_Public, _F(Function_dump), KType_void, KType_Function, KKMethodName_("dump"), 0,
 		_Public, _F(Value_dump), KType_void, KType_Value, KKMethodName_("dump"), 0,
 		_Public, _F(Type_dump), KType_void, KType_Type, KKMethodName_("dump"), 0,
-		_Public, _F(BasicNode_dump), KType_void, KType_BasicNode, KKMethodName_("dump"), 0,
+		_Public, _F(BasicBlock_dump), KType_void, KType_BasicBlock, KKMethodName_("dump"), 0,
 		_Public|_Static, _F(Function_create), KType_Function, KType_Function, KKMethodName_("create"), 4, KType_String, KFieldName_("name"),KType_FunctionType, KFieldName_("fnTy"),KType_Module, KFieldName_("m"),KType_int, KFieldName_("linkage"),
 		_Public, _F(Function_addFnAttr), KType_void, KType_Function, KKMethodName_("addFnAttr"), 1, KType_int, KFieldName_("attributes"),
-		_Public, _F(BasicNode_size), KType_int, KType_BasicNode, KKMethodName_("size"), 0,
-		_Public, _F(BasicNode_empty), KType_boolean, KType_BasicNode, KKMethodName_("empty"), 0,
+		_Public, _F(BasicBlock_size), KType_int, KType_BasicBlock, KKMethodName_("size"), 0,
+		_Public, _F(BasicBlock_empty), KType_boolean, KType_BasicBlock, KKMethodName_("empty"), 0,
 		_Public, _F(Module_new), KType_Module, KType_Module, KKMethodName_("new"), 1, KType_String, KFieldName_("name"),
 		_Public, _F(Module_getTypeByName), KType_Type, KType_Module, KKMethodName_("getTypeByName"), 1, KType_String, KFieldName_("name"),
 		_Public, _F(Module_dump), KType_void, KType_Module, KKMethodName_("dump"), 0,
 		_Public, _F(Module_getOrInsertFunction), KType_Function, KType_Module, KKMethodName_("getOrInsertFunction"), 2, KType_String, KFieldName_("name"),KType_FunctionType, KFieldName_("fnTy"),
 		_Public, _F(Module_createExecutionEngine), KType_ExecutionEngine, KType_Module, KKMethodName_("createExecutionEngine"), 1, KType_int, KFieldName_("optLevel"),
-		_Public|_Static, _F(BasicNode_create), KType_BasicNode, KType_BasicNode, KKMethodName_("create"), 2, KType_Function, KFieldName_("parent"),KType_String, KFieldName_("name"),
+		_Public|_Static, _F(BasicBlock_create), KType_BasicBlock, KType_BasicBlock, KKMethodName_("create"), 2, KType_Function, KFieldName_("parent"),KType_String, KFieldName_("name"),
 		_Public|_Static, _F(FunctionType_get), KType_FunctionType, KType_FunctionType, KKMethodName_("get"), 3, KType_Type, KFieldName_("retTy"),KType_Array_Type, KFieldName_("args"),KType_boolean, KFieldName_("b"),
 		_Public|_Static, _F(ArrayType_get),    KType_Type, KType_ArrayType, KKMethodName_("get"), 2, KType_Type, KFieldName_("t"),KType_int, KFieldName_("elemSize"),
 		_Public|_Static, _F(StructType_get),   KType_Type, KType_StructType, KKMethodName_("get"), 2, KType_Array_Type, KFieldName_("args"),KType_boolean, KFieldName_("isPacked"),
@@ -5117,7 +5126,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public|_Static, _F(LLVM_createIPSCCPPass),                 KType_Pass, KType_LLVM, KKMethodName_("createIPSCCPPass"), 0,
 		_Public|_Static, _F(LLVM_createLoopExtractorPass),          KType_Pass, KType_LLVM, KKMethodName_("createLoopExtractorPass"), 0,
 		_Public|_Static, _F(LLVM_createSingleLoopExtractorPass),    KType_Pass, KType_LLVM, KKMethodName_("createSingleLoopExtractorPass"), 0,
-		_Public|_Static, _F(LLVM_createNodeExtractorPass),         KType_Pass, KType_LLVM, KKMethodName_("createNodeExtractorPass"), 0,
+		_Public|_Static, _F(LLVM_createBlockExtractorPass),         KType_Pass, KType_LLVM, KKMethodName_("createBlockExtractorPass"), 0,
 		_Public|_Static, _F(LLVM_createStripDeadPrototypesPass),    KType_Pass, KType_LLVM, KKMethodName_("createStripDeadPrototypesPass"), 0,
 		_Public|_Static, _F(LLVM_createFunctionAttrsPass),          KType_Pass, KType_LLVM, KKMethodName_("createFunctionAttrsPass"), 0,
 		_Public|_Static, _F(LLVM_createMergeFunctionsPass),         KType_Pass, KType_LLVM, KKMethodName_("createMergeFunctionsPass"), 0,
@@ -5146,7 +5155,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public|_Static, _F(LLVM_createLoopSimplifyPass),            KType_Pass, KType_LLVM, KKMethodName_("createLoopSimplifyPass"), 0,
 		_Public|_Static, _F(LLVM_createTailCallEliminationPass),     KType_Pass, KType_LLVM, KKMethodName_("createTailCallEliminationPass"), 0,
 		_Public|_Static, _F(LLVM_createLowerSwitchPass),             KType_Pass, KType_LLVM, KKMethodName_("createLowerSwitchPass"), 0,
-		_Public|_Static, _F(LLVM_createNodePlacementPass),          KType_Pass, KType_LLVM, KKMethodName_("createNodePlacementPass"), 0,
+		_Public|_Static, _F(LLVM_createBlockPlacementPass),          KType_Pass, KType_LLVM, KKMethodName_("createBlockPlacementPass"), 0,
 		_Public|_Static, _F(LLVM_createLCSSAPass),                   KType_Pass, KType_LLVM, KKMethodName_("createLCSSAPass"), 0,
 		_Public|_Static, _F(LLVM_createEarlyCSEPass),                KType_Pass, KType_LLVM, KKMethodName_("createEarlyCSEPass"), 0,
 		_Public|_Static, _F(LLVM_createGVNPass),                     KType_Pass, KType_LLVM, KKMethodName_("createGVNPass"), 1, KType_boolean, KFieldName_("noLoads"),
@@ -5175,73 +5184,73 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public|_Static, _F(Intrinsic_getDeclaration), KType_Function, KType_intrinsic, KKMethodName_("getDeclaration"), 3, KType_Module, KFieldName_("m"),KType_int, KFieldName_("id"),KType_Array_Type, KFieldName_("args"),
 		_Public|_Static, _F(LLVM_parseBitcodeFile), KType_Value, KType_LLVM, KKMethodName_("parseBitcodeFile"), 1, KType_String, KFieldName_("bcfile"),
 
-		_Public|_Static, _F(ConstantNode_getAlignOf), KType_Constant, KType_ConstantNode, KKMethodName_("getAlignOf"), 1,KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getSizeOf), KType_Constant, KType_ConstantNode, KKMethodName_("getSizeOf"), 1,KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getOffsetOf), KType_Constant, KType_ConstantNode, KKMethodName_("getOffsetOf"), 2,KType_StructType, KFieldName_("sTy"), KType_int, KFieldName_("fieldNo"),
-		_Public|_Static, _F(ConstantNode_getOffsetOf), KType_Constant, KType_ConstantNode, KKMethodName_("getOffsetOf"), 2,KType_Type, KFieldName_("ty"), KType_Constant, KFieldName_("fieldNo"),
-		_Public|_Static, _F(ConstantNode_getNeg), KType_Constant, KType_ConstantNode, KKMethodName_("getNeg"), 3,KType_Constant, KFieldName_("c"), KType_boolean, KFieldName_("hasNUW"), KType_boolean, KFieldName_("hasNSW"),
-		_Public|_Static, _F(ConstantNode_getFNeg), KType_Constant, KType_ConstantNode, KKMethodName_("getFNeg"), 1,KType_Constant, KFieldName_("c"),
-		_Public|_Static, _F(ConstantNode_getNot), KType_Constant, KType_ConstantNode, KKMethodName_("getNot"), 1,KType_Constant, KFieldName_("c"),
-		_Public|_Static, _F(ConstantNode_getAdd), KType_Constant, KType_ConstantNode, KKMethodName_("getAdd"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("hasNUW"), KType_boolean, KFieldName_("hasNSW"),
-		_Public|_Static, _F(ConstantNode_getFAdd), KType_Constant, KType_ConstantNode, KKMethodName_("getFAdd"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getSub), KType_Constant, KType_ConstantNode, KKMethodName_("getSub"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("hasNUW"), KType_boolean, KFieldName_("hasNSW"),
-		_Public|_Static, _F(ConstantNode_getFSub), KType_Constant, KType_ConstantNode, KKMethodName_("getFSub"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getMul), KType_Constant, KType_ConstantNode, KKMethodName_("getMul"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("hasNUW"), KType_boolean, KFieldName_("hasNSW"),
-		_Public|_Static, _F(ConstantNode_getFMul), KType_Constant, KType_ConstantNode, KKMethodName_("getFMul"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getUDiv), KType_Constant, KType_ConstantNode, KKMethodName_("getUDiv"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("isExact"),
-		_Public|_Static, _F(ConstantNode_getSDiv), KType_Constant, KType_ConstantNode, KKMethodName_("getSDiv"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("isExact"),
-		_Public|_Static, _F(ConstantNode_getFDiv), KType_Constant, KType_ConstantNode, KKMethodName_("getFDiv"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getURem), KType_Constant, KType_ConstantNode, KKMethodName_("getURem"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getSRem), KType_Constant, KType_ConstantNode, KKMethodName_("getSRem"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getFRem), KType_Constant, KType_ConstantNode, KKMethodName_("getFRem"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getAnd), KType_Constant, KType_ConstantNode, KKMethodName_("getAnd"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getOr), KType_Constant, KType_ConstantNode, KKMethodName_("getOr"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getXor), KType_Constant, KType_ConstantNode, KKMethodName_("getXor"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getShl), KType_Constant, KType_ConstantNode, KKMethodName_("getShl"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("hasNUW"), KType_boolean, KFieldName_("hasNSW"),
-		_Public|_Static, _F(ConstantNode_getLShr), KType_Constant, KType_ConstantNode, KKMethodName_("getLShr"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("isExact"),
-		_Public|_Static, _F(ConstantNode_getAShr), KType_Constant, KType_ConstantNode, KKMethodName_("getAShr"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("isExact"),
-		_Public|_Static, _F(ConstantNode_getTrunc), KType_Constant, KType_ConstantNode, KKMethodName_("getTrunc"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getSExt), KType_Constant, KType_ConstantNode, KKMethodName_("getSExt"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getZExt), KType_Constant, KType_ConstantNode, KKMethodName_("getZExt"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getFPTrunc), KType_Constant, KType_ConstantNode, KKMethodName_("getFPTrunc"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getFPExtend), KType_Constant, KType_ConstantNode, KKMethodName_("getFPExtend"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getUIToFP), KType_Constant, KType_ConstantNode, KKMethodName_("getUIToFP"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getSIToFP), KType_Constant, KType_ConstantNode, KKMethodName_("getSIToFP"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getFPToUI), KType_Constant, KType_ConstantNode, KKMethodName_("getFPToUI"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getFPToSI), KType_Constant, KType_ConstantNode, KKMethodName_("getFPToSI"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getPtrToInt), KType_Constant, KType_ConstantNode, KKMethodName_("getPtrToInt"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getIntToPtr), KType_Constant, KType_ConstantNode, KKMethodName_("getIntToPtr"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getBitCast), KType_Constant, KType_ConstantNode, KKMethodName_("getBitCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getNSWNeg), KType_Constant, KType_ConstantNode, KKMethodName_("getNSWNeg"), 1,KType_Constant, KFieldName_("c"),
-		_Public|_Static, _F(ConstantNode_getNUWNeg), KType_Constant, KType_ConstantNode, KKMethodName_("getNUWNeg"), 1,KType_Constant, KFieldName_("c"),
-		_Public|_Static, _F(ConstantNode_getNSWAdd), KType_Constant, KType_ConstantNode, KKMethodName_("getNSWAdd"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getNUWAdd), KType_Constant, KType_ConstantNode, KKMethodName_("getNUWAdd"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getNSWSub), KType_Constant, KType_ConstantNode, KKMethodName_("getNSWSub"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getNUWSub), KType_Constant, KType_ConstantNode, KKMethodName_("getNUWSub"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getNSWMul), KType_Constant, KType_ConstantNode, KKMethodName_("getNSWMul"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getNUWMul), KType_Constant, KType_ConstantNode, KKMethodName_("getNUWMul"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getNSWShl), KType_Constant, KType_ConstantNode, KKMethodName_("getNSWShl"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getNUWShl), KType_Constant, KType_ConstantNode, KKMethodName_("getNUWShl"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getExactSDiv), KType_Constant, KType_ConstantNode, KKMethodName_("getExactSDiv"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getExactUDiv), KType_Constant, KType_ConstantNode, KKMethodName_("getExactUDiv"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getExactAShr), KType_Constant, KType_ConstantNode, KKMethodName_("getExactAShr"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getExactLShr), KType_Constant, KType_ConstantNode, KKMethodName_("getExactLShr"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantNode_getZExtOrBitCast), KType_Constant, KType_ConstantNode, KKMethodName_("getZExtOrBitCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getSExtOrBitCast), KType_Constant, KType_ConstantNode, KKMethodName_("getSExtOrBitCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getTruncOrBitCast), KType_Constant, KType_ConstantNode, KKMethodName_("getTruncOrBitCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getPointerCast), KType_Constant, KType_ConstantNode, KKMethodName_("getPointerCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getIntegerCast), KType_Constant, KType_ConstantNode, KKMethodName_("getIntegerCast"), 3,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"), KType_boolean, KFieldName_("isSigned"),
-		_Public|_Static, _F(ConstantNode_getFPCast), KType_Constant, KType_ConstantNode, KKMethodName_("getFPCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantNode_getSelect), KType_Constant, KType_ConstantNode, KKMethodName_("getSelect"), 3,KType_Constant, KFieldName_("c"), KType_Constant, KFieldName_("v1"), KType_Constant, KFieldName_("v2"),
-		_Public|_Static, _F(ConstantNode_getElementPtr0), KType_Constant, KType_ConstantNode, KKMethodName_("getElementPtr"), 3,KType_Constant, KFieldName_("c"), KType_Constant, KFieldName_("idx"), KType_boolean, KFieldName_("InBounds"),
-		_Public|_Static, _F(ConstantNode_getElementPtr), KType_Constant, KType_ConstantNode, KKMethodName_("getElementPtr"), 3,KType_Constant, KFieldName_("c"), KType_Array_Value, KFieldName_("IdxList"), KType_boolean, KFieldName_("InBounds"),
-		_Public|_Static, _F(ConstantNode_getInBoundsGetElementPtr0), KType_Constant, KType_ConstantNode, KKMethodName_("getInBoundsGetElementPtr0"), 2,KType_Constant, KFieldName_("c"), KType_Constant, KFieldName_("idx"),
-		_Public|_Static, _F(ConstantNode_getInBoundsGetElementPtr), KType_Constant, KType_ConstantNode, KKMethodName_("getInBoundsGetElementPtr"), 2,KType_Constant, KFieldName_("c"), KType_Array_Value, KFieldName_("idxList"),
-		_Public|_Static, _F(ConstantNode_getExtractElement), KType_Constant, KType_ConstantNode, KKMethodName_("getExtractElement"), 2,KType_Constant, KFieldName_("vec"), KType_Constant, KFieldName_("idx"),
-		_Public|_Static, _F(ConstantNode_getInsertElement), KType_Constant, KType_ConstantNode, KKMethodName_("getInsertElement"), 3,KType_Constant, KFieldName_("vec"), KType_Constant, KFieldName_("elt"), KType_Constant, KFieldName_("idx"),
-		_Public|_Static, _F(ConstantNode_getShuffleVector), KType_Constant, KType_ConstantNode, KKMethodName_("getShuffleVector"), 3,KType_Constant, KFieldName_("v1"), KType_Constant, KFieldName_("v2"), KType_Constant, KFieldName_("mask"),
-		_Public|_Static, _F(ConstantNode_getExtractValue), KType_Constant, KType_ConstantNode, KKMethodName_("getExtractValue"), 2,KType_Constant, KFieldName_("Agg"), KType_Array_Int, KFieldName_("idxs"),
-		_Public|_Static, _F(ConstantNode_getInsertValue), KType_Constant, KType_ConstantNode, KKMethodName_("getInsertValue"), 3,KType_Constant, KFieldName_("Agg"), KType_Constant, KFieldName_("val"), KType_Array_Int, KFieldName_("idxs"),
+		_Public|_Static, _F(ConstantExpr_getAlignOf), KType_Constant, KType_ConstantExpr, KKMethodName_("getAlignOf"), 1,KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getSizeOf), KType_Constant, KType_ConstantExpr, KKMethodName_("getSizeOf"), 1,KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getOffsetOf), KType_Constant, KType_ConstantExpr, KKMethodName_("getOffsetOf"), 2,KType_StructType, KFieldName_("sTy"), KType_int, KFieldName_("fieldNo"),
+		_Public|_Static, _F(ConstantExpr_getOffsetOf), KType_Constant, KType_ConstantExpr, KKMethodName_("getOffsetOf"), 2,KType_Type, KFieldName_("ty"), KType_Constant, KFieldName_("fieldNo"),
+		_Public|_Static, _F(ConstantExpr_getNeg), KType_Constant, KType_ConstantExpr, KKMethodName_("getNeg"), 3,KType_Constant, KFieldName_("c"), KType_boolean, KFieldName_("hasNUW"), KType_boolean, KFieldName_("hasNSW"),
+		_Public|_Static, _F(ConstantExpr_getFNeg), KType_Constant, KType_ConstantExpr, KKMethodName_("getFNeg"), 1,KType_Constant, KFieldName_("c"),
+		_Public|_Static, _F(ConstantExpr_getNot), KType_Constant, KType_ConstantExpr, KKMethodName_("getNot"), 1,KType_Constant, KFieldName_("c"),
+		_Public|_Static, _F(ConstantExpr_getAdd), KType_Constant, KType_ConstantExpr, KKMethodName_("getAdd"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("hasNUW"), KType_boolean, KFieldName_("hasNSW"),
+		_Public|_Static, _F(ConstantExpr_getFAdd), KType_Constant, KType_ConstantExpr, KKMethodName_("getFAdd"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getSub), KType_Constant, KType_ConstantExpr, KKMethodName_("getSub"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("hasNUW"), KType_boolean, KFieldName_("hasNSW"),
+		_Public|_Static, _F(ConstantExpr_getFSub), KType_Constant, KType_ConstantExpr, KKMethodName_("getFSub"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getMul), KType_Constant, KType_ConstantExpr, KKMethodName_("getMul"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("hasNUW"), KType_boolean, KFieldName_("hasNSW"),
+		_Public|_Static, _F(ConstantExpr_getFMul), KType_Constant, KType_ConstantExpr, KKMethodName_("getFMul"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getUDiv), KType_Constant, KType_ConstantExpr, KKMethodName_("getUDiv"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("isExact"),
+		_Public|_Static, _F(ConstantExpr_getSDiv), KType_Constant, KType_ConstantExpr, KKMethodName_("getSDiv"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("isExact"),
+		_Public|_Static, _F(ConstantExpr_getFDiv), KType_Constant, KType_ConstantExpr, KKMethodName_("getFDiv"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getURem), KType_Constant, KType_ConstantExpr, KKMethodName_("getURem"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getSRem), KType_Constant, KType_ConstantExpr, KKMethodName_("getSRem"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getFRem), KType_Constant, KType_ConstantExpr, KKMethodName_("getFRem"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getAnd), KType_Constant, KType_ConstantExpr, KKMethodName_("getAnd"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getOr), KType_Constant, KType_ConstantExpr, KKMethodName_("getOr"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getXor), KType_Constant, KType_ConstantExpr, KKMethodName_("getXor"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getShl), KType_Constant, KType_ConstantExpr, KKMethodName_("getShl"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("hasNUW"), KType_boolean, KFieldName_("hasNSW"),
+		_Public|_Static, _F(ConstantExpr_getLShr), KType_Constant, KType_ConstantExpr, KKMethodName_("getLShr"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("isExact"),
+		_Public|_Static, _F(ConstantExpr_getAShr), KType_Constant, KType_ConstantExpr, KKMethodName_("getAShr"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("isExact"),
+		_Public|_Static, _F(ConstantExpr_getTrunc), KType_Constant, KType_ConstantExpr, KKMethodName_("getTrunc"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getSExt), KType_Constant, KType_ConstantExpr, KKMethodName_("getSExt"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getZExt), KType_Constant, KType_ConstantExpr, KKMethodName_("getZExt"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getFPTrunc), KType_Constant, KType_ConstantExpr, KKMethodName_("getFPTrunc"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getFPExtend), KType_Constant, KType_ConstantExpr, KKMethodName_("getFPExtend"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getUIToFP), KType_Constant, KType_ConstantExpr, KKMethodName_("getUIToFP"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getSIToFP), KType_Constant, KType_ConstantExpr, KKMethodName_("getSIToFP"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getFPToUI), KType_Constant, KType_ConstantExpr, KKMethodName_("getFPToUI"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getFPToSI), KType_Constant, KType_ConstantExpr, KKMethodName_("getFPToSI"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getPtrToInt), KType_Constant, KType_ConstantExpr, KKMethodName_("getPtrToInt"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getIntToPtr), KType_Constant, KType_ConstantExpr, KKMethodName_("getIntToPtr"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getBitCast), KType_Constant, KType_ConstantExpr, KKMethodName_("getBitCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getNSWNeg), KType_Constant, KType_ConstantExpr, KKMethodName_("getNSWNeg"), 1,KType_Constant, KFieldName_("c"),
+		_Public|_Static, _F(ConstantExpr_getNUWNeg), KType_Constant, KType_ConstantExpr, KKMethodName_("getNUWNeg"), 1,KType_Constant, KFieldName_("c"),
+		_Public|_Static, _F(ConstantExpr_getNSWAdd), KType_Constant, KType_ConstantExpr, KKMethodName_("getNSWAdd"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getNUWAdd), KType_Constant, KType_ConstantExpr, KKMethodName_("getNUWAdd"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getNSWSub), KType_Constant, KType_ConstantExpr, KKMethodName_("getNSWSub"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getNUWSub), KType_Constant, KType_ConstantExpr, KKMethodName_("getNUWSub"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getNSWMul), KType_Constant, KType_ConstantExpr, KKMethodName_("getNSWMul"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getNUWMul), KType_Constant, KType_ConstantExpr, KKMethodName_("getNUWMul"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getNSWShl), KType_Constant, KType_ConstantExpr, KKMethodName_("getNSWShl"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getNUWShl), KType_Constant, KType_ConstantExpr, KKMethodName_("getNUWShl"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getExactSDiv), KType_Constant, KType_ConstantExpr, KKMethodName_("getExactSDiv"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getExactUDiv), KType_Constant, KType_ConstantExpr, KKMethodName_("getExactUDiv"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getExactAShr), KType_Constant, KType_ConstantExpr, KKMethodName_("getExactAShr"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getExactLShr), KType_Constant, KType_ConstantExpr, KKMethodName_("getExactLShr"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
+		_Public|_Static, _F(ConstantExpr_getZExtOrBitCast), KType_Constant, KType_ConstantExpr, KKMethodName_("getZExtOrBitCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getSExtOrBitCast), KType_Constant, KType_ConstantExpr, KKMethodName_("getSExtOrBitCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getTruncOrBitCast), KType_Constant, KType_ConstantExpr, KKMethodName_("getTruncOrBitCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getPointerCast), KType_Constant, KType_ConstantExpr, KKMethodName_("getPointerCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getIntegerCast), KType_Constant, KType_ConstantExpr, KKMethodName_("getIntegerCast"), 3,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"), KType_boolean, KFieldName_("isSigned"),
+		_Public|_Static, _F(ConstantExpr_getFPCast), KType_Constant, KType_ConstantExpr, KKMethodName_("getFPCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
+		_Public|_Static, _F(ConstantExpr_getSelect), KType_Constant, KType_ConstantExpr, KKMethodName_("getSelect"), 3,KType_Constant, KFieldName_("c"), KType_Constant, KFieldName_("v1"), KType_Constant, KFieldName_("v2"),
+		_Public|_Static, _F(ConstantExpr_getElementPtr0), KType_Constant, KType_ConstantExpr, KKMethodName_("getElementPtr"), 3,KType_Constant, KFieldName_("c"), KType_Constant, KFieldName_("idx"), KType_boolean, KFieldName_("InBounds"),
+		_Public|_Static, _F(ConstantExpr_getElementPtr), KType_Constant, KType_ConstantExpr, KKMethodName_("getElementPtr"), 3,KType_Constant, KFieldName_("c"), KType_Array_Value, KFieldName_("IdxList"), KType_boolean, KFieldName_("InBounds"),
+		_Public|_Static, _F(ConstantExpr_getInBoundsGetElementPtr0), KType_Constant, KType_ConstantExpr, KKMethodName_("getInBoundsGetElementPtr0"), 2,KType_Constant, KFieldName_("c"), KType_Constant, KFieldName_("idx"),
+		_Public|_Static, _F(ConstantExpr_getInBoundsGetElementPtr), KType_Constant, KType_ConstantExpr, KKMethodName_("getInBoundsGetElementPtr"), 2,KType_Constant, KFieldName_("c"), KType_Array_Value, KFieldName_("idxList"),
+		_Public|_Static, _F(ConstantExpr_getExtractElement), KType_Constant, KType_ConstantExpr, KKMethodName_("getExtractElement"), 2,KType_Constant, KFieldName_("vec"), KType_Constant, KFieldName_("idx"),
+		_Public|_Static, _F(ConstantExpr_getInsertElement), KType_Constant, KType_ConstantExpr, KKMethodName_("getInsertElement"), 3,KType_Constant, KFieldName_("vec"), KType_Constant, KFieldName_("elt"), KType_Constant, KFieldName_("idx"),
+		_Public|_Static, _F(ConstantExpr_getShuffleVector), KType_Constant, KType_ConstantExpr, KKMethodName_("getShuffleVector"), 3,KType_Constant, KFieldName_("v1"), KType_Constant, KFieldName_("v2"), KType_Constant, KFieldName_("mask"),
+		_Public|_Static, _F(ConstantExpr_getExtractValue), KType_Constant, KType_ConstantExpr, KKMethodName_("getExtractValue"), 2,KType_Constant, KFieldName_("Agg"), KType_Array_Int, KFieldName_("idxs"),
+		_Public|_Static, _F(ConstantExpr_getInsertValue), KType_Constant, KType_ConstantExpr, KKMethodName_("getInsertValue"), 3,KType_Constant, KFieldName_("Agg"), KType_Constant, KFieldName_("val"), KType_Array_Int, KFieldName_("idxs"),
 		_Public, _F(Type_opEQ), KType_boolean, KType_Type, KKMethodName_("=="), 1,KType_Type, KFieldName_("t"),
 		//FIXME
 	//_Public|_Const|_Im|_Coercion, _F(Float_toInt), KType_int, KType_float, KMethodName_To(KType_int), 0,
@@ -5252,7 +5261,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public|_Const|_Coercion|_Im, _F(Object_asFunction), KType_Function, KType_Object, KMethodName_To(KType_Function), 0,
 		_Public|_Const|_Coercion|_Im, _F(Object_toIRBuilder), KType_IRBuilder, KType_Object, KMethodName_To(KType_IRBuilder), 0,
 		_Public|_Const|_Coercion|_Im, _F(Object_asFunctionType), KType_FunctionType, KType_Object, KMethodName_To(KType_FunctionType), 0,
-		_Public|_Const|_Coercion|_Im, _F(Object_toLLVMBasicNode), KType_BasicNode, KType_Object, KMethodName_To(KType_BasicNode), 0,
+		_Public|_Const|_Coercion|_Im, _F(Object_toLLVMBasicBlock), KType_BasicBlock, KType_Object, KMethodName_To(KType_BasicBlock), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, methoddata, trace);

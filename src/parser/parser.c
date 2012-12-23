@@ -212,8 +212,8 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kNode_GetNode             = kNode_GetNode;
 	mod->kNode_GetNode              = kNode_GetNode;
 	mod->kNode_GetText              = kNode_GetText;
-	mod->kNode_SetConstValue        = kNode_SetConstValue;
-	mod->kNode_SetUnboxConstValue   = kNode_SetUnboxConstValue;
+	mod->kNode_SetConst        = kNode_SetConst;
+	mod->kNode_SetUnboxConst   = kNode_SetUnboxConst;
 	mod->kNode_SetVariable          = kNode_SetVariable;
 	mod->TypeCheckNodeAt        = TypeCheckNodeAt;
 	mod->TypeCheckNodeByName        = TypeCheckNodeByName;
