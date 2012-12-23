@@ -1909,7 +1909,7 @@ static KMETHOD IRBuilder_createPtrDiff(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void IRBuilder.SetInsertPoint(BasicNode BB);
-static KMETHOD IRBuilder_setInsertPoint(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
+static KMETHOD IRBuilder_SetInsertPoint(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	BasicNode * BB = konoha::object_cast<BasicNode *>(sfp[1].asObject);
@@ -2293,7 +2293,7 @@ static KMETHOD ArrayType_get(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## @Native void StructType.setBody(Array<Type> args, boolean isPacked);
-static KMETHOD StructType_setBody(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
+static KMETHOD StructType_SetBody(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 209
 	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
@@ -2500,7 +2500,7 @@ static KMETHOD ExecutionEngine_getTargetData(KonohaContext *kctx, KonohaStack *s
 #endif
 
 //## void Method.setFunction(NativeFunction func);
-static KMETHOD kMethod_setFunction(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD kMethod_SetFunction(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = (kMethod*) sfp[0].asObject;
 	kObject *po = sfp[1].asObject;
@@ -2536,7 +2536,7 @@ static KMETHOD Value_replaceAllUsesWith(KonohaContext *kctx _UNUSED_, KonohaStac
 	KReturnVoid();
 }
 //## Value Value.setName(String name);
-static KMETHOD Value_setName(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
+static KMETHOD Value_SetName(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
 	Value *self = konoha::object_cast<Value *>(sfp[0].asObject);
 	kString *name = sfp[1].asString;
@@ -2544,7 +2544,7 @@ static KMETHOD Value_setName(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 	KReturnVoid();
 }
 //## void LoadInst.setAlignment(int align);
-static KMETHOD LoadInst_setAlignment(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
+static KMETHOD LoadInst_SetAlignment(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
 	LoadInst *self = konoha::object_cast<LoadInst *>(sfp[0].asObject);
 	int align = sfp[1].intValue;
@@ -2552,7 +2552,7 @@ static KMETHOD LoadInst_setAlignment(KonohaContext *kctx _UNUSED_, KonohaStack *
 	KReturnVoid();
 }
 //## void StoreInst.setAlignment(int align);
-static KMETHOD StoreInst_setAlignment(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
+static KMETHOD StoreInst_SetAlignment(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
 	StoreInst *self = konoha::object_cast<StoreInst *>(sfp[0].asObject);
 	int align = sfp[1].intValue;
@@ -4419,7 +4419,7 @@ static KMETHOD LLVM_parseBitcodeFile(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //TODO Scriptnize
-static KMETHOD Instruction_setMetadata(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
+static KMETHOD Instruction_SetMetadata(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
 	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
@@ -4606,7 +4606,7 @@ static KDEFINE_INT_CONST IntAttributes[] = {
 //	kapi->loadClassIntConst(kctx, cid, IntAttributes);
 //}
 
-static void kmodllvm_setup(KonohaContext *kctx, struct KRuntimeModule *def, int newctx)
+static void kmodllvm_Setup(KonohaContext *kctx, struct KRuntimeModule *def, int newctx)
 {
 	(void)kctx;(void)def;(void)newctx;
 }
@@ -4629,9 +4629,9 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 	(void)argc;
 	kmodllvm_t *base = (kmodllvm_t*)KCalloc_UNTRACE(sizeof(kmodllvm_t), 1);
 	base->h.name     = "llvm";
-	base->h.setupModuleContext = kmodllvm_setup;
+	base->h.setupModuleContext = kmodllvm_Setup;
 	base->h.freeModule         = kmodllvm_free;
-	KLIB KRuntime_setModule(kctx, MOD_llvm, &base->h, trace);
+	KLIB KRuntime_SetModule(kctx, MOD_llvm, &base->h, trace);
 
 #define DEFINE_CLASS_CPP(\
 	/*const char * */structname,\
@@ -5006,13 +5006,13 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public, _F(IRBuilder_createIsNull),    KType_Value, KType_IRBuilder, KKMethodName_("createIsNull"), 1, KType_Value, KFieldName_("arg"),
 		_Public, _F(IRBuilder_createIsNotNull), KType_Value, KType_IRBuilder, KKMethodName_("createIsNotNull"), 1, KType_Value, KFieldName_("arg"),
 		_Public, _F(IRBuilder_createPtrDiff),   KType_Value, KType_IRBuilder, KKMethodName_("createPtrDiff"), 2, KType_Value, KFieldName_("lhs"),KType_Value, KFieldName_("rhs"),
-		_Public, _F(IRBuilder_setInsertPoint),  KType_Value, KType_IRBuilder, KKMethodName_("setInsertPoint"), 1, KType_BasicNode, KFieldName_("bb"),
+		_Public, _F(IRBuilder_SetInsertPoint),  KType_Value, KType_IRBuilder, KKMethodName_("setInsertPoint"), 1, KType_BasicNode, KFieldName_("bb"),
 		_Public, _F(IRBuilder_getInsertNode),  KType_BasicNode, KType_IRBuilder, KKMethodName_("getInsertNode"), 0,
 		_Public, _F(BasicNode_getParent), KType_Function, KType_BasicNode, KKMethodName_("getParent"), 0,
 		_Public, _F(BasicNode_insertBefore), KType_void, KType_BasicNode, KKMethodName_("insertBefore"), 2, KType_Instruction, KFieldName_("before"),KType_Instruction, KFieldName_("inst"),
 		_Public, _F(BasicNode_getLastInst),  KType_Value/*TODO*/, KType_BasicNode, KKMethodName_("getLastInst"), 0,
 		_Public, _F(BasicNode_getTerminator), KType_Value/*TODO*/, KType_BasicNode, KKMethodName_("getTerminator"), 0,
-		_Public, _F(Instruction_setMetadata), KType_void, KType_Instruction, KKMethodName_("setMetadata"), 3, KType_Module, KFieldName_("m"),KType_String, KFieldName_("name"),KType_int, KFieldName_("value"),
+		_Public, _F(Instruction_SetMetadata), KType_void, KType_Instruction, KKMethodName_("setMetadata"), 3, KType_Module, KFieldName_("m"),KType_String, KFieldName_("name"),KType_int, KFieldName_("value"),
 		_Public, _F(Function_dump), KType_void, KType_Function, KKMethodName_("dump"), 0,
 		_Public, _F(Value_dump), KType_void, KType_Value, KKMethodName_("dump"), 0,
 		_Public, _F(Type_dump), KType_void, KType_Type, KKMethodName_("dump"), 0,
@@ -5031,7 +5031,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public|_Static, _F(ArrayType_get),    KType_Type, KType_ArrayType, KKMethodName_("get"), 2, KType_Type, KFieldName_("t"),KType_int, KFieldName_("elemSize"),
 		_Public|_Static, _F(StructType_get),   KType_Type, KType_StructType, KKMethodName_("get"), 2, KType_Array_Type, KFieldName_("args"),KType_boolean, KFieldName_("isPacked"),
 		_Public|_Static, _F(StructType_create), KType_Type, KType_StructType, KKMethodName_("create"), 3, KType_Array_Type, KFieldName_("args"),KType_String, KFieldName_("name"),KType_boolean, KFieldName_("isPacked"),
-		_Public, _F(StructType_setBody), KType_void, KType_StructType, KKMethodName_("setBody"), 2, KType_Array_Type, KFieldName_("args"),KType_boolean, KFieldName_("isPacked"),
+		_Public, _F(StructType_SetBody), KType_void, KType_StructType, KKMethodName_("setBody"), 2, KType_Array_Type, KFieldName_("args"),KType_boolean, KFieldName_("isPacked"),
 		_Public, _F(StructType_isOpaque), KType_boolean, KType_StructType, KKMethodName_("isOpaque"), 0,
 		_Public, _F(ExecutionEngine_getPointerToFunction), KType_NativeFunction, KType_ExecutionEngine, KKMethodName_("getPointerToFunction"), 1, KType_Function, KFieldName_("func"),
 		_Public, _F(ExecutionEngine_addGlobalMapping), KType_void, KType_ExecutionEngine, KKMethodName_("addGlobalMapping"), 2, KType_GlobalVariable, KFieldName_("g"),KType_int, KFieldName_("addr"),
@@ -5055,13 +5055,13 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 #endif
 		_Public, _F(Argument_new), KType_Value/*TODO*/, KType_Argument, KKMethodName_("new"), 1, KType_Type, KFieldName_("type"),
 		_Public, _F(Value_replaceAllUsesWith), KType_void, KType_Value, KKMethodName_("replaceAllUsesWith"), 1, KType_Value, KFieldName_("v"),
-		_Public, _F(Value_setName), KType_void, KType_Value, KKMethodName_("setName"), 1, KType_String, KFieldName_("name"),
+		_Public, _F(Value_SetName), KType_void, KType_Value, KKMethodName_("setName"), 1, KType_String, KFieldName_("name"),
 		_Public, _F(Value_getType), KType_Type, KType_Value, KKMethodName_("getType"), 0,
 		_Public, _F(Function_getArguments), KType_Array_Value, KType_Function, KKMethodName_("getArguments"), 0,
 		_Public, _F(Function_getReturnType), KType_Type, KType_Function, KKMethodName_("getReturnType"), 0,
-		_Public, _F(LoadInst_setAlignment),  KType_void, KType_LoadInst, KKMethodName_("setAlignment"), 1, KType_int, KFieldName_("align"),
-		_Public, _F(StoreInst_setAlignment), KType_void, KType_StoreInst, KKMethodName_("setAlignment"), 1, KType_int, KFieldName_("align"),
-		_Public, _F(kMethod_setFunction), KType_void, KType_Method, KKMethodName_("setFunction"), 1, KType_NativeFunction, KFieldName_("nf"),
+		_Public, _F(LoadInst_SetAlignment),  KType_void, KType_LoadInst, KKMethodName_("setAlignment"), 1, KType_int, KFieldName_("align"),
+		_Public, _F(StoreInst_SetAlignment), KType_void, KType_StoreInst, KKMethodName_("setAlignment"), 1, KType_int, KFieldName_("align"),
+		_Public, _F(kMethod_SetFunction), KType_void, KType_Method, KKMethodName_("setFunction"), 1, KType_NativeFunction, KFieldName_("nf"),
 		_Public|_Static, _F(ConstantInt_get),         KType_Constant, KType_ConstantInt, KKMethodName_("getValue"), 2, KType_Type, KFieldName_("type"),KType_int, KFieldName_("v"),
 		_Public|_Static, _F(ConstantFP_get),          KType_Constant, KType_ConstantFP, KKMethodName_("getValue"), 2, KType_Type, KFieldName_("type"),KType_float, KFieldName_("v"),
 		_Public|_Static, _F(ConstantFP_get),          KType_Constant, KType_ConstantFP, KKMethodName_("getValueFromBits"), 2, KType_Type, KFieldName_("type"),KType_int, KFieldName_("v"),

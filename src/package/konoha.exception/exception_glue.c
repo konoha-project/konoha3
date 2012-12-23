@@ -212,7 +212,7 @@
 //	mod->h.setup    = kModuleException_Setup;
 //	mod->h.reftrace = kModuleException_Reftrace;
 //	mod->h.free     = kModuleException_Free;
-//	KLIB KRuntime_setModule(kctx, MOD_exception, &mod->h, trace);
+//	KLIB KRuntime_SetModule(kctx, MOD_exception, &mod->h, trace);
 //	KDEFINE_CLASS defException = {
 //		STRUCTNAME(Exception),
 //		.cflag = KClassFlag_Exception,
@@ -293,7 +293,7 @@
 //	int ret = false;
 //
 //	// check "catch(...)"
-//	//ret = SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_Exception, 0);
+//	//ret = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_Exception, 0);
 //
 //	kNode *catchNode = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
 //	kNode *parentNode = Node_LookupTryOrCatchNodeNULL(kctx, stmt);

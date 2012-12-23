@@ -45,11 +45,11 @@ extern "C" {
 //## flag RegExp Multiline   3 - is set * *; // it is used only for RegExp_p
 
 #define RegExp_isGlobal(o)        (KFlag_Is(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1))
-#define RegExp_setGlobal(o,b)     KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1,b)
+#define RegExp_SetGlobal(o,b)     KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1,b)
 #define RegExp_isIgnoreCase(o)    (KFlag_Is(uintptr_t,(o)->h.magicflag,kObjectFlag_Local2))
-#define RegExp_setIgnoreCase(o,b) KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local2,b)
+#define RegExp_SetIgnoreCase(o,b) KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local2,b)
 #define RegExp_isMultiline(o)     (KFlag_Is(uintptr_t,(o)->h.magicflag,kObjectFlag_Local3))
-#define RegExp_setMultiline(o,b)  KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local3,b)
+#define RegExp_SetMultiline(o,b)  KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local3,b)
 
 typedef void kregexp_t;
 
@@ -221,19 +221,19 @@ static int pcre_regexec(KonohaContext *kctx, kregexp_t *reg, const char *str, si
 
 /* ------------------------------------------------------------------------ */
 
-static void kRegExp_setOptions(kRegExp *re, const char *option)
+static void kRegExp_SetOptions(kRegExp *re, const char *option)
 {
 	size_t i, optlen = strlen(option);
 	for(i = 0; i < optlen; i++) {
 		switch(option[i]) {
 		case 'g':
-			RegExp_setGlobal(re, 1);
+			RegExp_SetGlobal(re, 1);
 			break;
 		case 'i':
-			RegExp_setIgnoreCase(re, 1);
+			RegExp_SetIgnoreCase(re, 1);
 			break;
 		case 'm':
-			RegExp_setMultiline(re, 1);
+			RegExp_SetMultiline(re, 1);
 		default:
 			break;
 		}
@@ -307,11 +307,11 @@ static void RegExp_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 			RegExp_isMultiline(re) ? "m" : "");
 }
 
-static void RegExp_set(KonohaContext *kctx, kRegExp *re, kString *ptns, kString *opts)
+static void RegExp_Set(KonohaContext *kctx, kRegExp *re, kString *ptns, kString *opts)
 {
 	const char *ptn = kString_text(ptns);
 	const char *opt = kString_text(opts);
-	kRegExp_setOptions(re, opt);
+	kRegExp_SetOptions(re, opt);
 	KFieldSet(re, re->pattern, ptns);
 	re->reg = pcre_regmalloc(kctx, ptns);
 	int cflags = pcre_ParseComplflags(kctx, opt);
@@ -368,7 +368,7 @@ static KMETHOD RegExp_getlastIndex(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD RegExp_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RegExp_set(kctx, sfp[0].asRegExp, sfp[1].asString, KNULL(String));
+	RegExp_Set(kctx, sfp[0].asRegExp, sfp[1].asString, KNULL(String));
 	KReturn(sfp[0].asObject);
 }
 
@@ -377,7 +377,7 @@ static KMETHOD RegExp_new(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD RegExp_new2(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RegExp_set(kctx, sfp[0].asRegExp, sfp[1].asString, sfp[2].asString);
+	RegExp_Set(kctx, sfp[0].asRegExp, sfp[1].asString, sfp[2].asString);
 	KReturn(sfp[0].asObject);
 }
 
@@ -696,14 +696,14 @@ static KMETHOD TypeCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *tk = expr->TermToken;
 	kRegExp *r = new_(RegExp, NULL, OnGcStack);
 	DBG_ASSERT(kArray_size(tk->subTokenList) == 2);
-	RegExp_set(kctx, r, tk->subTokenList->stringItems[0], tk->subTokenList->stringItems[1]);
+	RegExp_Set(kctx, r, tk->subTokenList->stringItems[0], tk->subTokenList->stringItems[1]);
 	KReturn(SUGAR kNode_SetConstValue(kctx, expr, NULL, UPCAST(r)));
 }
 
 static kbool_t regexp_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("$RegExp"), SYNFLAG_CTypeCheckFunc, 0, 0, {SUGAR termParseFunc}, {SUGARFUNC TypeCheck_RegExp}},
+		{ KSymbol_("$RegExp"), SYNFLAG_CTypeFunc, 0, 0, {SUGAR termParseFunc}, {SUGARFUNC TypeCheck_RegExp}},
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

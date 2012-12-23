@@ -161,7 +161,7 @@ static inline ARRAY(T) *ARRAY_Init_##T (ARRAY(T) *a) {\
 static inline T ARRAY_##T##_get(ARRAY(T) *a, int idx) {\
 	return a->list[idx];\
 }\
-static inline void ARRAY_##T##_set(ARRAY(T) *a, int idx, T v){ \
+static inline void ARRAY_##T##_Set(ARRAY(T) *a, int idx, T v){ \
 	a->list[idx] = v;\
 }\
 static inline void ARRAY_##T##_Add(ARRAY(T) *a, T v) {\
@@ -170,7 +170,7 @@ static inline void ARRAY_##T##_Add(ARRAY(T) *a, T v) {\
 		a->capacity *= 2;\
 		a->list = (T *)do_realloc(a->list, os, sizeof(T) * a->capacity);\
 	}\
-	ARRAY_##T##_set(a, a->size++, v);\
+	ARRAY_##T##_Set(a, a->size++, v);\
 }\
 static inline void ARRAY_##T##_dispose(ARRAY(T) *a) {\
 	do_Free(a->list, sizeof(T) * a->capacity);\
@@ -214,7 +214,7 @@ static inline int bitmap_get(bitmap_t *bm, unsigned index)
 	return (*bm & mask) != 0;
 }
 
-static inline void bitmap_set(bitmap_t *bm, unsigned index, unsigned val)
+static inline void bitmap_Set(bitmap_t *bm, unsigned index, unsigned val)
 {
 	bitmap_t mask = (uintptr_t)val << (index % BITS);
 	*bm |= mask;
@@ -302,7 +302,7 @@ struct HeapManager {
 	SubHeap heaps[SUBHEAP_KLASS_MAX+1];
 	MarkStack mstack;
 #if defined(USE_GENERATIONAL_GC) || defined(USE_CONCURRENT_GC)
-	ARRAY(BitMapPtr)  remember_sets;
+	ARRAY(BitMapPtr)  remember_Sets;
 #endif
 	Segment *segmentList;
 	ARRAY(SegmentPtr) segment_pool_a;
@@ -334,9 +334,9 @@ struct Segment {
 #ifdef USE_GENERATIONAL_GC
 	bitmap_t *snapshots[SEGMENT_LEVEL];
 	unsigned int tenure_live_count;
-	bitmap_t *remember_set; /* for debug */
+	bitmap_t *remember_Set; /* for debug */
 #elif defined(USE_CONCURRENT_GC)
-	bitmap_t *remember_set; /* for debug */
+	bitmap_t *remember_Set; /* for debug */
 #else
 	void *unused;
 #endif
@@ -350,7 +350,7 @@ typedef struct NodeHeader {
 	Segment *seg;
 	long klass;
 #if defined(USE_GENERATIONAL_GC) || defined(USE_CONCURRENT_GC)
-	bitmap_t *remember_set;
+	bitmap_t *remember_Set;
 #endif
 } NodeHeader;
 
@@ -573,8 +573,8 @@ static const unsigned BM_SIZE[] = {
 #define gc_stat(fmt, ...)  fprintf(global_gc_stat.fp, "(%s:%d) " fmt "\n" , __func__, __LINE__,  ## __VA_ARGS__)
 #endif
 
-#define Object_setTenure(o) KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_GCFlag,1)
-#define Object_setYoung(o)  KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_GCFlag,0)
+#define Object_SetTenure(o) KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_GCFlag,1)
+#define Object_SetYoung(o)  KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_GCFlag,0)
 #define Object_isTenure(o) (KFlag_Is(uintptr_t,(o)->h.magicflag, kObjectFlag_GCFlag))
 #define Object_isYoung(o)  (!Object_isTenure(o))
 
@@ -974,7 +974,7 @@ static bool nextSegment(HeapManager *mng, SubHeap *h, AllocationPointer *p)
 		}
 	}
 #ifdef USE_GENERATIONAL_GC
-	bitmap_set(&mng->flags, GC_MINOR_FLAG,
+	bitmap_Set(&mng->flags, GC_MINOR_FLAG,
 			(uintptr_t)((--h->minor_count) & (MINOR_COUNT-1)) == 0);
 #endif
 
@@ -1136,10 +1136,10 @@ static void *tryAlloc(HeapManager *mng, SubHeap *h)
 	bool isEmpty = inc(p, h);
 
 #ifdef USE_GENERATIONAL_GC
-	bitmap_set(&mng->flags, GC_MAJOR_FLAG,
+	bitmap_Set(&mng->flags, GC_MAJOR_FLAG,
 			(mng->segmentList == NULL && h->freelist == NULL && isEmpty));
 #elif USE_CONCURRENT_GC
-	bitmap_set(&mng->flags, GC_MAJOR_FLAG,
+	bitmap_Set(&mng->flags, GC_MAJOR_FLAG,
 			h->total > h->total_limit && mng->phase != GCPHASE_MARK_CONC);
 	KonohaContext *kctx = mng->kctx;
 	PLATAPI WriteBarrier(kctx, temp);
@@ -1208,11 +1208,11 @@ static void dispatchRememberSet(HeapManager *mng, size_t heap_size, AllocationNo
 	NodeHeader *head;
 	Segment *seg = mng->segmentList;
 	bitmap_t *map = (bitmap_t *)do_malloc(heap_size / (MIN_ALIGN) / sizeof(bitmap_t));
-	ARRAY_Add(BitMapPtr,  &mng->remember_sets, map);
+	ARRAY_Add(BitMapPtr,  &mng->remember_Sets, map);
 	while(seg) {
 		head = (NodeHeader *) block;
-		head->remember_set = map;
-		seg->remember_set  = map;
+		head->remember_Set = map;
+		seg->remember_Set  = map;
 		seg = seg->next;
 		map += SEGMENT_SIZE / MIN_ALIGN / BITS;
 		block++;
@@ -1291,7 +1291,7 @@ static HeapManager *HeapManager_Init(KonohaContext *kctx, size_t list_size)
 	ARRAY_Init(SegmentPtr, &mng->segment_pool_a);
 	ARRAY_Init(size_t, &mng->segment_size_a);
 #if defined(USE_GENERATIONAL_GC) || defined(USE_CONCURRENT_GC)
-	ARRAY_Init(BitMapPtr, &mng->remember_sets);
+	ARRAY_Init(BitMapPtr, &mng->remember_Sets);
 #endif
 
 	HeapManager_ExpandHeap(mng, list_size);
@@ -1397,7 +1397,7 @@ static kObject *bm_malloc_internal(HeapManager *mng, size_t n)
 		goto L_finaly;
 #ifdef USE_SAFEPOINT_POLICY
 #ifdef USE_GENERATIONAL_GC
-	bitmap_set(&mng->flags, GC_MAJOR_FLAG, 1);
+	bitmap_Set(&mng->flags, GC_MAJOR_FLAG, 1);
 #endif
 	HeapManager_ExpandHeap(mng, SUBHEAP_DEFAULT_SEGPOOL_SIZE*2);
 	newSegment(mng, h);
@@ -1689,7 +1689,7 @@ static void mark_mstack(HeapManager *mng, kObject *o, MarkStack *mstack)
 	if(!BM_TEST(*bm, bpmask)) {
 		BM_SET(*bm, bpmask);
 #ifdef USE_GENERATIONAL_GC
-		Object_setTenure(((kObjectVar *)o));
+		Object_SetTenure(((kObjectVar *)o));
 #endif
 		bitmap_mark(*bm, seg, bpidx, bpmask);
 #ifdef USE_CONCURRENT_GC
@@ -1731,7 +1731,7 @@ static void RememberSet_Add(kObject *o)
 	uintptr_t addr   = ((uintptr_t)o & ~(SEGMENT_SIZE - 1UL));
 	uintptr_t offset = ((uintptr_t)o &  (SEGMENT_SIZE - 1UL)) >> SUBHEAP_KLASS_MIN;
 	NodeHeader *head = (NodeHeader *) addr;
-	bitmap_t *map = head->remember_set;
+	bitmap_t *map = head->remember_Set;
 #ifdef DEBUG_WRITE_BARRIER
 	int ret = bitmap_get(map+(offset/BITS), offset%BITS);
 	if(ret == 0 && Object_isTenure(o)) {
@@ -1740,7 +1740,7 @@ static void RememberSet_Add(kObject *o)
 #endif
 
 #ifdef USE_GENERATIONAL_GC
-	bitmap_set(map+(offset/BITS), offset%BITS, Object_isTenure(o));
+	bitmap_Set(map+(offset/BITS), offset%BITS, Object_isTenure(o));
 #else
 	Segment *seg;
 	int index, klass;
@@ -1748,7 +1748,7 @@ static void RememberSet_Add(kObject *o)
 	OBJECT_LOAD_BLOCK_INFO(o, seg, index, klass);
 	BITPTR_INIT_(bpidx, bpmask, index);
 	bitmap_t *bm  = SEG_TRACE_BITMAP_N(seg, 0, bpidx);
-	bitmap_set(map+(offset/BITS), offset%BITS, !BM_TEST(*bm, bpmask));
+	bitmap_Set(map+(offset/BITS), offset%BITS, !BM_TEST(*bm, bpmask));
 #endif
 }
 #endif
@@ -1781,10 +1781,10 @@ static void KupdateObjectField_concmark_phase(kObject *parent, kObject *oldValPt
 static void RememberSet_Reftrace(KonohaContext *kctx, HeapManager *mng, KObjectVisitor *visitor)
 {
 	size_t i;
-	FOR_EACH_ARRAY_(mng->remember_sets, i) {
+	FOR_EACH_ARRAY_(mng->remember_Sets, i) {
 		uintptr_t base_Address = (uintptr_t) ARRAY_n(mng->managed_heap_a, i);
 		size_t bitmap_size = ARRAY_n(mng->heap_size_a, i) / (MIN_ALIGN * BITS);
-		bitmap_t *base = ARRAY_n(mng->remember_sets, i);
+		bitmap_t *base = ARRAY_n(mng->remember_Sets, i);
 		bitmap_t *m = base;
 		bitmap_t *e = m + bitmap_size;
 		for (; m != e; base+=BITS, base_Address +=
@@ -1882,10 +1882,10 @@ static void rearrangeSegList(SubHeap *h, unsigned klass, bitmap_t *checkFull)
 	h->freelist = unfilled;
 	fetchSegment(h, klass);
 #ifdef USE_CONCURRENT_GC
-	bitmap_set(checkFull, klass,
+	bitmap_Set(checkFull, klass,
 			h->total > h->seglist_size * SegmentNodeCount[klass] * HEAPEXPAND_MARGINE);
 #else
-	bitmap_set(checkFull, klass,
+	bitmap_Set(checkFull, klass,
 			(count_dead < SegmentNodeCount[klass] && h->freelist == NULL));
 #endif
 }
@@ -1919,7 +1919,7 @@ static void bmgc_gc_sweep(HeapManager *mng)
 
 	if(checkFull) {
 #ifdef USE_GENERATIONAL_GC
-		bitmap_set(&mng->flags, GC_MAJOR_FLAG, 1);
+		bitmap_Set(&mng->flags, GC_MAJOR_FLAG, 1);
 #endif
 #ifndef USE_CONCURRENT_GC
 		HeapManager_ExpandHeap(mng, SUBHEAP_DEFAULT_SEGPOOL_SIZE*2);

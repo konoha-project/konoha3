@@ -109,7 +109,7 @@ typedef enum {
 /* ------------------------------------------------------------------------ */
 
 #define BasicNode_isVisited(o)      (KFlag_Is(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1))
-#define BasicNode_setVisited(o,B)   KFlag_Set(uintptr_t,((kObjectVar *)o)->h.magicflag,kObjectFlag_Local1,B)
+#define BasicNode_SetVisited(o,B)   KFlag_Set(uintptr_t,((kObjectVar *)o)->h.magicflag,kObjectFlag_Local1,B)
 
 typedef struct kBasicNodeVar         kBasicNode;
 typedef const struct kByteCodeVar     kByteCode;

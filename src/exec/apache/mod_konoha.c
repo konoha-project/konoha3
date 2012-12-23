@@ -130,7 +130,7 @@ static KMETHOD Request_getHandler(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(KLIB new_kString(kctx, OnStack, self->r->handler, strlen(self->r->handler), 0));
 }
 // ## void Request.setContentType(String type);
-static KMETHOD Request_setContentType(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Request_SetContentType(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
 	kString *type = sfp[1].asString;
@@ -138,7 +138,7 @@ static KMETHOD Request_setContentType(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 // ##void Request.setContentEncoding(String enc);
-static KMETHOD Request_setContentEncoding(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Request_SetContentEncoding(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
 	kString *enc = sfp[1].asString;
@@ -178,12 +178,12 @@ static KMETHOD AprTable_Add(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 // ## void AprTable.set(String key, String val)
-static KMETHOD AprTable_set(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD AprTable_Set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTable *self = (kAprTable *) sfp[0].asObject;
 	const char *key = kString_text(sfp[1].asString);
 	const char *val = kString_text(sfp[2].asString);
-	apr_table_set(self->tbl, key, val);
+	apr_table_Set(self->tbl, key, val);
 	KReturnVoid();
 }
 // ## Array[AprTableEntry] AprTable.getElts()
@@ -247,13 +247,13 @@ KonohaContext* konoha_create(KClass **cRequest)
 		_P, _F(Request_getUri), KType_String, KType_Req, KKMethodName_("getUri"), 0,
 		_P, _F(Request_getPathInfo), KType_String, KType_Req, KKMethodName_("getPathInfo"), 0,
 		_P, _F(Request_getHandler), KType_String, KType_Req, KKMethodName_("getHandler"), 0,
-		_P, _F(Request_setContentType), KType_void, KType_Req, KKMethodName_("setContentType"), 1, KType_String, KFieldName_("type"),
-		_P, _F(Request_setContentEncoding), KType_void, KType_Req, KKMethodName_("setContentEncoding"), 1, KType_String, KFieldName_("enc"),
+		_P, _F(Request_SetContentType), KType_void, KType_Req, KKMethodName_("setContentType"), 1, KType_String, KFieldName_("type"),
+		_P, _F(Request_SetContentEncoding), KType_void, KType_Req, KKMethodName_("setContentEncoding"), 1, KType_String, KFieldName_("enc"),
 		_P, _F(Request_logError), KType_void, KType_Req, KKMethodName_("logError"), 3, KType_int, KFieldName_("level"), KType_int, KFieldName_("status"), KType_String, KFieldName_("msg"),
 		_P, _F(Request_getHeadersIn), KType_Tbl, KType_Req, KKMethodName_("getHeadersIn"), 0,
 		_P, _F(Request_getHeadersOut), KType_Tbl, KType_Req, KKMethodName_("getHeadersOut"), 0,
 		_P, _F(AprTable_Add), KType_void, KType_Tbl, KKMethodName_("add"), 2, KType_String, KFieldName_("key"), KType_String, KFieldName_("val"),
-		_P, _F(AprTable_set), KType_void, KType_Tbl, KKMethodName_("set"), 2, KType_String, KFieldName_("key"), KType_String, KFieldName_("val"),
+		_P, _F(AprTable_Set), KType_void, KType_Tbl, KKMethodName_("set"), 2, KType_String, KFieldName_("key"), KType_String, KFieldName_("val"),
 		_P, _F(AprTable_getElts), KType_TblEntryArray, KType_Tbl, KKMethodName_("getElts"), 0,
 		_P, _F(AprTableEntry_getKey), KType_String, KType_TblEntry, KKMethodName_("getKey"), 0,
 		_P, _F(AprTableEntry_getVal), KType_String, KType_TblEntry, KKMethodName_("getVal"), 0,

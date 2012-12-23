@@ -36,9 +36,9 @@ extern "C" {
 #define K_CLASSTABLE_INITSIZE 64
 #define K_PAGESIZE        4096
 
-#define K_VERSION   "0.2"
+#define K_VERSION   "0.3"
 #define K_MAJOR_VERSION 0
-#define K_MINOR_VERSION 2
+#define K_MINOR_VERSION 3
 #define K_PATCH_LEVEL   0
 
 #include<minikonoha/stardate.h>
@@ -198,7 +198,7 @@ typedef kushort_t        kshortflag_t;    /* flag field */
 #define KFlag_Set0(T,f,op)        f = (((T)(f)) & (~((T)(op))))
 #define KFlag_Set(T,f,op,b)       if(b) {KFlag_Set1(T,f,op);} else {KFlag_Set0(T,f,op);}
 
-#define FLAG_set(f,op)            KFlag_Set1(kshortflag_t,f,op)
+#define FLAG_Set(f,op)            KFlag_Set1(kshortflag_t,f,op)
 #define FLAG_unset(f,op)          KFlag_Set0(kshortflag_t,f,op)
 #define FLAG_is(f,op)             KFlag_Is(kshortflag_t,f,op)
 
@@ -370,11 +370,11 @@ typedef KPackageHandler* (*PackageLoadFunc)(void);
 #if defined(__MINGW64__)
 static inline int setjmp_mingw(_JBTYPE* t)
 {
-	return _setjmp(t, NULL);
+	return _Setjmp(t, NULL);
 }
 #define ksetjmp  setjmp_mingw
 #elif defined(__MINGW32__) || defined(_MSC_VER)
-#define ksetjmp  _setjmp
+#define ksetjmp  _Setjmp
 #else
 #define ksetjmp  setjmp
 #endif
@@ -542,8 +542,11 @@ typedef struct kNodeVar                 kNode;
 typedef struct kNodeVar                 kNodeVar;
 
 typedef struct kGammaVar                kGamma;
-typedef struct kGammaVar                kGammaVar;
+//typedef struct kGammaVar                kGammaVar;
 
+#define kTokenNULL kToken
+#define kNodeNULL  kNode
+#define kGammaNULL kGamma
 
 struct KonohaFactory {
 	// settings
@@ -1729,7 +1732,7 @@ struct KonohaLibVar {
 	void                (*kMethod_GenCode)(KonohaContext*, kMethod*, kNode *, int options);
 	intptr_t            (*kMethod_indexOfField)(kMethod *);
 
-	kbool_t             (*KRuntime_setModule)(KonohaContext*, int, struct KRuntimeModule *, KTraceInfo *);
+	kbool_t             (*KRuntime_SetModule)(KonohaContext*, int, struct KRuntimeModule *, KTraceInfo *);
 
 	void                (*kNameSpace_FreeSugarExtension)(KonohaContext *, kNameSpaceVar *);
 

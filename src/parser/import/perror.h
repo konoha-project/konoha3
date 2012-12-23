@@ -87,32 +87,32 @@ static void kToken_ToError(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglev
 	}
 }
 
-static void kNode_ToError(KonohaContext *kctx, kNode *node, kString *errmsg)
+static void MakeNodeError(KonohaContext *kctx, kNode *node, kString *errmsg, kGammaNULL *gma)
 {
 	if(errmsg != NULL) { // not in case of isNodeedErrorMessage
 		node->node = KNode_Error;
 		node->attrTypeId = KType_void;
 		KFieldSet(node, node->ErrorMessage, errmsg);
 		kNode_Set(ObjectConst, node, false);
-		node->stacktop = 0;
+		node->stacktop = gma == NULL ? 0 : gma->genv->localScope.varsize;
 	}
 }
 
-static kNode* kNode_Message2(KonohaContext *kctx, kNode *stmt, kToken *tk, kinfotag_t taglevel, const char *fmt, ...)
+static kNode* MessageNode(KonohaContext *kctx, kNode *node, kTokenNULL *tk, kGammaNULL *gma, kinfotag_t taglevel, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	kfileline_t uline = kNode_uline(stmt);
+	kfileline_t uline = kNode_uline(node);
 	if(tk != NULL) {
 		assert(IS_Token(tk));
 		uline = tk->uline;
 	}
 	kString *errmsg = KParserContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
-	if(taglevel <= ErrTag && !kNode_IsError(stmt)) {
-		kNode_ToError(kctx, stmt, errmsg);
+	if(taglevel <= ErrTag && !kNode_IsError(node)) {
+		MakeNodeError(kctx, node, errmsg, gma);
 	}
 	va_end(ap);
-	return K_NULLNODE;
+	return node;
 }
 
 int verbose_debug;
@@ -128,7 +128,7 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 		kString *emsg = KParserContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
 		va_end(ap);
 		if(taglevel <= ErrTag && !kNode_IsError(stmt)) {
-			kNode_ToError(kctx, stmt, emsg);
+			MakeNodeError(kctx, stmt, emsg, NULL);
 		}
 	}
 	else {

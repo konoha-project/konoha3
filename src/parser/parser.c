@@ -112,7 +112,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->h.name     = "sugar";
 	mod->h.allocSize = sizeof(KParserModule);
 	mod->h.setupModuleContext    = SugarModule_Setup;
-	KLIB KRuntime_setModule(kctx, MOD_sugar, (KRuntimeModule *)mod, 0);
+	KLIB KRuntime_SetModule(kctx, MOD_sugar, (KRuntimeModule *)mod, 0);
 
 	KonohaLibVar* l = (KonohaLibVar *)ctx->klib;
 	l->kNameSpace_GetClassByFullName       = kNameSpace_GetClassByFullName;
@@ -215,14 +215,14 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kNode_SetConstValue        = kNode_SetConstValue;
 	mod->kNode_SetUnboxConstValue   = kNode_SetUnboxConstValue;
 	mod->kNode_SetVariable          = kNode_SetVariable;
-	mod->kNode_TypeCheckNodeAt        = kNode_TypeCheckNodeAt;
-	mod->kNode_TypeCheckByName        = kNode_TypeCheckByName;
+	mod->TypeCheckNodeAt        = TypeCheckNodeAt;
+	mod->TypeCheckNodeByName        = TypeCheckNodeByName;
 	mod->TypeCheckBlock               = TypeCheckBlock;
-	mod->TypeCheckCallParam           = TypeCheckCallParam;
-	mod->new_TypedCallNode            = new_TypedCallNode;
+	mod->TypeCheckMethodParam           = TypeCheckMethodParam;
+	mod->new_MethodNode            = new_MethodNode;
 	mod->kGamma_AddLocalVariable      = kGamma_AddLocalVariable;
 	mod->kNode_DeclType               = kNode_DeclType;
-	mod->kNode_TypeCheckVariableNULL  = kNode_TypeCheckVariableNULL;
+	mod->TypeCheckNodeVariableNULL  = TypeCheckNodeVariableNULL;
 
 	mod->kNameSpace_DefineSyntax      = kNameSpace_DefineSyntax;
 	mod->kNameSpace_GetSyntax         = kNameSpace_GetSyntax;
@@ -237,7 +237,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->AddParamNode                 = AddParamNode;
 	mod->kNode_RightJoinNode          = kNode_RightJoinNode;
 	mod->kToken_ToError               = kToken_ToError;
-	mod->kNode_Message2               = kNode_Message2;
+	mod->MessageNode               = MessageNode;
 
 	mod->VisitNode                  = VisitNode;
 

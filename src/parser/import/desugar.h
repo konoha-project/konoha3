@@ -309,7 +309,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 		int nextIdx = SUGAR ParseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
 		if(foundClass == NULL) {
 			kToken *classNameToken = tokenList->TokenVarItems[beginIdx+1];
-			KReturn(SUGAR kNode_Message2(kctx, stmt, classNameToken, ErrTag, "not class: %s", KToken_t(classNameToken)));
+			KReturn(SUGAR MessageNode(kctx, stmt, classNameToken, NULL, ErrTag, "not class: %s", KToken_t(classNameToken)));
 		}
 		if((size_t)nextIdx < kArray_size(tokenList)) {
 			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
@@ -409,8 +409,8 @@ static KMETHOD TypeCheck_IntLiteral(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD TypeCheck_AndOperator(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, gma, reqc);
-	if(SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 1, gma, KClass_Boolean, 0) != K_NULLNODE) {
-		if(SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 2, gma, KClass_Boolean, 0) != K_NULLNODE) {
+	if(SUGAR TypeCheckNodeAt(kctx, expr, 1, gma, KClass_Boolean, 0) != K_NULLNODE) {
+		if(SUGAR TypeCheckNodeAt(kctx, expr, 2, gma, KClass_Boolean, 0) != K_NULLNODE) {
 			KReturn(kNode_Type(kctx, expr, KNode_And, KType_boolean));
 		}
 	}
@@ -419,8 +419,8 @@ static KMETHOD TypeCheck_AndOperator(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD TypeCheck_OrOperator(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, gma, reqc);
-	if(SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 1, gma, KClass_Boolean, 0) != K_NULLNODE) {
-		if(SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 2, gma, KClass_Boolean, 0) != K_NULLNODE) {
+	if(SUGAR TypeCheckNodeAt(kctx, expr, 1, gma, KClass_Boolean, 0) != K_NULLNODE) {
+		if(SUGAR TypeCheckNodeAt(kctx, expr, 2, gma, KClass_Boolean, 0) != K_NULLNODE) {
 			KReturn(kNode_Type(kctx, expr, KNode_Or, KType_boolean));
 		}
 	}
@@ -436,13 +436,11 @@ static kbool_t kNode_IsGetter(kNode *expr)
 	return false;
 }
 
-static kNode *TypeCheckCallParam(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kMethod *mtd, kGamma *gma, KClass* reqClass);
-
-static kNode* kNodeNode_ToSetter(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kGamma *gma, kNode *rightHandNode, KClass *reqClass)
+static kNode* MakeNodeSetter(KonohaContext *kctx, kNode *expr, kGamma *gma, kNode *rightHandNode, KClass *reqc)
 {
+	kNameSpace *ns = kNode_ns(expr);  // leftHandNode = rightHandNode
 	kMethod *mtd = expr->NodeList->MethodItems[0];
 	DBG_ASSERT(KMethodName_IsGetter(mtd->mn));
-	kNameSpace *ns = kNode_ns(stmt);  // leftHandNode = rightHandNode
 	KClass *c = KClass_(mtd->typeId);
 	kParam *pa = kMethod_GetParam(mtd);
 	int i, psize = pa->psize + 1;
@@ -461,21 +459,21 @@ static kNode* kNodeNode_ToSetter(KonohaContext *kctx, kNode *stmt, kNodeVar *exp
 	if(foundMethod != NULL) {
 		KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], foundMethod);
 		KLIB kArray_Add(kctx, expr->NodeList, rightHandNode);
-		return SUGAR TypeCheckCallParam(kctx, stmt, expr, foundMethod, gma, reqClass);
+		return SUGAR TypeCheckMethodParam(kctx, expr, gma, reqc);
 	}
-	return SUGAR kNode_Message2(kctx, stmt, (kToken *)expr, ErrTag, "undefined setter");
+	return SUGAR MessageNode(kctx, expr, NULL, gma, ErrTag, "undefined setter");
 }
 
 static KMETHOD TypeCheck_Assign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, gma, reqc);
-	kNode *leftHandNode = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 1, gma, KClass_INFER, TypeCheckPolicy_ALLOWVOID);
-	kNode *rightHandNode = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 2, gma, KClass_(leftHandNode->attrTypeId), 0);
+	kNode *leftHandNode = SUGAR TypeCheckNodeAt(kctx, expr, 1, gma, KClass_INFER, TypeCheckPolicy_ALLOWVOID);
+	kNode *rightHandNode = SUGAR TypeCheckNodeAt(kctx, expr, 2, gma, KClass_(leftHandNode->attrTypeId), 0);
 	kNode *returnNode = K_NULLNODE;
 	if(rightHandNode != K_NULLNODE && leftHandNode != K_NULLNODE) {
 		if(leftHandNode->node == KNode_Local || leftHandNode->node == KNode_Field /*FIXME:NODE || leftHandNode->node == KNode_STACKTOP*/) {
 			if(KTypeAttr_Is(ReadOnly, leftHandNode->attrTypeId)) {
-				returnNode = SUGAR kNode_Message2(kctx, stmt, (kToken *)expr, ErrTag, "read only: %s", KToken_t(leftHandNode->TermToken));
+				returnNode = SUGAR MessageNode(kctx, expr, leftHandNode->TermToken, gma, ErrTag, "read only: %s", KToken_t(leftHandNode->TermToken));
 			}
 			else {
 				expr->node      = KNode_Assign;
@@ -485,10 +483,10 @@ static KMETHOD TypeCheck_Assign(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 		else if(kNode_IsGetter(leftHandNode)) {
-			returnNode = kNodeNode_ToSetter(kctx, stmt, (kNodeVar *)leftHandNode, gma, rightHandNode, reqc);
+			returnNode = MakeNodeSetter(kctx, leftHandNode, gma, rightHandNode, reqc);
 		}
 		else {
-			returnNode = SUGAR kNode_Message2(kctx, stmt, (kToken *)expr, ErrTag, "assignment: variable name is expected");
+			returnNode = SUGAR MessageNode(kctx, expr, NULL, gma, ErrTag, "assignment: variable name is expected");
 		}
 	}
 	KReturn(returnNode);
@@ -526,7 +524,7 @@ static kNode* new_GetterNode(KonohaContext *kctx, kToken *tkU, kMethod *mtd, kNo
 	return new_TypedNode(kctx, kNode_ns(expr), KNode_MethodCall, kMethod_GetReturnType(mtd), 2, mtd, expr);
 }
 
-static kNode* kNode_TypeCheckVariableNULL(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kGamma *gma, KClass *reqClass)
+static kNode* TypeCheckNodeVariableNULL(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kGamma *gma, KClass *reqClass)
 {
 	DBG_ASSERT(expr->attrTypeId == KType_var);
 	kToken *tk = expr->TermToken;
@@ -588,7 +586,7 @@ static kNode* kNode_TypeCheckVariableNULL(KonohaContext *kctx, kNode *stmt, kNod
 static KMETHOD TypeCheck_Symbol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, gma, reqc);
-	kNode *texpr = kNode_TypeCheckVariableNULL(kctx, stmt, expr, gma, reqc);
+	kNode *texpr = TypeCheckNodeVariableNULL(kctx, stmt, expr, gma, reqc);
 	if(texpr == NULL) {
 		kToken *tk = expr->TermToken;
 		texpr = kNodeToken_Message(kctx, stmt, tk, ErrTag, "undefined name: %s", KToken_t(tk));
@@ -619,7 +617,7 @@ static kMethod *kNode_LookupOverloadedMethod(KonohaContext *kctx, kNode *stmt, k
 	for(i = 0; i < psize; i++) {
 		size_t n = i + 2;
 		KClass *paramType = (i < pa->psize) ? ResolveTypeVariable(kctx, KClass_(pa->paramtypeItems[i].attrTypeId), thisClass) : KClass_INFER;
-		kNode *texpr = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, n, gma, paramType, TypeCheckPolicy_NOCHECK);
+		kNode *texpr = SUGAR TypeCheckNodeAt(kctx, expr, n, gma, paramType, TypeCheckPolicy_NOCHECK);
 		if(texpr == K_NULLNODE) {
 			return NULL;
 		}
@@ -646,24 +644,25 @@ static kNodeVar* TypeMethodCallNode(KonohaContext *kctx, kNodeVar *expr, kMethod
 	return expr;
 }
 
-static kNode* BoxThisNode(KonohaContext *kctx, kNode *stmt, kGamma *gma, kNode *expr, kMethod *mtd, KClass **thisClassRef)
+static kNode* BoxThisNode(KonohaContext *kctx, kNode *expr, kGamma *gma, kMethod *mtd, KClass **thisClassRef)
 {
 	kNode *thisNode = expr->NodeList->NodeItems[1];
 	KClass *thisClass = KClass_(thisNode->attrTypeId);
-	DBG_ASSERT(IS_Method(mtd));
 	DBG_ASSERT(thisClass->typeId != KType_var);
 	DBG_P("mtd_cid=%s this=%s", KType_text(mtd->typeId), KClass_text(thisClass));
 	if(!KType_Is(UnboxType, mtd->typeId) && KClass_Is(UnboxType, thisClass)) {
-		KFieldSet(expr->NodeList, expr->NodeList->NodeItems[1], kNodeNode_ToBox(kctx, stmt, thisNode, gma, thisClass));
+		thisNode = kNode_SetNodeAt(kctx, expr, 1, BoxNode(kctx, thisNode, gma, thisClass));
 	}
 	thisClassRef[0] = thisClass;
 	return thisNode;
 }
 
-static kNode *TypeCheckCallParam(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kMethod *mtd, kGamma *gma, KClass* reqClass)
+static kNode *TypeCheckMethodParam(KonohaContext *kctx, kNode *expr, kGamma *gma, KClass* reqc)
 {
+	kMethod *mtd = expr->NodeList->MethodItems[0];
+	DBG_ASSERT(IS_Method(mtd));
 	KClass *thisClass = NULL;
-	kNode *thisNode = BoxThisNode(kctx, stmt, gma, expr, mtd, &thisClass);
+	kNode *thisNode = BoxThisNode(kctx, expr, gma, mtd, &thisClass);
 	kbool_t isConst = kNode_IsConstValue(thisNode);
 	kParam *pa = kMethod_GetParam(mtd);
 	DBG_ASSERT(pa->psize +2 <= kArray_size(expr->NodeList));
@@ -672,16 +671,16 @@ static kNode *TypeCheckCallParam(KonohaContext *kctx, kNode *stmt, kNodeVar *exp
 		size_t n = i + 2;
 		KClass* paramType = ResolveTypeVariable(kctx, KClass_(pa->paramtypeItems[i].attrTypeId), thisClass);
 		int tycheckPolicy = TypeCheckPolicy_(pa->paramtypeItems[i].attrTypeId);
-		kNode *texpr = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, n, gma, paramType, tycheckPolicy);
+		kNode *texpr = SUGAR TypeCheckNodeAt(kctx, expr, n, gma, paramType, tycheckPolicy);
 		if(texpr == K_NULLNODE) {
 			return kNodeNode_Message(kctx, stmt, expr, InfoTag, "%s.%s%s accepts %s at the parameter %d", kMethod_Fmt3(mtd), KClass_text(paramType), (int)i+1);
 		}
 		if(!kNode_IsConstValue(texpr)) isConst = 0;
 	}
-	expr = TypeMethodCallNode(kctx, expr, mtd, reqClass);
+	expr = TypeMethodCallNode(kctx, expr, mtd, reqc);
 	if(isConst && kMethod_Is(Const, mtd)) {
 		KClass *rtype = ResolveTypeVariable(kctx, KClass_(pa->rtype), thisClass);
-		return kNodeNode_ToConstValue(kctx, stmt, expr, expr->NodeList, rtype);
+		return MakeNodeConst(kctx, expr, rtype);
 	}
 	return expr;
 }
@@ -692,7 +691,7 @@ static kNode* TypeCheckDynamicCallParams(KonohaContext *kctx, kNode *stmt, kNode
 	kParam *pa = kMethod_GetParam(mtd);
 	KClass* ptype = (pa->psize == 0) ? KClass_Object : KClass_(pa->paramtypeItems[0].attrTypeId);
 	for(i = 2; i < kArray_size(expr->NodeList); i++) {
-		kNode *texpr = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, i, gma, ptype, 0);
+		kNode *texpr = SUGAR TypeCheckNodeAt(kctx, expr, i, gma, ptype, 0);
 		if(texpr == K_NULLNODE) return texpr;
 	}
 	kNode_AddNode(kctx, expr, new_ConstValueNode(kctx, NULL, UPCAST(name)));
@@ -711,7 +710,7 @@ static kMethod *kNameSpace_GuessCoercionMethodNULL(KonohaContext *kctx, kNameSpa
 	return NULL;
 }
 
-static kNode *kNodeNode_LookupMethod(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, KClass *thisClass, kGamma *gma, KClass *reqClass)
+static kNode *kNodeNode_LookupMethod(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, KClass *thisClass, kGamma *gma, KClass *reqc)
 {
 	kNameSpace *ns = kNode_ns(stmt);
 	kTokenVar *methodToken = expr->NodeList->TokenVarItems[0];
@@ -725,7 +724,7 @@ static kNode *kNodeNode_LookupMethod(KonohaContext *kctx, kNode *stmt, kNodeVar 
 		if(methodToken->text != TS_EMPTY) {  // find Dynamic Call ..
 			mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, thisClass, 0/*NONAME*/, 1, KMethodMatch_NoOption);
 			if(mtd != NULL) {
-				return TypeCheckDynamicCallParams(kctx, stmt, expr, mtd, gma, methodToken->text, methodToken->resolvedSymbol, reqClass);
+				return TypeCheckDynamicCallParams(kctx, stmt, expr, mtd, gma, methodToken->text, methodToken->resolvedSymbol, reqc);
 			}
 		}
 		if(methodToken->resolvedSymbol == MN_new && psize == 0 && KClass_(kNode_At(expr, 1)->attrTypeId)->baseTypeId == KType_Object) {
@@ -740,7 +739,8 @@ static kNode *kNodeNode_LookupMethod(KonohaContext *kctx, kNode *stmt, kNodeVar 
 		}
 		if(mtd != NULL) {
 			//DBG_P("found resolved method %s.%s%s isOverloaded=%d", kMethod_Fmt3(mtd), kMethod_Is(Overloaded, mtd));
-			return TypeCheckCallParam(kctx, stmt, expr, mtd, gma, reqClass);
+			KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], mtd);
+			return TypeCheckMethodParam(kctx, expr, gma, reqc);
 		}
 	}
 	return K_NULLNODE;
@@ -749,7 +749,7 @@ static kNode *kNodeNode_LookupMethod(KonohaContext *kctx, kNode *stmt, kNodeVar 
 static KMETHOD TypeCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, gma, reqc);
-	kNode *texpr = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, 1, gma, KClass_INFER, 0);
+	kNode *texpr = SUGAR TypeCheckNodeAt(kctx, expr, 1, gma, KClass_INFER, 0);
 	if(texpr != K_NULLNODE) {
 		KReturn(kNodeNode_LookupMethod(kctx, stmt, expr, KClass_(texpr->attrTypeId), gma, reqc));
 	}
@@ -758,7 +758,7 @@ static KMETHOD TypeCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp)
 // --------------------------------------------------------------------------
 // FuncStyleCall
 
-static kNode *kNode_TypeCheckFuncParams(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kGamma *gma);
+static kNode *TypeCheckNodeFuncParams(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kGamma *gma);
 
 static kMethod* kNode_LookupFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kNodeVar *exprN, kGamma *gma, KClass *reqClass)
 {
@@ -838,7 +838,8 @@ static KMETHOD TypeCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp)
 				DBG_P("overloaded found %s.%s%s", kMethod_Fmt3(mtd));
 				mtd = kNode_LookupOverloadedMethod(kctx, stmt, expr, mtd, gma);
 			}
-			KReturn(TypeCheckCallParam(kctx, stmt, expr, mtd, gma, reqc));
+			KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], mtd);
+			KReturn(TypeCheckMethodParam(kctx, expr, gma, reqc));
 		}
 		if(!KType_IsFunc(kNode_At(expr, 0)->attrTypeId)) {
 			kToken *tk = kNode_At(expr, 0)->TermToken;
@@ -847,16 +848,16 @@ static KMETHOD TypeCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	else {
-		if(kNode_TypeCheckNodeAt(kctx, stmt, expr, 0, gma, KClass_INFER, 0) != K_NULLNODE) {
+		if(TypeCheckNodeAt(kctx, expr, 0, gma, KClass_INFER, 0) != K_NULLNODE) {
 			if(!KType_IsFunc(expr->NodeList->NodeItems[0]->attrTypeId)) {
 				KReturn(kNodeNode_Message(kctx, stmt, expr, ErrTag, "function is expected"));
 			}
 		}
 	}
-	KReturn(kNode_TypeCheckFuncParams(kctx, stmt, expr, gma));
+	KReturn(TypeCheckNodeFuncParams(kctx, stmt, expr, gma));
 }
 
-static kNode *kNode_TypeCheckFuncParams(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kGamma *gma)
+static kNode *TypeCheckNodeFuncParams(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kGamma *gma)
 {
 	KClass *thisClass = KClass_(kNode_At(expr, 0)->attrTypeId);
 	kParam *pa = KClass_cparam(thisClass);
@@ -866,7 +867,7 @@ static kNode *kNode_TypeCheckFuncParams(KonohaContext *kctx, kNode *stmt, kNodeV
 	}
 	for(i = 0; i < pa->psize; i++) {
 		size_t n = i + 2;
-		kNode *texpr = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, n, gma, KClass_(pa->paramtypeItems[i].attrTypeId), 0);
+		kNode *texpr = SUGAR TypeCheckNodeAt(kctx, expr, n, gma, KClass_(pa->paramtypeItems[i].attrTypeId), 0);
 		if(texpr == K_NULLNODE) {
 			return texpr;
 		}
@@ -883,7 +884,7 @@ static kNode *kNode_TypeCheckFuncParams(KonohaContext *kctx, kNode *stmt, kNodeV
 //static KMETHOD Statement_Expression(KonohaContext *kctx, KonohaStack *sfp)  // $Node
 //{
 //	VAR_TypeCheck(stmt, gma, reqc);
-//	kbool_t r = kNode_TypeCheckByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_INFER, TypeCheckPolicy_ALLOWVOID);
+//	kbool_t r = TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_INFER, TypeCheckPolicy_ALLOWVOID);
 //	kNode_Type(kctx, stmt, EXPR);
 //	KReturnUnboxValue(r);
 //}
@@ -892,7 +893,7 @@ static kNode *kNode_TypeCheckFuncParams(KonohaContext *kctx, kNode *stmt, kNodeV
 static KMETHOD Statement_if(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, gma, reqc);
-	if(kNode_TypeCheckByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_Boolean, 0)) {
+	if(TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_Boolean, 0)) {
 		kNode *thenBlock = SUGAR kNode_GetBlock(kctx, stmt, DefaultNameSpace, KSymbol_BlockPattern, K_NULLBLOCK);
 		kNode *elseBlock = SUGAR kNode_GetBlock(kctx, stmt, DefaultNameSpace, KSymbol_else, K_NULLBLOCK);
 		TypeCheckBlock(kctx, thenBlock, gma, KClass_void);
@@ -958,7 +959,7 @@ static KMETHOD Statement_return(KonohaContext *kctx, KonohaStack *sfp)
 	KClass *returnType = kMethod_GetReturnType(gma->genv->currentWorkingMethod);
 	kNode_Type(kctx, stmt, KNode_Return, KType_void);
 	if(returnType->typeId != KType_void) {
-		kNode_TypeCheckByName(kctx, stmt, KSymbol_ExprPattern, gma, returnType, 0);
+		TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, gma, returnType, 0);
 	} else {
 		kNode *expr = (kNode *)kNode_GetObjectNULL(kctx, stmt, KSymbol_ExprPattern);
 		if(expr != NULL) {
@@ -990,7 +991,7 @@ static kbool_t kNode_DeclType(KonohaContext *kctx, kNode *stmt, kGamma *gma, kty
 		return true;
 	}
 	else if(declNode->syn->keyword == KSymbol_LET && kNode_isSymbolTerm(kNode_At(declNode, 1))) {
-		if(SUGAR kNode_TypeCheckNodeAt(kctx, stmt, declNode, 2, gma, KClass_(attrTypeId), 0) == K_NULLNODE) {
+		if(SUGAR TypeCheckNodeAt(kctx, declNode, 2, gma, KClass_(attrTypeId), 0) == K_NULLNODE) {
 			// this is neccesarry to avoid 'int a = a + 1;';
 			return false;
 		}
@@ -1077,7 +1078,7 @@ static kMethod* kMethod_DoLazyCompilation(KonohaContext *kctx, kMethod *mtd, kpa
 /* ------------------------------------------------------------------------ */
 /* [ParamUtils] */
 
-static kbool_t NodeTypeDecl_setParam(KonohaContext *kctx, kNode *stmt, int n, kparamtype_t *p)
+static kbool_t NodeTypeDecl_SetParam(KonohaContext *kctx, kNode *stmt, int n, kparamtype_t *p)
 {
 	kToken *tkT  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
 	kNode  *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
@@ -1098,7 +1099,7 @@ static kParam *kNode_newMethodParamNULL(KonohaContext *kctx, kNode *stmt, kGamma
 	kParam *pa = (kParam *)kNode_GetObjectNULL(kctx, stmt, KSymbol_ParamPattern);
 	if(pa == NULL || !IS_Param(pa)) {
 		KSyntax *syn = KSyntax_(kNode_ns(stmt), KSymbol_ParamPattern);
-		if(!TypeCheck(kctx, syn, stmt, gma, KClass_void)) {
+		if(!TypeNode(kctx, syn, stmt, gma, KClass_void)) {
 			return NULL;
 		}
 	}
@@ -1124,7 +1125,7 @@ static KMETHOD Statement_ParamsDecl(KonohaContext *kctx, KonohaStack *sfp)
 			p[i].attrTypeId = KType_void;
 			p[i].name = 0;
 			kNode *stmt = params->NodeList->NodeItems[i];
-			if(stmt->syn->keyword != KSymbol_TypeDeclPattern || !NodeTypeDecl_setParam(kctx, stmt, i, p)) {
+			if(stmt->syn->keyword != KSymbol_TypeDeclPattern || !NodeTypeDecl_SetParam(kctx, stmt, i, p)) {
 				break;
 			}
 		}
@@ -1222,9 +1223,9 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ PATTERN(Indent)},
 //		{ PATTERN(Symbol),  0, 0, 0, PatternMatch_MethodName, Expression_Term, NULL, NULL, TypeCheck_Symbol,},
-		{ PATTERN(Symbol),  SYNFLAG_CTypeCheckFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_Symbol},},
-		{ PATTERN(Text),    SYNFLAG_CTypeCheckFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_TextLiteral},},
-		{ PATTERN(Number),  SYNFLAG_CTypeCheckFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_IntLiteral},},
+		{ PATTERN(Symbol),  SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_Symbol},},
+		{ PATTERN(Text),    SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_TextLiteral},},
+		{ PATTERN(Number),  SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_IntLiteral},},
 		{ GROUP(Parenthesis), SYNFLAG_CFunc|SYNFLAG_NodePostfixOp2, Precedence_CStyleCALL, 0, {SUGARFUNC Expression_Parenthesis}, {SUGARFUNC TypeCheck_FuncStyleCall}}, //KSymbol_ParenthesisGroup
 		{ GROUP(Bracket),  }, //KSymbol_BracketGroup
 		{ GROUP(Brace),  },   // KSymbol_BraceGroup
@@ -1243,9 +1244,9 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(GTE), 0, Precedence_CStyleCOMPARE, 0, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(EQ),  0, Precedence_CStyleEQUALS, 0, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(NEQ), 0, Precedence_CStyleEQUALS, 0, {OperatorFunc}, {MethodCallFunc}},
-		{ TOKEN(LET), SYNFLAG_CTypeCheckFunc|SYNFLAG_NodeLeftJoinOp2, Precedence_CStyleASSIGN, 0, {OperatorFunc}, {SUGARFUNC TypeCheck_Assign}, },
-		{ TOKEN(AND), SYNFLAG_CTypeCheckFunc, Precedence_CStyleAND, 0, {OperatorFunc}, {SUGARFUNC TypeCheck_AndOperator}, },
-		{ TOKEN(OR),  SYNFLAG_CTypeCheckFunc, Precedence_CStyleOR,  0, {OperatorFunc}, {SUGARFUNC TypeCheck_OrOperator}, },
+		{ TOKEN(LET), SYNFLAG_CTypeFunc|SYNFLAG_NodeLeftJoinOp2, Precedence_CStyleASSIGN, 0, {OperatorFunc}, {SUGARFUNC TypeCheck_Assign}, },
+		{ TOKEN(AND), SYNFLAG_CTypeFunc, Precedence_CStyleAND, 0, {OperatorFunc}, {SUGARFUNC TypeCheck_AndOperator}, },
+		{ TOKEN(OR),  SYNFLAG_CTypeFunc, Precedence_CStyleOR,  0, {OperatorFunc}, {SUGARFUNC TypeCheck_OrOperator}, },
 		{ TOKEN(NOT), 0, 0, Precedence_CStylePREUNARY, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(COLON), 0, Precedence_CStyleTRINARY, },  // colon
 		{ TOKEN(COMMA), SYNFLAG_CFunc, Precedence_CStyleCOMMA, 0, {SUGARFUNC Expression_COMMA}, {NULL}},

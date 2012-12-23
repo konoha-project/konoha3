@@ -49,9 +49,9 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 //	if(nextIdx != -1 && nextIdx < kArray_size(tokenList)) {
 //		kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
 ////		if(ct->typeId == KType_void) {
-////			KReturn(SUGAR kNode_Message2(kctx, stmt, tk1, ErrTag, "undefined class: %s", kString_text(tk1->text)));
+////			KReturn(SUGAR MessageNode(kctx, stmt, tk1, ErrTag, "undefined class: %s", kString_text(tk1->text)));
 ////		} else if(KClass_Is(Virtual, ct)) {
-////			SUGAR kNode_Message2(kctx, stmt, NULL, ErrTag, "invalid application of 'dollar' to incomplete class %s", KClass_text(ct));
+////			SUGAR MessageNode(kctx, stmt, NULL, ErrTag, "invalid application of 'dollar' to incomplete class %s", KClass_text(ct));
 ////		}
 //		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // dollar C (...)
 //			KSyntax *syn = KSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall);

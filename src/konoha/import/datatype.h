@@ -832,7 +832,7 @@ static kString* KClass_shortName(KonohaContext *kctx, KClass *ct)
 	return ct->shortClassNameNULL;
 }
 
-static void KClass_setName(KonohaContext *kctx, KClassVar *ct, KTraceInfo *trace)
+static void KClass_SetName(KonohaContext *kctx, KClassVar *ct, KTraceInfo *trace)
 {
 	if(trace != NULL) {
 		/* To avoid SEGV, because this message is called at the initial time. */
@@ -859,7 +859,7 @@ static KClass *KClass_define(KonohaContext *kctx, kpackageId_t packageId, kStrin
 	else {
 		ct->classNameSymbol = KAsciiSymbol(kString_text(name), kString_size(name), _NEWID);
 	}
-	KClass_setName(kctx, ct, trace);
+	KClass_SetName(kctx, ct, trace);
 	return (KClass *)ct;
 }
 
@@ -1005,7 +1005,7 @@ static void InitStructData(KonohaContext *kctx)
 		KClassVar *ct = (KClassVar *)ctt[i];
 		const char *name = ct->DBG_NAME;
 		ct->classNameSymbol = ksymbolSPOL(name, strlen(name), StringPolicy_ASCII|StringPolicy_TEXT, _NEWID);
-		KClass_setName(kctx, ct, 0);
+		KClass_SetName(kctx, ct, 0);
 	}
 	KLIB Knull(kctx, KClass_NameSpace);
 }

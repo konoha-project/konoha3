@@ -48,7 +48,7 @@ static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## method void Array.set(Int n, T0 v);
-static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Array_Set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
 	size_t n = (size_t)sfp[1].intValue;
@@ -528,7 +528,7 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im,    _F(Array_get), KType_0,   KType_Array, KKMethodName_("get"), 1, KType_int, KFieldName_("index"),
-		_Public,        _F(Array_set), KType_void, KType_Array, KKMethodName_("set"), 2, KType_int, KFieldName_("index"),  KType_0, KFieldName_("value"),
+		_Public,        _F(Array_Set), KType_void, KType_Array, KKMethodName_("set"), 2, KType_int, KFieldName_("index"),  KType_0, KFieldName_("value"),
 		_Public|_Im,    _F(Array_RemoveAt), KType_0,   KType_Array, KKMethodName_("removeAt"), 1, KType_int, KFieldName_("index"),
 		_Public|_Const, _F(Array_getSize), KType_int, KType_Array, KKMethodName_("getSize"), 0,
 		_Public|_Const, _F(Array_getSize), KType_int, KType_Array, KKMethodName_("getlength"), 0,
@@ -566,7 +566,7 @@ static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	KClass *requestClass = reqc;
 	KClass *paramType = (requestClass->baseTypeId == KType_Array) ? KClass_(requestClass->p0) : KClass_INFER;
 	for(i = 2; i < kArray_size(expr->NodeList); i++) {
-		kNode *typedNode = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, i, gma, paramType, 0);
+		kNode *typedNode = SUGAR TypeCheckNodeAt(kctx, expr, i, gma, paramType, 0);
 		if(typedNode == K_NULLNODE) {
 			KReturn(typedNode);
 		}

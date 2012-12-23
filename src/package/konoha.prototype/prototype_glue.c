@@ -86,7 +86,7 @@ static KMETHOD Prototype_get(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 // @SmartReturn void Object.set(Symbol symbol, Object value)
-static KMETHOD Prototype_setObject(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Prototype_SetObject(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t symbol = (ksymbol_t)sfp[1].intValue;
 	KClass *c = kObject_class(sfp[2].asObject);
@@ -99,7 +99,7 @@ static KMETHOD Prototype_setObject(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 // @SmartReturn void Object.set(Symbol symbol, int value)
-static KMETHOD Prototype_setInt(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Prototype_SetInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t symbol = (ksymbol_t)sfp[1].intValue;
 	KLIB kObjectProto_SetUnboxValue(kctx, sfp[0].asObject, symbol, KType_int, sfp[2].unboxValue);
@@ -173,8 +173,8 @@ static void prototype_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 	int FN_key = KFieldName_("key"), FN_value = KFieldName_("value");
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im|_Const|kMethod_SmartReturn|_Final, _F(Prototype_get), KType_Object, KType_Prototype, KKMethodName_("get"), 1, KType_Symbol, FN_key,
-		_Public|_Final, _F(Prototype_setObject), KType_void, KType_Prototype, KKMethodName_("set"), 2, KType_Symbol, FN_key, KType_Object, FN_value,
-		_Public|_Final, _F(Prototype_setInt), KType_void, KType_Prototype, KKMethodName_("set"), 2, KType_Symbol, FN_key, KType_int, FN_value,
+		_Public|_Final, _F(Prototype_SetObject), KType_void, KType_Prototype, KKMethodName_("set"), 2, KType_Symbol, FN_key, KType_Object, FN_value,
+		_Public|_Final, _F(Prototype_SetInt), KType_void, KType_Prototype, KKMethodName_("set"), 2, KType_Symbol, FN_key, KType_int, FN_value,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

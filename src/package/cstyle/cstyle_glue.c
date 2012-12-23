@@ -45,7 +45,7 @@
 //	VAR_TypeCheck(stmt, gma, reqc);
 //	DBG_P("while statement .. ");
 //	int ret = false;
-//	if(SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_Boolean, 0)) {
+//	if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_Boolean, 0)) {
 //		kNode *bk = SUGAR kNode_GetNode(kctx, stmt, NULL/*DefaultNameSpace*/, KSymbol_NodePattern, K_NULLBLOCK);
 //		kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 //		kNode_Set(CatchBreak, stmt, true);
@@ -62,7 +62,7 @@
 //	VAR_TypeCheck(stmt, gma, reqc);
 //	DBG_P("do statement .. ");
 //	int ret = false;
-//	if(SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_Boolean, 0)) {
+//	if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_Boolean, 0)) {
 //		kNode *bk = SUGAR kNode_GetNode(kctx, stmt, NULL/*DefaultNameSpace*/, KSymbol_NodePattern, K_NULLBLOCK);
 //		kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 //		kNode_Set(CatchBreak, stmt, true);
@@ -110,7 +110,7 @@
 //	kNode *initNode = SUGAR kNode_GetNode(kctx, stmt, NULL/*defaultNS*/, KSymbol_InitNode, NULL);
 //	if(initNode == NULL) {  // with out init
 //		DBG_P(">>>>>>>>> Without init block");
-//		if(SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_Boolean, 0)) {
+//		if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_Boolean, 0)) {
 //			kNode *bk = SUGAR kNode_GetNode(kctx, stmt, NULL/*DefaultNameSpace*/, KSymbol_NodePattern, K_NULLBLOCK);
 //			kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 //			kNode_Set(CatchBreak, stmt, true);
@@ -154,7 +154,7 @@
 //			KReturnUnboxValue(true);
 //		}
 //	}
-//	SUGAR kNode_Message2(kctx, stmt, NULL, ErrTag, "break statement not within a loop");
+//	SUGAR MessageNode(kctx, stmt, NULL, ErrTag, "break statement not within a loop");
 //}
 //
 //static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
@@ -168,7 +168,7 @@
 //			KReturnUnboxValue(true);
 //		}
 //	}
-//	SUGAR kNode_Message2(kctx, stmt, NULL, ErrTag, "continue statement not within a loop");
+//	SUGAR MessageNode(kctx, stmt, NULL, ErrTag, "continue statement not within a loop");
 //}
 //
 //static KMETHOD PatternMatch_Inc(KonohaContext *kctx, KonohaStack *sfp)
@@ -287,7 +287,7 @@
 //			requestClass = NULL; // undefined
 //		}
 //		for(i = 2; i < kArray_size(arrayNode->NodeList); i++) {
-//			kNode *typedNode = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, arrayNode, i, gma, paramType, 0);
+//			kNode *typedNode = SUGAR TypeCheckNodeAt(kctx, arrayNode, i, gma, paramType, 0);
 //			if(typedNode == K_NULLNODE) {
 //				KReturn(typedNode);
 //			}
@@ -657,7 +657,7 @@
 //static kbool_t int_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 //{
 //	KDEFINE_SYNTAX SYNTAX[] = {
-//		{ KSymbol_NumberPattern, SYNFLAG_CTypeCheckFunc, 0, 0, {SUGAR termParseFunc}, {SUGARFUNC TypeCheck_ExtendedIntLiteral}},
+//		{ KSymbol_NumberPattern, SYNFLAG_CTypeFunc, 0, 0, {SUGAR termParseFunc}, {SUGARFUNC TypeCheck_ExtendedIntLiteral}},
 //		{ KSymbol_("~"),  0, 0, Precedence_CStylePREUNARY, {SUGAR opParseFunc}, {SUGAR callTypeCheckFunc} },
 //		{ KSymbol_("<<"), 0, Precedence_CStyleSHIFT,  0, {SUGAR opParseFunc}, {SUGAR callTypeCheckFunc}},
 //		{ KSymbol_(">>"), 0, Precedence_CStyleSHIFT,  0, {SUGAR opParseFunc}, {SUGAR callTypeCheckFunc}},

@@ -234,9 +234,9 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 			if(start - str > 0) {
 				kNode *first = new_ConstValueNode(kctx, NULL,
 						UPCAST(KLIB new_kString(kctx, OnGcStack, str, (start - str), 0)));
-				expr = (kNodeVar *) SUGAR new_TypedCallNode(kctx, stmt, gma, KClass_String, concat, 2, expr, first);
+				expr = (kNodeVar *) SUGAR new_MethodNode(kctx, stmt, gma, KClass_String, concat, 2, expr, first);
 			}
-			expr = (kNodeVar *) SUGAR new_TypedCallNode(kctx, stmt, gma, KClass_String, concat, 2, expr, newexpr);
+			expr = (kNodeVar *) SUGAR new_MethodNode(kctx, stmt, gma, KClass_String, concat, 2, expr, newexpr);
 		}
 		KTokenSeq_Pop(kctx, range);
 		KLIB KBuffer_Free(&wb);
@@ -246,7 +246,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 	if((start == NULL) || (start != NULL && end == NULL)) {
 		kNode *rest = new_ConstValueNode(kctx, KClass_String,
 				UPCAST(KLIB new_kString(kctx, OnGcStack, str, strlen(str), 0)));
-		expr = (kNodeVar *) SUGAR new_TypedCallNode(kctx, stmt, gma, KClass_String, concat, 2, expr, rest);
+		expr = (kNodeVar *) SUGAR new_MethodNode(kctx, stmt, gma, KClass_String, concat, 2, expr, rest);
 	}
 	KReturnWith(expr, RESET_GCSTACK());
 }

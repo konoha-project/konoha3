@@ -61,12 +61,12 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kNode *stmt, kObj
 	kNameSpace *ns = kNode_ns(stmt);
 	kMethod *mtd = KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, kObject_class(o), symbol, KType_var);
 	if(mtd != NULL) {
-		SUGAR kNode_Message2(kctx, stmt, NULL, ErrTag, "already defined name: %s", KSymbol_text(symbol));
+		SUGAR MessageNode(kctx, stmt, NULL, NULL, ErrTag, "already defined name: %s", KSymbol_text(symbol));
 		return NULL;
 	}
 	mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, kObject_class(o), symbol);
 	if(mtd != NULL && kMethod_GetReturnType(mtd)->typeId != ty) {
-		SUGAR kNode_Message2(kctx, stmt, NULL, ErrTag, "differently defined name: %s", KSymbol_text(symbol));
+		SUGAR MessageNode(kctx, stmt, NULL, NULL, ErrTag, "differently defined name: %s", KSymbol_text(symbol));
 		return NULL;
 	}
 	KLIB KClass_AddField(kctx, kObject_class(o), ty, symbol);
@@ -75,10 +75,11 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kNode *stmt, kObj
 
 static kNode* TypeDeclAndMakeSetter(KonohaContext *kctx, kNode *stmt, kGamma *gma, ktypeattr_t ty, kNode *termNode, kNode *valueNode, kObject *scr)
 {
+	kNameSpace *ns = kNode_ns(stmt);
 	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termNode->TermToken->resolvedSymbol);
 	if(mtd != NULL) {
 		kNode *recvNode =  new_ConstValueNode(kctx, NULL, scr);
-		return SUGAR new_TypedCallNode(kctx, stmt, gma, KType_void, mtd,  2, recvNode, valueNode);
+		return SUGAR new_MethodNode(kctx, ns, gma, KClass_void, mtd, 2, recvNode, valueNode);
 	}
 	return NULL;
 }

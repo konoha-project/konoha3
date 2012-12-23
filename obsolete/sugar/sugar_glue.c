@@ -196,7 +196,7 @@ static KMETHOD Node_AddParsedObject(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kNode   *stmt  = sfp[0].asNode;
 //	kString *msg   = sfp[1].asString;
-//	SUGAR kNode_Message2(kctx, stmt, NULL, ErrTag, "%s", kString_text(msg));
+//	SUGAR MessageNode(kctx, stmt, NULL, ErrTag, "%s", kString_text(msg));
 //	KReturn(K_NULLNODE);
 //}
 //
@@ -205,7 +205,7 @@ static KMETHOD Node_AddParsedObject(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kNode   *stmt  = sfp[0].asNode;
 //	kString *msg   = sfp[1].asString;
-//	SUGAR kNode_Message2(kctx, stmt, NULL, ErrTag, "%s", kString_text(msg));
+//	SUGAR MessageNode(kctx, stmt, NULL, ErrTag, "%s", kString_text(msg));
 //	KReturn(K_NULLNODE);
 //}
 
@@ -244,7 +244,7 @@ static KMETHOD Node_Message(KonohaContext *kctx, KonohaStack *sfp)
 	kNode   *stmt  = sfp[0].asNode;
 	kinfotag_t level = (kinfotag_t)sfp[1].intValue;
 	kString *msg   = sfp[2].asString;
-	KReturn(SUGAR kNode_Message2(kctx, stmt, NULL, level, "%s", kString_text(msg)));
+	KReturn(SUGAR MessageNode(kctx, stmt, NULL, level, "%s", kString_text(msg)));
 }
 
 //## Node Node.message(int error, Token tk, String msg);
@@ -253,7 +253,7 @@ static KMETHOD NodeToken_Message(KonohaContext *kctx, KonohaStack *sfp)
 	kNode   *stmt  = sfp[0].asNode;
 	kinfotag_t level = (kinfotag_t)sfp[1].intValue;
 	kString *msg   = sfp[3].asString;
-	KReturn(SUGAR kNode_Message2(kctx, stmt, sfp[2].asToken, level, "%s", kString_text(msg)));
+	KReturn(SUGAR MessageNode(kctx, stmt, sfp[2].asToken, level, "%s", kString_text(msg)));
 }
 
 //## Node Node.message(int error, Node expr, String msg);
@@ -262,7 +262,7 @@ static KMETHOD NodeNode_Message(KonohaContext *kctx, KonohaStack *sfp)
 	kNode   *stmt  = sfp[0].asNode;
 	kinfotag_t level = (kinfotag_t)sfp[1].intValue;
 	kString *msg   = sfp[3].asString;
-	KReturn(SUGAR kNode_Message2(kctx, stmt, sfp[2].asToken, level, "%s", kString_text(msg)));
+	KReturn(SUGAR MessageNode(kctx, stmt, sfp[2].asToken, level, "%s", kString_text(msg)));
 }
 
 #define TP_level         KType_int, KFieldName_("level")
@@ -380,7 +380,7 @@ static KMETHOD NameSpace_DefinedBinaryOperator(KonohaContext *kctx, KonohaStack 
 
 
 //## void NameSpace.setTokenFunc(symbol keyword, int konohaChar, Func f);
-static KMETHOD NameSpace_setTokenFunc(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_SetTokenFunc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
 	int konohaChar = (int)sfp[2].intValue;
@@ -457,7 +457,7 @@ static void LoadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, KTraceI
 		_Public|_Im, _F(NameSpace_DefinedExpression), KType_boolean, KType_NameSpace, KKMethodName_("definedExpression"), 1, KType_Symbol, FN_keyword,
 		_Public|_Im, _F(NameSpace_DefinedBinaryOperator), KType_boolean, KType_NameSpace, KKMethodName_("definedBinaryOperator"), 1, KType_Symbol, FN_keyword,
 //		_Public, _F(NameSpace_compileAllDefinedMethods), KType_void, KType_NameSpace, KKMethodName_("compileAllDefinedMethods"), 0,
-		_Public, _F(NameSpace_setTokenFunc), KType_void, KType_NameSpace, KKMethodName_("setTokenFunc"), 3, KType_Symbol, FN_keyword, KType_int, KFieldName_("kchar"), KType_FuncToken, FN_func,
+		_Public, _F(NameSpace_SetTokenFunc), KType_void, KType_NameSpace, KKMethodName_("setTokenFunc"), 3, KType_Symbol, FN_keyword, KType_int, KFieldName_("kchar"), KType_FuncToken, FN_func,
 		_Public, _F(NameSpace_AddPatternMatch), KType_void, KType_NameSpace, KKMethodName_("addPatternMatch"), 2, KType_Symbol, FN_keyword, KType_FuncPatternMatch, FN_func,
 		_Public, _F(NameSpace_AddExpression), KType_void, KType_NameSpace, KKMethodName_("addExpression"), 2, KType_Symbol, FN_keyword, KType_FuncExpression, FN_func,
 		_Public, _F(NameSpace_AddTopLevelStatement), KType_void, KType_NameSpace, KKMethodName_("addTopLevelStatement"), 2, KType_Symbol, FN_keyword, KType_FuncStatement, FN_func,
@@ -483,7 +483,7 @@ static KMETHOD Token_new(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Token.setKeyword(symbol keyword);
-static KMETHOD Token_setUnresolvedTokenType(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Token_SetUnresolvedTokenType(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
@@ -493,7 +493,7 @@ static KMETHOD Token_setUnresolvedTokenType(KonohaContext *kctx, KonohaStack *sf
 }
 
 //## void Token.setText(String text);
-static KMETHOD Token_setText(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Token_SetText(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
 	kString *text = sfp[1].asString;
@@ -502,7 +502,7 @@ static KMETHOD Token_setText(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Token.setSubArray(String[] sub);
-static KMETHOD Token_setSubArray(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Token_SetSubArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
 	kArray *sub = sfp[1].asArray;
@@ -555,7 +555,7 @@ static KMETHOD Node_Message2rintError(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNode   *stmt  = sfp[0].asNode;
 	kString *msg   = sfp[1].asString;
-	SUGAR kNode_Message2(kctx, stmt, NULL, ErrTag, "%s", kString_text(msg));
+	SUGAR MessageNode(kctx, stmt, NULL, ErrTag, "%s", kString_text(msg));
 	KReturn(K_NULLNODE);
 }
 
@@ -569,7 +569,7 @@ static KMETHOD Node_getBuild(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Node.setBuild(int buildid);
-static KMETHOD Node_setBuild(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Node_SetBuild(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNodeVar *stmt = (kNodeVar *) sfp[0].asNode;
 	stmt->node = sfp[1].intValue;
@@ -601,7 +601,7 @@ static KMETHOD Node_getNode(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Node.setType(int build);
-static KMETHOD Node_setType(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Node_SetType(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Node_typed(sfp[0].asNode, sfp[1].intValue);
 	KReturnVoid();
@@ -611,14 +611,14 @@ static KMETHOD Node_setType(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Node_TypeCheckNode(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t key = (ksymbol_t)sfp[1].intValue;
-	KReturnUnboxValue(SUGAR kNode_TypeCheckByName(kctx, sfp[0].asNode, key, sfp[2].asGamma, KClass_(sfp[3].intValue), 0));
+	KReturnUnboxValue(SUGAR TypeCheckNodeByName(kctx, sfp[0].asNode, key, sfp[2].asGamma, KClass_(sfp[3].intValue), 0));
 }
 
 //## boolean Node.TypeCheckNode(symbol key, Gamma gma, cid typeId, int pol);
 static KMETHOD Node_TypeCheckNodePol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t key = (ksymbol_t)sfp[1].intValue;
-	KReturnUnboxValue(SUGAR kNode_TypeCheckByName(kctx, sfp[0].asNode, key, sfp[2].asGamma, KClass_(sfp[3].intValue), (int)sfp[4].intValue));
+	KReturnUnboxValue(SUGAR TypeCheckNodeByName(kctx, sfp[0].asNode, key, sfp[2].asGamma, KClass_(sfp[3].intValue), (int)sfp[4].intValue));
 }
 
 //## Node Node.newNode(Token[] tokenList, int s, int e);
@@ -702,7 +702,7 @@ static KMETHOD Node_newTypedCallNode1(KonohaContext *kctx, KonohaStack *sfp)
 	if(method == NULL) {
 		KReturn(KNULL(Node));
 	}
-	KReturn(SUGAR new_TypedCallNode(kctx, stmt, gma, ct, method, 1, firstNode));
+	KReturn(SUGAR new_MethodNode(kctx, stmt, gma, ct, method, 1, firstNode));
 }
 
 //## Node Node.newTypedCallNode(Gamma gma, cid typeId, String methodName, Node firstNode, Node secondNode);
@@ -718,7 +718,7 @@ static KMETHOD Node_newTypedCallNode2(KonohaContext *kctx, KonohaStack *sfp)
 	if(method == NULL) {
 		KReturn(KNULL(Node));
 	}
-	KReturn(SUGAR new_TypedCallNode(kctx, stmt, gma, ct, method, 2, firstNode, secondNode));
+	KReturn(SUGAR new_MethodNode(kctx, stmt, gma, ct, method, 2, firstNode, secondNode));
 }
 
 //## Node Node.rightJoinNode(Node expr, Token[] tokenList, int currentIdx, int endIdx);
@@ -759,7 +759,7 @@ static KMETHOD Node_done(KonohaContext *kctx, KonohaStack *sfp)
 
 //## void Node.setNode(symbol key, Node expr);
 //## void Node.setNode(symbol key, Node block);
-static KMETHOD Node_setObject(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Node_SetObject(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNode *stmt   = sfp[0].asNode;
 	ksymbol_t key = (ksymbol_t)sfp[1].intValue;
@@ -804,7 +804,7 @@ static KMETHOD Node_getTermToken(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## Node Node.setConstValue(Object value);
-static KMETHOD Node_setConstValue(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Node_SetConstValue(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNodeVar *expr = (kNodeVar *) sfp[0].asNode;
 	KClass *ct = kObject_class(sfp[1].asObject);
@@ -815,7 +815,7 @@ static KMETHOD Node_setConstValue(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## Node Node.setVariable(Gamma gma, int build, cid typeid, int index);
-static KMETHOD Node_setVariable(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Node_SetVariable(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNodeVar *expr = (kNodeVar *) sfp[0].asNode;
 	kGamma *gma    = sfp[1].asGamma;
@@ -846,7 +846,7 @@ static KMETHOD Node_new(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Node.setType(int build, cid typeid);
-static KMETHOD Node_setType(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Node_SetType(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNodeVar *expr = (kNodeVar *)sfp[0].asNode;
 	knode_t build  = (knode_t)sfp[1].intValue;
@@ -998,9 +998,9 @@ static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 	KDEFINE_METHOD MethodData[] = {
 		/* Token */
 		_Public, _F(Token_new), KType_Token, KType_Token, KKMethodName_("new"), 1, KType_Symbol, FN_key,
-		_Public, _F(Token_setUnresolvedTokenType),  KType_void, KType_Token, KKMethodName_("setUnresolvedTokenType"),  1, KType_Symbol, FN_x,
-		_Public, _F(Token_setText),  KType_void, KType_Token, KKMethodName_("setText"),  1, KType_String, FN_x,
-		_Public, _F(Token_setSubArray), KType_void, KType_Token, KKMethodName_("setSubArray"), 1, KType_StringArray, FN_x,
+		_Public, _F(Token_SetUnresolvedTokenType),  KType_void, KType_Token, KKMethodName_("setUnresolvedTokenType"),  1, KType_Symbol, FN_x,
+		_Public, _F(Token_SetText),  KType_void, KType_Token, KKMethodName_("setText"),  1, KType_String, FN_x,
+		_Public, _F(Token_SetSubArray), KType_void, KType_Token, KKMethodName_("setSubArray"), 1, KType_StringArray, FN_x,
 //		_Public, _F(Token_isTypeName), KType_boolean, KType_Token, KKMethodName_("isTypeName"), 0,
 		_Public, _F(Token_isParenthesis), KType_boolean, KType_Token, KKMethodName_("isParenthesis"), 0,
 		_Public, _F(Token_getText), KType_String, KType_Token, KKMethodName_("getText"), 0,
@@ -1010,7 +1010,7 @@ static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 
 		/* Node */
 		_Public, _F(Node_getBuild), KType_int, KType_Node,  KKMethodName_("getBuild"), 0,
-		_Public, _F(Node_setBuild), KType_void, KType_Node, KKMethodName_("setBuild"), 1, KType_int, FN_buildid,
+		_Public, _F(Node_SetBuild), KType_void, KType_Node, KKMethodName_("setBuild"), 1, KType_int, FN_buildid,
 		_Public, _F(Node_getNode), KType_Node, KType_Node, KKMethodName_("getNode"), 2, KType_Symbol, FN_key, KType_Node, FN_defval,
 		_Public, _F(Node_getToken), KType_Token, KType_Node, KKMethodName_("getToken"), 2, KType_Symbol, FN_key, KType_Token, FN_defval,
 		_Public, _F(Node_getNode), KType_Node, KType_Node, KKMethodName_("getNode"), 2, KType_Symbol, FN_key, KType_Node, FN_defval,
@@ -1019,8 +1019,8 @@ static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 		_Public, _F(Node_Message2rintError), KType_Node, KType_Node, KKMethodName_("printError"), 1, KType_String, FN_msg,
 
 		_Public, _F(Node_newNode), KType_Node, KType_Node, KKMethodName_("newNode"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
-		_Public, _F(Node_setType), KType_void, KType_Node, KKMethodName_("setType"), 1, KType_int, FN_x,
-//		_Public, _F(kNode_Message2arsedNode), KType_Node, KType_Node, KKMethodName_("parseNode"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
+		_Public, _F(Node_SetType), KType_void, KType_Node, KKMethodName_("setType"), 1, KType_int, FN_x,
+//		_Public, _F(MessageNodearsedNode), KType_Node, KType_Node, KKMethodName_("parseNode"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
 		_Public, _F(Node_newUntypedCallStyleNode2), KType_Node, KType_Node, KKMethodName_("newUntypedCallStyleNode"), 2, KType_Token, KFieldName_("token"), KType_Node, KFieldName_("expr1"),
 		_Public, _F(Node_newUntypedCallStyleNode3), KType_Node, KType_Node, KKMethodName_("newUntypedCallStyleNode"), 3, KType_Token, KFieldName_("token"), KType_Node, KFieldName_("expr1"), KType_Node, KFieldName_("expr2"),
 		_Public, _F(Node_newUntypedCallStyleNode4), KType_Node, KType_Node, KKMethodName_("newUntypedCallStyleNode"), 4, KType_Token, KFieldName_("token"), KType_Node, KFieldName_("expr1"), KType_Node, KFieldName_("expr2"), KType_Node, KFieldName_("expr3"),
@@ -1031,18 +1031,18 @@ static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 		_Public, _F(Node_rightJoinNode), KType_Node, KType_Node, KKMethodName_("rightJoinNode"), 4, KType_Node, FN_expr, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
 		_Public, _F(Node_getTokenList), KType_TokenArray, KType_Node, KKMethodName_("getTokenList"), 2, KType_Symbol, FN_key, KType_TokenArray, FN_defval,
 		_Public, _F(Node_done), KType_void, KType_Node, KKMethodName_("done"), 0,
-		_Public, _F(Node_setObject), KType_void, KType_Node, KKMethodName_("setNode"), 2, KType_Symbol, FN_key, KType_Node, FN_expr,
-		_Public, _F(Node_setObject), KType_void, KType_Node, KKMethodName_("setNode"), 2, KType_Symbol, FN_key, KType_Node, KFieldName_("block"),
+		_Public, _F(Node_SetObject), KType_void, KType_Node, KKMethodName_("setNode"), 2, KType_Symbol, FN_key, KType_Node, FN_expr,
+		_Public, _F(Node_SetObject), KType_void, KType_Node, KKMethodName_("setNode"), 2, KType_Symbol, FN_key, KType_Node, KFieldName_("block"),
 		_Public, _F(Node_declType), KType_boolean, KType_Node, KKMethodName_("declType"), 3, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_Node, KFieldName_("declNode"),
 		_Public, _F(Node_newNode), KType_Node, KType_Node, KKMethodName_("newNode"), 1, KType_String, KFieldName_("macro"),
 
 		/* Node */
 		_Public, _F(Node_getTermToken), KType_Token, KType_Node, KKMethodName_("getTermToken"), 0,
-		_Public, _F(Node_setConstValue), KType_Node, KType_Node, KKMethodName_("setConstValue"), 1, KType_Object, KFieldName_("value"),
-		_Public, _F(Node_setVariable), KType_Node, KType_Node, KKMethodName_("setVariable"), 4, KType_Gamma, FN_gma, KType_int, FN_buildid, KType_cid, FN_typeid, KType_int, KFieldName_("index"),
+		_Public, _F(Node_SetConstValue), KType_Node, KType_Node, KKMethodName_("setConstValue"), 1, KType_Object, KFieldName_("value"),
+		_Public, _F(Node_SetVariable), KType_Node, KType_Node, KKMethodName_("setVariable"), 4, KType_Gamma, FN_gma, KType_int, FN_buildid, KType_cid, FN_typeid, KType_int, KFieldName_("index"),
 		_Public, _F(Node_newVariableNode), KType_Node, KType_Node, KKMethodName_("new"), 4, KType_Gamma, FN_gma, KType_int, FN_buildid, KType_cid, FN_typeid, KType_int, KFieldName_("index"),
 		_Public, _F(Node_new), KType_Node, KType_Node, KKMethodName_("new"), 1, KType_Object, KFieldName_("value"),
-		_Public, _F(Node_setType), KType_void, KType_Node, KKMethodName_("setType"), 2, KType_int, FN_buildid, KType_cid, FN_typeid,
+		_Public, _F(Node_SetType), KType_void, KType_Node, KKMethodName_("setType"), 2, KType_int, FN_buildid, KType_cid, FN_typeid,
 		_Public, _F(kNode_AddNode), KType_Node, KType_Node, KKMethodName_("addNode"), 1, KType_Node, FN_expr,
 
 		/* Node */
@@ -1113,7 +1113,7 @@ static KMETHOD Statement_syntax(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, gma, reqc);
 	kTokenArray *tokenList = (kTokenArray *)kNode_GetObject(kctx, stmt, KSymbol_TokenPattern, NULL);
 	if(tokenList == NULL) {
-		SUGAR kNode_Message2(kctx, stmt, NULL, ErrTag, "empty syntax");
+		SUGAR MessageNode(kctx, stmt, NULL, ErrTag, "empty syntax");
 	}
 	if(tokenList != NULL) {
 		if(!IS_Array(tokenList)) { // create tokenList from a Token
@@ -1126,7 +1126,7 @@ static KMETHOD Statement_syntax(KonohaContext *kctx, KonohaStack *sfp)
 		KSyntaxVar *syn = kNameSpace_guessSyntaxFromTokenList(kctx, ns, tokenList);
 		if(syn != NULL) {
 			if(syn->syntaxPatternListNULL != NULL) {
-				SUGAR kNode_Message2(kctx, stmt, NULL, InfoTag, "oveloading syntax: %s%s", PSYM_t(syn->keyword));
+				SUGAR MessageNode(kctx, stmt, NULL, InfoTag, "oveloading syntax: %s%s", PSYM_t(syn->keyword));
 			}
 			else {
 				syn->syntaxPatternListNULL = new_(TokenArray, 0, ns->NameSpaceConstList);

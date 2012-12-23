@@ -708,7 +708,7 @@ static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *o, ksym
 {
 	kObjectVar *v = (kObjectVar *)o;
 	if(ty == 0) ty = kObject_class(v)->typeId;
-	protomap_set((Kprotomap_t **)&v->h.prototypePtr, key, ty | KTypeAttr_Boxed, (void *)val);
+	protomap_Set((Kprotomap_t **)&v->h.prototypePtr, key, ty | KTypeAttr_Boxed, (void *)val);
 	PLATAPI WriteBarrier(kctx, v);
 }
 
@@ -716,7 +716,7 @@ static void kObjectProto_SetUnboxValue(KonohaContext *kctx, kAbstractObject *o, 
 {
 	kObjectVar *v = (kObjectVar *)o;
 	//PLATAPI WriteBarrier(kctx, v);   // why ? need this? by kimio
-	protomap_set((Kprotomap_t **)&v->h.prototypePtr, key, ty, (void *)unboxValue);
+	protomap_Set((Kprotomap_t **)&v->h.prototypePtr, key, ty, (void *)unboxValue);
 }
 
 static void kObjectProto_RemoveKey(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key)

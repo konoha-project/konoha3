@@ -102,7 +102,7 @@ static inline int kStringBase_isLiner(kStringBase *s)
 	return kStringBase_flag(s) == S_FLAG_LINER;
 }
 
-static void kStringBase_setFlag(kStringBase *s, uint32_t mask)
+static void kStringBase_SetFlag(kStringBase *s, uint32_t mask)
 {
 	s->h.magicflag |= (uintptr_t)mask;
 }
@@ -116,7 +116,7 @@ static kStringBase *new_kStringBase(KonohaContext *kctx, kArray* gcstack, uint32
 {
 	kStringBase *s = (kStringBase *)new_(String, 0, gcstack);
 	kStringBase_unsetFlag(s, MASK_INLINE);
-	kStringBase_setFlag(s, mask);
+	kStringBase_SetFlag(s, mask);
 	return s;
 }
 
@@ -124,7 +124,7 @@ static kStringBase *kStringBase_InitInline(KonohaContext *kctx, kStringBase *bas
 {
 	size_t i;
 	kInlineString *s = (kInlineString *) base;
-	kStringBase_setFlag(base, MASK_INLINE);
+	kStringBase_SetFlag(base, MASK_INLINE);
 	s->base.length = len;
 	DBG_ASSERT(len < SIZEOF_INLINETEXT);
 	for (i = 0; i < len; ++i) {
@@ -138,7 +138,7 @@ static kStringBase *kStringBase_InitInline(KonohaContext *kctx, kStringBase *bas
 static kStringBase *kStringBase_InitExternal(KonohaContext *kctx, kStringBase *base, const char *text, size_t len)
 {
 	kExternalString *s = (kExternalString *) base;
-	kStringBase_setFlag(base, MASK_EXTERNAL);
+	kStringBase_SetFlag(base, MASK_EXTERNAL);
 	s->base.length = len;
 	s->text = (char *) text;
 	return base;
@@ -147,7 +147,7 @@ static kStringBase *kStringBase_InitExternal(KonohaContext *kctx, kStringBase *b
 static kStringBase *kStringBase_InitLiner(KonohaContext *kctx, kStringBase *base, const char *text, size_t len)
 {
 	kLinerString *s = (kLinerString *) base;
-	kStringBase_setFlag(base, MASK_LINER);
+	kStringBase_SetFlag(base, MASK_LINER);
 	s->base.length = len;
 	s->text = (char *) KMalloc_UNTRACE(len+1);
 	memcpy(s->text, text, len);
@@ -169,7 +169,7 @@ static kLinerString *kRopeString_toLinerString(kRopeString *o, char *text, size_
 {
 	kLinerString *s = (kLinerString *) o;
 	kStringBase_unsetFlag((kStringBase *)s, MASK_ROPE);
-	kStringBase_setFlag((kStringBase *)s, MASK_LINER);
+	kStringBase_SetFlag((kStringBase *)s, MASK_LINER);
 	s->base.length = len;
 	s->text = text;
 	return s;

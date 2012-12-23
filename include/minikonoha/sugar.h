@@ -210,9 +210,9 @@ typedef enum {
 #define SUGARFUNC   (kFunc *)
 
 #define SYNFLAG_Macro               ((kshortflag_t)1)
-#define SYNFLAG_CFunc               (SYNFLAG_CParseFunc|SYNFLAG_CTypeCheckFunc)
+#define SYNFLAG_CFunc               (SYNFLAG_CParseFunc|SYNFLAG_CTypeFunc)
 #define SYNFLAG_CParseFunc          ((kshortflag_t)1 << 3)
-#define SYNFLAG_CTypeCheckFunc      ((kshortflag_t)1 << 4)
+#define SYNFLAG_CTypeFunc      ((kshortflag_t)1 << 4)
 
 #define SYNFLAG_NodeLeftJoinOp2     ((kshortflag_t)1 << 1)
 #define SYNFLAG_NodePostfixOp2      ((kshortflag_t)1 << 2)
@@ -482,9 +482,9 @@ static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeTy
 #define kNode_RemoveKey(CTX, O, K)                KLIB kObjectProto_RemoveKey(CTX, UPCAST(O), K)
 #define kNode_DoEach(CTX, O, THUNK, F)            kObjectProto_DoEach(CTX, UPCAST(O), THUNK, F)
 
-#define kNode_Message(kctx, STMT, PE, FMT, ...)            SUGAR kNode_Message2(kctx, STMT, NULL, PE, FMT, ## __VA_ARGS__)
-#define kNodeToken_Message(kctx, STMT, TK, PE, FMT, ...)   SUGAR kNode_Message2(kctx, STMT, TK, PE, FMT, ## __VA_ARGS__)
-#define kNodeNode_Message(kctx, STMT, EXPR, PE, FMT, ...)  SUGAR kNode_Message2(kctx, EXPR, NULL, PE, FMT, ## __VA_ARGS__)
+#define kNode_Message(kctx, STMT, PE, FMT, ...)            SUGAR MessageNode(kctx, STMT, NULL, NULL, PE, FMT, ## __VA_ARGS__)
+#define kNodeToken_Message(kctx, STMT, TK, PE, FMT, ...)   SUGAR MessageNode(kctx, STMT, TK, NULL, PE, FMT, ## __VA_ARGS__)
+#define kNodeNode_Message(kctx, STMT, EXPR, PE, FMT, ...)  SUGAR MessageNode(kctx, EXPR, NULL, NULL, PE, FMT, ## __VA_ARGS__)
 
 
 typedef struct {
@@ -495,7 +495,7 @@ typedef struct {
 #define Gamma_isTopLevel(GMA)  KFlag_Is(kshortflag_t, GMA->genv->flag, kGamma_TopLevel)
 #define kGamma_ERROR           (kshortflag_t)(1<<1)
 #define Gamma_hasERROR(GMA)    KFlag_Is(kshortflag_t, GMA->genv->flag, kGamma_ERROR)
-#define Gamma_setERROR(GMA,B) KFlag_Set(kshortflag_t, GMA->genv->flag, kGamma_ERROR, B)
+#define Gamma_SetERROR(GMA,B) KFlag_Set(kshortflag_t, GMA->genv->flag, kGamma_ERROR, B)
 
 typedef struct {
 	KGammaStackDecl *varItems;
@@ -603,18 +603,18 @@ typedef struct {
 	kNode*       (*kNode_SetConstValue)(KonohaContext *, kNodeVar *, KClass *, kObject *o);
 	kNode*       (*kNode_SetUnboxConstValue)(KonohaContext *, kNodeVar *, ktypeattr_t, uintptr_t unboxValue);
 	kNode*       (*kNode_SetVariable)(KonohaContext *, kNodeVar *, kGamma *, knode_t build, ktypeattr_t, intptr_t index);
-	kNode*      (*new_TypedCallNode)(KonohaContext *, kNode *, kGamma *, KClass *, kMethod *mtd, int n, ...);
+	kNode*       (*new_MethodNode)(KonohaContext *, kNameSpace *, kGamma *, KClass *, kMethod *mtd, int n, ...);
 
 	kNode*      (*TypeCheckBlock)(KonohaContext *, kNode *, kGamma *, KClass *);
-	kbool_t     (*kNode_TypeCheckByName)(KonohaContext *, kNode*, ksymbol_t, kGamma *, KClass *, int);
-	kNode*      (*kNode_TypeCheckNodeAt)(KonohaContext *, kNode *, kNode *, size_t, kGamma *, KClass *, int);
-	kNode *     (*TypeCheckCallParam)(KonohaContext *, kNode *, kNodeVar *, kMethod *, kGamma *, KClass *);
+	kbool_t     (*TypeCheckNodeByName)(KonohaContext *, kNode*, ksymbol_t, kGamma *, KClass *, int);
+	kNode*      (*TypeCheckNodeAt)(KonohaContext *, kNode *, size_t, kGamma *, KClass *, int);
+	kNode *     (*TypeCheckMethodParam)(KonohaContext *, kNode *, kGamma *, KClass *);
 	int         (*kGamma_AddLocalVariable)(KonohaContext *, kGamma *, ktypeattr_t, ksymbol_t);
 	kbool_t     (*kNode_DeclType)(KonohaContext *, kNode *, kGamma *, ktypeattr_t, kNode *, kObject *, KTypeDeclFunc);
-	kNode*      (*kNode_TypeCheckVariableNULL)(KonohaContext *, kNode *, kNodeVar *, kGamma *, KClass *);
+	kNode*      (*TypeCheckNodeVariableNULL)(KonohaContext *, kNode *, kNodeVar *, kGamma *, KClass *);
 
 	void       (*kToken_ToError)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
-	kNode *    (*kNode_Message2)(KonohaContext *, kNode *, kToken *, kinfotag_t, const char *fmt, ...);
+	kNode *    (*MessageNode)(KonohaContext *, kNode *, kToken *, kGamma *, kinfotag_t, const char *fmt, ...);
 
 	kbool_t (*VisitNode)(KonohaContext *, struct KBuilder *, kNode *node, void *thunk);
 

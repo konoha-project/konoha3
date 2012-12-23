@@ -395,12 +395,12 @@ static BasicNode *BasicNode_leapJump(KonohaContext *kctx, BasicNode *bb)
 }
 
 #define BasicNode_isVisited(bb)     (bb->incoming == -1)
-#define BasicNode_setVisited(bb)    bb->incoming = -1
+#define BasicNode_SetVisited(bb)    bb->incoming = -1
 
-static void BasicNode_setJumpAddr(KonohaContext *kctx, BasicNode *bb, char *vcode)
+static void BasicNode_SetJumpAddr(KonohaContext *kctx, BasicNode *bb, char *vcode)
 {
 	while(bb != NULL) {
-		BasicNode_setVisited(bb);
+		BasicNode_SetVisited(bb);
 		if(bb->branchid != -1) {
 			BasicNode *bbJ = BasicNode_leapJump(kctx, BasicNode_FindById(kctx, bb->branchid));
 			OPJMP *j = (OPJMP *)(vcode + bb->lastoffset);
@@ -408,8 +408,8 @@ static void BasicNode_setJumpAddr(KonohaContext *kctx, BasicNode *bb, char *vcod
 			j->jumppc = (KVirtualCode *)(vcode + bbJ->codeoffset);
 			bbJ = BasicNode_FindById(kctx, bb->branchid);
 			if(!BasicNode_isVisited(bbJ)) {
-				BasicNode_setVisited(bbJ);
-				BasicNode_setJumpAddr(kctx, bbJ, vcode);
+				BasicNode_SetVisited(bbJ);
+				BasicNode_SetJumpAddr(kctx, bbJ, vcode);
 			}
 		}
 		bb = BasicNode_FindById(kctx, bb->nextid);
@@ -906,7 +906,7 @@ static struct KVirtualCode *CompileKVirtualCode(KonohaContext *kctx, KBuilder *b
 	DBG_ASSERT(codesize != 0);
 	KVirtualCode *vcode = (KVirtualCode *)KCalloc_UNTRACE(codesize, 1);
 	memcpy((void *)vcode, KLIB KBuffer_text(kctx, &wb, NonZero), codesize);
-	BasicNode_setJumpAddr(kctx, BasicNode_FindById(kctx, beginId), (char *)vcode);
+	BasicNode_SetJumpAddr(kctx, BasicNode_FindById(kctx, beginId), (char *)vcode);
 	KLIB KBuffer_Free(&wb);
 	vcode = MakeThreadedCode(kctx, builder, vcode, codesize);
 	DumpKVirtualCode(kctx, vcode);

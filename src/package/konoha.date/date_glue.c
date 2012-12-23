@@ -322,7 +322,7 @@ static KMETHOD Date_getYear(KonohaContext *kctx, KonohaStack *sfp)
 //}
 
 //## int Date.setDate(int date);
-static KMETHOD Date_setDate(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetDate(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	time_t tv_sec = d->tv.tv_sec;
@@ -335,7 +335,7 @@ static KMETHOD Date_setDate(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.setFullYear(int year);
-static KMETHOD Date_setFullYear(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetFullYear(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	time_t tv_sec = d->tv.tv_sec;
@@ -348,7 +348,7 @@ static KMETHOD Date_setFullYear(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.setHours(int hours);
-static KMETHOD Date_setHours(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetHours(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	time_t tv_sec = d->tv.tv_sec;
@@ -361,7 +361,7 @@ static KMETHOD Date_setHours(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.setMilliseconds(int milliseconds);
-static KMETHOD Date_setMilliseconds(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetMilliseconds(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	d->tv.tv_usec = sfp[1].intValue * 1000;
@@ -370,7 +370,7 @@ static KMETHOD Date_setMilliseconds(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.setMinutes(int minutes);
-static KMETHOD Date_setMinutes(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetMinutes(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	time_t tv_sec = d->tv.tv_sec;
@@ -383,7 +383,7 @@ static KMETHOD Date_setMinutes(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.setMonth(int month);
-static KMETHOD Date_setMonth(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetMonth(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	time_t tv_sec = d->tv.tv_sec;
@@ -396,7 +396,7 @@ static KMETHOD Date_setMonth(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.setSeconds(int seconds);
-static KMETHOD Date_setSeconds(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetSeconds(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	time_t tv_sec = d->tv.tv_sec;
@@ -409,7 +409,7 @@ static KMETHOD Date_setSeconds(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.setTime(int milliseconds);
-static KMETHOD Date_setTime(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetTime(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	kint_t msec = sfp[1].intValue;
@@ -420,7 +420,7 @@ static KMETHOD Date_setTime(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.setUTCDate(int date);
-static KMETHOD Date_setUTCDate(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetUTCDate(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	time_t tv_sec = d->tv.tv_sec;
@@ -433,7 +433,7 @@ static KMETHOD Date_setUTCDate(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.setUTCFullYear(int year);
-static KMETHOD Date_setUTCFullYear(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetUTCFullYear(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	time_t tv_sec = d->tv.tv_sec;
@@ -446,7 +446,7 @@ static KMETHOD Date_setUTCFullYear(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.setUTCHours(int hours);
-static KMETHOD Date_setUTCHours(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetUTCHours(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	time_t tv_sec = d->tv.tv_sec;
@@ -459,7 +459,7 @@ static KMETHOD Date_setUTCHours(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.setUTCMilliseconds(int milliseconds);
-static KMETHOD Date_setUTCMilliseconds(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetUTCMilliseconds(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	d->tv.tv_usec = sfp[1].intValue * 1000;
@@ -468,7 +468,7 @@ static KMETHOD Date_setUTCMilliseconds(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.setUTCMinutes(int minutes);
-static KMETHOD Date_setUTCMinutes(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetUTCMinutes(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	time_t tv_sec = d->tv.tv_sec;
@@ -481,7 +481,7 @@ static KMETHOD Date_setUTCMinutes(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.setUTCMonth(int month);
-static KMETHOD Date_setUTCMonth(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetUTCMonth(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	time_t tv_sec = d->tv.tv_sec;
@@ -494,7 +494,7 @@ static KMETHOD Date_setUTCMonth(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.setUTCSeconds(int seconds);
-static KMETHOD Date_setUTCSeconds(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetUTCSeconds(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	time_t tv_sec = d->tv.tv_sec;
@@ -507,7 +507,7 @@ static KMETHOD Date_setUTCSeconds(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.setYear(int year);
-static KMETHOD Date_setYear(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Date_SetYear(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct kDateVar *d = sfp[0].asDate;
 	time_t tv_sec = d->tv.tv_sec;
@@ -634,22 +634,22 @@ static kbool_t date_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		_Public|_Im, _F(Date_getUTCSeconds), KType_int, KType_Date, KKMethodName_("getUTCSeconds"), 0,
 		_Public|_Im, _F(Date_getYear), KType_int, KType_Date, KKMethodName_("getYear"), 0,
 //		_Public|_Static, _F(Date_Parse), KType_int, KType_Date, KKMethodName_("parse"), 1, KType_String, KFieldName_("dateString"),
-		_Public, _F(Date_setDate), KType_int, KType_Date, KKMethodName_("setDate"), 1, KType_int, KFieldName_("date"),
-		_Public, _F(Date_setFullYear), KType_int, KType_Date, KKMethodName_("setFullYear"), 1, KType_int, KFieldName_("year"),
-		_Public, _F(Date_setHours), KType_int, KType_Date, KKMethodName_("setHours"), 1, KType_int, KFieldName_("hours"),
-		_Public, _F(Date_setMilliseconds), KType_int, KType_Date, KKMethodName_("setMilliseconds"), 1, KType_int, KFieldName_("milliseconds"),
-		_Public, _F(Date_setMinutes), KType_int, KType_Date, KKMethodName_("setMinutes"), 1, KType_int, KFieldName_("minutes"),
-		_Public, _F(Date_setMonth), KType_int, KType_Date, KKMethodName_("setMonth"), 1, KType_int, KFieldName_("month"),
-		_Public, _F(Date_setSeconds), KType_int, KType_Date, KKMethodName_("setSeconds"), 1, KType_int, KFieldName_("seconds"),
-		_Public, _F(Date_setTime), KType_int, KType_Date, KKMethodName_("setTime"), 1, KType_int, KFieldName_("milliseconds"),
-		_Public, _F(Date_setUTCDate), KType_int, KType_Date, KKMethodName_("setUTCDate"), 1, KType_int, KFieldName_("date"),
-		_Public, _F(Date_setUTCFullYear), KType_int, KType_Date, KKMethodName_("setUTCFullYear"), 1, KType_int, KFieldName_("year"),
-		_Public, _F(Date_setUTCHours), KType_int, KType_Date, KKMethodName_("setUTCHours"), 1, KType_int, KFieldName_("hours"),
-		_Public, _F(Date_setUTCMilliseconds), KType_int, KType_Date, KKMethodName_("setUTCMilliseconds"), 1, KType_int, KFieldName_("milliseconds"),
-		_Public, _F(Date_setUTCMinutes), KType_int, KType_Date, KKMethodName_("setUTCMinutes"), 1, KType_int, KFieldName_("minutes"),
-		_Public, _F(Date_setUTCMonth), KType_int, KType_Date, KKMethodName_("setUTCMonth"), 1, KType_int, KFieldName_("month"),
-		_Public, _F(Date_setUTCSeconds), KType_int, KType_Date, KKMethodName_("setUTCSeconds"), 1, KType_int, KFieldName_("seconds"),
-		_Public, _F(Date_setYear), KType_int, KType_Date, KKMethodName_("setYear"), 1, KType_int, KFieldName_("year"),
+		_Public, _F(Date_SetDate), KType_int, KType_Date, KKMethodName_("setDate"), 1, KType_int, KFieldName_("date"),
+		_Public, _F(Date_SetFullYear), KType_int, KType_Date, KKMethodName_("setFullYear"), 1, KType_int, KFieldName_("year"),
+		_Public, _F(Date_SetHours), KType_int, KType_Date, KKMethodName_("setHours"), 1, KType_int, KFieldName_("hours"),
+		_Public, _F(Date_SetMilliseconds), KType_int, KType_Date, KKMethodName_("setMilliseconds"), 1, KType_int, KFieldName_("milliseconds"),
+		_Public, _F(Date_SetMinutes), KType_int, KType_Date, KKMethodName_("setMinutes"), 1, KType_int, KFieldName_("minutes"),
+		_Public, _F(Date_SetMonth), KType_int, KType_Date, KKMethodName_("setMonth"), 1, KType_int, KFieldName_("month"),
+		_Public, _F(Date_SetSeconds), KType_int, KType_Date, KKMethodName_("setSeconds"), 1, KType_int, KFieldName_("seconds"),
+		_Public, _F(Date_SetTime), KType_int, KType_Date, KKMethodName_("setTime"), 1, KType_int, KFieldName_("milliseconds"),
+		_Public, _F(Date_SetUTCDate), KType_int, KType_Date, KKMethodName_("setUTCDate"), 1, KType_int, KFieldName_("date"),
+		_Public, _F(Date_SetUTCFullYear), KType_int, KType_Date, KKMethodName_("setUTCFullYear"), 1, KType_int, KFieldName_("year"),
+		_Public, _F(Date_SetUTCHours), KType_int, KType_Date, KKMethodName_("setUTCHours"), 1, KType_int, KFieldName_("hours"),
+		_Public, _F(Date_SetUTCMilliseconds), KType_int, KType_Date, KKMethodName_("setUTCMilliseconds"), 1, KType_int, KFieldName_("milliseconds"),
+		_Public, _F(Date_SetUTCMinutes), KType_int, KType_Date, KKMethodName_("setUTCMinutes"), 1, KType_int, KFieldName_("minutes"),
+		_Public, _F(Date_SetUTCMonth), KType_int, KType_Date, KKMethodName_("setUTCMonth"), 1, KType_int, KFieldName_("month"),
+		_Public, _F(Date_SetUTCSeconds), KType_int, KType_Date, KKMethodName_("setUTCSeconds"), 1, KType_int, KFieldName_("seconds"),
+		_Public, _F(Date_SetYear), KType_int, KType_Date, KKMethodName_("setYear"), 1, KType_int, KFieldName_("year"),
 		_Public, _F(Date_toDateString), KType_String, KType_Date, KKMethodName_("toDateString"), 0,
 		_Public, _F(Date_toGMTString), KType_String, KType_Date, KKMethodName_("toGMTString"), 0,
 		_Public, _F(Date_toISOString), KType_String, KType_Date, KKMethodName_("toISOString"), 0,

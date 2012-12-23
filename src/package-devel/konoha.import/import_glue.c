@@ -102,7 +102,7 @@
 //		expr = CreateImportCall(kctx, syn, tkImport, ns, pkgname);
 //	}
 //	KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_NodePattern, KType_Node, expr);
-//	ret = SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_void, TypeCheckPolicy_ALLOWVOID);
+//	ret = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_void, TypeCheckPolicy_ALLOWVOID);
 //	if(ret) {
 //		kNode_Type(kctx, stmt, EXPR);
 //	}

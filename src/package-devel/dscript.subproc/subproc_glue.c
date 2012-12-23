@@ -87,9 +87,9 @@ typedef struct {
 #define SUBPROC_IsBackground(P)  (FLAG_is((P)->flag, SUBPROC_BACKGROUND))
 #define SUBPROC_IsShell(P)       (FLAG_is((P)->flag, SUBPROC_SHELL))
 
-#define SUBPROC_setCloseFds(P)   (FLAG_set((P)->flag, SUBPROC_CLOSEFDS))
-#define SUBPROC_setBackground(P) (FLAG_set((P)->flag, SUBPROC_BACKGROUND))
-#define SUBPROC_setShell(P)      (FLAG_set((P)->flag, SUBPROC_SHELL))
+#define SUBPROC_SetCloseFds(P)   (FLAG_Set((P)->flag, SUBPROC_CLOSEFDS))
+#define SUBPROC_SetBackground(P) (FLAG_Set((P)->flag, SUBPROC_BACKGROUND))
+#define SUBPROC_SetShell(P)      (FLAG_Set((P)->flag, SUBPROC_SHELL))
 
 //#define SUBPROC_unsetCloseFds(P) (FLAG_unset((P)->flag, SUBPROC_CLOSEFDS))
 #define SUBPROC_unsetBackground(P) (FLAG_unset((P)->flag, SUBPROC_BACKGROUND))
@@ -130,7 +130,7 @@ struct kSubprocVar {
 #define W     1
 
 //#define kSubProc_is(P, S)            (KFlag_Is(uintptr_t, (S)->h.magicflag, kSubProcFlag_##P))
-#define kSubProc_set(P, S, T)         KFlag_Set(uintptr_t,(S)->h.magicflag, kSubProcFlag_##P, T)
+#define kSubProc_Set(P, S, T)         KFlag_Set(uintptr_t,(S)->h.magicflag, kSubProcFlag_##P, T)
 
 //#define kSubProcFlag_CLOSEFDS         ((kshortflag_t)(1<<0))
 #define kSubProcFlag_RunningBackground       ((kshortflag_t)(1<<1))
@@ -236,7 +236,7 @@ static kFile *new_PipeFile(KonohaContext *kctx, kArray *gcstack, int fd, const c
 			file->writerIconv = PLATAPI iconvUTF8ToSystemCharset(kctx, trace);
 		}
 	}
-	kFile_set(ChangeLessStream, file, true);
+	kFile_Set(ChangeLessStream, file, true);
 	return file;
 }
 
@@ -514,7 +514,7 @@ static KMETHOD SubProc_new(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void SubProc.setArgumentList(String[] a);
-static KMETHOD SubProc_setArgumentList(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD SubProc_SetArgumentList(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
 	KFieldSet(sbp, sbp->ArgumentList, sfp[1].asArray);
@@ -522,7 +522,7 @@ static KMETHOD SubProc_setArgumentList(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void SubProc.setInputStream(File f);
-static KMETHOD SubProc_setInputStream(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD SubProc_SetInputStream(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
 	kFile *file   = sfp[1].asFile;
@@ -531,7 +531,7 @@ static KMETHOD SubProc_setInputStream(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void SubProc.setOutputStream(File f);
-static KMETHOD SubProc_setOutputStream(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD SubProc_SetOutputStream(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
 	kFile *file   = sfp[1].asFile;
@@ -540,7 +540,7 @@ static KMETHOD SubProc_setOutputStream(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void SubProc.setErrorStream(File f);
-static KMETHOD SubProc_setErrorStream(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD SubProc_SetErrorStream(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
 	kFile *file   = sfp[1].asFile;
@@ -582,7 +582,7 @@ static KMETHOD SubProc_getErrorStream(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD SubProc_bg(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
-	kSubProc_set(RunningBackground, sbp, true);
+	kSubProc_Set(RunningBackground, sbp, true);
 	KMakeTrace(trace, sfp);
 	int pid = kSubProc_exec(kctx, sbp, trace);
 	sbp->childProcessId = pid;
@@ -709,10 +709,10 @@ static kbool_t subproc_InitSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public,     _F(SubProc_new),             KType_SubProc, KType_SubProc, KKMethodName_("new"), 1, KType_String, KFieldName_("command"),
-		_Public,     _F(SubProc_setArgumentList), KType_void, KType_SubProc, KKMethodName_("setArgumentList"), 1, KType_StringArray, KFieldName_("arguments"),
-		_Public,     _F(SubProc_setInputStream),  KType_void, KType_SubProc, KKMethodName_("setInputStream"), 1, KType_File, KFieldName_("stream"),
-		_Public,     _F(SubProc_setOutputStream), KType_void, KType_SubProc, KKMethodName_("setOutputStream"), 1, KType_File, KFieldName_("stream"),
-		_Public,     _F(SubProc_setErrorStream),  KType_void, KType_SubProc, KKMethodName_("setErrorStream"), 1, KType_File, KFieldName_("stream"),
+		_Public,     _F(SubProc_SetArgumentList), KType_void, KType_SubProc, KKMethodName_("setArgumentList"), 1, KType_StringArray, KFieldName_("arguments"),
+		_Public,     _F(SubProc_SetInputStream),  KType_void, KType_SubProc, KKMethodName_("setInputStream"), 1, KType_File, KFieldName_("stream"),
+		_Public,     _F(SubProc_SetOutputStream), KType_void, KType_SubProc, KKMethodName_("setOutputStream"), 1, KType_File, KFieldName_("stream"),
+		_Public,     _F(SubProc_SetErrorStream),  KType_void, KType_SubProc, KKMethodName_("setErrorStream"), 1, KType_File, KFieldName_("stream"),
 		_Public|_Im, _F(SubProc_getInputStream),  KType_File, KType_SubProc, KKMethodName_("getInputStream"), 0,
 		_Public|_Im, _F(SubProc_getOutputStream), KType_File, KType_SubProc, KKMethodName_("getOutputStream"), 0,
 		_Public|_Im, _F(SubProc_getErrorStream),  KType_File, KType_SubProc, KKMethodName_("getErrorStream"), 0,
@@ -748,11 +748,11 @@ static kbool_t subproc_InitSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 //		_Public|_Im, _F(Subproc_isERR2StdOUT), KType_boolean, KType_Subproc, KKMethodName_("isERR2StdOUT"), 0,
 //		_Public|_Static|_Im, _F(Subproc_call), KType_int, KType_Subproc, KKMethodName_("call"), 1, KType_String, KFieldName_("args"),
 //		_Public|_Static|_Im, _F(Subproc_CheckOutput), KType_String, KType_Subproc, KKMethodName_("checkOutput"), 1, KType_String, KFieldName_("data"),
-//		_Public|_Im, _F(Subproc_setCwd), KType_boolean, KType_Subproc, KKMethodName_("setCwd"), 1, KType_String, KFieldName_("cwd"),
-//		_Public|_Im, _F(Subproc_setBufsize), KType_boolean, KType_Subproc, KKMethodName_("setBufsize"), 1, KType_int, KFieldName_("bufsize"),
-//		_Public|_Im, _F(Subproc_setFileIN), KType_boolean, KType_Subproc, KKMethodName_("setFileIN"), 1, KType_FILE, KFieldName_("file"),
-//		_Public|_Im, _F(Subproc_setFileOUT), KType_boolean, KType_Subproc, KKMethodName_("setFileOUT"), 1, KType_FILE, KFieldName_("file"),
-//		_Public|_Im, _F(Subproc_setFileERR), KType_boolean, KType_Subproc, KKMethodName_("setFileERR"), 1, KType_FILE, KFieldName_("file"),
+//		_Public|_Im, _F(Subproc_SetCwd), KType_boolean, KType_Subproc, KKMethodName_("setCwd"), 1, KType_String, KFieldName_("cwd"),
+//		_Public|_Im, _F(Subproc_SetBufsize), KType_boolean, KType_Subproc, KKMethodName_("setBufsize"), 1, KType_int, KFieldName_("bufsize"),
+//		_Public|_Im, _F(Subproc_SetFileIN), KType_boolean, KType_Subproc, KKMethodName_("setFileIN"), 1, KType_FILE, KFieldName_("file"),
+//		_Public|_Im, _F(Subproc_SetFileOUT), KType_boolean, KType_Subproc, KKMethodName_("setFileOUT"), 1, KType_FILE, KFieldName_("file"),
+//		_Public|_Im, _F(Subproc_SetFileERR), KType_boolean, KType_Subproc, KKMethodName_("setFileERR"), 1, KType_FILE, KFieldName_("file"),
 //		_Public|_Im, _F(Subproc_getTimeout), KType_int, KType_Subproc, KKMethodName_("getTimeout"), 0,
 //		_Public|_Im, _F(Subproc_getReturncode), KType_int, KType_Subproc, KKMethodName_("getReturncode"), 0,
 //		_Public|_Im, _F(Subproc_enableERR2StdOUT), KType_boolean, KType_Subproc, KKMethodName_("enableERR2StdOUT"), 1, KType_boolean, KFieldName_("isStdout"),
@@ -1339,7 +1339,7 @@ static KMETHOD Subproc_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	KFieldSet(sp, sp->command, sfp[1].asString);
-	if(sfp[2].boolValue) SUBPROC_setCloseFds(sp);
+	if(sfp[2].boolValue) SUBPROC_SetCloseFds(sp);
 	KReturn(sp);
 }
 
@@ -1351,7 +1351,7 @@ static KMETHOD Subproc_bg(KonohaContext *kctx, KonohaStack *sfp)
 	if(PREEXEC(sp)) {
 		sp->timeoutKill = 0;
 		//sp->bg = 1;
-		SUBPROC_setBackground(sp);
+		SUBPROC_SetBackground(sp);
 		if( (ret = proc_start(kctx, sp)) != 0 ) {
 			// todo : proc_strat error
 		}
@@ -1444,13 +1444,13 @@ static KMETHOD Subproc_enableShellmode(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = PREEXEC(sp);
 	if(ret) {
 		//		sp->shell = sfp[1].boolValue;
-		if(sfp[1].boolValue) SUBPROC_setShell(sp);
+		if(sfp[1].boolValue) SUBPROC_SetShell(sp);
 	}
 	KReturnUnboxValue(ret);
 }
 
 //## boolean Subproc.setEnv(Map env);
-//KMETHOD Subproc_setEnv(KonohaContext *kctx, KonohaStack *sfp)
+//KMETHOD Subproc_SetEnv(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 //	subprocData_t *p = sp->spd;
@@ -1475,7 +1475,7 @@ static KMETHOD Subproc_enableShellmode(KonohaContext *kctx, KonohaStack *sfp)
 //}
 
 //## boolean Subproc.setCwd(String cwd);
-static KMETHOD Subproc_setCwd(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Subproc_SetCwd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	int ret = PREEXEC(sp);
@@ -1486,7 +1486,7 @@ static KMETHOD Subproc_setCwd(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## boolean Subproc.setBufsize(int size);
-static KMETHOD Subproc_setBufsize(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Subproc_SetBufsize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	int ret = PREEXEC(sp);
@@ -1497,7 +1497,7 @@ static KMETHOD Subproc_setBufsize(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## boolean Subproc.setFileIN(File in);
-static KMETHOD Subproc_setFileIN(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Subproc_SetFileIN(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	int ret = PREEXEC(sp);
@@ -1509,7 +1509,7 @@ static KMETHOD Subproc_setFileIN(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## boolean Subproc.setFileOUT(File out);
-KMETHOD Subproc_setFileOUT(KonohaContext *kctx, KonohaStack *sfp)
+KMETHOD Subproc_SetFileOUT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	int ret = PREEXEC(sp);
@@ -1521,7 +1521,7 @@ KMETHOD Subproc_setFileOUT(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## boolean Subproc.setFileERR(File err);
-KMETHOD Subproc_setFileERR(KonohaContext *kctx, KonohaStack *sfp)
+KMETHOD Subproc_SetFileERR(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	int ret = PREEXEC(sp);
@@ -1862,11 +1862,11 @@ static kbool_t subproc_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 		_Public|_Im, _F(Subproc_isERR2StdOUT), KType_boolean, KType_Subproc, KKMethodName_("isERR2StdOUT"), 0,
 //		_Public|_Static|_Im, _F(Subproc_call), KType_int, KType_Subproc, KKMethodName_("call"), 1, KType_String, KFieldName_("args"),
 //		_Public|_Static|_Im, _F(Subproc_CheckOutput), KType_String, KType_Subproc, KKMethodName_("checkOutput"), 1, KType_String, KFieldName_("data"),
-		_Public|_Im, _F(Subproc_setCwd), KType_boolean, KType_Subproc, KKMethodName_("setCwd"), 1, KType_String, KFieldName_("cwd"),
-		_Public|_Im, _F(Subproc_setBufsize), KType_boolean, KType_Subproc, KKMethodName_("setBufsize"), 1, KType_int, KFieldName_("bufsize"),
-		_Public|_Im, _F(Subproc_setFileIN), KType_boolean, KType_Subproc, KKMethodName_("setFileIN"), 1, KType_FILE, KFieldName_("file"),
-		_Public|_Im, _F(Subproc_setFileOUT), KType_boolean, KType_Subproc, KKMethodName_("setFileOUT"), 1, KType_FILE, KFieldName_("file"),
-		_Public|_Im, _F(Subproc_setFileERR), KType_boolean, KType_Subproc, KKMethodName_("setFileERR"), 1, KType_FILE, KFieldName_("file"),
+		_Public|_Im, _F(Subproc_SetCwd), KType_boolean, KType_Subproc, KKMethodName_("setCwd"), 1, KType_String, KFieldName_("cwd"),
+		_Public|_Im, _F(Subproc_SetBufsize), KType_boolean, KType_Subproc, KKMethodName_("setBufsize"), 1, KType_int, KFieldName_("bufsize"),
+		_Public|_Im, _F(Subproc_SetFileIN), KType_boolean, KType_Subproc, KKMethodName_("setFileIN"), 1, KType_FILE, KFieldName_("file"),
+		_Public|_Im, _F(Subproc_SetFileOUT), KType_boolean, KType_Subproc, KKMethodName_("setFileOUT"), 1, KType_FILE, KFieldName_("file"),
+		_Public|_Im, _F(Subproc_SetFileERR), KType_boolean, KType_Subproc, KKMethodName_("setFileERR"), 1, KType_FILE, KFieldName_("file"),
 		_Public|_Im, _F(Subproc_getTimeout), KType_int, KType_Subproc, KKMethodName_("getTimeout"), 0,
 		_Public|_Im, _F(Subproc_getReturncode), KType_int, KType_Subproc, KKMethodName_("getReturncode"), 0,
 		_Public|_Im, _F(Subproc_enableERR2StdOUT), KType_boolean, KType_Subproc, KKMethodName_("enableERR2StdOUT"), 1, KType_boolean, KFieldName_("isStdout"),

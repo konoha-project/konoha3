@@ -116,7 +116,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = kNode_ns(stmt);
 	kToken *symbolToken = SUGAR kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 	ksymbol_t unboxKey = symbolToken->resolvedSymbol;
-	kbool_t result = SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
+	kbool_t result = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
 	if(result) {
 		kNode *constNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
 		KClass *constClass = KClass_(constNode->attrTypeId);
@@ -159,7 +159,7 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	int popIsNodeingErrorMessage = sugarContext->isNodeedErrorMessage;
 	sugarContext->isNodeedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->NodeList); i++) {
-		kNode *typedNode = SUGAR kNode_TypeCheckNodeAt(kctx, stmt, expr, i, gma, KClass_INFER, TypeCheckPolicy_ALLOWVOID);
+		kNode *typedNode = SUGAR TypeCheckNodeAt(kctx, expr, i, gma, KClass_INFER, TypeCheckPolicy_ALLOWVOID);
 		if(typedNode == K_NULLNODE) {
 			isDefined = false;
 			break;
@@ -207,8 +207,8 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("namespace"), SYNFLAG_CTypeCheckFunc, 0, Precedence_Statement, {NULL}, {SUGARFUNC Statement_namespace}},
-		{ KSymbol_("const"), SYNFLAG_CTypeCheckFunc, 0, Precedence_Statement, {NULL}, {SUGARFUNC Statement_ConstDecl}},
+		{ KSymbol_("namespace"), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {NULL}, {SUGARFUNC Statement_namespace}},
+		{ KSymbol_("const"), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {NULL}, {SUGARFUNC Statement_ConstDecl}},
 		{ KSymbol_("defined"), 0,0, Precedence_CStylePREUNARY, {SUGARFUNC Expression_Defined}, {SUGARFUNC TypeCheck_Defined},},
 		{ KSymbol_END, },
 	};

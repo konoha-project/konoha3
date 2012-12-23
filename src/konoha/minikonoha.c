@@ -89,7 +89,7 @@ static void KRuntimeContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KFree(ctx->stack, sizeof(KRuntimeContextVar));
 }
 
-static kbool_t KRuntime_setModule(KonohaContext *kctx, int x, KRuntimeModule *d, KTraceInfo *trace)
+static kbool_t KRuntime_SetModule(KonohaContext *kctx, int x, KRuntimeModule *d, KTraceInfo *trace)
 {
 	if(kctx->modshare[x] != NULL) {
 		KLIB ReportScriptMessage(kctx, trace, ErrTag, "module %s already registered", kctx->modshare[x]->name);
@@ -116,7 +116,7 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 	if(kctx == NULL) {  // NULL means first one
 		KonohaLibVar *klib = (KonohaLibVar *)calloc(sizeof(KonohaLib) + sizeof(KonohaContextVar), 1);
 		klib_Init(klib);
-		klib->KRuntime_setModule  = KRuntime_setModule;
+		klib->KRuntime_SetModule  = KRuntime_SetModule;
 		klib->KonohaContext_Init = new_KonohaContext;
 		klib->KonohaContext_Free = KonohaContext_Free;
 		klib->ReftraceAll = ReftraceAll;

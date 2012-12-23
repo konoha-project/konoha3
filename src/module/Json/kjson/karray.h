@@ -78,14 +78,14 @@ static inline void ARRAY_##T##_Add(ARRAY(T) *a, ValueType v) {\
         a->capacity = 1 << LOG2(a->capacity * 2 + 1);\
         a->list = (T *)realloc(a->list, sizeof(T) * a->capacity);\
     }\
-    ARRAY_##T##_set(a, a->size++, v);\
+    ARRAY_##T##_Set(a, a->size++, v);\
 }
 
 #define DEF_ARRAY_OP(T)\
 static inline T *ARRAY_##T##_get(ARRAY(T) *a, int idx) {\
     return a->list+idx;\
 }\
-static inline void ARRAY_##T##_set(ARRAY(T) *a, int idx, T *v) {\
+static inline void ARRAY_##T##_Set(ARRAY(T) *a, int idx, T *v) {\
     memcpy(a->list+idx, v, sizeof(T));\
 }\
 DEF_ARRAY_OP__(T, T *)
@@ -94,7 +94,7 @@ DEF_ARRAY_OP__(T, T *)
 static inline T ARRAY_##T##_get(ARRAY(T) *a, int idx) {\
     return a->list[idx];\
 }\
-static inline void ARRAY_##T##_set(ARRAY(T) *a, int idx, T v) {\
+static inline void ARRAY_##T##_Set(ARRAY(T) *a, int idx, T v) {\
     a->list[idx] = v;\
 }\
 DEF_ARRAY_OP__(T, T)
@@ -102,7 +102,7 @@ DEF_ARRAY_OP__(T, T)
 #define DEF_ARRAY_T_OP(T) DEF_ARRAY_T(T);DEF_ARRAY_OP(T)
 
 #define ARRAY_get(T, a, idx)    ARRAY_##T##_get(a, idx)
-#define ARRAY_set(T, a, idx, v) ARRAY_##T##_set(a, idx, v)
+#define ARRAY_Set(T, a, idx, v) ARRAY_##T##_Set(a, idx, v)
 #define ARRAY_Add(T, a, v)      ARRAY_##T##_Add(a, v)
 #define ARRAY_dispose(T, a)     ARRAY_##T##_dispose(a)
 #define ARRAY_Init(T, a, s)     ARRAY_Init_##T (a, s)

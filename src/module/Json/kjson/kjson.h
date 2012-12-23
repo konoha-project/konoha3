@@ -166,8 +166,8 @@ static inline JSON *JSON_getArray(JSON json, const char *key, size_t *len)
 }
 
 /* [Other API] */
-KJSON_API void JSONObject_setObject(JSONMemoryPool *jm, JSON obj, JSON key, JSON value);
-KJSON_API void JSONObject_set(JSONMemoryPool *jm, JSON obj, const char *key, size_t len, JSON value);
+KJSON_API void JSONObject_SetObject(JSONMemoryPool *jm, JSON obj, JSON key, JSON value);
+KJSON_API void JSONObject_Set(JSONMemoryPool *jm, JSON obj, const char *key, size_t len, JSON value);
 KJSON_API void JSONArray_append(JSONMemoryPool *jm, JSON ary, JSON o);
 KJSON_API void JSON_Free(JSON o);
 
@@ -355,11 +355,11 @@ static inline JSON JSONArray_get(JSON json, unsigned index)
         return JSON_NOP();
     }
 }
-static inline bool JSONArray_set(JSON json, unsigned index, JSON val)
+static inline bool JSONArray_Set(JSON json, unsigned index, JSON val)
 {
     JSONArray *a = toAry(json.val);
     if(JSON_TYPE_CHECK(Array, json) && index < a->array.size) {
-        ARRAY_set(JSON, &a->array, index, val);
+        ARRAY_Set(JSON, &a->array, index, val);
         return true;
     }
     return false;

@@ -52,7 +52,7 @@
 //	return (kToken *)ParsedNodeToken;
 //}
 //
-//static void KMacroSet_setTokenAt(KonohaContext *kctx, KMacroSet *macroSet, int index, kArray *tokenList, const char *symbol, ...)
+//static void KMacroSet_SetTokenAt(KonohaContext *kctx, KMacroSet *macroSet, int index, kArray *tokenList, const char *symbol, ...)
 //{
 //	DBG_ASSERT(macroSet[index].tokenList == NULL);
 //	macroSet[index].symbol = KLIB Ksymbol(kctx, symbol, strlen(symbol), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID);
@@ -86,13 +86,13 @@
 //	 */
 //	SUGAR KTokenSeq_Tokenize(kctx, &source, "T _ = E; if(_.hasNext()) N = _.next();", 0);
 //	KMacroSet macroSet[4] = {{0, NULL, 0, 0}};
-//	KMacroSet_setTokenAt(kctx, macroSet, 0, source.tokenList, "T", IteratorTypeToken, NULL);
-//	KMacroSet_setTokenAt(kctx, macroSet, 1, source.tokenList, "E", IteratorNodeToken, NULL);
+//	KMacroSet_SetTokenAt(kctx, macroSet, 0, source.tokenList, "T", IteratorTypeToken, NULL);
+//	KMacroSet_SetTokenAt(kctx, macroSet, 1, source.tokenList, "E", IteratorNodeToken, NULL);
 //	if(TypeToken == NULL) {
-//		KMacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", VariableToken, NULL);
+//		KMacroSet_SetTokenAt(kctx, macroSet, 2, source.tokenList, "N", VariableToken, NULL);
 //	}
 //	else {
-//		KMacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", TypeToken, VariableToken, NULL);
+//		KMacroSet_SetTokenAt(kctx, macroSet, 2, source.tokenList, "N", TypeToken, VariableToken, NULL);
 //	}
 //	kNode *bk = SUGAR new_BlockNode(kctx, stmt, macroSet, &source);
 //	KTokenSeq_Pop(kctx, source);
@@ -115,7 +115,7 @@
 //	VAR_TypeCheck(stmt, gma, reqc);
 //	DBG_P("for statement .. ");
 //	int isOkay = false;
-//	if(SUGAR kNode_TypeCheckByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_INFER, 0)) {
+//	if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_INFER, 0)) {
 //		kNameSpace *ns = kNode_ns(stmt);
 //		kToken *TypeToken = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
 //		kToken *VariableToken  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
@@ -127,7 +127,7 @@
 //				kNodeNode_Message(kctx, stmt, IteratorNode, ErrTag, "expected Iterator expression after in");
 //				KReturnUnboxValue(false);
 //			}
-//			IteratorNode = SUGAR new_TypedCallNode(kctx, stmt, gma, KClass_INFER, mtd, 1, IteratorNode);
+//			IteratorNode = SUGAR new_MethodNode(kctx, stmt, gma, KClass_INFER, mtd, 1, IteratorNode);
 //			kNode_SetObject(kctx, stmt, KSymbol_NodePattern, IteratorNode);
 //		}
 //		kNode *block = new_MacroNode(kctx, stmt, new_TypeToken(kctx, ns, KClass_(IteratorNode->attrTypeId)), new_ParsedNodeToken(kctx, ns, IteratorNode), TypeToken, VariableToken);

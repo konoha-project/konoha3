@@ -265,7 +265,7 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 			KFieldInit(ns, syn->sugarFuncTable[KSugarParseFunc], fo);
 		}
 		if(syndef->typeCheckFunc != NULL) {
-			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CTypeCheckFunc)) ? KSugarFunc(ns, syndef->typeCheckMethodFunc) : syndef->typeCheckFunc;
+			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CTypeFunc)) ? KSugarFunc(ns, syndef->typeCheckMethodFunc) : syndef->typeCheckFunc;
 			KFieldInit(ns, syn->sugarFuncTable[KSugarTypeCheckFunc], fo);
 		}
 //		// set default function

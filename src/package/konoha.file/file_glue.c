@@ -410,7 +410,7 @@ static KMETHOD FILE_getfileno(KonohaContext *kctx , KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 
 //## void setReaderCharset(String charset);
-static KMETHOD File_setReaderCharset(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD File_SetReaderCharset(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFile   *file = sfp[0].asFile;
 	KMakeTrace(trace, sfp);
@@ -418,7 +418,7 @@ static KMETHOD File_setReaderCharset(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void setWriterCharset(String charset);
-static KMETHOD File_setWriterCharset(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD File_SetWriterCharset(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFile   *file = sfp[0].asFile;
 	KMakeTrace(trace, sfp);
@@ -452,8 +452,8 @@ static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *t
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static|_Const, _F(File_scriptPath), KType_String, KType_File, KKMethodName_("scriptPath"), 1, KType_String, KFieldName_("filename"),
-		_Public, _F(File_setWriterCharset), KType_void, KType_File, KKMethodName_("setWriterCharset"), 1, KType_String, KFieldName_("charset"),
-		_Public, _F(File_setReaderCharset), KType_void, KType_File, KKMethodName_("setReaderCharset"), 1, KType_String, KFieldName_("charset"),
+		_Public, _F(File_SetWriterCharset), KType_void, KType_File, KKMethodName_("setWriterCharset"), 1, KType_String, KFieldName_("charset"),
+		_Public, _F(File_SetReaderCharset), KType_void, KType_File, KKMethodName_("setReaderCharset"), 1, KType_String, KFieldName_("charset"),
 
 		_Public, _F(File_new), KType_File, KType_File, KKMethodName_("new"), 2, KType_String, KFieldName_("filename"), KType_String, KFieldName_("mode"),
 		_Public, _F(File_close), KType_void, KType_File, KKMethodName_("close"), 0,
@@ -488,7 +488,7 @@ static kFile* new_File(KonohaContext *kctx, kArray *gcstack, FILE *fp, const cha
 	kFile *file = new_(File, fp, gcstack);
 	file->fp = fp;
 	KFieldInit(file, file->PathInfoNULL, KLIB new_kString(kctx, OnField, pathInfo, len, StringPolicy_ASCII|StringPolicy_TEXT));
-	kFile_set(ChangeLessStream, file, true);
+	kFile_Set(ChangeLessStream, file, true);
 	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
 		if(fp == stdin) {
 			file->readerIconv = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);

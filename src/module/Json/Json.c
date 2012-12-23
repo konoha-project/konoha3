@@ -130,7 +130,7 @@ static kbool_t SetJsonKeyValue(KonohaContext *kctx, struct JsonBuf *jsonbuf, con
 		return false;
 	}
 	size_t keylen = KeyLen(key, keylen_or_zero);
-	JSONObject_set((JSONMemoryPool *)(PLATAPI JsonHandler), toJSON(jsonbuf->json_i),
+	JSONObject_Set((JSONMemoryPool *)(PLATAPI JsonHandler), toJSON(jsonbuf->json_i),
 			key, keylen, toJSON(otherbuf->json_i));
 	return true;
 }
@@ -143,7 +143,7 @@ static kbool_t SetJsonValue(KonohaContext *kctx, struct JsonBuf *jsonbuf, const 
 	kbool_t ret = true;
 	if(key != NULL) {
 		size_t keylen = KeyLen(key, keylen_or_zero);
-		JSONObject_set((JSONMemoryPool *)(PLATAPI JsonHandler),
+		JSONObject_Set((JSONMemoryPool *)(PLATAPI JsonHandler),
 				toJSON(jsonbuf->json_i), key, keylen, val);
 	}
 	else {
@@ -202,7 +202,7 @@ static kbool_t RetrieveJsonArrayAt(KonohaContext *kctx, struct JsonBuf *jsonbuf,
 static kbool_t SetJsonArrayAt(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf)
 {
 	if(JSON_TYPE_CHECK(Array, toJSON(jsonbuf->json_i))) {
-		JSONArray_set(toJSON(jsonbuf->json_i), index, toJSON(otherbuf->json_i));
+		JSONArray_Set(toJSON(jsonbuf->json_i), index, toJSON(otherbuf->json_i));
 		return true;
 	}
 	return false;

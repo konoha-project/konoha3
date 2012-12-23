@@ -39,14 +39,14 @@
 //};
 //
 //#define Map_isUnboxData(o)    (KFlag_Is(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1))
-//#define Map_setUnboxData(o,b) KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1,b)
+//#define Map_SetUnboxData(o,b) KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1,b)
 //
 //static void kMap_Init(KonohaContext *kctx, kObject *o, void *conf)
 //{
 //	kMap *map = (kMap *)o;
 //	map->map = KLIB KHashMap_Init(kctx, 17);
 //	if(KType_Is(UnboxType, kObject_p0(map))) {
-//		Map_setUnboxData(map, true);
+//		Map_SetUnboxData(map, true);
 //	}
 //}
 //
@@ -143,7 +143,7 @@
 //}
 //
 ////## method void Map.set(String key, T0 value);
-//static KMETHOD Map_set(KonohaContext *kctx, KonohaStack *sfp)
+//static KMETHOD Map_Set(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kMap *m = (kMap *)sfp[0].asObject;
 //	KHashMapEntry *e = kMap_getEntry(kctx, m, sfp[1].asString, true/*new_if_NULL*/);
@@ -218,7 +218,7 @@
 //		_Public, _F(Map_new), KType_Map, KType_Map, KKMethodName_("new"), 0,
 //		_Public|_Im|_Const, _F(Map_has), KType_boolean, KType_Map, KKMethodName_("has"), 1, KType_String, FN_key,
 //		_Public|_Im|_Const, _F(Map_get), KType_0, KType_Map, KKMethodName_("get"), 1, KType_String, FN_key,
-//		_Public, _F(Map_set), KType_void, KType_Map, KKMethodName_("set"), 2, KType_String, FN_key, KType_0, KFieldName_("value"),
+//		_Public, _F(Map_Set), KType_void, KType_Map, KKMethodName_("set"), 2, KType_String, FN_key, KType_0, KFieldName_("value"),
 //		_Public, _F(Map_Remove), KType_void, KType_Map, KKMethodName_("remove"), 1, KType_String, FN_key,
 //		_Public|_Im|_Const, _F(Map_keys), KType_Array0, KType_Map, KKMethodName_("keys"), 0,
 //		DEND,

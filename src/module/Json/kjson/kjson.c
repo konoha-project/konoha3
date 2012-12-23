@@ -170,24 +170,24 @@ KJSON_API void JSONArray_append(JSONMemoryPool *jm, JSON json, JSON o)
     _JSONArray_append(a, o);
 }
 
-static void _JSONObject_set(JSONObject *o, JSONString *key, JSON value)
+static void _JSONObject_Set(JSONObject *o, JSONString *key, JSON value)
 {
     assert(JSON_type(value) < 16);
-    kmap_set(&o->child, key, value.bits);
+    kmap_Set(&o->child, key, value.bits);
 }
 
-KJSON_API void JSONObject_setObject(JSONMemoryPool *jm, JSON json, JSON key, JSON value)
+KJSON_API void JSONObject_SetObject(JSONMemoryPool *jm, JSON json, JSON key, JSON value)
 {
     assert(JSON_TYPE_CHECK(Object, json));
     assert(JSON_TYPE_CHECK(String, key));
     JSONObject *o = toObj(json.val);
-    _JSONObject_set(o, toStr(key.val), value);
+    _JSONObject_Set(o, toStr(key.val), value);
 }
 
-KJSON_API void JSONObject_set(JSONMemoryPool *jm, JSON json, const char *keyword, size_t keylen, JSON value)
+KJSON_API void JSONObject_Set(JSONMemoryPool *jm, JSON json, const char *keyword, size_t keylen, JSON value)
 {
     JSONString *key = toStr(JSONString_new(jm, keyword, keylen).val);
-    _JSONObject_set(toObj(json.val), key, value);
+    _JSONObject_Set(toObj(json.val), key, value);
 }
 
 /* Parser functions */
@@ -480,7 +480,7 @@ static JSON parseObject(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
         val = kstack_Pop(&ins->stack);
         key = toStr(kstack_Pop(&ins->stack).val);
         assert(val.bits != 0 && key);
-        _JSONObject_set(obj, key, val);
+        _JSONObject_Set(obj, key, val);
     }
     assert(kstack_size(&ins->stack) == stack_top);
     return json;

@@ -405,7 +405,7 @@ static KMETHOD SignalEventListener_start(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 //## void System.setSafepoint();
-static KMETHOD System_setSafepoint(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD System_SetSafepoint(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kmodevent->flag |= FLAG_EVENT;
 	((KonohaContextVar *)kctx)->safepoint = 1;
@@ -413,14 +413,14 @@ static KMETHOD System_setSafepoint(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void System.setEventInvokeFunc(Func f);
-static KMETHOD System_setEventInvokeFunc(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD System_SetEventInvokeFunc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaContext_getEventContext(kctx)->invokeFuncNULL = sfp[1].asFunc;
 	KReturnVoid();
 }
 
 //## void System.setEnqFunc(Func f);
-static KMETHOD System_setEnqFunc(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD System_SetEnqFunc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaContext_getEventContext(kctx)->enqFuncNULL = sfp[1].asFunc;
 	KReturnVoid();
@@ -519,7 +519,7 @@ static void MODEVENT_Init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace
 	mod->h.allocSize = sizeof(KModuleEvent);
 	mod->h.setupModuleContext    = EventModule_Setup;
 	mod->h.freeModule = EventModule_Free;
-	KLIB KRuntime_setModule(kctx, MOD_EVENT, (KRuntimeModule *)mod, 0);
+	KLIB KRuntime_SetModule(kctx, MOD_EVENT, (KRuntimeModule *)mod, 0);
 
 	KSetKLibFunc(ns->packageId, KscheduleEvent, KscheduleEvent, trace);
 
@@ -585,9 +585,9 @@ static kbool_t eventlistener_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns
 		_Public|_Const|_Im, _F(Event_getInt),      KType_int,       KType_Event, KKMethodName_("getInt"),    1, KType_String, KFieldName_("key"),
 
 		/* dispatch */
-		_Public|_Static, _F(System_setSafepoint), KType_void, KType_System, KKMethodName_("setSafepoint"), 0,
-		_Public|_Static, _F(System_setEventInvokeFunc), KType_void, KType_System, KKMethodName_("setEventInvokeFunc"), 1, KType_Func, KFieldName_("f"),
-		_Public|_Static, _F(System_setEnqFunc), KType_void, KType_System, KKMethodName_("setEnqFunc"), 1, KType_EnqFunc, KFieldName_("f"),
+		_Public|_Static, _F(System_SetSafepoint), KType_void, KType_System, KKMethodName_("setSafepoint"), 0,
+		_Public|_Static, _F(System_SetEventInvokeFunc), KType_void, KType_System, KKMethodName_("setEventInvokeFunc"), 1, KType_Func, KFieldName_("f"),
+		_Public|_Static, _F(System_SetEnqFunc), KType_void, KType_System, KKMethodName_("setEnqFunc"), 1, KType_EnqFunc, KFieldName_("f"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
