@@ -351,7 +351,7 @@ static KMETHOD NameSpace_DefinedLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
 	KSyntax* syn = KSyntax_(sfp[0].asNameSpace, keyword);
-	KReturnUnboxValue(KSyntax_hasSugarFunc(syn, SugarFunc_TokenFunc));
+	KReturnUnboxValue(KSyntax_hasSugarFunc(syn, KSugarTokenFunc));
 }
 
 //## boolean NameSpace.definedStatement(symbol keyword);

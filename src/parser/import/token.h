@@ -94,7 +94,7 @@ static int ParseBackSlash(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 
 static int ParseNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
-	int ch, pos = tok_start, tokenType = TokenType_INT;
+	int ch, pos = tok_start, tokenType = TokenType_NUM;
 	const char *ts = tokenizer->source;
 	while((ch = ts[pos++]) != 0) {
 		if(ch == '.') {

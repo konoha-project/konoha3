@@ -1215,20 +1215,19 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	DBG_ASSERT(KSymbol_(":") == KSymbol_COLON);
 	DBG_ASSERT(KSymbol_("true") == KSymbol_true);
 	DBG_ASSERT(KSymbol_("return") == KSymbol_return);
-	DBG_P("MN_new=%d", KSymbol_("new"));
 	DBG_ASSERT(KSymbol_("new") == MN_new);
 	kFunc *TermFunc = KSugarFunc(ns, Expression_Term);
 	kFunc *OperatorFunc = KSugarFunc(ns, Expression_Operator);
 	kFunc *MethodCallFunc = KSugarFunc(ns, TypeCheck_MethodCall);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ TOKEN(ERR), SYNFLAG_NodeBreakExec, },
+		{ PATTERN(Indent)},
 //		{ PATTERN(Symbol),  0, 0, 0, PatternMatch_MethodName, Expression_Term, NULL, NULL, TypeCheck_Symbol,},
 		{ PATTERN(Symbol),  SYNFLAG_CTypeCheckFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_Symbol},},
 		{ PATTERN(Text),    SYNFLAG_CTypeCheckFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_TextLiteral},},
 		{ PATTERN(Number),  SYNFLAG_CTypeCheckFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_IntLiteral},},
 		{ GROUP(Parenthesis), SYNFLAG_CFunc|SYNFLAG_NodePostfixOp2, Precedence_CStyleCALL, 0, {SUGARFUNC Expression_Parenthesis}, {SUGARFUNC TypeCheck_FuncStyleCall}}, //KSymbol_ParenthesisGroup
-//		{ GROUP(Bracket),  },  //KSymbol_BracketGroup
-//		{ GROUP(Brace),  }, // KSymbol_BraceGroup
+		{ GROUP(Bracket),  }, //KSymbol_BracketGroup
+		{ GROUP(Brace),  },   // KSymbol_BraceGroup
 		{ PATTERN(Block), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_CStyleBlock}, {SUGARFUNC TypeCheck_Block}, },
 		{ PATTERN(Param), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_CStyleParam}, {SUGARFUNC Statement_ParamsDecl},},
 		{ PATTERN(Token), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_Token}, {NULL}},
@@ -1263,7 +1262,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ PATTERN(MethodDecl), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_MethodDecl}, {SUGARFUNC Statement_MethodDecl}},
 		{ TOKEN(if),           SYNFLAG_CFunc, 0, Precedence_Statement, {NULL}, {SUGARFUNC Statement_if}},
 		{ TOKEN(return), SYNFLAG_CFunc|SYNFLAG_NodeBreakExec, 0, Precedence_Statement, {NULL}, {SUGARFUNC Statement_return} },
-		{ KSymbol_("new"), SYNFLAG_CFunc, 0, Precedence_CStyleCALL, {SUGARFUNC Expression_new}, },
+		{ TOKEN(new), SYNFLAG_CFunc, 0, Precedence_CStyleCALL, {SUGARFUNC Expression_new}, },
 		{ KSymbol_END, },
 	};
 	kNameSpace_DefineSyntax(kctx, ns, SYNTAX, NULL);
@@ -1273,8 +1272,8 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	// Syntax Rule
 //	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(Expr), "$Expr", 0, NULL);
 	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(TypeDecl), "$TypeDecl $Type $Expr", 0, NULL);
-//	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(MethodDecl), "$MethodDecl $Type [ClassName: $Type \".\"] $Symbol $Param [$Block]", 0, NULL);
-//	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(if), "\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Expr]", 0, NULL);
-//	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(return), "\"return\" [$Expr]", 0, NULL);
+	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(MethodDecl), "$MethodDecl $Type [ClassName: $Type \".\"] $Symbol $Param [$Block]", 0, NULL);
+	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(if), "\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Expr]", 0, NULL);
+	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(return), "\"return\" [$Expr]", 0, NULL);
 }
 

@@ -32,15 +32,6 @@
 extern "C" {
 #endif
 
-typedef enum {
-	TokenType_INDENT = 1,
-	TokenType_SYMBOL = KSymbol_SymbolPattern,
-	TokenType_TEXT   = KSymbol_TextPattern,
-	TokenType_INT    = KSymbol_NumberPattern,
-	TokenType_CODE   = KSymbol_BlockPattern,
-	TokenType_ERR    = KSymbol_TokenPattern
-} kTokenType;
-
 // reserved
 //#define MN_new       (8+KSymbol_void)
 #define FN_this      KFieldName_("this")
@@ -210,10 +201,10 @@ typedef const struct KSyntaxVar   KSyntax;
 typedef struct KSyntaxVar         KSyntaxVar;
 
 typedef enum {
-	SugarFunc_TokenFunc         = 0,
-	KSugarParseFunc             = 1,
-	KSugarTypeCheckFunc         = 2,
-	SugarFunc_SIZE              = 3
+	KSugarTokenFunc         = 0,
+	KSugarParseFunc         = 1,
+	KSugarTypeCheckFunc     = 2,
+	SugarFunc_SIZE          = 3
 } SugerFunc;
 
 #define SUGARFUNC   (kFunc *)
@@ -274,7 +265,6 @@ typedef enum {
 typedef struct KDEFINE_SYNTAX {
 	ksymbol_t    keyword;
 	kshortflag_t flag;
-//	const char *rule;
 	int precedence_op2;
 	int precedence_op1;
 	union {
@@ -289,11 +279,12 @@ typedef struct KDEFINE_SYNTAX {
 
 #define KSugarFunc(ns, F)     new_(Func, KLIB new_kMethod(kctx, (ns)->NameSpaceConstList, 0, 0, 0, F), (ns)->NameSpaceConstList)
 
+/* Token */
+
 #define kToken_SetHintChar(tk, ch, ch2)           tk->hintChar = ((ch << 8) | ((char)ch2))
 #define kToken_GetOpenHintChar(tk)                ((int)(tk->hintChar >> 8))
 #define kToken_GetCloseHintChar(tk)               ((char)tk->hintChar)
 
-/* Token */
 struct kTokenVar {
 	kObjectHeader h;
 	union {
@@ -315,6 +306,17 @@ struct kTokenVar {
 	};
 };
 
+typedef enum {
+	TokenType_INDENT = KSymbol_IndentPattern,
+	TokenType_SYMBOL = KSymbol_SymbolPattern,
+	TokenType_TEXT   = KSymbol_TextPattern,
+	TokenType_NUM    = KSymbol_NumberPattern,
+	TokenType_CODE   = KSymbol_BlockPattern,
+	TokenType_ERR    = KSymbol_TokenPattern
+} kTokenType;
+
+
+
 #define kToken_IsIndent(T)  ((T)->unresolvedTokenType == TokenType_INDENT && (T)->resolvedSyntaxInfo == NULL)
 
 #define kTokenFlag_StatementSeparator    kObjectFlag_Local1
@@ -324,6 +326,8 @@ struct kTokenVar {
 
 #define kToken_Is(P, o)      (KFlag_Is(uintptr_t,(o)->h.magicflag, kTokenFlag_##P))
 #define kToken_Set(P,o,B)    KFlag_Set(uintptr_t,(o)->h.magicflag, kTokenFlag_##P, B)
+
+
 
 typedef struct KMacroSet {
 	int/*ksymbol_t*/          symbol;
@@ -415,9 +419,10 @@ struct kNodeVar {
 		kToken        *TermToken;            // Term
 	};
 	union {
-		kArray        *NodeList;       // Node
-		kNameSpace    *StmtNameSpace;  // Statement
-		struct kNodeVar *NodeToPush;   // KNode_Push
+		kArray          *NodeList;       // Node
+		kNameSpace      *StmtNameSpace;  // Statement
+		struct kNodeVar *NodeToPush;     // KNode_Push
+		kString         *ErrorMessage;   // KNode_Error
 	};
 	union {
 		KSyntax       *syn;  /* untyped */
@@ -425,7 +430,6 @@ struct kNodeVar {
 		intptr_t       index;
 		kObject*       ObjectConstValue;
 		intptr_t       stacktop;
-		kString       *ErrorMessage;
 	};
 	knode_t node; 	   ktypeattr_t attrTypeId;
 };
@@ -459,18 +463,17 @@ static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeTy
 
 #define kNode_IsTerm(N)           IS_Token((N)->TermToken)
 
-#define kNodeFlag_StackIndex         kObjectFlag_Local1
-#define kNodeFlag_ObjectConst        kObjectFlag_Local2
+#define kNodeFlag_ObjectConst        kObjectFlag_Local1
 
-#define kNodeFlag_OpenBlock          kObjectFlag_Local3  /* KNode_Block */
-#define kNodeFlag_CatchContinue      kObjectFlag_Local3
-#define kNodeFlag_CatchBreak         kObjectFlag_Local4
+#define kNodeFlag_OpenBlock          kObjectFlag_Local2  /* KNode_Block */
+#define kNodeFlag_CatchContinue      kObjectFlag_Local3  /* KNode_Block */
+#define kNodeFlag_CatchBreak         kObjectFlag_Local4  /* KNode_Block */
 
 #define kNode_Is(P, O)      (KFlag_Is(uintptr_t,(O)->h.magicflag, kNodeFlag_##P))
 #define kNode_Set(P, O, B)   KFlag_Set(uintptr_t,(O)->h.magicflag, kNodeFlag_##P, B)
 
 #define kNode_At(E, N)            ((E)->NodeList->NodeItems[(N)])
-#define kNode_IsERR(STMT)         ((STMT)->node == KNode_Error)
+#define kNode_IsError(STMT)         ((STMT)->node == KNode_Error)
 
 #define kNode_GetObjectNULL(CTX, O, K)            (KLIB kObject_getObject(CTX, UPCAST(O), K, NULL))
 #define kNode_GetObject(CTX, O, K, DEF)           (KLIB kObject_getObject(CTX, UPCAST(O), K, DEF))
@@ -481,7 +484,7 @@ static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeTy
 
 #define kNode_Message(kctx, STMT, PE, FMT, ...)            SUGAR kNode_Message2(kctx, STMT, NULL, PE, FMT, ## __VA_ARGS__)
 #define kNodeToken_Message(kctx, STMT, TK, PE, FMT, ...)   SUGAR kNode_Message2(kctx, STMT, TK, PE, FMT, ## __VA_ARGS__)
-#define kNodeNode_Message(kctx, STMT, EXPR, PE, FMT, ...)  SUGAR kNode_Message2(kctx, STMT, (kToken *)EXPR, PE, FMT, ## __VA_ARGS__)
+#define kNodeNode_Message(kctx, STMT, EXPR, PE, FMT, ...)  SUGAR kNode_Message2(kctx, EXPR, NULL, PE, FMT, ## __VA_ARGS__)
 
 
 typedef struct {

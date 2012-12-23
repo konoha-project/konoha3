@@ -74,15 +74,6 @@ static kString* KParserContext_vprintMessage(KonohaContext *kctx, kinfotag_t tag
 	return NULL;
 }
 
-//static kString* KParserContext_Message(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, ...)
-//{
-//	va_list ap;
-//	va_start(ap, fmt);
-//	kString *errmsg = KParserContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
-//	va_end(ap);
-//	return errmsg;
-//}
-
 static void kToken_ToError(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglevel, const char *fmt, ...)
 {
 	va_list ap;
@@ -96,15 +87,14 @@ static void kToken_ToError(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglev
 	}
 }
 
-static KSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t kw, int isnew);
-
-static void kNode_toERR(KonohaContext *kctx, kNode *stmt, kString *errmsg)
+static void kNode_ToError(KonohaContext *kctx, kNode *node, kString *errmsg)
 {
 	if(errmsg != NULL) { // not in case of isNodeedErrorMessage
-		kNodeVar *node = (kNodeVar*)stmt;
 		node->node = KNode_Error;
+		node->attrTypeId = KType_void;
 		KFieldSet(node, node->ErrorMessage, errmsg);
-		kNode_Set(ObjectConst, node, true);
+		kNode_Set(ObjectConst, node, false);
+		node->stacktop = 0;
 	}
 }
 
@@ -113,17 +103,13 @@ static kNode* kNode_Message2(KonohaContext *kctx, kNode *stmt, kToken *tk, kinfo
 	va_list ap;
 	va_start(ap, fmt);
 	kfileline_t uline = kNode_uline(stmt);
-	if(tk != NULL && taglevel <= ErrTag ) {
-		if(IS_Token(tk)) {
-			uline = tk->uline;
-		}
-//		else if(IS_Node(tk)) {
-//			uline = kNode_uline(kctx, (kNode *)tk, uline);
-//		}
+	if(tk != NULL) {
+		assert(IS_Token(tk));
+		uline = tk->uline;
 	}
 	kString *errmsg = KParserContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
-	if(taglevel <= ErrTag && !kNode_IsERR(stmt)) {
-		kNode_toERR(kctx, stmt, errmsg);
+	if(taglevel <= ErrTag && !kNode_IsError(stmt)) {
+		kNode_ToError(kctx, stmt, errmsg);
 	}
 	va_end(ap);
 	return K_NULLNODE;
@@ -141,8 +127,8 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 		kfileline_t uline = kNode_uline(stmt);
 		kString *emsg = KParserContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
 		va_end(ap);
-		if(taglevel <= ErrTag && !kNode_IsERR(stmt)) {
-			kNode_toERR(kctx, stmt, emsg);
+		if(taglevel <= ErrTag && !kNode_IsError(stmt)) {
+			kNode_ToError(kctx, stmt, emsg);
 		}
 	}
 	else {

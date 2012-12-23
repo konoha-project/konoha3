@@ -565,13 +565,6 @@ static int CallNode_getArgCount(kNode *expr)
 	return kArray_size(expr->NodeList) - 2;
 }
 
-static kString* Node_getErrorMessage(KonohaContext *kctx, kNode *stmt)
-{
-	kString* msg = (kString *)kNode_GetObjectNULL(kctx, stmt, KSymbol_ERR);
-	DBG_ASSERT(IS_String(msg));
-	return msg;
-}
-
 /* Visitor */
 
 static kbool_t KBuilder_VisitDoneNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
@@ -634,7 +627,7 @@ static kbool_t KBuilder_VisitFieldNode(KonohaContext *kctx, KBuilder *builder, k
 
 static kbool_t KBuilder_VisitErrorNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
-	ASM(ERROR, kNode_uline(stmt), Node_getErrorMessage(kctx, stmt));
+	ASM(ERROR, kNode_uline(stmt), stmt->ErrorMessage);
 	return false;
 }
 

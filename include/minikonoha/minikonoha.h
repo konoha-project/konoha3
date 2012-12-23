@@ -247,8 +247,8 @@ typedef struct {
 
 #ifdef USE_KEYWORD_LIST
 static const char *KEYWORD_LIST[] = {
-	"", "$Expr", "$Symbol", "$Text", "$Number", "$Type",
-	"()", "[]", "{}", "$Block", "$Param", "$TypeDecl", "$MethodDecl", "$Token",
+	"", "$Indent", "$Symbol", "$Text", "$Number", "$Type",
+	"()", "[]", "{}", "$Expr", "$Block", "$Param", "$TypeDecl", "$MethodDecl", "$Token",
 	".", "/", "%", "*", "+", "-", "<", "<=", ">", ">=", "==", "!=",
 	"&&", "||", "!", "=", ",", "$", ":", ";", /*"@",*/
 	"true", "false", "if", "else", "return", // syn
@@ -258,7 +258,7 @@ static const char *KEYWORD_LIST[] = {
 
 #define KSymbol_END              ((ksymbol_t)-1)
 #define KSymbol_ERR              (((ksymbol_t)0)|0) /**/
-#define KSymbol_ExprPattern      (((ksymbol_t)1)|KSymbolAttr_Pattern) /*$Node*/
+#define KSymbol_IndentPattern    (((ksymbol_t)1)|KSymbolAttr_Pattern) /*$Indent*/
 #define KSymbol_SymbolPattern    (((ksymbol_t)2)|KSymbolAttr_Pattern) /*$Symbol*/
 #define KSymbol_TextPattern      (((ksymbol_t)3)|KSymbolAttr_Pattern) /*$Text*/
 #define KSymbol_NumberPattern    (((ksymbol_t)4)|KSymbolAttr_Pattern) /*$Number*/
@@ -270,17 +270,18 @@ static const char *KEYWORD_LIST[] = {
 #define KSymbol_TypeCastGroup    (((ksymbol_t)6)|KSymbolAttr_Pattern)    /*$()*/
 #define KSymbol_TypeParamGroup   (((ksymbol_t)7)|KSymbolAttr_Pattern)    /*$[]*/
 #define KSymbol_OptionalGroup    (((ksymbol_t)7)|KSymbol_ATMARK)         /*@[]*/
-#define KSymbol_BlockPattern     (((ksymbol_t)9)|KSymbolAttr_Pattern)    /*$Node*/
-#define KSymbol_ParamPattern     (((ksymbol_t)10)|KSymbolAttr_Pattern)   /*$Param*/
-#define KSymbol_TypeDeclPattern  (((ksymbol_t)11)|KSymbolAttr_Pattern)   /*$TypeDecl*/
-#define KSymbol_MethodDeclPattern  (((ksymbol_t)12)|KSymbolAttr_Pattern) /*$MethodDecl*/
-#define KSymbol_TokenPattern     (((ksymbol_t)13)|KSymbolAttr_Pattern)   /*$Token*/
+#define KSymbol_ExprPattern      (((ksymbol_t)9)|KSymbolAttr_Pattern)    /*$Block*/
+#define KSymbol_BlockPattern     (((ksymbol_t)10)|KSymbolAttr_Pattern)    /*$Block*/
+#define KSymbol_ParamPattern     (((ksymbol_t)11)|KSymbolAttr_Pattern)   /*$Param*/
+#define KSymbol_TypeDeclPattern  (((ksymbol_t)12)|KSymbolAttr_Pattern)   /*$TypeDecl*/
+#define KSymbol_MethodDeclPattern  (((ksymbol_t)13)|KSymbolAttr_Pattern) /*$MethodDecl*/
+#define KSymbol_TokenPattern     (((ksymbol_t)14)|KSymbolAttr_Pattern)   /*$Token*/
 
 #define KSymbol_NodeOperator        KSymbol_ParamPattern
 #define KSymbol_NodeTerm            KSymbol_SymbolPattern
 #define KSymbol_NodeMethodCall      KSymbol_ParamPattern
 
-#define KSymbol_DOT     14
+#define KSymbol_DOT     15
 #define KSymbol_DIV     (1+KSymbol_DOT)
 #define KSymbol_MOD     (2+KSymbol_DOT)
 #define KSymbol_MUL     (3+KSymbol_DOT)
@@ -302,12 +303,13 @@ static const char *KEYWORD_LIST[] = {
 #define KSymbol_COLON   (17+KSymbol_DOT)
 #define KSymbol_SEMICOLON (18+KSymbol_DOT)
 
-#define KSymbol_true      33
+#define KSymbol_true      34
 #define KSymbol_false     (1+KSymbol_true)
 #define KSymbol_if        (2+KSymbol_true)
 #define KSymbol_else      (3+KSymbol_true)
 #define KSymbol_return    (4+KSymbol_true)
-
+#define KSymbol_new       (5+KSymbol_true)
+#define KSymbol_void      (6+KSymbol_true)
 
 /* MethodName
  * 110   to$(TypeId)
@@ -1796,8 +1798,7 @@ struct KonohaLibVar {
 #define KKMethodName_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 #define MN_box                             KKMethodName_("box")
 
-#define MN_new                    38  /* @see KSymbol_return + 1*/
-#define KSymbol_void              39
+#define MN_new                             KSymbol_new  /* @see KSymbol_return + 1*/
 
 #define new_(C, A, STACK)                 (k##C *)(KLIB new_kObject(kctx, STACK, KClass_##C, ((uintptr_t)A)))
 #define GcUnsafe                          NULL

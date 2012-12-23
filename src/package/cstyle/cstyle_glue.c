@@ -606,7 +606,7 @@
 //		}
 //		end = source;
 //		KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, start, end - start, StringPolicy_ASCII));
-//		tk->unresolvedTokenType = isFloat ? KSymbol_("$Float") : TokenType_INT;
+//		tk->unresolvedTokenType = isFloat ? KSymbol_("$Float") : TokenType_NUM;
 //	}
 //	KReturnUnboxValue(source - start);
 //}
