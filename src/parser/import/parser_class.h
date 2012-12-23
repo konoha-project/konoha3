@@ -59,12 +59,12 @@ static void kToken_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kTokenVar *tk = (kTokenVar *)o;
 	tk->uline     =   0;
-	tk->unresolvedTokenType = (ksymbol_t)(intptr_t)conf;
-	if(tk->unresolvedTokenType == 0  || KSymbol_Unmask(tk->unresolvedTokenType) != tk->unresolvedTokenType) {
+	tk->tokenType = (ksymbol_t)(intptr_t)conf;
+	if(tk->tokenType == 0  || KSymbol_Unmask(tk->tokenType) != tk->tokenType) {
 		KUnsafeFieldInit(tk->text, TS_EMPTY);
 	}
 	else {
-		KUnsafeFieldInit(tk->text, KSymbol_GetString(kctx, tk->unresolvedTokenType));
+		KUnsafeFieldInit(tk->text, KSymbol_GetString(kctx, tk->tokenType));
 	}
 	tk->resolvedSyntaxInfo = NULL;
 }
@@ -80,7 +80,7 @@ static void kToken_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 static const char *kToken_t(KonohaContext *kctx, kToken *tk)
 {
 	if(IS_String(tk->text)) {
-		if(tk->unresolvedTokenType == TokenType_CODE) {
+		if(tk->tokenType == TokenType_CODE) {
 			return "{... }";
 		}
 		return kString_text(tk->text);

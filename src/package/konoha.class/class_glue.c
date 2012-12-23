@@ -199,7 +199,7 @@ static kNode* kNode_ParseClassNodeNULL(KonohaContext *kctx, kNode *stmt, kToken 
 			int i;
 			for(i = range.beginIdx; i < range.endIdx; i++) {
 				kToken *tk = range.tokenList->TokenItems[i];
-				if(tk->hintChar == '(' && prevToken->unresolvedTokenType == TokenType_SYMBOL && strcmp(cname, kString_text(prevToken->text)) == 0) {
+				if(tk->hintChar == '(' && prevToken->tokenType == TokenType_SYMBOL && strcmp(cname, kString_text(prevToken->text)) == 0) {
 					kTokenVar *newToken = new_(TokenVar, TokenType_SYMBOL, sourceRange.tokenList);
 					KFieldSet(newToken, newToken->text, KSymbol_GetString(kctx, MN_new));
 				}

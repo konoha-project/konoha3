@@ -661,8 +661,8 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 	//int tokenListize = kArray_size(tenv->tokenList);
 	//if(tokenListize > 0) {
 	//	kToken *tkPrev = tenv->tokenList->TokenItems[tokenListize - 1];
-	//	if(tkPrev->unresolvedTokenType == TokenType_NUM ||
-	//		(tkPrev->topCharHint != '(' && tkPrev->unresolvedTokenType == TokenType_SYMBOL)) {
+	//	if(tkPrev->tokenType == TokenType_NUM ||
+	//		(tkPrev->topCharHint != '(' && tkPrev->tokenType == TokenType_SYMBOL)) {
 	//		KReturnUnboxValue(0);
 	//	}
 	//}
@@ -678,7 +678,7 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 				KFieldSet(tk, tk->subTokenList, a);
 				KLIB new_kString(kctx, a, source + 1, (pos0-2), 0);
 				KLIB new_kString(kctx, a, source + pos0, pos-pos0, 0);
-				tk->unresolvedTokenType = KSymbol_("$RegExp");
+				tk->tokenType = KSymbol_("$RegExp");
 			}
 			KReturnUnboxValue(pos);
 		}

@@ -271,7 +271,7 @@
 //	VAR_TypeCheck2(stmt, expr, gma, reqc);
 //	kToken *termToken = expr->TermToken;
 //	DBG_ASSERT(kNode_IsTerm(expr) && IS_Token(termToken));
-//	if(termToken->unresolvedTokenType == TokenType_CODE) {
+//	if(termToken->tokenType == TokenType_CODE) {
 //		SUGAR kToken_ToBraceGroup(kctx, (kTokenVar *)termToken, kNode_ns(stmt), NULL);
 //	}
 //	if(termToken->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
@@ -334,7 +334,7 @@
 //		if(ch == '\'' && prev != '\\') {
 //			if(IS_NOTNULL(tk)) {
 //				KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, source + 1, (pos-2), 0));
-//				tk->unresolvedTokenType = KSymbol_("$SingleQuotedChar");
+//				tk->tokenType = KSymbol_("$SingleQuotedChar");
 //			}
 //			KReturnUnboxValue(pos);
 //		}
@@ -606,7 +606,7 @@
 //		}
 //		end = source;
 //		KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, start, end - start, StringPolicy_ASCII));
-//		tk->unresolvedTokenType = isFloat ? KSymbol_("$Float") : TokenType_NUM;
+//		tk->tokenType = isFloat ? KSymbol_("$Float") : TokenType_NUM;
 //	}
 //	KReturnUnboxValue(source - start);
 //}

@@ -115,7 +115,7 @@ static KMETHOD Token_Parse(KonohaContext *kctx, KonohaStack *sfp)
 		size_t endIdx   = (size_t)sfp[4].intValue;
 		if(beginIdx <= endIdx && endIdx < len) {
 			ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
-			tk->unresolvedTokenType = keyword;
+			tk->tokenType = keyword;
 			KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, kString_text(text) + beginIdx, endIdx - beginIdx, 0));
 		}
 	}
@@ -487,7 +487,7 @@ static KMETHOD Token_SetUnresolvedTokenType(KonohaContext *kctx, KonohaStack *sf
 {
 	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
-	tk->unresolvedTokenType = keyword;
+	tk->tokenType = keyword;
 	DBG_P("setkeyword=%s%s", PSYM_t(keyword));
 	KReturnVoid();
 }

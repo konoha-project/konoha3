@@ -56,7 +56,6 @@ static KMETHOD PatternMatch_MethodName(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *tk = tokenList->TokenVarItems[beginIdx];
 		int returnIdx = -1;
 		if(tk->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern || tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0) {
-			DBG_P(">>>>>>>>>>>>>>> node=%p, name=%s%s tk=%p", stmt, KSymbol_Fmt2(name), tk);
 			kNode_AddParsedObject(kctx, stmt, name, UPCAST(tk));
 			returnIdx = beginIdx + 1;
 		}
@@ -122,7 +121,7 @@ static KMETHOD PatternMatch_Token(KonohaContext *kctx, KonohaStack *sfp)
 		kNode_AddParsedObject(kctx, stmt, name, UPCAST(tk));
 		KReturnUnboxValue(beginIdx+1);
 	}
-	KReturnUnboxValue(-2);
+	KReturnUnboxValue(-1);
 }
 
 static KMETHOD PatternMatch_TypeDecl(KonohaContext *kctx, KonohaStack *sfp)
@@ -263,9 +262,6 @@ static KMETHOD Expression_Parenthesis(KonohaContext *kctx, KonohaStack *sfp)
 	else {
 		kNameSpace *ns = kNode_ns(node);
 		ParseNode(kctx, node, tokenList, &beginIdx, operatorIdx, ParseExpressionOption, NULL);
-//		if(node == K_NULLNODE) {
-//			KReturn(lexpr);
-//		}
 		if(node->syn->keyword == KSymbol_DOT) {
 			node->syn = KSyntax_(ns, KSymbol_NodeMethodCall); // CALL
 		}
@@ -1245,6 +1241,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ PATTERN(Symbol),  SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_MethodName}, {SUGARFUNC TypeCheck_Symbol},},
 		{ PATTERN(Text),    SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_TextLiteral},},
 		{ PATTERN(Number),  SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_IntLiteral},},
+		{ PATTERN(Member),  SYNFLAG_CFunc, 0, 0, {NULL}, {NULL}},
 		{ GROUP(Parenthesis), SYNFLAG_CFunc|SYNFLAG_NodePostfixOp2, Precedence_CStyleCALL, 0, {SUGARFUNC Expression_Parenthesis}, {SUGARFUNC TypeCheck_FuncStyleCall}}, //KSymbol_ParenthesisGroup
 		{ GROUP(Bracket),  }, //KSymbol_BracketGroup
 		{ GROUP(Brace),  },   // KSymbol_BraceGroup

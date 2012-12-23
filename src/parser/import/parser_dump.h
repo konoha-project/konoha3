@@ -33,10 +33,10 @@ static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 		if(n < 0) n = (short)tk->uline;
 		if(tk->resolvedSyntaxInfo == NULL) {
 			if(kToken_IsIndent(tk)) {
-				DUMP_P("Token[%d] '%s' TokenType=%s%s indent=%d\n", n, KToken_t(tk), KSymbol_Fmt2(tk->unresolvedTokenType), tk->indent);
+				DUMP_P("Token[%d] '%s' TokenType=%s%s indent=%d\n", n, KToken_t(tk), KSymbol_Fmt2(tk->tokenType), tk->indent);
 			}
 			else {
-				DUMP_P("Token[%d] '%s' TokenType=``%s%s''\n", n, KToken_t(tk), KSymbol_Fmt2(tk->unresolvedTokenType));
+				DUMP_P("Token[%d] '%s' TokenType=``%s%s''\n", n, KToken_t(tk), KSymbol_Fmt2(tk->tokenType));
 			}
 		}
 //		else if(Token_isRule(tk)) {

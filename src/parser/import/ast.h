@@ -625,7 +625,7 @@ static int KTokenSeq_ApplyMacroSyntax(KonohaContext *kctx, KTokenSeq *tokens, KS
 				nextIdx = TokenUtils_SkipIndent(source->tokenList, nextIdx+1, source->endIdx);
 				if(nextIdx < source->endIdx) {
 					kTokenVar *tk = source->tokenList->TokenVarItems[nextIdx];
-					if(tk->unresolvedTokenType == TokenType_CODE) {
+					if(tk->tokenType == TokenType_CODE) {
 						tk = kToken_ToBraceGroup(kctx, tk, tokens->ns, macroParam);
 						new_CommaToken(kctx, groupToken->subTokenList);
 						KLIB kArray_Add(kctx, groupToken->subTokenList, tk);
@@ -660,7 +660,7 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 		if(kToken_IsIndent(tk) && tokens->TargetPolicy.RemovingIndent) {
 			continue;  // remove INDENT in () or []
 		}
-		if(tk->unresolvedTokenType == TokenType_CODE && (tokens->TargetPolicy.ExpandingBraceGroup || macroParam != NULL)) {
+		if(tk->tokenType == TokenType_CODE && (tokens->TargetPolicy.ExpandingBraceGroup || macroParam != NULL)) {
 			tk = kToken_ToBraceGroup(kctx, tk, tokens->ns, macroParam);
 			KLIB kArray_Add(kctx, tokens->tokenList, tk);
 			continue;
@@ -686,11 +686,11 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 				if(source->SourceConfig.foundErrorToken != NULL) return source->endIdx;
 				continue; // already added
 			}
-			if(tk->unresolvedTokenType == TokenType_ERR) {
+			if(tk->tokenType == TokenType_ERR) {
 				source->SourceConfig.foundErrorToken = tk;
 				return source->endIdx;  // resolved no more
 			}
-			if(tk->unresolvedTokenType == TokenType_SYMBOL) {
+			if(tk->tokenType == TokenType_SYMBOL) {
 				const char *t = kString_text(tk->text);
 				ksymbol_t symbol = KAsciiSymbol(t, kString_size(tk->text), KSymbol_NewId);
 				if(macroParam != NULL && KTokenSeq_ExpandMacro(kctx, tokens, symbol, macroParam)) {
@@ -710,10 +710,10 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 				tk->resolvedSyntaxInfo = (syn != NULL) ? syn : tokens->TargetPolicy.syntaxSymbolPattern;
 			}
 			else {
-				tk->resolvedSyntaxInfo = KSyntax_(tokens->ns, tk->unresolvedTokenType);
-				if(!kToken_Is(StatementSeparator, tk) && tk->unresolvedTokenType != TokenType_INDENT) {
+				tk->resolvedSyntaxInfo = KSyntax_(tokens->ns, tk->tokenType);
+				if(!kToken_Is(StatementSeparator, tk) && tk->tokenType != TokenType_INDENT) {
 					if(tk->resolvedSyntaxInfo == NULL) {
-						kToken_ToError(kctx, tk, ErrTag, "undefined pattern: %s%s", KSymbol_Fmt2(tk->unresolvedTokenType));
+						kToken_ToError(kctx, tk, ErrTag, "undefined pattern: %s%s", KSymbol_Fmt2(tk->tokenType));
 						source->SourceConfig.foundErrorToken = tk;
 						goto RETURN_ERROR;
 					}

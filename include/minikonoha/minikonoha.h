@@ -247,7 +247,7 @@ typedef struct {
 
 #ifdef USE_KEYWORD_LIST
 static const char *KEYWORD_LIST[] = {
-	"", "$Indent", "$Symbol", "$Text", "$Number", "$Type",
+	"", "$Indent", "$Symbol", "$Text", "$Number", "$Member", "$Type",
 	"()", "[]", "{}", "$Expr", "$Block", "$Param", "$TypeDecl", "$MethodDecl", "$Token",
 	".", "/", "%", "*", "+", "-", "<", "<=", ">", ">=", "==", "!=",
 	"&&", "||", "!", "=", ",", "$", ":", ";", /*"@",*/
@@ -257,31 +257,31 @@ static const char *KEYWORD_LIST[] = {
 #endif
 
 #define KSymbol_END              ((ksymbol_t)-1)
-#define KSymbol_ERR              (((ksymbol_t)0)|0) /**/
 #define KSymbol_IndentPattern    (((ksymbol_t)1)|KSymbolAttr_Pattern) /*$Indent*/
 #define KSymbol_SymbolPattern    (((ksymbol_t)2)|KSymbolAttr_Pattern) /*$Symbol*/
 #define KSymbol_TextPattern      (((ksymbol_t)3)|KSymbolAttr_Pattern) /*$Text*/
 #define KSymbol_NumberPattern    (((ksymbol_t)4)|KSymbolAttr_Pattern) /*$Number*/
-#define KSymbol_TypePattern      (((ksymbol_t)5)|KSymbolAttr_Pattern) /*$Type*/
+#define KSymbol_MemberPattern    (((ksymbol_t)5)|KSymbolAttr_Pattern) /*$Member*/
+#define KSymbol_TypePattern      (((ksymbol_t)6)|KSymbolAttr_Pattern) /*$Type*/
 
-#define KSymbol_ParenthesisGroup (((ksymbol_t)6)) /*()*/
-#define KSymbol_BracketGroup     (((ksymbol_t)7)) /*[]*/
-#define KSymbol_BraceGroup       (((ksymbol_t)8)) /*{}*/
-#define KSymbol_TypeCastGroup    (((ksymbol_t)6)|KSymbolAttr_Pattern)    /*$()*/
-#define KSymbol_TypeParamGroup   (((ksymbol_t)7)|KSymbolAttr_Pattern)    /*$[]*/
-#define KSymbol_OptionalGroup    (((ksymbol_t)7)|KSymbol_ATMARK)         /*@[]*/
-#define KSymbol_ExprPattern      (((ksymbol_t)9)|KSymbolAttr_Pattern)    /*$Block*/
-#define KSymbol_BlockPattern     (((ksymbol_t)10)|KSymbolAttr_Pattern)    /*$Block*/
-#define KSymbol_ParamPattern     (((ksymbol_t)11)|KSymbolAttr_Pattern)   /*$Param*/
-#define KSymbol_TypeDeclPattern  (((ksymbol_t)12)|KSymbolAttr_Pattern)   /*$TypeDecl*/
-#define KSymbol_MethodDeclPattern  (((ksymbol_t)13)|KSymbolAttr_Pattern) /*$MethodDecl*/
-#define KSymbol_TokenPattern     (((ksymbol_t)14)|KSymbolAttr_Pattern)   /*$Token*/
+#define KSymbol_ParenthesisGroup (((ksymbol_t)7)) /*()*/
+#define KSymbol_BracketGroup     (((ksymbol_t)8)) /*[]*/
+#define KSymbol_BraceGroup       (((ksymbol_t)9)) /*{}*/
+#define KSymbol_TypeCastGroup    (((ksymbol_t)7)|KSymbolAttr_Pattern)    /*$()*/
+#define KSymbol_TypeParamGroup   (((ksymbol_t)8)|KSymbolAttr_Pattern)    /*$[]*/
+#define KSymbol_OptionalGroup    (((ksymbol_t)8)|KSymbol_ATMARK)         /*@[]*/
+#define KSymbol_ExprPattern      (((ksymbol_t)10)|KSymbolAttr_Pattern)    /*$Block*/
+#define KSymbol_BlockPattern     (((ksymbol_t)11)|KSymbolAttr_Pattern)    /*$Block*/
+#define KSymbol_ParamPattern     (((ksymbol_t)12)|KSymbolAttr_Pattern)   /*$Param*/
+#define KSymbol_TypeDeclPattern  (((ksymbol_t)13)|KSymbolAttr_Pattern)   /*$TypeDecl*/
+#define KSymbol_MethodDeclPattern  (((ksymbol_t)14)|KSymbolAttr_Pattern) /*$MethodDecl*/
+#define KSymbol_TokenPattern     (((ksymbol_t)15)|KSymbolAttr_Pattern)   /*$Token*/
 
 #define KSymbol_NodeOperator        KSymbol_ParamPattern
 #define KSymbol_NodeTerm            KSymbol_SymbolPattern
 #define KSymbol_NodeMethodCall      KSymbol_ParamPattern
 
-#define KSymbol_DOT     15
+#define KSymbol_DOT     16
 #define KSymbol_DIV     (1+KSymbol_DOT)
 #define KSymbol_MOD     (2+KSymbol_DOT)
 #define KSymbol_MUL     (3+KSymbol_DOT)
@@ -303,7 +303,7 @@ static const char *KEYWORD_LIST[] = {
 #define KSymbol_COLON   (17+KSymbol_DOT)
 #define KSymbol_SEMICOLON (18+KSymbol_DOT)
 
-#define KSymbol_true      34
+#define KSymbol_true      35
 #define KSymbol_false     (1+KSymbol_true)
 #define KSymbol_if        (2+KSymbol_true)
 #define KSymbol_else      (3+KSymbol_true)

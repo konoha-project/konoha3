@@ -413,12 +413,12 @@ static kbool_t KTokenSeq_PreprocessSingleStatement(KonohaContext *kctx, KTokenSe
 	int beginIdx, endIdx;
 	for(beginIdx = source->beginIdx; beginIdx < source->endIdx; beginIdx++) {
 		kToken *tk = source->tokenList->TokenItems[beginIdx];
-		if(tk->unresolvedTokenType == TokenType_INDENT/* || kToken_Is(StatementSeparator, tk)*/) continue;
+		if(tk->tokenType == TokenType_INDENT/* || kToken_Is(StatementSeparator, tk)*/) continue;
 		break;
 	}
 	for(endIdx = beginIdx; endIdx < source->endIdx; endIdx++) {
 		kToken *tk = source->tokenList->TokenItems[endIdx];
-		if(tk->unresolvedTokenType == TokenType_INDENT/* || kToken_Is(StatementSeparator, tk)*/) {
+		if(tk->tokenType == TokenType_INDENT/* || kToken_Is(StatementSeparator, tk)*/) {
 			break;
 		}
 	}

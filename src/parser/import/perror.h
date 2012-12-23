@@ -82,7 +82,7 @@ static void kToken_ToError(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglev
 	va_end(ap);
 	if(errmsg != NULL) {
 		KFieldSet(tk, tk->text, errmsg);
-		tk->unresolvedTokenType = TokenType_ERR;
+		tk->tokenType = TokenType_ERR;
 		tk->resolvedSyntaxInfo = NULL;
 	}
 }

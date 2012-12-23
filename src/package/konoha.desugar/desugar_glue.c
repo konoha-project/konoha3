@@ -79,7 +79,7 @@
 //		size_t endIdx   = (size_t)sfp[4].intValue;
 //		if(beginIdx <= endIdx && endIdx <= len) {
 //			ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
-//			tk->unresolvedTokenType = keyword;
+//			tk->tokenType = keyword;
 //			KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, kString_text(text) + beginIdx, endIdx - beginIdx, 0));
 //		}
 //	}

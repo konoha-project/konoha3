@@ -295,7 +295,7 @@ struct kTokenVar {
 	kfileline_t     uline;
 	KSyntax        *resolvedSyntaxInfo;
 	union {
-		ksymbol_t   unresolvedTokenType; // (resolvedSyntaxInfo == NULL)
+		ksymbol_t   tokenType;           // (resolvedSyntaxInfo == NULL)
 		ksymbol_t   resolvedSymbol;      // symbol (resolvedSyntaxInfo != NULL)
 		ktypeattr_t resolvedTypeId;      // typeid if KSymbol_TypePattern
 	};
@@ -311,13 +311,14 @@ typedef enum {
 	TokenType_SYMBOL = KSymbol_SymbolPattern,
 	TokenType_TEXT   = KSymbol_TextPattern,
 	TokenType_NUM    = KSymbol_NumberPattern,
+	TokenType_Member = KSymbol_MemberPattern,
 	TokenType_CODE   = KSymbol_BlockPattern,
 	TokenType_ERR    = KSymbol_TokenPattern
 } kTokenType;
 
 
 
-#define kToken_IsIndent(T)  ((T)->unresolvedTokenType == TokenType_INDENT && (T)->resolvedSyntaxInfo == NULL)
+#define kToken_IsIndent(T)  ((T)->tokenType == TokenType_INDENT && (T)->resolvedSyntaxInfo == NULL)
 
 #define kTokenFlag_StatementSeparator    kObjectFlag_Local1
 #define kTokenFlag_MatchPreviousPattern  kObjectFlag_Local1
