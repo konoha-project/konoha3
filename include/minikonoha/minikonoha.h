@@ -1514,7 +1514,7 @@ struct kNameSpaceVar {
 	// the below references are defined in sugar
 	void                              *tokenMatrix;
 	KHashMap                          *syntaxMapNN;
-	kArray                            *stmtPatternListNULL_OnList;
+	kArray                            *metaPatternListNULL;
 	struct KBuilderAPI2               *builderApi;
 	KKeyValue                         *typeVariableItems;
 	size_t                             typesize;

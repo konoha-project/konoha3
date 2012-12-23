@@ -1139,7 +1139,7 @@ static KMETHOD Statement_syntax(KonohaContext *kctx, KonohaStack *sfp)
 			if(firstPatternIdx < kArray_size(patternList)) {
 				kToken *firstPattern = patternList->TokenItems[firstPatternIdx];
 				if(kToken_IsFirstPattern(firstPattern)) {
-					kNameSpace_AppendArrayRef(kctx, ns, &((kNameSpaceVar *)ns)->stmtPatternListNULL_OnList, UPCAST(firstPattern));
+					kNameSpace_AppendArrayRef(kctx, ns, &((kNameSpaceVar *)ns)->metaPatternListNULL, UPCAST(firstPattern));
 				}
 			}
 			r = 1;
@@ -1186,9 +1186,9 @@ static kbool_t RENAMEME_InitNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 		DEFINE_KEYWORD(KNode_OR),
 		DEFINE_KEYWORD(KNode_Assign),
 		DEFINE_KEYWORD(KNode_STACKTOP),
-		DEFINE_KEYWORD(TypeCheckPolicy_NOCHECK),
-		DEFINE_KEYWORD(TypeCheckPolicy_ALLOWVOID),
-		DEFINE_KEYWORD(TypeCheckPolicy_COERCION),
+		DEFINE_KEYWORD(TypeCheckPolicy_NoCheck),
+		DEFINE_KEYWORD(TypeCheckPolicy_AllowVoid),
+		DEFINE_KEYWORD(TypeCheckPolicy_Coercion),
 		DEFINE_KEYWORD(TypeCheckPolicy_CONST),
 #undef DEFINE_KEYWORD
 		{NULL},

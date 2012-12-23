@@ -37,9 +37,10 @@ static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kGamma *
 	return (kNode *)lsfp[K_RTNIDX].asObject;
 }
 
-static kNode *TypeNode(KonohaContext *kctx, KSyntax *syn, kNode *expr, kGamma *gma, KClass* reqtc)
+static kNode *TypeNode(KonohaContext *kctx, KSyntax *syn0, kNode *expr, kGamma *gma, KClass* reqtc)
 {
 	int callCount = 0;
+	KSyntax *syn = syn0;
 	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, KSymbol_Fmt2(syn->keyword));
 	kObject *reqType = KLIB Knull(kctx, reqtc);
 	while(true) {
@@ -58,14 +59,8 @@ static kNode *TypeNode(KonohaContext *kctx, KSyntax *syn, kNode *expr, kGamma *g
 		syn = syn->parentSyntaxNULL;
 	}
 	if(/*callCount == 0 || */!kNode_IsError(expr)) {
-		return kNode_Message(kctx, expr, ErrTag, "undefined typing: %s", KToken_t(expr->KeyOperatorToken));
-//		if(kNode_IsTerm(expr)) {
-//			return kNode_Message(kctx, stmt, expr->TermToken, ErrTag, "undefined typing: %s", KToken_t(expr->TermToken));
-//		}
-//		else {
-//			DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", expr->syn, expr->syn->parentSyntaxNULL, KSymbol_Fmt2(syn->keyword));
-//			return kNode_Message(kctx, stmt, ErrTag, "undefined operator: %s%s",  KSymbol_Fmt2(expr->syn->keyword));
-//		}
+		DBG_P("syn=%s%s", KSymbol_Fmt2(syn0->keyword));
+		return SUGAR MessageNode(kctx, expr, NULL, gma, ErrTag, "undefined typing: %s%s %s", KSymbol_Fmt2(syn0->keyword), KToken_t(expr->KeyOperatorToken));
 	}
 	return expr;
 }
@@ -132,26 +127,27 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClas
 //		}
 		expr = TypeNode(kctx, expr->syn, expr, gma, reqClass);
 		if(!kNode_IsValue(expr)) {
-			DBG_ASSERT(expr->stacktop == 0);
+			//DBG_ASSERT(expr->stacktop == 0);
+			DBG_P("expr->stacktop=%d, gma->top=%d", expr->stacktop, gma->genv->localScope.varsize);
 			expr->stacktop = gma->genv->localScope.varsize;
 		}
 		if(kNode_IsError(expr)) return expr;
 	}
 	KClass *typedClass = KClass_(expr->attrTypeId);
-	if(KClass_Is(TypeVar, typedClass)) {
-		return kNodeNode_Message(kctx, stmt, expr, ErrTag, "not type variable %s", KClass_text(typedClass));
-	}
 	if(reqClass->typeId == KType_void) {
 		expr->attrTypeId = KType_void;
 		return expr;
 	}
 	if(typedClass->typeId == KType_void) {
-		if(!FLAG_is(pol, TypeCheckPolicy_ALLOWVOID)) {
-			expr = kNodeNode_Message(kctx, stmt, expr, ErrTag, "void is not acceptable");
+		if(!FLAG_is(pol, TypeCheckPolicy_AllowVoid)) {
+			expr = SUGAR MessageNode(kctx, expr, NULL, gma, ErrTag, "void is not acceptable");
 		}
 		return expr;
 	}
-	if(reqClass->typeId == KType_var || typedClass == reqClass || FLAG_is(pol, TypeCheckPolicy_NOCHECK)) {
+	if(KClass_Is(TypeVar, typedClass)) {
+		return SUGAR MessageNode(kctx, expr, NULL, gma, ErrTag, "not type variable %s", KClass_text(typedClass));
+	}
+	if(reqClass->typeId == KType_var || typedClass == reqClass || FLAG_is(pol, TypeCheckPolicy_NoCheck)) {
 		return expr;
 	}
 	if(KClass_Isa(kctx, typedClass, reqClass)) {
@@ -162,7 +158,7 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClas
 	}
 	kMethod *mtd = kNameSpace_GetCoercionMethodNULL(kctx, ns, typedClass, reqClass);
 	if(mtd != NULL) {
-		if(kMethod_Is(Coercion, mtd) || FLAG_is(pol, TypeCheckPolicy_COERCION)) {
+		if(kMethod_Is(Coercion, mtd) || FLAG_is(pol, TypeCheckPolicy_Coercion)) {
 			return new_MethodNode(kctx, ns, gma, reqClass, mtd, 1, expr);
 		}
 		if(kNameSpace_IsAllowed(ImplicitCoercion, ns)) {
@@ -379,7 +375,7 @@ static kstatus_t kNode_Eval(KonohaContext *kctx, kNode *stmt, kMethod *mtd, KTra
 
 	KPushGammaStack(gma, &newgma);
 //	kGamma_InitIt(kctx, &newgma, kMethod_GetParam(mtd));
-	stmt = TypeNode(kctx, stmt->syn, stmt, gma, KClass_void);
+	stmt = TypeCheckNode(kctx, stmt, gma, KClass_var, TypeCheckPolicy_AllowVoid);
 	KPopGammaStack(gma, &newgma);
 	if(kNode_IsError(stmt)) {
 		return K_BREAK;  // to avoid duplicated error message
@@ -445,7 +441,7 @@ static kstatus_t KTokenSeq_Eval(KonohaContext *kctx, KTokenSeq *source, KTraceIn
 	while(KTokenSeq_PreprocessSingleStatement(kctx, &tokens, source)) {
 		int currentIdx = FindFirstStatementToken(kctx, tokens.tokenList, tokens.beginIdx, tokens.endIdx);
 		while(currentIdx < tokens.endIdx) {
-			kNode *node = ParseNewNode(kctx, source->ns, tokens.tokenList, &currentIdx, tokens.endIdx, ParseStatementPatternOption, NULL);
+			kNode *node = ParseNewNode(kctx, source->ns, tokens.tokenList, &currentIdx, tokens.endIdx, ParseMetaPatternOption, NULL);
 			if(mtd == NULL) {
 				mtd = KLIB new_kMethod(kctx, _GcStack, kMethod_Static, 0, 0, NULL);
 				KLIB kMethod_SetParam(kctx, mtd, KType_Object, 0, NULL);

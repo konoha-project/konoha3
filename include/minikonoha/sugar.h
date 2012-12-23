@@ -143,7 +143,7 @@ struct Tokenizer {
 	kString            *preparedString;
 };
 
-#define VAR_TRACE
+//#define VAR_TRACE
 #ifndef VAR_TRACE
 #define VAR_TRACE DBG_P("tracing..")
 #endif
@@ -643,10 +643,10 @@ typedef struct {
 #define KClass_INFER    KClass_(KType_var)
 
 typedef enum {
-	TypeCheckPolicy_NOPOLICY              = 0,
-	TypeCheckPolicy_NOCHECK               = 1,
-	TypeCheckPolicy_ALLOWVOID      = (1 << 1),
-	TypeCheckPolicy_COERCION       = (1 << 2),
+	TypeCheckPolicy_NoPolicy              = 0,
+	TypeCheckPolicy_NoCheck               = 1,
+	TypeCheckPolicy_AllowVoid      = (1 << 1),
+	TypeCheckPolicy_Coercion       = (1 << 2),
 	TypeCheckPolicy_CONST          = (1 << 4)
 } TypeCheckPolicy;
 

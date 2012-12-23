@@ -157,7 +157,7 @@ static kbool_t kNameSpace_ImportSyntax(KonohaContext *kctx, kNameSpace *ns, KSyn
 		if(syn->syntaxPatternListNULL != NULL && SAFECHECK(0 < kArray_size(syn->syntaxPatternListNULL))) {
 			kToken *patternToken = syn->syntaxPatternListNULL->TokenItems[0];
 			if(kToken_IsFirstPattern(patternToken)) {
-				kNameSpace_AppendArrayRef(kctx, ns, &((kNameSpaceVar *)ns)->stmtPatternListNULL_OnList, UPCAST(patternToken));
+				kNameSpace_AppendArrayRef(kctx, ns, &((kNameSpaceVar *)ns)->metaPatternListNULL, UPCAST(patternToken));
 			}
 		}
 		for(index = 0; index < SugarFunc_SIZE; index++) {
@@ -995,7 +995,7 @@ static kbool_t kNameSpace_ImportAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 				return false;
 			}
 		}
-		kNameSpace_AppendArrayRefArray(kctx, ns, &ns->stmtPatternListNULL_OnList, packageNS->stmtPatternListNULL_OnList);
+		kNameSpace_AppendArrayRefArray(kctx, ns, &ns->metaPatternListNULL, packageNS->metaPatternListNULL);
 		kNameSpace_ImportSyntaxAll(kctx, ns, packageNS, trace);
 		for(i = 0; i < kArray_size(packageNS->methodList_OnList); i++) {
 			kMethod *mtd = packageNS->methodList_OnList->MethodItems[i];

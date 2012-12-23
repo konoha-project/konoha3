@@ -97,7 +97,7 @@ static KMETHOD TypeCheck_as(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, gma, reqc);
 	kNode *targetNode = SUGAR TypeCheckNodeAt(kctx, expr, 2, gma, KClass_INFER, 0);
-	kNode *selfNode   = SUGAR TypeCheckNodeAt(kctx, expr, 1, gma, KClass_(targetNode->attrTypeId), TypeCheckPolicy_NOCHECK);
+	kNode *selfNode   = SUGAR TypeCheckNodeAt(kctx, expr, 1, gma, KClass_(targetNode->attrTypeId), TypeCheckPolicy_NoCheck);
 	if(selfNode != K_NULLNODE && targetNode != K_NULLNODE) {
 		KClass *selfClass = KClass_(selfNode->attrTypeId), *targetClass = KClass_(targetNode->attrTypeId);
 		if(selfClass->typeId == targetClass->typeId || selfClass->isSubType(kctx, selfClass, targetClass)) {
@@ -117,7 +117,7 @@ static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, gma, reqc);
 	kNode *targetNode = SUGAR TypeCheckNodeAt(kctx, expr, 2, gma, KClass_INFER, 0);
-	kNode *selfNode   = SUGAR TypeCheckNodeAt(kctx, expr, 1, gma, KClass_(targetNode->attrTypeId), TypeCheckPolicy_NOCHECK);
+	kNode *selfNode   = SUGAR TypeCheckNodeAt(kctx, expr, 1, gma, KClass_(targetNode->attrTypeId), TypeCheckPolicy_NoCheck);
 	if(selfNode != K_NULLNODE && targetNode != K_NULLNODE) {
 		KClass *selfClass = KClass_(selfNode->attrTypeId), *targetClass = KClass_(targetNode->attrTypeId);
 		if(selfNode->attrTypeId == targetNode->attrTypeId || selfClass->isSubType(kctx, selfClass, targetClass)) {
