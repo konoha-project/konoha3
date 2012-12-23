@@ -361,6 +361,7 @@ static kNode* kNode_Op(KonohaContext *kctx, kNode *node, kToken *keyToken, int n
 	KFieldSet(node, node->KeyOperatorToken, keyToken);
 	node->syn = keyToken->resolvedSyntaxInfo;
 	KFieldSet(node, node->NodeList, new_(Array, 0, OnField));
+	KLIB kArray_Add(kctx, node->NodeList, keyToken);
 	va_list ap;
 	va_start(ap, n);
 	node = kNode_AddSeveral(kctx, node, n, ap);

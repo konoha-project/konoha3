@@ -711,6 +711,7 @@ static kMethod *LookupMethod(KonohaContext *kctx, kNode *expr, kGamma *gma)
 	kNameSpace *ns = kNode_ns(expr);
 	KClass *thisClass = KClass_(kNode_At(expr, 1)->attrTypeId);
 	kToken *methodToken = expr->NodeList->TokenVarItems[0];
+	DBG_P(">>>>>>>>>>> type=%s", KClass_text(kObject_class(methodToken)));
 	DBG_ASSERT(IS_Token(methodToken));
 	size_t psize = kArray_size(expr->NodeList) - 2;
 	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, thisClass, methodToken->resolvedSymbol, psize, KMethodMatch_CamelStyle);
