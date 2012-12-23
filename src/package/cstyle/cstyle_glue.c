@@ -415,9 +415,9 @@
 //static void cstyle_defineExpression(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 //{
 //	KDEFINE_SYNTAX SYNTAX[] = {
-//		{ KSymbol_("[]"), SYNFLAG_NodePostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, Expression_Indexer, NULL, NULL, NULL, },
-//		{ KSymbol_("++"), SYNFLAG_NodePostfixOp2, NULL, Precedence_CStyleCALL, Precedence_CStylePREUNARY, NULL, Expression_Increment,},
-//		{ KSymbol_("--"), SYNFLAG_NodePostfixOp2, NULL, Precedence_CStyleCALL, Precedence_CStylePREUNARY, NULL, Expression_Increment,},
+//		{ KSymbol_("[]"), SYNFLAG_NodePostfixOp2, NULL, Precedence_CStyleSuffixCall, 0, NULL, Expression_Indexer, NULL, NULL, NULL, },
+//		{ KSymbol_("++"), SYNFLAG_NodePostfixOp2, NULL, Precedence_CStyleSuffixCall, Precedence_CStylePrefixOperator, NULL, Expression_Increment,},
+//		{ KSymbol_("--"), SYNFLAG_NodePostfixOp2, NULL, Precedence_CStyleSuffixCall, Precedence_CStylePrefixOperator, NULL, Expression_Increment,},
 //		{ KSymbol_END, }, /* sentinental */
 //	};
 //	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
@@ -658,7 +658,7 @@
 //{
 //	KDEFINE_SYNTAX SYNTAX[] = {
 //		{ KSymbol_NumberPattern, SYNFLAG_CTypeFunc, 0, 0, {SUGAR termParseFunc}, {SUGARFUNC TypeCheck_ExtendedIntLiteral}},
-//		{ KSymbol_("~"),  0, 0, Precedence_CStylePREUNARY, {SUGAR opParseFunc}, {SUGAR callTypeCheckFunc} },
+//		{ KSymbol_("~"),  0, 0, Precedence_CStylePrefixOperator, {SUGAR opParseFunc}, {SUGAR callTypeCheckFunc} },
 //		{ KSymbol_("<<"), 0, Precedence_CStyleSHIFT,  0, {SUGAR opParseFunc}, {SUGAR callTypeCheckFunc}},
 //		{ KSymbol_(">>"), 0, Precedence_CStyleSHIFT,  0, {SUGAR opParseFunc}, {SUGAR callTypeCheckFunc}},
 //		{ KSymbol_("&"),  0, Precedence_CStyleBITAND, 0, {SUGAR opParseFunc}, {SUGAR callTypeCheckFunc}},
@@ -671,7 +671,7 @@
 //
 //	KSyntaxVar *syn = (KSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, KSymbol_("+"), 0);
 //	if(syn != NULL) {
-//		syn->precedence_op1  = Precedence_CStylePREUNARY;
+//		syn->precedence_op1  = Precedence_CStylePrefixOperator;
 //	}
 //	return true;
 //}

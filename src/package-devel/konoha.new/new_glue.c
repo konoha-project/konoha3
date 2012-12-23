@@ -94,7 +94,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t new_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("new"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Expression_new, NULL, NULL, NULL, },
+		{ KSymbol_("new"), 0, NULL, 0, Precedence_CStyleSuffixCall, NULL, Expression_new, NULL, NULL, NULL, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

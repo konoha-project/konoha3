@@ -309,7 +309,9 @@ static kNode* kNode_AddNode(KonohaContext *kctx, kNode *self, kNode *node)
 		KFieldSet(self, self->NodeList, new_(Array, 0, OnField));
 	}
 	KLIB kArray_Add(kctx, self->NodeList, node);
-	KFieldSet(node, node->Parent, self);
+	if(node != K_NULLNODE) {
+		KFieldSet(node, node->Parent, self);
+	}
 	return node;
 }
 

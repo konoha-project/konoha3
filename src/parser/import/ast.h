@@ -183,7 +183,7 @@ static kNode* ParseNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int
 static kNode* ParseNewNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int *beginIdx, int endIdx, int option, const char *hintBeforeText)
 {
 	kNode *node = new_UntypedNode(kctx, OnGcStack, ns);
-	//DBG_P("begin,end=%d,%d", beginIdx[0], endIdx);
+	DBG_P("begin,end=(%d,%d)", beginIdx[0], endIdx);
 	if(KFlag_Is(int, option, ParseMetaPatternOption)) {
 		int nextId = ParseMetaPattern(kctx, ns, node, tokenList, beginIdx[0], endIdx);
 		if(nextId != PatternNoMatch) {

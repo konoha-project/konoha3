@@ -240,11 +240,13 @@ struct KSyntaxVar {
 };
 
 // operator prcedence
+// http://ja.cppreference.com/w/cpp/language/operator_precedence
 
 typedef enum {
-	Precedence_CStyleCALL     = 100,  /*x(), x[], x.x x->x x++ */
-	Precedence_CStylePREUNARY = 200,  /*++x, --x, sizeof x &x +x -x !x */
-	Precedence_CStyleCAST     = 300,  /* (T)x */
+	Precedence_CPPStyleScope  =  50,
+	Precedence_CStyleSuffixCall     = 100,  /*x(), x[], x.x x->x x++ */
+	Precedence_CStylePrefixOperator = 200,  /*++x, --x, sizeof x &x +x -x !x (T)x  */
+	Precedence_CppMember      = 300,  /* .x ->x */
 	Precedence_CStyleMUL      = 400,  /* x * x, x / x, x % x*/
 	Precedence_CStyleADD      = 500,  /* x + x, x - x */
 	Precedence_CStyleSHIFT    = 600,  /* x << x, x >> x */

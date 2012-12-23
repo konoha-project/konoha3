@@ -32,13 +32,13 @@ static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kGamma *
 	CallSugarMethod(kctx, lsfp, fo, 4, UPCAST(K_NULLNODE));
 	END_UnusedStack();
 	RESET_GCSTACK();
+	if(kNode_IsError(expr)) return expr;
 	DBG_ASSERT(IS_Node(lsfp[K_RTNIDX].asObject));
 	return (kNode *)lsfp[K_RTNIDX].asObject;
 }
 
 static kNode *TypeNode(KonohaContext *kctx, KSyntax *syn0, kNode *expr, kGamma *gma, KClass* reqtc)
 {
-	int callCount = 0;
 	KSyntax *syn = syn0;
 	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, KSymbol_Fmt2(syn->keyword));
 	kObject *reqType = KLIB Knull(kctx, reqtc);
@@ -47,8 +47,7 @@ static kNode *TypeNode(KonohaContext *kctx, KSyntax *syn0, kNode *expr, kGamma *
 		kFunc **FuncItems = KSyntax_funcTable(kctx, syn, KSugarTypeCheckFunc, &size);
 		for(index = size - 1; index >= 0; index--) {
 			kNode *texpr = CallTypeFunc(kctx, FuncItems[index], expr, gma, reqType);
-			callCount++;
-			if(kNode_IsError(expr)) return K_NULLNODE;
+			if(kNode_IsError(texpr)) return texpr;
 			if(texpr->attrTypeId != KType_var) {
 				DBG_ASSERT(texpr->node != -1);
 				return texpr;
@@ -57,7 +56,7 @@ static kNode *TypeNode(KonohaContext *kctx, KSyntax *syn0, kNode *expr, kGamma *
 		if(syn->parentSyntaxNULL == NULL) break;
 		syn = syn->parentSyntaxNULL;
 	}
-	if(/*callCount == 0 || */!kNode_IsError(expr)) {
+	if(!kNode_IsError(expr)) {
 		DBG_P("syn=%s%s", KSymbol_Fmt2(syn0->keyword));
 		return SUGAR MessageNode(kctx, expr, NULL, gma, ErrTag, "undefined typing: %s%s %s", KSymbol_Fmt2(syn0->keyword), KToken_t(expr->KeyOperatorToken));
 	}

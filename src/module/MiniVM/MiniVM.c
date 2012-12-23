@@ -894,7 +894,7 @@ static struct KVirtualCode *MakeThreadedCode(KonohaContext *kctx, KBuilder *buil
 	return (KVirtualCode *)p;
 }
 
-static struct KVirtualCode *CompileKVirtualCode(KonohaContext *kctx, KBuilder *builder, bblock_t beginId, bblock_t returnId)
+static struct KVirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *builder, bblock_t beginId, bblock_t returnId)
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
@@ -948,7 +948,7 @@ static struct KVirtualCode* MiniVM_GenerateKVirtualCode(KonohaContext *kctx, kMe
 		ASM(NMOV, OC_(K_RTNIDX), OC_(0), KClass_(mtd->typeId));   // FIXME: Type 'This' must be resolved
 	}
 	ASM(RET);
-	KVirtualCode *vcode = CompileKVirtualCode(kctx, builder, builder->bbBeginId, builder->bbReturnId);
+	KVirtualCode *vcode = CompileVirtualCode(kctx, builder, builder->bbBeginId, builder->bbReturnId);
 	RESET_GCSTACK();
 	KLIB KBuffer_Free(&wb);
 	return vcode;
