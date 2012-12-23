@@ -56,6 +56,7 @@ static KMETHOD PatternMatch_MethodName(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *tk = tokenList->TokenVarItems[beginIdx];
 		int returnIdx = -1;
 		if(tk->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern || tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0) {
+			DBG_P(">>>>>>>>>>>>>>> node=%p, name=%s%s tk=%p", stmt, KSymbol_Fmt2(name), tk);
 			kNode_AddParsedObject(kctx, stmt, name, UPCAST(tk));
 			returnIdx = beginIdx + 1;
 		}
@@ -1165,6 +1166,7 @@ static ktypeattr_t kNode_GetClassId(KonohaContext *kctx, kNode *stmt, kNameSpace
 static ksymbol_t kNode_GetMethodSymbol(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ksymbol_t kw, kmethodn_t defmn)
 {
 	kToken *tk = (kToken *)kNode_GetObjectNULL(kctx, stmt, kw);
+	DBG_P(">>>>>>>>>>>>>>> node=%p, kw=%s%s tk=%p", stmt, KSymbol_Fmt2(kw), tk);
 	if(tk == NULL || !IS_Token(tk) || !IS_String(tk->text)) {
 		return defmn;
 	}

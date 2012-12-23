@@ -127,8 +127,8 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClas
 //		}
 		expr = TypeNode(kctx, expr->syn, expr, gma, reqClass);
 		if(!kNode_IsValue(expr)) {
-			//DBG_ASSERT(expr->stacktop == 0);
-			DBG_P("expr->stacktop=%d, gma->top=%d", expr->stacktop, gma->genv->localScope.varsize);
+//			//DBG_ASSERT(expr->stacktop == 0);
+//			DBG_P("expr->stacktop=%d, gma->top=%d", expr->stacktop, gma->genv->localScope.varsize);
 			expr->stacktop = gma->genv->localScope.varsize;
 		}
 		if(kNode_IsError(expr)) return expr;

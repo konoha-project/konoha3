@@ -29,9 +29,8 @@ typedef enum {
 static int CallParseFunc(KonohaContext *kctx, kFunc *fo, kNode *node, ksymbol_t symbol, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx)
 {
 	BEGIN_UnusedStack(lsfp);
-//	lsfp[0].unboxValue = (uintptr_t)syn;
 	KUnsafeFieldSet(lsfp[1].asNode, node);
-	lsfp[3].intValue = symbol;
+	lsfp[2].intValue = symbol;
 	KUnsafeFieldSet(lsfp[3].asArray, tokenList);
 	lsfp[4].intValue = beginIdx;
 	lsfp[5].intValue = operatorIdx;
@@ -108,7 +107,6 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 	beginIdx = SkipAnnotation(kctx, tokenList, beginIdx, endIdx);
 	kToken *tk = tokenList->TokenItems[beginIdx];
 	KSyntax *syn = tk->resolvedSyntaxInfo;
-	DBG_P(">>>>>>>>>>>>>>>>>>> finding KSyntax=%s%s syn->syntaxPatternListNULL=%p", KSymbol_Fmt2(syn->keyword), syn->syntaxPatternListNULL);
 	if(syn->syntaxPatternListNULL == NULL) {
 		kNameSpace *currentNameSpace = ns;
 		while(currentNameSpace != NULL) {
