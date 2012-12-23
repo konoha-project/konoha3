@@ -851,10 +851,8 @@ static kbool_t kArray_AddSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 	int i;
 	ksymbol_t stmtEntryKey = 0;
 	kTokenVar *tk, *prevToken = NULL;
-	KdumpTokenArray(kctx, patterns->tokenList, patterns->beginIdx, patterns->endIdx);
 	for(i = patterns->beginIdx; i < patterns->endIdx; i++, prevToken = tk) {
 		tk = patterns->tokenList->TokenVarItems[i];
-		DBG_P("i=%d '%s'", i, kToken_t(kctx, tk));
 		DBG_ASSERT(!kToken_IsIndent(tk));
 		DBG_ASSERT(tk->resolvedSyntaxInfo != NULL);
 		if(tk->resolvedSyntaxInfo->keyword == KSymbol_TextPattern) {
