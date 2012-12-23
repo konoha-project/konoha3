@@ -109,6 +109,7 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 	KSyntax *syn = tk->resolvedSyntaxInfo;
 	if(syn->syntaxPatternListNULL == NULL) {
 		kNameSpace *currentNameSpace = ns;
+		KFieldSet(node, node->KeyOperatorToken, tk);
 		while(currentNameSpace != NULL) {
 			kArray *metaPatternList = currentNameSpace->metaPatternListNULL;
 			if(metaPatternList != NULL) {
@@ -127,6 +128,7 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 			currentNameSpace = currentNameSpace->parentNULL;
 		}
 	}
+	KFieldSet(node, node->KeyOperatorToken, K_NULLTOKEN);
 	return PatternNoMatch;
 }
 
@@ -153,7 +155,7 @@ static int FindOperator(KonohaContext *kctx, kNode *node, kArray *tokenList, int
 					precedence = syn->precedence_op2;
 					operatorIdx = i;
 				}
-				if(!FLAG_is(syn->flag, SYNFLAG_NodePostfixOp2)) isPrePosition = true;
+				if(!FLAG_is(syn->flag, SYNFLAG_Suffix)) isPrePosition = true;
 			}
 		}
 	}

@@ -415,9 +415,9 @@
 //static void cstyle_defineExpression(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 //{
 //	KDEFINE_SYNTAX SYNTAX[] = {
-//		{ KSymbol_("[]"), SYNFLAG_NodePostfixOp2, NULL, Precedence_CStyleSuffixCall, 0, NULL, Expression_Indexer, NULL, NULL, NULL, },
-//		{ KSymbol_("++"), SYNFLAG_NodePostfixOp2, NULL, Precedence_CStyleSuffixCall, Precedence_CStylePrefixOperator, NULL, Expression_Increment,},
-//		{ KSymbol_("--"), SYNFLAG_NodePostfixOp2, NULL, Precedence_CStyleSuffixCall, Precedence_CStylePrefixOperator, NULL, Expression_Increment,},
+//		{ KSymbol_("[]"), SYNFLAG_Suffix, NULL, Precedence_CStyleSuffixCall, 0, NULL, Expression_Indexer, NULL, NULL, NULL, },
+//		{ KSymbol_("++"), SYNFLAG_Suffix, NULL, Precedence_CStyleSuffixCall, Precedence_CStylePrefixOperator, NULL, Expression_Increment,},
+//		{ KSymbol_("--"), SYNFLAG_Suffix, NULL, Precedence_CStyleSuffixCall, Precedence_CStylePrefixOperator, NULL, Expression_Increment,},
 //		{ KSymbol_END, }, /* sentinental */
 //	};
 //	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

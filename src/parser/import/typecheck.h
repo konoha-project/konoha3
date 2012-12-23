@@ -40,7 +40,6 @@ static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kGamma *
 static kNode *TypeNode(KonohaContext *kctx, KSyntax *syn0, kNode *expr, kGamma *gma, KClass* reqtc)
 {
 	KSyntax *syn = syn0;
-	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, KSymbol_Fmt2(syn->keyword));
 	kObject *reqType = KLIB Knull(kctx, reqtc);
 	while(true) {
 		int index, size;

@@ -642,7 +642,7 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t array_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_BracketGroup, SYNFLAG_NodePostfixOp2|SYNFLAG_CFunc, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Bracket}, {SUGARFUNC TypeCheck_Bracket}, },
+		{ KSymbol_BracketGroup, SYNFLAG_Suffix|SYNFLAG_CFunc, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Bracket}, {SUGARFUNC TypeCheck_Bracket}, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

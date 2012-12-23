@@ -215,7 +215,7 @@ typedef enum {
 #define SYNFLAG_CTypeFunc      ((kshortflag_t)1 << 4)
 
 #define SYNFLAG_NodeLeftJoinOp2     ((kshortflag_t)1 << 1)
-#define SYNFLAG_NodePostfixOp2      ((kshortflag_t)1 << 2)
+#define SYNFLAG_Suffix      ((kshortflag_t)1 << 2)
 
 #define SYNFLAG_NodeBreakExec       ((kshortflag_t)1 << 8)  /* return, throw */
 #define SYNFLAG_NodeJumpAhead0      ((kshortflag_t)1 << 9)  /* continue */
@@ -246,7 +246,7 @@ typedef enum {
 	Precedence_CPPStyleScope  =  50,
 	Precedence_CStyleSuffixCall     = 100,  /*x(), x[], x.x x->x x++ */
 	Precedence_CStylePrefixOperator = 200,  /*++x, --x, sizeof x &x +x -x !x (T)x  */
-	Precedence_CppMember      = 300,  /* .x ->x */
+//	Precedence_CppMember      = 300,  /* .x ->x */
 	Precedence_CStyleMUL      = 400,  /* x * x, x / x, x % x*/
 	Precedence_CStyleADD      = 500,  /* x + x, x - x */
 	Precedence_CStyleSHIFT    = 600,  /* x << x, x >> x */

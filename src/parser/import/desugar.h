@@ -53,11 +53,14 @@ static KMETHOD PatternMatch_MethodName(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Parse(stmt, name, tokenList, beginIdx, opIdx, endIdx);
 	if(opIdx == -1) {
-		kTokenVar *tk = tokenList->TokenVarItems[beginIdx];
 		int returnIdx = -1;
-		if(tk->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern || tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0) {
-			kNode_AddParsedObject(kctx, stmt, name, UPCAST(tk));
-			returnIdx = beginIdx + 1;
+		kTokenVar *tk = tokenList->TokenVarItems[beginIdx];
+		KSyntax *syn = tk->resolvedSyntaxInfo;
+		if(syn->keyword != KSymbol_MemberPattern) {
+			if(syn->keyword == KSymbol_SymbolPattern || syn->precedence_op1 > 0 || syn->precedence_op2 > 0) {
+				kNode_AddParsedObject(kctx, stmt, name, UPCAST(tk));
+				returnIdx = beginIdx + 1;
+			}
 		}
 		KReturnUnboxValue(returnIdx);
 	}
@@ -154,6 +157,9 @@ static KMETHOD PatternMatch_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 		nextIdx = TokenUtils_SkipIndent(tokenList, nextIdx, endIdx);
 		if(nextIdx < endIdx) {
 			kToken *tk = tokenList->TokenItems[nextIdx];
+			if(tk->resolvedSyntaxInfo->keyword == KSymbol_MemberPattern) {
+				KReturnUnboxValue(-1);
+			}
 			if(ParseTypePattern(kctx, ns, tokenList, nextIdx, endIdx, NULL) != -1) {
 				KReturnUnboxValue(ParseSyntaxPattern(kctx, ns, stmt, stmt->syn, tokenList, beginIdx, endIdx));
 			}
@@ -1257,8 +1263,8 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ PATTERN(Symbol),  SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_MethodName}, {SUGARFUNC TypeCheck_Symbol},},
 		{ PATTERN(Text),    SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_TextLiteral},},
 		{ PATTERN(Number),  SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_IntLiteral},},
-		{ PATTERN(Member),  SYNFLAG_CFunc, Precedence_CppMember, 0, {SUGARFUNC Expression_Member}, {NULL}},
-		{ GROUP(Parenthesis), SYNFLAG_CFunc|SYNFLAG_NodePostfixOp2, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Parenthesis}, {SUGARFUNC TypeCheck_FuncStyleCall}}, //KSymbol_ParenthesisGroup
+		{ PATTERN(Member),  SYNFLAG_CFunc|SYNFLAG_Suffix, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Member}, {NULL}},
+		{ GROUP(Parenthesis), SYNFLAG_CFunc|SYNFLAG_Suffix, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Parenthesis}, {SUGARFUNC TypeCheck_FuncStyleCall}}, //KSymbol_ParenthesisGroup
 		{ GROUP(Bracket),  }, //KSymbol_BracketGroup
 		{ GROUP(Brace),  },   // KSymbol_BraceGroup
 		{ PATTERN(Block), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_CStyleBlock}, {SUGARFUNC TypeCheck_Block}, },
