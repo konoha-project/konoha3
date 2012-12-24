@@ -51,7 +51,7 @@
 //	KSyntaxVar *syn = (KSyntaxVar *) KSyntax_(ns, KSymbol_NodeMethodCall);
 //	kNode *expr;
 //	kTokenVar *tkImport = /*G*/new_(TokenVar, 0, OnGcStack);
-//	tkImport->resolvedSymbol = KKMethodName_("import");
+//	tkImport->resolvedSymbol = KMethodName_("import");
 //	if(IS_Token(tokenList)) {
 //		kTokenArray *list = ((kToken *) tokenList)->subTokenList;
 //		if(IS_String(list)) {

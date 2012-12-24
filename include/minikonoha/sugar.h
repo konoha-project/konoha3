@@ -490,7 +490,7 @@ static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeTy
 
 #define kNode_Message(kctx, STMT, PE, FMT, ...)            SUGAR MessageNode(kctx, STMT, NULL, NULL, PE, FMT, ## __VA_ARGS__)
 #define kNodeToken_Message(kctx, STMT, TK, PE, FMT, ...)   SUGAR MessageNode(kctx, STMT, TK, NULL, PE, FMT, ## __VA_ARGS__)
-#define kNodeNode_Message(kctx, STMT, EXPR, PE, FMT, ...)  SUGAR MessageNode(kctx, EXPR, NULL, NULL, PE, FMT, ## __VA_ARGS__)
+#define SUGAR MessageNode(kctx, STMT, EXPR, PE, FMT, ...)  SUGAR MessageNode(kctx, EXPR, NULL, NULL, PE, FMT, ## __VA_ARGS__)
 
 
 typedef struct {

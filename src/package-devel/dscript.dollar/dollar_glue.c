@@ -62,7 +62,7 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 //		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup) {     // dollar int [100]
 //			KSyntax *syn = KSyntax_(kNode_ns(stmt), KSymbol_("dollar"));
 //			KClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
-//			dollarToken->resolvedSymbol = KKMethodName_("dollarArray");
+//			dollarToken->resolvedSymbol = KMethodName_("dollarArray");
 //			kNode *expr = SUGAR dollar_UntypedCallStyleNode(kctx, syn, 2, dollarToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));
 //			KReturn(expr);
 //		}

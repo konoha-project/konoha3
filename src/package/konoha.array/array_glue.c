@@ -527,28 +527,28 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 	ktypeattr_t KType_FuncInject = (KLIB KClass_Generics(kctx, KClass_Func, KType_0 , 2, P_inject))->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im,    _F(Array_get), KType_0,   KType_Array, KKMethodName_("get"), 1, KType_int, KFieldName_("index"),
-		_Public,        _F(Array_Set), KType_void, KType_Array, KKMethodName_("set"), 2, KType_int, KFieldName_("index"),  KType_0, KFieldName_("value"),
-		_Public|_Im,    _F(Array_RemoveAt), KType_0,   KType_Array, KKMethodName_("removeAt"), 1, KType_int, KFieldName_("index"),
-		_Public|_Const, _F(Array_getSize), KType_int, KType_Array, KKMethodName_("getSize"), 0,
-		_Public|_Const, _F(Array_getSize), KType_int, KType_Array, KKMethodName_("getlength"), 0,
-		_Public,        _F(Array_clear), KType_void, KType_Array, KKMethodName_("clear"), 0,
-		_Public,        _F(Array_Add1), KType_void, KType_Array, KKMethodName_("add"), 1, KType_0, KFieldName_("value"),
-		_Public,        _F(Array_Push), KType_int, KType_Array, KKMethodName_("push"), 1, KType_0, KFieldName_("value"),
-		_Public,        _F(Array_Pop), KType_0, KType_Array, KKMethodName_("pop"), 0,
-		_Public,        _F(Array_shift), KType_0, KType_Array, KKMethodName_("shift"), 0,
-		_Public,        _F(Array_unshift), KType_int, KType_Array, KKMethodName_("unshift"), 1, KType_0, KFieldName_("value"),
-		_Public,        _F(Array_reverse), KType_Array, KType_Array, KKMethodName_("reverse"), 0,
-//		_Public|_Im,    _F(Array_map), KType_ArrayT0, KType_Array, KKMethodName_("map"), 1, KType_FuncMap, KFieldName_("func"),
-//		_Public|_Im,    _F(Array_inject), KType_0, KType_Array, KKMethodName_("inject"), 1, KType_FuncInject, KFieldName_("func"),
+		_Public|_Im,    _F(Array_get), KType_0,   KType_Array, KMethodName_("get"), 1, KType_int, KFieldName_("index"),
+		_Public,        _F(Array_Set), KType_void, KType_Array, KMethodName_("set"), 2, KType_int, KFieldName_("index"),  KType_0, KFieldName_("value"),
+		_Public|_Im,    _F(Array_RemoveAt), KType_0,   KType_Array, KMethodName_("removeAt"), 1, KType_int, KFieldName_("index"),
+		_Public|_Const, _F(Array_getSize), KType_int, KType_Array, KMethodName_("getSize"), 0,
+		_Public|_Const, _F(Array_getSize), KType_int, KType_Array, KMethodName_("getlength"), 0,
+		_Public,        _F(Array_clear), KType_void, KType_Array, KMethodName_("clear"), 0,
+		_Public,        _F(Array_Add1), KType_void, KType_Array, KMethodName_("add"), 1, KType_0, KFieldName_("value"),
+		_Public,        _F(Array_Push), KType_int, KType_Array, KMethodName_("push"), 1, KType_0, KFieldName_("value"),
+		_Public,        _F(Array_Pop), KType_0, KType_Array, KMethodName_("pop"), 0,
+		_Public,        _F(Array_shift), KType_0, KType_Array, KMethodName_("shift"), 0,
+		_Public,        _F(Array_unshift), KType_int, KType_Array, KMethodName_("unshift"), 1, KType_0, KFieldName_("value"),
+		_Public,        _F(Array_reverse), KType_Array, KType_Array, KMethodName_("reverse"), 0,
+//		_Public|_Im,    _F(Array_map), KType_ArrayT0, KType_Array, KMethodName_("map"), 1, KType_FuncMap, KFieldName_("func"),
+//		_Public|_Im,    _F(Array_inject), KType_0, KType_Array, KMethodName_("inject"), 1, KType_FuncInject, KFieldName_("func"),
 
-		_Public,        _F(Array_concat), KType_ArrayT0, KType_Array, KKMethodName_("concat"), 1, KType_ArrayT0, KFieldName_("a1"),
-		_Public,        _F(Array_indexOf), KType_int, KType_Array, KKMethodName_("indexOf"), 1, KType_0, KFieldName_("value"),
-		_Public,        _F(Array_lastIndexOf), KType_int, KType_Array, KKMethodName_("lastIndexOf"), 1, KType_0, KFieldName_("value"),
-//		_Public,        _F(Array_toString), KType_String, KType_Array, KKMethodName_("toString"), 0,
-		_Public|_Im,    _F(Array_new), KType_void, KType_Array, KKMethodName_("new"), 1, KType_int, KFieldName_("size"),
-		_Public,        _F(Array_newArray), KType_Array, KType_Array, KKMethodName_("newArray"), 1, KType_int, KFieldName_("size"),
-		_Public|kMethod_Hidden, _F(Array_newList), KType_Array, KType_Array, KKMethodName_("[]"), 0,
+		_Public,        _F(Array_concat), KType_ArrayT0, KType_Array, KMethodName_("concat"), 1, KType_ArrayT0, KFieldName_("a1"),
+		_Public,        _F(Array_indexOf), KType_int, KType_Array, KMethodName_("indexOf"), 1, KType_0, KFieldName_("value"),
+		_Public,        _F(Array_lastIndexOf), KType_int, KType_Array, KMethodName_("lastIndexOf"), 1, KType_0, KFieldName_("value"),
+//		_Public,        _F(Array_toString), KType_String, KType_Array, KMethodName_("toString"), 0,
+		_Public|_Im,    _F(Array_new), KType_void, KType_Array, KMethodName_("new"), 1, KType_int, KFieldName_("size"),
+		_Public,        _F(Array_newArray), KType_Array, KType_Array, KMethodName_("newArray"), 1, KType_int, KFieldName_("size"),
+		_Public|kMethod_Hidden, _F(Array_newList), KType_Array, KType_Array, KMethodName_("[]"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -578,7 +578,7 @@ static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	if(requestClass->baseTypeId != KType_Array) {
 		requestClass = (paramType->typeId == KType_var) ? KClass_Array : KClass_p0(kctx, KClass_Array, paramType->typeId);
 	}
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Array, KKMethodName_("[]"), -1, KMethodMatch_NoOption);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Array, KMethodName_("[]"), -1, KMethodMatch_NoOption);
 	DBG_ASSERT(mtd != NULL);
 	KFieldSet(expr, expr->NodeList->MethodItems[0], mtd);
 	KFieldSet(expr, expr->NodeList->NodeItems[1], SUGAR kNode_SetVariable(kctx, KNewNode(ns), KNode_New, requestClass->typeId, kArray_size(expr->NodeList) - 2));

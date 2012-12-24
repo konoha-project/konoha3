@@ -63,9 +63,9 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 static void object_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im|_Const|_Final, _F(Object_getTypeId), KType_int, KType_Object, KKMethodName_("getTypeId"), 0,
-		_Public|_Hidden|_Im|_Const|_Final, _F(Object_instanceOf), KType_boolean, KType_Object, KKMethodName_("<:"), 1, KType_Object, KFieldName_("type"),
-		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn|_Final, _F(Object_as), KType_Object, KType_Object, KKMethodName_("as"), 0,
+		_Public|_Im|_Const|_Final, _F(Object_getTypeId), KType_int, KType_Object, KMethodName_("getTypeId"), 0,
+		_Public|_Hidden|_Im|_Const|_Final, _F(Object_instanceOf), KType_boolean, KType_Object, KMethodName_("<:"), 1, KType_Object, KFieldName_("type"),
+		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn|_Final, _F(Object_as), KType_Object, KType_Object, KMethodName_("as"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -85,7 +85,7 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 			KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_boolean, staticSubType));
 		}
 		kNameSpace *ns = kNode_ns(stmt);
-		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, KKMethodName_("<:"), 1, KMethodMatch_NoOption);
+		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, KMethodName_("<:"), 1, KMethodMatch_NoOption);
 		DBG_ASSERT(mtd != NULL);
 		kNode *classValue = SUGAR kNode_SetConst(kctx, expr->NodeList->NodeVarItems[2], NULL, KLIB Knull(kctx, targetClass));
 		KFieldSet(expr->NodeList, expr->NodeList->NodeItems[2], classValue);
@@ -105,11 +105,11 @@ static KMETHOD TypeCheck_as(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		if(selfClass->isSubType(kctx, targetClass, selfClass)) {
 			kNameSpace *ns = kNode_ns(stmt);
-			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, KKMethodName_("as"), 0, KMethodMatch_CamelStyle);
+			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, KMethodName_("as"), 0, KMethodMatch_CamelStyle);
 			DBG_ASSERT(mtd != NULL);
 			KReturn(SUGAR TypeCheckMethodParam(kctx, mtd, expr, gma, targetClass));
 		}
-		KReturn(kNodeNode_Message(kctx, stmt, selfNode, ErrTag, "unable to downcast: %s as %s", KType_text(selfNode->attrTypeId), KType_text(targetNode->attrTypeId)));
+		KReturn(SUGAR MessageNode(kctx, selfNode, NULL, gma, ErrTag, "unable to downcast: %s as %s", KType_text(selfNode->attrTypeId), KType_text(targetNode->attrTypeId)));
 	}
 }
 
@@ -121,16 +121,16 @@ static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 	if(selfNode != K_NULLNODE && targetNode != K_NULLNODE) {
 		KClass *selfClass = KClass_(selfNode->attrTypeId), *targetClass = KClass_(targetNode->attrTypeId);
 		if(selfNode->attrTypeId == targetNode->attrTypeId || selfClass->isSubType(kctx, selfClass, targetClass)) {
-			kNodeNode_Message(kctx, stmt, selfNode, InfoTag, "no need: %s to %s", KType_text(selfNode->attrTypeId), KType_text(targetNode->attrTypeId));
+			SUGAR MessageNode(kctx, selfNode, NULL, gma, InfoTag, "no need: %s to %s", KType_text(selfNode->attrTypeId), KType_text(targetNode->attrTypeId));
 			KReturn(selfNode);
 		}
 		kNameSpace *ns = kNode_ns(stmt);
 		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, selfClass, targetClass);
 		if(mtd == NULL) {
-			mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, selfClass, KKMethodName_("to"), 0, KMethodMatch_CamelStyle);
+			mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, selfClass, KMethodName_("to"), 0, KMethodMatch_CamelStyle);
 			DBG_ASSERT(mtd != NULL);  // because Object.to is found.
 			if(mtd->typeId != selfClass->typeId) {
-				KReturn(kNodeNode_Message(kctx, stmt, selfNode, ErrTag, "undefined coercion: %s to %s", KClass_text(selfClass), KClass_text(targetClass)));
+				KReturn(SUGAR MessageNode(kctx, selfNode, NULL, gma, ErrTag, "undefined coercion: %s to %s", KClass_text(selfClass), KClass_text(targetClass)));
 			}
 		}
 		KReturn(SUGAR TypeCheckMethodParam(kctx, mtd, expr, gma, targetClass));

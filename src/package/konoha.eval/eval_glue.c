@@ -69,7 +69,7 @@ static KMETHOD NameSpace_Eval(KonohaContext *kctx, KonohaStack *sfp)
 static void eval_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_Eval), KType_boolean, KType_NameSpace, KKMethodName_("eval"), 1, KType_String, KFieldName_("command"),
+		_Public, _F(NameSpace_Eval), KType_boolean, KType_NameSpace, KMethodName_("eval"), 1, KType_String, KFieldName_("command"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

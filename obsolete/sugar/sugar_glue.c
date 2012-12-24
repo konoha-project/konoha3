@@ -142,9 +142,9 @@ static KMETHOD Token_error(KonohaContext *kctx, KonohaStack *sfp)
 static void sugar_defineTokenFunc(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(String_AsciiAt), KType_int, KType_String, KKMethodName_("AsciiAt"), 1, TP_pos,
-		_Public, _F(Token_Parse), KType_int, KType_Token, KKMethodName_("parse"), 4, TP_kw, TP_source, TP_begin, TP_end,
-		_Public, _F(Token_error), KType_int, KType_Token, KKMethodName_("error"), 4, TP_message, TP_source, TP_begin, TP_end,
+		_Public, _F(String_AsciiAt), KType_int, KType_String, KMethodName_("AsciiAt"), 1, TP_pos,
+		_Public, _F(Token_Parse), KType_int, KType_Token, KMethodName_("parse"), 4, TP_kw, TP_source, TP_begin, TP_end,
+		_Public, _F(Token_error), KType_int, KType_Token, KMethodName_("error"), 4, TP_message, TP_source, TP_begin, TP_end,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -227,9 +227,9 @@ static KMETHOD Node_AddParsedObject(KonohaContext *kctx, KonohaStack *sfp)
 //static void sugar_definePatternMethod(KonohaContext *kctx, kNameSpace *ns, int KType_Symbol, KTraceInfo *trace)
 //{
 //	KDEFINE_METHOD MethodData[] = {
-//		_Public, _F(Node_Message), KType_Node, KType_Node, KKMethodName_("message"), 2, TP_level, TP_message,
-//		_Public, _F(NodeToken_Message), KType_Node, KType_Node, KKMethodName_("message"), 3, TP_level, TP_token, TP_message,
-//		_Public, _F(NodeNode_Message), KType_Node, KType_Node, KKMethodName_("message"), 3, TP_level, TP_expr, TP_message,
+//		_Public, _F(Node_Message), KType_Node, KType_Node, KMethodName_("message"), 2, TP_level, TP_message,
+//		_Public, _F(NodeToken_Message), KType_Node, KType_Node, KMethodName_("message"), 3, TP_level, TP_token, TP_message,
+//		_Public, _F(NodeNode_Message), KType_Node, KType_Node, KMethodName_("message"), 3, TP_level, TP_expr, TP_message,
 //		DEND,
 //	};
 //	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -272,9 +272,9 @@ static KMETHOD NodeNode_Message(KonohaContext *kctx, KonohaStack *sfp)
 static void sugar_defineMessageMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Node_Message), KType_Node, KType_Node, KKMethodName_("message"), 2, TP_level, TP_message,
-		_Public, _F(NodeToken_Message), KType_Node, KType_Node, KKMethodName_("message"), 3, TP_level, TP_token, TP_message,
-		_Public, _F(NodeNode_Message), KType_Node, KType_Node, KKMethodName_("message"), 3, TP_level, TP_expr, TP_message,
+		_Public, _F(Node_Message), KType_Node, KType_Node, KMethodName_("message"), 2, TP_level, TP_message,
+		_Public, _F(NodeToken_Message), KType_Node, KType_Node, KMethodName_("message"), 3, TP_level, TP_token, TP_message,
+		_Public, _F(NodeNode_Message), KType_Node, KType_Node, KMethodName_("message"), 3, TP_level, TP_expr, TP_message,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -451,18 +451,18 @@ static void LoadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, KTraceI
 	//DBG_P("func=%s", KType_text(KType_FuncTypeCheck));
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im, _F(NameSpace_DefinedSyntax), KType_boolean, KType_NameSpace, KKMethodName_("definedSyntax"), 1, KType_Symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_DefinedLiteral), KType_boolean, KType_NameSpace, KKMethodName_("definedLiteral"), 1, KType_Symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_DefinedStatement), KType_boolean, KType_NameSpace, KKMethodName_("definedStatement"), 1, KType_Symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_DefinedExpression), KType_boolean, KType_NameSpace, KKMethodName_("definedExpression"), 1, KType_Symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_DefinedBinaryOperator), KType_boolean, KType_NameSpace, KKMethodName_("definedBinaryOperator"), 1, KType_Symbol, FN_keyword,
-//		_Public, _F(NameSpace_compileAllDefinedMethods), KType_void, KType_NameSpace, KKMethodName_("compileAllDefinedMethods"), 0,
-		_Public, _F(NameSpace_SetTokenFunc), KType_void, KType_NameSpace, KKMethodName_("setTokenFunc"), 3, KType_Symbol, FN_keyword, KType_int, KFieldName_("kchar"), KType_FuncToken, FN_func,
-		_Public, _F(NameSpace_AddPatternMatch), KType_void, KType_NameSpace, KKMethodName_("addPatternMatch"), 2, KType_Symbol, FN_keyword, KType_FuncPatternMatch, FN_func,
-		_Public, _F(NameSpace_AddExpression), KType_void, KType_NameSpace, KKMethodName_("addExpression"), 2, KType_Symbol, FN_keyword, KType_FuncExpression, FN_func,
-		_Public, _F(NameSpace_AddTopLevelStatement), KType_void, KType_NameSpace, KKMethodName_("addTopLevelStatement"), 2, KType_Symbol, FN_keyword, KType_FuncStatement, FN_func,
-		_Public, _F(NameSpace_AddStatement), KType_void, KType_NameSpace, KKMethodName_("addStatement"), 2, KType_Symbol, FN_keyword, KType_FuncStatement, FN_func,
-		_Public, _F(NameSpace_AddTypeCheck), KType_void, KType_NameSpace, KKMethodName_("addTypeCheck"), 2, KType_Symbol, FN_keyword, KType_FuncTypeCheck, FN_func,
+		_Public|_Im, _F(NameSpace_DefinedSyntax), KType_boolean, KType_NameSpace, KMethodName_("definedSyntax"), 1, KType_Symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_DefinedLiteral), KType_boolean, KType_NameSpace, KMethodName_("definedLiteral"), 1, KType_Symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_DefinedStatement), KType_boolean, KType_NameSpace, KMethodName_("definedStatement"), 1, KType_Symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_DefinedExpression), KType_boolean, KType_NameSpace, KMethodName_("definedExpression"), 1, KType_Symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_DefinedBinaryOperator), KType_boolean, KType_NameSpace, KMethodName_("definedBinaryOperator"), 1, KType_Symbol, FN_keyword,
+//		_Public, _F(NameSpace_compileAllDefinedMethods), KType_void, KType_NameSpace, KMethodName_("compileAllDefinedMethods"), 0,
+		_Public, _F(NameSpace_SetTokenFunc), KType_void, KType_NameSpace, KMethodName_("setTokenFunc"), 3, KType_Symbol, FN_keyword, KType_int, KFieldName_("kchar"), KType_FuncToken, FN_func,
+		_Public, _F(NameSpace_AddPatternMatch), KType_void, KType_NameSpace, KMethodName_("addPatternMatch"), 2, KType_Symbol, FN_keyword, KType_FuncPatternMatch, FN_func,
+		_Public, _F(NameSpace_AddExpression), KType_void, KType_NameSpace, KMethodName_("addExpression"), 2, KType_Symbol, FN_keyword, KType_FuncExpression, FN_func,
+		_Public, _F(NameSpace_AddTopLevelStatement), KType_void, KType_NameSpace, KMethodName_("addTopLevelStatement"), 2, KType_Symbol, FN_keyword, KType_FuncStatement, FN_func,
+		_Public, _F(NameSpace_AddStatement), KType_void, KType_NameSpace, KMethodName_("addStatement"), 2, KType_Symbol, FN_keyword, KType_FuncStatement, FN_func,
+		_Public, _F(NameSpace_AddTypeCheck), KType_void, KType_NameSpace, KMethodName_("addTypeCheck"), 2, KType_Symbol, FN_keyword, KType_FuncTypeCheck, FN_func,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -997,59 +997,59 @@ static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 
 	KDEFINE_METHOD MethodData[] = {
 		/* Token */
-		_Public, _F(Token_new), KType_Token, KType_Token, KKMethodName_("new"), 1, KType_Symbol, FN_key,
-		_Public, _F(Token_SetUnresolvedTokenType),  KType_void, KType_Token, KKMethodName_("setUnresolvedTokenType"),  1, KType_Symbol, FN_x,
-		_Public, _F(Token_SetText),  KType_void, KType_Token, KKMethodName_("setText"),  1, KType_String, FN_x,
-		_Public, _F(Token_SetSubArray), KType_void, KType_Token, KKMethodName_("setSubArray"), 1, KType_StringArray, FN_x,
-//		_Public, _F(Token_isTypeName), KType_boolean, KType_Token, KKMethodName_("isTypeName"), 0,
-		_Public, _F(Token_isParenthesis), KType_boolean, KType_Token, KKMethodName_("isParenthesis"), 0,
-		_Public, _F(Token_getText), KType_String, KType_Token, KKMethodName_("getText"), 0,
-		_Public, _F(Token_isSymbol), KType_boolean, KType_Token, KKMethodName_("isSymbol"), 0,
-		_Public, _F(Token_newUntypedNode), KType_Node, KType_Token, KKMethodName_("newUntypedNode"), 0,
-		_Public, _F(Token_isBeforeWhiteSpace), KType_boolean, KType_Token, KKMethodName_("isBeforeWhiteSpace"), 0,
+		_Public, _F(Token_new), KType_Token, KType_Token, KMethodName_("new"), 1, KType_Symbol, FN_key,
+		_Public, _F(Token_SetUnresolvedTokenType),  KType_void, KType_Token, KMethodName_("setUnresolvedTokenType"),  1, KType_Symbol, FN_x,
+		_Public, _F(Token_SetText),  KType_void, KType_Token, KMethodName_("setText"),  1, KType_String, FN_x,
+		_Public, _F(Token_SetSubArray), KType_void, KType_Token, KMethodName_("setSubArray"), 1, KType_StringArray, FN_x,
+//		_Public, _F(Token_isTypeName), KType_boolean, KType_Token, KMethodName_("isTypeName"), 0,
+		_Public, _F(Token_isParenthesis), KType_boolean, KType_Token, KMethodName_("isParenthesis"), 0,
+		_Public, _F(Token_getText), KType_String, KType_Token, KMethodName_("getText"), 0,
+		_Public, _F(Token_isSymbol), KType_boolean, KType_Token, KMethodName_("isSymbol"), 0,
+		_Public, _F(Token_newUntypedNode), KType_Node, KType_Token, KMethodName_("newUntypedNode"), 0,
+		_Public, _F(Token_isBeforeWhiteSpace), KType_boolean, KType_Token, KMethodName_("isBeforeWhiteSpace"), 0,
 
 		/* Node */
-		_Public, _F(Node_getBuild), KType_int, KType_Node,  KKMethodName_("getBuild"), 0,
-		_Public, _F(Node_SetBuild), KType_void, KType_Node, KKMethodName_("setBuild"), 1, KType_int, FN_buildid,
-		_Public, _F(Node_getNode), KType_Node, KType_Node, KKMethodName_("getNode"), 2, KType_Symbol, FN_key, KType_Node, FN_defval,
-		_Public, _F(Node_getToken), KType_Token, KType_Node, KKMethodName_("getToken"), 2, KType_Symbol, FN_key, KType_Token, FN_defval,
-		_Public, _F(Node_getNode), KType_Node, KType_Node, KKMethodName_("getNode"), 2, KType_Symbol, FN_key, KType_Node, FN_defval,
-		_Public, _F(Node_TypeCheckNode), KType_boolean, KType_Node, KKMethodName_("TypeCheckNode"), 3, KType_Symbol, FN_key, KType_Gamma, FN_gma, KType_cid, FN_typeid,
-		_Public, _F(Node_TypeCheckNodePol), KType_boolean, KType_Node, KKMethodName_("TypeCheckNode"), 4, KType_Symbol, FN_key, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_int, FN_pol,
-		_Public, _F(Node_Message2rintError), KType_Node, KType_Node, KKMethodName_("printError"), 1, KType_String, FN_msg,
+		_Public, _F(Node_getBuild), KType_int, KType_Node,  KMethodName_("getBuild"), 0,
+		_Public, _F(Node_SetBuild), KType_void, KType_Node, KMethodName_("setBuild"), 1, KType_int, FN_buildid,
+		_Public, _F(Node_getNode), KType_Node, KType_Node, KMethodName_("getNode"), 2, KType_Symbol, FN_key, KType_Node, FN_defval,
+		_Public, _F(Node_getToken), KType_Token, KType_Node, KMethodName_("getToken"), 2, KType_Symbol, FN_key, KType_Token, FN_defval,
+		_Public, _F(Node_getNode), KType_Node, KType_Node, KMethodName_("getNode"), 2, KType_Symbol, FN_key, KType_Node, FN_defval,
+		_Public, _F(Node_TypeCheckNode), KType_boolean, KType_Node, KMethodName_("TypeCheckNode"), 3, KType_Symbol, FN_key, KType_Gamma, FN_gma, KType_cid, FN_typeid,
+		_Public, _F(Node_TypeCheckNodePol), KType_boolean, KType_Node, KMethodName_("TypeCheckNode"), 4, KType_Symbol, FN_key, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_int, FN_pol,
+		_Public, _F(Node_Message2rintError), KType_Node, KType_Node, KMethodName_("printError"), 1, KType_String, FN_msg,
 
-		_Public, _F(Node_newNode), KType_Node, KType_Node, KKMethodName_("newNode"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
-		_Public, _F(Node_SetType), KType_void, KType_Node, KKMethodName_("setType"), 1, KType_int, FN_x,
-//		_Public, _F(MessageNodearsedNode), KType_Node, KType_Node, KKMethodName_("parseNode"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
-		_Public, _F(Node_newUntypedCallStyleNode2), KType_Node, KType_Node, KKMethodName_("newUntypedCallStyleNode"), 2, KType_Token, KFieldName_("token"), KType_Node, KFieldName_("expr1"),
-		_Public, _F(Node_newUntypedCallStyleNode3), KType_Node, KType_Node, KKMethodName_("newUntypedCallStyleNode"), 3, KType_Token, KFieldName_("token"), KType_Node, KFieldName_("expr1"), KType_Node, KFieldName_("expr2"),
-		_Public, _F(Node_newUntypedCallStyleNode4), KType_Node, KType_Node, KKMethodName_("newUntypedCallStyleNode"), 4, KType_Token, KFieldName_("token"), KType_Node, KFieldName_("expr1"), KType_Node, KFieldName_("expr2"), KType_Node, KFieldName_("expr3"),
-		_Public, _F(Node_newUntypedCallStyleNode5), KType_Node, KType_Node, KKMethodName_("newUntypedCallStyleNode"), 5, KType_Token, KFieldName_("token"), KType_Node, KFieldName_("expr1"), KType_Node, KFieldName_("expr2"), KType_Node, KFieldName_("expr3"), KType_Node, KFieldName_("expr4"),
-		_Public, _F(Node_newUntypedCallStyleNode6), KType_Node, KType_Node, KKMethodName_("newUntypedCallStyleNode"), 6, KType_Token, KFieldName_("token"), KType_Node, KFieldName_("expr1"), KType_Node, KFieldName_("expr2"), KType_Node, KFieldName_("expr3"), KType_Node, KFieldName_("expr4"), KType_Node, KFieldName_("expr5"),
-		_Public, _F(Node_newTypedCallNode1), KType_Node, KType_Node, KKMethodName_("newTypedCallNode"), 4, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_Symbol, KFieldName_("methodName"), KType_Node, KFieldName_("firstNode"),
-		_Public, _F(Node_newTypedCallNode2), KType_Node, KType_Node, KKMethodName_("newTypedCallNode"), 5, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_Symbol, KFieldName_("methodName"), KType_Node, KFieldName_("firstNode"), KType_Node, KFieldName_("secondNode"),
-		_Public, _F(Node_rightJoinNode), KType_Node, KType_Node, KKMethodName_("rightJoinNode"), 4, KType_Node, FN_expr, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
-		_Public, _F(Node_getTokenList), KType_TokenArray, KType_Node, KKMethodName_("getTokenList"), 2, KType_Symbol, FN_key, KType_TokenArray, FN_defval,
-		_Public, _F(Node_done), KType_void, KType_Node, KKMethodName_("done"), 0,
-		_Public, _F(Node_SetObject), KType_void, KType_Node, KKMethodName_("setNode"), 2, KType_Symbol, FN_key, KType_Node, FN_expr,
-		_Public, _F(Node_SetObject), KType_void, KType_Node, KKMethodName_("setNode"), 2, KType_Symbol, FN_key, KType_Node, KFieldName_("block"),
-		_Public, _F(Node_declType), KType_boolean, KType_Node, KKMethodName_("declType"), 3, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_Node, KFieldName_("declNode"),
-		_Public, _F(Node_newNode), KType_Node, KType_Node, KKMethodName_("newNode"), 1, KType_String, KFieldName_("macro"),
-
-		/* Node */
-		_Public, _F(Node_getTermToken), KType_Token, KType_Node, KKMethodName_("getTermToken"), 0,
-		_Public, _F(Node_SetConstValue), KType_Node, KType_Node, KKMethodName_("setConstValue"), 1, KType_Object, KFieldName_("value"),
-		_Public, _F(Node_SetVariable), KType_Node, KType_Node, KKMethodName_("setVariable"), 4, KType_Gamma, FN_gma, KType_int, FN_buildid, KType_cid, FN_typeid, KType_int, KFieldName_("index"),
-		_Public, _F(Node_newVariableNode), KType_Node, KType_Node, KKMethodName_("new"), 4, KType_Gamma, FN_gma, KType_int, FN_buildid, KType_cid, FN_typeid, KType_int, KFieldName_("index"),
-		_Public, _F(Node_new), KType_Node, KType_Node, KKMethodName_("new"), 1, KType_Object, KFieldName_("value"),
-		_Public, _F(Node_SetType), KType_void, KType_Node, KKMethodName_("setType"), 2, KType_int, FN_buildid, KType_cid, FN_typeid,
-		_Public, _F(kNode_AddNode), KType_Node, KType_Node, KKMethodName_("addNode"), 1, KType_Node, FN_expr,
+		_Public, _F(Node_newNode), KType_Node, KType_Node, KMethodName_("newNode"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
+		_Public, _F(Node_SetType), KType_void, KType_Node, KMethodName_("setType"), 1, KType_int, FN_x,
+//		_Public, _F(MessageNodearsedNode), KType_Node, KType_Node, KMethodName_("parseNode"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
+		_Public, _F(Node_newUntypedCallStyleNode2), KType_Node, KType_Node, KMethodName_("newUntypedCallStyleNode"), 2, KType_Token, KFieldName_("token"), KType_Node, KFieldName_("expr1"),
+		_Public, _F(Node_newUntypedCallStyleNode3), KType_Node, KType_Node, KMethodName_("newUntypedCallStyleNode"), 3, KType_Token, KFieldName_("token"), KType_Node, KFieldName_("expr1"), KType_Node, KFieldName_("expr2"),
+		_Public, _F(Node_newUntypedCallStyleNode4), KType_Node, KType_Node, KMethodName_("newUntypedCallStyleNode"), 4, KType_Token, KFieldName_("token"), KType_Node, KFieldName_("expr1"), KType_Node, KFieldName_("expr2"), KType_Node, KFieldName_("expr3"),
+		_Public, _F(Node_newUntypedCallStyleNode5), KType_Node, KType_Node, KMethodName_("newUntypedCallStyleNode"), 5, KType_Token, KFieldName_("token"), KType_Node, KFieldName_("expr1"), KType_Node, KFieldName_("expr2"), KType_Node, KFieldName_("expr3"), KType_Node, KFieldName_("expr4"),
+		_Public, _F(Node_newUntypedCallStyleNode6), KType_Node, KType_Node, KMethodName_("newUntypedCallStyleNode"), 6, KType_Token, KFieldName_("token"), KType_Node, KFieldName_("expr1"), KType_Node, KFieldName_("expr2"), KType_Node, KFieldName_("expr3"), KType_Node, KFieldName_("expr4"), KType_Node, KFieldName_("expr5"),
+		_Public, _F(Node_newTypedCallNode1), KType_Node, KType_Node, KMethodName_("newTypedCallNode"), 4, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_Symbol, KFieldName_("methodName"), KType_Node, KFieldName_("firstNode"),
+		_Public, _F(Node_newTypedCallNode2), KType_Node, KType_Node, KMethodName_("newTypedCallNode"), 5, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_Symbol, KFieldName_("methodName"), KType_Node, KFieldName_("firstNode"), KType_Node, KFieldName_("secondNode"),
+		_Public, _F(Node_rightJoinNode), KType_Node, KType_Node, KMethodName_("rightJoinNode"), 4, KType_Node, FN_expr, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
+		_Public, _F(Node_getTokenList), KType_TokenArray, KType_Node, KMethodName_("getTokenList"), 2, KType_Symbol, FN_key, KType_TokenArray, FN_defval,
+		_Public, _F(Node_done), KType_void, KType_Node, KMethodName_("done"), 0,
+		_Public, _F(Node_SetObject), KType_void, KType_Node, KMethodName_("setNode"), 2, KType_Symbol, FN_key, KType_Node, FN_expr,
+		_Public, _F(Node_SetObject), KType_void, KType_Node, KMethodName_("setNode"), 2, KType_Symbol, FN_key, KType_Node, KFieldName_("block"),
+		_Public, _F(Node_declType), KType_boolean, KType_Node, KMethodName_("declType"), 3, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_Node, KFieldName_("declNode"),
+		_Public, _F(Node_newNode), KType_Node, KType_Node, KMethodName_("newNode"), 1, KType_String, KFieldName_("macro"),
 
 		/* Node */
-		_Public, _F(Node_TypeCheckAll), KType_boolean, KType_Node, KKMethodName_("TypeCheckAll"), 1, KType_Gamma, FN_gma,
+		_Public, _F(Node_getTermToken), KType_Token, KType_Node, KMethodName_("getTermToken"), 0,
+		_Public, _F(Node_SetConstValue), KType_Node, KType_Node, KMethodName_("setConstValue"), 1, KType_Object, KFieldName_("value"),
+		_Public, _F(Node_SetVariable), KType_Node, KType_Node, KMethodName_("setVariable"), 4, KType_Gamma, FN_gma, KType_int, FN_buildid, KType_cid, FN_typeid, KType_int, KFieldName_("index"),
+		_Public, _F(Node_newVariableNode), KType_Node, KType_Node, KMethodName_("new"), 4, KType_Gamma, FN_gma, KType_int, FN_buildid, KType_cid, FN_typeid, KType_int, KFieldName_("index"),
+		_Public, _F(Node_new), KType_Node, KType_Node, KMethodName_("new"), 1, KType_Object, KFieldName_("value"),
+		_Public, _F(Node_SetType), KType_void, KType_Node, KMethodName_("setType"), 2, KType_int, FN_buildid, KType_cid, FN_typeid,
+		_Public, _F(kNode_AddNode), KType_Node, KType_Node, KMethodName_("addNode"), 1, KType_Node, FN_expr,
+
+		/* Node */
+		_Public, _F(Node_TypeCheckAll), KType_boolean, KType_Node, KMethodName_("TypeCheckAll"), 1, KType_Gamma, FN_gma,
 
 		/* Gamma */
-		_Public, _F(Gamma_declareLocalVariable), KType_int, KType_Gamma, KKMethodName_("declareLocalVariable"), 2, KType_cid, FN_typeid, KType_Symbol, FN_key,
+		_Public, _F(Gamma_declareLocalVariable), KType_int, KType_Gamma, KMethodName_("declareLocalVariable"), 2, KType_cid, FN_typeid, KType_Symbol, FN_key,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

@@ -107,23 +107,23 @@ static kMethod* CallNode_getMethod(kNode *expr)
 	return expr->NodeList->MethodItems[0];
 }
 
-#define MN_opNOT  KKMethodName_("!")
-#define MN_opADD  KKMethodName_("+")
-#define MN_opSUB  KKMethodName_("-")
-#define MN_opMUL  KKMethodName_("*")
-#define MN_opDIV  KKMethodName_("/")
-#define MN_opMOD  KKMethodName_("%")
-#define MN_opEQ   KKMethodName_("==")
-#define MN_opNEQ  KKMethodName_("!=")
-#define MN_opLT   KKMethodName_("<")
-#define MN_opLTE  KKMethodName_("<=")
-#define MN_opGT   KKMethodName_(">")
-#define MN_opGTE  KKMethodName_(">=")
-#define MN_opLAND KKMethodName_("&")
-#define MN_opLOR  KKMethodName_("|")
-#define MN_opLXOR KKMethodName_("^")
-#define MN_opLSFT KKMethodName_("<<")
-#define MN_opRSFT KKMethodName_(">>")
+#define MN_opNOT  KMethodName_("!")
+#define MN_opADD  KMethodName_("+")
+#define MN_opSUB  KMethodName_("-")
+#define MN_opMUL  KMethodName_("*")
+#define MN_opDIV  KMethodName_("/")
+#define MN_opMOD  KMethodName_("%")
+#define MN_opEQ   KMethodName_("==")
+#define MN_opNEQ  KMethodName_("!=")
+#define MN_opLT   KMethodName_("<")
+#define MN_opLTE  KMethodName_("<=")
+#define MN_opGT   KMethodName_(">")
+#define MN_opGTE  KMethodName_(">=")
+#define MN_opLAND KMethodName_("&")
+#define MN_opLOR  KMethodName_("|")
+#define MN_opLXOR KMethodName_("^")
+#define MN_opLSFT KMethodName_("<<")
+#define MN_opRSFT KMethodName_(">>")
 
 enum kSymbolPrefix{
 	kSymbolPrefix_NONE,
@@ -398,7 +398,7 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 	kbool_t isGlobal = (KClass_(receiver->attrTypeId) == globalObjectClass || receiver->attrTypeId == KType_NameSpace);
 	const char *methodName = KSymbol_text(mtd->mn);
 	if(receiver->attrTypeId == KType_NameSpace) {
-		if(mtd->mn == KKMethodName_("import")) {
+		if(mtd->mn == KMethodName_("import")) {
 			kString *packageNameString = (kString *)kNode_At(expr, 2)->ObjectConstValue;
 			kNameSpace *ns = (kNameSpace *)receiver->ObjectConstValue;
 			JSBuilder_importPackage(kctx, ns, packageNameString, expr->TermToken->uline);

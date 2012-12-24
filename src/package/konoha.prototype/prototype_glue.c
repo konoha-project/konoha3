@@ -172,9 +172,9 @@ static void prototype_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 {
 	int FN_key = KFieldName_("key"), FN_value = KFieldName_("value");
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im|_Const|kMethod_SmartReturn|_Final, _F(Prototype_get), KType_Object, KType_Prototype, KKMethodName_("get"), 1, KType_Symbol, FN_key,
-		_Public|_Final, _F(Prototype_SetObject), KType_void, KType_Prototype, KKMethodName_("set"), 2, KType_Symbol, FN_key, KType_Object, FN_value,
-		_Public|_Final, _F(Prototype_SetInt), KType_void, KType_Prototype, KKMethodName_("set"), 2, KType_Symbol, FN_key, KType_int, FN_value,
+		_Public|_Im|_Const|kMethod_SmartReturn|_Final, _F(Prototype_get), KType_Object, KType_Prototype, KMethodName_("get"), 1, KType_Symbol, FN_key,
+		_Public|_Final, _F(Prototype_SetObject), KType_void, KType_Prototype, KMethodName_("set"), 2, KType_Symbol, FN_key, KType_Object, FN_value,
+		_Public|_Final, _F(Prototype_SetInt), KType_void, KType_Prototype, KMethodName_("set"), 2, KType_Symbol, FN_key, KType_int, FN_value,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

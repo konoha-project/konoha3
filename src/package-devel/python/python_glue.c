@@ -506,7 +506,7 @@ static kbool_t python_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		_Public|_Const|_Im|_Coercion, _F(Int_toPyObject), KType_PyObject, KType_int, KMethodName_To(KType_PyObject), 0,
 		_Public|_Const|_Im|_Coercion, _F(PyObject_toString), KType_String, KType_PyObject, KMethodName_To(KType_String), 0,
 		_Public|_Const|_Im|_Coercion, _F(String_toPyObject), KType_PyObject, KType_String, KMethodName_To(KType_PyObject), 0,
-		//_Public,                      _F(Array_Add), KType_void, KType_Array, KKMethodName_("add"), 1, KType_0, KFieldName_("value"),
+		//_Public,                      _F(Array_Add), KType_void, KType_Array, KMethodName_("add"), 1, KType_0, KFieldName_("value"),
 		// [TODO] add following konoha class.
 		//_Public|_Const|_Im|_Coercion, _F(PyObject_toList), KType_Array, KType_PyObject, KMethodName_To(KType_Array), 0,
 		//_Public|_Const|_Im|_Coercion, _F(Array_toPyObject), KType_PyObject, KType_Array, KMethodName_To(KType_PyObject), 0,

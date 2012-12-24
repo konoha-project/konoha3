@@ -124,7 +124,7 @@
 //		if(!KType_IsIterator(IteratorNode->attrTypeId)) {
 //			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_(IteratorNode->attrTypeId), KMethodName_To(KType_Iterator), 0, KMethodMatch_NoOption);
 //			if(mtd == NULL) {
-//				kNodeNode_Message(kctx, stmt, IteratorNode, ErrTag, "expected Iterator expression after in");
+//				SUGAR MessageNode(kctx, stmt, IteratorNode, ErrTag, "expected Iterator expression after in");
 //				KReturnUnboxValue(false);
 //			}
 //			IteratorNode = SUGAR new_MethodNode(kctx, stmt, gma, KClass_INFER, mtd, 1, IteratorNode);

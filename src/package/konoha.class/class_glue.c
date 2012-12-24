@@ -48,7 +48,7 @@ static KMETHOD NameSpace_AllowImplicitField(KonohaContext *kctx, KonohaStack *sf
 static void class_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Ignored, _F(NameSpace_AllowImplicitField), KType_void, KType_NameSpace, KKMethodName_("AllowImplicitField"), 1, KType_boolean, KFieldName_("allow"),
+		_Public|_Const|_Ignored, _F(NameSpace_AllowImplicitField), KType_void, KType_NameSpace, KMethodName_("AllowImplicitField"), 1, KType_boolean, KFieldName_("allow"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
