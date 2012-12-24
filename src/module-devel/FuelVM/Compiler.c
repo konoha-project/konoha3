@@ -175,7 +175,7 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 	if(thisTy == KType_boolean) {
 		if(params->psize == 0) { /* UnaryOperator */
 			if(retTy == KType_boolean) {
-				/* booleaen booleaen.opSUB() */
+				/* booleaen booleaen.opNEG() */
 				enum UnaryOp Op = KMethodName_toUnaryOperator(kctx, mn);
 				INode *Param = FetchINode(kctx, builder, stmt, expr, 1, KType_boolean);
 				return CreateUnaryInst(BLD(builder), Op, Param);
@@ -184,7 +184,7 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 		else if(params->psize == 1) { /* BinaryOperator */
 			ktypeattr_t ptype = params->paramtypeItems[0].attrTypeId;
 			if(retTy == KType_boolean && ptype == KType_boolean) {
-				/* boolean booleaen.(opEQ|opNE) (booleaen x) */
+				/* boolean boolean.(opEQ|opNE) (boolean x) */
 				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
 				assert(Op == Eq || Op == Nq);
 				INode *LHS = FetchINode(kctx, builder, stmt, expr, 1, KType_boolean);
