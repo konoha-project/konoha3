@@ -777,7 +777,6 @@ static kMethod *LookupMethod(KonohaContext *kctx, kNode *expr, kGamma *gma)
 static KMETHOD TypeCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(expr, gma, reqc);
-	KBeginMethodCall(gma, expr);
 	kNode *texpr = K_NULLNODE;
 	kMethod *mtd = expr->NodeList->MethodItems[0];
 	if(!IS_Method(mtd)) {
@@ -787,7 +786,6 @@ static KMETHOD TypeCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp)
 	if(mtd != NULL) {
 		texpr = TypeCheckMethodParam(kctx, mtd, expr, gma, reqc);
 	}
-	KEndMethodCall(gma);
 	KReturn(texpr);
 }
 

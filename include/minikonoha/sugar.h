@@ -216,6 +216,7 @@ typedef enum {
 
 #define SYNFLAG_NodeLeftJoinOp2     ((kshortflag_t)1 << 1)
 #define SYNFLAG_Suffix      ((kshortflag_t)1 << 2)
+#define SYNFLAG_CallNode            ((kshortflag_t)1 << 11)
 
 #define SYNFLAG_NodeBreakExec       ((kshortflag_t)1 << 8)  /* return, throw */
 #define SYNFLAG_NodeJumpAhead0      ((kshortflag_t)1 << 9)  /* continue */
@@ -490,7 +491,6 @@ static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeTy
 
 #define kNode_Message(kctx, STMT, PE, FMT, ...)            SUGAR MessageNode(kctx, STMT, NULL, NULL, PE, FMT, ## __VA_ARGS__)
 #define kNodeToken_Message(kctx, STMT, TK, PE, FMT, ...)   SUGAR MessageNode(kctx, STMT, TK, NULL, PE, FMT, ## __VA_ARGS__)
-#define SUGAR MessageNode(kctx, STMT, EXPR, PE, FMT, ...)  SUGAR MessageNode(kctx, EXPR, NULL, NULL, PE, FMT, ## __VA_ARGS__)
 
 
 typedef struct {
@@ -499,9 +499,9 @@ typedef struct {
 
 #define kGamma_TopLevel        (kshortflag_t)(1)
 #define Gamma_isTopLevel(GMA)  KFlag_Is(kshortflag_t, GMA->genv->flag, kGamma_TopLevel)
-#define kGamma_ERROR           (kshortflag_t)(1<<1)
-#define Gamma_hasERROR(GMA)    KFlag_Is(kshortflag_t, GMA->genv->flag, kGamma_ERROR)
-#define Gamma_SetERROR(GMA,B) KFlag_Set(kshortflag_t, GMA->genv->flag, kGamma_ERROR, B)
+//#define kGamma_ERROR           (kshortflag_t)(1<<1)
+//#define Gamma_hasERROR(GMA)    KFlag_Is(kshortflag_t, GMA->genv->flag, kGamma_ERROR)
+//#define Gamma_SetERROR(GMA,B) KFlag_Set(kshortflag_t, GMA->genv->flag, kGamma_ERROR, B)
 
 typedef struct {
 	KGammaStackDecl *varItems;
@@ -654,59 +654,21 @@ typedef enum {
 } TypeCheckPolicy;
 
 #define KPushMethodCall(gma)   SUGAR kGamma_AddLocalVariable(kctx, gma, KType_var, 0)
-#define KBeginMethodCall(gma, expr) \
-		int _varsize = gma->genv->localScope.varsize;\
-		expr->stacktop = gma->genv->localScope.varsize;\
-		KPushMethodCall(gma); KPushMethodCall(gma); KPushMethodCall(gma); KPushMethodCall(gma)
-
-#define KEndMethodCall(gma) gma->genv->localScope.varsize = _varsize;\
-
 
 #define new_ConstNode(CTX, NS, T, O)               SUGAR kNode_SetConst(CTX, KNewNode(NS), T, O)
 #define new_UnboxConstNode(CTX, NS, T, D)         SUGAR kNode_SetUnboxConst(CTX, KNewNode(NS), T, D)
 #define new_VariableNode(CTX, NS, BLD, TY, IDX)   SUGAR kNode_SetVariable(CTX, KNewNode(NS), BLD, TY, IDX)
 
-#ifdef USING_SUGAR_AS_BUILTIN
-
-#define SUGAR
-
-//static kNode* kNode_SetConst(KonohaContext *kctx, kNodeVar *expr, ktypeattr_t ty, kObject *o);
-//static kNode* kNode_SetUnboxConst(KonohaContext *kctx, kNodeVar *expr, ktypeattr_t ty, uintptr_t unboxValue);
-//static kNode* kNode_SetVariable(KonohaContext *kctx, kNode *expr, kGamma *gma, knode_t build, ktypeattr_t ty, intptr_t index);
-
-#define KType_Symbol                          KPARSERM->cSymbol->typeId
-#define KType_Token                           KPARSERM->cToken->typeId
-#define KType_Node                            KPARSERM->cNode->typeId
-#define KType_Node                           KPARSERM->cNode->typeId
-#define KType_Node                            KPARSERM->cNode->typeId
-#define KType_Gamma                           KPARSERM->cGamma->typeId
-#define KType_TokenArray                      KPARSERM->cTokenArray->typeId
-
-#define KSyntax_(KS, KW)                       kNameSpace_GetSyntax(kctx, KS, KW, 0)
-
-
-#else/*SUGAR_EXPORTS*/
-
-#define SUGAR        ((const KParserModule *)KPARSERM)->
+#define SUGAR                                   ((const KParserModule *)KPARSERM)->
 #define KType_Symbol                            SUGAR cSymbol->typeId
 #define KType_Token                             SUGAR cToken->typeId
-#ifdef USE_NODE
 #define KType_Node                              SUGAR cNode->typeId
-#define KType_Node                             SUGAR cNode->typeId
-#define KType_Node                              SUGAR cNode->typeId
-#else
-#define KType_Node                              SUGAR cNode->typeId
-#define KType_Node                             SUGAR cNode->typeId
-#define KType_Node                              SUGAR cNode->typeId
-#endif
 #define KType_Gamma                             SUGAR cGamma->typeId
 #define KType_TokenArray                        SUGAR cTokenArray->typeId
 
 //#define KSymbol_(T)                               _e->keyword(kctx, T, sizeof(T)-1, KSymbol_Noname)
 #define KSyntax_(KS, KW)                        SUGAR kNameSpace_GetSyntax(kctx, KS, KW, 0)
 #define NEWKSyntax_(KS, KW)                     (KSyntaxVar *)(SUGAR kNameSpace_GetSyntax(kctx, KS, KW, 1))
-
-#endif/*SUGAR_EXPORTS*/
 
 #ifdef USE_SMALLBUILD
 #define KdumpToken(ctx, tk)

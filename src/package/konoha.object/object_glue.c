@@ -29,7 +29,6 @@
 extern "C"{
 #endif
 
-
 // Object.getTypeId()
 static KMETHOD Object_getTypeId(KonohaContext *kctx, KonohaStack *sfp)
 {

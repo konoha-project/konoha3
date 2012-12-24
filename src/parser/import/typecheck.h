@@ -41,14 +41,23 @@ static kNode *TypeNode(KonohaContext *kctx, KSyntax *syn0, kNode *expr, kGamma *
 {
 	KSyntax *syn = syn0;
 	kObject *reqType = KLIB Knull(kctx, reqtc);
+	int varsize = gma->genv->localScope.varsize;
+	expr->stacktop = varsize;
+	if(KFlag_Is(kshortflag_t, syn->flag, SYNFLAG_CallNode)) {
+		KPushMethodCall(gma);
+		KPushMethodCall(gma);
+		KPushMethodCall(gma);
+		KPushMethodCall(gma);
+	}
 	while(true) {
 		int index, size;
 		kFunc **FuncItems = KSyntax_funcTable(kctx, syn, KSugarTypeCheckFunc, &size);
 		for(index = size - 1; index >= 0; index--) {
 			kNode *texpr = CallTypeFunc(kctx, FuncItems[index], expr, gma, reqType);
-			if(kNode_IsError(texpr)) return texpr;
-			if(texpr->attrTypeId != KType_var) {
-				DBG_ASSERT(texpr->node != -1);
+			if(kNode_IsError(texpr) || texpr->attrTypeId != KType_var) {
+				if(!kNode_Is(OpenBlock, texpr)) {
+					gma->genv->localScope.varsize = varsize;
+				}
 				return texpr;
 			}
 		}
@@ -57,8 +66,9 @@ static kNode *TypeNode(KonohaContext *kctx, KSyntax *syn0, kNode *expr, kGamma *
 	}
 	if(!kNode_IsError(expr)) {
 		DBG_P("syn=%s%s", KSymbol_Fmt2(syn0->keyword));
-		return SUGAR MessageNode(kctx, expr, NULL, gma, ErrTag, "undefined typing: %s%s %s", KSymbol_Fmt2(syn0->keyword), KToken_t(expr->KeyOperatorToken));
+		expr = SUGAR MessageNode(kctx, expr, NULL, gma, ErrTag, "undefined typing: %s%s %s", KSymbol_Fmt2(syn0->keyword), KToken_t(expr->KeyOperatorToken));
 	}
+	gma->genv->localScope.varsize = varsize;
 	return expr;
 }
 
@@ -233,9 +243,6 @@ static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kGamma *gma, KCl
 	}
 	else {
 		kNode_Type(kctx, block, KNode_Block, KType_void);
-	}
-	if(lvarsize < gma->genv->localScope.varsize && !kNode_Is(OpenBlock, block)) {
-		gma->genv->localScope.varsize = lvarsize;
 	}
 	return block;
 }
