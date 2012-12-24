@@ -190,10 +190,13 @@ static kNode* ParseNewNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLis
 		int nextId = ParseMetaPattern(kctx, ns, node, tokenList, beginIdx[0], endIdx);
 		if(nextId != PatternNoMatch) {
 			beginIdx[0] = nextId;
+			KDump(node);
 			return node;
 		}
 	}
-	return ParseNode(kctx, node, tokenList, beginIdx, endIdx, option, hintBeforeText);
+	node = ParseNode(kctx, node, tokenList, beginIdx, endIdx, option, hintBeforeText);
+	KDump(node);
+	return node;
 }
 
 static kNode *AddParamNode(KonohaContext *kctx, kNameSpace *ns, kNode *node, kArray *tokenList, int s, int e, const char *hintBeforeText/* if NULL empty isAllowed */)

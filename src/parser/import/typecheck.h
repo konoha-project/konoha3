@@ -133,11 +133,6 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClas
 //			expr = new_ConstNode(kctx, ns, NULL, UPCAST(expr));
 //		}
 		expr = TypeNode(kctx, expr->syn, expr, gma, reqClass);
-		if(!kNode_IsValue(expr)) {
-//			//DBG_ASSERT(expr->stacktop == 0);
-//			DBG_P("expr->stacktop=%d, gma->top=%d", expr->stacktop, gma->genv->localScope.varsize);
-			expr->stacktop = gma->genv->localScope.varsize;
-		}
 		if(kNode_IsError(expr)) return expr;
 	}
 	KClass *typedClass = KClass_(expr->attrTypeId);
@@ -152,8 +147,6 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClas
 		return expr;
 	}
 	if(KClass_Is(TypeVar, typedClass)) {
-		DBG_P("typedClass=%s", KClass_text(typedClass));
-		DBG_ASSERT(kctx == NULL);
 		return SUGAR MessageNode(kctx, expr, NULL, gma, ErrTag, "not type variable %s", KClass_text(typedClass));
 	}
 	if(reqClass->typeId == KType_var || typedClass == reqClass || FLAG_is(pol, TypeCheckPolicy_NoCheck)) {
@@ -230,14 +223,12 @@ static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kGamma *gma, KCl
 	for(i = 0; i < size; i++) {
 		kNode *stmt = TypeCheckNodeList(kctx, block->NodeList, i, gma, KClass_void);
 		if(kNode_IsError(stmt)) {
-//			Gamma_SetERROR(gma, 1);
 			return block;  // untyped
 		}
 	}
 	if(size >= 0) {
 		kNode *stmt = TypeCheckNodeList(kctx, block->NodeList, size, gma, reqc);
 		if(!kNode_IsError(stmt)) {
-//			Gamma_SetERROR(gma, 1);
 			kNode_Type(kctx, block, KNode_Block, stmt->attrTypeId);
 		}
 	}

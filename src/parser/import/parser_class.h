@@ -184,13 +184,49 @@ static void kNodeTerm_p(KonohaContext *kctx, kObject *o, KonohaValue *values, in
 		kObject_class(o)->p(kctx, values, pos, wb);
 	}
 }
+
+#define DefineCase(NAME)  case KNode_##NAME:   return #NAME;
+
+static const char* KNode_text(knode_t node)
+{
+	switch(node) {
+	KNodeList(DefineCase)
+	}
+	return "unknown";
+}
 #endif
+
+
 
 static void kNode_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb)
 {
 #ifndef USE_SMALLBUILD
 	kNode *expr = values[pos].asNode;
-	KLIB KBuffer_Write(kctx, wb, "(", 1);
+	KLIB KBuffer_Write(kctx, wb, "{", 1);
+	if(expr->attrTypeId == KType_var) {
+		if(expr->KeyOperatorToken == K_NULLTOKEN) {
+			KLIB KBuffer_printf(kctx, wb, "nulltoken");
+		}
+		else {
+			KLIB KBuffer_printf(kctx, wb, "%s%s %s", KSymbol_Fmt2(expr->KeyOperatorToken->resolvedSyntaxInfo->keyword), KToken_t(expr->KeyOperatorToken));
+		}
+	}
+	else {
+		KLIB KBuffer_printf(kctx, wb, "%s %s :%s", KNode_text(expr->node), KToken_t(expr->KeyOperatorToken), KType_text(expr->attrTypeId));
+	}
+	KLIB kObjectProto_p(kctx, values, pos, wb, 0);
+	if(IS_Array(expr->NodeList)) {
+		size_t i;
+		KLIB KBuffer_Write(kctx, wb, "[", 1);
+		for(i = 0; i < kArray_size(expr->NodeList); i++) {
+			if(i > 0) {
+				KLIB KBuffer_Write(kctx, wb, " ", 1);
+			}
+			KLIB KBuffer_printf(kctx, wb, "#%d :%s", (int)i, KClass_text(kObject_class(expr->NodeList->ObjectItems[i])));
+			kNodeTerm_p(kctx, expr->NodeList->ObjectItems[i], values, pos+1, wb);
+		}
+		KLIB KBuffer_Write(kctx, wb, "]", 1);
+	}
 	if(expr->node == KNode_Const) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("const "));
 		kNodeTerm_p(kctx, (kObject *)expr->ObjectConstValue, values, pos+1, wb);
@@ -220,38 +256,13 @@ static void kNode_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 //	else if(expr->node == KNode_STACKTOP) {
 //		KLIB KBuffer_printf(kctx, wb, "stack %d", expr->index);
 //	}
-	else if(kNode_IsTerm(expr)) {
-		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("term "));
-		kNodeTerm_p(kctx, (kObject *)expr->TermToken, values, pos+1, wb);
-	}
-	else if(IS_Array(expr->NodeList)) {
-		size_t i;
-		for(i = 0; i < kArray_size(expr->NodeList); i++) {
-			if(i > 0) {
-				KLIB KBuffer_Write(kctx, wb, " ", 1);
-			}
-			kNodeTerm_p(kctx, expr->NodeList->ObjectItems[i], values, pos+1, wb);
-		}
-	}
-	KLIB KBuffer_Write(kctx, wb, ")", 1);
-	if(expr->attrTypeId != KType_var) {
-		KLIB KBuffer_printf(kctx, wb, ":%s", KType_text(expr->attrTypeId));
-	}
+//	else if(kNode_IsTerm(expr)) {
+//		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("term "));
+//		kNodeTerm_p(kctx, (kObject *)expr->TermToken, values, pos+1, wb);
+//	}
+	KLIB KBuffer_Write(kctx, wb, "}", 1);
 #endif
 }
-
-//static void kNode_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb)
-//{
-//	kNode *stmt = values[pos].asNode;
-//	if(stmt->syn == NULL) {
-//		KLIB KBuffer_printf(kctx, wb, "DONE {uline: %d, ", (kshort_t)kNode_uline(stmt));
-//	}
-//	else {
-//		KLIB KBuffer_printf(kctx, wb, "%s%s {uline: %d, ", KSymbol_Fmt2(stmt->syn->keyword), (kshort_t)kNode_uline(stmt));
-//	}
-//	KLIB kObjectProto_p(kctx, values, pos, wb, 0);
-//	KLIB KBuffer_Write(kctx, wb, "}", 1);
-//}
 
 // untyped node
 
