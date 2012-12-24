@@ -762,8 +762,15 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 	else {
 		w->values[w->pos].unboxValue = d->unboxValue;
 	}
-	kObject_class(d->ObjectValue)->p(kctx, w->values, w->pos, w->wb);
 	w->count++;
+	int i;
+	for(i = 0; i < w->pos; i++) {
+		if(w->values[i].asObject == d->ObjectValue) {
+			KLIB KBuffer_Write(kctx, w->wb, "...", 3);
+			return;
+		}
+	}
+	kObject_class(d->ObjectValue)->p(kctx, w->values, w->pos, w->wb);
 }
 
 static int kObjectProto_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb, int count)
