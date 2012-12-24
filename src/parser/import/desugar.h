@@ -1115,23 +1115,7 @@ static kMethod* kMethod_DoLazyCompilation(KonohaContext *kctx, kMethod *mtd, kpa
 }
 
 /* ------------------------------------------------------------------------ */
-/* [ParamUtils] */
-
-static kbool_t NodeTypeDecl_SetParam(KonohaContext *kctx, kNode *stmt, int n, kparamtype_t *p)
-{
-	kToken *tkT  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
-	kNode  *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
-	DBG_ASSERT(tkT != NULL);
-	DBG_ASSERT(expr != NULL);
-	if(kNode_isSymbolTerm(expr)) {
-		kToken *tkN = expr->TermToken;
-		ksymbol_t fn = KAsciiSymbol(kString_text(tkN->text), kString_size(tkN->text), KSymbol_NewId);
-		p[n].name = fn;
-		p[n].attrTypeId = Token_typeLiteral(tkT);
-		return true;
-	}
-	return false;
-}
+/* [ParamDecl] */
 
 static kParam *kNode_GetParamNULL(KonohaContext *kctx, kNode *stmt, kGamma* gma)
 {
@@ -1144,6 +1128,22 @@ static kParam *kNode_GetParamNULL(KonohaContext *kctx, kNode *stmt, kGamma* gma)
 	pa = (kParam *)kNode_GetObjectNULL(kctx, stmt, KSymbol_ParamPattern);
 	DBG_ASSERT(IS_Param(pa));
 	return pa;
+}
+
+static kbool_t SetParamType(KonohaContext *kctx, kNode *stmt, int n, kparamtype_t *p)
+{
+	kToken *tkT  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
+	kNode  *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
+	DBG_ASSERT(tkT != NULL);
+	DBG_ASSERT(expr != NULL);
+	if(kNode_isSymbolTerm(expr)) {
+		kToken *tkN = expr->TermToken;
+//		ksymbol_t fn = /*KAsciiSymbol(kString_text(tkN->text), kString_size(tkN->text), KSymbol_NewId);*/
+		p[n].name = tkN->resolvedSymbol;
+		p[n].attrTypeId = Token_typeLiteral(tkT);
+		return true;
+	}
+	return false;
 }
 
 static KMETHOD Statement_ParamDecl(KonohaContext *kctx, KonohaStack *sfp)
@@ -1163,7 +1163,7 @@ static KMETHOD Statement_ParamDecl(KonohaContext *kctx, KonohaStack *sfp)
 			p[i].attrTypeId = KType_void;
 			p[i].name = 0;
 			kNode *stmt = params->NodeList->NodeItems[i];
-			if(stmt->syn->keyword != KSymbol_TypeDeclPattern || !NodeTypeDecl_SetParam(kctx, stmt, i, p)) {
+			if(stmt->syn->keyword != KSymbol_TypeDeclPattern || !SetParamType(kctx, stmt, i, p)) {
 				break;
 			}
 		}
