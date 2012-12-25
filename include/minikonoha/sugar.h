@@ -671,7 +671,7 @@ typedef enum {
 #define NEWKSyntax_(KS, KW)                     (KSyntaxVar *)(SUGAR kNameSpace_GetSyntax(kctx, KS, KW, 1))
 
 #ifdef USE_SMALLBUILD
-#definr KDump(O)
+#define KDump(O)
 #define KdumpToken(ctx, tk)
 #define KdumpTokenArray(CTX, TLS, S, E)
 #define KdumpKTokenSeq(CTX, MSG, R)
