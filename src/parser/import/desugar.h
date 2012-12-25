@@ -194,6 +194,9 @@ static KMETHOD Parse_Pattern(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Parse(node, name, tokenList, beginIdx, operatorIdx, endIdx);
 	if(beginIdx == operatorIdx) {
+		kToken *tk = tokenList->TokenVarItems[beginIdx];
+		node->syn = tk->resolvedSyntaxInfo;
+		KFieldSet(node, node->KeyOperatorToken, tk);
 		KReturnUnboxValue(ParseSyntaxPattern(kctx, kNode_ns(node), node, node->syn, tokenList, beginIdx, endIdx));
 	}
 	KReturnUnboxValue(-1);
