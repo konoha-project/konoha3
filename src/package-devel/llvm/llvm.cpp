@@ -1909,13 +1909,8 @@ static KMETHOD IRBuilder_createPtrDiff(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(p);
 }
 
-<<<<<<< HEAD
-//## void IRBuilder.SetInsertPoint(BasicNode BB);
-static KMETHOD IRBuilder_SetInsertPoint(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
-=======
 //## void IRBuilder.SetInsertPoint(BasicBlock BB);
-static KMETHOD IRBuilder_setInsertPoint(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
->>>>>>> 8d7b2b4ac54185eca7baa1c2ccb2a0d7ced18da1
+static KMETHOD IRBuilder_SetInsertPoint(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	BasicBlock * BB = konoha::object_cast<BasicBlock *>(sfp[1].asObject);
@@ -5005,23 +5000,13 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public, _F(IRBuilder_createIsNull),    KType_Value, KType_IRBuilder, KMethodName_("createIsNull"), 1, KType_Value, KFieldName_("arg"),
 		_Public, _F(IRBuilder_createIsNotNull), KType_Value, KType_IRBuilder, KMethodName_("createIsNotNull"), 1, KType_Value, KFieldName_("arg"),
 		_Public, _F(IRBuilder_createPtrDiff),   KType_Value, KType_IRBuilder, KMethodName_("createPtrDiff"), 2, KType_Value, KFieldName_("lhs"),KType_Value, KFieldName_("rhs"),
-<<<<<<< HEAD
-		_Public, _F(IRBuilder_SetInsertPoint),  KType_Value, KType_IRBuilder, KMethodName_("setInsertPoint"), 1, KType_BasicNode, KFieldName_("bb"),
-		_Public, _F(IRBuilder_getInsertNode),  KType_BasicNode, KType_IRBuilder, KMethodName_("getInsertNode"), 0,
-		_Public, _F(BasicNode_getParent), KType_Function, KType_BasicNode, KMethodName_("getParent"), 0,
-		_Public, _F(BasicNode_insertBefore), KType_void, KType_BasicNode, KMethodName_("insertBefore"), 2, KType_Instruction, KFieldName_("before"),KType_Instruction, KFieldName_("inst"),
-		_Public, _F(BasicNode_getLastInst),  KType_Value/*TODO*/, KType_BasicNode, KMethodName_("getLastInst"), 0,
-		_Public, _F(BasicNode_getTerminator), KType_Value/*TODO*/, KType_BasicNode, KMethodName_("getTerminator"), 0,
-		_Public, _F(Instruction_SetMetadata), KType_void, KType_Instruction, KMethodName_("setMetadata"), 3, KType_Module, KFieldName_("m"),KType_String, KFieldName_("name"),KType_int, KFieldName_("value"),
-=======
-		_Public, _F(IRBuilder_setInsertPoint),  KType_Value, KType_IRBuilder, KMethodName_("setInsertPoint"), 1, KType_BasicBlock, KFieldName_("bb"),
+		_Public, _F(IRBuilder_SetInsertPoint),  KType_Value, KType_IRBuilder, KMethodName_("setInsertPoint"), 1, KType_BasicBlock, KFieldName_("bb"),
 		_Public, _F(IRBuilder_getInsertBlock),  KType_BasicBlock, KType_IRBuilder, KMethodName_("getInsertBlock"), 0,
 		_Public, _F(BasicBlock_getParent), KType_Function, KType_BasicBlock, KMethodName_("getParent"), 0,
 		_Public, _F(BasicBlock_insertBefore), KType_void, KType_BasicBlock, KMethodName_("insertBefore"), 2, KType_Instruction, KFieldName_("before"),KType_Instruction, KFieldName_("inst"),
 		_Public, _F(BasicBlock_getLastInst),  KType_Value/*TODO*/, KType_BasicBlock, KMethodName_("getLastInst"), 0,
 		_Public, _F(BasicBlock_getTerminator), KType_Value/*TODO*/, KType_BasicBlock, KMethodName_("getTerminator"), 0,
-		_Public, _F(Instruction_setMetadata), KType_void, KType_Instruction, KMethodName_("setMetadata"), 3, KType_Module, KFieldName_("m"),KType_String, KFieldName_("name"),KType_int, KFieldName_("value"),
->>>>>>> 8d7b2b4ac54185eca7baa1c2ccb2a0d7ced18da1
+		_Public, _F(Instruction_SetMetadata), KType_void, KType_Instruction, KMethodName_("setMetadata"), 3, KType_Module, KFieldName_("m"),KType_String, KFieldName_("name"),KType_int, KFieldName_("value"),
 		_Public, _F(Function_dump), KType_void, KType_Function, KMethodName_("dump"), 0,
 		_Public, _F(Value_dump), KType_void, KType_Value, KMethodName_("dump"), 0,
 		_Public, _F(Type_dump), KType_void, KType_Type, KMethodName_("dump"), 0,
