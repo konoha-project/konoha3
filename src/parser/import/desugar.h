@@ -1093,7 +1093,7 @@ static KMETHOD KMethodFunc_LazyCompilation(KonohaContext *kctx, KonohaStack *sfp
 
 static void kMethod_SetLazyCompilation(KonohaContext *kctx, kMethodVar *mtd, kNode *stmt, kNameSpace *ns)
 {
-	kToken *tcode = SUGAR kNode_GetToken(kctx, stmt, KSymbol_ExprPattern, NULL);
+	kToken *tcode = SUGAR kNode_GetToken(kctx, stmt, KSymbol_BlockPattern, NULL);
 	if(tcode != NULL && tcode->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		KFieldSet(mtd, mtd->SourceToken, tcode);
 		KFieldSet(mtd, mtd->LazyCompileNameSpace, ns);
