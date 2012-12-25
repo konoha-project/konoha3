@@ -290,8 +290,8 @@ static KMETHOD Json_AddJson(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
-//## void Json.setBool(String key, boolean value);
-static KMETHOD Json_setBool(KonohaContext *kctx, KonohaStack *sfp)
+//## void Json.setBoolean(String key, boolean value);
+static KMETHOD Json_setBoolean(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
 	if(!PLATAPI SetJsonValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), KJSON_BOOLEAN, sfp[2].unboxValue)) {
@@ -360,7 +360,7 @@ static kbool_t json_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		_Public,            _F(Json_setJson),   KType_void,       KType_Json, KKMethodName_("set"),        2, KType_String, FN_k, KType_Json, FN_v,
 		_Public,            _F(Json_setJson_index),   KType_void,       KType_Json, KKMethodName_("set"),        2, KType_int,    FN_k, KType_Json, FN_v,
 		_Public,            _F(Json_AddJson),   KType_void,       KType_Json, KKMethodName_("add"),        1, KType_Json,   FN_v,
-		_Public,            _F(Json_setBool),   KType_void,       KType_Json, KKMethodName_("setBool"),    2, KType_String, FN_k, KType_boolean, FN_v,
+		_Public,            _F(Json_setBoolean),   KType_void,       KType_Json, KKMethodName_("setBoolean"),    2, KType_String, FN_k, KType_boolean, FN_v,
 		_Public,            _F(Json_setFloat),  KType_void,       KType_Json, KKMethodName_("setFloat"),   2, KType_String, FN_k, KType_float, FN_v,
 		_Public,            _F(Json_setInt),    KType_void,       KType_Json, KKMethodName_("setInt"),     2, KType_String, FN_k, KType_int, FN_v,
 		_Public,            _F(Json_setString), KType_void,       KType_Json, KKMethodName_("setString"),  2, KType_String, FN_k, KType_String, FN_v,
