@@ -663,8 +663,9 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 	}
 	for(; currentIdx < source->endIdx; currentIdx++) {
 		kTokenVar *tk = source->tokenList->TokenVarItems[currentIdx];
-		if(kToken_IsIndent(tk) && tokens->TargetPolicy.RemovingIndent) {
-			continue;  // remove INDENT in () or []
+		/* filter */
+		if(tk->tokenType == TokenType_INDENT && tokens->TargetPolicy.RemovingIndent) {
+			continue;  /* filtering indent; */
 		}
 		if(tk->tokenType == TokenType_CODE && (tokens->TargetPolicy.ExpandingBraceGroup || macroParam != NULL)) {
 			tk = kToken_ToBraceGroup(kctx, tk, tokens->ns, macroParam);
@@ -717,12 +718,16 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 			}
 			else {
 				tk->resolvedSyntaxInfo = KSyntax_(tokens->ns, tk->tokenType);
-				if(!kToken_Is(StatementSeparator, tk) && tk->tokenType != TokenType_INDENT) {
+//				if(!kToken_Is(StatementSeparator, tk) && tk->tokenType != TokenType_INDENT) {
 					if(tk->resolvedSyntaxInfo == NULL) {
 						kToken_ToError(kctx, tk, ErrTag, "undefined pattern: %s%s", KSymbol_Fmt2(tk->tokenType));
 						source->SourceConfig.foundErrorToken = tk;
 						goto RETURN_ERROR;
 					}
+//				}
+				if(tk->tokenType == KSymbol_MemberPattern) {
+					const char *t = kString_text(tk->text);
+					tk->resolvedSymbol = KAsciiSymbol(t, kString_size(tk->text), KSymbol_NewId);
 				}
 			}
 		}

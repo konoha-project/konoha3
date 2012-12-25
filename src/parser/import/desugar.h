@@ -885,7 +885,14 @@ static KMETHOD TypeCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp)
 	kNode *firstNode = kNode_At(expr, 0);
 	DBG_ASSERT(IS_Node(firstNode));
 	DBG_P(">>>>>>>>>>>>> firstNode=%s%s", KSymbol_Fmt2(firstNode->syn->keyword));
-	if(kNode_isSymbolTerm(kNode_At(expr, 0))) {
+	if(firstNode->syn->keyword == KSymbol_MemberPattern) {
+		KFieldSet(expr, expr->KeyOperatorToken, firstNode->KeyOperatorToken);
+		KFieldSet(expr->NodeList, expr->NodeList->ObjectItems[1], firstNode->NodeList->ObjectItems[1]);
+		KFieldSet(expr->NodeList, expr->NodeList->ObjectItems[0], firstNode->NodeList->ObjectItems[0]);
+		TypeCheck_MethodCall(kctx, sfp);
+		return;
+	}
+	else if(kNode_isSymbolTerm(kNode_At(expr, 0))) {
 		kNameSpace *ns = kNode_ns(expr);
 		kMethod *mtd = TypeFirstNodeAndLookupMethod(kctx, ns, expr, gma, reqc);
 		if(mtd != NULL) {
