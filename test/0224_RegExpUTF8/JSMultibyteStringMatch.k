@@ -1,7 +1,7 @@
 //written by Joseph
 
 import("js4.array");
-import("konoha.regexp");
+import("js4.regexp");
 
 void test() {
 	String[] ma = "世界、こんにちは、世界".match(/世界/g);

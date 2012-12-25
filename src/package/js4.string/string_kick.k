@@ -1,5 +1,5 @@
 import("java2.string");
-import("konoha.regexp");
+import("js4.regexp");
 
 @Public String[] String.split() {
     /* XXX(ide)

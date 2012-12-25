@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-import("konoha.regexp");
+import("js4.regexp");
 import("konoha.new");
 import("java2.string");
 import("konoha.foreach");
