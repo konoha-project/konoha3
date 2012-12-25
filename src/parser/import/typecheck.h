@@ -274,7 +274,7 @@ static kNode* kMethod_newNode(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns,
 	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList, 0};
 	KTokenSeq_Push(kctx, tokens);
 	KTokenSeq_Tokenize(kctx, &tokens, script, uline);
-	kNode *block = new_BlockNode2(kctx, NULL/*parentNode*/, NULL/*macro*/, &tokens);
+	kNode *block = new_BlockNode2(kctx, NULL/*macro*/, &tokens);
 	KTokenSeq_Pop(kctx, tokens);
 	return block;
 }

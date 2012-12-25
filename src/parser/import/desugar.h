@@ -69,7 +69,7 @@ static KMETHOD PatternMatch_MethodName(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static void KTokenSeq_CheckCStyleParam(KonohaContext *kctx, KTokenSeq* tokens)
+static void CheckCStyleParam(KonohaContext *kctx, KTokenSeq* tokens)
 {
 	int i;
 	for(i = 0; i < tokens->endIdx; i++) {
@@ -91,9 +91,9 @@ static KMETHOD PatternMatch_CStyleParam(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *tk = tokenList->TokenItems[beginIdx];
 	if(tk->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {
 		KTokenSeq param = {kNode_ns(stmt), tk->subTokenList, 0, kArray_size(tk->subTokenList)};
-		KTokenSeq_CheckCStyleParam(kctx, &param);
-		kNode *bk = new_BlockNode2(kctx, stmt, NULL, &param);
-		kNode_AddParsedObject(kctx, stmt, name, UPCAST(bk));
+		CheckCStyleParam(kctx, &param);
+		kNode *block = new_BlockNode2(kctx, NULL, &param);
+		kNode_AddParsedObject(kctx, stmt, name, UPCAST(block));
 		returnIdx = beginIdx + 1;
 	}
 	KReturnUnboxValue(returnIdx);
@@ -110,8 +110,8 @@ static KMETHOD PatternMatch_CStyleBlock(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	int newEndIdx = FindEndOfStatement(kctx, kNode_ns(stmt), tokenList, beginIdx, endIdx);
 	KTokenSeq tokens = {kNode_ns(stmt), tokenList, beginIdx, newEndIdx};
-	kNode *bk = new_BlockNode2(kctx, stmt, NULL, &tokens);
-	kNode_AddParsedObject(kctx, stmt, name, UPCAST(bk));
+	kNode *block = new_BlockNode2(kctx, NULL, &tokens);
+	kNode_AddParsedObject(kctx, stmt, name, UPCAST(block));
 	KReturnUnboxValue(newEndIdx);
 }
 
@@ -1157,8 +1157,8 @@ static KMETHOD Statement_ParamDecl(KonohaContext *kctx, KonohaStack *sfp)
 		for(i = 0; i < psize; i++) {
 			p[i].attrTypeId = KType_void;
 			p[i].name = 0;
-			kNode *stmt = params->NodeList->NodeItems[i];
-			if(stmt->syn->keyword != KSymbol_TypeDeclPattern || !SetParamType(kctx, stmt, i, p)) {
+			kNode *node = params->NodeList->NodeItems[i];
+			if(node->syn->keyword != KSymbol_TypeDeclPattern || !SetParamType(kctx, node, i, p)) {
 				break;
 			}
 		}
@@ -1215,10 +1215,10 @@ static KMETHOD Statement_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 		MethodDeclFlag[5].symbol = KSymbol_("@Override");
 		MethodDeclFlag[6].symbol = KSymbol_("@Restricted");
 	}
-	uintptr_t flag    = kNode_ParseFlag(kctx, stmt, MethodDeclFlag, 0);
-	ktypeattr_t typeId    = kNode_GetClassId(kctx, stmt, ns, KSymbol_("ClassName"), kObject_typeId(ns));
-	kmethodn_t mn     = kNode_GetMethodSymbol(kctx, stmt, ns, KSymbol_SymbolPattern, MN_new);
-	kParam *pa        = kNode_GetParamNULL(kctx, stmt, gma);
+	uintptr_t flag      = kNode_ParseFlag(kctx, stmt, MethodDeclFlag, 0);
+	ktypeattr_t typeId  = kNode_GetClassId(kctx, stmt, ns, KSymbol_("ClassName"), kObject_typeId(ns));
+	kmethodn_t mn       = kNode_GetMethodSymbol(kctx, stmt, ns, KSymbol_SymbolPattern, MN_new);
+	kParam *pa          = kNode_GetParamNULL(kctx, stmt, gma);
 	if(KType_Is(Singleton, typeId)) { flag |= kMethod_Static; }
 	if(KType_Is(Final, typeId)) { flag |= kMethod_Final; }
 	if(pa != NULL) {  // if pa is NULL, error is printed out.

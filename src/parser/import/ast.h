@@ -230,6 +230,7 @@ static int MatchSyntaxPattern(KonohaContext *kctx, kNode *node, KTokenSeq *token
 		L_ReDo:;
 		//tokenIdx = TokenUtils_SkipOnlyIndent(tokens->tokenList, tokenIdx, tokens->endIdx);
 		//DBG_P("patternIdx=%d, tokenIdx=%d, tokenEndIdx=%d", patternIdx, tokenIdx, tokens->endIdx);
+		KDump(node);
 		if(tokenIdx < tokens->endIdx) {
 			kToken *tk = tokens->tokenList->TokenItems[tokenIdx];
 			errRuleRef[1] = tk;
@@ -788,7 +789,7 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 //	return true;
 //}
 
-static kNode *new_BlockNode2(KonohaContext *kctx, kNode *parent, KMacroSet *macro, KTokenSeq *source)
+static kNode *new_BlockNode2(KonohaContext *kctx, KMacroSet *macro, KTokenSeq *source)
 {
 	KTokenSeq tokens = {source->ns, source->tokenList, kArray_size(source->tokenList)};
 	source->SourceConfig.openToken = NULL;
@@ -806,21 +807,21 @@ static kNode *new_BlockNode2(KonohaContext *kctx, kNode *parent, KMacroSet *macr
 
 static kNode* kNode_GetBlock(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ksymbol_t kw, kNode *def)
 {
-	kNode *bk = (kNode *)kNode_GetObjectNULL(kctx, stmt, kw);
-	if(bk == NULL) return def;
-	if(IS_Token(bk)) {
-		kToken *tk = (kToken *)bk;
+	kNode *block = (kNode *)kNode_GetObjectNULL(kctx, stmt, kw);
+	if(block == NULL) return def;
+	if(IS_Token(block)) {
+		kToken *tk = (kToken *)block;
 		if(ns == NULL) ns = kNode_ns(stmt);
 		if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 			kToken_ToBraceGroup(kctx, (kTokenVar *)tk, ns, NULL);
 		}
 		if(tk->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
 			KTokenSeq range = {ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
-			bk = new_BlockNode2(kctx, stmt, NULL, &range);
-			KLIB kObjectProto_SetObject(kctx, stmt, kw, kObject_typeId(bk), bk);
+			block = new_BlockNode2(kctx, NULL, &range);
+			KLIB kObjectProto_SetObject(kctx, stmt, kw, kObject_typeId(block), block);
 		}
 	}
-	return (IS_Node(bk)) ? bk : def;
+	return (IS_Node(block)) ? block : def;
 }
 
 // ---------------------------------------------------------------------------
