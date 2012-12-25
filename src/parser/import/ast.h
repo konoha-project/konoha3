@@ -64,7 +64,7 @@ static int FindFirstStatementToken(KonohaContext *kctx, kArray *tokenList, int c
 {
 	for(; currentIdx < endIdx; currentIdx++) {
 		kToken *tk = tokenList->TokenItems[currentIdx];
-		if(kToken_IsIndent(tk) || kToken_Is(StatementSeparator, tk)) continue;
+		if((tk)->tokenType == TokenType_INDENT || kToken_Is(StatementSeparator, tk)) continue;
 		break;
 	}
 	return currentIdx;
