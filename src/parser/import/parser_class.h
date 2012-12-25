@@ -410,6 +410,7 @@ static kNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kNode *exp
 static kNode* new_MethodNode(KonohaContext *kctx, kNameSpace *ns, kGamma *gma, KClass *reqc, kMethod *mtd, int n, ...)
 {
 	kNode *expr = new_(Node, ns, OnGcStack);
+	KFieldSet(expr, expr->NodeList, new_(Array, 0, OnField));
 	KLIB kArray_Add(kctx, expr->NodeList, mtd);
 	va_list ap;
 	va_start(ap, n);
