@@ -175,7 +175,9 @@ static KMETHOD Json_hasKey(KonohaContext *kctx, KonohaStack *sfp)
 	kJson *jo = (kJson *)sfp[0].asObject;
 	struct JsonBuf jsonbuf = {};
 	kbool_t ret = PLATAPI RetrieveJsonKeyValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), &jsonbuf);
-	PLATAPI FreeJson(kctx, &jsonbuf);
+	/* TODO(ide)
+	 * In common json library, retrieved Json object is need not to free object. */
+	//PLATAPI FreeJson(kctx, &jsonbuf);
 	KReturnUnboxValue(ret);
 }
 
