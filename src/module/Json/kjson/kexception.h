@@ -55,6 +55,7 @@ typedef struct kexception_handler {
 static inline void kexception_handler_reset(kexception_handler_t *eh)
 {
     memset(eh->handler, 0, sizeof(jmp_buf));
+    eh->has_error = 0;
 }
 
 static inline void kexception_handler_init(kexception_handler_t *eh)

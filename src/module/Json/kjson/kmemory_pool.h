@@ -31,12 +31,14 @@
 #ifndef KJSON_MEMORY_H
 #define KJSON_MEMORY_H
 
+#define USE_MEMORYPOOL 1
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #ifndef unlikely
-#define unlikely(x)   __builtin_expect(!!(x), 0)
+#define unlikely(x) __builtin_expect(!!(x), 0)
 #endif
 
 #ifndef likely
@@ -80,6 +82,7 @@ typedef struct JSONMemoryPool {
 
 static inline void JSONMemoryPool_Init(JSONMemoryPool *pool)
 {
+#ifdef USE_MEMORYPOOL
     int i;
     ARRAY_init(PageData,  &pool->array, MAX_ALIGN_LOG2 - MIN_ALIGN_LOG2);
     ARRAY_init(BlockInfo, &pool->current_block, MAX_ALIGN_LOG2 - MIN_ALIGN_LOG2);
@@ -93,10 +96,13 @@ static inline void JSONMemoryPool_Init(JSONMemoryPool *pool)
         block.current = block.base;
         ARRAY_add(BlockInfo, &pool->current_block, &block);
     }
+#endif
 }
 
 static void *JSONMemoryPool_Alloc(JSONMemoryPool *pool, size_t n, bool *malloced)
 {
+    void *newblock;
+#ifdef USE_MEMORYPOOL
     assert(n > 0);
     if(unlikely(n > (1 << MAX_ALIGN_LOG2))) {
         *malloced = true;
@@ -112,15 +118,26 @@ static void *JSONMemoryPool_Alloc(JSONMemoryPool *pool, size_t n, bool *malloced
         return (void *) ptr;
     }
     PageData *page = ARRAY_get(PageData, &pool->array, index);
-    void *newblock = malloc(MEMORYBLOCK_SIZE);
+    newblock = malloc(MEMORYBLOCK_SIZE);
     block->base    = (char *)newblock;
     block->current = (char *)newblock + size;
     ARRAY_add(CharPtr, &page->block, block->base);
+#else
+    newblock = malloc(n);
+#endif
     return newblock;
+}
+
+static inline void JSONMemoryPool_Free(JSONMemoryPool *pool, void *ptr)
+{
+#ifndef USE_MEMORYPOOL
+    free(ptr);
+#endif
 }
 
 static inline void JSONMemoryPool_Delete(JSONMemoryPool *pool)
 {
+#ifdef USE_MEMORYPOOL
     PageData *p, *end;
     FOR_EACH_ARRAY(pool->array, p, end) {
         CharPtr *x, *e;
@@ -131,6 +148,7 @@ static inline void JSONMemoryPool_Delete(JSONMemoryPool *pool)
     }
     ARRAY_dispose(PageData, &pool->array);
     ARRAY_dispose(BlockInfo,  &pool->current_block);
+#endif
 }
 
 #ifdef __cplusplus

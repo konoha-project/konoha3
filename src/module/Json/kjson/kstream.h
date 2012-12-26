@@ -72,6 +72,7 @@ static input_stream *new_string_input_stream(input_stream *ins, const char *buf,
     const uint8_t *text = (const uint8_t *) buf;
     ins->pos = text;
     ins->end = text + len + 1;
+    kexception_handler_init(&ins->exception);
     kstack_init(&ins->stack);
     return ins;
 }
