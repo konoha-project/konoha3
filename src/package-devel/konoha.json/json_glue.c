@@ -149,7 +149,7 @@ static KMETHOD String_toJson(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 	KMakeTrace(trace, sfp);
-	PLATAPI ParseJson(kctx, &jo->jsonbuf, kString_text(sfp[0].asString), kString_size(sfp[0].asString), trace);
+	PLATAPI CreateJson(kctx, &jo->jsonbuf, KJSON_STRING, kString_text(sfp[0].asString));
 	KReturn(jo);
 }
 
