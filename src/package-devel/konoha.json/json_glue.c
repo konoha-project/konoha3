@@ -356,7 +356,7 @@ static kbool_t json_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		_Public|_Const|_Im, _F(Json_getInt),    KType_int,        KType_Json, KKMethodName_("getInt"),     1, KType_String, FN_k,
 		_Public|_Const|_Im, _F(Json_getString), KType_String,     KType_Json, KKMethodName_("getString"),  1, KType_String, FN_k,
 		_Public,            _F(Json_new),       KType_Json,       KType_Json, KKMethodName_("new"),        0,
-		_Public|_Static|_Const|_Im, _F(Json_Parse), KType_Json,   KType_Json, KKMethodName_("parse"),      1, KType_String, FN_v,
+		_Public|_Static|_Im, _F(Json_Parse), KType_Json,   KType_Json, KKMethodName_("parse"),      1, KType_String, FN_v,
 		_Public,            _F(Json_setJson),   KType_void,       KType_Json, KKMethodName_("set"),        2, KType_String, FN_k, KType_Json, FN_v,
 		_Public,            _F(Json_setJson_index),   KType_void,       KType_Json, KKMethodName_("set"),        2, KType_int,    FN_k, KType_Json, FN_v,
 		_Public,            _F(Json_AddJson),   KType_void,       KType_Json, KKMethodName_("add"),        1, KType_Json,   FN_v,
