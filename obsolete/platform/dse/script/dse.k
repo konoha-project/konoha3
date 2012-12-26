@@ -8,7 +8,7 @@ import("konoha.ns");  // konoha.const is obsolete
 import("konoha.string");
 import("konoha.bytes");
 import("konoha.file");
-import("konoha.date");
+import("js4.date");
 import("posix.process");
 import("dscript.subproc");
 

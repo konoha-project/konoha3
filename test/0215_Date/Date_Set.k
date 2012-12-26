@@ -1,6 +1,6 @@
 // written by okamoto
 
-import("konoha.date");
+import("js4.date");
 
 void test() {
 	Date d = new Date();

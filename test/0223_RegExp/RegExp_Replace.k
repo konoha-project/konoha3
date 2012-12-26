@@ -1,4 +1,4 @@
-import("konoha.regexp");
+import("js4.regexp");
 
 void test() {
 	assert("hoge1234".replace(/123/, "xxx") == "hogexxx4");

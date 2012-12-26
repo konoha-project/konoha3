@@ -1,5 +1,5 @@
 import("konoha.new");
-import("konoha.regexp");
+import("js4.regexp");
 
 void f() {
     RegExp a = new RegExp("abc", "");

@@ -1,7 +1,7 @@
 //written by Joseph
 
 import("konoha.new");
-import("konoha.regexp");
+import("js4.regexp");
 
 void test() {
 	RegExp myExp = new RegExp("Hello, world!");
