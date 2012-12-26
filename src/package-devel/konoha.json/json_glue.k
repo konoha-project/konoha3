@@ -43,10 +43,10 @@ import("konoha.float");
 }
 
 @Public void Json.add(float val){
-	this.add(Json.parse(val.toString());
+	this.add(Json.parse(val.toString()));
 }
 
 @Public void Json.add(boolean val){
-	this.add(Json.parse(val.toString());
+	this.add(Json.parse(val.toString()));
 }
 
