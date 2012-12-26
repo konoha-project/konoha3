@@ -1,6 +1,7 @@
 // written by ide
+// modified by chenji
 
-import("java2.string");
+import("dshell");
 
 int add(int n) {
     return n + 1;
@@ -19,9 +20,7 @@ void interpolation() {
 interpolation();
 
 void literal() {
-    //assert("abcd efgh".isNotNull());
     assert("abcd efgh".getlength() == 9);
-    //assert("${".isNotNull());
     assert("${".getlength() == 2);
 }
 

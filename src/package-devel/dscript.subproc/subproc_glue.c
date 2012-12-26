@@ -333,9 +333,10 @@ static int kSubProc_exec(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
 		if(!KonohaContext_Is(Interactive, kctx)) {
 			setsid(); // separate from tty
 			// prevent child process from getting tty again
-			if(fork()) {
-				exit(0);
-			}
+			// FIXME: if fork() is enabiled, cannot get exit status correctly.
+			//if(fork()) {
+			//	exit(0);
+			//}
 			ignoreSigchld(kctx, trace);
 		}
 //		if(!IS_NULL(sp->cwd)) { // TODO!!

@@ -442,14 +442,14 @@ static KMETHOD Stmt_TypeCheckExpr(KonohaContext *kctx, KonohaStack *sfp)
 				kclass, sfp[4].intValue));
 }
 
-////## Expr Stmt.newExpr(Token[] tokenList, int s, int e);
-//static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kStmt *stmt  = sfp[0].asStmt;
-//	kArray *tokenList  = sfp[1].asArray;
-//	int s = sfp[2].intValue, e = sfp[3].intValue;
-//	KReturn(SUGAR kStmt_ParseExpr(kctx, stmt, tokenList, s, e, NULL));
-//}
+//## Expr Stmt.newExpr(Token[] tokenList, int s, int e);
+static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kStmt *stmt  = sfp[0].asStmt;
+	kArray *tokenList  = sfp[1].asArray;
+	int s = sfp[2].intValue, e = sfp[3].intValue;
+	KReturn(SUGAR kStmt_ParseExpr(kctx, stmt, tokenList, s, e, NULL));
+}
 
 //## Expr Stmt.newUntypedCallStyleExpr(Token token);
 static KMETHOD Stmt_newUntypedCallStyleExpr1(KonohaContext *kctx, KonohaStack *sfp)
@@ -534,6 +534,38 @@ static KMETHOD Stmt_newUntypedCallStyleExpr7(KonohaContext *kctx, KonohaStack *s
 	KSyntax *syn = KSyntax_(Stmt_ns(stmt), KSymbol_ExprMethodCall);
 	KReturn(SUGAR new_UntypedCallStyleExpr(kctx, syn, 7, token, expr1, expr2, expr3, expr4, expr5, expr6));
 }
+
+//## Expr Stmt.newTypedCallExpr(Gamma gma, Object type, String methodName, Expr firstExpr);
+static KMETHOD Stmt_newTypedCallExpr1(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kStmt *stmt          = sfp[0].asStmt;
+	kGamma *gma          = sfp[1].asGamma;
+	KClass *type         = kObject_class(sfp[2].asObject);
+	ksymbol_t methodName = (ksymbol_t)sfp[3].intValue;
+	kExpr *firstExpr     = sfp[4].asExpr;
+	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), type, methodName, 0, KMethodMatch_CamelStyle);
+	if(method == NULL) {
+		KReturn(KNULL(Expr));
+	}
+	KReturn(SUGAR new_TypedCallExpr(kctx, stmt, gma, type, method, 1, firstExpr));
+}
+
+//## Expr Stmt.newTypedCallExpr(Gamma gma, cid typeId, String methodName, Expr firstExpr, Expr secondExpr);
+static KMETHOD Stmt_newTypedCallExpr2(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kStmt *stmt          = sfp[0].asStmt;
+	kGamma *gma          = sfp[1].asGamma;
+	KClass *type         = kObject_class(sfp[2].asObject);
+	ksymbol_t methodName = (ksymbol_t)sfp[3].intValue;
+	kExpr *firstExpr     = sfp[4].asExpr;
+	kExpr *secondExpr    = sfp[5].asExpr;
+	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), type, methodName, 1, KMethodMatch_CamelStyle);
+	if(method == NULL) {
+		KReturn(KNULL(Expr));
+	}
+	KReturn(SUGAR new_TypedCallExpr(kctx, stmt, gma, type, method, 2, firstExpr, secondExpr));
+}
+
 
 //## void Stmt.setType(int type);
 static KMETHOD Stmt_setType(KonohaContext *kctx, KonohaStack *sfp)
@@ -644,7 +676,7 @@ static void desugar_defineStmtMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Stmt_opEQ), KType_boolean, KType_Stmt, KKMethodName_("=="), 1, KType_Stmt, KFieldName_("other"),
 		_Public, _F(Stmt_TypeCheckExpr), KType_boolean, KType_Stmt, KKMethodName_("TypeCheckExpr"), 4, TP_kw, TP_gma, TP_type, TP_pol,
-//		_Public, _F(Stmt_newExpr), KType_Expr, KType_Stmt, KKMethodName_("newExpr"), 3, TP_tokens, TP_begin, TP_end,
+		_Public, _F(Stmt_newExpr), KType_Expr, KType_Stmt, KKMethodName_("newExpr"), 3, TP_tokens, TP_begin, TP_end,
 		_Public, _F(Stmt_setType), KType_void, KType_Stmt, KKMethodName_("setType"), 1, TP_type,
 		_Public, _F(Stmt_LookupStmt), KType_Stmt, KType_Stmt, KKMethodName_("lookupStmt"), 1, TP_kw,
 //////		_Public, _F(kStmt_Message2arsedExpr), KType_Expr, KType_Stmt, KKMethodName_("parseExpr"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
@@ -655,7 +687,8 @@ static void desugar_defineStmtMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 		_Public, _F(Stmt_newUntypedCallStyleExpr5), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 5, TP_token, TP_ArgExpr(1), TP_ArgExpr(2), TP_ArgExpr(3), TP_ArgExpr(4),
 		_Public, _F(Stmt_newUntypedCallStyleExpr6), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 6, TP_token, TP_ArgExpr(1), TP_ArgExpr(2), TP_ArgExpr(3), TP_ArgExpr(4), TP_ArgExpr(5),
 		_Public, _F(Stmt_newUntypedCallStyleExpr7), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 7, TP_token, TP_ArgExpr(1), TP_ArgExpr(2), TP_ArgExpr(3), TP_ArgExpr(4), TP_ArgExpr(5), TP_ArgExpr(6),
-////		_Public, _F(Stmt_rightJoinExpr), KType_Expr, KType_Stmt, KKMethodName_("rightJoinExpr"), 4, KType_Expr, FN_expr, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
+		_Public, _F(Stmt_newTypedCallExpr1), KType_Expr, KType_Stmt, KKMethodName_("newTypedCallExpr"), 4, TP_gma, TP_type, KType_Symbol, KFieldName_("methodName"), KType_Expr, KFieldName_("firstExpr"),
+		_Public, _F(Stmt_newTypedCallExpr2), KType_Expr, KType_Stmt, KKMethodName_("newTypedCallExpr"), 5, TP_gma, TP_type, KType_Symbol, KFieldName_("methodName"), KType_Expr, KFieldName_("firstExpr"), KType_Expr, KFieldName_("secondExpr"),
 		_Public, _F(Stmt_setObject), KType_void, KType_Stmt, KKMethodName_("setExpr"), 2, KType_Symbol, FN_key, KType_Expr, KFieldName_("expr"),
 		_Public, _F(Stmt_setObject), KType_void, KType_Stmt, KKMethodName_("setBlock"), 2, KType_Symbol, FN_key, KType_Block, KFieldName_("block"),
 		_Public, _F(Stmt_getObject), KType_Block, KType_Stmt, KKMethodName_("getBlock"), 1, KType_Symbol, FN_key,
@@ -669,22 +702,7 @@ static void desugar_defineStmtMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 }
-////## Expr Stmt.newTypedCallExpr(Gamma gma, cid typeId, String methodName, Expr firstExpr, Expr secondExpr);
-//static KMETHOD Stmt_newTypedCallExpr2(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kStmt *stmt          = sfp[0].asStmt;
-//	kGamma *gma          = sfp[1].asGamma;
-//	ktypeattr_t cid          = (ktypeattr_t)sfp[2].intValue;
-//	ksymbol_t methodName = (ksymbol_t)sfp[3].intValue;
-//	kExpr *firstExpr     = sfp[4].asExpr;
-//	kExpr *secondExpr    = sfp[5].asExpr;
-//	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), cid, methodName, 2, KMethodMatch_CamelStyle);
-//	if(method == NULL) {
-//		KReturn(KNULL(Expr));
-//	}
-//	KReturn(SUGAR new_TypedCallExpr(kctx, stmt, gma, cid, method, 2, firstExpr, secondExpr));
-//}
-//
+
 ////## Expr Stmt.rightJoinExpr(Expr expr, Token[] tokenList, int currentIdx, int endIdx);
 //static KMETHOD Stmt_rightJoinExpr(KonohaContext *kctx, KonohaStack *sfp)
 //{
@@ -710,24 +728,6 @@ static void desugar_defineStmtMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 // --------------------------------------------------------------------------
 /* Expr */
 
-////## Token Expr.getTermToken();
-//static KMETHOD Expr_getTermToken(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kExpr *expr = sfp[0].asExpr;
-//	KReturn(expr->TermToken);
-//}
-//
-////## Expr Expr.setConstValue(Object value);
-//static KMETHOD Expr_setConstValue(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kExpr *expr = sfp[0].asExpr;
-//	KClass *ct = kObject_class(sfp[1].asObject);
-//	if(KClass_Is(UnboxType, (ct)) {
-//		KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, ct->typeId, sfp[1].unboxValue));
-//	}
-//	KReturn(SUGAR kExpr_SetConstValue(kctx, expr, ct->typeId, sfp[1].asObject));
-//}
-//
 ////## Expr Expr.setVariable(Gamma gma, int build, cid typeid, int index);
 //static KMETHOD Expr_setVariable(KonohaContext *kctx, KonohaStack *sfp)
 //{
@@ -759,6 +759,25 @@ static KMETHOD Expr_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(new_ConstValueExpr(kctx, ct, sfp[1].asObject));
 }
 
+//## Token Expr.getTermToken();
+static KMETHOD Expr_getTermToken(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kExpr *expr = sfp[0].asExpr;
+	KReturn(expr->TermToken);
+}
+
+//## Expr Expr.setConstValue(Object value);
+static KMETHOD Expr_setConstValue(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kExprVar *expr = (kExprVar *)sfp[0].asExpr;
+	KClass *ct = kObject_class(sfp[1].asObject);
+	if(KClass_Is(UnboxType, (ct))) {
+		KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, ct->typeId, sfp[1].unboxValue));
+	}
+	KReturn(SUGAR kExpr_SetConstValue(kctx, expr, ct, sfp[1].asObject));
+}
+
+
 ////## void Expr.setType(int build, cid typeid);
 //static KMETHOD Expr_setType(KonohaContext *kctx, KonohaStack *sfp)
 //{
@@ -775,6 +794,8 @@ static void desugar_defineExprMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Expr_new), KType_Expr, KType_Expr, KKMethodName_("new"), 1, KType_Object, KFieldName_("value"),
+		_Public, _F(Expr_getTermToken), KType_Token, KType_Expr, KKMethodName_("getTermToken"), 0,
+		_Public, _F(Expr_setConstValue), KType_Expr, KType_Expr, KKMethodName_("setConstValue"), 1, KType_Object, KFieldName_("value") | KTypeAttr_Coercion,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -940,16 +961,12 @@ static void desugar_defineExprMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 //		_Public, _F(Stmt_newUntypedCallStyleExpr4), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 4, KType_Token, KFieldName_("token"), KType_Expr, KFieldName_("expr1"), KType_Expr, KFieldName_("expr2"), KType_Expr, KFieldName_("expr3"),
 //		_Public, _F(Stmt_newUntypedCallStyleExpr5), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 5, KType_Token, KFieldName_("token"), KType_Expr, KFieldName_("expr1"), KType_Expr, KFieldName_("expr2"), KType_Expr, KFieldName_("expr3"), KType_Expr, KFieldName_("expr4"),
 //		_Public, _F(Stmt_newUntypedCallStyleExpr6), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 6, KType_Token, KFieldName_("token"), KType_Expr, KFieldName_("expr1"), KType_Expr, KFieldName_("expr2"), KType_Expr, KFieldName_("expr3"), KType_Expr, KFieldName_("expr4"), KType_Expr, KFieldName_("expr5"),
-//		_Public, _F(Stmt_newTypedCallExpr1), KType_Expr, KType_Stmt, KKMethodName_("newTypedCallExpr"), 4, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_Symbol, KFieldName_("methodName"), KType_Expr, KFieldName_("firstExpr"),
-//		_Public, _F(Stmt_newTypedCallExpr2), KType_Expr, KType_Stmt, KKMethodName_("newTypedCallExpr"), 5, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_Symbol, KFieldName_("methodName"), KType_Expr, KFieldName_("firstExpr"), KType_Expr, KFieldName_("secondExpr"),
 //		_Public, _F(Stmt_rightJoinExpr), KType_Expr, KType_Stmt, KKMethodName_("rightJoinExpr"), 4, KType_Expr, FN_expr, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
 //		_Public, _F(Stmt_getTokenList), KType_TokenArray, KType_Stmt, KKMethodName_("getTokenList"), 2, KType_Symbol, FN_key, KType_TokenArray, FN_defval,
 //		_Public, _F(Stmt_declType), KType_boolean, KType_Stmt, KKMethodName_("declType"), 3, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_Expr, KFieldName_("declExpr"),
 //		_Public, _F(Stmt_newBlock), KType_Block, KType_Stmt, KKMethodName_("newBlock"), 1, KType_String, KFieldName_("macro"),
 //
 //		/* Expr */
-//		_Public, _F(Expr_getTermToken), KType_Token, KType_Expr, KKMethodName_("getTermToken"), 0,
-//		_Public, _F(Expr_setConstValue), KType_Expr, KType_Expr, KKMethodName_("setConstValue"), 1, KType_Object, KFieldName_("value") | FN_COERCION,
 //		_Public, _F(Expr_setVariable), KType_Expr, KType_Expr, KKMethodName_("setVariable"), 4, KType_Gamma, FN_gma, KType_int, FN_buildid, KType_cid, FN_typeid, KType_int, KFieldName_("index"),
 //		_Public, _F(Expr_newVariableExpr), KType_Expr, KType_Expr, KKMethodName_("new"), 4, KType_Gamma, FN_gma, KType_int, FN_buildid, KType_cid, FN_typeid, KType_int, KFieldName_("index"),
 //		_Public, _F(Expr_new), KType_Expr, KType_Expr, KKMethodName_("new"), 1, KType_Object, KFieldName_("value") | FN_COERCION,
