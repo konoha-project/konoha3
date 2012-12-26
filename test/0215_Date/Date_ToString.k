@@ -1,8 +1,8 @@
 // written by okamoto
 
 import("java2.string");
-import("konoha.regexp");
-import("konoha.date");
+import("js4.regexp");
+import("js4.date");
 
 void test() {
 	Date d = new Date();

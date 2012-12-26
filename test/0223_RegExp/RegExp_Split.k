@@ -1,5 +1,5 @@
 import("js4.array");
-import("konoha.regexp");
+import("js4.regexp");
 
 void test() {
 	Array[String] r1 = "aa/bb/cc/dd/ee".split(/\//);

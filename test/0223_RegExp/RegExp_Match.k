@@ -1,5 +1,5 @@
 import("js4.array");
-import("konoha.regexp");
+import("js4.regexp");
 
 void f() {
     Array[String] r1 = "hoge1234".match(/123/);

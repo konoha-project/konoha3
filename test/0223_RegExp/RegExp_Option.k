@@ -1,4 +1,4 @@
-import("konoha.regexp");
+import("js4.regexp");
 
 void test() {
 	assert("hello".search(/[ABCDE]/i) == 1);

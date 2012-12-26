@@ -6,4 +6,4 @@ endif(NOT HAVE_PCRE_H)
 
 FIND_PACKAGE_EXTRA_LIBRARY(pcre)
 set(PACKAGE_SOURCE_CODE regexp_glue.c)
-add_konoha_package(konoha.regexp)
+add_konoha_package(js4.regexp)

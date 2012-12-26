@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("konoha.regexp");
+import("js4.regexp");
 
 void test() {
 	String str = "こんにちは、世界!";

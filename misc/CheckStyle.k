@@ -1,4 +1,4 @@
-import("konoha.regexp");
+import("js4.regexp");
 import("konoha.new");
 import("js4.string");
 import("konoha.foreach");

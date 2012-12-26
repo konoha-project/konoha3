@@ -723,11 +723,10 @@ static kbool_t regexp_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 
 KDEFINE_PACKAGE *regexp_Init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("konoha", "1.0"),
-		.PackupNameSpace    = regexp_PackupNameSpace,
-		.ExportNameSpace   = regexp_ExportNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSetPackageName(d, "js4", K_VERSION);
+	d.PackupNameSpace = regexp_PackupNameSpace;
+	d.ExportNameSpace = regexp_ExportNameSpace;
 	return &d;
 }
 
