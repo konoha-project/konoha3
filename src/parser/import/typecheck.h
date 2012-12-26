@@ -205,7 +205,7 @@ static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t sy
 static kNode* TypeCheckNodeList(KonohaContext *kctx, kArray *nodeList, size_t n, kGamma *gma, KClass *reqc)
 {
 	kNode *stmt = nodeList->NodeItems[n];
-	//if(stmt->node == KNode_Done) return stmt;
+	if(stmt->attrTypeId != KType_var) return stmt;
 	if(!kNode_IsError(stmt)) {
 		stmt = TypeNode(kctx, stmt->syn, stmt, gma, reqc);
 		KFieldSet(nodeList, nodeList->NodeItems[n], stmt);

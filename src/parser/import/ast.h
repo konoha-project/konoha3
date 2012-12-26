@@ -172,7 +172,9 @@ static kNode* ParseNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int
 {
 	if(beginIdx[0] < endIdx) {
 		int opIdx = FindOperator(kctx, node, tokenList, beginIdx[0], endIdx);
-		beginIdx[0] = ParseSyntaxNode(kctx, tokenList->TokenItems[opIdx]->resolvedSyntaxInfo, node, 0, tokenList, beginIdx[0], opIdx, endIdx);
+		kToken *keyOperator = tokenList->TokenItems[opIdx];
+		kNode_Termnize(kctx, node, keyOperator); // set operator
+		beginIdx[0] = ParseSyntaxNode(kctx, keyOperator->resolvedSyntaxInfo, node, 0, tokenList, beginIdx[0], opIdx, endIdx);
 		return node;
 	}
 	else {
