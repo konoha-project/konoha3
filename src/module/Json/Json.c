@@ -35,7 +35,8 @@ extern "C" {
 struct JsonBuf {
 	uint64_t json_i;
 };
-#define AsJSON(JSONBUF) (toJSON(jsonbuf->json_i))
+
+#define AsJSON(JSONBUF) (toJSON(JSONBUF->json_i))
 
 static kbool_t IsJsonType(struct JsonBuf *jsonbuf, KJSONTYPE type)
 {
