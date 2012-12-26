@@ -199,6 +199,12 @@ static void visitIBinary(Visitor *visitor, INode *Node)
 	VISIT_2(Node, Tag, Inst->LHS, Inst->RHS);
 }
 
+static void visitIPHI(Visitor *visitor, INode *Node)
+{
+	IPHI *Inst = (IPHI *) Node;
+	VISIT_3(Node, 0, Inst->Val, (INode *) Inst->LHS, (INode *) Inst->RHS);
+}
+
 typedef void (*VisitFn)(Visitor *visitor, INode *Node);
 static const VisitFn Fn[] = {
 	visitBlock,

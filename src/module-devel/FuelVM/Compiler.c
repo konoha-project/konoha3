@@ -295,66 +295,103 @@ static bool FuelVM_VisitIfStmt(KonohaContext *kctx, KBuilder *builder, kStmt *st
 	Block *ThenBB  = CreateBlock(BLD(builder));
 	Block *ElseBB  = CreateBlock(BLD(builder));
 	Block *MergeBB = CreateBlock(BLD(builder));
+	ARRAY(INodePtr) ThenTable;
+	ARRAY(INodePtr) ElseTable;
 	/* if */
 	SUGAR VisitExpr(kctx, builder, stmt, expr);
 	CreateBranch(BLD(builder), FuelVM_getExpression(builder), ThenBB, ElseBB);
-	/* then */
-	IRBuilder_setBlock(BLD(builder), ThenBB);
-	SUGAR VisitBlock(kctx, builder, Stmt_getFirstBlock(kctx, stmt));
-	if(!Block_HasTerminatorInst(BLD(builder)->Current)) {
-		IRBuilder_JumpTo(BLD(builder), MergeBB);
+	{ /* then */
+		FuelVM_RecordNodeCreationStart(BLD(builder), &ThenTable);
+		IRBuilder_setBlock(BLD(builder), ThenBB);
+		SUGAR VisitBlock(kctx, builder, Stmt_getFirstBlock(kctx, stmt));
+		if(!Block_HasTerminatorInst(BLD(builder)->Current)) {
+			IRBuilder_JumpTo(BLD(builder), MergeBB);
+		}
+		FuelVM_RecordNodeCreationStop(BLD(builder), &ThenTable);
 	}
-	/* else */
-	IRBuilder_setBlock(BLD(builder), ElseBB);
-	SUGAR VisitBlock(kctx, builder, Stmt_getElseBlock(kctx, stmt));
-	if(!Block_HasTerminatorInst(BLD(builder)->Current)) {
-		IRBuilder_JumpTo(BLD(builder), MergeBB);
+	{ /* else */
+		FuelVM_RecordNodeCreationStart(BLD(builder), &ElseTable);
+		IRBuilder_setBlock(BLD(builder), ElseBB);
+		SUGAR VisitBlock(kctx, builder, Stmt_getElseBlock(kctx, stmt));
+		if(!Block_HasTerminatorInst(BLD(builder)->Current)) {
+			IRBuilder_JumpTo(BLD(builder), MergeBB);
+		}
+		FuelVM_RecordNodeCreationStop(BLD(builder), &ElseTable);
 	}
 	/* endif */
 	IRBuilder_setBlock(BLD(builder), MergeBB);
+	FuelVM_InsertPHI(BLD(builder), MergeBB, &ThenTable, &ElseTable);
 	return true;
 }
 
 static bool FuelVM_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
-	Block *HeaderBB = CreateBlock(BLD(builder));
-	Block *BodyBB   = CreateBlock(BLD(builder));
-	Block *ItrBB    = CreateBlock(BLD(builder));
-	Block *MergeBB  = CreateBlock(BLD(builder));
-	/* Head  : if(COND) { goto Body } else {goto Merge }
-	 * Body  :   Body1
-	 *           Body2
-	 *           goto Itr
-	 * Itr   :   Body3
-	 *           goto Header
-	 * Merge : ...
-	 */
+	Block *HeadBB  = CreateBlock(BLD(builder));
+	Block *BodyBB  = CreateBlock(BLD(builder));
+	Block *ItrBB   = CreateBlock(BLD(builder));
+	Block *MergeBB = CreateBlock(BLD(builder));
+	ARRAY(INodePtr) HeadTable;
+	ARRAY(INodePtr) BodyTable;
 
 	kStmt_SetLabelBlock(kctx, stmt, KSymbol_("continue"), ItrBB);
 	kStmt_SetLabelBlock(kctx, stmt, KSymbol_("break"),    MergeBB);
 
-	if(kStmt_Is(RedoLoop, stmt)) {
-		IRBuilder_JumpTo(BLD(builder), BodyBB);
+	if(!kStmt_Is(RedoLoop, stmt)) {
+	/* [WhileStmt]
+	 * "Head" is Join Node
+	 * Head  : if(COND) { goto Body } else {goto Merge }
+	 * Body  : Body
+	 *         ...
+	 *         goto Itr
+	 * Itr   : Body3
+	 *         goto Head
+	 * Merge : ...
+	 */
+		IRBuilder_JumpTo(BLD(builder), HeadBB);
 	} else {
-		IRBuilder_JumpTo(BLD(builder), HeaderBB);
+		/* [LoopStmt] (aka do-while loop)
+		 * "Body" is Join Node
+		 * Body  : Body
+		 *         ...
+		 *         goto Itr
+		 * Itr   : Body3
+		 *         goto Head
+		 * Head  : if(COND) { goto Body } else {goto Merge }
+		 * Merge : ...
+		 */
+		IRBuilder_JumpTo(BLD(builder), BodyBB);
 	}
 
-	IRBuilder_setBlock(BLD(builder), HeaderBB);
-	SUGAR VisitExpr(kctx, builder, stmt, Stmt_getFirstExpr(kctx, stmt));
-	CreateBranch(BLD(builder), FuelVM_getExpression(builder), BodyBB, MergeBB);
-
-	IRBuilder_setBlock(BLD(builder), BodyBB);
-	SUGAR VisitBlock(kctx, builder, Stmt_getFirstBlock(kctx, stmt));
-	IRBuilder_JumpTo(BLD(builder), ItrBB);
-
-	IRBuilder_setBlock(BLD(builder), ItrBB);
-	kBlock *itrBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_("Iterator"), NULL);
-	if(itrBlock != NULL) {
-		SUGAR VisitBlock(kctx, builder, itrBlock);
+	{ /* Head */
+		IRBuilder_setBlock(BLD(builder), HeadBB);
+		FuelVM_RecordNodeCreationStart(BLD(builder), &HeadTable);
+		SUGAR VisitExpr(kctx, builder, stmt, Stmt_getFirstExpr(kctx, stmt));
+		CreateBranch(BLD(builder), FuelVM_getExpression(builder), BodyBB, MergeBB);
+		FuelVM_RecordNodeCreationStop(BLD(builder),  &HeadTable);
 	}
 
-	IRBuilder_JumpTo(BLD(builder), HeaderBB);
+	{ /* Body */
+		IRBuilder_setBlock(BLD(builder), BodyBB);
+		FuelVM_RecordNodeCreationStart(BLD(builder), &BodyTable);
+		SUGAR VisitBlock(kctx, builder, Stmt_getFirstBlock(kctx, stmt));
+		IRBuilder_JumpTo(BLD(builder), ItrBB);
+
+		/* Itr */
+		kBlock *itrBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KSymbol_("Iterator"), NULL);
+		IRBuilder_setBlock(BLD(builder), ItrBB);
+		if(itrBlock != NULL) {
+			SUGAR VisitBlock(kctx, builder, itrBlock);
+		}
+		IRBuilder_JumpTo(BLD(builder), HeadBB);
+		FuelVM_RecordNodeCreationStop(BLD(builder),  &BodyTable);
+	}
+
 	IRBuilder_setBlock(BLD(builder), MergeBB);
+	if(!kStmt_Is(RedoLoop, stmt)) {
+		FuelVM_InsertPHI(BLD(builder), HeadBB,  &HeadTable, &BodyTable);
+	} else {
+		FuelVM_InsertPHI(BLD(builder), MergeBB, &BodyTable, &HeadTable);
+	}
 	return true;
 }
 

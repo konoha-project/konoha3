@@ -30,6 +30,7 @@ extern "C" {
 
 DEF_ARRAY_OP_NOPOINTER(BlockPtr);
 DEF_ARRAY_OP_NOPOINTER(INodePtr);
+DEF_ARRAY_OP_NOPOINTER(INodeArrayPtr);
 
 /* Node API */
 
@@ -172,6 +173,7 @@ static IUpdate *newIUpdate(FuelIRBuilder *builder, IField *LHS, INode *RHS)
 	IUpdate *Node = CREATE_NODE(IUpdate);
 	Node->LHS = LHS;
 	Node->RHS = RHS;
+	INode_setType((INode *) Node, LHS->base.Type);
 	return (Node);
 }
 
@@ -303,6 +305,26 @@ static void disposeIBinary(INode *Node)
 	DISPOSE_NODE(Inst->RHS);
 }
 
+static IPHI *newIPHI(FuelIRBuilder *builder, IUpdate *LHS, IUpdate *RHS)
+{
+	IPHI *Node = CREATE_NODE(IPHI);
+	assert(LHS->LHS == RHS->LHS);
+	Node->Val = (INode *) LHS->LHS;
+	Node->LHS = LHS;
+	Node->RHS = RHS;
+	assert(LHS->base.Type == RHS->base.Type);
+	INode_setType((INode *) Node, LHS->base.Type);
+	return (Node);
+}
+
+static void disposeIPHI(INode *Node)
+{
+	IPHI *Inst = (IPHI *) Node;
+	DISPOSE_NODE(Inst->Val);
+	DISPOSE_NODE(Inst->LHS);
+	DISPOSE_NODE(Inst->RHS);
+}
+
 /* Builder API */
 static void *IRBuilder_AllocNode(FuelIRBuilder *builder, size_t Size)
 {
@@ -316,6 +338,9 @@ static INode *newINode(struct FuelIRBuilder *builder, enum IRType Kind)
 	Node->Id   = builder->LastNodeId++;
 	Node->Marked = 0;
 	Node->Unused = 0;
+	if(Kind != TYPE_IR_Block) {
+		INode_setParent(Node, (INode *) builder->Current);
+	}
 	INode_setRange(Node, INTPTR_MIN, INTPTR_MAX);
 	return (Node);
 }
@@ -400,10 +425,12 @@ void IRBuilder_Init(FuelIRBuilder *builder, KonohaContext *kctx)
 	builder->API = &API;
 	builder->API->Fn_Init(builder);
 	builder->Context = kctx;
+	ARRAY_init(INodeArrayPtr, &builder->VariableTable, 0);
 }
 
 void IRBuilder_Exit(FuelIRBuilder *builder)
 {
+	ARRAY_dispose(INodeArrayPtr, &builder->VariableTable);
 	builder->API->Fn_Exit(builder);
 }
 
@@ -428,6 +455,59 @@ INode *IRBuilder_FindLocalVarByHash(FuelIRBuilder *builder, enum TypeId Type, ui
 		}
 	}
 	return 0;
+}
+
+/* ------------------------------------------------------------------------- */
+/* PHI API */
+
+void FuelVM_RecordNodeCreationStart(FuelIRBuilder *builder, ARRAY(INodePtr) *Table)
+{
+	ARRAY_init(INodePtr, Table, 4);
+	ARRAY_add(INodeArrayPtr, &builder->VariableTable, Table);
+}
+
+void FuelVM_RecordNodeCreationStop(FuelIRBuilder *builder, ARRAY(INodePtr) *Table)
+{
+	ARRAY(INodePtr) **x;
+	unsigned idx;
+	FOR_EACH_ARRAY_(builder->VariableTable, x, idx) {
+		if(*x == Table) {
+			ARRAY_RemoveAt(INodeArrayPtr, &builder->VariableTable, idx);
+			break;
+		}
+	}
+}
+
+void FuelVM_InsertPHI(FuelIRBuilder *builder, Block *BB, ARRAY(INodePtr) *Table1, ARRAY(INodePtr) *Table2)
+{
+
+	Block *OldBlock = builder->Current;
+	IRBuilder_setBlock(builder, BB);
+	INodePtr *x, *e;
+	FOR_EACH_ARRAY(*Table1, x, e) {
+		INodePtr *Inst, *End;
+		FOR_EACH_ARRAY(*Table2, Inst, End) {
+			IUpdate *Node1 = (IUpdate *) *x;
+			IUpdate *Node2 = (IUpdate *) *Inst;
+			if(NODE_ID(Node1->LHS) == NODE_ID(Node2->LHS)) {
+				CreatePHI(builder, *x, *Inst);
+			}
+		}
+	}
+	ARRAY_dispose(INodePtr, Table1);
+	ARRAY_dispose(INodePtr, Table2);
+	IRBuilder_setBlock(builder, OldBlock);
+}
+
+void UpdateInst_Record(FuelIRBuilder *builder, IUpdate *Node)
+{
+	if(Node->LHS->Op == LocalScope) {
+		ARRAY(INodePtr) **x, **e;
+		FOR_EACH_ARRAY(builder->VariableTable, x, e) {
+			ARRAY(INodePtr) *List = *x;
+			ARRAY_add(INodePtr, List, ToINode(Node));
+		}
+	}
 }
 
 #ifdef __cplusplus

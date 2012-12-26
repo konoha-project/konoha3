@@ -37,6 +37,7 @@ static void ReplaceValue(INode **NodePtr, INode *oldVal, INode *newVal)
 {
 	if((*NodePtr)->Id == oldVal->Id) {
 		*NodePtr = newVal;
+		newVal->ParentId = oldVal->ParentId;
 	}
 }
 
@@ -124,6 +125,17 @@ static void ReplaceOldValueWith(INode *Node, INode *oldVal, INode *newVal)
 			ReplaceValue(&(Inst->RHS), oldVal, newVal);
 			break;
 		}
+		CASE(IPHI) {
+			IPHI *Inst  = (IPHI *) Node;
+			ReplaceValue(&Inst->Val, oldVal, newVal);
+			if(Inst->LHS) {
+				ReplaceValue((INode **)&Inst->LHS, oldVal, newVal);
+			}
+			if(Inst->RHS) {
+				ReplaceValue((INode **)&Inst->RHS, oldVal, newVal);
+			}
+			break;
+		}
 		default:
 			assert(0 && "unreachable");
 #undef CASE
@@ -132,8 +144,9 @@ static void ReplaceOldValueWith(INode *Node, INode *oldVal, INode *newVal)
 
 static void IRBuilder_ReplaceValueWith(FuelIRBuilder *builder, INode *oldVal, INode *newVal)
 {
-	oldVal->Unused = 1;
 	BlockPtr *x, *e;
+
+	oldVal->Unused = 1;
 	FOR_EACH_ARRAY(builder->Blocks, x, e) {
 		INodePtr *Inst, *End;
 		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
@@ -430,8 +443,23 @@ void IRBuilder_RemoveTrivialCondBranch(FuelIRBuilder *builder)
 						TargetBB  = Br->ElseBB;
 						RemovedBB = Br->ThenBB;
 					}
+					RemovedBB->base.Unused = 1;
+					INodePtr *Inst, *End;
+					FOR_EACH_ARRAY(RemovedBB->insts, Inst, End) {
+						(*Inst)->Unused = 1;
+					}
 					*NodePtr = (INode *) builder->API->newJump(builder, TargetBB);
 				}
+			}
+		}
+	}
+	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+		INodePtr *Inst, *End;
+		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
+			IPHI *PHI;
+			if((PHI = CHECK_KIND(*Inst, IPHI)) != 0) {
+				if(PHI->LHS && PHI->LHS->base.Unused) { PHI->LHS = 0; }
+				if(PHI->RHS && PHI->RHS->base.Unused) { PHI->RHS = 0; }
 			}
 		}
 	}

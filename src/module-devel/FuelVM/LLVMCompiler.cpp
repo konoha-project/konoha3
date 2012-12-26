@@ -38,7 +38,7 @@ typedef struct LLVMIRBuilder {
 	Value    *Vsfp;
 	Value    *VsfpRef;
 	Value    *Vstack_top;
-	std::vector<Value *> *ValueTable;
+	FuelIRBuilder *FuelBuilder;
 };
 
 static Module *GlobalModule = 0;
@@ -123,7 +123,6 @@ static Value *EmitGlobalVariable(KonohaContext *kctx, Type *Ty, kMethod *mtd)
 	return G;
 }
 
-
 static Value *EmitConstant(IRBuilder<> *builder, kObject *obj)
 {
 	Constant *V = static_cast<Constant*>(EmitConstant(builder, (void *) obj));
@@ -136,31 +135,68 @@ static Value *EmitConstant(IRBuilder<> *builder, kMethod *mtd)
 	return builder->CreateBitCast(V, GetLLVMType(ID_PtrkMethodVar));
 }
 
-static void SetValue(LLVMIRBuilder *writer, INode *Node, Value *Val)
+static Value *GetValueFromParent(Block *BB, unsigned Id)
 {
-	unsigned Idx = NODE_ID(Node);
-	std::vector<Value *> *table = writer->ValueTable;
-	table->reserve(Idx+1);
-	(*table)[Idx] = Val;
+	std::vector<Value *> *table = reinterpret_cast<std::vector<Value *> *>(BB->Table);
+	table->reserve(Id+1);
+	Value *Val = table->at(Id);
+	return Val;
+}
+
+static Value *GetValueFromParent(Block *BB, INode *Node)
+{
+	return GetValueFromParent(BB, NODE_ID(Node));
 }
 
 static Value *GetValue(LLVMIRBuilder *writer, INode *Node)
 {
+	Block *BB = writer->Current;
+	while(true) {
+		if(Value *Val = GetValueFromParent(BB, Node)) {
+			return Val;
+		}
+		if(ARRAY_size(BB->preds) != 1)
+			break;
+		BB = *ARRAY_n(BB->preds, 0);
+	}
+	return NULL;
+}
+
+static void SetValueToBlock(Block *BB, INode *Node, Value *Val)
+{
 	unsigned Idx = NODE_ID(Node);
-	std::vector<Value *> *table = writer->ValueTable;
-	Value *Val = table->at(Idx);
-	assert(Val != 0 && "undefined value");
-	return Val;
+	std::vector<Value *> *table = reinterpret_cast<std::vector<Value *> *>(BB->Table);
+	if(Node->Unused == 1 && CHECK_KIND(Node, IUpdate)) {
+		if(Value *OldVal = GetValueFromParent(BB, NODE_ID(Node))) {
+			OldVal->replaceAllUsesWith(Val);
+		}
+	}
+	table->reserve(Idx+1);
+	(*table)[Idx] = Val;
+}
+
+static void SetValue(LLVMIRBuilder *writer, INode *Node, Value *Val)
+{
+	Block *BB = writer->Current;
+	SetValueToBlock(BB, Node, Val);
 }
 
 static BasicBlock *GetBlock(LLVMIRBuilder *writer, Block *Target)
 {
-	return (BasicBlock *) GetValue(writer, ToINode(Target));
+	BlockPtr *EntryBBPtr = ARRAY_n(writer->FuelBuilder->Blocks, 0);
+	return (BasicBlock *) GetValueFromParent(*EntryBBPtr, ToINode(Target));
+}
+
+static BasicBlock *GetParent(LLVMIRBuilder *writer, INode *Node)
+{
+	BlockPtr *EntryBBPtr = ARRAY_n(writer->FuelBuilder->Blocks, 0);
+	return (BasicBlock *) GetValueFromParent(*EntryBBPtr, Node->ParentId);
 }
 
 static void SetBlock(LLVMIRBuilder *writer, Block *Target, BasicBlock *BB)
 {
-	SetValue(writer, ToINode(Target), (Value *) BB);
+	BlockPtr *EntryBBPtr = ARRAY_n(writer->FuelBuilder->Blocks, 0);
+	SetValueToBlock(*EntryBBPtr, ToINode(Target), (Value *) BB);
 }
 
 static void SetConstant(LLVMIRBuilder *writer, INode *Node, SValue Val)
@@ -484,11 +520,22 @@ static void EmitNewInst(LLVMIRBuilder *writer, INew *Node)
 static void EmitUnaryInst(LLVMIRBuilder *writer, IUnary *Node)
 {
 	Value *Val = GetValue(writer, Node->Node);
-#define VSET(WRITER, NODE, FUNC) SetValue(WRITER, (INode *)NODE, (WRITER)->builder->FUNC)
-
 	enum TypeId Type = Node->base.Type;
+	IRBuilder<> *builder = writer->builder;
+#define VSET(WRITER, NODE, FUNC) SetValue(WRITER, (INode *)NODE, (WRITER)->builder->FUNC)
 #define CASE(X, OP) case X: VSET(writer, Node, Create##OP(Val, #X));return
-	if(Type == TYPE_int) {
+	if(Type == TYPE_boolean) {
+		if(Val->getType() != builder->getInt1Ty()) {
+			Val = builder->CreateTrunc(Val, builder->getInt1Ty());
+		}
+		switch(Node->Op) {
+			CASE(Not, Not);
+			default:
+				assert(0 && "unreachable");
+				break;
+		}
+	}
+	else if(Type == TYPE_int) {
 		switch(Node->Op) {
 			CASE(Not, Not); CASE(Neg, Neg);
 			default:
@@ -510,11 +557,18 @@ static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 {
 	Value *LHS = GetValue(writer, Node->LHS);
 	Value *RHS = GetValue(writer, Node->RHS);
+	IRBuilder<> *builder = writer->builder;
 #define VSET(WRITER, NODE, FUNC) SetValue(WRITER, (INode *)NODE, (WRITER)->builder->FUNC)
 
 	enum TypeId Type = Node->LHS->Type;
 #define CASE(X, OP) case X: VSET(writer, Node, Create##OP(LHS, RHS, #X));return
 	if(Type == TYPE_boolean) {
+		if(LHS->getType() != builder->getInt1Ty()) {
+			LHS = builder->CreateTrunc(LHS, builder->getInt1Ty());
+		}
+		if(RHS->getType() != builder->getInt1Ty()) {
+			RHS = builder->CreateTrunc(RHS, builder->getInt1Ty());
+		}
 		switch(Node->Op) {
 			CASE(Eq, ICmpEQ); CASE(Nq, ICmpNE);
 			default:
@@ -547,6 +601,7 @@ static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 
 static void EmitThrowInst(LLVMIRBuilder *writer, IThrow *Node)
 {
+	(void)writer;(void)Node;
 	assert(0 && "TODO");
 }
 
@@ -618,6 +673,8 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 					break;
 				case LocalScope: {
 					Value *NewVal = GetValue(writer, Inst->RHS);
+					asm volatile("int3");
+					SetValue(writer, Node, NewVal);
 					SetValue(writer, (INode *)LHS, NewVal);
 					break;
 				}
@@ -658,7 +715,24 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 			break;
 		}
 		CASE(IBinary) {
+				asm volatile("int3");
 			EmitBinaryInst(writer, (IBinary *) Node);
+			break;
+		}
+		CASE(IPHI) {
+			IPHI  *Inst = (IPHI *) Node;
+			IRBuilder<> *builder = writer->builder;
+			INode *Left  = (INode *) Inst->LHS;
+			INode *Right = (INode *) Inst->RHS;
+			Value *LHS = 0, *RHS = 0;
+			if(Left && Right) {
+				LHS = GetValue(writer, Left);
+				RHS = GetValue(writer, Right);
+				PHINode *PHI = builder->CreatePHI(LHS->getType(), 2, "PHI");
+				PHI->addIncoming(LHS, GetParent(writer, Left));
+				PHI->addIncoming(RHS, GetParent(writer, Right));
+				SetValueToBlock(writer->Current, Inst->Val,  PHI);
+			}
 			break;
 		}
 		default:
@@ -708,7 +782,7 @@ static void LLVMIRBuilder_visitValue(Visitor *visitor, INode *Node, const char *
 					return;
 				}
 				case LocalScope:
-					SetValue(writer, Node, 0);
+					//SetValue(writer, Node, 0);
 					break;
 			}
 			return;
@@ -794,22 +868,45 @@ static Function *EmitFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Func
 	return FWrap;
 }
 
-static void EmitPrologue(LLVMIRBuilder *writer, FuelIRBuilder *builder, IMethod *Mtd)
+static void SetLocalVariable(Block *BB, INode *Node)
 {
-	BasicBlock *EntryBB;
-	writer->Func = EmitInternalFunction(Mtd->Context, GlobalModule, Mtd->Method);
-	EntryBB = BasicBlock::Create(getGlobalContext(), "EntryBlock", writer->Func);
-	writer->builder = new IRBuilder<>(EntryBB);
+	Type *Ty = ToLLVMType(Node->Type);
+	Value *Val = new Argument(Ty);
+	SetValueToBlock(BB, Node, Val);
+	Node->Unused = 1;
+}
 
-	SetBlock(writer, Mtd->EntryBlock, EntryBB);
+static void PrepareLocalVariable(FuelIRBuilder *builder)
+{
 	BlockPtr *x, *e;
 	FOR_EACH_ARRAY(builder->Blocks, x, e) {
-		if(x == ARRAY_n(builder->Blocks, 0)) {
-			continue;
+		Block *BB = *x;
+		INodePtr *Ptr, *End;
+		FOR_EACH_ARRAY(BB->insts, Ptr, End) {
+			if(CHECK_KIND(*Ptr, IUpdate)) {
+				SetLocalVariable(BB, *Ptr);
+			}
+			else if(IPHI *Inst = CHECK_KIND(*Ptr, IPHI)) {
+				SetLocalVariable(BB, (INode *) Inst->LHS);
+				SetLocalVariable(BB, (INode *) Inst->RHS);
+			}
 		}
+	}
+}
+
+static void EmitPrologue(LLVMIRBuilder *writer, FuelIRBuilder *builder, IMethod *Mtd)
+{
+	BlockPtr *x, *e;
+	writer->Func = EmitInternalFunction(Mtd->Context, GlobalModule, Mtd->Method);
+	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+		(*x)->Table = (void *)(new std::vector<Value *>(builder->LastNodeId));
 		SetBlock(writer, *x, BasicBlock::Create(getGlobalContext(), "BB", writer->Func));
 	}
 
+	PrepareLocalVariable(builder);
+
+	BasicBlock *EntryBB = GetBlock(writer, Mtd->EntryBlock);
+	writer->builder = new IRBuilder<>(EntryBB);
 	writer->builder->SetInsertPoint(EntryBB);
 	Value *Vsfp = GetStackTop(writer);
 	PrepareCallStack(writer, Vsfp);
@@ -829,14 +926,11 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 		LLVMIRBuilder_visitList,
 		LLVMIRBuilder_visitValue},
 		Mtd->Context,
-		0, 0, 0, 0, 0, 0, 0
+		0, 0, 0, 0, 0, 0, builder
 	};
 
-	std::vector<Value *> ValueTable(builder->LastNodeId);
-
-	writer.ValueTable = &ValueTable;
-
 	EmitPrologue(&writer, builder, Mtd);
+
 	BlockPtr *x, *e;
 	FOR_EACH_ARRAY(builder->Blocks, x, e) {
 		writer.Current = *x;
@@ -858,6 +952,7 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 	pm.add(createIndVarSimplifyPass());       // Canonicalize indvars
 	pm.add(createLoopDeletionPass());         // Delete dead loops
 
+	writer.Func->dump();
 	pm.doInitialization();
 	pm.run(*Wrapper);
 	pm.run(*writer.Func);

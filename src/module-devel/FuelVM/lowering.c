@@ -137,10 +137,26 @@ static void IRBuilder_SimplifyCFG(FuelIRBuilder *builder)
 			(*x)->insts.size -= 1;
 			FOR_EACH_ARRAY(Target->insts, Inst, End) {
 				ARRAY_add(INodePtr, &(*x)->insts, *Inst);
+				INode_setParent(*Inst, (INode *) *x);
 			}
 			ARRAY_clear(Target->insts);
 			ARRAY_clear(Target->succs);
 			ARRAY_clear((*x)->succs);
+		}
+	}
+}
+
+static void IRBuilder_AnnotateUpdateInst(FuelIRBuilder *builder)
+{
+	BlockPtr *x, *e;
+	FOR_EACH_ARRAY(builder->Blocks, x, e) {
+		INodePtr *Inst, *End;
+		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
+			IPHI *PHI;
+			if((PHI = CHECK_KIND(*Inst, IPHI)) != 0) {
+				if(PHI->LHS) { PHI->LHS->State = MayBePHI; }
+				if(PHI->RHS) { PHI->RHS->State = MayBePHI; }
+			}
 		}
 	}
 }
@@ -179,7 +195,6 @@ static void IRBuilder_FlattenICond(FuelIRBuilder *builder)
 		}
 	}
 }
-
 
 static void CopyIfBlockHasSingleInst(Block *BB, INode *LastInst, Block *Block)
 {
@@ -266,105 +281,117 @@ static void TraceNode1(INode *Node)
 		case IR_TYPE_IConstant:
 		case IR_TYPE_IArgument:
 			break;
-			CASE(IField) {
-				IField *Inst = (IField *) Node;
-				switch(Inst->Op) {
-					case GlobalScope:
-					case EnvScope:
-					case FieldScope:
-						INode_SetMarked(Node);
-						INode_SetMarked(Inst->Node);
-						break;
-					case LocalScope:
-						break;
-				}
-				break;
+		CASE(IField) {
+			IField *Inst = (IField *) Node;
+			switch(Inst->Op) {
+				case GlobalScope:
+				case EnvScope:
+				case FieldScope:
+					INode_SetMarked(Node);
+					INode_SetMarked(Inst->Node);
+					break;
+				case LocalScope:
+					break;
 			}
-			CASE(ICond) {
-				ICond *Inst = (ICond *) Node;
-				INodePtr *x, *e;
-				FOR_EACH_ARRAY(Inst->Insts, x, e) {
+			break;
+		}
+		CASE(ICond) {
+			ICond *Inst = (ICond *) Node;
+			INodePtr *x, *e;
+			FOR_EACH_ARRAY(Inst->Insts, x, e) {
+				INode_SetMarked(*x);
+			}
+			break;
+		}
+		CASE(INew) {
+			INode_SetMarked(Node);
+			break;
+		}
+		CASE(ICall) {
+			ICall *Inst = (ICall *) Node;
+			INode_SetMarked(Node);
+			INodePtr *x;
+			unsigned i = 0;
+			FOR_EACH_ARRAY_(Inst->Params, x, i) {
+				if(i != 0) {
 					INode_SetMarked(*x);
 				}
-				break;
 			}
-			CASE(INew) {
-				INode_SetMarked(Node);
-				break;
+			break;
+		}
+		CASE(IFunction) {
+			IFunction *Inst = (IFunction *) Node;
+			INodePtr *x, *e;
+			FOR_EACH_ARRAY(Inst->Env, x, e) {
+				INode_SetMarked(*x);
 			}
-			CASE(ICall) {
-				ICall *Inst = (ICall *) Node;
-				INode_SetMarked(Node);
-				INodePtr *x;
-				unsigned i = 0;
-				FOR_EACH_ARRAY_(Inst->Params, x, i) {
-					if(i != 0) {
-						INode_SetMarked(*x);
-					}
-				}
-				break;
+			break;
+		}
+		CASE(IUpdate) {
+			/* IUpdate Inst is Marked at TraceNode2() */
+			break;
+		}
+		CASE(IBranch) {
+			INode_SetMarked(Node);
+			INode_SetMarked(((IBranch *) Node)->Cond);
+			break;
+		}
+		CASE(ITest) {
+			INode_SetMarked(Node);
+			INode_SetMarked((INode *)((ITest *) Node)->Value);
+			assert(0 && "TODO");
+			break;
+		}
+		CASE(IReturn) {
+			IReturn *Inst = (IReturn *) Node;
+			INode_SetMarked(Node);
+			if(Inst->Inst) {
+				INode_SetMarked(Inst->Inst);
 			}
-			CASE(IFunction) {
-				IFunction *Inst = (IFunction *) Node;
-				INodePtr *x, *e;
-				FOR_EACH_ARRAY(Inst->Env, x, e) {
-					INode_SetMarked(*x);
-				}
-				break;
+			break;
+		}
+		CASE(IJump) {
+			INode_SetMarked(Node);
+			break;
+		}
+		CASE(IThrow) {
+			IThrow *Inst = (IThrow *) Node;
+			INode_SetMarked(Node);
+			INode_SetMarked((INode *) Inst->Val);
+			break;
+		}
+		CASE(ITry) {
+			INode_SetMarked(Node);
+			assert(0 && "TODO");
+			break;
+		}
+		CASE(IYield) {
+			INode_SetMarked(Node);
+			INode_SetMarked(((IYield *) Node)->Value);
+			break;
+		}
+		CASE(IUnary) {
+			INode_SetMarked(((IUnary *) Node)->Node);
+			break;
+		}
+		CASE(IBinary) {
+			IBinary *Inst  = (IBinary *) Node;
+			INode_SetMarked(Inst->LHS);
+			INode_SetMarked(Inst->RHS);
+			break;
+		}
+		CASE(IPHI) {
+			IPHI *Inst  = (IPHI *) Node;
+			INode_SetMarked(Node);
+			INode_SetMarked((INode *) Inst->Val);
+			if(Inst->LHS) {
+				INode_SetMarked((INode *) Inst->LHS->LHS);
 			}
-			CASE(IUpdate) {
-				/* IUpdate Inst is Marked at TraceNode2() */
-				break;
+			if(Inst->RHS) {
+				INode_SetMarked((INode *) Inst->RHS->LHS);
 			}
-			CASE(IBranch) {
-				INode_SetMarked(Node);
-				INode_SetMarked(((IBranch *) Node)->Cond);
-				break;
-			}
-			CASE(ITest) {
-				INode_SetMarked(Node);
-				INode_SetMarked((INode *)((ITest *) Node)->Value);
-				assert(0 && "TODO");
-				break;
-			}
-			CASE(IReturn) {
-				IReturn *Inst = (IReturn *) Node;
-				INode_SetMarked(Node);
-				if(Inst->Inst) {
-					INode_SetMarked(Inst->Inst);
-				}
-				break;
-			}
-			CASE(IJump) {
-				INode_SetMarked(Node);
-				break;
-			}
-			CASE(IThrow) {
-				IThrow *Inst = (IThrow *) Node;
-				INode_SetMarked(Node);
-				INode_SetMarked((INode *) Inst->Val);
-				break;
-			}
-			CASE(ITry) {
-				INode_SetMarked(Node);
-				assert(0 && "TODO");
-				break;
-			}
-			CASE(IYield) {
-				INode_SetMarked(Node);
-				INode_SetMarked(((IYield *) Node)->Value);
-				break;
-			}
-			CASE(IUnary) {
-				INode_SetMarked(((IUnary *) Node)->Node);
-				break;
-			}
-			CASE(IBinary) {
-				IBinary *Inst  = (IBinary *) Node;
-				INode_SetMarked(Inst->LHS);
-				INode_SetMarked(Inst->RHS);
-				break;
-			}
+			break;
+		}
 		default:
 			assert(0 && "unreachable");
 #undef CASE
@@ -404,6 +431,7 @@ static void IRBuilder_RemoveUnusedVariable(FuelIRBuilder *builder)
 	BlockPtr *x, *e;
 	FOR_EACH_ARRAY(builder->Blocks, x, e) {
 		INodePtr *Inst, *End;
+		INode_SetMarked((INode *)(*x));
 		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
 			TraceNode1(*Inst);
 		}
@@ -1152,6 +1180,7 @@ ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option)
 	IRBuilder_FlattenICond(builder);
 	Flag = IRBuilder_Optimize(builder, BB, Flag);
 
+	IRBuilder_AnnotateUpdateInst(builder);
 	IRBuilder_RemoveRedundantConstants(builder);
 	IRBuilder_RemoveUnusedVariable(builder);
 
