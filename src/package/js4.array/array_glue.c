@@ -469,7 +469,7 @@ static KMETHOD Array_join1(KonohaContext *kctx, KonohaStack *sfp)
 
 static void kArray_slice(KonohaContext *kctx, kArray *toArray, kArray *fromArray, int begin, int end)
 {
-	DBG_ASSERT(begin <= end);
+	DBG_ASSERT(begin < end);
 	if(kArray_Is(UnboxData, fromArray)) {
 		for(; begin < end; begin++) {
 			UnboxArray_Add(kctx, toArray, fromArray->unboxItems[begin]);
@@ -485,10 +485,13 @@ static void kArray_slice(KonohaContext *kctx, kArray *toArray, kArray *fromArray
 //## Array Array.slice(int begin);
 static KMETHOD Array_slice0(KonohaContext *kctx, KonohaStack *sfp)
 {
-	INIT_GCSTACK();
 	kArray *a = sfp[0].asArray;
 	size_t asize = kArray_size(a);
 	uintptr_t begin = sfp[1].intValue;
+	if(begin >= asize) {
+		KReturn(KLIB Knull(kctx, KGetReturnType(sfp)));
+	}
+	INIT_GCSTACK();
 	KCheckIndex(begin, asize);
 	kArray *returnValue = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), asize - begin);
 	kArray_slice(kctx, returnValue, a, begin, asize);
@@ -500,14 +503,14 @@ static KMETHOD Array_slice1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	uintptr_t begin = sfp[1].intValue;
 	uintptr_t end = sfp[2].intValue;
-	if(begin > end) {
+	if(begin >= end) {
 		KReturn(KLIB Knull(kctx, KGetReturnType(sfp)));
 	}
 	INIT_GCSTACK();
 	kArray *a = sfp[0].asArray;
 	size_t asize = kArray_size(a);
 	KCheckIndex(begin, asize);
-	KCheckIndex(end, asize);
+	KCheckIndex(end - 1, asize);
 	kArray *returnValue = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), end - begin);
 	kArray_slice(kctx, returnValue, a, begin, end);
 	KReturnWith(returnValue, RESET_GCSTACK());
@@ -662,12 +665,12 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		_JS|_Public|_Im,    _F(Array_concat), KType_ArrayT0, KType_Array, KKMethodName_("concat"), 1, KType_ArrayT0, KFieldName_("a1"),
 		_JS|_Public|_Im,    _F(Array_join0), KType_String, KType_Array, KKMethodName_("join"), 0,
 		_JS|_Public|_Im,    _F(Array_join1), KType_String, KType_Array, KKMethodName_("join"), 1, KType_String, KFieldName_("separator"),
-		_JS|_Public,        _F(Array_slice0), KType_ArrayT0, KType_Array, KKMethodName_("slice"), 1, KType_int, KFieldName_("begin"),
-		_JS|_Public,        _F(Array_slice1), KType_ArrayT0, KType_Array, KKMethodName_("slice"), 2, KType_int, KFieldName_("begin"), KType_int, KFieldName_("end"),
-		_JS|_Public,        _F(Array_indexOf0), KType_int, KType_Array, KKMethodName_("indexOf"), 1, KType_0, KFieldName_("value"),
-		_JS|_Public,        _F(Array_indexOf1), KType_int, KType_Array, KKMethodName_("indexOf"), 2, KType_0, KFieldName_("value"), KType_int, KFieldName_("fromIndex"),
-		_JS|_Public,        _F(Array_lastIndexOf0), KType_int, KType_Array, KKMethodName_("lastIndexOf"), 1, KType_0, KFieldName_("value"),
-		_JS|_Public,        _F(Array_lastIndexOf1), KType_int, KType_Array, KKMethodName_("lastIndexOf"), 2, KType_0, KFieldName_("value"), KType_int, KFieldName_("fromIndex"),
+		_JS|_Public|_Im,    _F(Array_slice0), KType_ArrayT0, KType_Array, KKMethodName_("slice"), 1, KType_int, KFieldName_("begin"),
+		_JS|_Public|_Im,    _F(Array_slice1), KType_ArrayT0, KType_Array, KKMethodName_("slice"), 2, KType_int, KFieldName_("begin"), KType_int, KFieldName_("end"),
+		_JS|_Public|_Im,    _F(Array_indexOf0), KType_int, KType_Array, KKMethodName_("indexOf"), 1, KType_0, KFieldName_("value"),
+		_JS|_Public|_Im,    _F(Array_indexOf1), KType_int, KType_Array, KKMethodName_("indexOf"), 2, KType_0, KFieldName_("value"), KType_int, KFieldName_("fromIndex"),
+		_JS|_Public|_Im,    _F(Array_lastIndexOf0), KType_int, KType_Array, KKMethodName_("lastIndexOf"), 1, KType_0, KFieldName_("value"),
+		_JS|_Public|_Im,    _F(Array_lastIndexOf1), KType_int, KType_Array, KKMethodName_("lastIndexOf"), 2, KType_0, KFieldName_("value"), KType_int, KFieldName_("fromIndex"),
 
 		_Public|_Im,    _F(Array_RemoveAt), KType_0,   KType_Array, KKMethodName_("removeAt"), 1, KType_int, KFieldName_("index"),
 		_Public|_Const, _F(Array_getSize), KType_int, KType_Array, KKMethodName_("getSize"), 0,

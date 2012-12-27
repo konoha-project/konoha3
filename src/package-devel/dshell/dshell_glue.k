@@ -36,20 +36,10 @@ import("js4.string");
 import("dscript.subproc");
 import("konoha.desugar");
 
-@Public String FILE.readAll() {
-	String ret = "";
-	String line = this.readLine();
-	while(line != null) {
-		ret = ret + line + "\n";
-		line = this.readLine();
-	}
-	if(ret == "") {
-		return ret;
-	}
-	return ret.substr(0, ret.getlength() - 1);
-}
-
 String[] concatTokenList(Token[] tokenList) {
+	if(defined(DEBUG)) {
+		System.p(tokenList);
+	}
 	int i = 0;
 	String[] ret = [];
 	String buf = "";
@@ -99,37 +89,17 @@ int indexOf(String[] a, String s, int startIdx) {
 	return -1;
 }
 
-String expandDollar(String arg) {
-	if(arg.startsWith("${") && arg.endsWith("}")) {
-		return arg.substring(2, arg.getlength() -1) + ".toString()";
-	}
-	else if(arg.startsWith("$")) {
-		return arg.substr(1) + ".toString()";
-	}
-	return "\"" + arg + "\"";
-}
-
 String expandArgs(String[] args) {
 	String ret = "[";
 	int i = 0;
 	while(i < args.getlength() - 1) {
-		ret = ret + expandDollar(args[i]) + ", ";
+		ret = ret + "\"" + args[i] + "\", ";
 		i = i + 1;
 	}
 	if(args.getlength() >= 1) {
-		ret = ret + expandDollar(args[args.getlength() - 1]);
+		ret = ret + "\"" + args[args.getlength() - 1] + "\"";
 	}
 	ret = ret + "]";
-	return ret;
-}
-
-String[] slice(String[] a, int s, int length) {
-	String[] ret = [];
-	int i = 0;
-	while(i < length) {
-		ret.add(a[s + i]);
-		i = i + 1;
-	}
 	return ret;
 }
 
@@ -195,6 +165,7 @@ String getPipeString(String prevname, String varname, String[] args, int startin
 			ret = ret + varname + ".bg();\n";
 		}
 	}
+	ret = ret + "global.lastExitStatus = " + varname + ".getStatus();\n";
 	return ret;
 }
 
@@ -239,7 +210,7 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 			stdout.println(args[startindex]);
 		}
 		if(argsize > 0) {
-			ret = ret + varname + ".setArgumentList(" + expandArgs(slice(args, startindex + 1, argsize)) + ");\n";
+			ret = ret + varname + ".setArgumentList(" + expandArgs(args.slice(startindex + 1, startindex + 1 + argsize)) + ");\n";
 		}
 		if(index >= 0) {
 			ret = ret + getPipeString(prevname, varname, args, startindex, argsize, enableStdout, index);
@@ -266,6 +237,7 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 		System.p(ret);
 	}
 	if(!enableStdout) {
+		ret = ret + "global.lastExitStatus = " + varname + ".getStatus(); ";
 		ret = ret + "return " + varname + ".communicate(\"\")[0]; }";
 	}
 	return ret;
@@ -320,7 +292,7 @@ Expr expressionAsk(Stmt stmt, Token[] tokenList, int beginIdx, int operatorIdx, 
 
 int getLastIndex(String source) {
 	int i = 0;
-	String endSymbol = " )}";
+	String endSymbol = " )}\n";
 	while(i < source.getlength()) {
 		if(endSymbol.indexOf(source[i]) >= 0) {
 			return i;
@@ -383,7 +355,13 @@ Expr expressionDollarVariable(Stmt stmt, Token[] tokenList, int beginIdx, int op
 	else if(text.startsWith("${") && text.endsWith("}")) {
 		text = text.substring(2, text.getlength() - 1);
 	}
-	else if(text.startsWith("$")) {
+	else if(text == "$?") {
+		Token methodToken = new Token("getExitStatus");
+		Expr classExpr = new Expr(NameSpace);
+		Expr expr = stmt.newUntypedCallStyleExpr(methodToken, classExpr);
+		return expr;
+	}
+	else {
 		text = text.substring(1, text.getlength());
 	}
 	Token methodToken = new Token("getenv");
@@ -393,10 +371,56 @@ Expr expressionDollarVariable(Stmt stmt, Token[] tokenList, int beginIdx, int op
 	return expr;
 }
 
+Expr typeCheckStringInterpolation(Stmt stmt, Expr expr, Gamma gma, int typeid) {
+	Token tk = expr.getTermToken();
+	String text = tk.getText();
+	String beginText = String.fromCharCode(36) + String.fromCharCode(123)/*${*/;
+	String endText = String.fromCharCode(125)/*}*/;
+	String openBrace = String.fromCharCode(40)/*(*/;
+	String closeBrace = String.fromCharCode(41)/*)*/;
+	String concatText = String.fromCharCode(43)/*+*/;
+	int start = text.indexOf(beginText);
+	int end = -1;
+	if(start < 0) {
+		return null;
+	}
+	expr = new Expr(String);
+	while(true) {
+		start = text.indexOf(beginText);
+		if(start < 0) {
+			break;
+		}
+		end = text.indexOf(endText);
+		if(end < 0) {
+			break;
+		}
+		if(end - start > 2) {
+			String buf = text.substring(start + 2, end);
+			Token[] tokens = Preprocess(buf);
+			Expr newexpr = stmt.newExpr(tokens, 0, tokens.getlength());
+			if(start > 0) {
+				Expr first = new Expr(text.substring(0, start));
+				expr = stmt.newTypedCallExpr(gma, String, concatText, expr, first);
+			}
+			expr = stmt.newTypedCallExpr(gma, String, concatText, expr, newexpr);
+			if(expr.isNull()) {
+				return expr;
+			}
+		}
+		text = text.substr(end + 1);
+	}
+	if(start < 0 || end < 0) {
+		Expr rest = new Expr(text);
+		expr = stmt.newTypedCallExpr(gma, String, concatText, expr, rest);
+	}
+	return expr;
+}
+
 AddPatternMatch("$Shell", patternMatchShell);
 AddStatement("$Shell", statementShell);
 AddTopLevelStatement("$Shell", statementShell);
 AddExpression("ask", expressionAsk);
+AddTypeCheck("$Text", typeCheckStringInterpolation);
 
 syntax $Shell $Token*
 
