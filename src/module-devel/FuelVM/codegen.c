@@ -309,8 +309,13 @@ static void disposeIBinary(INode *Node)
 static IPHI *newIPHI(FuelIRBuilder *builder, IUpdate *LHS, IUpdate *RHS)
 {
 	IPHI *Node = CREATE_NODE(IPHI);
-	assert(LHS->LHS == RHS->LHS);
-	Node->Val = (INode *) LHS->LHS;
+	assert(CHECK_KIND(LHS, IField) || CHECK_KIND(LHS, IUpdate));
+	assert(CHECK_KIND(RHS, IField) || CHECK_KIND(RHS, IUpdate));
+	if(CHECK_KIND(LHS, IField)) {
+	Node->Val = (INode *) LHS;
+	} else {
+		Node->Val = (INode *) LHS->LHS;
+	}
 	Node->LHS = LHS;
 	Node->RHS = RHS;
 	assert(LHS->base.Type == RHS->base.Type);
@@ -342,7 +347,6 @@ static INode *newINode(struct FuelIRBuilder *builder, enum IRType Kind)
 	if(Kind != TYPE_IR_Block) {
 		INode_setParent(Node, (INode *) builder->Current);
 	}
-	INode_setRange(Node, INTPTR_MIN, INTPTR_MAX);
 	return (Node);
 }
 
@@ -463,7 +467,7 @@ INode *IRBuilder_FindLocalVarByHash(FuelIRBuilder *builder, enum TypeId Type, ui
 
 void FuelVM_RecordNodeCreationStart(FuelIRBuilder *builder, ARRAY(INodePtr) *Table)
 {
-	ARRAY_init(INodePtr, Table, 4);
+	ARRAY_init(INodePtr, Table, 0);
 	ARRAY_add(INodeArrayPtr, &builder->VariableTable, Table);
 }
 
@@ -479,24 +483,59 @@ void FuelVM_RecordNodeCreationStop(FuelIRBuilder *builder, ARRAY(INodePtr) *Tabl
 	}
 }
 
-void FuelVM_InsertPHI(FuelIRBuilder *builder, Block *BB, ARRAY(INodePtr) *Table1, ARRAY(INodePtr) *Table2)
+void FuelVM_InsertPHI(FuelIRBuilder *builder, Block *Parent, Block *BB, ARRAY(INodePtr) *Table1, ARRAY(INodePtr) *Table2, enum PhiInsertionPolicy policy)
 {
-
 	Block *OldBlock = builder->Current;
 	IRBuilder_setBlock(builder, BB);
+	unsigned InstSize = ARRAY_size(BB->insts);
 	INodePtr *x, *e;
+
+	ARRAY(INodePtr) Tmp;
+	ARRAY_init(INodePtr, &Tmp, 0);
 	FOR_EACH_ARRAY(*Table1, x, e) {
 		INodePtr *Inst, *End;
 		FOR_EACH_ARRAY(*Table2, Inst, End) {
 			IUpdate *Node1 = (IUpdate *) *x;
 			IUpdate *Node2 = (IUpdate *) *Inst;
 			if(NODE_ID(Node1->LHS) == NODE_ID(Node2->LHS)) {
-				CreatePHI(builder, *x, *Inst);
+				if(policy == INSERT_FORCE) {
+					Node1->base.Marked = 1;
+					Node2->base.Marked = 1;
+				}
+				ARRAY_add(INodePtr, &Tmp, (INode *) builder->API->newPHI(builder, Node1, Node2));
 			}
 		}
 	}
+
+	if(policy == INSERT_FORCE) {
+		FOR_EACH_ARRAY(*Table1, x, e) {
+			IUpdate *Node = (IUpdate *) *x;
+			if(Node->base.Marked == 0) {
+				ARRAY_add(INodePtr, &Tmp, (INode *) builder->API->newPHI(builder, Node, (IUpdate *)Node->LHS));
+			}
+			Node->base.Marked = 0;
+		}
+
+		FOR_EACH_ARRAY(*Table2, x, e) {
+			IUpdate *Node = (IUpdate *) *x;
+			if(Node->base.Marked == 0) {
+				ARRAY_add(INodePtr, &Tmp, (INode *) builder->API->newPHI(builder, Node, (IUpdate *)Node->LHS));
+			}
+			Node->base.Marked = 0;
+		}
+	}
+
 	ARRAY_dispose(INodePtr, Table1);
 	ARRAY_dispose(INodePtr, Table2);
+
+	if(ARRAY_size(Tmp) != 0) {
+		ARRAY(INodePtr) *list = &(BB)->insts;
+		ARRAY_ensureSize(INodePtr, &Tmp, ARRAY_size(BB->insts) + ARRAY_size(Tmp));
+		memcpy(Tmp.list + ARRAY_size(Tmp), list->list, sizeof(INodePtr)*InstSize);
+		memcpy(list->list, Tmp.list, sizeof(INodePtr)*(InstSize + ARRAY_size(Tmp)));
+		list->size += ARRAY_size(Tmp);
+		ARRAY_dispose(INodePtr, &Tmp);
+	}
 	IRBuilder_setBlock(builder, OldBlock);
 }
 

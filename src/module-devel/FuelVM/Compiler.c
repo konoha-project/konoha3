@@ -295,6 +295,7 @@ static bool FuelVM_VisitIfStmt(KonohaContext *kctx, KBuilder *builder, kStmt *st
 	Block *ThenBB  = CreateBlock(BLD(builder));
 	Block *ElseBB  = CreateBlock(BLD(builder));
 	Block *MergeBB = CreateBlock(BLD(builder));
+	Block *Parent = BLD(builder)->Current;
 	ARRAY(INodePtr) ThenTable;
 	ARRAY(INodePtr) ElseTable;
 	/* if */
@@ -320,7 +321,7 @@ static bool FuelVM_VisitIfStmt(KonohaContext *kctx, KBuilder *builder, kStmt *st
 	}
 	/* endif */
 	IRBuilder_setBlock(BLD(builder), MergeBB);
-	FuelVM_InsertPHI(BLD(builder), MergeBB, &ThenTable, &ElseTable);
+	FuelVM_InsertPHI(BLD(builder), Parent, MergeBB, &ThenTable, &ElseTable, INSERT_DEFAULT);
 	return true;
 }
 
@@ -336,6 +337,7 @@ static bool FuelVM_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt *
 	kStmt_SetLabelBlock(kctx, stmt, KSymbol_("continue"), ItrBB);
 	kStmt_SetLabelBlock(kctx, stmt, KSymbol_("break"),    MergeBB);
 
+	Block *Parent = BLD(builder)->Current;
 	if(!kStmt_Is(RedoLoop, stmt)) {
 	/* [WhileStmt]
 	 * "Head" is Join Node
@@ -388,9 +390,9 @@ static bool FuelVM_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt *
 
 	IRBuilder_setBlock(BLD(builder), MergeBB);
 	if(!kStmt_Is(RedoLoop, stmt)) {
-		FuelVM_InsertPHI(BLD(builder), HeadBB,  &HeadTable, &BodyTable);
+		FuelVM_InsertPHI(BLD(builder), Parent, HeadBB,  &BodyTable, &HeadTable, INSERT_FORCE);
 	} else {
-		FuelVM_InsertPHI(BLD(builder), MergeBB, &BodyTable, &HeadTable);
+		FuelVM_InsertPHI(BLD(builder), Parent, MergeBB, &BodyTable, &HeadTable, INSERT_FORCE);
 	}
 	return true;
 }

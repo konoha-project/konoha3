@@ -156,8 +156,9 @@ static Value *GetValueFromParent(Block *BB, unsigned Id, bool CheckUndef = true)
 	ValueInfo &Info = table->at(Id);
 
 	bool IsUndef = Info.second();
-	if (CheckUndef && IsUndef)
+	if (CheckUndef && IsUndef) {
 		return 0;
+	}
 	return Info.first();
 }
 
@@ -551,6 +552,7 @@ static void EmitNewInst(LLVMIRBuilder *writer, INew *Node)
 static void EmitUnaryInst(LLVMIRBuilder *writer, IUnary *Node)
 {
 	Value *Val = GetValue(writer, Node->Node);
+	assert(Val != 0);
 	enum TypeId Type = Node->base.Type;
 	IRBuilder<> *builder = writer->builder;
 #define VSET(WRITER, NODE, FUNC) SetValue(WRITER, (INode *)NODE, (WRITER)->builder->FUNC)
@@ -588,6 +590,7 @@ static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 {
 	Value *LHS = GetValue(writer, Node->LHS);
 	Value *RHS = GetValue(writer, Node->RHS);
+	assert(LHS != 0 && RHS != 0);
 	IRBuilder<> *builder = writer->builder;
 #define VSET(WRITER, NODE, FUNC) SetValue(WRITER, (INode *)NODE, (WRITER)->builder->FUNC)
 
@@ -755,6 +758,7 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 			INode *Right = (INode *) Inst->RHS;
 			Value *LHS = 0, *RHS = 0;
 			if(Left && Right) {
+				asm volatile("int3");
 				LHS = GetValue(writer, Left, Left->ParentId);
 				RHS = GetValue(writer, Right, Right->ParentId);
 				assert(LHS != 0 && RHS != 0);
@@ -942,6 +946,18 @@ static void EmitPrologue(LLVMIRBuilder *writer, FuelIRBuilder *builder, IMethod 
 	PrepareCallStack(writer, Vsfp);
 }
 
+static void visitIBlock(LLVMIRBuilder *writer, Block *block)
+{
+	writer->Current = block;
+	block->base.Evaled = 1;
+	BasicBlock *BB = GetBlock(writer, block);
+	writer->builder->SetInsertPoint(BB);
+	INodePtr *x, *e;
+	FOR_EACH_ARRAY(block->insts, x, e) {
+		visitINode(&writer->visitor, *x);
+	}
+}
+
 } /* namespace FuelVM */
 
 extern "C" {
@@ -963,13 +979,7 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 
 	BlockPtr *x, *e;
 	FOR_EACH_ARRAY(builder->Blocks, x, e) {
-		writer.Current = *x;
-		BasicBlock *BB = GetBlock(&writer, *x);
-		writer.builder->SetInsertPoint(BB);
-		INodePtr *Inst, *End;
-		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
-			visitINode(&writer.visitor, *Inst);
-		}
+		visitIBlock(&writer, *x);
 	}
 	Function *Wrapper = EmitFunction(Mtd->Context, GlobalModule, Mtd->Method, writer.Func);
 

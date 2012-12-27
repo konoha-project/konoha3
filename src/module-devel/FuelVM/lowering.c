@@ -385,10 +385,18 @@ static void TraceNode1(INode *Node)
 			INode_SetMarked(Node);
 			INode_SetMarked((INode *) Inst->Val);
 			if(Inst->LHS) {
-				INode_SetMarked((INode *) Inst->LHS->LHS);
+				if(CHECK_KIND(Inst->LHS, IUpdate)) {
+					INode_SetMarked((INode *) Inst->LHS->LHS);
+				} else {
+					INode_SetMarked((INode *) Inst->LHS);
+				}
 			}
 			if(Inst->RHS) {
-				INode_SetMarked((INode *) Inst->RHS->LHS);
+				if(CHECK_KIND(Inst->RHS, IUpdate)) {
+					INode_SetMarked((INode *) Inst->RHS->LHS);
+				} else {
+					INode_SetMarked((INode *) Inst->RHS);
+				}
 			}
 			break;
 		}
@@ -1033,7 +1041,7 @@ static void ByteCodeWriter_SaveCurrentInstId(ByteCodeWriter *writer)
 {
 	Block *Current = writer->Current;
 	unsigned Index = ARRAY_size(*writer->ByteCode);
-	INode_setRangeEnd(ToINode(Current), Index);
+	ToINode(Current)->Offset = Index;
 }
 
 static void ByteCode_Link(ARRAY(BlockPtr) *blocks, ByteCode *code)
@@ -1044,13 +1052,13 @@ static void ByteCode_Link(ARRAY(BlockPtr) *blocks, ByteCode *code)
 			case OPCODE_CondBrTrue:
 			case OPCODE_CondBrFalse: {
 				OPCondBrTrue *Inst  = (OPCondBrTrue *) pc;
-				unsigned offset = INode_getRangeEnd(ToINode((Block *)Inst->Block));
+				unsigned offset =ToINode((Block *)Inst->Block)->Offset;
 				Inst->Block = (void *) (code + offset);
 				break;
 			}
 			case OPCODE_Jump: {
 				OPJump *Inst = (OPJump *) pc;
-				unsigned offset = INode_getRangeEnd(ToINode((Block *)Inst->Block));
+				unsigned offset = ToINode((Block *)Inst->Block)->Offset;
 				Inst->Block = (void *) (code + offset);
 				break;
 			}
@@ -1109,7 +1117,7 @@ static ByteCode *IRBuilder_Lowering(FuelIRBuilder *builder)
 	ByteCode *pc = ARRAY_n(Code, 0);
 	((OPThreadedCode *) (pc))->CodeSize = ARRAY_size(Code);
 	BlockPtr *block = ARRAY_n(builder->Blocks, 0);
-	INode_setRangeEnd(ToINode(*block), 0);
+	ToINode(*block)->Offset = 0;
 	ByteCode_Link(&builder->Blocks, pc);
 
 #ifdef DUMP_FUEL_IR

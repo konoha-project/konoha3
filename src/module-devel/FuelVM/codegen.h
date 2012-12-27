@@ -106,43 +106,19 @@ enum IRType {
 struct INode {
 	enum IRType Kind;
 	enum TypeId Type;
-	unsigned Id:30;
+	unsigned Id:27;
 	unsigned Marked:1;
 	unsigned Unused:1;
+	unsigned Visited:1;
+	unsigned Removed:1;
+	unsigned Evaled:1;
 	unsigned ParentId;
-	intptr_t range_begin;
-	intptr_t range_end;
+	unsigned Offset;
 };
-
-static inline void INode_setRangeBegin(struct INode *Node, intptr_t Begin)
-{
-	Node->range_begin = Begin;
-}
-
-static inline void INode_setRangeEnd(struct INode *Node, intptr_t End)
-{
-	Node->range_end = End;
-}
-
-static inline intptr_t INode_getRangeBegin(struct INode *Node)
-{
-	return Node->range_begin;
-}
-
-static inline intptr_t INode_getRangeEnd(struct INode *Node)
-{
-	return Node->range_end;
-}
 
 static inline void INode_setParent(struct INode *Node, struct INode *Parent)
 {
 	Node->ParentId = Parent->Id;
-}
-
-static inline void INode_setRange(struct INode *Node, intptr_t Begin, intptr_t End)
-{
-	INode_setRangeBegin(Node, Begin);
-	INode_setRangeEnd(Node, End);
 }
 
 static inline void INode_setType(struct INode *Node, enum TypeId Type)
@@ -402,7 +378,13 @@ void CondInst_SetBranchInst(ICond *Cond, IBranch *Branch);
 void UpdateInst_Record(FuelIRBuilder *builder, IUpdate *Node);
 void FuelVM_RecordNodeCreationStart(FuelIRBuilder *builder, ARRAY(INodePtr) *Table);
 void FuelVM_RecordNodeCreationStop(FuelIRBuilder *builder, ARRAY(INodePtr) *Table);
-void FuelVM_InsertPHI(FuelIRBuilder *builder, Block *BB, ARRAY(INodePtr) *Table1, ARRAY(INodePtr) *Table2);
+
+enum PhiInsertionPolicy {
+	INSERT_DEFAULT,
+	INSERT_FORCE
+};
+
+void FuelVM_InsertPHI(FuelIRBuilder *builder, Block *Parent, Block *BB, ARRAY(INodePtr) *Table1, ARRAY(INodePtr) *Table2, enum PhiInsertionPolicy policty);
 
 /* utility */
 static inline void IField_setHash(IField *Inst, uintptr_t Hash)
@@ -440,11 +422,11 @@ static inline bool Block_HasTerminatorInst(Block *block)
 	return IsBranchInst(Inst);
 }
 
-#define CHECK_KIND(NODE, KIND) ((KIND *) check_kind(NODE, IR_TYPE_##KIND))
+#define CHECK_KIND(NODE, KIND) ((KIND *) check_kind(((INode *)NODE), IR_TYPE_##KIND))
 #define ToINode(NODE) (&(NODE)->base)
-#define Block_IsVisited(BB) INode_getRangeBegin(&(BB)->base)
-#define Block_SetVisited(BB, BOOLVAL) INode_setRangeBegin(&(BB)->base, BOOLVAL)
-#define Block_SetRemoved(BB) INode_setRangeEnd(&(BB)->base, 1)
+#define Block_IsVisited(BB) (BB->base.Visited)
+#define Block_SetVisited(BB, BOOLVAL) ((BB)->base.Visited = BOOLVAL)
+#define Block_SetRemoved(BB) ((BB)->base.Removed = 1)
 
 static inline unsigned GetNodeId(INode *Node)
 {
@@ -583,16 +565,9 @@ static inline INode *CreateBinaryInst(FuelIRBuilder *builder, enum BinaryOp Op, 
 
 static inline INode *CreatePHI(FuelIRBuilder *builder, INode *LHS, INode *RHS)
 {
-	IUpdate *Left, *Right;
-	if((Left = CHECK_KIND(LHS, IUpdate)) != 0) {
-		if((Right = CHECK_KIND(RHS, IUpdate)) != 0) {
-			INode *Node = (INode *) builder->API->newPHI(builder, Left, Right);
-			IRBuilder_add(builder, Node);
-			return Node;
-		}
-	}
-	assert(0 && "unreachable");
-	return NULL;
+	INode *Node = (INode *) builder->API->newPHI(builder, (IUpdate *) LHS, (IUpdate *) RHS);
+	IRBuilder_add(builder, Node);
+	return Node;
 }
 
 static inline void IRBuilder_setBlock(FuelIRBuilder *builder, Block *Block)
