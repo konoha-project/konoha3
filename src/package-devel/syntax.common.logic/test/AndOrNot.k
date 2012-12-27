@@ -1,4 +1,4 @@
-import("sbvr.logic");
+import("system.common.logic");
 
 void f() {
 	assert((not true) == false);
