@@ -66,7 +66,8 @@ static void f()
         CreateReturn(builder, 0);
     }
 
-    IRBuilder_Compile(builder, EntryBB);
+    bool JITCompiled = false;
+    IRBuilder_Compile(builder, EntryBB, &JITCompiled);
     IRBuilder_Exit(builder);
 }
 
@@ -153,7 +154,8 @@ static void g()
         CreateReturn(builder, Field1);
     }
 
-    union ByteCode *code = IRBuilder_Compile(builder, BB0);
+    bool JITCompiled = false;
+    union ByteCode *code = IRBuilder_Compile(builder, BB0, &JITCompiled);
     SValue Stack[128];
     Stack[0].ival = 6;
     SValue Ret = FuelVM_Exec(Stack+1, code+1);
@@ -220,7 +222,8 @@ static void h()
         CreateReturn(builder, Val4);
     }
 
-    //IRBuilder_Compile(builder, BB0);
+    bool JITCompiled = false;
+    //IRBuilder_Compile(builder, BB0, &JITCompiled);
     IRBuilder_Exit(builder);
 }
 

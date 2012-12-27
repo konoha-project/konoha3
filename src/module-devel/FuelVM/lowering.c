@@ -1127,14 +1127,6 @@ static ByteCode *IRBuilder_Lowering(FuelIRBuilder *builder)
 	return pc+1;
 }
 
-#ifndef FUELVM_USE_LLVM
-ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
-{
-	fprintf(stderr, "%s:%d LLVM has not been linked in.\n", __func__, __LINE__);
-	return IRBuilder_Lowering(builder);
-}
-#endif
-
 static bool IRBuilder_Optimize(FuelIRBuilder *builder, Block *BB, bool Flag)
 {
 	IRBuilder_RemoveIndirectJumpBlock(builder, BB, Flag); Flag = !Flag;
@@ -1168,7 +1160,7 @@ static unsigned IRBuilder_CalculateThreshold(FuelIRBuilder *builder, IMethod *Mt
 	return Threshold;
 }
 
-ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option)
+ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option, bool *JITCompiled)
 {
 	Block *BB = Mtd->EntryBlock;
 	bool Flag = true;
@@ -1189,11 +1181,17 @@ ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option)
 
 	unsigned Threshold = IRBuilder_CalculateThreshold(builder, Mtd, option);
 
+#ifndef FUELVM_USE_LLVM
+	fprintf(stderr, "%s:%d LLVM has not been linked in.\n", __func__, __LINE__);
+	code = IRBuilder_Lowering(builder);
+#else
 	if(Threshold >= COMPILE_LLVM) {
 		code = IRBuilder_CompileToLLVMIR(builder, Mtd);
+		*JITCompiled = true;
 	} else {
 		code = IRBuilder_Lowering(builder);
 	}
+#endif
 	ARRAY_dispose(BlockPtr, &builder->Blocks);
 	return code;
 }

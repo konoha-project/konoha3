@@ -657,8 +657,14 @@ static INode *SetUpArguments(KonohaContext *kctx, FuelIRBuilder *builder, kMetho
 	return Arg0;
 }
 
+static KMethodFunc AbstractMethodPtr = 0;
+
 static struct KVirtualCode *FuelVM_GenerateKVirtualCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
 {
+	if(unlikely(AbstractMethodPtr == 0)) {
+		AbstractMethodPtr = mtd->invokeKMethodFunc;
+	}
+
 	kNameSpace *ns = block->BlockNameSpace;
 	KBuilder builderbuf = {}, *builder = &builderbuf;
 	FuelIRBuilder Builder = {};
@@ -682,7 +688,12 @@ static struct KVirtualCode *FuelVM_GenerateKVirtualCode(KonohaContext *kctx, kMe
 	}
 	RESET_GCSTACK();
 	IMethod Mtd = {kctx, mtd, EntryBlock};
-	union ByteCode *code = IRBuilder_Compile(BLD(builder), &Mtd, option);
+	bool JITCompiled = false;
+	KLIB kMethod_SetFunc(kctx, mtd, 0);
+	union ByteCode *code = IRBuilder_Compile(BLD(builder), &Mtd, option, &JITCompiled);
+	if (JITCompiled) {
+		KLIB kMethod_SetFunc(kctx, mtd, (KMethodFunc) code);
+	}
 	IRBuilder_Exit(&Builder);
 	return (struct KVirtualCode *) code;
 }
@@ -705,11 +716,7 @@ static KMETHOD FuelVM_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMethodFunc FuelVM_GenerateKMethodFunc(KonohaContext *kctx, struct KVirtualCode *vcode)
 {
-	unsigned *magic = (unsigned *)(((ByteCode *)vcode)-1);
-	if(*magic == FUELVM_BYTECODE_MAGICNUMBER)
-		return FuelVM_RunVirtualMachine;
-	else
-		return (KMethodFunc) vcode;
+	return 0;
 }
 
 static struct KVirtualCode *GetDefaultBootCode(void)
@@ -725,8 +732,8 @@ static struct KVirtualCode *GetDefaultBootCode(void)
 
 static void FuelVM_SetMethodCode(KonohaContext *kctx, kMethodVar *mtd, struct KVirtualCode *vcode, KMethodFunc func)
 {
-	KLIB kMethod_SetFunc(kctx, mtd, func);
-	if(func == FuelVM_RunVirtualMachine) {
+	if(mtd->invokeKMethodFunc == AbstractMethodPtr) {
+		KLIB kMethod_SetFunc(kctx, mtd, FuelVM_RunVirtualMachine);
 		mtd->vcode_start = vcode;
 	}
 }

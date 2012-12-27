@@ -387,7 +387,7 @@ struct FuelIRBuilder {
 
 void IRBuilder_Init(FuelIRBuilder *builder, KonohaContext *kctx);
 void IRBuilder_Exit(FuelIRBuilder *builder);
-union ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option);
+union ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option, bool *JITCompiled);
 union ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd);
 INode *IRBuilder_FindLocalVarByHash(FuelIRBuilder *builder, enum TypeId type, uintptr_t Hash);
 

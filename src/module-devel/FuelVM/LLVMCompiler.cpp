@@ -29,6 +29,21 @@
 using namespace llvm;
 
 namespace FuelVM {
+
+template<typename T1, typename T2>
+struct Pair {
+private:
+	T1 first_;
+	T2 second_;
+public:
+	Pair() : first_(0), second_(0) {}
+	Pair(T1 first, T2 second) : first_(first), second_(second) {}
+	T1 first()  const { return first_; }
+	T2 second() const { return second_; }
+};
+
+typedef Pair<Value *, bool> ValueInfo;
+
 typedef struct LLVMIRBuilder {
 	Visitor visitor;
 	KonohaContext *kctx;
@@ -39,7 +54,7 @@ typedef struct LLVMIRBuilder {
 	Value    *VsfpRef;
 	Value    *Vstack_top;
 	FuelIRBuilder *FuelBuilder;
-};
+} LLVMIRBuilder;
 
 static Module *GlobalModule = 0;
 static ExecutionEngine *GlobalEngine = 0;
@@ -135,22 +150,38 @@ static Value *EmitConstant(IRBuilder<> *builder, kMethod *mtd)
 	return builder->CreateBitCast(V, GetLLVMType(ID_PtrkMethodVar));
 }
 
-static Value *GetValueFromParent(Block *BB, unsigned Id)
+static Value *GetValueFromParent(Block *BB, unsigned Id, bool CheckUndef = true)
 {
-	std::vector<Value *> *table = reinterpret_cast<std::vector<Value *> *>(BB->Table);
-	table->reserve(Id+1);
-	Value *Val = table->at(Id);
-	return Val;
+	std::vector<ValueInfo> *table = reinterpret_cast<std::vector<ValueInfo> *>(BB->Table);
+	ValueInfo &Info = table->at(Id);
+
+	bool IsUndef = Info.second();
+	if (CheckUndef && IsUndef)
+		return 0;
+	return Info.first();
 }
 
-static Value *GetValueFromParent(Block *BB, INode *Node)
+static Value *GetValueFromParent(Block *BB, INode *Node, bool NeedCheck = true)
 {
-	return GetValueFromParent(BB, NODE_ID(Node));
+	return GetValueFromParent(BB, NODE_ID(Node), NeedCheck);
 }
 
-static Value *GetValue(LLVMIRBuilder *writer, INode *Node)
+static Block *FindBlock(LLVMIRBuilder *writer, unsigned Id)
+{
+	BlockPtr *x, *e;
+	FOR_EACH_ARRAY(writer->FuelBuilder->Blocks, x, e) {
+		if((*x)->base.Id == Id)
+			return *x;
+	}
+	return writer->Current;
+}
+
+static Value *GetValue(LLVMIRBuilder *writer, INode *Node, unsigned ParentId = UINT_MAX)
 {
 	Block *BB = writer->Current;
+	if (ParentId != UINT_MAX) {
+		BB = FindBlock(writer, ParentId);
+	}
 	while(true) {
 		if(Value *Val = GetValueFromParent(BB, Node)) {
 			return Val;
@@ -162,17 +193,17 @@ static Value *GetValue(LLVMIRBuilder *writer, INode *Node)
 	return NULL;
 }
 
-static void SetValueToBlock(Block *BB, INode *Node, Value *Val)
+static void SetValueToBlock(Block *BB, INode *Node, Value *Val, bool IsUndef = false)
 {
 	unsigned Idx = NODE_ID(Node);
-	std::vector<Value *> *table = reinterpret_cast<std::vector<Value *> *>(BB->Table);
+	std::vector<ValueInfo> *table = reinterpret_cast<std::vector<ValueInfo> *>(BB->Table);
 	if(Node->Unused == 1 && CHECK_KIND(Node, IUpdate)) {
-		if(Value *OldVal = GetValueFromParent(BB, NODE_ID(Node))) {
+		if(Value *OldVal = GetValueFromParent(BB, NODE_ID(Node), false)) {
 			OldVal->replaceAllUsesWith(Val);
 		}
 	}
-	table->reserve(Idx+1);
-	(*table)[Idx] = Val;
+	ValueInfo Info(Val, IsUndef);
+	(*table)[Idx] = Info;
 }
 
 static void SetValue(LLVMIRBuilder *writer, INode *Node, Value *Val)
@@ -184,7 +215,7 @@ static void SetValue(LLVMIRBuilder *writer, INode *Node, Value *Val)
 static BasicBlock *GetBlock(LLVMIRBuilder *writer, Block *Target)
 {
 	BlockPtr *EntryBBPtr = ARRAY_n(writer->FuelBuilder->Blocks, 0);
-	return (BasicBlock *) GetValueFromParent(*EntryBBPtr, ToINode(Target));
+	return (BasicBlock *) GetValueFromParent(*EntryBBPtr, ToINode(Target), false);
 }
 
 static BasicBlock *GetParent(LLVMIRBuilder *writer, INode *Node)
@@ -673,7 +704,6 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 					break;
 				case LocalScope: {
 					Value *NewVal = GetValue(writer, Inst->RHS);
-					asm volatile("int3");
 					SetValue(writer, Node, NewVal);
 					SetValue(writer, (INode *)LHS, NewVal);
 					break;
@@ -715,7 +745,6 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 			break;
 		}
 		CASE(IBinary) {
-				asm volatile("int3");
 			EmitBinaryInst(writer, (IBinary *) Node);
 			break;
 		}
@@ -726,8 +755,9 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 			INode *Right = (INode *) Inst->RHS;
 			Value *LHS = 0, *RHS = 0;
 			if(Left && Right) {
-				LHS = GetValue(writer, Left);
-				RHS = GetValue(writer, Right);
+				LHS = GetValue(writer, Left, Left->ParentId);
+				RHS = GetValue(writer, Right, Right->ParentId);
+				assert(LHS != 0 && RHS != 0);
 				PHINode *PHI = builder->CreatePHI(LHS->getType(), 2, "PHI");
 				PHI->addIncoming(LHS, GetParent(writer, Left));
 				PHI->addIncoming(RHS, GetParent(writer, Right));
@@ -872,7 +902,7 @@ static void SetLocalVariable(Block *BB, INode *Node)
 {
 	Type *Ty = ToLLVMType(Node->Type);
 	Value *Val = new Argument(Ty);
-	SetValueToBlock(BB, Node, Val);
+	SetValueToBlock(BB, Node, Val, true);
 	Node->Unused = 1;
 }
 
@@ -899,7 +929,7 @@ static void EmitPrologue(LLVMIRBuilder *writer, FuelIRBuilder *builder, IMethod 
 	BlockPtr *x, *e;
 	writer->Func = EmitInternalFunction(Mtd->Context, GlobalModule, Mtd->Method);
 	FOR_EACH_ARRAY(builder->Blocks, x, e) {
-		(*x)->Table = (void *)(new std::vector<Value *>(builder->LastNodeId));
+		(*x)->Table = (void *)(new std::vector<ValueInfo>(builder->LastNodeId));
 		SetBlock(writer, *x, BasicBlock::Create(getGlobalContext(), "BB", writer->Func));
 	}
 
@@ -952,7 +982,6 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 	pm.add(createIndVarSimplifyPass());       // Canonicalize indvars
 	pm.add(createLoopDeletionPass());         // Delete dead loops
 
-	writer.Func->dump();
 	pm.doInitialization();
 	pm.run(*Wrapper);
 	pm.run(*writer.Func);
