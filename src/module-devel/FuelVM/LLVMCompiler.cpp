@@ -14,12 +14,12 @@
 #include <llvm/Transforms/IPO.h>
 #include <vector>
 #include <string>
-#include <iostream>
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/konoha_common.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
+#include <stdio.h>
 #include "codegen.h"
 #include "visitor.h"
 #include "FuelVM.h"
@@ -72,7 +72,7 @@ static void InitLLVM()
 		.setEngineKind(EngineKind::JIT)
 		.setErrorStr(&Error).create();
 	if(Error != "") {
-		std::cout << Error << std::endl;
+		fprintf(stderr, "[%s:%d] %s", __FILE__, __LINE__, Error.c_str());
 		abort();
 	}
 	LLVMType_Init();
@@ -188,8 +188,11 @@ static Value *GetValue(LLVMIRBuilder *writer, INode *Node, INode *Parent = 0)
 		if(Value *Val = GetValueFromParent(BB, Node)) {
 			return Val;
 		}
-		if(ARRAY_size(BB->preds) != 1)
+		if(ARRAY_size(BB->preds) == 0)
 			break;
+		if(ARRAY_size(BB->preds) != 1) {
+			fprintf(stderr, "[%s:%d] WARNING: BB%d Node%d\n", __FILE__, __LINE__, BB->base.Id, Node->Id);
+		}
 		BB = *ARRAY_n(BB->preds, 0);
 	}
 	return NULL;
@@ -563,11 +566,8 @@ static void EmitUnaryInst(LLVMIRBuilder *writer, IUnary *Node)
 
 static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 {
-				asm volatile("int3");
 	Value *LHS = GetValue(writer, Node->LHS);
 	Value *RHS = GetValue(writer, Node->RHS);
-	LHS->dump();
-	RHS->dump();
 	assert(LHS != 0 && RHS != 0);
 	IRBuilder<> *builder = writer->builder;
 	enum TypeId Type = Node->LHS->Type;
@@ -740,7 +740,6 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 				PHINode *PHI = builder->CreatePHI(LHS->getType(), 2, "PHI");
 				PHI->addIncoming(LHS, GetParent(writer, Left));
 				PHI->addIncoming(RHS, GetParent(writer, Right));
-				asm volatile("int3");
 				SetValueToBlock(writer->Current, Inst->Val,  PHI);
 			}
 			break;
@@ -969,6 +968,7 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 	pm.add(createIndVarSimplifyPass());       // Canonicalize indvars
 	pm.add(createLoopDeletionPass());         // Delete dead loops
 
+	writer.Func->dump();
 	pm.doInitialization();
 	pm.run(*Wrapper);
 	pm.run(*writer.Func);

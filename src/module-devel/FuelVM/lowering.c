@@ -204,6 +204,11 @@ static void CopyIfBlockHasSingleInst(Block *BB, INode *LastInst, Block *Block)
 			//debug("Jump %d=>%d\n", BB->base.Id, Block->base.Id);
 			memcpy(LastInst, Inst, sizeof(INodeImpl));
 		}
+		else if(CHECK_KIND(LastInst, IJump) && CHECK_KIND(Inst, IJump)) {
+			if(ARRAY_size(Block->preds) == 1 && ARRAY_size(Block->succs) == 1) {
+				memcpy(LastInst, Inst, sizeof(INodeImpl));
+			}
+		}
 		else if(CHECK_KIND(LastInst, IBranch) && CHECK_KIND(Inst, IJump)) {
 			//debug("Branch %d=>%d\n", BB->base.Id, Block->base.Id);
 			IBranch *Branch = (IBranch *) LastInst;
