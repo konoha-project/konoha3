@@ -96,7 +96,7 @@ static kbool_t Logic_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 KDEFINE_PACKAGE *logic_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "sbvr.logic", "1.0");
+	KSetPackageName(d, "syntax.common.logic", "1.0");
 	d.PackupNameSpace    = Logic_PackupNameSpace;
 	d.ExportNameSpace   = Logic_ExportNameSpace;
 	return &d;
