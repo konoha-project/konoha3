@@ -63,7 +63,7 @@ static uint64_t NewJsonI(JSONMemoryPool *pool, KJSONTYPE type, va_list ap)
 			const char *s = va_arg(ap, const char *);
 			return JSONString_new(pool, s, strlen(s)).bits;
 		}
-		case KJSON_INT:      return JSONInt_new(pool, va_arg(ap, int)).bits;
+		case KJSON_INT:      return JSONInt_new(pool, va_arg(ap, intptr_t)).bits;
 		case KJSON_DOUBLE:   return JSONDouble_new(va_arg(ap, double)).bits;
 		case KJSON_BOOLEAN:  return JSONBool_new(va_arg(ap, int)).bits;
 		case KJSON_NULL:     return JSONNull_new().bits;

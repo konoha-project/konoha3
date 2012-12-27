@@ -182,10 +182,12 @@ static inline void JSON_Release(JSON json)
 
 /* [Getter API] */
 KJSON_API JSON JSON_get(JSON json, const char *key, size_t len);
-static inline int JSON_getInt(JSON json, const char *key, size_t len)
+static inline int64_t JSON_getInt(JSON json, const char *key, size_t len)
 {
     JSON v = JSON_get(json, key, len);
-    return JSON_isValid(v) ? toInt32(v.val) : 0;
+    return JSON_isValid(v) ?
+        (JSON_type(json) == JSON_Int32) ?
+            toInt32(v.val) : toInt64(v.val)->val : 0;
 }
 
 static inline bool JSON_getBool(JSON json, const char *key, size_t len)

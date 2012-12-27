@@ -1,0 +1,11 @@
+// reported at ML667
+import("konoha.json");
+
+void main() {
+    int i = 12345678901;
+    Json json = new Json();
+    json.setInt("int64",i);
+    assert(json.getInt("int64") == i);
+}
+
+main();
