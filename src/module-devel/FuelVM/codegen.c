@@ -389,7 +389,6 @@ static const struct IRBuilderAPI API = {
 
 static void Block_add(Block *BB, INode *Stmt)
 {
-	//assert(Block_HasTerminatorInst(BB) == false);
 	ARRAY_add(INodePtr, &BB->insts, Stmt);
 }
 

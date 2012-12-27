@@ -339,16 +339,16 @@ static bool FuelVM_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt *
 
 	Block *Parent = BLD(builder)->Current;
 	if(!kStmt_Is(RedoLoop, stmt)) {
-	/* [WhileStmt]
-	 * "Head" is Join Node
-	 * Head  : if(COND) { goto Body } else {goto Merge }
-	 * Body  : Body
-	 *         ...
-	 *         goto Itr
-	 * Itr   : Body3
-	 *         goto Head
-	 * Merge : ...
-	 */
+		/* [WhileStmt]
+		 * "Head" is Join Node
+		 * Head  : if(COND) { goto Body } else {goto Merge }
+		 * Body  : Body
+		 *         ...
+		 *         goto Itr
+		 * Itr   : Body3
+		 *         goto Head
+		 * Merge : ...
+		 */
 		IRBuilder_JumpTo(BLD(builder), HeadBB);
 	} else {
 		/* [LoopStmt] (aka do-while loop)
@@ -627,7 +627,6 @@ static void FuelVM_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt *s
 static void FuelVM_VisitStackTopExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
 	assert(0 && "TODO");
-	//KBuilder_AsmNMOV(kctx, builder, a, expr->attrTypeId, expr->index + shift);
 }
 
 /* end of Visitor */

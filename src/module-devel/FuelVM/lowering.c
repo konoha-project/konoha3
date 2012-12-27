@@ -1204,15 +1204,6 @@ ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option, bo
 	return code;
 }
 
-#if 0
-static void CheckByteCodeSize()
-{
-#define PRINT_SIZE(X) fprintf(stderr, "%s: %d\n", #X, (int)sizeof(OP##X));
-	BYTECODE_LIST(PRINT_SIZE)
-#undef PRINT_SIZE
-}
-#endif
-
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

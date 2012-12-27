@@ -242,11 +242,6 @@ static void SetConstant(LLVMIRBuilder *writer, INode *Node, SValue Val)
 		case TYPE_boolean: SetValue(writer, Node, EmitConstant(builder, Val.bval)); break;
 		case TYPE_int:     SetValue(writer, Node, EmitConstant(builder, Val.ival)); break;
 		case TYPE_float:   SetValue(writer, Node, EmitConstant(builder, Val.fval)); break;
-		case TYPE_String:
-		case TYPE_Function:
-		case TYPE_Array:
-		case TYPE_Method:
-		case TYPE_Any:
 		default:
 			SetValue(writer, Node, EmitConstant(builder, (kObject *)Val.ptr));
 			break;
@@ -361,11 +356,6 @@ static Value *LoadValueFromStack(IRBuilder<> *builder, KClass *ct, Type *ReqTy, 
 	return builder->CreateLoad(Src);
 }
 
-//static void check(KonohaStack *sfp, KonohaStack *top)
-//{
-//	asm volatile("int3");
-//}
-
 static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::vector<Value *> &List)
 {
 	KonohaContext *kctx = writer->kctx;
@@ -414,22 +404,6 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 	}
 
 	RestoreStackTop(writer, PrepareCallStack(writer, Vsfp, List.size()));
-
-#if 0
-	{
-		GlobalVariable *G;
-		if((G = GlobalModule->getNamedGlobal("check")) == 0) {
-			std::vector<Type *> Fields;
-			Fields.push_back(GetLLVMType(ID_PtrKonohaValueVar));
-			Fields.push_back(GetLLVMType(ID_PtrKonohaValueVar));
-			FunctionType *FnTy = FunctionType::get(Type::getVoidTy(LLVM_CONTEXT()), Fields, false);
-			G = new GlobalVariable(*GlobalModule, FnTy, true,
-					GlobalValue::ExternalLinkage, NULL, "check");
-		}
-		GlobalEngine->addGlobalMapping(G, (void *) check);
-		builder->CreateCall2(G, Vsfp, Vtop);
-	}
-#endif
 
 	builder->CreateCall2(FuncPtr, Vctx, Vtop);
 
@@ -592,8 +566,6 @@ static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 	Value *RHS = GetValue(writer, Node->RHS);
 	assert(LHS != 0 && RHS != 0);
 	IRBuilder<> *builder = writer->builder;
-#define VSET(WRITER, NODE, FUNC) SetValue(WRITER, (INode *)NODE, (WRITER)->builder->FUNC)
-
 	enum TypeId Type = Node->LHS->Type;
 #define CASE(X, OP) case X: VSET(writer, Node, Create##OP(LHS, RHS, #X));return
 	if(Type == TYPE_boolean) {
