@@ -112,13 +112,13 @@ struct INode {
 	unsigned Visited:1;
 	unsigned Removed:1;
 	unsigned Evaled:1;
-	unsigned ParentId;
+	struct INode *Parent;
 	unsigned Offset;
 };
 
 static inline void INode_setParent(struct INode *Node, struct INode *Parent)
 {
-	Node->ParentId = Parent->Id;
+	Node->Parent = Parent;
 }
 
 static inline void INode_setType(struct INode *Node, enum TypeId Type)

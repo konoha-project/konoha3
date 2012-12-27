@@ -37,7 +37,7 @@ static void ReplaceValue(INode **NodePtr, INode *oldVal, INode *newVal)
 {
 	if((*NodePtr)->Id == oldVal->Id) {
 		*NodePtr = newVal;
-		newVal->ParentId = oldVal->ParentId;
+		newVal->Parent = oldVal->Parent;
 	}
 }
 

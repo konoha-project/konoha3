@@ -150,21 +150,22 @@ static Value *EmitConstant(IRBuilder<> *builder, kMethod *mtd)
 	return builder->CreateBitCast(V, GetLLVMType(ID_PtrkMethodVar));
 }
 
-static Value *GetValueFromParent(Block *BB, unsigned Id, bool CheckUndef = true)
+static Value *CreateUndefinedValue(Block *BB, INode *Node);
+
+static Value *GetValueFromParent(Block *BB, INode *Node, bool CheckUndef = true)
 {
 	std::vector<ValueInfo> *table = reinterpret_cast<std::vector<ValueInfo> *>(BB->Table);
+	unsigned Id = NODE_ID(Node);
 	ValueInfo &Info = table->at(Id);
 
 	bool IsUndef = Info.second();
 	if (CheckUndef && IsUndef) {
+		if(BB->base.Evaled == 0) {
+			return CreateUndefinedValue(BB, Node);
+		}
 		return 0;
 	}
 	return Info.first();
-}
-
-static Value *GetValueFromParent(Block *BB, INode *Node, bool NeedCheck = true)
-{
-	return GetValueFromParent(BB, NODE_ID(Node), NeedCheck);
 }
 
 static Block *FindBlock(LLVMIRBuilder *writer, unsigned Id)
@@ -177,11 +178,11 @@ static Block *FindBlock(LLVMIRBuilder *writer, unsigned Id)
 	return writer->Current;
 }
 
-static Value *GetValue(LLVMIRBuilder *writer, INode *Node, unsigned ParentId = UINT_MAX)
+static Value *GetValue(LLVMIRBuilder *writer, INode *Node, INode *Parent = 0)
 {
 	Block *BB = writer->Current;
-	if (ParentId != UINT_MAX) {
-		BB = FindBlock(writer, ParentId);
+	if (Parent != 0) {
+		BB = FindBlock(writer, Parent->Id);
 	}
 	while(true) {
 		if(Value *Val = GetValueFromParent(BB, Node)) {
@@ -199,7 +200,7 @@ static void SetValueToBlock(Block *BB, INode *Node, Value *Val, bool IsUndef = f
 	unsigned Idx = NODE_ID(Node);
 	std::vector<ValueInfo> *table = reinterpret_cast<std::vector<ValueInfo> *>(BB->Table);
 	if(Node->Unused == 1 && CHECK_KIND(Node, IUpdate)) {
-		if(Value *OldVal = GetValueFromParent(BB, NODE_ID(Node), false)) {
+		if(Value *OldVal = GetValueFromParent(BB, Node, false)) {
 			OldVal->replaceAllUsesWith(Val);
 		}
 	}
@@ -222,7 +223,7 @@ static BasicBlock *GetBlock(LLVMIRBuilder *writer, Block *Target)
 static BasicBlock *GetParent(LLVMIRBuilder *writer, INode *Node)
 {
 	BlockPtr *EntryBBPtr = ARRAY_n(writer->FuelBuilder->Blocks, 0);
-	return (BasicBlock *) GetValueFromParent(*EntryBBPtr, Node->ParentId);
+	return (BasicBlock *) GetValueFromParent(*EntryBBPtr, Node->Parent);
 }
 
 static void SetBlock(LLVMIRBuilder *writer, Block *Target, BasicBlock *BB)
@@ -562,8 +563,11 @@ static void EmitUnaryInst(LLVMIRBuilder *writer, IUnary *Node)
 
 static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 {
+				asm volatile("int3");
 	Value *LHS = GetValue(writer, Node->LHS);
 	Value *RHS = GetValue(writer, Node->RHS);
+	LHS->dump();
+	RHS->dump();
 	assert(LHS != 0 && RHS != 0);
 	IRBuilder<> *builder = writer->builder;
 	enum TypeId Type = Node->LHS->Type;
@@ -730,13 +734,13 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 			INode *Right = (INode *) Inst->RHS;
 			Value *LHS = 0, *RHS = 0;
 			if(Left && Right) {
-				asm volatile("int3");
-				LHS = GetValue(writer, Left, Left->ParentId);
-				RHS = GetValue(writer, Right, Right->ParentId);
+				LHS = GetValue(writer, Left, Left->Parent);
+				RHS = GetValue(writer, Right, Right->Parent);
 				assert(LHS != 0 && RHS != 0);
 				PHINode *PHI = builder->CreatePHI(LHS->getType(), 2, "PHI");
 				PHI->addIncoming(LHS, GetParent(writer, Left));
 				PHI->addIncoming(RHS, GetParent(writer, Right));
+				asm volatile("int3");
 				SetValueToBlock(writer->Current, Inst->Val,  PHI);
 			}
 			break;
@@ -874,12 +878,13 @@ static Function *EmitFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Func
 	return FWrap;
 }
 
-static void SetLocalVariable(Block *BB, INode *Node)
+static Value *CreateUndefinedValue(Block *BB, INode *Node)
 {
 	Type *Ty = ToLLVMType(Node->Type);
 	Value *Val = new Argument(Ty);
 	SetValueToBlock(BB, Node, Val, true);
 	Node->Unused = 1;
+	return Val;
 }
 
 static void PrepareLocalVariable(FuelIRBuilder *builder)
@@ -890,11 +895,11 @@ static void PrepareLocalVariable(FuelIRBuilder *builder)
 		INodePtr *Ptr, *End;
 		FOR_EACH_ARRAY(BB->insts, Ptr, End) {
 			if(CHECK_KIND(*Ptr, IUpdate)) {
-				SetLocalVariable(BB, *Ptr);
+				CreateUndefinedValue(BB, *Ptr);
 			}
 			else if(IPHI *Inst = CHECK_KIND(*Ptr, IPHI)) {
-				SetLocalVariable(BB, (INode *) Inst->LHS);
-				SetLocalVariable(BB, (INode *) Inst->RHS);
+				CreateUndefinedValue(BB, (INode *) Inst->LHS);
+				CreateUndefinedValue(BB, (INode *) Inst->RHS);
 			}
 		}
 	}
