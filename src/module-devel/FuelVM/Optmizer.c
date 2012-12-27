@@ -302,13 +302,37 @@ static INode *SimplifyICond(FuelIRBuilder *builder, ICond *Inst)
 	return (INode *) builder->API->newConstant(builder, TYPE_boolean, val);
 }
 
+static INode *RemoveTrivialAssertion(FuelIRBuilder *builder, ICall *Inst)
+{
+	/* Remove NameSpace.assert(true) */
+	KonohaContext *kctx = builder->Context;
+	INode **MtdPtr = ARRAY_n(Inst->Params, 0);
+	kMethod *mtd = (kMethod *) ((IConstant *) *MtdPtr)->Value.obj;
+	if(mtd->typeId == TYPE_NameSpace && mtd->mn == KKMethodName_("assert")) {
+		if(ARRAY_size(Inst->Params) != 3) {
+			return 0;
+		}
+		IConstant *Val;
+		if((Val = CHECK_KIND(*ARRAY_n(Inst->Params, 2), IConstant))) {
+			if(Val->base.Type == TYPE_boolean && Val->Value.bval == true) {
+				return (INode *) Val;
+			}
+		}
+	}
+	return 0;
+}
+
 static INode *SimplifyICall(FuelIRBuilder *builder, ICall *Inst)
 {
 	SValue val = {};
 	unsigned i;
-	INodePtr *x;
-	INode **MtdPtr = ARRAY_n(Inst->Params, 0);
+	INodePtr *x, *MtdPtr = ARRAY_n(Inst->Params, 0);
 	kMethod *mtd = (kMethod *) ((IConstant *) *MtdPtr)->Value.obj;
+
+	INode *ret = NULL;
+	if((ret = RemoveTrivialAssertion(builder, Inst)) != 0) {
+		return ret;
+	}
 	if(!kMethod_Is(Const, mtd)) {
 		return NULL;
 	}
@@ -410,6 +434,9 @@ void IRBuilder_SimplifyStdCall(FuelIRBuilder *builder)
 		INodePtr *Inst, *End;
 		ARRAY_clear(Modified);
 		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
+			if((*Inst)->Unused == 1) {
+				continue;
+			}
 			INode *Node = SimplifyInst(builder, *Inst);
 			if(Node) {
 				SchedulingReplaceValue(builder, *Inst, Node);
