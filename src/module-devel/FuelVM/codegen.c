@@ -121,6 +121,7 @@ static void disposeICond(INode *Node)
 static INew *newINew(FuelIRBuilder *builder, uintptr_t Conf, enum TypeId Type)
 {
 	INew *Node = CREATE_NODE(INew);
+	ARRAY_init(INodePtr, &Node->Params, 0);
 	Node->base.Type = Type;
 	Node->Conf = Conf;
 	return (Node);
