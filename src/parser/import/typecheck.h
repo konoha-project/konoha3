@@ -61,7 +61,6 @@ static kNode *TypeNode(KonohaContext *kctx, KSyntax *syn0, kNode *expr, kGamma *
 				if(!kNode_Is(OpenBlock, texpr)) {
 					gma->genv->localScope.varsize = varsize;
 				}
-				DBG_P(">>>>>>> typed");
 				KDump(texpr);
 				return texpr;
 			}
@@ -70,7 +69,6 @@ static kNode *TypeNode(KonohaContext *kctx, KSyntax *syn0, kNode *expr, kGamma *
 		syn = syn->parentSyntaxNULL;
 	}
 	if(!kNode_IsError(expr)) {
-		DBG_P("syn=%s%s", KSymbol_Fmt2(syn0->keyword));
 		expr = SUGAR MessageNode(kctx, expr, NULL, gma, ErrTag, "undefined typing: %s%s %s", KSymbol_Fmt2(syn0->keyword), KToken_t(expr->KeyOperatorToken));
 	}
 	gma->genv->localScope.varsize = varsize;

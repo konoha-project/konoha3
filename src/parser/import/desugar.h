@@ -207,7 +207,8 @@ static KMETHOD Expression_Term(KonohaContext *kctx, KonohaStack *sfp)
 		else {
 			nextIdx = operatorIdx + 1;
 		}
-		DBG_ASSERT(node->TermToken == tk);
+		kNode_Termnize(kctx, node, tk);
+		//DBG_ASSERT(node->TermToken == tk);
 		KReturnUnboxValue(nextIdx);
 	}
 }
@@ -232,24 +233,24 @@ static KMETHOD Expression_Operator(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(returnIdx);
 }
 
-static inline kbool_t isFieldName(kArray *tokenList, int operatorIdx, int endIdx)
-{
-	if(operatorIdx + 1 < endIdx) {
-		kToken *tk = tokenList->TokenItems[operatorIdx + 1];
-		return (tk->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern);
-	}
-	return false;
-}
-
-static KMETHOD Expression_DOT(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_Expression(node, tokenList, beginIdx, operatorIdx, endIdx);
-	if(beginIdx < operatorIdx && isFieldName(tokenList, operatorIdx, endIdx)) {
-		kNameSpace *ns = kNode_ns(node);
-		kNode_Op(kctx, node, tokenList->TokenItems[operatorIdx + 1], 1, ParseNewNode(kctx, ns, tokenList, &beginIdx, operatorIdx, ParseExpressionOption, NULL));
-		KReturnUnboxValue(operatorIdx + 2);
-	}
-}
+//static inline kbool_t isFieldName(kArray *tokenList, int operatorIdx, int endIdx)
+//{
+//	if(operatorIdx + 1 < endIdx) {
+//		kToken *tk = tokenList->TokenItems[operatorIdx + 1];
+//		return (tk->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern);
+//	}
+//	return false;
+//}
+//
+//static KMETHOD Expression_DOT(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	VAR_Expression(node, tokenList, beginIdx, operatorIdx, endIdx);
+//	if(beginIdx < operatorIdx && isFieldName(tokenList, operatorIdx, endIdx)) {
+//		kNameSpace *ns = kNode_ns(node);
+//		kNode_Op(kctx, node, tokenList->TokenItems[operatorIdx + 1], 1, ParseNewNode(kctx, ns, tokenList, &beginIdx, operatorIdx, ParseExpressionOption, NULL));
+//		KReturnUnboxValue(operatorIdx + 2);
+//	}
+//}
 
 static KMETHOD Expression_Member(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -1289,7 +1290,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ PATTERN(Block), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_CStyleBlock}, {SUGARFUNC TypeCheck_Block}, },
 		{ PATTERN(Param), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_CStyleParam}, {SUGARFUNC Statement_ParamDecl},},
 		{ PATTERN(Token), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_Token}, {NULL}},
-		{ TOKEN(DOT), SYNFLAG_CFunc, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_DOT}, {NULL}, },
+		{ TOKEN(DOT), /*SYNFLAG_CFunc, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_DOT}, {NULL},*/ },
 		{ TOKEN(DIV), 0, Precedence_CStyleMUL, 0, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(MOD), 0, Precedence_CStyleMUL, 0, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(MUL), 0, Precedence_CStyleMUL, 0, {OperatorFunc}, {MethodCallFunc}},

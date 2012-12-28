@@ -258,7 +258,7 @@ static void kNode_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 //			}
 			KLIB KBuffer_Write(kctx, wb, "\n", 1);
 			KBuffer_WriteIndent(kctx, wb, pos+1);
-			KLIB KBuffer_printf(kctx, wb, "#%d :%s", (int)i, KClass_text(kObject_class(expr->NodeList->ObjectItems[i])));
+			KLIB KBuffer_printf(kctx, wb, "#%d :%s ", (int)i, KClass_text(kObject_class(expr->NodeList->ObjectItems[i])));
 			kNodeTerm_p(kctx, expr->NodeList->ObjectItems[i], values, pos+1, wb);
 		}
 		KLIB KBuffer_Write(kctx, wb, "]", 1);
@@ -272,13 +272,6 @@ static void kNode_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 static kNode* new_UntypedNode(KonohaContext *kctx, kArray *gcstack, kNameSpace *ns)
 {
 	kNode *unode = (kNode *)new_(Node, ns, gcstack);
-	return unode;
-}
-
-static kNode* new_BlockNode(KonohaContext *kctx, kNameSpace *ns)
-{
-	kNode *unode = new_(Node, ns, OnGcStack);
-	KFieldSet(unode, unode->NodeList, new_(Array, 0, OnField));
 	return unode;
 }
 

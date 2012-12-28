@@ -45,9 +45,9 @@ static int ParseSyntaxNode(KonohaContext *kctx, KSyntax *syn, kNode *node, ksymb
 	int callCount = 0;
 	int index, size = 0;
 	kFunc **funcItems = KSyntax_funcTable(kctx, syn, KSugarParseFunc, &size);
-	if(opIdx != -1) {
+	if(opIdx != PatternNoMatch) {
 		KFieldSet(node, node->TermToken, tokenList->TokenItems[opIdx]);
-		node->syn = node->TermToken->resolvedSyntaxInfo;
+		node->syn = syn;/*node->TermToken->resolvedSyntaxInfo*/;
 	}
 	for(index = size - 1; index >= 0; index--) {
 		DBG_ASSERT(IS_Func(funcItems[index]));
@@ -156,7 +156,7 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 				for(i = kArray_size(metaPatternList) - 1; i >=0; i--) {
 					kToken *patternToken = metaPatternList->TokenItems[i];
 					node->syn = patternToken->resolvedSyntaxInfo;
-					int nextIdx = ParseSyntaxNode(kctx, patternToken->resolvedSyntaxInfo, node, 0, tokenList, beginIdx, -1, endIdx);
+					int nextIdx = ParseSyntaxNode(kctx, patternToken->resolvedSyntaxInfo, node, 0, tokenList, beginIdx, PatternNoMatch, endIdx);
 					//DBG_P(">>>>>>>>>> searching meta pattern = %s%s index=%d,%d,%d", KSymbol_Fmt2(patternToken->resolvedSymbol), beginIdx, nextIdx, endIdx);
 					if(nextIdx != PatternNoMatch) return nextIdx;
 					if(kNode_IsError(node)) return endIdx;
@@ -207,6 +207,7 @@ static int ParseNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int be
 		int opIdx = FindOperator(kctx, node, tokenList, beginIdx, endIdx);
 		kToken *keyOperator = tokenList->TokenItems[opIdx];
 		DBG_P("KeyOperator >>>>>>>> %d<%d<%d, %s", beginIdx, opIdx, endIdx, KToken_t(keyOperator));
+		//kNode_Termnize(kctx, node, keyOperator);
 		return ParseSyntaxNode(kctx, keyOperator->resolvedSyntaxInfo, node, 0, tokenList, beginIdx, opIdx, endIdx);
 	}
 	else {
@@ -787,27 +788,6 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 	RETURN_ERROR:;
 	KTokenSeq_End(kctx, tokens);
 	return source->endIdx;
-}
-
-/* ------------------------------------------------------------------------ */
-
-static kNode* kNode_GetBlock(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ksymbol_t kw, kNode *def)
-{
-	kNode *block = (kNode *)kNode_GetObjectNULL(kctx, stmt, kw);
-	if(block == NULL) return def;
-	if(IS_Token(block)) {
-		kToken *tk = (kToken *)block;
-		if(ns == NULL) ns = kNode_ns(stmt);
-		if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
-			kToken_ToBraceGroup(kctx, (kTokenVar *)tk, ns, NULL);
-		}
-		if(tk->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
-			int beginIdx = 0;
-			block = ParseNewNode(kctx, ns, tk->subTokenList, &beginIdx, kArray_size(tk->subTokenList), ParseMetaPatternOption|ParseBlockOption, NULL);
-			KLIB kObjectProto_SetObject(kctx, stmt, kw, kObject_typeId(block), block);
-		}
-	}
-	return (IS_Node(block)) ? block : def;
 }
 
 // ---------------------------------------------------------------------------

@@ -532,7 +532,6 @@ static void KBuilder_AsmNMOV(KonohaContext *kctx, KBuilder *builder, int a, KCla
 	ASM(NMOV, TC_(a, ty), TC_(b, ty), ty);
 }
 
-
 //----------------------------------------------------------------------------
 
 static kNode* Node_getFirstBlock(KonohaContext *kctx, kNode *stmt)
