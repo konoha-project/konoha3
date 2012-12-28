@@ -433,11 +433,11 @@ static void enqueueEventToGlobalQueue(KonohaContext *kctx, RawEvent rawEvent)
 {
 	kEvent *ev = (kEvent *)KLIB new_kObject(kctx, OnStack, KClass_Event, 0);
 	ev->j = (json_t *)rawEvent;
-	ktypeattr_t resolve_type = kMethod_GetReturnType(KonohaContext_getEventContext(kctx)->enqFuncNULL->method);
+	KClass *returnType = kMethod_GetReturnType(KonohaContext_getEventContext(kctx)->enqFuncNULL->method);
 	BEGIN_UnusedStack(lsfp);
 	KUnsafeFieldSet(lsfp[0].asObject, K_NULL);
 	KUnsafeFieldSet(lsfp[1].asObject, (kObject *)ev);
-	KStackSetFuncAll(lsfp, KLIB Knull(kctx, KClass_(resolve_type)), 0/*UL*/, KonohaContext_getEventContext(kctx)->enqFuncNULL, 1);
+	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, KonohaContext_getEventContext(kctx)->enqFuncNULL, 1);
 	KStackCall(lsfp);
 	END_UnusedStack();
 }
