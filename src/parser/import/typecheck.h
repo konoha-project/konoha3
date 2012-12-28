@@ -118,6 +118,7 @@ static kNode *BoxNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClass* req
 {
 	kNode *node = KNewNode(kNode_ns(node));
 	KFieldSet(node, node->NodeToPush, node);
+	DBG_ASSERT(kctx == NULL);
 	return kNode_Type(kctx, node, KNode_And, node->attrTypeId);
 	//	KClass *c = KClass_(node->attrTypeId);
 //	if(c->typeId != KType_boolean) c = KClass_Int;
@@ -126,7 +127,7 @@ static kNode *BoxNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClass* req
 //	//return new_MethodNode(kctx, stmt, gma, reqClass, mtd, 1, texpr);
 //	kNodeVar *expr = new_UntypedOperatorNode(kctx, KSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall), 2, mtd, node);
 //	return kNode_Type(kctx, expr, KNode_MethodCall, c->typeId/*reqClass->typeId*/);
-	return node; // FIXME:Node
+//	return node; // FIXME:Node
 }
 
 static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClass* reqClass, int pol)
@@ -135,9 +136,6 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClas
 	if(kNode_IsError(expr)) return expr;
 	kNameSpace *ns = kNode_ns(expr);
 	if(KTypeAttr_Unmask(expr->attrTypeId) == KType_var) {
-//		if(!IS_Node(expr)) {
-//			expr = new_ConstNode(kctx, ns, NULL, UPCAST(expr));
-//		}
 		expr = TypeNode(kctx, expr->syn, expr, gma, reqClass);
 		if(kNode_IsError(expr)) return expr;
 	}
@@ -148,7 +146,6 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClas
 	}
 	if(typedClass->typeId == KType_void) {
 		if(!FLAG_is(pol, TypeCheckPolicy_AllowVoid)) {
-			KDump(expr);
 			expr = SUGAR MessageNode(kctx, expr, NULL, gma, ErrTag, "void is unacceptable");
 			DBG_ASSERT(kctx==NULL);
 		}

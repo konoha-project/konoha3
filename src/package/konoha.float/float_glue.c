@@ -315,7 +315,7 @@ static KMETHOD TypeCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("$Float"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_Float, },
+		{ KSymbol_("$Float"), SYNFLAG_CTypeFunc, 0, 0, {SUGAR termParseFunc}, {SUGARFUNC TypeCheck_Float},},
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
@@ -327,7 +327,7 @@ static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 static kbool_t float_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	/* Use cstyle package's Parser to parsing FloatLiteral */
-	KImportPackageSymbol(ns, "cstyle", "$Number", trace);
+//	KImportPackageSymbol(ns, "cstyle", "$Number", trace);
 	float_defineMethod(kctx, ns, trace);
 	float_defineSyntax(kctx, ns, trace);
 	return true;

@@ -251,7 +251,6 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 	KReturnWith(expr, RESET_GCSTACK());
 }
 
-
 // --------------------------------------------------------------------------
 
 
@@ -262,7 +261,7 @@ static kbool_t string_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	int FN_n = KFieldName_("n");
 
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_TextPattern, 0,  NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_ExtendedTextLiteral, },
+		{ KSymbol_TextPattern, SYNFLAG_CTypeFunc, 0, 0, {NULL}, {SUGARFUNC TypeCheck_ExtendedTextLiteral}, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

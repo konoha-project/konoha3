@@ -270,37 +270,17 @@ static void cstyle_DefineStatement(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	cstyle_DefineStatement(kctx, ns, trace);
-//	KDEFINE_SYNTAX defLiteral[] = {
-//		{ KSymbol_("$SingleQuotedChar"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_SingleQuotedChar, },
-//		{ KSymbol_END, }, /* sentinental */
-//	};
-//	SUGAR kNameSpace_DefineSyntax(kctx, ns, defLiteral, trace);
-//	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_("$SingleQuotedChar"), KonohaChar_Quote, KSugarFunc(ns, TokenFunc_SingleQuotedChar));
-//
-//	cstyle_defineExpression(kctx, ns, option, trace);
-//	cstyle_defineArrayLiteral(kctx, ns, trace);
-//
-//	int_defineMethod(kctx, ns, trace);
-//	int_defineSyntax(kctx, ns, trace);
-//	cstyle_defineAssign(kctx, ns, trace);
-//
-//	null_PackupNameSpace(kctx, ns, trace);
 	return true;
 }
 
 static kbool_t cstyle_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
-//	KDEFINE_INT_CONST ClassData[] = {   // long as alias
-//		{"long", VirtualType_KClass, (uintptr_t)KClass_Int},
-//		{NULL},
-//	};
-//	KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(ClassData), false/*isOverride*/, trace);
 	return true;
 }
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* cstyle_Init(void)
+KDEFINE_PACKAGE* CStyleWhile_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "CStyle", "1.0");
