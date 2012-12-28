@@ -38,12 +38,12 @@ static void DeclVariable(KonohaContext *kctx, kNode *stmt, kGamma *gma, ktypeatt
 	kToken *termToken = termNode->TermToken;
 	if(Gamma_isTopLevel(gma)) {
 		kNameSpace *ns = kNode_ns(stmt);
-		if(ns->globalObjectNULL_OnList == NULL) {
+		if(ns->globalObjectNULL == NULL) {
 			kNodeToken_Message(kctx, stmt, termToken, ErrTag, "unavailable global variable");
 			return;
 		}
 		kNodeToken_Message(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", KSymbol_Fmt2(termToken->resolvedSymbol), KType_text(ty));
-		KLIB KClass_AddField(kctx, kObject_class(ns->globalObjectNULL_OnList), ty, termToken->resolvedSymbol);
+		KLIB KClass_AddField(kctx, kObject_class(ns->globalObjectNULL), ty, termToken->resolvedSymbol);
 	}
 	else {
 		kNodeToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", KSymbol_Fmt2(termToken->resolvedSymbol), KType_text(ty));

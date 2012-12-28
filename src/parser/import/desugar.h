@@ -514,7 +514,7 @@ static KMETHOD TypeCheck_Assign(KonohaContext *kctx, KonohaStack *sfp)
 
 static int kGamma_AddLocalVariable(KonohaContext *kctx, kGamma *gma, ktypeattr_t attrTypeId, ksymbol_t name)
 {
-	KGammaStack *s = &gma->genv->localScope;
+	struct KGammaStack *s = &gma->genv->localScope;
 	int index = s->varsize;
 	if(!(s->varsize < s->capacity)) {
 		s->capacity *= 2;
@@ -551,7 +551,7 @@ static kNode* TypeCheckNodeVariableNULL(KonohaContext *kctx, kNode *stmt, kNodeV
 	ksymbol_t symbol = tk->resolvedSymbol;
 	kNameSpace *ns = kNode_ns(stmt);
 	int i;
-	KGammaAllocaData *genv = gma->genv;
+	struct KGammaLocalData *genv = gma->genv;
 	for(i = genv->localScope.varsize - 1; i >= 0; i--) {
 		if(genv->localScope.varItems[i].name == symbol) {
 			return SUGAR kNode_SetVariable(kctx, expr, KNode_Local, genv->localScope.varItems[i].attrTypeId, i);
@@ -573,11 +573,11 @@ static kNode* TypeCheckNodeVariableNULL(KonohaContext *kctx, kNode *stmt, kNodeV
 			}
 		}
 	}
-	if((Gamma_isTopLevel(gma) || kNameSpace_IsAllowed(ImplicitGlobalVariable, ns)) && ns->globalObjectNULL_OnList != NULL) {
-		KClass *globalClass = kObject_class(ns->globalObjectNULL_OnList);
+	if((Gamma_isTopLevel(gma) || kNameSpace_IsAllowed(ImplicitGlobalVariable, ns)) && ns->globalObjectNULL != NULL) {
+		KClass *globalClass = kObject_class(ns->globalObjectNULL);
 		kMethod *mtd = kNameSpace_GetGetterMethodNULL(kctx, ns, globalClass, symbol);
 		if(mtd != NULL) {
-			return new_GetterNode(kctx, tk, mtd, new_ConstNode(kctx, ns, globalClass, ns->globalObjectNULL_OnList));
+			return new_GetterNode(kctx, tk, mtd, new_ConstNode(kctx, ns, globalClass, ns->globalObjectNULL));
 		}
 	}
 	kMethod *mtd = kNameSpace_GetNameSpaceFuncNULL(kctx, ns, symbol, reqClass);  // finding function
@@ -803,7 +803,7 @@ static kMethod* TypeFirstNodeAndLookupMethod(KonohaContext *kctx, kNameSpace *ns
 	kNodeVar *firstNode = (kNodeVar *)kNode_At(exprN, 0);
 	kToken *termToken = firstNode->TermToken;
 	ksymbol_t funcName = termToken->resolvedSymbol;
-	KGammaAllocaData *genv = gma->genv;
+	struct KGammaLocalData *genv = gma->genv;
 	int i;
 	for(i = genv->localScope.varsize - 1; i >= 0; i--) {
 		if(genv->localScope.varItems[i].name == funcName && KType_IsFunc(genv->localScope.varItems[i].attrTypeId)) {
@@ -852,11 +852,11 @@ static kMethod* TypeFirstNodeAndLookupMethod(KonohaContext *kctx, kNameSpace *ns
 			return mtd;
 		}
 	}
-	if((Gamma_isTopLevel(gma) || kNameSpace_IsAllowed(ImplicitGlobalVariable,ns)) && ns->globalObjectNULL_OnList != NULL) {
-		KClass *globalClass = kObject_class(ns->globalObjectNULL_OnList);
+	if((Gamma_isTopLevel(gma) || kNameSpace_IsAllowed(ImplicitGlobalVariable,ns)) && ns->globalObjectNULL != NULL) {
+		KClass *globalClass = kObject_class(ns->globalObjectNULL);
 		kMethod *mtd = kNameSpace_GetGetterMethodNULL(kctx, ns, globalClass, funcName);
 		if(mtd != NULL && kMethod_IsReturnFunc(mtd)) {
-			KFieldSet(exprN->NodeList, exprN->NodeList->NodeItems[0], new_GetterNode(kctx, termToken, mtd, new_ConstNode(kctx, ns, globalClass, ns->globalObjectNULL_OnList)));
+			KFieldSet(exprN->NodeList, exprN->NodeList->NodeItems[0], new_GetterNode(kctx, termToken, mtd, new_ConstNode(kctx, ns, globalClass, ns->globalObjectNULL)));
 			return NULL;
 		}
 		return mtd;

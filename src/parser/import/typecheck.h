@@ -285,16 +285,16 @@ static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kGamma *gma, KCl
 
 /* ------------------------------------------------------------------------ */
 
-static KGammaAllocaData *kGamma_Push(KonohaContext *kctx, kGamma *gma, KGammaAllocaData *newone)
+static struct KGammaLocalData *kGamma_Push(KonohaContext *kctx, kGamma *gma, struct KGammaLocalData *newone)
 {
-	KGammaAllocaData *oldone = gma->genv;
+	struct KGammaLocalData *oldone = gma->genv;
 	gma->genv = newone;
 	return oldone;
 }
 
-static KGammaAllocaData *kGamma_Pop(KonohaContext *kctx, kGamma *gma, KGammaAllocaData *oldone, KGammaAllocaData *checksum)
+static struct KGammaLocalData *kGamma_Pop(KonohaContext *kctx, kGamma *gma, struct KGammaLocalData *oldone, struct KGammaLocalData *checksum)
 {
-	KGammaAllocaData *newone = gma->genv;
+	struct KGammaLocalData *newone = gma->genv;
 	assert(checksum == newone);
 	gma->genv = oldone;
 	if(newone->localScope.allocsize > 0) {
@@ -303,7 +303,7 @@ static KGammaAllocaData *kGamma_Pop(KonohaContext *kctx, kGamma *gma, KGammaAllo
 	return newone;
 }
 
-#define KPushGammaStack(G,B) KGammaAllocaData *oldbuf_ = kGamma_Push(kctx, G, B)
+#define KPushGammaStack(G,B) struct KGammaLocalData *oldbuf_ = kGamma_Push(kctx, G, B)
 #define KPopGammaStack(G,B)  kGamma_Pop(kctx, G, oldbuf_, B)
 
 // --------------------------------------------------------------------------
@@ -324,7 +324,7 @@ static kNode* kMethod_ParseBodyNode(KonohaContext *kctx, kMethod *mtd, kNameSpac
 	return node;
 }
 
-static void kGamma_InitParam(KonohaContext *kctx, KGammaAllocaData *genv, kParam *pa, kparamtype_t *callparam)
+static void kGamma_InitParam(KonohaContext *kctx, struct KGammaLocalData *genv, kParam *pa, kparamtype_t *callparam)
 {
 	int i, psize = (pa->psize + 1 < genv->localScope.capacity) ? pa->psize : genv->localScope.capacity - 1;
 	for(i = 0; i < psize; i++) {
@@ -347,7 +347,7 @@ static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t 
 	}
 	kGamma *gma = KGetParserContext(kctx)->preparedGamma;
 	kNode *node = kMethod_ParseBodyNode(kctx, mtd, ns, text, uline);
-	KGammaAllocaData newgma = {0};
+	struct KGammaLocalData newgma = {0};
 	KGammaStackDecl lvarItems[32 + param->psize];
 	bzero(lvarItems, sizeof(KGammaStackDecl) * (32 + param->psize));
 	newgma.currentWorkingMethod = mtd;
@@ -406,7 +406,7 @@ static kstatus_t kNode_Eval(KonohaContext *kctx, kNode *stmt, kMethod *mtd, KTra
 {
 	kGamma *gma = KGetParserContext(kctx)->preparedGamma;
 	KGammaStackDecl lvarItems[32] = {};
-	KGammaAllocaData newgma = {0};
+	struct KGammaLocalData newgma = {0};
 	newgma.flag = kGamma_TopLevel;
 	newgma.currentWorkingMethod = mtd;
 	newgma.thisClass     = KClass_NameSpace;

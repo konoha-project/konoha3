@@ -86,15 +86,15 @@ static kNode* TypeDeclAndMakeSetter(KonohaContext *kctx, kNode *stmt, kGamma *gm
 
 static kbool_t kNameSpace_InitGlobalObject(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	if(ns->globalObjectNULL_OnList == NULL) {
+	if(ns->globalObjectNULL == NULL) {
 		KDEFINE_CLASS defGlobalObject = {0};
 		defGlobalObject.structname = "GlobalObject";
 		defGlobalObject.typeId = KTypeAttr_NewId;
 		defGlobalObject.cflag = KClassFlag_Singleton|KClassFlag_Final;
 		defGlobalObject.cstruct_size = sizeof(kGlobalObject);
 		KClass *cGlobalObject = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defGlobalObject, trace);
-		((kNameSpaceVar *)ns)->globalObjectNULL_OnList =  KLIB Knull(kctx, cGlobalObject);
-		return KLIB kNameSpace_SetConstData(kctx, ns, KSymbol_("global"), cGlobalObject->typeId, (uintptr_t)ns->globalObjectNULL_OnList, true/*isOverride*/, trace);
+		((kNameSpaceVar *)ns)->globalObjectNULL =  KLIB Knull(kctx, cGlobalObject);
+		return KLIB kNameSpace_SetConstData(kctx, ns, KSymbol_("global"), cGlobalObject->typeId, (uintptr_t)ns->globalObjectNULL, true/*isOverride*/, trace);
 	}
 	return true;
 }
@@ -109,7 +109,7 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 		if(kNameSpace_InitGlobalObject(kctx, ns, trace)) {
 			kToken *tk  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
 			kNode  *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
-			SUGAR kNode_DeclType(kctx, stmt, gma, tk->resolvedTypeId, expr, ns->globalObjectNULL_OnList, TypeDeclAndMakeSetter);
+			SUGAR kNode_DeclType(kctx, stmt, gma, tk->resolvedTypeId, expr, ns->globalObjectNULL, TypeDeclAndMakeSetter);
 		}
 		KReturn(kNode_Type(kctx, stmt, KNode_Done, KType_void));
 	}

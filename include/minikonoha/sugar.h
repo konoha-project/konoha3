@@ -445,7 +445,7 @@ struct kNodeVar {
 #define KNewNode(ns)     new_(Node, ns, OnGcStack)
 
 #define kNode_IsRootNode(O)       IS_NameSpace(O->RootNodeNameSpace)
-#define kNode_ns(O)                kNode_GetNameSpace(kctx, O)
+#define kNode_ns(O)               kNode_GetNameSpace(kctx, O)
 static inline kNameSpace *kNode_GetNameSpace(KonohaContext *kctx, kNode *node)
 {
 	kNameSpace *ns = node->StmtNameSpace;
@@ -511,25 +511,24 @@ typedef struct {
 //#define Gamma_hasERROR(GMA)    KFlag_Is(kshortflag_t, GMA->genv->flag, kGamma_ERROR)
 //#define Gamma_SetERROR(GMA,B) KFlag_Set(kshortflag_t, GMA->genv->flag, kGamma_ERROR, B)
 
-typedef struct {
+struct KGammaStack {
 	KGammaStackDecl *varItems;
 	size_t varsize;
 	size_t capacity;
 	size_t allocsize;  // set size if not allocated  (by default on stack)
-} KGammaStack;
+} ;
 
-typedef struct  {
+struct KGammaLocalData {
 	kshortflag_t  flag;      kshortflag_t  cflag;
 	KClass   *thisClass;
 	//ktypeattr_t      static_cid;
-	kMethod      *currentWorkingMethod;
-	KGammaStack    localScope;
-	int           blockScopeShiftSize;
-} KGammaAllocaData;
+	kMethod       *currentWorkingMethod;
+	struct KGammaStack    localScope;
+} ;
 
 struct kGammaVar {
 	kObjectHeader h;
-	KGammaAllocaData *genv;
+	struct KGammaLocalData *genv;
 };
 
 

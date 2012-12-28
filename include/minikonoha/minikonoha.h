@@ -1508,7 +1508,7 @@ struct kNameSpaceVar {
 	kArray                            *NameSpaceConstList;
 	kNameSpace                        *parentNULL;
 	KDict                              constTable;
-	kObject                           *globalObjectNULL_OnList;
+	kObject                           *globalObjectNULL;
 	kArray                            *methodList_OnList;   // default K_EMPTYARRAY
 	size_t                             sortedMethodList;
 	// the below references are defined in sugar
