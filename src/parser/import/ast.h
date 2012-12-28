@@ -166,6 +166,7 @@ typedef enum {
 	ParseExpressionOption = 0,
 	ParseMetaPatternOption = 1,
 	OnlyPatternMatch = 1 << 2,
+	ParseBlockOption = 1 << 3,
 } ParseOption;
 
 static kNode* ParseNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int *beginIdx, int endIdx, int option, const char *hintBeforeText)
@@ -173,6 +174,7 @@ static kNode* ParseNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int
 	if(beginIdx[0] < endIdx) {
 		int opIdx = FindOperator(kctx, node, tokenList, beginIdx[0], endIdx);
 		kToken *keyOperator = tokenList->TokenItems[opIdx];
+		DBG_P("KeyOperator >>>>>>>> %d<%d<%d, %s", beginIdx[0], opIdx, endIdx, KToken_t(keyOperator));
 		kNode_Termnize(kctx, node, keyOperator); // set operator
 		beginIdx[0] = ParseSyntaxNode(kctx, keyOperator->resolvedSyntaxInfo, node, 0, tokenList, beginIdx[0], opIdx, endIdx);
 		return node;
@@ -198,6 +200,19 @@ static kNode* ParseNewNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLis
 	}
 	node = ParseNode(kctx, node, tokenList, beginIdx, endIdx, option, hintBeforeText);
 	KDump(node);
+	return node;
+}
+
+static kNode *ParseStatementNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
+{
+	KTokenSeq source = {ns, tokenList, beginIdx, endIdx};
+	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList, 0};
+	KTokenSeq_Push(kctx, tokens);
+	SUGAR KTokenSeq_Preprocess(kctx, &tokens, NULL, &source, beginIdx);
+	DBG_ASSERT(source.SourceConfig.openToken == NULL);
+	DBG_ASSERT(source.SourceConfig.stopChar == 0);
+	kNode *node = ParseNewNode(kctx, ns, tokens.tokenList, &tokens.beginIdx, tokens.endIdx, ParseMetaPatternOption, NULL);
+	KTokenSeq_Pop(kctx, tokens);
 	return node;
 }
 
@@ -796,21 +811,24 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 //	return true;
 //}
 
-static kNode *new_BlockNode2(KonohaContext *kctx, KMacroSet *macro, KTokenSeq *source)
-{
-	KTokenSeq tokens = {source->ns, source->tokenList, kArray_size(source->tokenList)};
-	source->SourceConfig.openToken = NULL;
-	source->SourceConfig.stopChar = 0;
-	KTokenSeq_Preprocess(kctx, &tokens, macro, source, source->beginIdx);
-	kNode *block = new_BlockNode(kctx, source->ns);
-	int currentIdx = FindFirstStatementToken(kctx, tokens.tokenList, tokens.beginIdx, tokens.endIdx);
-	while(currentIdx < tokens.endIdx) {
-		kNode *node = ParseNewNode(kctx, source->ns, tokens.tokenList, &currentIdx, tokens.endIdx, ParseMetaPatternOption, NULL);
-		kNode_AddNode(kctx, block, node);
-		currentIdx = FindFirstStatementToken(kctx, tokens.tokenList, currentIdx, tokens.endIdx);
-	}
-	return block;
-}
+//static kNode *new_BlockNode2(KonohaContext *kctx, KMacroSet *macro, KTokenSeq *source)
+//{
+//	KTokenSeq tokens = {source->ns, source->tokenList, kArray_size(source->tokenList)};
+//	source->SourceConfig.openToken = NULL;
+//	source->SourceConfig.stopChar = 0;
+//	KTokenSeq_Preprocess(kctx, &tokens, macro, source, source->beginIdx);
+//	kNode *block = new_BlockNode(kctx, source->ns);
+//	int currentIdx = FindFirstStatementToken(kctx, tokens.tokenList, tokens.beginIdx, tokens.endIdx);
+//	while(currentIdx < tokens.endIdx) {
+//		DBG_P(">>BEFORE %d<%d<%d<<", tokens.beginIdx, currentIdx, tokens.endIdx);
+//		kNode *node = ParseNewNode(kctx, source->ns, tokens.tokenList, &currentIdx, tokens.endIdx, ParseMetaPatternOption, NULL);
+//		KDump(block);
+//		kNode_AddNode(kctx, block, node);
+//		DBG_P(">>AFTER<< %d<%d<%d<<", tokens.beginIdx, currentIdx, tokens.endIdx); KDump(block);
+//		currentIdx = FindFirstStatementToken(kctx, tokens.tokenList, currentIdx, tokens.endIdx);
+//	}
+//	return block;
+//}
 
 static kNode* kNode_GetBlock(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ksymbol_t kw, kNode *def)
 {
@@ -823,8 +841,8 @@ static kNode* kNode_GetBlock(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, k
 			kToken_ToBraceGroup(kctx, (kTokenVar *)tk, ns, NULL);
 		}
 		if(tk->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
-			KTokenSeq range = {ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
-			block = new_BlockNode2(kctx, NULL, &range);
+			int beginIdx = 0;
+			block = ParseNewNode(kctx, ns, tk->subTokenList, &beginIdx, kArray_size(tk->subTokenList), ParseMetaPatternOption|ParseBlockOption, NULL);
 			KLIB kObjectProto_SetObject(kctx, stmt, kw, kObject_typeId(block), block);
 		}
 	}

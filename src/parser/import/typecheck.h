@@ -33,6 +33,9 @@ static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kGamma *
 	END_UnusedStack();
 	RESET_GCSTACK();
 	if(kNode_IsError(expr)) return expr;
+	if(lsfp[K_RTNIDX].asNode == K_NULLNODE) {
+		DBG_ASSERT(expr->attrTypeId == KType_var); // untyped
+	}
 	DBG_ASSERT(IS_Node(lsfp[K_RTNIDX].asObject));
 	return (kNode *)lsfp[K_RTNIDX].asObject;
 }
@@ -51,13 +54,15 @@ static kNode *TypeNode(KonohaContext *kctx, KSyntax *syn0, kNode *expr, kGamma *
 	}
 	while(true) {
 		int index, size;
-		kFunc **FuncItems = KSyntax_funcTable(kctx, syn, KSugarTypeCheckFunc, &size);
+		kFunc **FuncItems = KSyntax_funcTable(kctx, syn, KSugarTypeFunc, &size);
 		for(index = size - 1; index >= 0; index--) {
 			kNode *texpr = CallTypeFunc(kctx, FuncItems[index], expr, gma, reqType);
 			if(kNode_IsError(texpr) || texpr->attrTypeId != KType_var) {
 				if(!kNode_Is(OpenBlock, texpr)) {
 					gma->genv->localScope.varsize = varsize;
 				}
+				DBG_P(">>>>>>> typed");
+				KDump(texpr);
 				return texpr;
 			}
 		}
@@ -142,7 +147,9 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClas
 	}
 	if(typedClass->typeId == KType_void) {
 		if(!FLAG_is(pol, TypeCheckPolicy_AllowVoid)) {
-			expr = SUGAR MessageNode(kctx, expr, NULL, gma, ErrTag, "void is not acceptable");
+			KDump(expr);
+			expr = SUGAR MessageNode(kctx, expr, NULL, gma, ErrTag, "void is unacceptable");
+			DBG_ASSERT(kctx==NULL);
 		}
 		return expr;
 	}
@@ -215,25 +222,31 @@ static kNode* TypeCheckNodeList(KonohaContext *kctx, kArray *nodeList, size_t n,
 
 static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kGamma *gma, KClass *reqc)
 {
-	size_t lvarsize = gma->genv->localScope.varsize;
-	if(block != K_NULLBLOCK) {
-		block->stacktop = lvarsize;
-	}
-	int i, size = kArray_size(block->NodeList) - 1;
+	DBG_P("########## starting block");
+	KDump(block);
+	int i, size = kNode_GetListSize(kctx, block) - 1;
 	for(i = 0; i < size; i++) {
+		DBG_P("###### Block[%d]", i);
+		KDump(kNode_At(block, i));
 		kNode *stmt = TypeCheckNodeList(kctx, block->NodeList, i, gma, KClass_void);
+		KDump(stmt);
 		if(kNode_IsError(stmt)) {
-			return block;  // untyped
+			return stmt;  // untyped
 		}
 	}
 	if(size >= 0) {
+		DBG_P("###### Block[%d]", size);
+		KDump(kNode_At(block, size));
 		kNode *stmt = TypeCheckNodeList(kctx, block->NodeList, size, gma, reqc);
+		KDump(stmt);
 		if(!kNode_IsError(stmt)) {
 			kNode_Type(kctx, block, KNode_Block, stmt->attrTypeId);
 		}
 	}
 	else {
-		kNode_Type(kctx, block, KNode_Block, KType_void);
+		if(block != K_NULLBLOCK) {
+			kNode_Type(kctx, block, KNode_Block, KType_void);
+		}
 	}
 	return block;
 }
@@ -263,7 +276,7 @@ static KGammaAllocaData *kGamma_Pop(KonohaContext *kctx, kGamma *gma, KGammaAllo
 
 // --------------------------------------------------------------------------
 
-static kNode* kMethod_newNode(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *source, kfileline_t uline)
+static kNode* kMethod_ParseBodyNode(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *source, kfileline_t uline)
 {
 	const char *script = kString_text(source);
 	if(IS_NULL(source) || script[0] == 0) {
@@ -274,9 +287,9 @@ static kNode* kMethod_newNode(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns,
 	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList, 0};
 	KTokenSeq_Push(kctx, tokens);
 	KTokenSeq_Tokenize(kctx, &tokens, script, uline);
-	kNode *block = new_BlockNode2(kctx, NULL/*macro*/, &tokens);
+	kNode *node = ParseStatementNode(kctx, ns, tokens.tokenList, tokens.beginIdx, tokens.endIdx);
 	KTokenSeq_Pop(kctx, tokens);
-	return block;
+	return node;
 }
 
 static void kGamma_InitParam(KonohaContext *kctx, KGammaAllocaData *genv, kParam *pa, kparamtype_t *callparam)
@@ -301,7 +314,8 @@ static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t 
 		//DynamicComplie();
 	}
 	kGamma *gma = KGetParserContext(kctx)->preparedGamma;
-	kNode *bk = kMethod_newNode(kctx, mtd, ns, text, uline);
+	kNode *node = kMethod_ParseBodyNode(kctx, mtd, ns, text, uline);
+	DBG_P("############"); KDump(node);
 	KGammaAllocaData newgma = {0};
 	KGammaStackDecl lvarItems[32 + param->psize];
 	bzero(lvarItems, sizeof(KGammaStackDecl) * (32 + param->psize));
@@ -314,8 +328,8 @@ static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t 
 
 	KPushGammaStack(gma, &newgma);
 	kGamma_InitParam(kctx, &newgma, param, callparamNULL);
-	TypeCheckBlock(kctx, bk, gma, KClass_void);
-	KLIB kMethod_GenCode(kctx, mtd, bk, options);
+	node = TypeCheckNode(kctx, node, gma, KClass_void, 0);
+	KLIB kMethod_GenCode(kctx, mtd, node, options);
 	KPopGammaStack(gma, &newgma);
 	RESET_GCSTACK();
 	return mtd;

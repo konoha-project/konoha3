@@ -425,7 +425,7 @@ static KMETHOD NameSpace_AddTopLevelStatement(KonohaContext *kctx, KonohaStack *
 static KMETHOD NameSpace_AddTypeCheck(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
-	SUGAR kNameSpace_AddSugarFunc(kctx, sfp[0].asNameSpace, keyword, KSugarTypeCheckFunc, sfp[2].asFunc);
+	SUGAR kNameSpace_AddSugarFunc(kctx, sfp[0].asNameSpace, keyword, KSugarTypeFunc, sfp[2].asFunc);
 }
 
 static void LoadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)

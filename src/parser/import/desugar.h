@@ -71,7 +71,7 @@ static KMETHOD PatternMatch_MethodName(KonohaContext *kctx, KonohaStack *sfp)
 
 static void CheckCStyleParam(KonohaContext *kctx, KTokenSeq* tokens)
 {
-	int i;
+	int i, count = 0;
 	for(i = 0; i < tokens->endIdx; i++) {
 		kTokenVar *tk = tokens->tokenList->TokenVarItems[i];
 		if(tk->resolvedSymbol == KSymbol_void) {
@@ -79,8 +79,12 @@ static void CheckCStyleParam(KonohaContext *kctx, KTokenSeq* tokens)
 			return;
 		}
 		if(tk->resolvedSyntaxInfo->keyword == KSymbol_COMMA) {
-			kToken_Set(StatementSeparator, tk, true);
+			tk->resolvedSyntaxInfo = K_NULLTOKEN->resolvedSyntaxInfo;
+			count++;
 		}
+	}
+	if(count == 0 && tokens->beginIdx < tokens->endIdx) {
+		KLIB kArray_Add(kctx, tokens->tokenList, K_NULLTOKEN); // to ensure block
 	}
 }
 
@@ -92,7 +96,7 @@ static KMETHOD PatternMatch_CStyleParam(KonohaContext *kctx, KonohaStack *sfp)
 	if(tk->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {
 		KTokenSeq param = {kNode_ns(stmt), tk->subTokenList, 0, kArray_size(tk->subTokenList)};
 		CheckCStyleParam(kctx, &param);
-		kNode *block = new_BlockNode2(kctx, NULL, &param);
+		kNode *block = ParseNewNode(kctx, param.ns, param.tokenList, &param.beginIdx, param.endIdx, ParseMetaPatternOption, NULL);
 		kNode_AddParsedObject(kctx, stmt, name, UPCAST(block));
 		returnIdx = beginIdx + 1;
 	}
@@ -108,11 +112,32 @@ static KMETHOD PatternMatch_CStyleBlock(KonohaContext *kctx, KonohaStack *sfp)
 		kNode_AddParsedObject(kctx, stmt, name, UPCAST(tk));
 		KReturnUnboxValue(beginIdx+1);
 	}
-	int newEndIdx = FindEndOfStatement(kctx, kNode_ns(stmt), tokenList, beginIdx, endIdx);
-	KTokenSeq tokens = {kNode_ns(stmt), tokenList, beginIdx, newEndIdx};
-	kNode *block = new_BlockNode2(kctx, NULL, &tokens);
+	kNode *block = ParseNewNode(kctx, kNode_ns(stmt), tokenList, &beginIdx, endIdx, ParseMetaPatternOption, NULL);
 	kNode_AddParsedObject(kctx, stmt, name, UPCAST(block));
-	KReturnUnboxValue(newEndIdx);
+	KReturnUnboxValue(beginIdx);
+}
+
+static KMETHOD Parse_Block(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_Parse(block, name, tokenList, beginIdx, opIdx, endIdx);
+	kNameSpace *ns = kNode_ns(block);
+	int i;
+	for(i = opIdx; i < endIdx; i++) {
+		kToken *tk = tokenList->TokenVarItems[i];
+		if(tk->resolvedSyntaxInfo->precedence_op2 == Precedence_CStyleStatementEnd) {
+			if(beginIdx < i) {
+				kNode *stmt = ParseNewNode(kctx, ns, tokenList, &beginIdx, i, ParseMetaPatternOption, NULL);
+				kNode_AddNode(kctx, block, stmt);
+			}
+			beginIdx = i + 1;
+		}
+	}
+	if(beginIdx < endIdx) {
+		kNode *stmt = ParseNewNode(kctx, ns, tokenList, &beginIdx, endIdx, ParseMetaPatternOption, NULL);
+		kNode_AddNode(kctx, block, stmt);
+	}
+	DBG_P("create block size=%d", kArray_size(block->NodeList));
+	KReturnUnboxValue(endIdx);
 }
 
 static KMETHOD PatternMatch_Token(KonohaContext *kctx, KonohaStack *sfp)
@@ -225,7 +250,7 @@ static KMETHOD Expression_Operator(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(node, tokenList, beginIdx, operatorIdx, endIdx);
 	kNameSpace *ns = kNode_ns(node);
-//	if(/*syn->keyword != KSymbol_LET && */syn->sugarFuncTable[KSugarTypeCheckFunc] == NULL) {
+//	if(/*syn->keyword != KSymbol_LET && */syn->sugarFuncTable[KSugarTypeFunc] == NULL) {
 //		DBG_P("switching type checker of %s%s to MethodCall ..", KSymbol_Fmt2(syn->keyword));
 //		syn = KSyntax_(ns, KSymbol_NodeMethodCall);  // switch type checker
 //	}
@@ -746,7 +771,6 @@ static kMethod *LookupMethod(KonohaContext *kctx, kNode *expr, kGamma *gma)
 	kNameSpace *ns = kNode_ns(expr);
 	KClass *thisClass = KClass_(kNode_At(expr, 1)->attrTypeId);
 	kToken *methodToken = expr->NodeList->TokenVarItems[0];
-	DBG_P(">>>>>>>>>>> type=%s", KClass_text(kObject_class(methodToken)));
 	DBG_ASSERT(IS_Token(methodToken));
 	size_t psize = kArray_size(expr->NodeList) - 2;
 	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, thisClass, methodToken->resolvedSymbol, psize, KMethodMatch_CamelStyle);
@@ -769,10 +793,6 @@ static kMethod *LookupMethod(KonohaContext *kctx, kNode *expr, kGamma *gma)
 		if(kMethod_Is(Overloaded, mtd)) {
 			mtd = LookupOverloadedMethod(kctx, ns, mtd, expr, gma);
 		}
-//		if(mtd != NULL) {
-//			//DBG_P("found resolved method %s.%s%s isOverloaded=%d", kMethod_Fmt3(mtd), kMethod_Is(Overloaded, mtd));
-//			return TypeCheckMethodParam(kctx, mtd, expr, gma, reqc);
-//		}
 	}
 	return mtd;
 }
@@ -783,6 +803,9 @@ static KMETHOD TypeCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp)
 	kNode *texpr = K_NULLNODE;
 	kMethod *mtd = expr->NodeList->MethodItems[0];
 	if(!IS_Method(mtd)) {
+		KDump(expr);
+		DBG_P("@");
+		KDump(kNode_At(expr, 1));
 		texpr = SUGAR TypeCheckNodeAt(kctx, expr, 1, gma, KClass_INFER, 0);
 		mtd = (kNode_IsError(texpr)) ? NULL : LookupMethod(kctx, expr, gma);
 	}
@@ -1162,7 +1185,7 @@ static KMETHOD Statement_ParamDecl(KonohaContext *kctx, KonohaStack *sfp)
 		pa = new_kParam(kctx, rtype, 0, NULL);
 	}
 	else if(IS_Node(params)) {
-		size_t i, psize = kArray_size(params->NodeList);
+		size_t i, psize = kNode_GetListSize(kctx, params);
 		kparamtype_t *p = ALLOCA(kparamtype_t, psize);
 		for(i = 0; i < psize; i++) {
 			p[i].attrTypeId = KType_void;
@@ -1264,7 +1287,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	kFunc *patternParseFunc = KSugarFunc(ns, Parse_Pattern);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ PATTERN(Indent)},
-//		{ PATTERN(Symbol),  0, 0, 0, PatternMatch_MethodName, Expression_Term, NULL, NULL, TypeCheck_Symbol,},
+		{ TOKEN(SEMICOLON), SYNFLAG_CFunc|SYNFLAG_NodeLeftJoinOp2, Precedence_CStyleStatementEnd, Precedence_CStyleStatementEnd, {SUGARFUNC Parse_Block}, {SUGARFUNC TypeCheck_Block}},
 		{ PATTERN(Symbol),  SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_MethodName}, {SUGARFUNC TypeCheck_Symbol},},
 		{ PATTERN(Text),    SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_TextLiteral},},
 		{ PATTERN(Number),  SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_IntLiteral},},
@@ -1310,6 +1333,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ KSymbol_END, },
 	};
 	kNameSpace_DefineSyntax(kctx, ns, SYNTAX, NULL);
+	((kTokenVar *)K_NULLTOKEN)->resolvedSyntaxInfo = kNameSpace_GetSyntax(kctx, ns, KSymbol_SEMICOLON, 0/*already created*/);
 	KPARSERM->termParseFunc     = TermFunc;
 	KPARSERM->opParseFunc       = OperatorFunc;
 	KPARSERM->patternParseFunc  = patternParseFunc;

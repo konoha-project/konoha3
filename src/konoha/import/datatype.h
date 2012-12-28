@@ -483,6 +483,12 @@ static void kMethod_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
+static void kMethod_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+{
+	kMethod *mtd = v[pos].asMethod;
+	KBuffer_printf(kctx, wb, "%s.%s%s", kMethod_Fmt3(mtd));
+}
+
 #define KClass_MethodVar KClass_Method
 static kMethodVar* new_kMethod(KonohaContext *kctx, kArray *gcstack, uintptr_t flag, ktypeattr_t cid, kmethodn_t mn, KMethodFunc func)
 {
@@ -938,6 +944,7 @@ static void loadInitStructData(KonohaContext *kctx)
 	defMethod.init = kMethod_Init;
 	defMethod.reftrace = kMethod_Reftrace;
 	defMethod.free     = kMethod_Free;
+	defMethod.p        = kMethod_p;
 
 	KDEFINE_CLASS defFunc = {0};
 	SETTYNAME(defFunc, Func);

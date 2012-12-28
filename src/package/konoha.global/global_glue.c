@@ -117,7 +117,7 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_TypeDeclPattern, KSugarTypeCheckFunc, KSugarFunc(ns, Statement_GlobalTypeDecl));
+	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_TypeDeclPattern, KSugarTypeFunc, KSugarFunc(ns, Statement_GlobalTypeDecl));
 	return true;
 }
 

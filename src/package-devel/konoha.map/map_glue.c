@@ -241,7 +241,7 @@
 //
 //static kbool_t map_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 //{
-//	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_NodePattern, KSugarTypeCheckFunc, KSugarFunc(ns, TypeCheck_MapLiteral));
+//	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_NodePattern, KSugarTypeFunc, KSugarFunc(ns, TypeCheck_MapLiteral));
 //	return true;
 //}
 //

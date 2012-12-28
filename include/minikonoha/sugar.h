@@ -203,7 +203,7 @@ typedef struct KSyntaxVar         KSyntaxVar;
 typedef enum {
 	KSugarTokenFunc         = 0,
 	KSugarParseFunc         = 1,
-	KSugarTypeCheckFunc     = 2,
+	KSugarTypeFunc     = 2,
 	SugarFunc_SIZE          = 3
 } SugerFunc;
 
@@ -468,6 +468,11 @@ static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeTy
 	return node;
 }
 
+static inline size_t kNode_GetListSize(KonohaContext *kctx, kNode *node)
+{
+	return (IS_Array(node->NodeList)) ? kArray_size(node->NodeList) : 0;
+}
+
 #define kNode_IsTerm(N)           IS_Token((N)->TermToken)
 
 #define kNodeFlag_ObjectConst        kObjectFlag_Local1
@@ -476,7 +481,7 @@ static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeTy
 #define kNodeFlag_CatchContinue      kObjectFlag_Local3  /* KNode_Block */
 #define kNodeFlag_CatchBreak         kObjectFlag_Local4  /* KNode_Block */
 
-#define kNode_Is(P, O)      (KFlag_Is(uintptr_t,(O)->h.magicflag, kNodeFlag_##P))
+#define kNode_Is(P, O)       (KFlag_Is(uintptr_t,(O)->h.magicflag, kNodeFlag_##P))
 #define kNode_Set(P, O, B)   KFlag_Set(uintptr_t,(O)->h.magicflag, kNodeFlag_##P, B)
 
 #define kNode_At(E, N)            ((E)->NodeList->NodeItems[(N)])
@@ -550,7 +555,7 @@ struct kGammaVar {
 #define IS_Node(O)   (kObject_class(O) == KClass_Node)
 #define IS_Gamma(O)  (kObject_class(O) == KClass_Gamma)
 
-#define K_NULLTOKEN  (kToken *)((KClass_Token)->defaultNullValue)
+#define K_NULLTOKEN  ((kToken *)(KClass_Token)->defaultNullValue)
 #define K_NULLNODE   (kNode *)((KClass_Node)->defaultNullValue)
 #define K_NULLBLOCK  (kNode *)((KClass_Node)->defaultNullValue)
 

@@ -309,7 +309,7 @@
 //
 //static kbool_t cstyle_defineArrayLiteral(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 //{
-//	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_NodePattern, KSugarTypeCheckFunc, KSugarFunc(ns, TypeCheck_ArrayLiteral));
+//	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_NodePattern, KSugarTypeFunc, KSugarFunc(ns, TypeCheck_ArrayLiteral));
 //	KDEFINE_METHOD MethodData[] = {
 //		_Public|kMethod_Hidden, _F(Array_newList), KType_Array, KType_Array, KMethodName_("{}"), 0,
 //		DEND,
