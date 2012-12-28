@@ -22,6 +22,32 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+static kNode *kNode_Rebase(KonohaContext *kctx, kNode *node, size_t stacktop)
+{
+	if(!kNode_IsValue(node) && node->stacktop != stacktop) {
+		size_t i, size = kNode_GetNodeListSize(kctx, node);
+		if(node->node == KNode_Block) {
+			for(i = 0; i < size; i++) {
+				kNode *sub = node->NodeList->NodeItems[i];
+				if(kNode_IsValue(sub)) continue;
+				kNode_Rebase(kctx, sub, stacktop + (sub->stacktop - node->stacktop));
+			}
+		}
+		else if(IS_Array(node->NodeList)) {
+			for(i = 1; i < size; i++) {
+				kNode *sub = node->NodeList->NodeItems[i];
+				if(kNode_IsValue(sub)) continue;
+				kNode_Rebase(kctx, sub, (i - 1) + stacktop + K_CALLDELTA);
+			}
+		}
+		else if(IS_Node(node->NodeToPush)) {
+			kNode_Rebase(kctx, node->NodeToPush, stacktop);
+		}
+		node->stacktop = stacktop;
+	}
+	return node;
+}
+
 static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kGamma *gma, kObject *reqType)
 {
 	INIT_GCSTACK();
@@ -46,22 +72,25 @@ static kNode *TypeNode(KonohaContext *kctx, KSyntax *syn0, kNode *expr, kGamma *
 	kObject *reqType = KLIB Knull(kctx, reqtc);
 	int varsize = gma->genv->localScope.varsize;
 	expr->stacktop = varsize;
-	if(KFlag_Is(kshortflag_t, syn->flag, SYNFLAG_CallNode)) {
-		KPushMethodCall(gma);
-		KPushMethodCall(gma);
-		KPushMethodCall(gma);
-		KPushMethodCall(gma);
-	}
+	DBG_P(">>>>>>>>>> #stacktop = %d", varsize);
+//	if(KFlag_Is(kshortflag_t, syn->flag, SYNFLAG_CallNode)) {
+//		KPushMethodCall(gma);
+//		KPushMethodCall(gma);
+//		KPushMethodCall(gma);
+//		KPushMethodCall(gma);
+//	}
 	while(true) {
 		int index, size;
 		kFunc **FuncItems = KSyntax_funcTable(kctx, syn, KSugarTypeFunc, &size);
 		for(index = size - 1; index >= 0; index--) {
 			kNode *texpr = CallTypeFunc(kctx, FuncItems[index], expr, gma, reqType);
 			if(kNode_IsError(texpr) || texpr->attrTypeId != KType_var) {
-				if(!kNode_Is(OpenBlock, texpr)) {
+				if(!kNode_Is(OpenBlock, expr)) {
 					gma->genv->localScope.varsize = varsize;
 				}
-				KDump(texpr);
+//				if(!kNode_IsValue(texpr)) {
+//					texpr->stacktop = varsize;
+//				}
 				return texpr;
 			}
 		}
@@ -120,14 +149,6 @@ static kNode *BoxNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClass* req
 	KFieldSet(node, node->NodeToPush, node);
 	DBG_ASSERT(kctx == NULL);
 	return kNode_Type(kctx, node, KNode_And, node->attrTypeId);
-	//	KClass *c = KClass_(node->attrTypeId);
-//	if(c->typeId != KType_boolean) c = KClass_Int;
-//	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, kNode_ns(stmt), c, MN_box, 0, KMethodMatch_CamelStyle);
-//	DBG_ASSERT(mtd != NULL);
-//	//return new_MethodNode(kctx, stmt, gma, reqClass, mtd, 1, texpr);
-//	kNodeVar *expr = new_UntypedOperatorNode(kctx, KSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall), 2, mtd, node);
-//	return kNode_Type(kctx, expr, KNode_MethodCall, c->typeId/*reqClass->typeId*/);
-//	return node; // FIXME:Node
 }
 
 static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClass* reqClass, int pol)

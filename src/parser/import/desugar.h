@@ -681,7 +681,7 @@ static kNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kNode *exp
 		KClass *rtype = ResolveTypeVariable(kctx, KClass_(pa->rtype), thisClass);
 		return MakeNodeConst(kctx, expr, rtype);
 	}
-	return expr;
+	return kNode_Rebase(kctx, expr, gma->genv->localScope.varsize);
 }
 
 static kNode* TypeCheckDynamicCallParams(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kMethod *mtd, kGamma *gma, kString *name, kmethodn_t mn, KClass *reqClass)
