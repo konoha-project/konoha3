@@ -207,7 +207,7 @@ static kNode* kNode_ParseClassNodeNULL(KonohaContext *kctx, kNode *stmt, kToken 
 				prevToken = tk;
 			}
 			KTokenSeq_End(kctx, (&sourceRange));
-			bk = SUGAR new_BlockNode(kctx, stmt/*parent*/, NULL, &sourceRange);
+			bk = SUGAR ParseNewNode(kctx, range.ns, sourceRange.tokenList, &sourceRange.beginIdx, sourceRange.endIdx, ParseMetaPatternOption, NULL);
 			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_BlockPattern, KType_Node, bk);
 		}
 		KTokenSeq_Pop(kctx, range);

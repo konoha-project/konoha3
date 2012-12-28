@@ -537,12 +537,12 @@ static void KBuilder_AsmNMOV(KonohaContext *kctx, KBuilder *builder, int a, KCla
 
 static kNode* Node_getFirstBlock(KonohaContext *kctx, kNode *stmt)
 {
-	return SUGAR kNode_GetBlock(kctx, stmt, NULL, KSymbol_BlockPattern, K_NULLBLOCK);
+	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_BlockPattern, K_NULLBLOCK);
 }
 
 static kNode* Node_getElseNode(KonohaContext *kctx, kNode *stmt)
 {
-	return SUGAR kNode_GetBlock(kctx, stmt, NULL, KSymbol_else, K_NULLBLOCK);
+	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_else, K_NULLBLOCK);
 }
 
 static kNode* Node_getFirstExpr(KonohaContext *kctx, kNode *stmt)

@@ -303,7 +303,7 @@ static void kNode_AddParsedObject(KonohaContext *kctx, kNode *stmt, ksymbol_t ke
 	else {
 		if(!IS_Array(valueList)) {
 			INIT_GCSTACK();
-			kArray *newList = /*G*/new_(Array, 0, _GcStack);
+			kArray *newList = new_(Array, 0, _GcStack);
 			KLIB kArray_Add(kctx, newList, valueList);
 			KLIB kObjectProto_SetObject(kctx, stmt, keyid, kObject_typeId(newList), newList);
 			valueList = newList;
@@ -483,21 +483,6 @@ static kNode* kNode_GetNode(KonohaContext *kctx, kNode *stmt, ksymbol_t kw, kNod
 	kNode *expr = (kNode *)kNode_GetObjectNULL(kctx, stmt, kw);
 	if(expr != NULL && IS_Node(expr)) {
 		return expr;
-	}
-	return def;
-}
-
-static const char* kNode_GetText(KonohaContext *kctx, kNode *stmt, ksymbol_t kw, const char *def)
-{
-	kNode *expr = (kNode *)kNode_GetObjectNULL(kctx, stmt, kw);
-	if(expr != NULL) {
-		if(IS_Node(expr) && kNode_IsTerm(expr)) {
-			return kString_text(expr->TermToken->text);
-		}
-		else if(IS_Token(expr)) {
-			kToken *tk = (kToken *)expr;
-			if(IS_String(tk->text)) return kString_text(tk->text);
-		}
 	}
 	return def;
 }

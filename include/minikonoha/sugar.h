@@ -563,6 +563,13 @@ struct kGammaVar {
 
 typedef kNode* (*KTypeDeclFunc)(KonohaContext *kctx, kNode *stmt, kGamma *gma, ktypeattr_t ty, kNode *termNode, kNode *vexpr, kObject *thunk);
 
+typedef enum {
+	ParseExpressionOption = 0,
+	ParseMetaPatternOption = 1,
+	OnlyPatternMatch = 1 << 2,
+	ParseBlockOption = 1 << 3,
+} ParseOption;
+
 struct KBuilder;
 
 typedef struct {
@@ -600,16 +607,20 @@ typedef struct {
 	kToken*     (*kNode_GetToken)(KonohaContext *, kNode *, ksymbol_t kw, kToken *def);
 	kNode*      (*kNode_GetNode)(KonohaContext *, kNode *, ksymbol_t kw, kNode *def);
 	const char* (*kNode_GetText)(KonohaContext *, kNode *, ksymbol_t kw, const char *def);
-	kNode*      (*kNode_GetBlock)(KonohaContext *, kNode *, kNameSpace *, ksymbol_t kw, kNode *def);
+//	kNode*      (*kNode_GetBlock)(KonohaContext *, kNode *, kNameSpace *, ksymbol_t kw, kNode *def);
 
-	kNode*      (*new_BlockNode)(KonohaContext *, kNode *, KMacroSet *, KTokenSeq *);
+//	kNode*      (*new_BlockNode)(KonohaContext *, kNode *, KMacroSet *, KTokenSeq *);
 //	kNodeVar*    (*new_BlockNode)(KonohaContext *kctx, kArray *gcstack, KSyntax *syn, ...);
 	void         (*kNode_InsertAfter)(KonohaContext *, kNode *, kNode *target, kNode *);
 
 	kNode*       (*kNode_Termnize)(KonohaContext *, kNode *, kToken *);
 	kNodeVar*    (*new_UntypedOperatorNode)(KonohaContext *, KSyntax *syn, int n, ...);
+	int          (*ParseSyntaxNode)(KonohaContext *, KSyntax *, kNode *, ksymbol_t, kArray *, int beginIdx, int opIdx, int endIdx);
+
 	kNode*       (*kNode_ParseOperatorNode)(KonohaContext *, kNode *, KSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
-	kNode*       (*ParseNewNode)(KonohaContext *, kNameSpace *, kArray *tokenList, int* s, int e, int option, const char *hintBeforeText);
+	int          (*ParseNode)(KonohaContext *, kNode *, kArray *, int beginIdx, int endIdx, ParseOption option, const char *hintBeforeText);
+	kNode*       (*ParseNewNode)(KonohaContext *, kNameSpace *, kArray *tokenList, int* s, int e, ParseOption option, const char *hintBeforeText);
+
 	kNode*       (*AddParamNode)(KonohaContext *, kNameSpace *, kNode *, kArray *tokenList, int, int, const char *hintBeforeText);
 	kNode*       (*kNode_RightJoinNode)(KonohaContext *, kNode *, kNode *, kArray *, int, int);
 
