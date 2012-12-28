@@ -104,7 +104,19 @@ static int SkipAnnotation(KonohaContext *kctx, kArray *tokenList, int currentIdx
 
 static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kArray *tokenList, int beginIdx, int endIdx)
 {
+	int i;
+	for(i = beginIdx; i < endIdx; i++) {
+		kToken *tk = tokenList->TokenItems[i];
+		if(tk->resolvedSyntaxInfo->precedence_op2 == Precedence_CStyleStatementEnd) {
+			DBG_P("KeyOperator >>>>>>>> %d<%d<%d, '%s'", beginIdx, i, endIdx, KToken_t(tk));
+			kNode_Termnize(kctx, node, tk); // set operator
+			return ParseSyntaxNode(kctx, tk->resolvedSyntaxInfo, node, 0, tokenList, beginIdx, i, endIdx);
+		}
+	}
 	beginIdx = SkipAnnotation(kctx, tokenList, beginIdx, endIdx);
+	if(!(beginIdx < endIdx)) {
+		return endIdx;  // empty
+	}
 	kToken *tk = tokenList->TokenItems[beginIdx];
 	KSyntax *syn = tk->resolvedSyntaxInfo;
 	if(syn->syntaxPatternListNULL == NULL) {
@@ -247,7 +259,7 @@ static int MatchSyntaxPattern(KonohaContext *kctx, kNode *node, KTokenSeq *token
 		L_ReDo:;
 		//tokenIdx = TokenUtils_SkipOnlyIndent(tokens->tokenList, tokenIdx, tokens->endIdx);
 		//DBG_P("patternIdx=%d, tokenIdx=%d, tokenEndIdx=%d", patternIdx, tokenIdx, tokens->endIdx);
-		KDump(node);
+		//KDump(node);
 		if(tokenIdx < tokens->endIdx) {
 			kToken *tk = tokens->tokenList->TokenItems[tokenIdx];
 			errRuleRef[1] = tk;

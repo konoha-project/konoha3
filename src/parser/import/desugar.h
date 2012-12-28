@@ -69,40 +69,6 @@ static KMETHOD PatternMatch_MethodName(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static void CheckCStyleParam(KonohaContext *kctx, KTokenSeq* tokens)
-{
-	int i, count = 0;
-	for(i = 0; i < tokens->endIdx; i++) {
-		kTokenVar *tk = tokens->tokenList->TokenVarItems[i];
-		if(tk->resolvedSymbol == KSymbol_void) {
-			tokens->endIdx = i; //  f(void) = > f()
-			return;
-		}
-		if(tk->resolvedSyntaxInfo->keyword == KSymbol_COMMA) {
-			tk->resolvedSyntaxInfo = K_NULLTOKEN->resolvedSyntaxInfo;
-			count++;
-		}
-	}
-	if(count == 0 && tokens->beginIdx < tokens->endIdx) {
-		KLIB kArray_Add(kctx, tokens->tokenList, K_NULLTOKEN); // to ensure block
-	}
-}
-
-static KMETHOD PatternMatch_CStyleParam(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
-	int returnIdx = -1;
-	kToken *tk = tokenList->TokenItems[beginIdx];
-	if(tk->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {
-		KTokenSeq param = {kNode_ns(stmt), tk->subTokenList, 0, kArray_size(tk->subTokenList)};
-		CheckCStyleParam(kctx, &param);
-		kNode *block = ParseNewNode(kctx, param.ns, param.tokenList, &param.beginIdx, param.endIdx, ParseMetaPatternOption, NULL);
-		kNode_AddParsedObject(kctx, stmt, name, UPCAST(block));
-		returnIdx = beginIdx + 1;
-	}
-	KReturnUnboxValue(returnIdx);
-}
-
 static KMETHOD PatternMatch_CStyleBlock(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
@@ -1145,6 +1111,42 @@ static kMethod* kMethod_DoLazyCompilation(KonohaContext *kctx, kMethod *mtd, kpa
 /* ------------------------------------------------------------------------ */
 /* [ParamDecl] */
 
+static void CheckCStyleParam(KonohaContext *kctx, KTokenSeq* tokens)
+{
+	int i, count = 0;
+	for(i = 0; i < tokens->endIdx; i++) {
+		kTokenVar *tk = tokens->tokenList->TokenVarItems[i];
+		if(tk->resolvedSymbol == KSymbol_void) {
+			tokens->endIdx = i; //  f(void) = > f()
+			return;
+		}
+		if(tk->resolvedSyntaxInfo->keyword == KSymbol_COMMA) {
+			tk->resolvedSyntaxInfo = K_NULLTOKEN->resolvedSyntaxInfo;
+			count++;
+		}
+	}
+	if(count == 0 && tokens->beginIdx < tokens->endIdx) {
+		KLIB kArray_Add(kctx, tokens->tokenList, K_NULLTOKEN); // to ensure block
+		tokens->endIdx += 1;
+	}
+}
+
+static KMETHOD PatternMatch_CStyleParam(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
+	int returnIdx = -1;
+	kToken *tk = tokenList->TokenItems[beginIdx];
+	if(tk->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {
+		KTokenSeq param = {kNode_ns(stmt), tk->subTokenList, 0, kArray_size(tk->subTokenList)};
+		CheckCStyleParam(kctx, &param);
+		kNode *block = ParseNewNode(kctx, param.ns, param.tokenList, &param.beginIdx, param.endIdx, ParseMetaPatternOption, NULL);
+		kNode_AddParsedObject(kctx, stmt, name, UPCAST(block));
+		DBG_P(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> block"); KDump(block);
+		returnIdx = beginIdx + 1;
+	}
+	KReturnUnboxValue(returnIdx);
+}
+
 static kParam *kNode_GetParamNULL(KonohaContext *kctx, kNode *stmt, kGamma* gma)
 {
 	kParam *pa = (kParam *)kNode_GetObjectNULL(kctx, stmt, KSymbol_ParamPattern);
@@ -1160,15 +1162,15 @@ static kParam *kNode_GetParamNULL(KonohaContext *kctx, kNode *stmt, kGamma* gma)
 
 static kbool_t SetParamType(KonohaContext *kctx, kNode *stmt, int n, kparamtype_t *p)
 {
-	kToken *tkT  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
+	kToken *typeToken  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
 	kNode  *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
-	DBG_ASSERT(tkT != NULL);
+	DBG_ASSERT(typeToken != NULL);
 	DBG_ASSERT(expr != NULL);
 	if(kNode_isSymbolTerm(expr)) {
 		kToken *tkN = expr->TermToken;
 //		ksymbol_t fn = /*KAsciiSymbol(kString_text(tkN->text), kString_size(tkN->text), KSymbol_NewId);*/
 		p[n].name = tkN->resolvedSymbol;
-		p[n].attrTypeId = Token_typeLiteral(tkT);
+		p[n].attrTypeId = Token_typeLiteral(typeToken);
 		return true;
 	}
 	return false;
@@ -1177,15 +1179,16 @@ static kbool_t SetParamType(KonohaContext *kctx, kNode *stmt, int n, kparamtype_
 static KMETHOD Statement_ParamDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, gma, reqc);
-	kToken *tkT = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL); // type
-	ktypeattr_t rtype =  tkT == NULL ? KType_void : Token_typeLiteral(tkT);
+	kToken *returnTypeToken = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL); // type
+	ktypeattr_t returnType =  (returnTypeToken == NULL) ? KType_void : Token_typeLiteral(returnTypeToken);
 	kParam *pa = NULL;
 	kNode *params = (kNode *)kNode_GetObjectNULL(kctx, stmt, KSymbol_ParamPattern);
 	if(params == NULL) {
-		pa = new_kParam(kctx, rtype, 0, NULL);
+		pa = new_kParam(kctx, returnType, 0, NULL);
 	}
 	else if(IS_Node(params)) {
 		size_t i, psize = kNode_GetListSize(kctx, params);
+		DBG_P(">>>>>>>>>> psize=%d", psize);
 		kparamtype_t *p = ALLOCA(kparamtype_t, psize);
 		for(i = 0; i < psize; i++) {
 			p[i].attrTypeId = KType_void;
@@ -1195,7 +1198,7 @@ static KMETHOD Statement_ParamDecl(KonohaContext *kctx, KonohaStack *sfp)
 				break;
 			}
 		}
-		pa = new_kParam(kctx, rtype, psize, p);
+		pa = new_kParam(kctx, returnType, psize, p);
 	}
 	if(pa != NULL && IS_Param(pa)) {
 		KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_ParamPattern, KType_Param, pa);
