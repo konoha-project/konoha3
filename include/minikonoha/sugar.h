@@ -459,6 +459,8 @@ static inline kNameSpace *kNode_GetNameSpace(KonohaContext *kctx, kNode *node)
 	return ns;
 }
 
+#define kNode_GetParent(kctx, node)  (IS_Node(node->Parent)) ? node->Parent : K_NULLNODE
+
 static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeType, ktypeattr_t attrTypeId)
 {
 	if(node->node != KNode_Error) {
@@ -618,7 +620,7 @@ typedef struct {
 	kNode*       (*new_MethodNode)(KonohaContext *, kNameSpace *, kGamma *, KClass *, kMethod *mtd, int n, ...);
 
 	kNode*      (*TypeCheckBlock)(KonohaContext *, kNode *, kGamma *, KClass *);
-	kbool_t     (*TypeCheckNodeByName)(KonohaContext *, kNode*, ksymbol_t, kGamma *, KClass *, int);
+	kNode*      (*TypeCheckNodeByName)(KonohaContext *, kNode*, ksymbol_t, kGamma *, KClass *, int);
 	kNode*      (*TypeCheckNodeAt)(KonohaContext *, kNode *, size_t, kGamma *, KClass *, int);
 	kNode *     (*TypeCheckMethodParam)(KonohaContext *, kMethod *mtd, kNode *, kGamma *, KClass *);
 	int         (*kGamma_AddLocalVariable)(KonohaContext *, kGamma *, ktypeattr_t, ksymbol_t);

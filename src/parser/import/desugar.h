@@ -913,77 +913,76 @@ static KMETHOD TypeCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp)
 // ---------------------------------------------------------------------------
 // Statement Node
 
-//static KMETHOD Statement_Expression(KonohaContext *kctx, KonohaStack *sfp)  // $Node
-//{
-//	VAR_TypeCheck(stmt, gma, reqc);
-//	kbool_t r = TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_INFER, TypeCheckPolicy_AllowVoid);
-//	kNode_Type(kctx, stmt, EXPR);
-//	KReturnUnboxValue(r);
-//}
-
 #define DefaultNameSpace NULL
+
 static KMETHOD Statement_if(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, gma, reqc);
 	if(TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_Boolean, 0)) {
-		kNode *thenBlock = SUGAR kNode_GetBlock(kctx, stmt, DefaultNameSpace, KSymbol_BlockPattern, K_NULLBLOCK);
-		kNode *elseBlock = SUGAR kNode_GetBlock(kctx, stmt, DefaultNameSpace, KSymbol_else, K_NULLBLOCK);
-		TypeCheckBlock(kctx, thenBlock, gma, KClass_void);
-		TypeCheckBlock(kctx, elseBlock, gma, KClass_void);
+		SUGAR kNode_GetBlock(kctx, stmt, DefaultNameSpace, KSymbol_BlockPattern, K_NULLBLOCK);
+		kNode *thenNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, gma, KClass_void, 0);
+		kNode *elseNode = SUGAR kNode_GetBlock(kctx, stmt, DefaultNameSpace, KSymbol_else, NULL);
+		if(elseNode != NULL) {
+			SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_else, gma, KClass_(thenNode->attrTypeId), 0);
+		}
 		KReturn(kNode_Type(kctx, stmt, KNode_If, KType_void));
 	}
 }
 
-//static kNode* Node_LookupIfNodeWithoutElse(KonohaContext *kctx, kNode *stmt)
-//{
-//	kNode *bkElse = SUGAR kNode_GetBlock(kctx, stmt, DefaultNameSpace, KSymbol_else, NULL);
-//	if(bkElse != NULL) {
-//		if(kArray_size(bkElse->NodeList) == 1) {
-//			kNode *stmtIf = bkElse->NodeList->NodeItems[0];
-//			if(stmtIf->syn->keyword == KSymbol_if) {
-//				return Node_LookupIfNodeWithoutElse(kctx, stmtIf);
-//			}
-//		}
-//		return NULL;
-//	}
-//	return stmt;
-//}
-//
-//static kNode* Node_LookupIfNodeNULL(KonohaContext *kctx, kNode *stmt)
-//{
-//	int i;
-//	kArray *bka = stmt->parentNodeNULL->NodeList;
-//	kNode *prevIfNode = NULL;
-//	for(i = 0; kArray_size(bka); i++) {
-//		kNode *s = bka->NodeItems[i];
-//		if(s == stmt) {
-//			if(prevIfNode != NULL) {
-//				return Node_LookupIfNodeWithoutElse(kctx, prevIfNode);
-//			}
-//			return NULL;
-//		}
-//		if(s->syn == NULL) continue;  // this is done
-//		prevIfNode = (s->syn->keyword == KSymbol_if) ? s : NULL;
-//	}
-//	return NULL;
-//}
-//
-//static KMETHOD Statement_else(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	VAR_TypeCheck(stmt, gma, reqc);
-//	kNode *stmtIf = Node_LookupIfNodeNULL(kctx, stmt);
-//	if(stmtIf != NULL) {
-//		kNode *bkElse = SUGAR kNode_GetBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KSymbol_NodePattern, K_NULLBLOCK);
-//		KLIB kObjectProto_SetObject(kctx, stmtIf, KSymbol_else, KType_Node, bkElse);
-//		kNode_Type(kctx, stmt, KNode_Done, KType_void);
-//		TypeCheckBlock(kctx, bkElse, gma);
-//	}
-//	else {
-//		kNode_Message(kctx, stmt, ErrTag, "else is not statement");
-////		r = 0;
-//	}
-////	KReturnUnboxValue(r);
-//}
+static kNode* LookupNoElseIfNode(KonohaContext *kctx, kNode *ifNode)
+{
+	DBG_ASSERT(ifNode->node == KNode_If);
+	kNode *elseNode = SUGAR kNode_GetNode(kctx, ifNode, KSymbol_else, NULL);
+	if(elseNode != NULL) {
+		if(elseNode->node == KNode_If) {
+			return LookupNoElseIfNode(kctx, elseNode);
+		}
+		if(kNode_GetNodeListSize(kctx, elseNode) == 1) {
+			ifNode = elseNode->NodeList->NodeItems[0];
+			if(ifNode->node == KNode_If) {
+				return LookupNoElseIfNode(kctx, ifNode);
+			}
+		}
+		return NULL;
+	}
+	return ifNode;
+}
+
+static kNode* kNode_LookupIfNodeNULL(KonohaContext *kctx, kNode *stmt)
+{
+	kNode *block = kNode_GetParent(kctx, stmt);
+	if(IS_Array(block->NodeList)) {
+		kNode *prevIfNode = NULL;
+		int i;
+		for(i = 0; kArray_size(block->NodeList); i++) {
+			kNode *node = block->NodeList->NodeItems[i];
+			if(node == stmt) {
+				if(prevIfNode != NULL && prevIfNode->node == KNode_If) {
+					return LookupNoElseIfNode(kctx, prevIfNode);
+				}
+				return NULL;
+			}
+			prevIfNode = node;
+		}
+	}
+	return NULL;
+}
+
+static KMETHOD Statement_else(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_TypeCheck(stmt, gma, reqc);
+	kNode *ifNode = kNode_LookupIfNodeNULL(kctx, stmt);
+	if(ifNode != NULL) {
+		kNode *elseNode = SUGAR kNode_GetBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KSymbol_BlockPattern, K_NULLBLOCK);
+		SUGAR kNode_AddParsedObject(kctx, ifNode, KSymbol_else, UPCAST(elseNode));
+		SUGAR TypeCheckNodeByName(kctx, ifNode, KSymbol_else, gma, KClass_(ifNode->attrTypeId), 0);
+		KReturn(kNode_Type(kctx, stmt, KNode_Done, KType_void));
+	}
+	else {
+		KReturn(kNode_Message(kctx, stmt, ErrTag, "else is not statement"));
+	}
+//	KReturnUnboxValue(r);
+}
 
 static KMETHOD Statement_return(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -1187,7 +1186,6 @@ static KMETHOD Statement_ParamDecl(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else if(IS_Node(params)) {
 		size_t i, psize = kNode_GetNodeListSize(kctx, params);
-		DBG_P(">>>>>>>>>> psize=%d", psize);
 		kparamtype_t *p = ALLOCA(kparamtype_t, psize);
 		for(i = 0; i < psize; i++) {
 			p[i].attrTypeId = KType_void;
@@ -1330,6 +1328,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ PATTERN(TypeDecl),   SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_TypeDecl}, {SUGARFUNC Statement_TypeDecl}},
 		{ PATTERN(MethodDecl), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_MethodDecl}, {SUGARFUNC Statement_MethodDecl}},
 		{ TOKEN(if),           SYNFLAG_CTypeFunc, 0, Precedence_Statement, {patternParseFunc}, {SUGARFUNC Statement_if}},
+		{ TOKEN(else),         SYNFLAG_CTypeFunc, 0, Precedence_Statement, {patternParseFunc}, {SUGARFUNC Statement_else}},
 		{ TOKEN(return), SYNFLAG_CTypeFunc|SYNFLAG_NodeBreakExec, 0, Precedence_Statement, {patternParseFunc}, {SUGARFUNC Statement_return} },
 		{ TOKEN(new), SYNFLAG_CFunc, 0, Precedence_CStyleSuffixCall, {SUGARFUNC Expression_new}, },
 		{ KSymbol_END, },
@@ -1346,6 +1345,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(MethodDecl), "$MethodDecl $Type $Symbol $Param [$Block]", 0, NULL);
 	//kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(MethodDecl), "$MethodDecl $Type [ClassName: $Type \".\"] $Symbol $Param [$Block]", 0, NULL);
 	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(if), "\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Expr]", 0, NULL);
+	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(else), "\"else\" $Block", 0, NULL);
 	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(return), "\"return\" [$Expr]", 0, NULL);
 }
 
