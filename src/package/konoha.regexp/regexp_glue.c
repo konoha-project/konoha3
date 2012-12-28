@@ -692,7 +692,7 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD TypeCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck2(stmt, expr, gma, reqc);
+	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	kToken *tk = expr->TermToken;
 	kRegExp *r = new_(RegExp, NULL, OnGcStack);
 	DBG_ASSERT(kArray_size(tk->subTokenList) == 2);

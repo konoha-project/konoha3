@@ -183,16 +183,16 @@ struct Tokenizer {
 		int E = (int)sfp[6].intValue;\
 		VAR_TRACE; (void)syn; (void)STMT; (void)TLS; (void)S; (void)C; (void)E
 
-// Node TypeCheck(Node expr, Gamma gma, Object type)
+// Node TypeCheck(Node expr, Gamma ns, Object type)
 #define VAR_TypeCheck(EXPR, GMA, TY) \
 		kNode *EXPR = (kNode *)sfp[1].asObject;\
-		kGamma *GMA = (kGamma *)sfp[2].asObject;\
+		kNameSpace *GMA = kNode_ns(EXPR);\
 		KClass* TY = kObject_class(sfp[3].asObject);\
 		VAR_TRACE; (void)EXPR; (void)GMA; (void)TY
 
 #define VAR_TypeCheck2(STMT, EXPR, GMA, TY) \
 		kNode *EXPR = (kNode *)sfp[1].asObject;\
-		kGamma *GMA = (kGamma *)sfp[2].asObject;\
+		kNameSpace *GMA = kNode_ns(EXPR);\
 		KClass* TY = kObject_class(sfp[3].asObject);\
 		kNode *STMT = expr;\
 		VAR_TRACE; (void)STMT; (void)EXPR; (void)GMA; (void)TY
@@ -505,11 +505,11 @@ typedef struct {
 	ktypeattr_t    attrTypeId;    ksymbol_t  name;
 } KGammaStackDecl;
 
-#define kGamma_TopLevel        (kshortflag_t)(1)
-#define Gamma_isTopLevel(GMA)  KFlag_Is(kshortflag_t, GMA->genv->flag, kGamma_TopLevel)
-//#define kGamma_ERROR           (kshortflag_t)(1<<1)
-//#define Gamma_hasERROR(GMA)    KFlag_Is(kshortflag_t, GMA->genv->flag, kGamma_ERROR)
-//#define Gamma_SetERROR(GMA,B) KFlag_Set(kshortflag_t, GMA->genv->flag, kGamma_ERROR, B)
+#define kNameSpace_TopLevel        (kshortflag_t)(1)
+#define Gamma_isTopLevel(GMA)       KFlag_Is(kshortflag_t, GMA->genv->flag, kNameSpace_TopLevel)
+//#define kNameSpace_ERROR           (kshortflag_t)(1<<1)
+//#define Gamma_hasERROR(GMA)    KFlag_Is(kshortflag_t, GMA->genv->flag, kNameSpace_ERROR)
+//#define Gamma_SetERROR(GMA,B) KFlag_Set(kshortflag_t, GMA->genv->flag, kNameSpace_ERROR, B)
 
 struct KGammaStack {
 	KGammaStackDecl *varItems;
@@ -526,10 +526,10 @@ struct KGammaLocalData {
 	struct KGammaStack    localScope;
 } ;
 
-struct kGammaVar {
-	kObjectHeader h;
-	struct KGammaLocalData *genv;
-};
+//struct kNameSpaceVar {
+//	kObjectHeader h;
+//	struct KGammaLocalData *genv;
+//};
 
 
 /* ------------------------------------------------------------------------ */
@@ -561,7 +561,7 @@ struct kGammaVar {
 #define K_NULLNODE   (kNode *)((KClass_Node)->defaultNullValue)
 #define K_NULLBLOCK  (kNode *)((KClass_Node)->defaultNullValue)
 
-typedef kNode* (*KTypeDeclFunc)(KonohaContext *kctx, kNode *stmt, kGamma *gma, ktypeattr_t ty, kNode *termNode, kNode *vexpr, kObject *thunk);
+typedef kNode* (*KTypeDeclFunc)(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ktypeattr_t ty, kNode *termNode, kNode *vexpr, kObject *thunk);
 
 typedef enum {
 	ParseExpressionOption = 0,
@@ -628,18 +628,18 @@ typedef struct {
 	kNode*       (*kNode_SetUnboxConst)(KonohaContext *, kNode *, ktypeattr_t, uintptr_t);
 	kNode*       (*kNode_SetVariable)(KonohaContext *, kNode *, knode_t build, ktypeattr_t, intptr_t index);
 
-	kNode*       (*new_MethodNode)(KonohaContext *, kNameSpace *, kGamma *, KClass *, kMethod *mtd, int n, ...);
+	kNode*       (*new_MethodNode)(KonohaContext *, kNameSpace *, KClass *, kMethod *mtd, int n, ...);
 
-	kNode*      (*TypeCheckBlock)(KonohaContext *, kNode *, kGamma *, KClass *);
-	kNode*      (*TypeCheckNodeByName)(KonohaContext *, kNode*, ksymbol_t, kGamma *, KClass *, int);
-	kNode*      (*TypeCheckNodeAt)(KonohaContext *, kNode *, size_t, kGamma *, KClass *, int);
-	kNode *     (*TypeCheckMethodParam)(KonohaContext *, kMethod *mtd, kNode *, kGamma *, KClass *);
-	int         (*kGamma_AddLocalVariable)(KonohaContext *, kGamma *, ktypeattr_t, ksymbol_t);
-	kbool_t     (*kNode_DeclType)(KonohaContext *, kNode *, kGamma *, ktypeattr_t, kNode *, kObject *, KTypeDeclFunc);
-	kNode*      (*TypeCheckNodeVariableNULL)(KonohaContext *, kNode *, kNodeVar *, kGamma *, KClass *);
+	kNode*      (*TypeCheckBlock)(KonohaContext *, kNode *, kNameSpace *, KClass *);
+	kNode*      (*TypeCheckNodeByName)(KonohaContext *, kNode*, ksymbol_t, kNameSpace *, KClass *, int);
+	kNode*      (*TypeCheckNodeAt)(KonohaContext *, kNode *, size_t, kNameSpace *, KClass *, int);
+	kNode *     (*TypeCheckMethodParam)(KonohaContext *, kMethod *mtd, kNode *, kNameSpace *, KClass *);
+	int         (*kNameSpace_AddLocalVariable)(KonohaContext *, kNameSpace *, ktypeattr_t, ksymbol_t);
+	kbool_t     (*kNode_DeclType)(KonohaContext *, kNode *, kNameSpace *, ktypeattr_t, kNode *, kObject *, KTypeDeclFunc);
+	kNode*      (*TypeCheckNodeVariableNULL)(KonohaContext *, kNode *, kNodeVar *, kNameSpace *, KClass *);
 
 	void       (*kToken_ToError)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
-	kNode *    (*MessageNode)(KonohaContext *, kNode *, kToken *, kGamma *, kinfotag_t, const char *fmt, ...);
+	kNode *    (*MessageNode)(KonohaContext *, kNode *, kToken *, kNameSpace *, kinfotag_t, const char *fmt, ...);
 
 	kbool_t (*VisitNode)(KonohaContext *, struct KBuilder *, kNode *node, void *thunk);
 
@@ -657,7 +657,6 @@ typedef struct {
 	kArray            *errorMessageList;
 	int                errorMessageCount;
 	kbool_t            isNodeedErrorMessage;
-	kGamma            *preparedGamma;
 	kArray            *definedMethodList;
 } KParserContext;
 
@@ -672,7 +671,7 @@ typedef enum {
 	TypeCheckPolicy_Creation       = (1 << 6),  /* TypeCheckNodeByName */
 } TypeCheckPolicy;
 
-#define KPushMethodCall(gma)   SUGAR kGamma_AddLocalVariable(kctx, gma, KType_var, 0)
+#define KPushMethodCall(gma)   SUGAR kNameSpace_AddLocalVariable(kctx, ns, KType_var, 0)
 
 #define new_ConstNode(CTX, NS, T, O)               SUGAR kNode_SetConst(CTX, KNewNode(NS), T, O)
 #define new_UnboxConstNode(CTX, NS, T, D)         SUGAR kNode_SetUnboxConst(CTX, KNewNode(NS), T, D)

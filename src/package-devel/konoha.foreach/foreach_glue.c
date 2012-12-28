@@ -112,10 +112,10 @@
 //
 //static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck(stmt, gma, reqc);
+//	VAR_TypeCheck(stmt, ns, reqc);
 //	DBG_P("for statement .. ");
 //	int isOkay = false;
-//	if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_INFER, 0)) {
+//	if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, ns, KClass_INFER, 0)) {
 //		kNameSpace *ns = kNode_ns(stmt);
 //		kToken *TypeToken = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
 //		kToken *VariableToken  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
@@ -127,7 +127,7 @@
 //				SUGAR MessageNode(kctx, stmt, IteratorNode, ErrTag, "expected Iterator expression after in");
 //				KReturnUnboxValue(false);
 //			}
-//			IteratorNode = SUGAR new_MethodNode(kctx, stmt, gma, KClass_INFER, mtd, 1, IteratorNode);
+//			IteratorNode = SUGAR new_MethodNode(kctx, stmt, ns, KClass_INFER, mtd, 1, IteratorNode);
 //			kNode_SetObject(kctx, stmt, KSymbol_NodePattern, IteratorNode);
 //		}
 //		kNode *block = new_MacroNode(kctx, stmt, new_TypeToken(kctx, ns, KClass_(IteratorNode->attrTypeId)), new_ParsedNodeToken(kctx, ns, IteratorNode), TypeToken, VariableToken);

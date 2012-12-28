@@ -96,7 +96,6 @@ static void SugarModule_Setup(KonohaContext *kctx, struct KRuntimeModule *def, i
 		base->preparedTokenList = new_(TokenArray, K_PAGESIZE/sizeof(void *), OnContextConstList);
 		base->errorMessageList  = new_(StringArray, 8, OnContextConstList);
 		base->definedMethodList = new_(MethodArray, 8, OnContextConstList);
-		base->preparedGamma     = new_(Gamma, NULL, OnContextConstList);
 
 		KLIB KArray_Init(kctx, &base->errorMessageBuffer, K_PAGESIZE);
 		kctx->modlocal[MOD_sugar] = (KContextModule *)base;
@@ -147,39 +146,15 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	defToken.reftrace = kToken_Reftrace;
 	defToken.p = kToken_p;
 
-#ifdef USE_NODE
 	KDEFINE_CLASS defNode = {0};
 	SETSTRUCTNAME(defNode, Node);
 	defNode.init = kNode_Init;
 	defNode.reftrace = kNode_Reftrace;
 	defNode.p        = kNode_p;
-#else
-	KDEFINE_CLASS defNode = {0};
-	SETSTRUCTNAME(defNode, Node);
-	defNode.init = kNode_Init;
-	defNode.reftrace = kNode_Reftrace;
-	defNode.p        = kNode_p;
-
-	KDEFINE_CLASS defNode = {0};
-	SETSTRUCTNAME(defNode, Node);
-	defNode.init = kNode_Init;
-	defNode.reftrace = kNode_Reftrace;
-	defNode.p        = kNode_p;
-
-	KDEFINE_CLASS defNode = {0};
-	SETSTRUCTNAME(defNode, Node);
-	defNode.init = kNode_Init;
-	defNode.reftrace = kNode_Reftrace;
-#endif
-
-	KDEFINE_CLASS defGamma = {0};
-	SETSTRUCTNAME(defGamma, Gamma);
-	defGamma.init = Gamma_Init;
 
 	mod->cSymbol =    KLIB KClass_define(kctx, PackageId_sugar, NULL, &defSymbol, 0);
 	mod->cToken =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defToken, 0);
 	mod->cNode  =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defNode, 0);
-	mod->cGamma =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defGamma, 0);
 	mod->cTokenArray = KClass_p0(kctx, KClass_Array, mod->cToken->typeId);
 
 	KLIB Knull(kctx, mod->cToken);
@@ -219,7 +194,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->TypeCheckBlock               = TypeCheckBlock;
 	mod->TypeCheckMethodParam           = TypeCheckMethodParam;
 	mod->new_MethodNode            = new_MethodNode;
-	mod->kGamma_AddLocalVariable      = kGamma_AddLocalVariable;
+	mod->kNameSpace_AddLocalVariable      = kNameSpace_AddLocalVariable;
 	mod->kNode_DeclType               = kNode_DeclType;
 	mod->TypeCheckNodeVariableNULL  = TypeCheckNodeVariableNULL;
 

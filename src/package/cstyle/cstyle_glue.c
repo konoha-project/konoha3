@@ -42,10 +42,10 @@
 //
 //static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck(stmt, gma, reqc);
+//	VAR_TypeCheck(stmt, ns, reqc);
 //	DBG_P("while statement .. ");
 //	int ret = false;
-//	if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_Boolean, 0)) {
+//	if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, ns, KClass_Boolean, 0)) {
 //		kNode *bk = SUGAR kNode_GetNode(kctx, stmt, NULL/*DefaultNameSpace*/, KSymbol_NodePattern, K_NULLBLOCK);
 //		kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 //		kNode_Set(CatchBreak, stmt, true);
@@ -59,10 +59,10 @@
 //
 //static KMETHOD Statement_do(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck(stmt, gma, reqc);
+//	VAR_TypeCheck(stmt, ns, reqc);
 //	DBG_P("do statement .. ");
 //	int ret = false;
-//	if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_Boolean, 0)) {
+//	if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, ns, KClass_Boolean, 0)) {
 //		kNode *bk = SUGAR kNode_GetNode(kctx, stmt, NULL/*DefaultNameSpace*/, KSymbol_NodePattern, K_NULLBLOCK);
 //		kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 //		kNode_Set(CatchBreak, stmt, true);
@@ -104,13 +104,13 @@
 //
 //static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck(stmt, gma, reqc);
+//	VAR_TypeCheck(stmt, ns, reqc);
 //	int ret = true;
 //	int KSymbol_InitNode = KSymbol_("init"), KSymbol_IteratorNode = KSymbol_("Iterator");
 //	kNode *initNode = SUGAR kNode_GetNode(kctx, stmt, NULL/*defaultNS*/, KSymbol_InitNode, NULL);
 //	if(initNode == NULL) {  // with out init
 //		DBG_P(">>>>>>>>> Without init block");
-//		if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_Boolean, 0)) {
+//		if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, ns, KClass_Boolean, 0)) {
 //			kNode *bk = SUGAR kNode_GetNode(kctx, stmt, NULL/*DefaultNameSpace*/, KSymbol_NodePattern, K_NULLBLOCK);
 //			kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 //			kNode_Set(CatchBreak, stmt, true);
@@ -145,7 +145,7 @@
 //
 //static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck(stmt, gma, reqc);
+//	VAR_TypeCheck(stmt, ns, reqc);
 //	kNode *p = stmt;
 //	while((p = kNode_GetParentNULL(p)) != NULL) {
 //		if(kNode_Is(CatchBreak, p)) {
@@ -159,7 +159,7 @@
 //
 //static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck(stmt, gma, reqc);
+//	VAR_TypeCheck(stmt, ns, reqc);
 //	kNode *p = stmt;
 //	while((p = kNode_GetParentNULL(p)) != NULL) {
 //		if(kNode_Is(CatchContinue, p)) {
@@ -268,7 +268,7 @@
 //
 //static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck2(stmt, expr, gma, reqc);
+//	VAR_TypeCheck2(stmt, expr, ns, reqc);
 //	kToken *termToken = expr->TermToken;
 //	DBG_ASSERT(kNode_IsTerm(expr) && IS_Token(termToken));
 //	if(termToken->tokenType == TokenType_CODE) {
@@ -287,7 +287,7 @@
 //			requestClass = NULL; // undefined
 //		}
 //		for(i = 2; i < kArray_size(arrayNode->NodeList); i++) {
-//			kNode *typedNode = SUGAR TypeCheckNodeAt(kctx, arrayNode, i, gma, paramType, 0);
+//			kNode *typedNode = SUGAR TypeCheckNodeAt(kctx, arrayNode, i, ns, paramType, 0);
 //			if(typedNode == K_NULLNODE) {
 //				KReturn(typedNode);
 //			}
@@ -302,7 +302,7 @@
 //		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, kNode_ns(stmt), KClass_Array, KMethodName_("{}"), -1, KMethodMatch_NoOption);
 //		DBG_ASSERT(mtd != NULL);
 //		KFieldSet(arrayNode, arrayNode->NodeList->MethodItems[0], mtd);
-//		KFieldSet(arrayNode, arrayNode->NodeList->NodeItems[1], SUGAR kNode_SetVariable(kctx, NULL, gma, KNode_New, requestClass->typeId, kArray_size(arrayNode->NodeList) - 2));
+//		KFieldSet(arrayNode, arrayNode->NodeList->NodeItems[1], SUGAR kNode_SetVariable(kctx, NULL, ns, KNode_New, requestClass->typeId, kArray_size(arrayNode->NodeList) - 2));
 //		KReturn(Node_typed(arrayNode, KNode_MethodCall, requestClass->typeId));
 //	}
 //}
@@ -348,7 +348,7 @@
 //
 //static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck2(stmt, expr, gma, reqc);
+//	VAR_TypeCheck2(stmt, expr, ns, reqc);
 //	kToken *tk = expr->TermToken;
 //	if(kString_size(tk->text) == 1) {
 //		int ch = kString_text(tk->text)[0];
@@ -648,7 +648,7 @@
 //
 //static KMETHOD TypeCheck_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck2(stmt, expr, gma, reqc);
+//	VAR_TypeCheck2(stmt, expr, ns, reqc);
 //	kToken *tk = expr->TermToken;
 //	long long n = kstrtoll(kString_text(tk->text));
 //	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_int, (uintptr_t)n));
@@ -768,7 +768,7 @@
 //
 //static KMETHOD TypeCheck_null(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck2(stmt, expr, gma, reqc);
+//	VAR_TypeCheck2(stmt, expr, ns, reqc);
 //	if(reqty == KType_var) reqty = KType_Object;
 //	KReturn(SUGAR kNode_SetVariable(kctx, expr, KNode_Null, reqty, 0));
 //}

@@ -537,16 +537,12 @@ typedef struct kNameSpaceVar            kNameSpaceVar;
 
 typedef const struct kTokenVar          kToken;
 typedef struct kTokenVar                kTokenVar;
-
 typedef struct kNodeVar                 kNode;
 typedef struct kNodeVar                 kNodeVar;
 
-typedef struct kGammaVar                kGamma;
-//typedef struct kGammaVar                kGammaVar;
-
 #define kTokenNULL kToken
 #define kNodeNULL  kNode
-#define kGammaNULL kGamma
+#define kNameSpaceNULL kNameSpace
 
 struct KonohaFactory {
 	// settings
@@ -992,7 +988,7 @@ struct KContextModule {
 	kNameSpace  *asNameSpace;\
 	kToken      *asToken;\
 	kNode       *asNode;\
-	kGamma      *asGamma;\
+	kNameSpace      *asGamma;\
 	const struct kExceptionVar  *asException;\
 	const struct kFloatVar      *asFloat; \
 	struct kDateVar             *asDate;\

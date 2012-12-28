@@ -560,14 +560,13 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 
 static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck2(stmt, expr, gma, reqc);
-	kNameSpace *ns = kNode_ns(stmt);
+	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	// [0] currentToken, [1] NULL, [2] ....
 	size_t i;
 	KClass *requestClass = reqc;
 	KClass *paramType = (requestClass->baseTypeId == KType_Array) ? KClass_(requestClass->p0) : KClass_INFER;
 	for(i = 2; i < kArray_size(expr->NodeList); i++) {
-		kNode *typedNode = SUGAR TypeCheckNodeAt(kctx, expr, i, gma, paramType, 0);
+		kNode *typedNode = SUGAR TypeCheckNodeAt(kctx, expr, i, ns, paramType, 0);
 		if(typedNode == K_NULLNODE) {
 			KReturn(typedNode);
 		}

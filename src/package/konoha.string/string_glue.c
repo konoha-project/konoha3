@@ -180,7 +180,7 @@ static kString *remove_escapes(KonohaContext *kctx, kToken *tk)
 
 static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck2(stmt, expr, gma, reqc);
+	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	kToken  *tk   = expr->TermToken;
 	INIT_GCSTACK();
 	kString *text = remove_escapes(kctx, tk);
@@ -196,7 +196,6 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 		KReturnWith(K_NULLNODE, RESET_GCSTACK());
 	}
 	expr = (kNodeVar *) SUGAR kNode_SetConst(kctx, expr, NULL, UPCAST(text));
-	kNameSpace *ns = kNode_ns(stmt);
 	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_String, KMethodName_("+"), 1, KMethodMatch_NoOption);
 
 	expr = (kNodeVar *) new_ConstNode(kctx, ns, NULL, UPCAST(TS_EMPTY));
@@ -234,9 +233,9 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 			if(start - str > 0) {
 				kNode *first = new_ConstNode(kctx, ns, NULL,
 						UPCAST(KLIB new_kString(kctx, OnGcStack, str, (start - str), 0)));
-				expr = (kNodeVar *) SUGAR new_MethodNode(kctx, stmt, gma, KClass_String, concat, 2, expr, first);
+				expr = (kNodeVar *) SUGAR new_MethodNode(kctx, stmt, ns, KClass_String, concat, 2, expr, first);
 			}
-			expr = (kNodeVar *) SUGAR new_MethodNode(kctx, stmt, gma, KClass_String, concat, 2, expr, newexpr);
+			expr = (kNodeVar *) SUGAR new_MethodNode(kctx, stmt, ns, KClass_String, concat, 2, expr, newexpr);
 		}
 		KTokenSeq_Pop(kctx, range);
 		KLIB KBuffer_Free(&wb);
@@ -246,7 +245,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 	if((start == NULL) || (start != NULL && end == NULL)) {
 		kNode *rest = new_ConstNode(kctx, ns, KClass_String,
 				UPCAST(KLIB new_kString(kctx, OnGcStack, str, strlen(str), 0)));
-		expr = (kNodeVar *) SUGAR new_MethodNode(kctx, stmt, gma, KClass_String, concat, 2, expr, rest);
+		expr = (kNodeVar *) SUGAR new_MethodNode(kctx, stmt, ns, KClass_String, concat, 2, expr, rest);
 	}
 	KReturnWith(expr, RESET_GCSTACK());
 }

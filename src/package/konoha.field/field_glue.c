@@ -186,16 +186,15 @@ static kbool_t KClass_AddField(KonohaContext *kctx, KClass *ct, ktypeattr_t type
 
 static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck2(stmt, expr, gma, reqc);
+	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	kToken *fieldToken = expr->NodeList->TokenItems[0];
 	ksymbol_t fn = fieldToken->resolvedSymbol;
-	kNode *self = SUGAR TypeCheckNodeAt(kctx, expr, 1, gma, KClass_INFER, 0);
-	kNameSpace *ns = kNode_ns(stmt);
+	kNode *self = SUGAR TypeCheckNodeAt(kctx, expr, 1, ns, KClass_INFER, 0);
 	if(self != K_NULLNODE) {
 		kMethod *mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, KClass_(self->attrTypeId), fn);
 		if(mtd != NULL) {
 			KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], mtd);
-			KReturn(SUGAR TypeCheckMethodParam(kctx, mtd, expr, gma, reqc));
+			KReturn(SUGAR TypeCheckMethodParam(kctx, mtd, expr, ns, reqc));
 		}
 		else {  // dynamic field    o.name => o.get(name)
 			kparamtype_t p[1] = {{KType_Symbol}};
@@ -204,10 +203,10 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 			if(mtd != NULL) {
 				KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], mtd);
 				KLIB kArray_Add(kctx, expr->NodeList, new_UnboxConstNode(kctx, ns, KType_Symbol, KSymbol_Unmask(fn)));
-				KReturn(SUGAR TypeCheckMethodParam(kctx, mtd, expr, gma, reqc));
+				KReturn(SUGAR TypeCheckMethodParam(kctx, mtd, expr, ns, reqc));
 			}
 		}
-		SUGAR MessageNode(kctx, stmt, fieldToken, gma, ErrTag, "undefined field: %s", kString_text(fieldToken->text));
+		SUGAR MessageNode(kctx, stmt, fieldToken, ns, ErrTag, "undefined field: %s", kString_text(fieldToken->text));
 	}
 }
 

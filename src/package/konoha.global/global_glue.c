@@ -73,13 +73,12 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kNode *stmt, kObj
 	return KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, kObject_class(o), symbol, ty);
 }
 
-static kNode* TypeDeclAndMakeSetter(KonohaContext *kctx, kNode *stmt, kGamma *gma, ktypeattr_t ty, kNode *termNode, kNode *valueNode, kObject *scr)
+static kNode* TypeDeclAndMakeSetter(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ktypeattr_t ty, kNode *termNode, kNode *valueNode, kObject *scr)
 {
-	kNameSpace *ns = kNode_ns(stmt);
 	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termNode->TermToken->resolvedSymbol);
 	if(mtd != NULL) {
 		kNode *recvNode =  new_ConstNode(kctx, ns, NULL, scr);
-		return SUGAR new_MethodNode(kctx, ns, gma, KClass_void, mtd, 2, recvNode, valueNode);
+		return SUGAR new_MethodNode(kctx, ns, KClass_void, mtd, 2, recvNode, valueNode);
 	}
 	return NULL;
 }
@@ -101,15 +100,14 @@ static kbool_t kNameSpace_InitGlobalObject(KonohaContext *kctx, kNameSpace *ns, 
 
 static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck(stmt, gma, reqc);
-	if(Gamma_isTopLevel(gma)) {
-		kNameSpace *ns = kNode_ns(stmt);
+	VAR_TypeCheck(stmt, ns, reqc);
+	if(Gamma_isTopLevel(ns)) {
 		KMakeTrace(trace, sfp);
 		trace->pline = kNode_uline(stmt);
 		if(kNameSpace_InitGlobalObject(kctx, ns, trace)) {
 			kToken *tk  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
 			kNode  *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
-			SUGAR kNode_DeclType(kctx, stmt, gma, tk->resolvedTypeId, expr, ns->globalObjectNULL, TypeDeclAndMakeSetter);
+			SUGAR kNode_DeclType(kctx, stmt, ns, tk->resolvedTypeId, expr, ns->globalObjectNULL, TypeDeclAndMakeSetter);
 		}
 		KReturn(kNode_Type(kctx, stmt, KNode_Done, KType_void));
 	}

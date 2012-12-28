@@ -401,9 +401,9 @@ static kNode* new_TypedNode(KonohaContext *kctx, kNameSpace *ns, int build, KCla
 	return (kNode *)node;
 }
 
-static kNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kNode *expr, kGamma *gma, KClass* reqc);
+static kNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kNode *expr, kNameSpace *ns, KClass* reqc);
 
-static kNode* new_MethodNode(KonohaContext *kctx, kNameSpace *ns, kGamma *gma, KClass *reqc, kMethod *mtd, int n, ...)
+static kNode* new_MethodNode(KonohaContext *kctx, kNameSpace *ns, KClass *reqc, kMethod *mtd, int n, ...)
 {
 	kNode *expr = new_(Node, ns, OnGcStack);
 	KFieldSet(expr, expr->NodeList, new_(Array, 0, OnField));
@@ -413,7 +413,7 @@ static kNode* new_MethodNode(KonohaContext *kctx, kNameSpace *ns, kGamma *gma, K
 	expr = kNode_AddSeveral(kctx, expr, n, ap);
 	va_end(ap);
 	expr->node = KNode_MethodCall;
-	return TypeCheckMethodParam(kctx, mtd, expr, gma, reqc);
+	return TypeCheckMethodParam(kctx, mtd, expr, ns, reqc);
 }
 
 static kNode* kNode_SetConst(KonohaContext *kctx, kNode *expr, KClass *typedClass, kObject *o)
@@ -478,14 +478,5 @@ static kNode* kNode_GetNode(KonohaContext *kctx, kNode *stmt, ksymbol_t kw, kNod
 		return expr;
 	}
 	return def;
-}
-
-/* --------------- */
-/* Gamma */
-
-static void Gamma_Init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	kGamma *gma = (kGamma *)o;
-	gma->genv = NULL;
 }
 

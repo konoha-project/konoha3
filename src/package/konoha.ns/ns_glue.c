@@ -92,7 +92,7 @@ static void namespace_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck(stmt, gma, reqc);
+	VAR_TypeCheck(stmt, ns, reqc);
 	kstatus_t result = K_CONTINUE;
 	kToken *tk = SUGAR kNode_GetToken(kctx, stmt, KSymbol_BlockPattern, NULL);
 	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
@@ -112,17 +112,15 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck(stmt, gma, reqc);
-	kNameSpace *ns = kNode_ns(stmt);
+	VAR_TypeCheck(stmt, ns, reqc);
 	kToken *symbolToken = SUGAR kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 	ksymbol_t unboxKey = symbolToken->resolvedSymbol;
-	kbool_t result = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_INFER, TypeCheckPolicy_CONST);
-	if(result) {
-		kNode *constNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
+	kNode *constNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_INFER, TypeCheckPolicy_CONST);
+	if(!kNode_IsError(constNode)) {
 		KClass *constClass = KClass_(constNode->attrTypeId);
 		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
-		result = false;
+		kbool_t result = false;
 		if(constNode->node == KNode_Null) {   // const C = String
 			type = VirtualType_KClass;
 			unboxValue = (uintptr_t)constClass;
@@ -143,23 +141,23 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 		else {
 			kNode_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", KSymbol_Fmt2(unboxKey));
 		}
+		constNode = kNode_Type(kctx, stmt, KNode_Done, KType_void);
 	}
-	kNode_Type(kctx, stmt, KNode_Done, KType_void);
-	KReturnUnboxValue(result);
+	KReturn(constNode);
 }
 
 /* defined (EXPR) */
 
 static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck2(stmt, expr, gma, reqc);
+	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	size_t i;
 	kbool_t isDefined = true;
 	KParserContext *sugarContext = KGetParserContext(kctx);
 	int popIsNodeingErrorMessage = sugarContext->isNodeedErrorMessage;
 	sugarContext->isNodeedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->NodeList); i++) {
-		kNode *typedNode = SUGAR TypeCheckNodeAt(kctx, expr, i, gma, KClass_INFER, TypeCheckPolicy_AllowVoid);
+		kNode *typedNode = SUGAR TypeCheckNodeAt(kctx, expr, i, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
 		if(typedNode == K_NULLNODE) {
 			isDefined = false;
 			break;

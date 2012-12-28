@@ -36,13 +36,13 @@ extern "C" {
 
 static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck(stmt, gma, reqc);
+	VAR_TypeCheck(stmt, ns, reqc);
 	DBG_P("while statement .. ");
-	kNode *exprNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_Boolean, 0);
+	kNode *exprNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
 	if(kNode_IsError(exprNode)) {
 		KReturn(exprNode);
 	}
-	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, gma, KClass_void, 0);
+	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
 	kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 	kNode_Set(CatchBreak, stmt, true);
 	KReturn(kNode_Type(kctx, stmt, KNode_While, KType_void));
@@ -50,10 +50,10 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 
 //static KMETHOD Statement_do(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck(stmt, gma, reqc);
+//	VAR_TypeCheck(stmt, ns, reqc);
 //	DBG_P("do statement .. ");
 //	int ret = false;
-//	if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_Boolean, 0)) {
+//	if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0)) {
 //		kNode *bk = SUGAR kNode_GetNode(kctx, stmt, NULL/*DefaultNameSpace*/, KSymbol_BlockPattern, K_NULLBLOCK);
 //		kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 //		kNode_Set(CatchBreak, stmt, true);
@@ -95,13 +95,13 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 //
 //static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck(stmt, gma, reqc);
+//	VAR_TypeCheck(stmt, ns, reqc);
 //	int ret = true;
 //	int KSymbol_InitNode = KSymbol_("init"), KSymbol_IteratorNode = KSymbol_("Iterator");
 //	kNode *initNode = SUGAR kNode_GetNode(kctx, stmt, NULL/*defaultNS*/, KSymbol_InitNode, NULL);
 //	if(initNode == NULL) {  // with out init
 //		DBG_P(">>>>>>>>> Without init block");
-//		if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_Boolean, 0)) {
+//		if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, ns, KClass_Boolean, 0)) {
 //			kNode *bk = SUGAR kNode_GetNode(kctx, stmt, NULL/*DefaultNameSpace*/, KSymbol_NodePattern, K_NULLBLOCK);
 //			kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 //			kNode_Set(CatchBreak, stmt, true);
@@ -133,7 +133,7 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck(stmt, gma, reqc);
+	VAR_TypeCheck(stmt, ns, reqc);
 	kNode *p = stmt;
 	while((p = kNode_GetParentNULL(p)) != NULL) {
 		if(kNode_Is(CatchBreak, p)) {
@@ -141,12 +141,12 @@ static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 			KReturn(kNode_Type(kctx, stmt, KNode_Break, KType_void));
 		}
 	}
-	SUGAR MessageNode(kctx, stmt, NULL, gma, ErrTag, "break statement not within a loop");
+	SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "break statement not within a loop");
 }
 
 static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck(stmt, gma, reqc);
+	VAR_TypeCheck(stmt, ns, reqc);
 	kNode *p = stmt;
 	while((p = kNode_GetParentNULL(p)) != NULL) {
 		if(kNode_Is(CatchContinue, p)) {
@@ -154,7 +154,7 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 			KReturn(kNode_Type(kctx, stmt, KNode_Continue, KType_void));
 		}
 	}
-	SUGAR MessageNode(kctx, stmt, NULL, gma, ErrTag, "continue statement not within a loop");
+	SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "continue statement not within a loop");
 }
 
 static void cstyle_DefineStatement(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
@@ -210,7 +210,7 @@ static void cstyle_DefineStatement(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 //
 //static KMETHOD TypeCheck_null(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck2(stmt, expr, gma, reqc);
+//	VAR_TypeCheck2(stmt, expr, ns, reqc);
 //	if(reqty == KType_var) reqty = KType_Object;
 //	KReturn(SUGAR kNode_SetVariable(kctx, expr, KNode_Null, reqty, 0));
 //}

@@ -260,7 +260,7 @@
 //
 //static KMETHOD Statement_try(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck(stmt, gma, reqc);
+//	VAR_TypeCheck(stmt, ns, reqc);
 //	DBG_P("try statement .. \n");
 //	int ret = false;
 //	kNode *tryNode, *catchNode, *finallyNode;
@@ -288,12 +288,12 @@
 //
 //static KMETHOD Statement_catch(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck(stmt, gma, reqc);
+//	VAR_TypeCheck(stmt, ns, reqc);
 //	DBG_P("catch statement .. \n");
 //	int ret = false;
 //
 //	// check "catch(...)"
-//	//ret = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_Exception, 0);
+//	//ret = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, ns, KClass_Exception, 0);
 //
 //	kNode *catchNode = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
 //	kNode *parentNode = Node_LookupTryOrCatchNodeNULL(kctx, stmt);
@@ -313,7 +313,7 @@
 //
 //static KMETHOD Statement_finally(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck(stmt, gma, reqc);
+//	VAR_TypeCheck(stmt, ns, reqc);
 //	DBG_P("finally statement .. \n");
 //	int ret = false;
 //	kNode *finallyNode = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);

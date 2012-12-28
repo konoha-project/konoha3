@@ -231,7 +231,7 @@
 //
 //static KMETHOD TypeCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck2(stmt, expr, gma, reqc);
+//	VAR_TypeCheck2(stmt, expr, ns, reqc);
 //	kToken *termToken = expr->TermToken;
 //	if(kNode_IsTerm(expr) && IS_Token(termToken)) {
 //		DBG_P("termToken='%s'", kString_text(termToken->text));

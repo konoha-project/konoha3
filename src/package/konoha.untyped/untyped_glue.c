@@ -32,12 +32,11 @@ extern "C"{
 // --------------------------------------------------------------------------
 /* Decl */
 
-static void DeclVariable(KonohaContext *kctx, kNode *stmt, kGamma *gma, ktypeattr_t ty, kNode *termNode)
+static void DeclVariable(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ktypeattr_t ty, kNode *termNode)
 {
 	DBG_ASSERT(kNode_isSymbolTerm(termNode));
 	kToken *termToken = termNode->TermToken;
-	if(Gamma_isTopLevel(gma)) {
-		kNameSpace *ns = kNode_ns(stmt);
+	if(Gamma_isTopLevel(ns)) {
 		if(ns->globalObjectNULL == NULL) {
 			kNodeToken_Message(kctx, stmt, termToken, ErrTag, "unavailable global variable");
 			return;
@@ -47,20 +46,20 @@ static void DeclVariable(KonohaContext *kctx, kNode *stmt, kGamma *gma, ktypeatt
 	}
 	else {
 		kNodeToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", KSymbol_Fmt2(termToken->resolvedSymbol), KType_text(ty));
-		SUGAR kGamma_AddLocalVariable(kctx, gma, ty, termToken->resolvedSymbol);
+		SUGAR kNameSpace_AddLocalVariable(kctx, ns, ty, termToken->resolvedSymbol);
 	}
 }
 
 static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck2(stmt, expr, gma, reqc);
+	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	kNodeVar *leftHandNode = (kNodeVar *)kNode_At(expr, 1);
 	if(kNode_isSymbolTerm(leftHandNode)) {
-		kNode *texpr = SUGAR TypeCheckNodeVariableNULL(kctx, stmt, leftHandNode, gma, KClass_INFER);
+		kNode *texpr = SUGAR TypeCheckNodeVariableNULL(kctx, stmt, leftHandNode, ns, KClass_INFER);
 		if(texpr == NULL) {
-			kNode *rightHandNode = SUGAR TypeCheckNodeAt(kctx, expr, 2, gma, KClass_INFER, 0);
+			kNode *rightHandNode = SUGAR TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
 			if(rightHandNode != K_NULLNODE) {
-				DeclVariable(kctx, stmt, gma, rightHandNode->attrTypeId, leftHandNode);
+				DeclVariable(kctx, stmt, ns, rightHandNode->attrTypeId, leftHandNode);
 			}
 		}
 		else {

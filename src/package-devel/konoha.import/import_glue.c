@@ -42,7 +42,7 @@
 //static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	int ret = false;
-//	VAR_TypeCheck(stmt, gma, reqc);
+//	VAR_TypeCheck(stmt, ns, reqc);
 //	kTokenArray *tokenList = (kTokenArray *) kNode_GetObjectNULL(kctx, stmt, KSymbol_TokenPattern);
 //	if(tokenList == NULL) {
 //		KReturnUnboxValue(false);
@@ -102,7 +102,7 @@
 //		expr = CreateImportCall(kctx, syn, tkImport, ns, pkgname);
 //	}
 //	KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_NodePattern, KType_Node, expr);
-//	ret = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, gma, KClass_void, TypeCheckPolicy_AllowVoid);
+//	ret = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, ns, KClass_void, TypeCheckPolicy_AllowVoid);
 //	if(ret) {
 //		kNode_Type(kctx, stmt, EXPR);
 //	}
