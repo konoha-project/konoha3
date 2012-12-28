@@ -658,12 +658,12 @@
 //{
 //	KDEFINE_SYNTAX SYNTAX[] = {
 //		{ KSymbol_NumberPattern, SYNFLAG_CTypeFunc, 0, 0, {SUGAR termParseFunc}, {SUGARFUNC TypeCheck_ExtendedIntLiteral}},
-//		{ KSymbol_("~"),  0, 0, Precedence_CStylePrefixOperator, {SUGAR opParseFunc}, {SUGAR callTypeCheckFunc} },
-//		{ KSymbol_("<<"), 0, Precedence_CStyleSHIFT,  0, {SUGAR opParseFunc}, {SUGAR callTypeCheckFunc}},
-//		{ KSymbol_(">>"), 0, Precedence_CStyleSHIFT,  0, {SUGAR opParseFunc}, {SUGAR callTypeCheckFunc}},
-//		{ KSymbol_("&"),  0, Precedence_CStyleBITAND, 0, {SUGAR opParseFunc}, {SUGAR callTypeCheckFunc}},
-//		{ KSymbol_("|"),  0, Precedence_CStyleBITOR,  0, {SUGAR opParseFunc}, {SUGAR callTypeCheckFunc}},
-//		{ KSymbol_("^"),  0, Precedence_CStyleBITXOR, 0, {SUGAR opParseFunc}, {SUGAR callTypeCheckFunc}},
+//		{ KSymbol_("~"),  0, 0, Precedence_CStylePrefixOperator, {SUGAR opParseFunc}, {SUGAR methodTypeFunc} },
+//		{ KSymbol_("<<"), 0, Precedence_CStyleSHIFT,  0, {SUGAR opParseFunc}, {SUGAR methodTypeFunc}},
+//		{ KSymbol_(">>"), 0, Precedence_CStyleSHIFT,  0, {SUGAR opParseFunc}, {SUGAR methodTypeFunc}},
+//		{ KSymbol_("&"),  0, Precedence_CStyleBITAND, 0, {SUGAR opParseFunc}, {SUGAR methodTypeFunc}},
+//		{ KSymbol_("|"),  0, Precedence_CStyleBITOR,  0, {SUGAR opParseFunc}, {SUGAR methodTypeFunc}},
+//		{ KSymbol_("^"),  0, Precedence_CStyleBITXOR, 0, {SUGAR opParseFunc}, {SUGAR methodTypeFunc}},
 //		{ KSymbol_END, },
 //	};
 //	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
@@ -703,11 +703,11 @@
 //static kbool_t cstyle_defineAssign(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 //{
 //	KDEFINE_SYNTAX SYNTAX[] = {
-//		{ KSymbol_("+="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
-//		{ KSymbol_("-="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
-//		{ KSymbol_("*="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
-//		{ KSymbol_("/="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
-//		{ KSymbol_("%="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
+//		{ KSymbol_("+="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleAssign, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
+//		{ KSymbol_("-="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleAssign, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
+//		{ KSymbol_("*="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleAssign, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
+//		{ KSymbol_("/="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleAssign, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
+//		{ KSymbol_("%="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleAssign, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
 //
 //		{ KSymbol_("<<"), 0, NULL, Precedence_CStyleSHIFT,  0,                     NULL, NULL, NULL, NULL, NULL, },
 //		{ KSymbol_(">>"), 0, NULL, Precedence_CStyleSHIFT,  0,                     NULL, NULL, NULL, NULL, NULL, },
@@ -715,11 +715,11 @@
 //		{ KSymbol_("|"),  0, NULL, Precedence_CStyleBITOR,  0,                     NULL, NULL, NULL, NULL, NULL, },
 //		{ KSymbol_("^"),  0, NULL, Precedence_CStyleBITXOR, 0,                     NULL, NULL, NULL, NULL, NULL, },
 //
-//		{ KSymbol_("|="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
-//		{ KSymbol_("&="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
-//		{ KSymbol_("<<="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
-//		{ KSymbol_(">>="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
-//		{ KSymbol_("^="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
+//		{ KSymbol_("|="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleAssign, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
+//		{ KSymbol_("&="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleAssign, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
+//		{ KSymbol_("<<="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleAssign, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
+//		{ KSymbol_(">>="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleAssign, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
+//		{ KSymbol_("^="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleAssign, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
 //		{ KSymbol_END, },
 //	};
 //	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

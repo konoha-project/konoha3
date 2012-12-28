@@ -259,7 +259,7 @@ typedef enum {
 	Precedence_CStyleAND      = 1200,
 	Precedence_CStyleOR       = 1300,
 	Precedence_CStyleTRINARY  = 1400,  /* ? : */
-	Precedence_CStyleASSIGN   = 1500,
+	Precedence_CStyleAssign   = 1500,
 	Precedence_CStyleCOMMA    = 1600,
 	Precedence_Statement      = 1900,
 	Precedence_CStyleStatementEnd    = 2000
@@ -574,7 +574,7 @@ typedef struct {
 	kFunc  *termParseFunc;
 	kFunc  *opParseFunc;
 	kFunc  *patternParseFunc;
-	kFunc  *callTypeCheckFunc;
+	kFunc  *methodTypeFunc;
 	//
 	KSyntax*      (*kNameSpace_GetSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
 	void          (*kNameSpace_DefineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *, KTraceInfo *);

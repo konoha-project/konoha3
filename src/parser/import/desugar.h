@@ -1312,7 +1312,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(GTE), 0, Precedence_CStyleCOMPARE, 0, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(EQ),  0, Precedence_CStyleEQUALS, 0, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(NEQ), 0, Precedence_CStyleEQUALS, 0, {OperatorFunc}, {MethodCallFunc}},
-		{ TOKEN(LET), SYNFLAG_CTypeFunc|SYNFLAG_NodeLeftJoinOp2, Precedence_CStyleASSIGN, 0, {OperatorFunc}, {SUGARFUNC TypeCheck_Assign}, },
+		{ TOKEN(LET), SYNFLAG_CTypeFunc|SYNFLAG_NodeLeftJoinOp2, Precedence_CStyleAssign, 0, {OperatorFunc}, {SUGARFUNC TypeCheck_Assign}, },
 		{ TOKEN(AND), SYNFLAG_CTypeFunc, Precedence_CStyleAND, 0, {OperatorFunc}, {SUGARFUNC TypeCheck_AndOperator}, },
 		{ TOKEN(OR),  SYNFLAG_CTypeFunc, Precedence_CStyleOR,  0, {OperatorFunc}, {SUGARFUNC TypeCheck_OrOperator}, },
 		{ TOKEN(NOT), 0, 0, Precedence_CStylePrefixOperator, {OperatorFunc}, {MethodCallFunc}},
@@ -1339,7 +1339,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	KPARSERM->termParseFunc     = TermFunc;
 	KPARSERM->opParseFunc       = OperatorFunc;
 	KPARSERM->patternParseFunc  = patternParseFunc;
-	KPARSERM->callTypeCheckFunc = MethodCallFunc;
+	KPARSERM->methodTypeFunc = MethodCallFunc;
 	// Syntax Rule
 //	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(Expr), "$Expr", 0, NULL);
 	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(TypeDecl), "$TypeDecl $Type $Expr", 0, NULL);
