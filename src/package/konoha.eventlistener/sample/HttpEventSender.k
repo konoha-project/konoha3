@@ -1,11 +1,11 @@
 import("konoha.new");
-import("jansson");
+import("konoha.json");
 import("curl");
 
 void sendHttpEvent(String host, int port) {
 	Json sdata = new Json();
 	sdata.setString("event", "hoge");
-	String req = sdata.dump();
+	String req = sdata.toString();
 	String res = "";
 	Curl c = new Curl();
 	String url = "http://" + host + ":" + port;
