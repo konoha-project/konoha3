@@ -196,6 +196,18 @@ static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t sy
 {
 	kNode *expr = (kNode *)kNode_GetObjectNULL(kctx, stmt, symbol);
 	DBG_ASSERT(expr != NULL);
+	if(IS_Token(expr)) {
+		kTokenVar *tk = (kTokenVar *)expr;
+		kNameSpace *ns = kNode_ns(stmt);
+		if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
+			kToken_ToBraceGroup(kctx, (kTokenVar *)tk, ns, NULL);
+		}
+		if(tk->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
+			int beginIdx = 0;
+			expr = ParseNewNode(kctx, ns, tk->subTokenList, &beginIdx, kArray_size(tk->subTokenList), ParseMetaPatternOption|ParseBlockOption, NULL);
+			KLIB kObjectProto_SetObject(kctx, stmt, symbol, kObject_typeId(expr), expr);
+		}
+	}
 	if(IS_Node(expr)) {
 		kNode *texpr = TypeCheckNode(kctx, expr, gma, reqClass, pol);
 		if(texpr != expr) {
@@ -315,7 +327,6 @@ static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t 
 	}
 	kGamma *gma = KGetParserContext(kctx)->preparedGamma;
 	kNode *node = kMethod_ParseBodyNode(kctx, mtd, ns, text, uline);
-	DBG_P("############"); KDump(node);
 	KGammaAllocaData newgma = {0};
 	KGammaStackDecl lvarItems[32 + param->psize];
 	bzero(lvarItems, sizeof(KGammaStackDecl) * (32 + param->psize));

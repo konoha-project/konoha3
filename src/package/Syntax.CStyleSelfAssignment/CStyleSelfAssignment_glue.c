@@ -176,7 +176,7 @@ static kbool_t int_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 // --------------------------------------------------------------------------
 
-static kbool_t CStyleBitwiseOperator_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
+static kbool_t CStyleSelfAssignment_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 //	cstyle_DefineStatement(kctx, ns, trace);
 //	KDEFINE_SYNTAX defLiteral[] = {
@@ -197,7 +197,7 @@ static kbool_t CStyleBitwiseOperator_PackupNameSpace(KonohaContext *kctx, kNameS
 	return true;
 }
 
-static kbool_t CStyleBitwiseOperator_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
+static kbool_t CStyleSelfAssignment_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	KDEFINE_INT_CONST ClassData[] = {   // long as alias
 		{"long", VirtualType_KClass, (uintptr_t)KClass_Int},
@@ -209,12 +209,12 @@ static kbool_t CStyleBitwiseOperator_ExportNameSpace(KonohaContext *kctx, kNameS
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* CStyleBitwiseOperator_Init(void)
+KDEFINE_PACKAGE* CStyleSelfAssignment_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "CStyle", "1.0");
-	d.PackupNameSpace   = CStyleBitwiseOperator_PackupNameSpace;
-	d.ExportNameSpace   = CStyleBitwiseOperator_ExportNameSpace;
+	d.PackupNameSpace   = CStyleSelfAssignment_PackupNameSpace;
+	d.ExportNameSpace   = CStyleSelfAssignment_ExportNameSpace;
 	return &d;
 }
 
