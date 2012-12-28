@@ -1518,6 +1518,7 @@ struct kNameSpaceVar {
 	struct KBuilderAPI2               *builderApi;
 	KKeyValue                         *typeVariableItems;
 	size_t                             typesize;
+	struct KGammaLocalData            *genv;
 };
 
 // NameSpace_syntaxOption
