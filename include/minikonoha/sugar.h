@@ -388,6 +388,7 @@ typedef kshort_t       knode_t;
 	OP(UnboxConst)\
 	OP(Local)\
 	OP(Field)\
+	OP(Box)\
 	OP(MethodCall)\
 	OP(And)\
 	OP(Or)\

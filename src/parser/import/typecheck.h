@@ -114,9 +114,12 @@ static kNode* MakeNodeConst(KonohaContext *kctx, kNode *expr, KClass *rtype)
 	return SUGAR kNode_SetConst(kctx, expr, NULL, lsfp[K_RTNIDX].asObject);
 }
 
-static kNode *BoxNode(KonohaContext *kctx, kNode *node, kGamma *gma, KClass* reqClass)
+static kNode *BoxNode(KonohaContext *kctx, kNode *expr, kGamma *gma, KClass* reqClass)
 {
-//	KClass *c = KClass_(node->attrTypeId);
+	kNode *node = KNewNode(kNode_ns(node));
+	KFieldSet(node, node->NodeToPush, node);
+	return kNode_Type(kctx, node, KNode_And, node->attrTypeId);
+	//	KClass *c = KClass_(node->attrTypeId);
 //	if(c->typeId != KType_boolean) c = KClass_Int;
 //	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, kNode_ns(stmt), c, MN_box, 0, KMethodMatch_CamelStyle);
 //	DBG_ASSERT(mtd != NULL);
@@ -193,26 +196,27 @@ static kNode* TypeCheckNodeAt(KonohaContext *kctx, kNode *node, size_t pos, kGam
 static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t symbol, kGamma *gma, KClass *reqClass, int pol)
 {
 	kNode *expr = (kNode *)kNode_GetObjectNULL(kctx, stmt, symbol);
-	DBG_ASSERT(expr != NULL);
-	if(IS_Token(expr)) {
-		kTokenVar *tk = (kTokenVar *)expr;
-		kNameSpace *ns = kNode_ns(stmt);
-		if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
-			kToken_ToBraceGroup(kctx, (kTokenVar *)tk, ns, NULL);
+	if(expr != NULL) {
+		if(IS_Token(expr)) {
+			kTokenVar *tk = (kTokenVar *)expr;
+			kNameSpace *ns = kNode_ns(stmt);
+			if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
+				kToken_ToBraceGroup(kctx, (kTokenVar *)tk, ns, NULL);
+			}
+			if(tk->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
+				int beginIdx = 0;
+				expr = ParseNewNode(kctx, ns, tk->subTokenList, &beginIdx, kArray_size(tk->subTokenList), ParseMetaPatternOption|ParseBlockOption, NULL);
+				KLIB kObjectProto_SetObject(kctx, stmt, symbol, kObject_typeId(expr), expr);
+			}
 		}
-		if(tk->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
-			int beginIdx = 0;
-			expr = ParseNewNode(kctx, ns, tk->subTokenList, &beginIdx, kArray_size(tk->subTokenList), ParseMetaPatternOption|ParseBlockOption, NULL);
-			KLIB kObjectProto_SetObject(kctx, stmt, symbol, kObject_typeId(expr), expr);
+		if(IS_Node(expr)) {
+			kNode *texpr = TypeCheckNode(kctx, expr, gma, reqClass, pol);
+			if(texpr != expr) {
+				KLIB kObjectProto_SetObject(kctx, stmt, symbol, KType_Node, texpr);
+				KFieldSet(texpr, texpr->Parent, stmt);
+			}
+			return texpr;
 		}
-	}
-	if(IS_Node(expr)) {
-		kNode *texpr = TypeCheckNode(kctx, expr, gma, reqClass, pol);
-		if(texpr != expr) {
-			KLIB kObjectProto_SetObject(kctx, stmt, symbol, KType_Node, texpr);
-			KFieldSet(texpr, texpr->Parent, stmt);
-		}
-		return texpr;
 	}
 	return NULL; //error
 }

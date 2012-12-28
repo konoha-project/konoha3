@@ -224,6 +224,12 @@ static int KMethodName_isUnaryOperator(KonohaContext *kctx, kmethodn_t mn)
 	return 0;
 }
 
+static kbool_t JSBuilder_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
+{
+	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);  // ADDED by kimio
+	return true;
+}
+
 static kbool_t JSBuilder_VisitErrorNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void* thunk)
 {
 	//JSBuilder_EmitString(kctx, builder, kString_text(kNode_GetObjectNULL(kctx, stmt, KSymbol_)), "", "");

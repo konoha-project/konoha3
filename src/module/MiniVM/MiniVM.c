@@ -867,8 +867,17 @@ static kbool_t KBuilder_VisitPushNode(KonohaContext *kctx, KBuilder *builder, kN
 {
 	SUGAR VisitNode(kctx, builder, expr->NodeToPush, &(expr->stacktop));
 	return true;
+}
+
+static kbool_t KBuilder_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
+{
+	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);
+
+	return true;
 
 }
+
+
 
 // end of Visitor
 
