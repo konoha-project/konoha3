@@ -642,7 +642,7 @@ static kbool_t KBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, k
 {
 	size_t i;
 	intptr_t espidx = block->stacktop;
-	for (i = 0; i < kNode_GetNodeListSize(block); i++) {
+	for (i = 0; i < kNode_GetNodeListSize(kctx, block); i++) {
 		kNode *stmt = block->NodeList->NodeItems[i];
 		builder->common.uline = kNode_uline(stmt);
 		if(!SUGAR VisitNode(kctx, builder, stmt, &espidx)) break;
