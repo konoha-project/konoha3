@@ -1186,7 +1186,7 @@ static KMETHOD Statement_ParamDecl(KonohaContext *kctx, KonohaStack *sfp)
 		pa = new_kParam(kctx, returnType, 0, NULL);
 	}
 	else if(IS_Node(params)) {
-		size_t i, psize = kNode_GetListSize(kctx, params);
+		size_t i, psize = kNode_GetNodeListSize(kctx, params);
 		DBG_P(">>>>>>>>>> psize=%d", psize);
 		kparamtype_t *p = ALLOCA(kparamtype_t, psize);
 		for(i = 0; i < psize; i++) {

@@ -224,7 +224,7 @@ static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kGamma *gma, KCl
 {
 	DBG_P("########## starting block");
 	KDump(block);
-	int i, size = kNode_GetListSize(kctx, block) - 1;
+	int i, size = kNode_GetNodeListSize(kctx, block) - 1;
 	for(i = 0; i < size; i++) {
 		DBG_P("###### Block[%d]", i);
 		KDump(kNode_At(block, i));

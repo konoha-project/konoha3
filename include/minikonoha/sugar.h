@@ -468,7 +468,7 @@ static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeTy
 	return node;
 }
 
-static inline size_t kNode_GetListSize(KonohaContext *kctx, kNode *node)
+static inline size_t kNode_GetNodeListSize(KonohaContext *kctx, kNode *node)
 {
 	return (IS_Array(node->NodeList)) ? kArray_size(node->NodeList) : 0;
 }
