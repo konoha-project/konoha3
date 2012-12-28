@@ -1141,7 +1141,6 @@ static KMETHOD PatternMatch_CStyleParam(KonohaContext *kctx, KonohaStack *sfp)
 		CheckCStyleParam(kctx, &param);
 		kNode *block = ParseNewNode(kctx, param.ns, param.tokenList, &param.beginIdx, param.endIdx, ParseMetaPatternOption, NULL);
 		kNode_AddParsedObject(kctx, stmt, name, UPCAST(block));
-		DBG_P(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> block"); KDump(block);
 		returnIdx = beginIdx + 1;
 	}
 	KReturnUnboxValue(returnIdx);
@@ -1224,7 +1223,7 @@ static ktypeattr_t kNode_GetClassId(KonohaContext *kctx, kNode *stmt, kNameSpace
 static ksymbol_t kNode_GetMethodSymbol(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ksymbol_t kw, kmethodn_t defmn)
 {
 	kToken *tk = (kToken *)kNode_GetObjectNULL(kctx, stmt, kw);
-	DBG_P(">>>>>>>>>>>>>>> node=%p, kw=%s%s tk=%p", stmt, KSymbol_Fmt2(kw), tk);
+	//DBG_P(">>>>>>>>>>>>>>> node=%p, kw=%s%s tk=%p", stmt, KSymbol_Fmt2(kw), tk);
 	if(tk == NULL || !IS_Token(tk) || !IS_String(tk->text)) {
 		return defmn;
 	}
@@ -1289,7 +1288,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	kFunc *MethodCallFunc = KSugarFunc(ns, TypeCheck_MethodCall);
 	kFunc *patternParseFunc = KSugarFunc(ns, Parse_Pattern);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ PATTERN(Indent)},
+		{ PATTERN(Indent), SYNFLAG_CFunc|SYNFLAG_NodeLeftJoinOp2, Precedence_CStyleStatementEnd, Precedence_CStyleStatementEnd, {SUGARFUNC Parse_Block}, {SUGARFUNC TypeCheck_Block}},
 		{ TOKEN(SEMICOLON), SYNFLAG_CFunc|SYNFLAG_NodeLeftJoinOp2, Precedence_CStyleStatementEnd, Precedence_CStyleStatementEnd, {SUGARFUNC Parse_Block}, {SUGARFUNC TypeCheck_Block}},
 		{ PATTERN(Symbol),  SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_MethodName}, {SUGARFUNC TypeCheck_Symbol},},
 		{ PATTERN(Text),    SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_TextLiteral},},

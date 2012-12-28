@@ -223,7 +223,10 @@ static void kNode_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 		KLIB KBuffer_printf(kctx, wb, "%s %s :%s ", KNode_text(expr->node), KToken_t(expr->KeyOperatorToken), KType_text(expr->attrTypeId));
 	}
 	KLIB kObjectProto_p(kctx, values, pos, wb, 0);
-	if(expr->node == KNode_Const) {
+	if(expr->node == KNode_Error) {
+		KLIB KBuffer_printf(kctx, wb, "%s", kString_text(expr->ErrorMessage));
+	}
+	else if(expr->node == KNode_Const) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("const "));
 		kNodeTerm_p(kctx, (kObject *)expr->ObjectConstValue, values, pos+1, wb);
 	}

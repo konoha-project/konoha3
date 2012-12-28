@@ -53,9 +53,9 @@ static int ParseSyntaxNode(KonohaContext *kctx, KSyntax *syn, kNode *node, ksymb
 		if(nextIdx != PatternNoMatch) return nextIdx;
 	}
 	if(opIdx != -1 && !kNode_IsError(node)) {
-		const char *emesg = (callCount > 0) ? "syntax error: %s" : "undefined: %s";
+		const char *emesg = (callCount > 0) ? "syntax error: %s%s" : "undefined: %s%s";
 		kToken *tk = tokenList->TokenItems[opIdx];
-		SUGAR MessageNode(kctx, node, tk, NULL, ErrTag, emesg, KToken_t(tk));
+		SUGAR MessageNode(kctx, node, tk, NULL, ErrTag, emesg, KSymbol_Fmt2(syn->keyword)/*KToken_t(tk)*/);
 	}
 	return PatternNoMatch;
 }
@@ -108,7 +108,6 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 	for(i = beginIdx; i < endIdx; i++) {
 		kToken *tk = tokenList->TokenItems[i];
 		if(tk->resolvedSyntaxInfo->precedence_op2 == Precedence_CStyleStatementEnd) {
-			DBG_P("KeyOperator >>>>>>>> %d<%d<%d, '%s'", beginIdx, i, endIdx, KToken_t(tk));
 			kNode_Termnize(kctx, node, tk); // set operator
 			return ParseSyntaxNode(kctx, tk->resolvedSyntaxInfo, node, 0, tokenList, beginIdx, i, endIdx);
 		}
@@ -130,7 +129,7 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 					kToken *patternToken = metaPatternList->TokenItems[i];
 					node->syn = patternToken->resolvedSyntaxInfo;
 					int nextIdx = ParseSyntaxNode(kctx, patternToken->resolvedSyntaxInfo, node, 0, tokenList, beginIdx, -1, endIdx);
-					DBG_P(">>>>>>>>>> searching meta pattern = %s%s index=%d,%d,%d", KSymbol_Fmt2(patternToken->resolvedSymbol), beginIdx, nextIdx, endIdx);
+					//DBG_P(">>>>>>>>>> searching meta pattern = %s%s index=%d,%d,%d", KSymbol_Fmt2(patternToken->resolvedSymbol), beginIdx, nextIdx, endIdx);
 					if(nextIdx != PatternNoMatch) return nextIdx;
 					if(kNode_IsError(node)) return endIdx;
 					node->syn = NULL;
