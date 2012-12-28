@@ -529,7 +529,7 @@ void FuelVM_InsertPHI(FuelIRBuilder *builder, Block *Parent, Block *BB, ARRAY(IN
 
 	if(ARRAY_size(Tmp) != 0) {
 		ARRAY(INodePtr) *list = &(BB)->insts;
-		ARRAY_ensureSize(INodePtr, &Tmp, ARRAY_size(BB->insts) + ARRAY_size(Tmp));
+		ARRAY_ensureSize(INodePtr, list, ARRAY_size(BB->insts) + ARRAY_size(Tmp));
 		memcpy(Tmp.list + ARRAY_size(Tmp), list->list, sizeof(INodePtr)*InstSize);
 		memcpy(list->list, Tmp.list, sizeof(INodePtr)*(InstSize + ARRAY_size(Tmp)));
 		list->size += ARRAY_size(Tmp);
