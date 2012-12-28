@@ -336,7 +336,8 @@ static inline JSON JSONString_new(JSONMemoryPool *jm, const char *s, size_t len)
     JSONString *o = (JSONString *) JSONMemoryPool_Alloc(jm, sizeof(*o), &malloced);
     JSON json = toJSON(ValueS(o));
     JSON_Init(json);
-    char *str = (len > JSONSTRING_INLINE_SIZE) ? (char *) malloc(len) : o->text;
+    char *str = (len > JSONSTRING_INLINE_SIZE) ? (char *) malloc(len + 1) : o->text;
+    str[len] = '\0';
     memcpy(str, s, len);
     JSONString_init(o, (const char *)str, len);
     return json;
