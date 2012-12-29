@@ -6,6 +6,7 @@ void main() {
     Json json = new Json();
     json.setInt("int64",i);
     assert(json.getInt("int64") == i);
+    assert(json.toString() == "{\"int64\":12345678901}");
 }
 
 main();
