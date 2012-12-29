@@ -834,7 +834,7 @@ static void JSONUString_toString(string_builder *sb, JSON json)
 
 static void JSONInt32_toString(string_builder *sb, JSON json)
 {
-    int32_t i = toInt32(json.val);
+    intptr_t i = toInt32(json.val);
     string_builder_add_int(sb, i);
 }
 static void JSONInt64_toString(string_builder *sb, JSON json)
