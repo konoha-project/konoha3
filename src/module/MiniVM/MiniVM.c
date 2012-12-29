@@ -632,15 +632,15 @@ static kbool_t KBuilder_VisitErrorNode(KonohaContext *kctx, KBuilder *builder, k
 
 static void inline AssignLocal(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
-	if(node->attrTypeId != KType_void && ((intptr_t*)thunk)[0] != node->stacktop) {
-		KBuilder_AsmNMOV(kctx, builder, ((intptr_t*)thunk)[0], KClass_(node->attrTypeId), node->stacktop);
+	if(node->attrTypeId != KType_void && ((intptr_t*)thunk)[0] != node->stackbase) {
+		KBuilder_AsmNMOV(kctx, builder, ((intptr_t*)thunk)[0], KClass_(node->attrTypeId), node->stackbase);
 	}
 }
 
 static kbool_t KBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, kNode *block, void *thunk)
 {
 	size_t i;
-	intptr_t espidx = block->stacktop;
+	intptr_t espidx = block->stackbase;
 	for (i = 0; i < kNode_GetNodeListSize(kctx, block); i++) {
 		kNode *stmt = block->NodeList->NodeItems[i];
 		builder->common.uline = kNode_uline(stmt);
@@ -663,7 +663,7 @@ static kbool_t KBuilder_VisitReturnNode(KonohaContext *kctx, KBuilder *builder, 
 
 static kbool_t KBuilder_VisitIfNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
-	intptr_t espidx = stmt->stacktop;
+	intptr_t espidx = stmt->stackbase;
 	bblock_t lbELSE = new_BasicNodeLABEL(kctx);
 	bblock_t lbEND  = new_BasicNodeLABEL(kctx);
 	/* if */
@@ -683,7 +683,7 @@ static kbool_t KBuilder_VisitIfNode(KonohaContext *kctx, KBuilder *builder, kNod
 
 static kbool_t KBuilder_VisitWhileNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
-	intptr_t espidx = stmt->stacktop;
+	intptr_t espidx = stmt->stackbase;
 	bblock_t lbCONTINUE = new_BasicNodeLABEL(kctx);
 	bblock_t lbBREAK    = new_BasicNodeLABEL(kctx);
 	kNode_SetLabelNode(kctx, stmt, KSymbol_("continue"), lbCONTINUE);
@@ -700,7 +700,7 @@ static kbool_t KBuilder_VisitWhileNode(KonohaContext *kctx, KBuilder *builder, k
 
 static kbool_t KBuilder_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
-	intptr_t espidx = stmt->stacktop;
+	intptr_t espidx = stmt->stackbase;
 	bblock_t lbCONTINUE = new_BasicNodeLABEL(kctx);
 	bblock_t lbENTRY    = new_BasicNodeLABEL(kctx);
 	bblock_t lbBREAK    = new_BasicNodeLABEL(kctx);
@@ -720,7 +720,7 @@ static kbool_t KBuilder_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder,
 
 //static kbool_t KBuilder_VisitForNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 //{
-//	intptr_t espidx = stmt->stacktop;
+//	intptr_t espidx = stmt->stackbase;
 //	bblock_t lbCONTINUE = new_BasicNodeLABEL(kctx);
 //	bblock_t lbENTRY    = new_BasicNodeLABEL(kctx);
 //	bblock_t lbBREAK    = new_BasicNodeLABEL(kctx);
@@ -779,7 +779,7 @@ static kbool_t KBuilder_VisitThrowNode(KonohaContext *kctx, KBuilder *builder, k
 
 static kbool_t KBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	intptr_t espidx = expr->stacktop, thisidx = espidx + K_CALLDELTA;
+	intptr_t espidx = expr->stackbase, thisidx = espidx + K_CALLDELTA;
 	kMethod *mtd = CallNode_getMethod(expr);
 	DBG_ASSERT(IS_Method(mtd));
 	/*
@@ -849,7 +849,7 @@ static kbool_t KBuilder_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, 
 	}
 	else{
 		assert(leftHandNode->node == KNode_Field);
-		intptr_t espidx = expr->stacktop;
+		intptr_t espidx = expr->stackbase;
 		SUGAR VisitNode(kctx, builder, rightHandNode, &espidx);
 		kshort_t index  = (kshort_t)leftHandNode->index;
 		kshort_t xindex = (kshort_t)(leftHandNode->index >> (sizeof(kshort_t)*8));
@@ -865,7 +865,7 @@ static kbool_t KBuilder_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, 
 
 static kbool_t KBuilder_VisitPushNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	SUGAR VisitNode(kctx, builder, expr->NodeToPush, &(expr->stacktop));
+	SUGAR VisitNode(kctx, builder, expr->NodeToPush, &(expr->stackbase));
 	return true;
 }
 
@@ -949,7 +949,7 @@ static struct KVirtualCode* MiniVM_GenerateKVirtualCode(KonohaContext *kctx, kMe
 	ASM(CHKSTACK, 0);
 	//ASM_LABEL(kctx, builder, builder->bbBeginId);
 
-	SUGAR VisitNode(kctx, builder, block, &block->stacktop);
+	SUGAR VisitNode(kctx, builder, block, &block->stackbase);
 
 	ASM_LABEL(kctx, builder,  builder->bbReturnId);
 	if(mtd->mn == MN_new) {

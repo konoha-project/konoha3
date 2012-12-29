@@ -22,28 +22,28 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-static kNode *kNode_Rebase(KonohaContext *kctx, kNode *node, size_t stacktop)
+static kNode *kNode_Rebase(KonohaContext *kctx, kNode *node, size_t stackbase)
 {
-	if(!kNode_IsValue(node)/* && node->stacktop != stacktop*/) {
+	if(!kNode_IsValue(node)/* && node->stackbase != stackbase*/) {
 		size_t i, size = kNode_GetNodeListSize(kctx, node);
 		if(node->node == KNode_Block) {
 			for(i = 0; i < size; i++) {
 				kNode *sub = node->NodeList->NodeItems[i];
 				if(kNode_IsValue(sub)) continue;
-				kNode_Rebase(kctx, sub, stacktop + (sub->stacktop - node->stacktop));
+				kNode_Rebase(kctx, sub, stackbase + (sub->stackbase - node->stackbase));
 			}
 		}
 		else if(IS_Array(node->NodeList)) {
 			for(i = 1; i < size; i++) {
 				kNode *sub = node->NodeList->NodeItems[i];
 				if(kNode_IsValue(sub)) continue;
-				kNode_Rebase(kctx, sub, (i - 1) + stacktop + K_CALLDELTA);
+				kNode_Rebase(kctx, sub, (i - 1) + stackbase + K_CALLDELTA);
 			}
 		}
 		else if(IS_Node(node->NodeToPush)) {
-			kNode_Rebase(kctx, node->NodeToPush, stacktop);
+			kNode_Rebase(kctx, node->NodeToPush, stackbase);
 		}
-		node->stacktop = stacktop;
+		node->stackbase = stackbase;
 	}
 	return node;
 }
@@ -71,8 +71,8 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn0, kNode *expr, kNameSpa
 	kSyntax *syn = syn0;
 	kObject *reqType = KLIB Knull(kctx, reqtc);
 	int varsize = ns->genv->localScope.varsize;
-	expr->stacktop = varsize;
-	DBG_P(">>>>>>>>>> #stacktop = %d", varsize);
+	expr->stackbase = varsize;
+	DBG_P(">>>>>>>>>> #stackbase = %d", varsize);
 //	if(KFlag_Is(kshortflag_t, syn->flag, SYNFLAG_CallNode)) {
 //		KPushMethodCall(gma);
 //		KPushMethodCall(gma);
@@ -89,7 +89,7 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn0, kNode *expr, kNameSpa
 					ns->genv->localScope.varsize = varsize;
 				}
 //				if(!kNode_IsValue(texpr)) {
-//					texpr->stacktop = varsize;
+//					texpr->stackbase = varsize;
 //				}
 				return texpr;
 			}
@@ -372,7 +372,7 @@ static kNode* kNode_CheckReturnType(KonohaContext *kctx, kNode *node)
 	if(node->attrTypeId != KType_void) {
 		kNode *stmt = new_TypedNode(kctx, kNode_ns(node), KNode_Return, KClass_void, 0);
 		kNode_AddParsedObject(kctx, stmt, KSymbol_ExprPattern, UPCAST(node));
-		DBG_ASSERT(stmt->stacktop == 0);
+		DBG_ASSERT(stmt->stackbase == 0);
 		return stmt;
 	}
 	return node;

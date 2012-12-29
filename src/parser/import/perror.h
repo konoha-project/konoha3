@@ -94,7 +94,7 @@ static void MakeNodeError(KonohaContext *kctx, kNode *node, kString *errmsg, kNa
 		node->attrTypeId = KType_void;
 		KFieldSet(node, node->ErrorMessage, errmsg);
 		kNode_Set(ObjectConst, node, false);
-		node->stacktop = ns == NULL ? 0 : ns->genv->localScope.varsize;
+		node->stackbase = ns == NULL ? 0 : ns->genv->localScope.varsize;
 	}
 }
 
