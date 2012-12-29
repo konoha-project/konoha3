@@ -7,10 +7,10 @@
 import("cstyle");
 import("konoha.ns");  // konoha.const is obsolete
 import("konoha.class");
-import("konoha.array");
+import("JavaScript.Array");
 import("konoha.new");
-import("konoha.float");
-import("konoha.math");
+import("Type.Float");
+import("JavaScript.Math");
 const N=550;
 //const N=5500;
 

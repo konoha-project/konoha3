@@ -1,6 +1,6 @@
 // import("konoha.desugar");
 // import("cstyle"); // use cstyle
-// import("konoha.string");
+// import("JavaScript.String");
 // // //import("konoha.assign"); Don't use any more
 
 // int singleQuoteToken (Token tk, String source) {

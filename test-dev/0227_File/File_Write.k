@@ -2,7 +2,7 @@
 //Modified by Joseph
 
 import("konoha.bytes");
-import("konoha.string");
+import("JavaScript.String");
 import("posix.file");
 
 void test() {

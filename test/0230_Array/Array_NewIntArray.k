@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 import("konoha.new")
-import("konoha.array");
+import("JavaScript.Array");
 import("konoha.class");
 
 void test() {

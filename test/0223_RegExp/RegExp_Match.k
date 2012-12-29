@@ -1,5 +1,5 @@
-import("konoha.array");
-import("konoha.regexp");
+import("JavaScript.Array");
+import("JavaScript.Regexp");
 
 void f() {
     Array[String] r1 = "hoge1234".match(/123/);

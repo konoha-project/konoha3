@@ -4,7 +4,7 @@ import("jansson");
 import("curl");
 import("konoha.class");
 import("konoha.ns");  // konoha.const is obsolete
-import("konoha.string");
+import("JavaScript.String");
 import("konoha.bytes");
 import("konoha.file");
 

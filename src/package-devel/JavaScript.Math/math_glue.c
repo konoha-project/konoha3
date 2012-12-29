@@ -208,7 +208,7 @@ static KMETHOD Math_random(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t math_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.float", trace);
+	KRequirePackage("Type.Float", trace);
 	static KDEFINE_CLASS MathDef = {0};
 	MathDef.cflag = KClassFlag_Singleton|KClassFlag_Final;
 	MathDef.structname = "Math"; /*structname*/

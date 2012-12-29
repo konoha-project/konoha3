@@ -8,8 +8,8 @@ import("cstyle");
 import("konoha.ns");  // konoha.const is obsolete
 import("konoha.global");
 import("konoha.class");
-import("konoha.float");
-import("konoha.array");
+import("Type.Float");
+import("JavaScript.Array");
 // //import("konoha.assign"); Don't use any more
 import("konoha.bytes");
 import("konoha.file");

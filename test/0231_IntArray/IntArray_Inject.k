@@ -1,4 +1,4 @@
-import("konoha.array");
+import("JavaScript.Array");
 
 int add(int a, int b) {
 	return a+b;

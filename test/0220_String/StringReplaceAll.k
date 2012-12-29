@@ -1,4 +1,4 @@
-import("konoha.string")
+import("JavaScript.String")
 
 void f() {
     String x = "あいうえああ";

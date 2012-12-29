@@ -38,13 +38,13 @@ typedef struct Complex {
 	double _Complex z;
 } kComplex;
 
-static void Complex_Init(KonohaContext *kctx, kObject *o, void *conf)
+static void kComplex_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kComplex *kc = (kComplex *) o;
 	kc->z = 0;
 }
 
-static void Complex_Free(KonohaContext *kctx, kObject *o)
+static void kComplex_Free(KonohaContext *kctx, kObject *o)
 {
 }
 
@@ -649,12 +649,12 @@ static KMETHOD Complex_conjl(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t Complex_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.float", trace);
+	KRequirePackage("Type.Float", trace);
 	KDEFINE_CLASS defComplex = {0};
 	SETSTRUCTNAME(defComplex, Complex);
 	defComplex.cflag     = KClassFlag_Final;
-	defComplex.init      = Complex_Init;
-	defComplex.free      = Complex_Free;
+	defComplex.init      = kComplex_Init;
+	defComplex.free      = kComplex_Free;
 	KClass *ComplexClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defComplex, trace);
 
 	/* You can define methods with the following procedures. */
@@ -742,7 +742,7 @@ static kbool_t Complex_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 	return true;
 }
 
-KDEFINE_PACKAGE* complex_Init(void)
+KDEFINE_PACKAGE* Complex_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");

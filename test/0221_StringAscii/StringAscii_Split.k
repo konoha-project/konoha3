@@ -1,7 +1,7 @@
 //written by Joseph
 
-import("konoha.array");
-import("konoha.string");
+import("JavaScript.Array");
+import("JavaScript.String");
 
 void test() {
 	String[] ma = "How are you doing today?".split(" ");

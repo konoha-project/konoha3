@@ -1,6 +1,6 @@
 //written by takeo onoda
 
-import("konoha.string");
+import("JavaScript.String");
 
 void test() {
 	assert("hoge".get(0) == "h");

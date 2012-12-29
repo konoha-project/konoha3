@@ -331,7 +331,7 @@ static KMETHOD Json_SetInt(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t json_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.float", trace);
+	KRequirePackage("Type.Float", trace);
 	KDEFINE_CLASS JsonDef = {
 		.structname = "Json",
 		.typeId = KTypeAttr_NewId,
@@ -381,7 +381,7 @@ static kbool_t json_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE* json_Init(void)
+KDEFINE_PACKAGE* Json_Init(void) 
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("json", "1.0"),

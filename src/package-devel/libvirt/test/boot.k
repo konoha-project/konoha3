@@ -1,7 +1,7 @@
 import("konoha.new");
 import("konoha.class");
 import("konoha.foreach");
-import("konoha.array");
+import("JavaScript.Array");
 import("cstyle");
 import("libvirt");
 

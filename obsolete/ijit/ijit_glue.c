@@ -705,7 +705,7 @@ static void _kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kNode *bk)
 static kbool_t ijit_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("sugar", trace);
-	KRequirePackage("konoha.float", trace);
+	KRequirePackage("Type.Float", trace);
 	KRequirePackage("llvm", trace);
 	KRequirePackage("konoha.assign", trace);
 	KRequirePackage("konoha.null", trace);

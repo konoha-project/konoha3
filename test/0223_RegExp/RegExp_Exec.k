@@ -1,7 +1,7 @@
 //written by Joseph
 
-import("konoha.array");
-import("konoha.regexp");
+import("JavaScript.Array");
+import("JavaScript.Regexp");
 
 void test() {
 	String str = "Hello world!";

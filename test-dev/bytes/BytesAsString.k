@@ -1,7 +1,7 @@
 // written by imasahiro
 // modified shinpei nakata
 
-import("konoha.string");
+import("JavaScript.String");
 import("konoha.bytes");
 import("konoha.new");
 

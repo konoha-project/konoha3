@@ -1,6 +1,6 @@
 // written by okamoto
 import("konoha.new");
-import("konoha.array");
+import("JavaScript.Array");
 
 void f () {
 	int[] ia = new int[0];

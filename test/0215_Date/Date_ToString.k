@@ -1,8 +1,8 @@
 // written by okamoto
 
-import("konoha.string");
-import("konoha.regexp");
-import("konoha.date");
+import("JavaScript.String");
+import("JavaScript.Regexp");
+import("JavaScript.Date");
 
 void test() {
 	Date d = new Date();

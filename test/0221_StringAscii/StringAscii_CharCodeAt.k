@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("konoha.string");
+import("JavaScript.String");
 
 void test() {
 	assert("HELLO WORLD".charCodeAt(0) == 72);

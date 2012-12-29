@@ -1,5 +1,5 @@
 // generated with genstrstrby kimio kuramitsu
-import("konoha.string")
+import("JavaScript.String")
 
 void test() {
   String a = "a";

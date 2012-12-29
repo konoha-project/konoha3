@@ -2,7 +2,7 @@
 //Modified by Wakamori
 
 import("konoha.new");
-import("konoha.array");
+import("JavaScript.Array");
 import("dscript.subproc");
 
 void test() {

@@ -1,5 +1,5 @@
 import("mecab");
-import("konoha.regexp");
+import("JavaScript.Regexp");
 import("konoha");
 
 void main() {

@@ -1,6 +1,6 @@
 // written by kimio
 
-import("konoha.string");
+import("JavaScript.String");
 import("cstyle");
 
 void test() {

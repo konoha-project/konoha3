@@ -2,7 +2,7 @@
 // added by kimio
 
 import("cstyle");
-import("konoha.string");
+import("JavaScript.String");
 
 void f() {
 	int i = 0;

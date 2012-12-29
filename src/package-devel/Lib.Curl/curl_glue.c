@@ -177,7 +177,7 @@ static const char *getOptionSymbol(CURLoption opt)
 
 #define toCURL(o)         ((kCurl *)o)->curl
 
-static void Curl_Init(KonohaContext *kctx, kObject *o, void *conf)
+static void kCurl_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct kCurlVar *c = (struct kCurlVar *)o;
 	c->curl = curl_easy_init();
@@ -185,7 +185,7 @@ static void Curl_Init(KonohaContext *kctx, kObject *o, void *conf)
 	c->bytesNULL = NULL;
 }
 
-static void Curl_Free(KonohaContext *kctx, kObject *o)
+static void kCurl_Free(KonohaContext *kctx, kObject *o)
 {
 	struct kCurlVar *c = (struct kCurlVar *)o;
 	if(c->headers != NULL) {
@@ -197,7 +197,7 @@ static void Curl_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Curl_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void kCurl_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	struct kCurlVar *c = (struct kCurlVar *)o;
 	KRefTraceNullable(c->URLInfoNULL);
@@ -752,14 +752,14 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t curl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
-	KRequirePackage("konoha.file", trace);
+	KRequirePackage("Type.File", trace);
 
 	KDEFINE_CLASS defCurl = {
 		STRUCTNAME(Curl),
 		.cflag = KClassFlag_Final,
-		.init = Curl_Init,
-		.reftrace = Curl_Reftrace,
-		.free = Curl_Free,
+		.init = kCurl_Init,
+		.reftrace = kCurl_Reftrace,
+		.free = kCurl_Free,
 	};
 	KClass *cCurl = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCurl, trace);
 

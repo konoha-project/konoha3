@@ -1,7 +1,7 @@
 // written by shinpei
 
 // //import("konoha.assign"); Don't use any more
-import("konoha.array");
+import("JavaScript.Array");
 
 void test () {
 	String[] sa1 = ["a", "b"];

@@ -7,11 +7,11 @@
 
 import("cstyle");
 import("konoha.ns");  // konoha.const is obsolete
-import("konoha.float");
+import("Type.Float");
 import("konoha.class");
 // //import("konoha.assign"); Don't use any more
-import("konoha.array");
-import("konoha.math");
+import("JavaScript.Array");
+import("JavaScript.Math");
 
 const PI = 3.141592653589793;
 const SOLAR_MASS = 4 * PI * PI;

@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("konoha.string");
+import("JavaScript.String");
 
 void test() {
 	assert("Hello World!".toLowerCase() == "hello world!");

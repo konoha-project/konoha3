@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("konoha.string");
+import("JavaScript.String");
 
 void test() {
 	assert("こんにちは、世界!".slice(1, 5) == "んにちは");

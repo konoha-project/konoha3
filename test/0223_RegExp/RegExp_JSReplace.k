@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("konoha.regexp");
+import("JavaScript.Regexp");
 
 void test() {
 	RegExp patt = /world/gi;

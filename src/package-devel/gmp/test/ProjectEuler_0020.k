@@ -7,7 +7,7 @@
 
 */
 import("konoha.class");
-import("konoha.array");
+import("JavaScript.Array");
 import("cstyle");
 import("gmp")
 

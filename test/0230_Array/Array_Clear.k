@@ -1,6 +1,6 @@
 // written by Tetsuro Matsumura
 
-import("konoha.array");
+import("JavaScript.Array");
 
 void test() {
 	int[] a = [1, 2, 9];

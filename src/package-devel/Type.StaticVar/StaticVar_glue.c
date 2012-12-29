@@ -45,7 +45,7 @@ static kbool_t var_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpa
 	return true;
 }
 
-KDEFINE_PACKAGE* var_Init(void)
+KDEFINE_PACKAGE* StaticVar_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "var", "1.0");

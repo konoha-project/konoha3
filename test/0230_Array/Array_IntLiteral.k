@@ -1,5 +1,5 @@
 // written by kimio kuramitsu
-import("konoha.array");
+import("JavaScript.Array");
 
 void test() {
 	int[] a = [1, 2, 3];

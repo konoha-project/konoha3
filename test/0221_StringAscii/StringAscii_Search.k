@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("konoha.string");
+import("JavaScript.String");
 
 void test() {
 	assert("Hello, world!".search("world") == 7);

@@ -135,7 +135,7 @@ static kbool_t global_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return kNameSpace_InitGlobalObject(kctx, exportNS, trace);
 }
 
-KDEFINE_PACKAGE* global_Init(void)
+KDEFINE_PACKAGE* GlobalVariable_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);

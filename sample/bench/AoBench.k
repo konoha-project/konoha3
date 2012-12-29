@@ -1,11 +1,11 @@
 
 // written by shinpei nakata
 
-import("konoha.float");
-import("konoha.math");
+import("Type.Float");
+import("JavaScript.Math");
 import("konoha.class");
 import("konoha.bytes");
-import("konoha.string");
+import("JavaScript.String");
 import("konoha.file");
 
 int width = 256;

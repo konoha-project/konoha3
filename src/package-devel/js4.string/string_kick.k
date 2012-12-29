@@ -1,3 +1,3 @@
-import("konoha.string");
-import("konoha.regexp");
+import("JavaScript.String");
+import("JavaScript.Regexp");
 

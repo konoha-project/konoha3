@@ -1,6 +1,6 @@
 //written by takeo onoda
 
-import("konoha.string");
+import("JavaScript.String");
 
 void test() {
 	assert("fOoBaR123".toUpper() == "FOOBAR123");

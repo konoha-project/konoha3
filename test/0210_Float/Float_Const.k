@@ -1,7 +1,7 @@
 /* this test is written by masahiro ide */
 /* probably formatter is required (commented by kimio) */
 
-import("konoha.float");
+import("Type.Float");
 
 System.p("Nan == "+ NaN);
 System.p("+Infinity == "+ Infinity);

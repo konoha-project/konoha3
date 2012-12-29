@@ -7,7 +7,7 @@
 import("cstyle");
 // //import("konoha.assign"); Don't use any more
 import("konoha.ns");  // konoha.const is obsolete
-import("konoha.array");
+import("JavaScript.Array");
 import("konoha.new");
 import("konoha.class");
 import("cstyle"); // konoha.int was obsolete

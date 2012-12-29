@@ -1,4 +1,4 @@
-import("konoha.array");
+import("JavaScript.Array");
 
 void test() {
 	int[] ia = [1,2,3];

@@ -1,7 +1,7 @@
 //written by Joseph
 
-import("konoha.array");
-import("konoha.regexp");
+import("JavaScript.Array");
+import("JavaScript.Regexp");
 
 void test() {
 	String[] ma = "The rain in SPAIN stays mainly in the plain".match(/ain/g);

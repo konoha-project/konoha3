@@ -5,10 +5,10 @@
  */
 
 import("cstyle");
-import("konoha.float");
+import("Type.Float");
 // //import("konoha.assign"); Don't use any more
 import("konoha.ns");  // konoha.const is obsolete
-import("konoha.math");
+import("JavaScript.Math");
 const N=2500000;
 //N=2_500_000;
 

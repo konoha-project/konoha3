@@ -1,7 +1,7 @@
 // written by Joseph
 // modified by chenji
 
-import("konoha.string");
+import("JavaScript.String");
 
 void test() {
 	assert("Hello world!".substr(2) == "llo world!");

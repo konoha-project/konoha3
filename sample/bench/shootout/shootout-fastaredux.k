@@ -6,13 +6,13 @@
 
 import("cstyle");
 import("konoha.ns");  // konoha.const is obsolete
-import("konoha.float");
+import("Type.Float");
 import("konoha.global");
 import("konoha.class");
-import("konoha.array");
+import("JavaScript.Array");
 import("konoha.new");
 // //import("konoha.assign"); Don't use any more
-import("konoha.string");
+import("JavaScript.String");
 import("konoha.bytes");
 import("konoha.file");
 

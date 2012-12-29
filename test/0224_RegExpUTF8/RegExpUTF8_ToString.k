@@ -1,7 +1,7 @@
 //written by Joseph
 
 import("konoha.new");
-import("konoha.regexp");
+import("JavaScript.Regexp");
 
 void test() {
 	RegExp myExp = new RegExp("こんにちは、世界");

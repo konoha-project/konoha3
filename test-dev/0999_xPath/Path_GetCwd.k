@@ -1,6 +1,6 @@
 //Written by Joseph
 
-import("konoha.string");
+import("JavaScript.String");
 import("posix.path");
 
 void test() {

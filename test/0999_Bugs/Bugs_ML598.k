@@ -2,8 +2,8 @@
 // Reported at ML #598
 // SEGV at git:c4b1feb97a58bef08bf1472fad346689cf9ac4a0
 import("cstyle", "null");
-import("konoha.array");
-import("konoha.string");
+import("JavaScript.Array");
+import("JavaScript.String");
 
 String[] extractNoun() {
     if (false) {

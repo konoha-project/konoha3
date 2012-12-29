@@ -1,7 +1,7 @@
 // written by Joseph
 // written by chenji
 
-import("konoha.string");
+import("JavaScript.String");
 
 void test() {
 	//NOTE: The length of "Hello world!" is 12.

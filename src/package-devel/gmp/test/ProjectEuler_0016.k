@@ -7,7 +7,7 @@ What is the sum of the digits of the number 21000?
 
 */
 import("konoha.class");
-import("konoha.string");
+import("JavaScript.String");
 import("cstyle");
 import("gmp");
 

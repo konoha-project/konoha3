@@ -1,7 +1,7 @@
 import("konoha.new");
 import("konoha.ns");  // konoha.const is obsolete
 import("konoha.bytes");
-import("konoha.string");
+import("JavaScript.String");
 import("konoha.file");
 import("dscript.subproc");
 import("jansson");

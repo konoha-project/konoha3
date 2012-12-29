@@ -1,7 +1,7 @@
 //written by Joseph
 
 import("konoha.class");
-import("konoha.regexp");
+import("JavaScript.Regexp");
 
 void test() {
 	RegExp patt = /Anything/g;

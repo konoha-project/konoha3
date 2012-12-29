@@ -1,6 +1,6 @@
 // written by imasahiro
 import("konoha.foreach");
-import("konoha.array");
+import("JavaScript.Array");
 
 void f() {
     int[] list = [1, 2, 3, 4];

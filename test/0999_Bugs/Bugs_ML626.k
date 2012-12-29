@@ -1,7 +1,7 @@
 // reported by makino
 
 import("cstyle");
-import("konoha.regexp");
+import("JavaScript.Regexp");
 
 void test() {
         assert((8 / 2) == 4);

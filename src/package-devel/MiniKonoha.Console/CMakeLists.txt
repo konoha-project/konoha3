@@ -1,3 +1,3 @@
 cmake_minimum_required(VERSION 2.6)
-set(PACKAGE_SOURCE_CODE console_glue.c)
-add_konoha_package(konoha.console)
+set(PACKAGE_SOURCE_CODE Console_glue.c)
+add_konoha_package(MiniKonoha.Console)

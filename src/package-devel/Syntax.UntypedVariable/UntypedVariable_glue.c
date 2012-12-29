@@ -80,7 +80,7 @@ static kbool_t untyped_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 	return true;
 }
 
-KDEFINE_PACKAGE* untyped_Init(void)
+KDEFINE_PACKAGE* UntypedVariable_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");

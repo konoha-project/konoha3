@@ -1,9 +1,9 @@
-import("konoha.regexp");
+import("JavaScript.Regexp");
 import("konoha.new");
-import("konoha.string");
+import("JavaScript.String");
 import("konoha.foreach");
 import("konoha.ns");  // konoha.const is obsolete
-import("konoha.array");
+import("JavaScript.Array");
 import("konoha.file");
 import("cstyle");
 

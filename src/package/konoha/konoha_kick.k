@@ -29,9 +29,9 @@ import("konoha.class");
 import("konoha.var");
 import("konoha.global");
 import("konoha.ns");
-import("konoha.string");
-import("konoha.regexp");
-import("konoha.array");
+import("JavaScript.String");
+import("JavaScript.Regexp");
+import("JavaScript.Array");
 import("konoha.map");
 import("konoha.iterator");
 

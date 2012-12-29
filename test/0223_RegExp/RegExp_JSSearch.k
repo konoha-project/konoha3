@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("konoha.regexp");
+import("JavaScript.Regexp");
 
 void test() {
 	assert("Hello, world!".search(/World/gi) == 7);

@@ -1,6 +1,6 @@
 // written by shinpei
 
-import("konoha.array");
+import("JavaScript.Array");
 
 void f() {
 	Array[String] sa = ["a","b","c"];

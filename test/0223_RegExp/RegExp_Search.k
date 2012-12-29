@@ -1,4 +1,4 @@
-import("konoha.regexp");
+import("JavaScript.Regexp");
 
 void test() {
 	assert("hoge1234".search(/123/) == 4);

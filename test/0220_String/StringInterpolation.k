@@ -1,6 +1,6 @@
 // written by ide
 
-import("konoha.string");
+import("JavaScript.String");
 
 int add(int n) {
     return n + 1;

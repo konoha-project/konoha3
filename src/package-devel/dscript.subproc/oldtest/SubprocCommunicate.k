@@ -3,7 +3,7 @@
 
 import("konoha.new");
 import("cstyle"); // konoha.null is obsolate; use cstyle
-import("konoha.array");
+import("JavaScript.Array");
 import("dscript.subproc");
 
 void test() {

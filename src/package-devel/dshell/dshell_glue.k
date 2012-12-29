@@ -25,14 +25,14 @@
 import("cstyle", "while");
 import("cstyle", "break");
 import("cstyle", "null");
-import("konoha.array");
+import("JavaScript.Array");
 import("konoha.console");
 import("konoha.ns");  // konoha.defined is obsolete
 import("konoha.eval");
 import("konoha.file");
-import("konoha.math");
+import("JavaScript.Math");
 import("konoha.object");
-import("konoha.string");
+import("JavaScript.String");
 import("dscript.subproc");
 import("konoha.desugar");
 

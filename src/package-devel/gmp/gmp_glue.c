@@ -940,7 +940,7 @@ static KMETHOD Float_opNEQ_mpf(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t gmp_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.float", trace);
+	KRequirePackage("Type.Float", trace);
 
 	static KDEFINE_CLASS MpzDef = {0};
 	SETSTRUCTNAME(MpzDef, Mpz);

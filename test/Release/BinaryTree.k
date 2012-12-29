@@ -4,7 +4,7 @@ import("konoha.class");
 import("konoha.global");
 import("cstyle"); // konoha.null is obsolate; use cstyle
 import("cstyle"); // konoha.int was obsolete
-import("konoha.array");
+import("JavaScript.Array");
 import("konoha.ns");  // konoha.const is obsolete
 AllowImplicitGlobalVariable(true);
 

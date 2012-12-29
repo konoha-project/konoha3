@@ -533,7 +533,7 @@ static void MpiModule_Free(KonohaContext *kctx, struct KRuntimeModule *baseh)
 static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("konoha.bytes", trace);
-	KRequirePackage("konoha.float", trace);
+	KRequirePackage("Type.Float", trace);
 	KModuleMpi *mod = (KModuleMpi *)KCalloc_UNTRACE(sizeof(KModuleMpi), 1);
 	mod->h.name     = "mpi";
 	mod->h.setupModuleContext    = MpiModule_Setup;
