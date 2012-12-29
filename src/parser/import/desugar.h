@@ -55,7 +55,7 @@ static KMETHOD PatternMatch_MethodName(KonohaContext *kctx, KonohaStack *sfp)
 	if(opIdx == -1) {
 		int returnIdx = -1;
 		kTokenVar *tk = tokenList->TokenVarItems[beginIdx];
-		KSyntax *syn = tk->resolvedSyntaxInfo;
+		kSyntax *syn = tk->resolvedSyntaxInfo;
 		if(syn->keyword != KSymbol_MemberPattern) {
 			if(syn->keyword == KSymbol_SymbolPattern || syn->precedence_op1 > 0 || syn->precedence_op2 > 0) {
 				kNode_AddParsedObject(kctx, stmt, name, UPCAST(tk));
@@ -219,7 +219,7 @@ static KMETHOD Expression_Operator(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = kNode_ns(node);
 //	if(/*syn->keyword != KSymbol_LET && */syn->sugarFuncTable[KSugarTypeFunc] == NULL) {
 //		DBG_P("switching type checker of %s%s to MethodCall ..", KSymbol_Fmt2(syn->keyword));
-//		syn = KSyntax_(ns, KSymbol_NodeMethodCall);  // switch type checker
+//		syn = kSyntax_(ns, KSymbol_NodeMethodCall);  // switch type checker
 //	}
 	int returnIdx = operatorIdx + 1;
 	kTokenVar *tk = tokenList->TokenVarItems[operatorIdx];
@@ -301,7 +301,7 @@ static KMETHOD Expression_COMMA(KonohaContext *kctx, KonohaStack *sfp)
 //			kToken_ToBraceGroup(kctx, (kTokenVar *)tk, kNode_ns(stmt), NULL);
 //		}
 //		if(tk->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
-//			kNodeVar *expr = new_(NodeVar, KSyntax_(kNode_ns(stmt), KSymbol_NodePattern), OnGcStack);
+//			kNodeVar *expr = new_(NodeVar, kSyntax_(kNode_ns(stmt), KSymbol_NodePattern), OnGcStack);
 //			KTokenSeq range = {kNode_ns(stmt), tk->subTokenList, 0, kArray_size(tk->subTokenList)};
 //			KFieldSet(expr, expr->block, SUGAR new_BlockNode(kctx, stmt, NULL, &range));
 //			KReturn(expr);
@@ -309,7 +309,7 @@ static KMETHOD Expression_COMMA(KonohaContext *kctx, KonohaStack *sfp)
 //	}
 //}
 
-static kNode* NewNode(KonohaContext *kctx, KSyntax *syn, kToken *tk, ktypeattr_t ty)
+static kNode* NewNode(KonohaContext *kctx, kSyntax *syn, kToken *tk, ktypeattr_t ty)
 {
 	kNodeVar *expr = new_(NodeVar, syn, OnGcStack);
 	KFieldSet(expr, expr->TermToken, tk);
@@ -334,7 +334,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 		if((size_t)nextIdx < kArray_size(tokenList)) {
 			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
 			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // new C (...)
-				KSyntax *syn = KSyntax_(ns, KSymbol_NodeMethodCall);
+				kSyntax *syn = kSyntax_(ns, KSymbol_NodeMethodCall);
 				kNode *expr = SUGAR new_UntypedOperatorNode(kctx, syn, 2, newToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
 				newToken->resolvedSymbol = MN_new;
 				KReturn(expr);
@@ -1138,7 +1138,7 @@ static kParam *kNode_GetParamNULL(KonohaContext *kctx, kNode *stmt, kNameSpace* 
 {
 	kParam *pa = (kParam *)kNode_GetObjectNULL(kctx, stmt, KSymbol_ParamPattern);
 	if(pa == NULL || !IS_Param(pa)) {
-		KSyntax *syn = KSyntax_(kNode_ns(stmt), KSymbol_ParamPattern);
+		kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern);
 		TypeNode(kctx, syn, stmt, ns, KClass_void);
 		if(kNode_IsError(stmt)) return NULL;
 	}

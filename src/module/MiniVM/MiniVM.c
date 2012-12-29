@@ -751,7 +751,7 @@ static kbool_t KBuilder_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder,
 
 static kbool_t KBuilder_VisitJumpNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
-	KSyntax *syn = stmt->syn;
+	kSyntax *syn = stmt->syn;
 	kNode *jump = kNode_GetNode(kctx, stmt, syn->keyword);
 	DBG_ASSERT(jump != NULL && IS_Node(jump));
 	bblock_t lbJUMP = kNode_GetLabelNode(kctx, jump, syn->keyword);

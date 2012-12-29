@@ -27,21 +27,31 @@
 /* --------------- */
 /* NameSpace */
 
-static void syntaxMap_Free(KonohaContext *kctx, void *p)
-{
-	KFree(p, sizeof(KSyntax));
-}
+//static void syntaxMap_Free(KonohaContext *kctx, void *p)
+//{
+//	KFree(p, sizeof(kSyntax));
+//}
 
 static void kNameSpace_FreeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns)
 {
 	if(ns->syntaxMapNN != NULL) {
-		KLIB KHashMap_Free(kctx, ns->syntaxMapNN, syntaxMap_Free);
+		KLIB KHashMap_Free(kctx, ns->syntaxMapNN, NULL/*syntaxMap_Free*/);
 	}
 	if(ns->tokenMatrix != NULL) {
 		KFree((void *)ns->tokenMatrix, SIZEOF_TOKENMATRIX);
 	}
 }
 
+/* --------------- */
+/* Symbol */
+
+static void kSyntax_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kSyntaxVar *syn = (kSyntaxVar *)o;
+	bzero(&syn->parentSyntaxNULL, sizeof(kSyntax) - sizeof(kObjectHeader));
+	kNameSpace *ns = conf == NULL ? KNULL(NameSpace) : (kNameSpace *)conf;
+	KFieldInit(syn, syn->packageNameSpace, ns);
+}
 
 /* --------------- */
 /* Symbol */
@@ -378,7 +388,7 @@ static kNode* kNode_Op(KonohaContext *kctx, kNode *node, kToken *keyToken, int n
 	return node;
 }
 
-static kNodeVar* new_UntypedOperatorNode(KonohaContext *kctx, KSyntax *syn, int n, ...)
+static kNodeVar* new_UntypedOperatorNode(KonohaContext *kctx, kSyntax *syn, int n, ...)
 {
 	va_list ap;
 	va_start(ap, n);

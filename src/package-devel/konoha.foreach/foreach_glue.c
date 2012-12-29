@@ -47,7 +47,7 @@
 //static kToken* new_ParsedNodeToken(KonohaContext *kctx, kNameSpace *ns, kNode *expr)
 //{
 //	kTokenVar *ParsedNodeToken = new_(TokenVar, 0, OnGcStack);
-//	ParsedNodeToken->resolvedSyntaxInfo = KSyntax_(ns, KSymbol_NodePattern);
+//	ParsedNodeToken->resolvedSyntaxInfo = kSyntax_(ns, KSymbol_NodePattern);
 //	KFieldSet(ParsedNodeToken, ParsedNodeToken->parsedNode, expr);
 //	return (kToken *)ParsedNodeToken;
 //}

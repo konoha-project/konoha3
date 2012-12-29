@@ -226,6 +226,7 @@ typedef struct {
 
 #define KTypeAttr_Boxed      KFLAG_H0    /* KeyValueStore, Field */
 #define KTypeAttr_ReadOnly   KFLAG_H1    /* Variable, Field */
+#define KTypeAttr_Temporary  KFLAG_H1    /* KeyValueStore */
 #define KTypeAttr_Coercion   KFLAG_H2    /* Variable, Field */
 
 #define KTypeAttr_Is(P, t)   (((t) & KTypeAttr_##P) == KTypeAttr_##P)

@@ -66,9 +66,9 @@ static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kNameSpa
 	return (kNode *)lsfp[K_RTNIDX].asObject;
 }
 
-static kNode *TypeNode(KonohaContext *kctx, KSyntax *syn0, kNode *expr, kNameSpace *ns, KClass* reqtc)
+static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn0, kNode *expr, kNameSpace *ns, KClass* reqtc)
 {
-	KSyntax *syn = syn0;
+	kSyntax *syn = syn0;
 	kObject *reqType = KLIB Knull(kctx, reqtc);
 	int varsize = ns->genv->localScope.varsize;
 	expr->stacktop = varsize;
@@ -81,7 +81,7 @@ static kNode *TypeNode(KonohaContext *kctx, KSyntax *syn0, kNode *expr, kNameSpa
 //	}
 	while(true) {
 		int index, size;
-		kFunc **FuncItems = KSyntax_funcTable(kctx, syn, KSugarTypeFunc, &size);
+		kFunc **FuncItems = kSyntax_funcTable(kctx, syn, KSugarTypeFunc, &size);
 		for(index = size - 1; index >= 0; index--) {
 			kNode *texpr = CallTypeFunc(kctx, FuncItems[index], expr, ns, reqType);
 			if(kNode_IsError(texpr) || texpr->attrTypeId != KType_var) {

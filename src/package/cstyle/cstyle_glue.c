@@ -207,7 +207,7 @@
 //	}
 //	if(start < end) {
 //		kToken *opToken = tokenList->TokenItems[i];
-//		KSyntax *opSyntax = opToken->resolvedSyntaxInfo;
+//		kSyntax *opSyntax = opToken->resolvedSyntaxInfo;
 //		KTokenSeq macro = {kNode_ns(stmt), tokenList};
 //		KTokenSeq_Push(kctx, macro);
 //		KMacroSet macroParam[] = {
@@ -219,7 +219,7 @@
 //		kNode *expr = SUGAR ParseNewNode(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, NULL);
 //		if(expr != K_NULLNODE) {
 //			SUGAR kNode_AddParsedObject(kctx, stmt, KSymbol_NodePattern, UPCAST(expr));
-//			((kNodeVar *)stmt)->syn = KSyntax_(kNode_ns(stmt), KSymbol_NodePattern);
+//			((kNodeVar *)stmt)->syn = kSyntax_(kNode_ns(stmt), KSymbol_NodePattern);
 //		}
 //		KTokenSeq_Pop(kctx, macro);
 //		end = SUGAR FindEndOfStatement(kctx, kNode_ns(stmt), tokenList, end+1, endIdx);
@@ -397,7 +397,7 @@
 //		kTokenVar *tkN = new_(TokenVar, 0, OnGcStack);
 //		tkN->resolvedSymbol= KMethodName_ToGetter(0);
 //		tkN->uline = currentToken->uline;
-//		KSyntax *syn = KSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall);
+//		kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall);
 //		leftNode  = SUGAR new_UntypedOperatorNode(kctx, syn, 2, tkN, leftNode);
 //		leftNode = SUGAR AddParamNode(kctx, ns, leftNode, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), "[");
 //		KReturn(SUGAR kNode_RightJoinNode(kctx, stmt, leftNode, tokenList, operatorIdx + 1, endIdx));
@@ -669,7 +669,7 @@
 //	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 //	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_NumberPattern, KonohaChar_Digit, KSugarFunc(ns, TokenFunc_ExtendedIntLiteral));
 //
-//	KSyntaxVar *syn = (KSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, KSymbol_("+"), 0);
+//	kSyntaxVar *syn = (kSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, KSymbol_("+"), 0);
 //	if(syn != NULL) {
 //		syn->precedence_op1  = Precedence_CStylePrefixOperator;
 //	}
@@ -683,7 +683,7 @@
 //{
 //	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 //	kToken *opToken = tokenList->TokenItems[operatorIdx];
-//	KSyntax *opSyntax = opToken->resolvedSyntaxInfo;
+//	kSyntax *opSyntax = opToken->resolvedSyntaxInfo;
 //	if(opSyntax->macroParamSize == 2) {
 //		KTokenSeq macro = {kNode_ns(stmt), tokenList};
 //		KTokenSeq_Push(kctx, macro);
@@ -782,7 +782,7 @@
 //		if(tk->resolvedSymbol == KSymbol_("null")) {
 //			kNode *leftHandNode = SUGAR ParseNewNode(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
 //			tk->resolvedSymbol = KSymbol_("isNull");
-//			KReturn(SUGAR new_UntypedOperatorNode(kctx, KSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall), 2, tk, leftHandNode));
+//			KReturn(SUGAR new_UntypedOperatorNode(kctx, kSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall), 2, tk, leftHandNode));
 //		}
 //	}
 //	DBG_P("checking parent .. == ..");
@@ -797,7 +797,7 @@
 //		if(tk->resolvedSymbol == KSymbol_("null")) {
 //			kNode *leftHandNode = SUGAR ParseNewNode(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
 //			tk->resolvedSymbol = KSymbol_("isNotNull");
-//			KReturn(SUGAR new_UntypedOperatorNode(kctx, KSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall), 2, tk, leftHandNode));
+//			KReturn(SUGAR new_UntypedOperatorNode(kctx, kSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall), 2, tk, leftHandNode));
 //		}
 //	}
 //	DBG_P("checking parent .. != ..");

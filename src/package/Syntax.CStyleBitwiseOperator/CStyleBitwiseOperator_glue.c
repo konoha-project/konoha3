@@ -114,7 +114,7 @@ static kbool_t int_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 //	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_NumberPattern, KonohaChar_Digit, KSugarFunc(ns, TokenFunc_ExtendedIntLiteral));
-	KSyntaxVar *syn = (KSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, KSymbol_("+"), 0);
+	kSyntaxVar *syn = (kSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, KSymbol_("+"), 0);
 	if(syn != NULL) {
 		syn->precedence_op1  = Precedence_CStylePrefixOperator;
 	}
@@ -128,7 +128,7 @@ static kbool_t int_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 //{
 //	VAR_Expression(stmt, tokenList, beginIdx, opIdx, endIdx);
 //	kToken *opToken = tokenList->TokenItems[opIdx];
-//	KSyntax *opSyntax = opToken->resolvedSyntaxInfo;
+//	kSyntax *opSyntax = opToken->resolvedSyntaxInfo;
 //	if(opSyntax->macroParamSize == 2) {
 //		KTokenSeq macro = {kNode_ns(stmt), tokenList};
 //		KTokenSeq_Push(kctx, macro);

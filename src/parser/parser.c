@@ -140,6 +140,11 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	defSymbol.unbox = KClass_(KType_int)->unbox;
 	defSymbol.p = kSymbol_p;
 
+	KDEFINE_CLASS defSyntax = {0};
+	SETSTRUCTNAME(defSyntax, Syntax);
+	defSyntax.init = kSyntax_Init;
+	//defSyntax.p = kSyntax_p;
+
 	KDEFINE_CLASS defToken = {0};
 	SETSTRUCTNAME(defToken, Token);
 	defToken.init = kToken_Init;
@@ -153,6 +158,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	defNode.p        = kNode_p;
 
 	mod->cSymbol =    KLIB KClass_define(kctx, PackageId_sugar, NULL, &defSymbol, 0);
+	mod->cSyntax =    KLIB KClass_define(kctx, PackageId_sugar, NULL, &defSyntax, 0);
 	mod->cToken =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defToken, 0);
 	mod->cNode  =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defNode, 0);
 	mod->cTokenArray = KClass_p0(kctx, KClass_Array, mod->cToken->typeId);

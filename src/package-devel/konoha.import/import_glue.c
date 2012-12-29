@@ -31,7 +31,7 @@
 //
 //#define makeStringConstValue(kctx, text) new_ConstNode(kctx, ns, KClass_String, UPCAST(text))
 //
-//static kNode *CreateImportCall(KonohaContext *kctx, KSyntaxVar *syn, kToken *tkImport, kNameSpace *ns, kString *pkgname)
+//static kNode *CreateImportCall(KonohaContext *kctx, kSyntaxVar *syn, kToken *tkImport, kNameSpace *ns, kString *pkgname)
 //{
 //	kNode *ePKG = makeStringConstValue(kctx, pkgname);
 //	kNode *expr = SUGAR new_UntypedOperatorNode(kctx, syn, 3,
@@ -48,7 +48,7 @@
 //		KReturnUnboxValue(false);
 //	}
 //	kNameSpace *ns = kNode_ns(stmt);
-//	KSyntaxVar *syn = (KSyntaxVar *) KSyntax_(ns, KSymbol_NodeMethodCall);
+//	kSyntaxVar *syn = (kSyntaxVar *) kSyntax_(ns, KSymbol_NodeMethodCall);
 //	kNode *expr;
 //	kTokenVar *tkImport = /*G*/new_(TokenVar, 0, OnGcStack);
 //	tkImport->resolvedSymbol = KMethodName_("import");

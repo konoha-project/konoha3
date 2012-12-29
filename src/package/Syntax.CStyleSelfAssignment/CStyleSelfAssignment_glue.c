@@ -38,7 +38,7 @@ static KMETHOD Expression_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, opIdx, endIdx);
 	kToken *opToken = tokenList->TokenItems[opIdx];
-	KSyntax *opSyntax = opToken->resolvedSyntaxInfo;
+	kSyntax *opSyntax = opToken->resolvedSyntaxInfo;
 	DBG_ASSERT(opSyntax->macroParamSize == 2);
 	KTokenSeq macro = {kNode_ns(stmt), tokenList};
 	KTokenSeq_Push(kctx, macro);
