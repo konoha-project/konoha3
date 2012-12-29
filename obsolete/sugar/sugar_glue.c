@@ -506,7 +506,7 @@ static KMETHOD Token_SetSubArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
 	kArray *sub = sfp[1].asArray;
-	KFieldSet(tk, tk->subTokenList, sub);
+	KFieldSet(tk, tk->GroupTokenList, sub);
 	KReturnVoid();
 }
 
@@ -938,8 +938,8 @@ static KMETHOD Gamma_declareLocalVariable(KonohaContext *kctx, KonohaStack *sfp)
 //		kObject_Set(NullObject, expr, 1);
 //	}
 //	if(IS_NOTNULL(expr)) {
-//		assert(IS_Array(tk->subTokenList));
-//		expr = SUGAR AddParamNode(kctx, ns, expr, tk->subTokenList, 0, kArray_size(tk->subTokenList), 1/*allowEmpty*/);
+//		assert(IS_Array(tk->GroupTokenList));
+//		expr = SUGAR AddParamNode(kctx, ns, expr, tk->GroupTokenList, 0, kArray_size(tk->GroupTokenList), 1/*allowEmpty*/);
 //	}
 //	KReturn(expr);
 //}

@@ -121,79 +121,12 @@ static kbool_t int_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 	return true;
 }
 
-///* ------------------------------------------------------------------------ */
-///* assignment */
-//
-//static KMETHOD Expression_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	VAR_Expression(stmt, tokenList, beginIdx, opIdx, endIdx);
-//	kToken *opToken = tokenList->TokenItems[opIdx];
-//	kSyntax *opSyntax = opToken->resolvedSyntaxInfo;
-//	if(opSyntax->macroParamSize == 2) {
-//		KTokenSeq macro = {kNode_ns(stmt), tokenList};
-//		KTokenSeq_Push(kctx, macro);
-//		KMacroSet macroParam[] = {
-//			{KSymbol_("X"), tokenList, beginIdx, opIdx},
-//			{KSymbol_("Y"), tokenList, opIdx+1, endIdx},
-//			{0, NULL, 0, 0},
-//		};
-//		macro.TargetPolicy.RemovingIndent = true;
-//		SUGAR KTokenSeq_ApplyMacro(kctx, &macro, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam);
-//		SUGAR ParseNode(kctx, node, macro.tokenList, &macro.beginIdx, macro.endIdx, NULL);
-//		KTokenSeq_Pop(kctx, macro);
-//	}
-//}
-//
-//static kbool_t cstyle_defineAssign(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
-//{
-//	kFunc *binaryParseFunc = KSugarFunc(Expression_BinarySugar);
-//	KDEFINE_SYNTAX SYNTAX[] = {
-//		{ KSymbol_("+="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, {binaryParseFunc}, {NULL}},
-//		{ KSymbol_("-="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, {binaryParseFunc}, {NULL}},
-//		{ KSymbol_("*="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, {binaryParseFunc}, {NULL}},
-//		{ KSymbol_("/="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, {binaryParseFunc}, {NULL}},
-//		{ KSymbol_("%="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, {binaryParseFunc}, {NULL}},
-//		{ KSymbol_("|="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleAssign, {binaryParseFunc}, {NULL}},
-//		{ KSymbol_("&="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleAssign, {binaryParseFunc}, {NULL}},
-//		{ KSymbol_("<<="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleAssign, {binaryParseFunc}, {NULL}},
-//		{ KSymbol_(">>="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleAssign, {binaryParseFunc}, {NULL}},
-//		{ KSymbol_("^="), (SYNFLAG_NodeLeftJoinOp2), NULL, Precedence_CStyleAssign, {binaryParseFunc}, {NULL}},
-//		{ KSymbol_END, },
-//	};
-//	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-//	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("+="), 2,  "X Y X = (X) + (Y)", false);
-//	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("-="), 2,  "X Y X = (X) - (Y)", false);
-//	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("*="), 2,  "X Y X = (X) * (Y)", false);
-//	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("/="), 2,  "X Y X = (X) / (Y)", false);
-//	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("%="), 2,  "X Y X = (X) % (Y)", false);
-//	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("|="), 2,  "X Y X = (X) | (Y)", false);
-//	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("&="), 2,  "X Y X = (X) & (Y)", false);
-//	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("<<="), 2, "X Y X = (X) << (Y)", false);
-//	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_(">>="), 2, "X Y X = (X) >> (Y)", false);
-//	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("^="), 2,  "X Y X = (X) ^ (Y)", false);
-//	return true;
-//}
-
 // --------------------------------------------------------------------------
 
 static kbool_t CStyleBitwiseOperator_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-//	cstyle_DefineStatement(kctx, ns, trace);
-//	KDEFINE_SYNTAX defLiteral[] = {
-//		{ KSymbol_("$SingleQuotedChar"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_SingleQuotedChar, },
-//		{ KSymbol_END, }, /* sentinental */
-//	};
-//	SUGAR kNameSpace_DefineSyntax(kctx, ns, defLiteral, trace);
-//	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_("$SingleQuotedChar"), KonohaChar_Quote, KSugarFunc(ns, TokenFunc_SingleQuotedChar));
-//
-//	cstyle_defineExpression(kctx, ns, option, trace);
-//	cstyle_defineArrayLiteral(kctx, ns, trace);
-
 	int_defineMethod(kctx, ns, trace);
 	int_defineSyntax(kctx, ns, trace);
-//	cstyle_defineAssign(kctx, ns, trace);
-
-//	null_PackupNameSpace(kctx, ns, trace);
 	return true;
 }
 

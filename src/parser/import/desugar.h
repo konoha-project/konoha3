@@ -268,7 +268,7 @@ static KMETHOD Expression_Parenthesis(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *parenthesisToken = tokenList->TokenItems[operatorIdx];
 	if(beginIdx == operatorIdx) {
 		int nextIdx = 0;
-		ParseNode(kctx, node, parenthesisToken->subTokenList, nextIdx, kArray_size(parenthesisToken->subTokenList), ParseExpressionOption, "(");
+		ParseNode(kctx, node, parenthesisToken->GroupTokenList, nextIdx, kArray_size(parenthesisToken->GroupTokenList), ParseExpressionOption, "(");
 	}
 	else {
 		kNameSpace *ns = kNode_ns(node);
@@ -276,8 +276,8 @@ static KMETHOD Expression_Parenthesis(KonohaContext *kctx, KonohaStack *sfp)
 		kNode_Termnize(kctx, node, parenthesisToken);
 		kNode_AddNode(kctx, node, lnode);
 		kNode_AddNode(kctx, node, K_NULLNODE);
-		if(kArray_size(parenthesisToken->subTokenList) > 0) {
-			AddParamNode(kctx, ns, node, parenthesisToken->subTokenList, 0, kArray_size(parenthesisToken->subTokenList), "(");
+		if(kArray_size(parenthesisToken->GroupTokenList) > 0) {
+			AddParamNode(kctx, ns, node, parenthesisToken->GroupTokenList, 0, kArray_size(parenthesisToken->GroupTokenList), "(");
 		}
 	}
 	KReturnUnboxValue(operatorIdx+1);
@@ -302,7 +302,7 @@ static KMETHOD Expression_COMMA(KonohaContext *kctx, KonohaStack *sfp)
 //		}
 //		if(tk->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
 //			kNodeVar *expr = new_(NodeVar, kSyntax_(kNode_ns(stmt), KSymbol_NodePattern), OnGcStack);
-//			KTokenSeq range = {kNode_ns(stmt), tk->subTokenList, 0, kArray_size(tk->subTokenList)};
+//			KTokenSeq range = {kNode_ns(stmt), tk->GroupTokenList, 0, kArray_size(tk->GroupTokenList)};
 //			KFieldSet(expr, expr->block, SUGAR new_BlockNode(kctx, stmt, NULL, &range));
 //			KReturn(expr);
 //		}
@@ -487,27 +487,30 @@ static kNode* MakeNodeSetter(KonohaContext *kctx, kNode *expr, kNameSpace *ns, k
 static KMETHOD TypeCheck_Assign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
+	//KDump(expr);
 	kNode *leftHandNode = SUGAR TypeCheckNodeAt(kctx, expr, 1, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
 	kNode *rightHandNode = SUGAR TypeCheckNodeAt(kctx, expr, 2, ns, KClass_(leftHandNode->attrTypeId), 0);
+	if(kNode_IsError(leftHandNode)) {
+		KReturn(leftHandNode);
+	}
+	if(kNode_IsError(rightHandNode)) {
+		KReturn(rightHandNode);
+	}
 	kNode *returnNode = K_NULLNODE;
-	if(rightHandNode != K_NULLNODE && leftHandNode != K_NULLNODE) {
-		if(leftHandNode->node == KNode_Local || leftHandNode->node == KNode_Field /*FIXME:NODE || leftHandNode->node == KNode_STACKTOP*/) {
-			if(KTypeAttr_Is(ReadOnly, leftHandNode->attrTypeId)) {
-				returnNode = SUGAR MessageNode(kctx, expr, leftHandNode->TermToken, ns, ErrTag, "read only: %s", KToken_t(leftHandNode->TermToken));
-			}
-			else {
-				expr->node      = KNode_Assign;
-				expr->attrTypeId = leftHandNode->attrTypeId;
-				//((kNodeVar *)rightHandNode)->attrTypeId = leftHandNode->attrTypeId;
-				returnNode = expr;
-			}
-		}
-		else if(kNode_IsGetter(leftHandNode)) {
-			returnNode = MakeNodeSetter(kctx, leftHandNode, ns, rightHandNode, reqc);
+	if(leftHandNode->node == KNode_Local || leftHandNode->node == KNode_Field) {
+		if(KTypeAttr_Is(ReadOnly, leftHandNode->attrTypeId)) {
+			returnNode = SUGAR MessageNode(kctx, expr, leftHandNode->TermToken, ns, ErrTag, "read only: %s", KToken_t(leftHandNode->TermToken));
 		}
 		else {
-			returnNode = SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "assignment: variable name is expected");
+			returnNode = kNode_Type(kctx, expr, KNode_Assign, leftHandNode->attrTypeId);
 		}
+	}
+	else if(kNode_IsGetter(leftHandNode)) {
+		returnNode = MakeNodeSetter(kctx, leftHandNode, ns, rightHandNode, reqc);
+	}
+	else {
+		KDump(leftHandNode);
+		returnNode = SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "assignment: variable name is expected");
 	}
 	KReturn(returnNode);
 }
@@ -1126,7 +1129,7 @@ static KMETHOD PatternMatch_CStyleParam(KonohaContext *kctx, KonohaStack *sfp)
 	int returnIdx = -1;
 	kToken *tk = tokenList->TokenItems[beginIdx];
 	if(tk->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {
-		KTokenSeq param = {kNode_ns(stmt), tk->subTokenList, 0, kArray_size(tk->subTokenList)};
+		KTokenSeq param = {kNode_ns(stmt), tk->GroupTokenList, 0, kArray_size(tk->GroupTokenList)};
 		CheckCStyleParam(kctx, &param);
 		kNode *block = ParseNewNode(kctx, param.ns, param.tokenList, &param.beginIdx, param.endIdx, ParseMetaPatternOption, NULL);
 		kNode_AddParsedObject(kctx, stmt, name, UPCAST(block));

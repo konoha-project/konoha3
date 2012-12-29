@@ -111,7 +111,7 @@
 //	}
 //	else if(IS_Array(tk)) {
 //		size_t i;
-//		kArray *a = tk->subTokenList;
+//		kArray *a = tk->GroupTokenList;
 //		KLIB KBuffer_Write(kctx, wb, &c, 1);
 //		for(i = 0; i < kArray_size(a); i++) {
 //			KLIB KBuffer_Write(kctx, wb, " ", 1);
@@ -196,8 +196,8 @@
 //static KMETHOD Token_getSubTokenList(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
-//	if(IS_Array(tk->subTokenList)) {
-//		KReturnField(tk->subTokenList);
+//	if(IS_Array(tk->GroupTokenList)) {
+//		KReturnField(tk->GroupTokenList);
 //	}
 //}
 //
@@ -841,8 +841,8 @@
 ////		kObject_Set(NullObject, expr, 1);
 ////	}
 ////	if(IS_NOTNULL(expr)) {
-////		assert(IS_Array(tk->subTokenList));
-////		expr = SUGAR AddParamNode(kctx, ns, expr, tk->subTokenList, 0, kArray_size(tk->subTokenList), 1/*allowEmpty*/);
+////		assert(IS_Array(tk->GroupTokenList));
+////		expr = SUGAR AddParamNode(kctx, ns, expr, tk->GroupTokenList, 0, kArray_size(tk->GroupTokenList), 1/*allowEmpty*/);
 ////	}
 ////	KReturn(expr);
 ////}

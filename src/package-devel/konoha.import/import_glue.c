@@ -53,7 +53,7 @@
 //	kTokenVar *tkImport = /*G*/new_(TokenVar, 0, OnGcStack);
 //	tkImport->resolvedSymbol = KMethodName_("import");
 //	if(IS_Token(tokenList)) {
-//		kTokenArray *list = ((kToken *) tokenList)->subTokenList;
+//		kTokenArray *list = ((kToken *) tokenList)->GroupTokenList;
 //		if(IS_String(list)) {
 //			/* case: import cstyle; */
 //			kString *pkgname = (kString *) list;

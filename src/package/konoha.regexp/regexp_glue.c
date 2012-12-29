@@ -675,7 +675,7 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 			while(isalpha(source[pos])) pos++;
 			if(IS_NOTNULL(tk)) {
 				kArray *a = (kArray *)KLIB new_kObject(kctx, OnField, KClass_StringArray0, 2); // FIXME
-				KFieldSet(tk, tk->subTokenList, a);
+				KFieldSet(tk, tk->GroupTokenList, a);
 				KLIB new_kString(kctx, a, source + 1, (pos0-2), 0);
 				KLIB new_kString(kctx, a, source + pos0, pos-pos0, 0);
 				tk->tokenType = KSymbol_("$RegExp");
@@ -695,8 +695,8 @@ static KMETHOD TypeCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	kToken *tk = expr->TermToken;
 	kRegExp *r = new_(RegExp, NULL, OnGcStack);
-	DBG_ASSERT(kArray_size(tk->subTokenList) == 2);
-	RegExp_Set(kctx, r, tk->subTokenList->stringItems[0], tk->subTokenList->stringItems[1]);
+	DBG_ASSERT(kArray_size(tk->GroupTokenList) == 2);
+	RegExp_Set(kctx, r, tk->GroupTokenList->stringItems[0], tk->GroupTokenList->stringItems[1]);
 	KReturn(SUGAR kNode_SetConst(kctx, expr, NULL, UPCAST(r)));
 }
 

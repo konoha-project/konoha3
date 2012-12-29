@@ -61,13 +61,13 @@ static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
 
 // --------------------------------------------------------------------------
 
-static void Float_Init(KonohaContext *kctx, kObject *o, void *conf)
+static void kFloat_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kNumberVar *n = (kNumberVar *)o;  // kFloat has the same structure
 	n->unboxValue = (uintptr_t)conf;  // conf is unboxed data
 }
 
-static void Float_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+static void kFloat_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	KLIB KBuffer_printf(kctx, wb, KFLOAT_FMT, v[pos].floatValue);
 }
@@ -256,8 +256,8 @@ static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		SETUNBOXNAME(defFloat, float);
 		defFloat.cstruct_size = sizeof(kFloat);
 		defFloat.cflag = KClassFlag_int;
-		defFloat.init = Float_Init;
-		defFloat.p     = Float_p;
+		defFloat.init = kFloat_Init;
+		defFloat.p     = kFloat_p;
 		KClass_Float = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defFloat, trace);
 	}
 	int FN_x = KFieldName_("x");
@@ -346,7 +346,7 @@ static kbool_t float_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 }
 
 
-KDEFINE_PACKAGE* float_Init(void)
+KDEFINE_PACKAGE* Float_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);

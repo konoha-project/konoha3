@@ -139,9 +139,9 @@ static void kToken_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer 
 	if(IS_String(tk->text)) {
 		KLIB KBuffer_printf(kctx, wb, "'%s'", kString_text(tk->text));
 	}
-	else if(IS_Array(tk->subTokenList)) {
+	else if(IS_Array(tk->GroupTokenList)) {
 		size_t i;
-		kArray *a = tk->subTokenList;
+		kArray *a = tk->GroupTokenList;
 		KLIB KBuffer_Write(kctx, wb, "[", 1);
 		if(kArray_size(a) > 0) {
 			KUnsafeFieldSet(values[pos+1].asToken, a->TokenItems[0]);

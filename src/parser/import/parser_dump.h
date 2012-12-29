@@ -85,10 +85,10 @@ static void dumpTokenArray(KonohaContext *kctx, int nest, kArray *a, int s, int 
 		while(s < e) {
 			kToken *tk = a->TokenItems[s];
 			dumpIndent(kctx, nest);
-			if(IS_Array(tk->subTokenList)) {
+			if(IS_Array(tk->GroupTokenList)) {
 				ksymbol_t closure = (tk->resolvedSyntaxInfo == NULL) ? tk->resolvedSymbol : tk->resolvedSyntaxInfo->keyword;
 				DUMP_P("%c\n", dumpBeginTokenList(closure));
-				dumpTokenArray(kctx, nest+1, tk->subTokenList, 0, kArray_size(tk->subTokenList));
+				dumpTokenArray(kctx, nest+1, tk->GroupTokenList, 0, kArray_size(tk->GroupTokenList));
 				dumpIndent(kctx, nest);
 				DUMP_P("%c\n", dumpEndTokenList(closure));
 			}

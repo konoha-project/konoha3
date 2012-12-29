@@ -222,7 +222,7 @@ static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t sy
 			}
 			if(tk->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
 				int beginIdx = 0;
-				expr = ParseNewNode(kctx, ns, tk->subTokenList, &beginIdx, kArray_size(tk->subTokenList), ParseMetaPatternOption|ParseBlockOption, NULL);
+				expr = ParseNewNode(kctx, ns, tk->GroupTokenList, &beginIdx, kArray_size(tk->GroupTokenList), ParseMetaPatternOption|ParseBlockOption, NULL);
 				KLIB kObjectProto_SetObject(kctx, stmt, symbol, kObject_typeId(expr), expr);
 			}
 		}

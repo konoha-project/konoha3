@@ -295,7 +295,7 @@ struct kTokenVar {
 	kObjectHeader h;
 	union {
 		kString *text;
-		kArray  *subTokenList;
+		kArray  *GroupTokenList;
 		kNode   *parsedNode;
 	};
 	kfileline_t     uline;
@@ -309,6 +309,7 @@ struct kTokenVar {
 		kushort_t   indent;               // indent when kw == TokenType_INDENT
 		kshort_t    hintChar;
 		ksymbol_t   stmtEntryKey;         // pattern name for 'setting key in Node'
+		ksymbol_t   groupTokenType;       // group token type
 	};
 };
 
@@ -326,10 +327,13 @@ typedef enum {
 
 #define kToken_IsIndent(T)  ((T)->tokenType == TokenType_INDENT && (T)->resolvedSyntaxInfo == NULL)
 
-#define kTokenFlag_StatementSeparator    kObjectFlag_Local1
-#define kTokenFlag_MatchPreviousPattern  kObjectFlag_Local1
+#define kTokenFlag_BeforeWhiteSpace      kObjectFlag_Local1
+#define kTokenFlag_MatchPreviousPattern  kObjectFlag_Local2
 #define kTokenFlag_RequiredReformat      kObjectFlag_Local2
-#define kTokenFlag_BeforeWhiteSpace      kObjectFlag_Local3
+#define kTokenFlag_HasIndent             kObjectFlag_Local2/*reserved*/
+#define kTokenFlag_OpenGroup             kObjectFlag_Local3/*reserved*/
+#define kTokenFlag_CloseGroup            kObjectFlag_Local4/*reserved*/
+#define kTokenFlag_StatementSeparator    kObjectFlag_Local4/*obsolete*/
 
 #define kToken_Is(P, o)      (KFlag_Is(uintptr_t,(o)->h.magicflag, kTokenFlag_##P))
 #define kToken_Set(P,o,B)    KFlag_Set(uintptr_t,(o)->h.magicflag, kTokenFlag_##P, B)

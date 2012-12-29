@@ -60,12 +60,12 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 			}
 			kSyntax *newsyn = kSyntax_(ns, KSymbol_("new"));
 			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup) {     // new int [100]
-				kArray *subTokenList = nextTokenAfterClassName->subTokenList;
+				kArray *GroupTokenList = nextTokenAfterClassName->GroupTokenList;
 				KClass *classT0 = NULL;
 				kNode *expr;
 				int hasGenerics = -1;
-				if(kArray_size(subTokenList) > 0) {
-					hasGenerics = SUGAR ParseTypePattern(kctx, ns, subTokenList, 0, kArray_size(subTokenList), &classT0);
+				if(kArray_size(GroupTokenList) > 0) {
+					hasGenerics = SUGAR ParseTypePattern(kctx, ns, GroupTokenList, 0, kArray_size(GroupTokenList), &classT0);
 				}
 				if(hasGenerics != -1) {
 					/* new Type1[Type2[]] => Type1<Type2>.new Or Type1<Type2>.newList */

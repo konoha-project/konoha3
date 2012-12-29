@@ -194,10 +194,10 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	if(beginIdx == currentIdx && beginIdx + 1 < endIdx) {
 		kTokenVar *definedToken = tokenList->TokenVarItems[beginIdx];   // defined
 		kTokenVar *pToken = tokenList->TokenVarItems[beginIdx+1];
-		if(IS_Array(pToken->subTokenList)) {
+		if(IS_Array(pToken->GroupTokenList)) {
 			kNode *expr = SUGAR new_UntypedOperatorNode(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
-			filterArrayList(kctx, ns, pToken->subTokenList, 0, kArray_size(pToken->subTokenList));
-			KReturn(SUGAR AddParamNode(kctx, ns, expr, pToken->subTokenList, 0, kArray_size(pToken->subTokenList), 0/*isAllowEmpty*/));
+			filterArrayList(kctx, ns, pToken->GroupTokenList, 0, kArray_size(pToken->GroupTokenList));
+			KReturn(SUGAR AddParamNode(kctx, ns, expr, pToken->GroupTokenList, 0, kArray_size(pToken->GroupTokenList), 0/*isAllowEmpty*/));
 		}
 	}
 }
