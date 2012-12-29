@@ -664,7 +664,23 @@ static struct KVirtualCode *FuelVM_GenerateKVirtualCode(KonohaContext *kctx, kMe
 			INode *Ret = CreateReturn(BLD(builder), Self);
 			INode_setType(Ret, ConvertToTypeId(kctx, mtd->typeId));
 		} else {
-			CreateReturn(BLD(builder), 0);
+			ktypeattr_t retTy = kMethod_GetReturnType(mtd)->typeId;
+			if(retTy == KType_void) {
+				CreateReturn(BLD(builder), 0);
+			} else {
+				enum TypeId Type = ConvertToTypeId(kctx, retTy);
+				INode *Ret;
+				if(KType_Is(UnboxType, retTy)) {
+					SValue V; V.bits = 0;
+					Ret = CreateConstant(BLD(builder), Type, V);
+				} else {
+					kObject *obj = KLIB Knull(kctx, KClass_(retTy));
+					Ret = CreateObject(BLD(builder), Type, (void *)obj);
+				}
+				Ret = CreateReturn(BLD(builder), Ret);
+				INode_setType(Ret, Type);
+				CreateReturn(BLD(builder), 0);
+			}
 		}
 	}
 	RESET_GCSTACK();

@@ -89,6 +89,11 @@ static Value *EmitConstant(IRBuilder<> *builder, bool bval)
 	return builder->getInt1(bval);
 }
 
+static Value *EmitConstant(IRBuilder<> *builder, int ival)
+{
+	return builder->getInt32(ival);
+}
+
 static Value *EmitConstant(IRBuilder<> *builder, int64_t ival)
 {
 	return builder->getInt64(ival);
@@ -563,8 +568,42 @@ static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 
 static void EmitThrowInst(LLVMIRBuilder *writer, IThrow *Node)
 {
-	(void)writer;(void)Node;
-	assert(0 && "TODO");
+	IRBuilder<> *builder = writer->builder;
+	Value *Err = GetValue(writer, Node->Val);
+	GlobalVariable *G;
+	KonohaContext *kctx = writer->kctx;
+	if((G = GlobalModule->getNamedGlobal("KLIB_KRuntime_raise")) == 0) {
+		std::vector<Type *> Args;
+		union {
+			void (*KRuntime_raise)(KonohaContext*, int, int, kString *, KonohaStack *);
+			void *ptr;
+		} F;
+		F.KRuntime_raise = KLIB KRuntime_raise;
+
+		Args.push_back(GetLLVMType(ID_PtrKonohaContextVar));
+		Args.push_back(GetLLVMType(ID_int));
+		Args.push_back(GetLLVMType(ID_int));
+		Args.push_back(GetLLVMType(ID_PtrkObjectVar));
+		Args.push_back(GetLLVMType(ID_PtrKonohaValueVar));
+		FunctionType *FnTy = FunctionType::get(Type::getVoidTy(LLVM_CONTEXT()), Args, false);
+		G = new GlobalVariable(*GlobalModule, FnTy, true, GlobalValue::ExternalLinkage, NULL, "KLIB_KRuntime_raise");
+
+		GlobalEngine->addGlobalMapping(G, F.ptr);
+	}
+
+	Value *Vctx = GetContext(writer);
+	Value *Vsfp = GetStackTop(writer);
+	Value *Vtop = PrepareCallStack(writer, Vsfp);
+	/* stack_top[-4].uline */
+	uint64_t uline = Node->uline;
+	StoreValueToStack(builder, KClass_Int, getLongTy(), K_RTNIDX, Vtop,
+			EmitConstant(builder, uline), "uline");
+
+	Value *vsymbol = EmitConstant(builder, (int)KException_("RuntimeScript"));
+	Value *vfault  = EmitConstant(builder, (int)SoftwareFault);
+
+	builder->CreateCall5(G, Vctx, vsymbol, vfault, Err, Vtop);
+	builder->CreateUnreachable();
 }
 
 static void EmitPHIInst(LLVMIRBuilder *writer, IPHI *Node)
