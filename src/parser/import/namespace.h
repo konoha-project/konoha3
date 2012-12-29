@@ -256,31 +256,16 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 		if(syndef->precedence_op2 > 0) {
 			syn->precedence_op2 = syndef->precedence_op2;
 		}
-//		if(syndef->rule != NULL) {
-//			syn->syntaxPatternListNULL = new_(TokenArray, 0, ns->NameSpaceConstList);
-//			kNameSpace_ParseSyntaxPattern(kctx, ns, syndef->rule, 0, syn->syntaxPatternListNULL);
-//		}
 		if(syndef->parseFunc != NULL) {
 			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CParseFunc)) ? KSugarFunc(ns, syndef->parseMethodFunc) : syndef->parseFunc;
+			DBG_ASSERT(IS_Func(fo));
 			KFieldInit(ns, syn->sugarFuncTable[KSugarParseFunc], fo);
 		}
-		if(syndef->typeCheckFunc != NULL) {
-			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CTypeFunc)) ? KSugarFunc(ns, syndef->typeCheckMethodFunc) : syndef->typeCheckFunc;
+		if(syndef->typeFunc != NULL) {
+			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CTypeFunc)) ? KSugarFunc(ns, syndef->typeCheckMethodFunc) : syndef->typeFunc;
+			DBG_ASSERT(IS_Func(fo));
 			KFieldInit(ns, syn->sugarFuncTable[KSugarTypeFunc], fo);
 		}
-//		// set default function
-//		if(syn->parentSyntaxNULL == NULL && syn->sugarFuncTable[KSugarParseFunc] == NULL) {
-//			if(syn->precedence_op2 > 0 || syn->precedence_op1 > 0) {
-//				kFunc *fo = kSyntax_(ns, KSymbol_NodeOperator)->sugarFuncTable[KSugarParseFunc];
-//				DBG_ASSERT(fo != NULL);
-//				KFieldInit(ns, syn->sugarFuncTable[KSugarParseFunc], fo);
-//			}
-//			else if(syn->sugarFuncTable[KSugarTypeFunc] != NULL) {
-//				kFunc *fo = kSyntax_(ns, KSymbol_NodeTerm)->sugarFuncTable[KSugarParseFunc];
-//				DBG_ASSERT(fo != NULL);
-//				KFieldInit(ns, syn->sugarFuncTable[KSugarParseFunc], fo);
-//			}
-//		}
 		DBG_ASSERT(syn == kSyntax_(ns, syndef->keyword));
 		KLIB ReportScriptMessage(kctx, trace, DebugTag, "@%s new syntax %s%s", KPackage_text(ns->packageId), KSymbol_Fmt2(syn->keyword));
 		syndef++;

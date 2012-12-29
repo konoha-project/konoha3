@@ -278,7 +278,7 @@ typedef struct KDEFINE_SYNTAX {
 		KMethodFunc parseMethodFunc;
 	};
 	union {
-		kFunc* typeCheckFunc;
+		kFunc* typeFunc;
 		KMethodFunc typeCheckMethodFunc;
 	};
 } KDEFINE_SYNTAX;
