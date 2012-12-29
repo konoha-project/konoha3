@@ -885,7 +885,7 @@ static kbool_t curl_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE* curl_Init(void)
+KDEFINE_PACKAGE* Curl_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("curl", "1.0"),

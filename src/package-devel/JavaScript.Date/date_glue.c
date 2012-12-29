@@ -672,7 +672,7 @@ static kbool_t date_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE* date_Init(void)
+KDEFINE_PACKAGE* Date_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "date", "1.0");

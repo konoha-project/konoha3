@@ -724,7 +724,7 @@ static kbool_t regexp_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* regexp_Init(void)
+KDEFINE_PACKAGE* Regexp_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("konoha", "1.0"),

@@ -5,5 +5,5 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/missing)
 endif(NOT HAVE_PCRE_H)
 
 FIND_PACKAGE_EXTRA_LIBRARY(pcre)
-set(PACKAGE_SOURCE_CODE regexp_glue.c)
-add_konoha_package(konoha.regexp)
+set(PACKAGE_SOURCE_CODE Regexp_glue.c)
+add_konoha_package(JavaScript.Regexp)
