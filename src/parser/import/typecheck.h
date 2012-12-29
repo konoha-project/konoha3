@@ -24,7 +24,7 @@
 
 static kNode *kNode_Rebase(KonohaContext *kctx, kNode *node, size_t stacktop)
 {
-	if(!kNode_IsValue(node) && node->stacktop != stacktop) {
+	if(!kNode_IsValue(node)/* && node->stacktop != stacktop*/) {
 		size_t i, size = kNode_GetNodeListSize(kctx, node);
 		if(node->node == KNode_Block) {
 			for(i = 0; i < size; i++) {
