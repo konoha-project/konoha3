@@ -54,7 +54,7 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 ////			SUGAR MessageNode(kctx, stmt, NULL, ErrTag, "invalid application of 'dollar' to incomplete class %s", KClass_text(ct));
 ////		}
 //		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // dollar C (...)
-//			kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall);
+//			kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/);
 //			kNode *expr = SUGAR dollar_UntypedCallStyleNode(kctx, syn, 2, dollarToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
 //			dollarToken->resolvedSymbol = MN_dollar;
 //			KReturn(expr);

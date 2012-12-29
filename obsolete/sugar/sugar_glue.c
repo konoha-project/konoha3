@@ -636,7 +636,7 @@ static KMETHOD Node_newUntypedCallStyleNode2(KonohaContext *kctx, KonohaStack *s
 	kNode *stmt   = sfp[0].asNode;
 	kToken *token = sfp[1].asToken;
 	kNode *expr1  = sfp[2].asNode;
-	kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall);
+	kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/);
 	KReturn(SUGAR new_UntypedOperatorNode(kctx, syn, 2, token, expr1));
 }
 
@@ -647,7 +647,7 @@ static KMETHOD Node_newUntypedCallStyleNode3(KonohaContext *kctx, KonohaStack *s
 	kToken *token = sfp[1].asToken;
 	kNode *expr1  = sfp[2].asNode;
 	kNode *expr2  = sfp[3].asNode;
-	kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall);
+	kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/);
 	KReturn(SUGAR new_UntypedOperatorNode(kctx, syn, 3, token, expr1, expr2));
 }
 
@@ -659,7 +659,7 @@ static KMETHOD Node_newUntypedCallStyleNode4(KonohaContext *kctx, KonohaStack *s
 	kNode *expr1  = sfp[2].asNode;
 	kNode *expr2  = sfp[3].asNode;
 	kNode *expr3  = sfp[4].asNode;
-	kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall);
+	kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/);
 	KReturn(SUGAR new_UntypedOperatorNode(kctx, syn, 4, token, expr1, expr2, expr3));
 }
 
@@ -672,7 +672,7 @@ static KMETHOD Node_newUntypedCallStyleNode5(KonohaContext *kctx, KonohaStack *s
 	kNode *expr2  = sfp[3].asNode;
 	kNode *expr3  = sfp[4].asNode;
 	kNode *expr4  = sfp[5].asNode;
-	kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall);
+	kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/);
 	KReturn(SUGAR new_UntypedOperatorNode(kctx, syn, 5, token, expr1, expr2, expr3, expr4));
 }
 
@@ -686,7 +686,7 @@ static KMETHOD Node_newUntypedCallStyleNode6(KonohaContext *kctx, KonohaStack *s
 	kNode *expr3  = sfp[4].asNode;
 	kNode *expr4  = sfp[5].asNode;
 	kNode *expr5  = sfp[6].asNode;
-	kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall);
+	kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/);
 	KReturn(SUGAR new_UntypedOperatorNode(kctx, syn, 6, token, expr1, expr2, expr3, expr4, expr5));
 }
 

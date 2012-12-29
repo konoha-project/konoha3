@@ -53,7 +53,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 		if((size_t)nextIdx < kArray_size(tokenList)) {
 			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
 			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // new C (...)
-				kSyntax *syn = kSyntax_(ns, KSymbol_NodeMethodCall);
+				kSyntax *syn = kSyntax_(ns, KSymbol_ParamPattern/*MethodCall*/);
 				kNode *expr = SUGAR new_UntypedOperatorNode(kctx, syn, 2, newToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
 				newToken->resolvedSymbol = MN_new;
 				KReturn(expr);
@@ -70,7 +70,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 				if(hasGenerics != -1) {
 					/* new Type1[Type2[]] => Type1<Type2>.new Or Type1<Type2>.newList */
 					KClass *realType = KClass_p0(kctx, foundClass, classT0->typeId);
-					kSyntax *syn;// = (realType->baseTypeId != KType_Array) ? kSyntax_(ns, KSymbol_NodeMethodCall) : newsyn;
+					kSyntax *syn;// = (realType->baseTypeId != KType_Array) ? kSyntax_(ns, KSymbol_ParamPattern/*MethodCall*/) : newsyn;
 					syn = newsyn;
 					newToken->resolvedSymbol = (realType->baseTypeId != KType_Array) ? MN_new : KMethodName_("newArray");
 					expr = SUGAR new_UntypedOperatorNode(kctx, syn, 2, newToken,

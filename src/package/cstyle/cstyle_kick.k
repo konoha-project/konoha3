@@ -1,4 +1,4 @@
-//Import("Syntax.CStyleWhile");
+Import("Syntax.CStyleWhile");
 Import("Syntax.CStyleBitwiseOperator");
 Import("Syntax.CStyleSelfAssignment");
 

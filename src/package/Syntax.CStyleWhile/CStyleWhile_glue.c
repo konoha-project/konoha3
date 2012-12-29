@@ -224,7 +224,7 @@ static void cstyle_DefineStatement(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 //		if(tk->resolvedSymbol == KSymbol_("null")) {
 //			kNode *leftHandNode = SUGAR ParseNewNode(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
 //			tk->resolvedSymbol = KSymbol_("isNull");
-//			KReturn(SUGAR new_UntypedOperatorNode(kctx, kSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall), 2, tk, leftHandNode));
+//			KReturn(SUGAR new_UntypedOperatorNode(kctx, kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/), 2, tk, leftHandNode));
 //		}
 //	}
 //	DBG_P("checking parent .. == ..");
@@ -239,7 +239,7 @@ static void cstyle_DefineStatement(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 //		if(tk->resolvedSymbol == KSymbol_("null")) {
 //			kNode *leftHandNode = SUGAR ParseNewNode(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
 //			tk->resolvedSymbol = KSymbol_("isNotNull");
-//			KReturn(SUGAR new_UntypedOperatorNode(kctx, kSyntax_(kNode_ns(stmt), KSymbol_NodeMethodCall), 2, tk, leftHandNode));
+//			KReturn(SUGAR new_UntypedOperatorNode(kctx, kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/), 2, tk, leftHandNode));
 //		}
 //	}
 //	DBG_P("checking parent .. != ..");

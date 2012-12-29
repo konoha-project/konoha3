@@ -278,9 +278,9 @@ static const char *KEYWORD_LIST[] = {
 #define KSymbol_MethodDeclPattern  (((ksymbol_t)14)|KSymbolAttr_Pattern) /*$MethodDecl*/
 #define KSymbol_TokenPattern     (((ksymbol_t)15)|KSymbolAttr_Pattern)   /*$Token*/
 
-#define KSymbol_NodeOperator        KSymbol_ParamPattern
-#define KSymbol_NodeTerm            KSymbol_SymbolPattern
-#define KSymbol_NodeMethodCall      KSymbol_ParamPattern
+//#define KSymbol_NodeOperator        KSymbol_ParamPattern
+//#define KSymbol_NodeTerm            KSymbol_SymbolPattern
+//#define KSymbol_ParamPattern/*MethodCall*/      KSymbol_ParamPattern
 
 #define KSymbol_DOT     16
 #define KSymbol_DIV     (1+KSymbol_DOT)

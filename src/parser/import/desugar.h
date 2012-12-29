@@ -219,7 +219,7 @@ static KMETHOD Expression_Operator(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = kNode_ns(node);
 //	if(/*syn->keyword != KSymbol_LET && */syn->sugarFuncTable[KSugarTypeFunc] == NULL) {
 //		DBG_P("switching type checker of %s%s to MethodCall ..", KSymbol_Fmt2(syn->keyword));
-//		syn = kSyntax_(ns, KSymbol_NodeMethodCall);  // switch type checker
+//		syn = kSyntax_(ns, KSymbol_ParamPattern/*MethodCall*/);  // switch type checker
 //	}
 	int returnIdx = operatorIdx + 1;
 	kTokenVar *tk = tokenList->TokenVarItems[operatorIdx];
@@ -334,7 +334,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 		if((size_t)nextIdx < kArray_size(tokenList)) {
 			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
 			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // new C (...)
-				kSyntax *syn = kSyntax_(ns, KSymbol_NodeMethodCall);
+				kSyntax *syn = kSyntax_(ns, KSymbol_ParamPattern/*MethodCall*/);
 				kNode *expr = SUGAR new_UntypedOperatorNode(kctx, syn, 2, newToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
 				newToken->resolvedSymbol = MN_new;
 				KReturn(expr);
@@ -647,7 +647,7 @@ static kNode* BoxThisNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, kMet
 	kNode *thisNode = expr->NodeList->NodeItems[1];
 	KClass *thisClass = KClass_(thisNode->attrTypeId);
 	DBG_ASSERT(thisClass->typeId != KType_var);
-	DBG_P("mtd_cid=%s this=%s", KType_text(mtd->typeId), KClass_text(thisClass));
+	//DBG_P("mtd_cid=%s this=%s", KType_text(mtd->typeId), KClass_text(thisClass));
 	if(!KType_Is(UnboxType, mtd->typeId) && KClass_Is(UnboxType, thisClass)) {
 		thisNode = kNode_SetNodeAt(kctx, expr, 1, BoxNode(kctx, thisNode, ns, thisClass));
 	}
@@ -671,7 +671,8 @@ static kNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kNode *exp
 		int tycheckPolicy = TypeCheckPolicy_(pa->paramtypeItems[i].attrTypeId);
 		kNode *texpr = SUGAR TypeCheckNodeAt(kctx, expr, n, ns, paramType, tycheckPolicy);
 		if(kNode_IsError(texpr) /* texpr = K_NULLNODE */) {
-			return SUGAR MessageNode(kctx, expr, NULL, ns, InfoTag, "%s.%s%s accepts %s at the parameter %d", kMethod_Fmt3(mtd), KClass_text(paramType), (int)i+1);
+			SUGAR MessageNode(kctx, expr, NULL, ns, InfoTag, "%s.%s%s accepts %s at the parameter %d", kMethod_Fmt3(mtd), KClass_text(paramType), (int)i+1);
+			return texpr;
 		}
 		if(!kNode_IsConstValue(texpr)) isConst = 0;
 	}

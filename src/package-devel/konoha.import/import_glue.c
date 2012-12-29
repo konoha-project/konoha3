@@ -48,7 +48,7 @@
 //		KReturnUnboxValue(false);
 //	}
 //	kNameSpace *ns = kNode_ns(stmt);
-//	kSyntaxVar *syn = (kSyntaxVar *) kSyntax_(ns, KSymbol_NodeMethodCall);
+//	kSyntaxVar *syn = (kSyntaxVar *) kSyntax_(ns, KSymbol_ParamPattern/*MethodCall*/);
 //	kNode *expr;
 //	kTokenVar *tkImport = /*G*/new_(TokenVar, 0, OnGcStack);
 //	tkImport->resolvedSymbol = KMethodName_("import");
