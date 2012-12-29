@@ -10,17 +10,6 @@ typedef struct OPThreadedCode {
 	ushort CodeSize;
 } PACKED OPThreadedCode;
 
-#define OPEXEC_ThreadedCode(PC) do {\
-	uchar InvokedCount = ((OPThreadedCode *)PC)->InvokedCount;\
-	uchar StackSize = ((OPThreadedCode *)PC)->StackSize;\
-	ushort CodeSize = ((OPThreadedCode *)PC)->CodeSize;\
-	InvokedCount += 1;\
-	CodeThreading(PC, JUMP_TABLE);\
-	((OPPrologue *)PC)->InvokedCount = InvokedCount;\
-	(void)CodeSize;\
-	return Val;\
-} while(0)
-
 #define OPFIELDSIZE_ThreadedCode 3
 #define DUMP_ThreadedCode(OP_3) OP_3(ThreadedCode, uchar, InvokedCount, uchar, StackSize, ushort, CodeSize)
 
@@ -32,17 +21,6 @@ typedef struct OPPrologue {
 	ushort CodeSize;
 } PACKED OPPrologue;
 
-#define OPEXEC_Prologue(PC) do {\
-	uchar InvokedCount = ((OPPrologue *)PC)->InvokedCount;\
-	uchar StackSize = ((OPPrologue *)PC)->StackSize;\
-	ushort CodeSize = ((OPPrologue *)PC)->CodeSize;\
-	InvokedCount += 1;\
-	((OPPrologue *)PC)->InvokedCount = InvokedCount;\
-	Stack += StackSize;\
-	(void)CodeSize;\
-	return Val;\
-} while(0)
-
 #define OPFIELDSIZE_Prologue 3
 #define DUMP_Prologue(OP_3) OP_3(Prologue, uchar, InvokedCount, uchar, StackSize, ushort, CodeSize)
 
@@ -52,13 +30,6 @@ typedef struct OPLoadConstant {
 	VMRegister Dst;
 	SValue Src;
 } PACKED OPLoadConstant;
-
-#define OPEXEC_LoadConstant(PC) do {\
-	VMRegister Dst = ((OPLoadConstant *)PC)->Dst;\
-	SValue Src = ((OPLoadConstant *)PC)->Src;\
-	Reg[Dst] = Src;\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_LoadConstant 2
 #define DUMP_LoadConstant(OP_2) OP_2(LoadConstant, VMRegister, Dst, SValue, Src)
@@ -70,13 +41,6 @@ typedef struct OPLoadArgumentI {
 	uint SrcIdx;
 } PACKED OPLoadArgumentI;
 
-#define OPEXEC_LoadArgumentI(PC) do {\
-	VMRegister Dst = ((OPLoadArgumentI *)PC)->Dst;\
-	uint SrcIdx = ((OPLoadArgumentI *)PC)->SrcIdx;\
-	Reg[Dst].ival = Stack[SrcIdx].intValue;\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_LoadArgumentI 2
 #define DUMP_LoadArgumentI(OP_2) OP_2(LoadArgumentI, VMRegister, Dst, uint, SrcIdx)
 
@@ -87,13 +51,6 @@ typedef struct OPLoadArgumentO {
 	uint SrcIdx;
 } PACKED OPLoadArgumentO;
 
-#define OPEXEC_LoadArgumentO(PC) do {\
-	VMRegister Dst = ((OPLoadArgumentO *)PC)->Dst;\
-	uint SrcIdx = ((OPLoadArgumentO *)PC)->SrcIdx;\
-	Reg[Dst].obj = Stack[SrcIdx].asObject;\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_LoadArgumentO 2
 #define DUMP_LoadArgumentO(OP_2) OP_2(LoadArgumentO, VMRegister, Dst, uint, SrcIdx)
 
@@ -103,13 +60,6 @@ typedef struct OPLoadLocal {
 	VMRegister Dst;
 	VMRegister Src;
 } PACKED OPLoadLocal;
-
-#define OPEXEC_LoadLocal(PC) do {\
-	VMRegister Dst = ((OPLoadLocal *)PC)->Dst;\
-	VMRegister Src = ((OPLoadLocal *)PC)->Src;\
-	Reg[Dst] = Reg[Src];\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_LoadLocal 2
 #define DUMP_LoadLocal(OP_2) OP_2(LoadLocal, VMRegister, Dst, VMRegister, Src)
@@ -122,14 +72,6 @@ typedef struct OPLoadField {
 	uint FieldIdx;
 } PACKED OPLoadField;
 
-#define OPEXEC_LoadField(PC) do {\
-	VMRegister Dst = ((OPLoadField *)PC)->Dst;\
-	VMRegister Src = ((OPLoadField *)PC)->Src;\
-	uint FieldIdx = ((OPLoadField *)PC)->FieldIdx;\
-	Reg[Dst] = Reg[Src].obj->fields[FieldIdx];\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_LoadField 3
 #define DUMP_LoadField(OP_3) OP_3(LoadField, VMRegister, Dst, VMRegister, Src, uint, FieldIdx)
 
@@ -139,13 +81,6 @@ typedef struct OPStoreLocal {
 	VMRegister Dst;
 	VMRegister Src;
 } PACKED OPStoreLocal;
-
-#define OPEXEC_StoreLocal(PC) do {\
-	VMRegister Dst = ((OPStoreLocal *)PC)->Dst;\
-	VMRegister Src = ((OPStoreLocal *)PC)->Src;\
-	Reg[Dst] = Reg[Src];\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_StoreLocal 2
 #define DUMP_StoreLocal(OP_2) OP_2(StoreLocal, VMRegister, Dst, VMRegister, Src)
@@ -158,14 +93,6 @@ typedef struct OPStoreField {
 	VMRegister Src;
 } PACKED OPStoreField;
 
-#define OPEXEC_StoreField(PC) do {\
-	VMRegister Dst = ((OPStoreField *)PC)->Dst;\
-	uint FieldIdx = ((OPStoreField *)PC)->FieldIdx;\
-	VMRegister Src = ((OPStoreField *)PC)->Src;\
-	Reg[Dst].obj->fields[FieldIdx] = Reg[Src];\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_StoreField 3
 #define DUMP_StoreField(OP_3) OP_3(StoreField, VMRegister, Dst, uint, FieldIdx, VMRegister, Src)
 
@@ -176,14 +103,6 @@ typedef struct OPLAnd {
 	VMRegister LHS;
 	VMRegister RHS;
 } PACKED OPLAnd;
-
-#define OPEXEC_LAnd(PC) do {\
-	VMRegister Dst = ((OPLAnd *)PC)->Dst;\
-	VMRegister LHS = ((OPLAnd *)PC)->LHS;\
-	VMRegister RHS = ((OPLAnd *)PC)->RHS;\
-	Reg[Dst].bval = Reg[LHS].bval && Reg[RHS].bval;\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_LAnd 3
 #define DUMP_LAnd(OP_3) OP_3(LAnd, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
@@ -196,14 +115,6 @@ typedef struct OPLOr {
 	VMRegister RHS;
 } PACKED OPLOr;
 
-#define OPEXEC_LOr(PC) do {\
-	VMRegister Dst = ((OPLOr *)PC)->Dst;\
-	VMRegister LHS = ((OPLOr *)PC)->LHS;\
-	VMRegister RHS = ((OPLOr *)PC)->RHS;\
-	Reg[Dst].bval = Reg[LHS].bval || Reg[RHS].bval;\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_LOr 3
 #define DUMP_LOr(OP_3) OP_3(LOr, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -214,14 +125,6 @@ typedef struct OPNew {
 	uintptr_t Param;
 	TypeId Type;
 } PACKED OPNew;
-
-#define OPEXEC_New(PC) do {\
-	VMRegister Dst = ((OPNew *)PC)->Dst;\
-	uintptr_t Param = ((OPNew *)PC)->Param;\
-	TypeId Type = ((OPNew *)PC)->Type;\
-	Reg[Dst].obj = CreateObject(kctx, Param, Type);\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_New 3
 #define DUMP_New(OP_3) OP_3(New, VMRegister, Dst, uintptr_t, Param, TypeId, Type)
@@ -235,15 +138,6 @@ typedef struct OPCall {
 	uintptr_t uline;
 } PACKED OPCall;
 
-#define OPEXEC_Call(PC) do {\
-	uchar ParamSize = ((OPCall *)PC)->ParamSize;\
-	kMethodPtr Mtd = ((OPCall *)PC)->Mtd;\
-	kObjectPtr Obj = ((OPCall *)PC)->Obj;\
-	uintptr_t uline = ((OPCall *)PC)->uline;\
-	Reg[Dst] = CallMethod(kctx, Mtd, ParamSize, ReturnType, Obj, uline);\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_Call 4
 #define DUMP_Call(OP_4) OP_4(Call, uchar, ParamSize, kMethodPtr, Mtd, kObjectPtr, Obj, uintptr_t, uline)
 
@@ -255,14 +149,6 @@ typedef struct OPVCall {
 	uintptr_t uline;
 } PACKED OPVCall;
 
-#define OPEXEC_VCall(PC) do {\
-	uint ParamSize = ((OPVCall *)PC)->ParamSize;\
-	Cache CacheInfo = ((OPVCall *)PC)->CacheInfo;\
-	uintptr_t uline = ((OPVCall *)PC)->uline;\
-	Reg[Dst] = CallMethodWithCache(kctx, Mtd, ParamSize, CacheInfo, uline);\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_VCall 3
 #define DUMP_VCall(OP_3) OP_3(VCall, uint, ParamSize, Cache, CacheInfo, uintptr_t, uline)
 
@@ -271,12 +157,6 @@ typedef struct OPPushI {
 	LIRHeader Header;
 	VMRegister Src;
 } PACKED OPPushI;
-
-#define OPEXEC_PushI(PC) do {\
-	VMRegister Src = ((OPPushI *)PC)->Src;\
-	PushUnboxedValue(kctx, Reg[Src]);\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_PushI 1
 #define DUMP_PushI(OP_1) OP_1(PushI, VMRegister, Src)
@@ -287,12 +167,6 @@ typedef struct OPPushO {
 	VMRegister Src;
 } PACKED OPPushO;
 
-#define OPEXEC_PushO(PC) do {\
-	VMRegister Src = ((OPPushO *)PC)->Src;\
-	PushBoxedValue(kctx, Reg[Src]);\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_PushO 1
 #define DUMP_PushO(OP_1) OP_1(PushO, VMRegister, Src)
 
@@ -301,12 +175,6 @@ typedef struct OPPopI {
 	LIRHeader Header;
 	VMRegister Dst;
 } PACKED OPPopI;
-
-#define OPEXEC_PopI(PC) do {\
-	VMRegister Dst = ((OPPopI *)PC)->Dst;\
-	Reg[Dst] = PopUnboxedValue(kctx);\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_PopI 1
 #define DUMP_PopI(OP_1) OP_1(PopI, VMRegister, Dst)
@@ -317,12 +185,6 @@ typedef struct OPPopO {
 	VMRegister Dst;
 } PACKED OPPopO;
 
-#define OPEXEC_PopO(PC) do {\
-	VMRegister Dst = ((OPPopO *)PC)->Dst;\
-	Reg[Dst] = PopBoxedValue(kctx);\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_PopO 1
 #define DUMP_PopO(OP_1) OP_1(PopO, VMRegister, Dst)
 
@@ -332,13 +194,6 @@ typedef struct OPFunc {
 	VMRegister Dst;
 	IArray StackLayout;
 } PACKED OPFunc;
-
-#define OPEXEC_Func(PC) do {\
-	VMRegister Dst = ((OPFunc *)PC)->Dst;\
-	IArray StackLayout = ((OPFunc *)PC)->StackLayout;\
-	Reg[Dst].obj = CreateFunction(Stack, StackLayout);\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_Func 2
 #define DUMP_Func(OP_2) OP_2(Func, VMRegister, Dst, IArray, StackLayout)
@@ -351,14 +206,6 @@ typedef struct OPTest {
 	Cache CacheInfo;
 } PACKED OPTest;
 
-#define OPEXEC_Test(PC) do {\
-	VMRegister Src = ((OPTest *)PC)->Src;\
-	TestFunc Func = ((OPTest *)PC)->Func;\
-	Cache CacheInfo = ((OPTest *)PC)->CacheInfo;\
-	AppendCache(Func, Reg[Src], CacheInfo);\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_Test 3
 #define DUMP_Test(OP_3) OP_3(Test, VMRegister, Src, TestFunc, Func, Cache, CacheInfo)
 
@@ -367,12 +214,6 @@ typedef struct OPReturnI {
 	LIRHeader Header;
 	VMRegister Src;
 } PACKED OPReturnI;
-
-#define OPEXEC_ReturnI(PC) do {\
-	VMRegister Src = ((OPReturnI *)PC)->Src;\
-	Stack[K_RTNIDX].intValue = Reg[Src].ival;\
-	return;\
-} while(0)
 
 #define OPFIELDSIZE_ReturnI 1
 #define DUMP_ReturnI(OP_1) OP_1(ReturnI, VMRegister, Src)
@@ -383,12 +224,6 @@ typedef struct OPReturnO {
 	VMRegister Src;
 } PACKED OPReturnO;
 
-#define OPEXEC_ReturnO(PC) do {\
-	VMRegister Src = ((OPReturnO *)PC)->Src;\
-	Stack[K_RTNIDX].asObject = Reg[Src].obj;\
-	return;\
-} while(0)
-
 #define OPFIELDSIZE_ReturnO 1
 #define DUMP_ReturnO(OP_1) OP_1(ReturnO, VMRegister, Src)
 
@@ -396,10 +231,6 @@ typedef struct OPReturnO {
 typedef struct OPReturnVoid {
 	LIRHeader Header;
 } PACKED OPReturnVoid;
-
-#define OPEXEC_ReturnVoid(PC) do {\
-	return Val;\
-} while(0)
 
 #define OPFIELDSIZE_ReturnVoid 0
 #define DUMP_ReturnVoid(OP_0) OP_0(ReturnVoid)
@@ -411,13 +242,6 @@ typedef struct OPCondBrTrue {
 	Address Block;
 } PACKED OPCondBrTrue;
 
-#define OPEXEC_CondBrTrue(PC) do {\
-	VMRegister Src = ((OPCondBrTrue *)PC)->Src;\
-	Address Block = ((OPCondBrTrue *)PC)->Block;\
-	if(Reg[Src].bval) { PC = (ByteCode *)Block; DISPATCH_JUMPTO(Block); } else {}\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_CondBrTrue 2
 #define DUMP_CondBrTrue(OP_2) OP_2(CondBrTrue, VMRegister, Src, Address, Block)
 
@@ -428,13 +252,6 @@ typedef struct OPCondBrFalse {
 	Address Block;
 } PACKED OPCondBrFalse;
 
-#define OPEXEC_CondBrFalse(PC) do {\
-	VMRegister Src = ((OPCondBrFalse *)PC)->Src;\
-	Address Block = ((OPCondBrFalse *)PC)->Block;\
-	if(!Reg[Src].bval) { PC = (ByteCode *)Block; DISPATCH_JUMPTO(Block); } else {}\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_CondBrFalse 2
 #define DUMP_CondBrFalse(OP_2) OP_2(CondBrFalse, VMRegister, Src, Address, Block)
 
@@ -443,12 +260,6 @@ typedef struct OPJump {
 	LIRHeader Header;
 	Address Block;
 } PACKED OPJump;
-
-#define OPEXEC_Jump(PC) do {\
-	Address Block = ((OPJump *)PC)->Block;\
-	PC = (ByteCode *)Block;\
-	DISPATCH_JUMPTO(Block);\
-} while(0)
 
 #define OPFIELDSIZE_Jump 1
 #define DUMP_Jump(OP_1) OP_1(Jump, Address, Block)
@@ -460,12 +271,6 @@ typedef struct OPThrow {
 	uintptr_t uline;
 } PACKED OPThrow;
 
-#define OPEXEC_Throw(PC) do {\
-	VMRegister Src = ((OPThrow *)PC)->Src;\
-	uintptr_t uline = ((OPThrow *)PC)->uline;\
-	Raise(kctx, Stack, (kString *) Reg[Src].obj, uline);\
-} while(0)
-
 #define OPFIELDSIZE_Throw 2
 #define DUMP_Throw(OP_2) OP_2(Throw, VMRegister, Src, uintptr_t, uline)
 
@@ -476,12 +281,6 @@ typedef struct OPTry {
 	Address Finaly;
 } PACKED OPTry;
 
-#define OPEXEC_Try(PC) do {\
-	Address Catch = ((OPTry *)PC)->Catch;\
-	Address Finaly = ((OPTry *)PC)->Finaly;\
-	Try_(Catch, Finaly, Stack);\
-} while(0)
-
 #define OPFIELDSIZE_Try 2
 #define DUMP_Try(OP_2) OP_2(Try, Address, Catch, Address, Finaly)
 
@@ -490,12 +289,6 @@ typedef struct OPYield {
 	LIRHeader Header;
 	VMRegister Src;
 } PACKED OPYield;
-
-#define OPEXEC_Yield(PC) do {\
-	VMRegister Src = ((OPYield *)PC)->Src;\
-	Yield(Reg[Src], Stack);\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_Yield 1
 #define DUMP_Yield(OP_1) OP_1(Yield, VMRegister, Src)
@@ -507,14 +300,6 @@ typedef struct OPNot {
 	VMRegister Src;
 } PACKED OPNot;
 
-#define OPEXEC_Not(PC) do {\
-	VMRegister Dst = ((OPNot *)PC)->Dst;\
-	VMRegister Src = ((OPNot *)PC)->Src;\
-	CompileTimeAssert((TypeOf(Src) == int));\
-	Reg[Dst].ival = !(Reg[Src].ival);\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_Not 2
 #define DUMP_Not(OP_2) OP_2(Not, VMRegister, Dst, VMRegister, Src)
 
@@ -524,14 +309,6 @@ typedef struct OPNeg {
 	VMRegister Dst;
 	VMRegister Src;
 } PACKED OPNeg;
-
-#define OPEXEC_Neg(PC) do {\
-	VMRegister Dst = ((OPNeg *)PC)->Dst;\
-	VMRegister Src = ((OPNeg *)PC)->Src;\
-	CompileTimeAssert((TypeOf(Src) == int));\
-	Reg[Dst].ival = -Reg[Src].ival;\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_Neg 2
 #define DUMP_Neg(OP_2) OP_2(Neg, VMRegister, Dst, VMRegister, Src)
@@ -544,15 +321,6 @@ typedef struct OPAdd {
 	VMRegister RHS;
 } PACKED OPAdd;
 
-#define OPEXEC_Add(PC) do {\
-	VMRegister Dst = ((OPAdd *)PC)->Dst;\
-	VMRegister LHS = ((OPAdd *)PC)->LHS;\
-	VMRegister RHS = ((OPAdd *)PC)->RHS;\
-	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));\
-	Reg[Dst].ival = Reg[LHS].ival + Reg[RHS].ival;\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_Add 3
 #define DUMP_Add(OP_3) OP_3(Add, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -563,15 +331,6 @@ typedef struct OPSub {
 	VMRegister LHS;
 	VMRegister RHS;
 } PACKED OPSub;
-
-#define OPEXEC_Sub(PC) do {\
-	VMRegister Dst = ((OPSub *)PC)->Dst;\
-	VMRegister LHS = ((OPSub *)PC)->LHS;\
-	VMRegister RHS = ((OPSub *)PC)->RHS;\
-	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));\
-	Reg[Dst].ival = Reg[LHS].ival - Reg[RHS].ival;\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_Sub 3
 #define DUMP_Sub(OP_3) OP_3(Sub, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
@@ -584,15 +343,6 @@ typedef struct OPMul {
 	VMRegister RHS;
 } PACKED OPMul;
 
-#define OPEXEC_Mul(PC) do {\
-	VMRegister Dst = ((OPMul *)PC)->Dst;\
-	VMRegister LHS = ((OPMul *)PC)->LHS;\
-	VMRegister RHS = ((OPMul *)PC)->RHS;\
-	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));\
-	Reg[Dst].ival = Reg[LHS].ival * Reg[RHS].ival;\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_Mul 3
 #define DUMP_Mul(OP_3) OP_3(Mul, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -603,15 +353,6 @@ typedef struct OPDiv {
 	VMRegister LHS;
 	VMRegister RHS;
 } PACKED OPDiv;
-
-#define OPEXEC_Div(PC) do {\
-	VMRegister Dst = ((OPDiv *)PC)->Dst;\
-	VMRegister LHS = ((OPDiv *)PC)->LHS;\
-	VMRegister RHS = ((OPDiv *)PC)->RHS;\
-	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));\
-	Reg[Dst].ival = Reg[LHS].ival / Reg[RHS].ival;\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_Div 3
 #define DUMP_Div(OP_3) OP_3(Div, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
@@ -624,15 +365,6 @@ typedef struct OPMod {
 	VMRegister RHS;
 } PACKED OPMod;
 
-#define OPEXEC_Mod(PC) do {\
-	VMRegister Dst = ((OPMod *)PC)->Dst;\
-	VMRegister LHS = ((OPMod *)PC)->LHS;\
-	VMRegister RHS = ((OPMod *)PC)->RHS;\
-	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);\
-	Reg[Dst].ival = Reg[LHS].ival % Reg[RHS].ival;\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_Mod 3
 #define DUMP_Mod(OP_3) OP_3(Mod, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -643,15 +375,6 @@ typedef struct OPLShift {
 	VMRegister LHS;
 	VMRegister RHS;
 } PACKED OPLShift;
-
-#define OPEXEC_LShift(PC) do {\
-	VMRegister Dst = ((OPLShift *)PC)->Dst;\
-	VMRegister LHS = ((OPLShift *)PC)->LHS;\
-	VMRegister RHS = ((OPLShift *)PC)->RHS;\
-	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);\
-	Reg[Dst].ival = Reg[LHS].ival << Reg[RHS].ival;\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_LShift 3
 #define DUMP_LShift(OP_3) OP_3(LShift, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
@@ -664,15 +387,6 @@ typedef struct OPRShift {
 	VMRegister RHS;
 } PACKED OPRShift;
 
-#define OPEXEC_RShift(PC) do {\
-	VMRegister Dst = ((OPRShift *)PC)->Dst;\
-	VMRegister LHS = ((OPRShift *)PC)->LHS;\
-	VMRegister RHS = ((OPRShift *)PC)->RHS;\
-	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);\
-	Reg[Dst].ival = Reg[LHS].ival >> Reg[RHS].ival;\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_RShift 3
 #define DUMP_RShift(OP_3) OP_3(RShift, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -683,15 +397,6 @@ typedef struct OPAnd {
 	VMRegister LHS;
 	VMRegister RHS;
 } PACKED OPAnd;
-
-#define OPEXEC_And(PC) do {\
-	VMRegister Dst = ((OPAnd *)PC)->Dst;\
-	VMRegister LHS = ((OPAnd *)PC)->LHS;\
-	VMRegister RHS = ((OPAnd *)PC)->RHS;\
-	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);\
-	Reg[Dst].ival = Reg[LHS].ival & Reg[RHS].ival;\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_And 3
 #define DUMP_And(OP_3) OP_3(And, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
@@ -704,15 +409,6 @@ typedef struct OPOr {
 	VMRegister RHS;
 } PACKED OPOr;
 
-#define OPEXEC_Or(PC) do {\
-	VMRegister Dst = ((OPOr *)PC)->Dst;\
-	VMRegister LHS = ((OPOr *)PC)->LHS;\
-	VMRegister RHS = ((OPOr *)PC)->RHS;\
-	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);\
-	Reg[Dst].ival = Reg[LHS].ival | Reg[RHS].ival;\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_Or 3
 #define DUMP_Or(OP_3) OP_3(Or, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -723,15 +419,6 @@ typedef struct OPXor {
 	VMRegister LHS;
 	VMRegister RHS;
 } PACKED OPXor;
-
-#define OPEXEC_Xor(PC) do {\
-	VMRegister Dst = ((OPXor *)PC)->Dst;\
-	VMRegister LHS = ((OPXor *)PC)->LHS;\
-	VMRegister RHS = ((OPXor *)PC)->RHS;\
-	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);\
-	Reg[Dst].ival = Reg[LHS].ival ^ Reg[RHS].ival;\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_Xor 3
 #define DUMP_Xor(OP_3) OP_3(Xor, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
@@ -744,14 +431,6 @@ typedef struct OPEq {
 	VMRegister RHS;
 } PACKED OPEq;
 
-#define OPEXEC_Eq(PC) do {\
-	VMRegister Dst = ((OPEq *)PC)->Dst;\
-	VMRegister LHS = ((OPEq *)PC)->LHS;\
-	VMRegister RHS = ((OPEq *)PC)->RHS;\
-	Reg[Dst].bval = (Reg[LHS].ival == Reg[RHS].ival);\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_Eq 3
 #define DUMP_Eq(OP_3) OP_3(Eq, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -762,14 +441,6 @@ typedef struct OPNq {
 	VMRegister LHS;
 	VMRegister RHS;
 } PACKED OPNq;
-
-#define OPEXEC_Nq(PC) do {\
-	VMRegister Dst = ((OPNq *)PC)->Dst;\
-	VMRegister LHS = ((OPNq *)PC)->LHS;\
-	VMRegister RHS = ((OPNq *)PC)->RHS;\
-	Reg[Dst].bval = (Reg[LHS].ival != Reg[RHS].ival);\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_Nq 3
 #define DUMP_Nq(OP_3) OP_3(Nq, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
@@ -782,14 +453,6 @@ typedef struct OPGt {
 	VMRegister RHS;
 } PACKED OPGt;
 
-#define OPEXEC_Gt(PC) do {\
-	VMRegister Dst = ((OPGt *)PC)->Dst;\
-	VMRegister LHS = ((OPGt *)PC)->LHS;\
-	VMRegister RHS = ((OPGt *)PC)->RHS;\
-	Reg[Dst].bval = (Reg[LHS].ival >  Reg[RHS].ival);\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_Gt 3
 #define DUMP_Gt(OP_3) OP_3(Gt, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -800,14 +463,6 @@ typedef struct OPGe {
 	VMRegister LHS;
 	VMRegister RHS;
 } PACKED OPGe;
-
-#define OPEXEC_Ge(PC) do {\
-	VMRegister Dst = ((OPGe *)PC)->Dst;\
-	VMRegister LHS = ((OPGe *)PC)->LHS;\
-	VMRegister RHS = ((OPGe *)PC)->RHS;\
-	Reg[Dst].bval = (Reg[LHS].ival >= Reg[RHS].ival);\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_Ge 3
 #define DUMP_Ge(OP_3) OP_3(Ge, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
@@ -820,14 +475,6 @@ typedef struct OPLt {
 	VMRegister RHS;
 } PACKED OPLt;
 
-#define OPEXEC_Lt(PC) do {\
-	VMRegister Dst = ((OPLt *)PC)->Dst;\
-	VMRegister LHS = ((OPLt *)PC)->LHS;\
-	VMRegister RHS = ((OPLt *)PC)->RHS;\
-	Reg[Dst].bval = (Reg[LHS].ival <  Reg[RHS].ival);\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_Lt 3
 #define DUMP_Lt(OP_3) OP_3(Lt, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -839,14 +486,6 @@ typedef struct OPLe {
 	VMRegister RHS;
 } PACKED OPLe;
 
-#define OPEXEC_Le(PC) do {\
-	VMRegister Dst = ((OPLe *)PC)->Dst;\
-	VMRegister LHS = ((OPLe *)PC)->LHS;\
-	VMRegister RHS = ((OPLe *)PC)->RHS;\
-	Reg[Dst].bval = (Reg[LHS].ival <= Reg[RHS].ival);\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_Le 3
 #define DUMP_Le(OP_3) OP_3(Le, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -856,14 +495,6 @@ typedef struct OPFNeg {
 	VMRegister Dst;
 	VMRegister Src;
 } PACKED OPFNeg;
-
-#define OPEXEC_FNeg(PC) do {\
-	VMRegister Dst = ((OPFNeg *)PC)->Dst;\
-	VMRegister Src = ((OPFNeg *)PC)->Src;\
-	CompileTimeAssert((TypeOf(Src) == float));\
-	Reg[Dst].fval = -Reg[Src].fval;\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_FNeg 2
 #define DUMP_FNeg(OP_2) OP_2(FNeg, VMRegister, Dst, VMRegister, Src)
@@ -876,16 +507,6 @@ typedef struct OPFAdd {
 	VMRegister RHS;
 } PACKED OPFAdd;
 
-#define OPEXEC_FAdd(PC) do {\
-	VMRegister Dst = ((OPFAdd *)PC)->Dst;\
-	VMRegister LHS = ((OPFAdd *)PC)->LHS;\
-	VMRegister RHS = ((OPFAdd *)PC)->RHS;\
-	CompileTimeAssert((TypeOf(LHS) == float && TypeOf(RHS) == float));\
-			(TypeOf(LHS) == float || TypeOf(RHS) == float));\
-	Reg[Dst].fval = Reg[LHS].fval + Reg[RHS].fval;\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_FAdd 3
 #define DUMP_FAdd(OP_3) OP_3(FAdd, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -896,16 +517,6 @@ typedef struct OPFSub {
 	VMRegister LHS;
 	VMRegister RHS;
 } PACKED OPFSub;
-
-#define OPEXEC_FSub(PC) do {\
-	VMRegister Dst = ((OPFSub *)PC)->Dst;\
-	VMRegister LHS = ((OPFSub *)PC)->LHS;\
-	VMRegister RHS = ((OPFSub *)PC)->RHS;\
-	CompileTimeAssert((TypeOf(LHS) == float && TypeOf(RHS) == float));\
-			(TypeOf(LHS) == float || TypeOf(RHS) == float));\
-	Reg[Dst].fval = Reg[LHS].fval - Reg[RHS].fval;\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_FSub 3
 #define DUMP_FSub(OP_3) OP_3(FSub, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
@@ -918,15 +529,6 @@ typedef struct OPFMul {
 	VMRegister RHS;
 } PACKED OPFMul;
 
-#define OPEXEC_FMul(PC) do {\
-	VMRegister Dst = ((OPFMul *)PC)->Dst;\
-	VMRegister LHS = ((OPFMul *)PC)->LHS;\
-	VMRegister RHS = ((OPFMul *)PC)->RHS;\
-	CompileTimeAssert((TypeOf(LHS) == float && TypeOf(RHS) == float));\
-	Reg[Dst].fval = Reg[LHS].fval * Reg[RHS].fval;\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_FMul 3
 #define DUMP_FMul(OP_3) OP_3(FMul, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -937,15 +539,6 @@ typedef struct OPFDiv {
 	VMRegister LHS;
 	VMRegister RHS;
 } PACKED OPFDiv;
-
-#define OPEXEC_FDiv(PC) do {\
-	VMRegister Dst = ((OPFDiv *)PC)->Dst;\
-	VMRegister LHS = ((OPFDiv *)PC)->LHS;\
-	VMRegister RHS = ((OPFDiv *)PC)->RHS;\
-	CompileTimeAssert(TypeOf(LHS) == float || TypeOf(RHS) == float);\
-	Reg[Dst].fval = Reg[LHS].fval / Reg[RHS].fval;\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_FDiv 3
 #define DUMP_FDiv(OP_3) OP_3(FDiv, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
@@ -958,14 +551,6 @@ typedef struct OPFEq {
 	VMRegister RHS;
 } PACKED OPFEq;
 
-#define OPEXEC_FEq(PC) do {\
-	VMRegister Dst = ((OPFEq *)PC)->Dst;\
-	VMRegister LHS = ((OPFEq *)PC)->LHS;\
-	VMRegister RHS = ((OPFEq *)PC)->RHS;\
-	Reg[Dst].bval = (Reg[LHS].fval == Reg[RHS].fval);\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_FEq 3
 #define DUMP_FEq(OP_3) OP_3(FEq, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -976,14 +561,6 @@ typedef struct OPFNq {
 	VMRegister LHS;
 	VMRegister RHS;
 } PACKED OPFNq;
-
-#define OPEXEC_FNq(PC) do {\
-	VMRegister Dst = ((OPFNq *)PC)->Dst;\
-	VMRegister LHS = ((OPFNq *)PC)->LHS;\
-	VMRegister RHS = ((OPFNq *)PC)->RHS;\
-	Reg[Dst].bval = (Reg[LHS].fval != Reg[RHS].fval);\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_FNq 3
 #define DUMP_FNq(OP_3) OP_3(FNq, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
@@ -996,14 +573,6 @@ typedef struct OPFGt {
 	VMRegister RHS;
 } PACKED OPFGt;
 
-#define OPEXEC_FGt(PC) do {\
-	VMRegister Dst = ((OPFGt *)PC)->Dst;\
-	VMRegister LHS = ((OPFGt *)PC)->LHS;\
-	VMRegister RHS = ((OPFGt *)PC)->RHS;\
-	Reg[Dst].bval = (Reg[LHS].fval >  Reg[RHS].fval);\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_FGt 3
 #define DUMP_FGt(OP_3) OP_3(FGt, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -1014,14 +583,6 @@ typedef struct OPFGe {
 	VMRegister LHS;
 	VMRegister RHS;
 } PACKED OPFGe;
-
-#define OPEXEC_FGe(PC) do {\
-	VMRegister Dst = ((OPFGe *)PC)->Dst;\
-	VMRegister LHS = ((OPFGe *)PC)->LHS;\
-	VMRegister RHS = ((OPFGe *)PC)->RHS;\
-	Reg[Dst].bval = (Reg[LHS].fval >= Reg[RHS].fval);\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_FGe 3
 #define DUMP_FGe(OP_3) OP_3(FGe, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
@@ -1034,14 +595,6 @@ typedef struct OPFLt {
 	VMRegister RHS;
 } PACKED OPFLt;
 
-#define OPEXEC_FLt(PC) do {\
-	VMRegister Dst = ((OPFLt *)PC)->Dst;\
-	VMRegister LHS = ((OPFLt *)PC)->LHS;\
-	VMRegister RHS = ((OPFLt *)PC)->RHS;\
-	Reg[Dst].bval = (Reg[LHS].fval <  Reg[RHS].fval);\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_FLt 3
 #define DUMP_FLt(OP_3) OP_3(FLt, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -1053,14 +606,6 @@ typedef struct OPFLe {
 	VMRegister RHS;
 } PACKED OPFLe;
 
-#define OPEXEC_FLe(PC) do {\
-	VMRegister Dst = ((OPFLe *)PC)->Dst;\
-	VMRegister LHS = ((OPFLe *)PC)->LHS;\
-	VMRegister RHS = ((OPFLe *)PC)->RHS;\
-	Reg[Dst].bval = (Reg[LHS].ival <= Reg[RHS].ival);\
-	DISPATCH_NEXT(PC);\
-} while(0)
-
 #define OPFIELDSIZE_FLe 3
 #define DUMP_FLe(OP_3) OP_3(FLe, VMRegister, Dst, VMRegister, LHS, VMRegister, RHS)
 
@@ -1068,10 +613,6 @@ typedef struct OPFLe {
 typedef struct OPNop {
 	LIRHeader Header;
 } PACKED OPNop;
-
-#define OPEXEC_Nop(PC) do {\
-	DISPATCH_NEXT(PC);\
-} while(0)
 
 #define OPFIELDSIZE_Nop 0
 #define DUMP_Nop(OP_0) OP_0(Nop)

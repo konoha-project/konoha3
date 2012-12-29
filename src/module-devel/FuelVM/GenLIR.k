@@ -24,7 +24,7 @@
 
 import("js4.regexp");
 import("konoha.new");
-import("java2.string");
+import("js4.string");
 import("konoha.foreach");
 import("konoha.ns");
 import("js4.array");
@@ -160,7 +160,7 @@ void main (String[] args) {
         IR ir = irs[i];
         ir.opcode = i;
         ret = ret + printTypedef(ir);
-        ret = ret + printMethodDef(ir);
+        //ret = ret + printMethodDef(ir);
         ret = ret + printDumpCode(ir);
         i = i + 1;
     }
