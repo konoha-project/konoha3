@@ -306,20 +306,15 @@ static void disposeIBinary(INode *Node)
 	DISPOSE_NODE(Inst->RHS);
 }
 
-static IPHI *newIPHI(FuelIRBuilder *builder, IUpdate *LHS, IUpdate *RHS)
+static IPHI *newIPHI(FuelIRBuilder *builder, INode *Val)
 {
 	IPHI *Node = CREATE_NODE(IPHI);
-	assert(CHECK_KIND(LHS, IField) || CHECK_KIND(LHS, IUpdate));
-	assert(CHECK_KIND(RHS, IField) || CHECK_KIND(RHS, IUpdate));
-	if(CHECK_KIND(LHS, IField)) {
-	Node->Val = (INode *) LHS;
-	} else {
-		Node->Val = (INode *) LHS->LHS;
-	}
-	Node->LHS = LHS;
-	Node->RHS = RHS;
-	assert(LHS->base.Type == RHS->base.Type);
-	INode_setType((INode *) Node, LHS->base.Type);
+	IField *Inst = CHECK_KIND(Val, IField);
+	assert(Inst && "Val is IFeild Instruction");
+	assert(Inst->Op == LocalScope);
+	Node->Val = Val;
+	ARRAY_init(INodePtr, &Node->Args, 0);
+	INode_setType((INode *) Node, Val->Type);
 	return (Node);
 }
 
@@ -327,8 +322,11 @@ static void disposeIPHI(INode *Node)
 {
 	IPHI *Inst = (IPHI *) Node;
 	DISPOSE_NODE(Inst->Val);
-	DISPOSE_NODE(Inst->LHS);
-	DISPOSE_NODE(Inst->RHS);
+	INodePtr *x, *e;
+	FOR_EACH_ARRAY(Inst->Args, x, e) {
+		DISPOSE_NODE(*x);
+	}
+	ARRAY_dispose(INodePtr, &Inst->Args);
 }
 
 /* Builder API */
@@ -424,6 +422,11 @@ void CondInst_SetBranchInst(ICond *Cond, IBranch *Branch)
 	}
 }
 
+void PHIInst_addParam(IPHI *Inst, IUpdate *Val)
+{
+	ARRAY_add(INodePtr, &Inst->Args, (INode *) Val);
+}
+
 void IRBuilder_Init(FuelIRBuilder *builder, KonohaContext *kctx)
 {
 	builder->API = &API;
@@ -459,94 +462,6 @@ INode *IRBuilder_FindLocalVarByHash(FuelIRBuilder *builder, enum TypeId Type, ui
 		}
 	}
 	return 0;
-}
-
-/* ------------------------------------------------------------------------- */
-/* PHI API */
-
-void FuelVM_RecordNodeCreationStart(FuelIRBuilder *builder, ARRAY(INodePtr) *Table)
-{
-	ARRAY_init(INodePtr, Table, 0);
-	ARRAY_add(INodeArrayPtr, &builder->VariableTable, Table);
-}
-
-void FuelVM_RecordNodeCreationStop(FuelIRBuilder *builder, ARRAY(INodePtr) *Table)
-{
-	ARRAY(INodePtr) **x;
-	unsigned idx;
-	FOR_EACH_ARRAY_(builder->VariableTable, x, idx) {
-		if(*x == Table) {
-			ARRAY_RemoveAt(INodeArrayPtr, &builder->VariableTable, idx);
-			break;
-		}
-	}
-}
-
-void FuelVM_InsertPHI(FuelIRBuilder *builder, Block *Parent, Block *BB, ARRAY(INodePtr) *Table1, ARRAY(INodePtr) *Table2, enum PhiInsertionPolicy policy)
-{
-	Block *OldBlock = builder->Current;
-	IRBuilder_setBlock(builder, BB);
-	unsigned InstSize = ARRAY_size(BB->insts);
-	INodePtr *x, *e;
-
-	ARRAY(INodePtr) Tmp;
-	ARRAY_init(INodePtr, &Tmp, 0);
-	FOR_EACH_ARRAY(*Table1, x, e) {
-		INodePtr *Inst, *End;
-		FOR_EACH_ARRAY(*Table2, Inst, End) {
-			IUpdate *Node1 = (IUpdate *) *x;
-			IUpdate *Node2 = (IUpdate *) *Inst;
-			if(NODE_ID(Node1->LHS) == NODE_ID(Node2->LHS)) {
-				if(policy == INSERT_FORCE) {
-					Node1->base.Marked = 1;
-					Node2->base.Marked = 1;
-				}
-				ARRAY_add(INodePtr, &Tmp, (INode *) builder->API->newPHI(builder, Node1, Node2));
-			}
-		}
-	}
-
-	if(policy == INSERT_FORCE) {
-		FOR_EACH_ARRAY(*Table1, x, e) {
-			IUpdate *Node = (IUpdate *) *x;
-			if(Node->base.Marked == 0) {
-				ARRAY_add(INodePtr, &Tmp, (INode *) builder->API->newPHI(builder, Node, (IUpdate *)Node->LHS));
-			}
-			Node->base.Marked = 0;
-		}
-
-		FOR_EACH_ARRAY(*Table2, x, e) {
-			IUpdate *Node = (IUpdate *) *x;
-			if(Node->base.Marked == 0) {
-				ARRAY_add(INodePtr, &Tmp, (INode *) builder->API->newPHI(builder, Node, (IUpdate *)Node->LHS));
-			}
-			Node->base.Marked = 0;
-		}
-	}
-
-	ARRAY_dispose(INodePtr, Table1);
-	ARRAY_dispose(INodePtr, Table2);
-
-	if(ARRAY_size(Tmp) != 0) {
-		ARRAY(INodePtr) *list = &(BB)->insts;
-		ARRAY_ensureSize(INodePtr, list, ARRAY_size(BB->insts) + ARRAY_size(Tmp));
-		memcpy(Tmp.list + ARRAY_size(Tmp), list->list, sizeof(INodePtr)*InstSize);
-		memcpy(list->list, Tmp.list, sizeof(INodePtr)*(InstSize + ARRAY_size(Tmp)));
-		list->size += ARRAY_size(Tmp);
-		ARRAY_dispose(INodePtr, &Tmp);
-	}
-	IRBuilder_setBlock(builder, OldBlock);
-}
-
-void UpdateInst_Record(FuelIRBuilder *builder, IUpdate *Node)
-{
-	if(Node->LHS->Op == LocalScope) {
-		ARRAY(INodePtr) **x, **e;
-		FOR_EACH_ARRAY(builder->VariableTable, x, e) {
-			ARRAY(INodePtr) *List = *x;
-			ARRAY_add(INodePtr, List, ToINode(Node));
-		}
-	}
 }
 
 #ifdef __cplusplus

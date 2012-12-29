@@ -202,7 +202,7 @@ static void visitIBinary(Visitor *visitor, INode *Node)
 static void visitIPHI(Visitor *visitor, INode *Node)
 {
 	IPHI *Inst = (IPHI *) Node;
-	VISIT_3(Node, 0, Inst->Val, (INode *) Inst->LHS, (INode *) Inst->RHS);
+	VISIT_N(Node, 0, Inst->Args); /* FIXME : trace Inst->Val */
 }
 
 typedef void (*VisitFn)(Visitor *visitor, INode *Node);

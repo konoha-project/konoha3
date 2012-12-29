@@ -146,21 +146,6 @@ static void IRBuilder_SimplifyCFG(FuelIRBuilder *builder)
 	}
 }
 
-static void IRBuilder_AnnotateUpdateInst(FuelIRBuilder *builder)
-{
-	BlockPtr *x, *e;
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
-		INodePtr *Inst, *End;
-		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
-			IPHI *PHI;
-			if((PHI = CHECK_KIND(*Inst, IPHI)) != 0) {
-				if(PHI->LHS) { PHI->LHS->State = MayBePHI; }
-				if(PHI->RHS) { PHI->RHS->State = MayBePHI; }
-			}
-		}
-	}
-}
-
 static void IRBuilder_RemoveInstructionAfterBranchInst(FuelIRBuilder *builder)
 {
 	BlockPtr *x, *e;
@@ -389,19 +374,10 @@ static void TraceNode1(INode *Node)
 			IPHI *Inst  = (IPHI *) Node;
 			INode_SetMarked(Node);
 			INode_SetMarked((INode *) Inst->Val);
-			if(Inst->LHS) {
-				if(CHECK_KIND(Inst->LHS, IUpdate)) {
-					INode_SetMarked((INode *) Inst->LHS->LHS);
-				} else {
-					INode_SetMarked((INode *) Inst->LHS);
-				}
-			}
-			if(Inst->RHS) {
-				if(CHECK_KIND(Inst->RHS, IUpdate)) {
-					INode_SetMarked((INode *) Inst->RHS->LHS);
-				} else {
-					INode_SetMarked((INode *) Inst->RHS);
-				}
+
+			INodePtr *x, *e;
+			FOR_EACH_ARRAY(Inst->Args, x, e) {
+				INode_SetMarked(*x);
 			}
 			break;
 		}
@@ -586,7 +562,7 @@ static void Dump_visitValue(Visitor *visitor, INode *Node, const char *Tag, SVal
 		printNode(Inst->Node);
 		debug(", Type:%s, %d]\n", Type2String(Node->Type), Inst->FieldIndex);
 	} else {
-		debug("Type:%s, 0x%llx]\n", Type2String(Node->Type), Val.bits);
+		debug("Type:%s, 0x%llx]\n", Type2String(Node->Type), (unsigned long long) Val.bits);
 	}
 }
 #endif
@@ -1173,6 +1149,8 @@ static unsigned IRBuilder_CalculateThreshold(FuelIRBuilder *builder, IMethod *Mt
 	return Threshold;
 }
 
+void InsertPHINode(FuelIRBuilder *builder);
+
 ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option, bool *JITCompiled)
 {
 	Block *BB = Mtd->EntryBlock;
@@ -1185,11 +1163,9 @@ ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option, bo
 	IRBuilder_FlattenICond(builder);
 	Flag = IRBuilder_Optimize(builder, BB, Flag);
 
-	IRBuilder_AnnotateUpdateInst(builder);
 	IRBuilder_RemoveRedundantConstants(builder);
 	IRBuilder_RemoveUnusedVariable(builder);
 
-	IRBuilder_DumpFunction(builder);
 	ByteCode *code = NULL;
 
 	unsigned Threshold = IRBuilder_CalculateThreshold(builder, Mtd, option);
@@ -1199,9 +1175,12 @@ ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option, bo
 	code = IRBuilder_Lowering(builder);
 #else
 	if(Threshold >= COMPILE_LLVM) {
+		InsertPHINode(builder);
+		IRBuilder_DumpFunction(builder);
 		code = IRBuilder_CompileToLLVMIR(builder, Mtd);
 		*JITCompiled = true;
 	} else {
+		IRBuilder_DumpFunction(builder);
 		code = IRBuilder_Lowering(builder);
 	}
 #endif

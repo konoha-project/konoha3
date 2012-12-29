@@ -106,7 +106,7 @@ static void ReplaceOldValueWith(INode *Node, INode *oldVal, INode *newVal)
 		}
 		case IR_TYPE_IJump:
 		case IR_TYPE_ITry:
-		break;
+			break;
 		CASE(IThrow) {
 			ReplaceValue(&((IThrow *)Node)->Val, oldVal, newVal);
 			break;
@@ -126,14 +126,7 @@ static void ReplaceOldValueWith(INode *Node, INode *oldVal, INode *newVal)
 			break;
 		}
 		CASE(IPHI) {
-			IPHI *Inst  = (IPHI *) Node;
-			ReplaceValue(&Inst->Val, oldVal, newVal);
-			if(Inst->LHS) {
-				ReplaceValue((INode **)&Inst->LHS, oldVal, newVal);
-			}
-			if(Inst->RHS) {
-				ReplaceValue((INode **)&Inst->RHS, oldVal, newVal);
-			}
+			assert(0 && "unreachable");
 			break;
 		}
 		default:
@@ -477,16 +470,6 @@ void IRBuilder_RemoveTrivialCondBranch(FuelIRBuilder *builder)
 					}
 					*NodePtr = (INode *) builder->API->newJump(builder, TargetBB);
 				}
-			}
-		}
-	}
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
-		INodePtr *Inst, *End;
-		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
-			IPHI *PHI;
-			if((PHI = CHECK_KIND(*Inst, IPHI)) != 0) {
-				if(PHI->LHS && PHI->LHS->base.Unused) { PHI->LHS = 0; }
-				if(PHI->RHS && PHI->RHS->base.Unused) { PHI->RHS = 0; }
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 # written by imasahiro
 
 set(MODULE_SOURCE_CODE Compiler.c FuelVM.c codegen.c lowering.c visitor.c
-        Optmizer.c)
+        Optmizer.c Analysis.c)
 
 set(LLVM_INSTALL_DIR "" CACHE STRING "Install dir which llvm installed")
 find_program(LLVM_CONFIG

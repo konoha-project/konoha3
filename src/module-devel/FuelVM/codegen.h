@@ -209,14 +209,9 @@ typedef struct IFunction {
 	uintptr_t uline;
 } IFunction;
 
-enum UpdateState {
-	Default, Init, MayBePHI
-};
-
 /*$ void Update { Symbol, Inst } */
 typedef struct IUpdate {
 	INode base;
-	enum UpdateState State;
 	IField *LHS;
 	INode  *RHS;
 } IUpdate;
@@ -301,12 +296,11 @@ typedef struct IBinary {
 	INode *RHS;
 } IBinary;
 
-/*$ T PHI { [IUpdate, ValueRef], [IUpdate, ValueRef]} */
+/*$ T PHI { INode *Field, [IUpdate, ...]} */
 typedef struct IPHI {
 	INode base;
-	INode   *Val;
-	IUpdate *LHS;
-	IUpdate *RHS;
+	INode *Val;
+	ARRAY(INodePtr) Args;
 } IPHI;
 
 typedef union INodeImpl {
@@ -342,7 +336,7 @@ typedef struct IRBuilderAPI {
 	IYield    *(*newYield)(FuelIRBuilder *builder, INode *INode);
 	IUnary    *(*newUnary)(FuelIRBuilder *builder, enum UnaryOp Op, INode *INode);
 	IBinary   *(*newBinary)(FuelIRBuilder *builder, enum BinaryOp Op, INode *LHS, INode *RHS);
-	IPHI      *(*newPHI)(FuelIRBuilder *builder, IUpdate *LHS, IUpdate *RHS);
+	IPHI      *(*newPHI)(FuelIRBuilder *builder, INode *Val);
 } IRBuilderAPI;
 
 struct FuelIRBuilder {
@@ -359,6 +353,7 @@ struct FuelIRBuilder {
 	};
 	KonohaContext *Context;
 	ARRAY(INodeArrayPtr) VariableTable;
+	struct ControlFlowGraph *cfg;
 };
 
 void IRBuilder_Init(FuelIRBuilder *builder, KonohaContext *kctx);
@@ -372,19 +367,7 @@ void INewInst_addParam(INew *Inst, INode *Param);
 void CallInst_addParam(ICall *Inst, INode *Param);
 void CondInst_addParam(ICond *Inst, INode *Param);
 void CondInst_SetBranchInst(ICond *Cond, IBranch *Branch);
-
-/* ------------------------------------------------------------------------- */
-/* PHI API */
-void UpdateInst_Record(FuelIRBuilder *builder, IUpdate *Node);
-void FuelVM_RecordNodeCreationStart(FuelIRBuilder *builder, ARRAY(INodePtr) *Table);
-void FuelVM_RecordNodeCreationStop(FuelIRBuilder *builder, ARRAY(INodePtr) *Table);
-
-enum PhiInsertionPolicy {
-	INSERT_DEFAULT,
-	INSERT_FORCE
-};
-
-void FuelVM_InsertPHI(FuelIRBuilder *builder, Block *Parent, Block *BB, ARRAY(INodePtr) *Table1, ARRAY(INodePtr) *Table2, enum PhiInsertionPolicy policty);
+void PHIInst_addParam(IPHI *Inst, IUpdate *Val);
 
 /* utility */
 static inline void IField_setHash(IField *Inst, uintptr_t Hash)
@@ -503,7 +486,6 @@ static inline INode *CreateUpdate(FuelIRBuilder *builder, INode *Field, INode *I
 {
 	INode *Node = (INode *) builder->API->newUpdate(builder, (IField *) Field, Inst);
 	IRBuilder_add(builder, Node);
-	UpdateInst_Record(builder, (IUpdate *) Node);
 	return Node;
 }
 
@@ -563,9 +545,9 @@ static inline INode *CreateBinaryInst(FuelIRBuilder *builder, enum BinaryOp Op, 
 	return Node;
 }
 
-static inline INode *CreatePHI(FuelIRBuilder *builder, INode *LHS, INode *RHS)
+static inline INode *CreatePHI(FuelIRBuilder *builder, INode *Val)
 {
-	INode *Node = (INode *) builder->API->newPHI(builder, (IUpdate *) LHS, (IUpdate *) RHS);
+	INode *Node = (INode *) builder->API->newPHI(builder, Val);
 	IRBuilder_add(builder, Node);
 	return Node;
 }

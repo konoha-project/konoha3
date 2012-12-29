@@ -295,33 +295,25 @@ static bool FuelVM_VisitIfStmt(KonohaContext *kctx, KBuilder *builder, kStmt *st
 	Block *ThenBB  = CreateBlock(BLD(builder));
 	Block *ElseBB  = CreateBlock(BLD(builder));
 	Block *MergeBB = CreateBlock(BLD(builder));
-	Block *Parent = BLD(builder)->Current;
-	ARRAY(INodePtr) ThenTable;
-	ARRAY(INodePtr) ElseTable;
 	/* if */
 	SUGAR VisitExpr(kctx, builder, stmt, expr);
 	CreateBranch(BLD(builder), FuelVM_getExpression(builder), ThenBB, ElseBB);
 	{ /* then */
-		FuelVM_RecordNodeCreationStart(BLD(builder), &ThenTable);
 		IRBuilder_setBlock(BLD(builder), ThenBB);
 		SUGAR VisitBlock(kctx, builder, Stmt_getFirstBlock(kctx, stmt));
 		if(!Block_HasTerminatorInst(BLD(builder)->Current)) {
 			IRBuilder_JumpTo(BLD(builder), MergeBB);
 		}
-		FuelVM_RecordNodeCreationStop(BLD(builder), &ThenTable);
 	}
 	{ /* else */
-		FuelVM_RecordNodeCreationStart(BLD(builder), &ElseTable);
 		IRBuilder_setBlock(BLD(builder), ElseBB);
 		SUGAR VisitBlock(kctx, builder, Stmt_getElseBlock(kctx, stmt));
 		if(!Block_HasTerminatorInst(BLD(builder)->Current)) {
 			IRBuilder_JumpTo(BLD(builder), MergeBB);
 		}
-		FuelVM_RecordNodeCreationStop(BLD(builder), &ElseTable);
 	}
 	/* endif */
 	IRBuilder_setBlock(BLD(builder), MergeBB);
-	FuelVM_InsertPHI(BLD(builder), Parent, MergeBB, &ThenTable, &ElseTable, INSERT_DEFAULT);
 	return true;
 }
 
@@ -331,13 +323,10 @@ static bool FuelVM_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt *
 	Block *BodyBB  = CreateBlock(BLD(builder));
 	Block *ItrBB   = CreateBlock(BLD(builder));
 	Block *MergeBB = CreateBlock(BLD(builder));
-	ARRAY(INodePtr) HeadTable;
-	ARRAY(INodePtr) BodyTable;
 
 	kStmt_SetLabelBlock(kctx, stmt, KSymbol_("continue"), ItrBB);
 	kStmt_SetLabelBlock(kctx, stmt, KSymbol_("break"),    MergeBB);
 
-	Block *Parent = BLD(builder)->Current;
 	if(!kStmt_Is(RedoLoop, stmt)) {
 		/* [WhileStmt]
 		 * "Head" is Join Node
@@ -366,15 +355,12 @@ static bool FuelVM_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt *
 
 	{ /* Head */
 		IRBuilder_setBlock(BLD(builder), HeadBB);
-		FuelVM_RecordNodeCreationStart(BLD(builder), &HeadTable);
 		SUGAR VisitExpr(kctx, builder, stmt, Stmt_getFirstExpr(kctx, stmt));
 		CreateBranch(BLD(builder), FuelVM_getExpression(builder), BodyBB, MergeBB);
-		FuelVM_RecordNodeCreationStop(BLD(builder),  &HeadTable);
 	}
 
 	{ /* Body */
 		IRBuilder_setBlock(BLD(builder), BodyBB);
-		FuelVM_RecordNodeCreationStart(BLD(builder), &BodyTable);
 		SUGAR VisitBlock(kctx, builder, Stmt_getFirstBlock(kctx, stmt));
 		IRBuilder_JumpTo(BLD(builder), ItrBB);
 
@@ -385,15 +371,9 @@ static bool FuelVM_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt *
 			SUGAR VisitBlock(kctx, builder, itrBlock);
 		}
 		IRBuilder_JumpTo(BLD(builder), HeadBB);
-		FuelVM_RecordNodeCreationStop(BLD(builder),  &BodyTable);
 	}
 
 	IRBuilder_setBlock(BLD(builder), MergeBB);
-	if(!kStmt_Is(RedoLoop, stmt)) {
-		FuelVM_InsertPHI(BLD(builder), Parent, HeadBB,  &BodyTable, &HeadTable, INSERT_FORCE);
-	} else {
-		FuelVM_InsertPHI(BLD(builder), Parent, MergeBB, &BodyTable, &HeadTable, INSERT_FORCE);
-	}
 	return true;
 }
 
