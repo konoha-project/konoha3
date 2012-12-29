@@ -612,7 +612,7 @@ typedef struct {
 	uintptr_t   (*kNode_ParseFlag)(KonohaContext *kctx, kNode *stmt, KFlagSymbolData *flagData, uintptr_t flag);
 	kToken*     (*kNode_GetToken)(KonohaContext *, kNode *, ksymbol_t kw, kToken *def);
 	kNode*      (*kNode_GetNode)(KonohaContext *, kNode *, ksymbol_t kw, kNode *def);
-	const char* (*kNode_GetText)(KonohaContext *, kNode *, ksymbol_t kw, const char *def);
+//	const char* (*kNode_GetText)(KonohaContext *, kNode *, ksymbol_t kw, const char *def);
 //	kNode*      (*kNode_GetBlock)(KonohaContext *, kNode *, kNameSpace *, ksymbol_t kw, kNode *def);
 
 //	kNode*      (*new_BlockNode)(KonohaContext *, kNode *, KMacroSet *, KTokenSeq *);
@@ -636,7 +636,7 @@ typedef struct {
 
 	kNode*       (*new_MethodNode)(KonohaContext *, kNameSpace *, KClass *, kMethod *mtd, int n, ...);
 
-	kNode*      (*TypeCheckBlock)(KonohaContext *, kNode *, kNameSpace *, KClass *);
+//	kNode*      (*TypeCheckBlock)(KonohaContext *, kNode *, kNameSpace *, KClass *);
 	kNode*      (*TypeCheckNodeByName)(KonohaContext *, kNode*, ksymbol_t, kNameSpace *, KClass *, int);
 	kNode*      (*TypeCheckNodeAt)(KonohaContext *, kNode *, size_t, kNameSpace *, KClass *, int);
 	kNode *     (*TypeCheckMethodParam)(KonohaContext *, kMethod *mtd, kNode *, kNameSpace *, KClass *);
