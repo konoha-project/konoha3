@@ -180,6 +180,9 @@ static KMETHOD Token_Is(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *)sfp[0].asToken;
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
+	if(keyword == KSymbol_("$Indent") && tk->resolvedSymbol == TokenType_INDENT) {
+		KReturnUnboxValue(true);
+	}
 	KReturnUnboxValue(tk->resolvedSyntaxInfo != NULL && tk->resolvedSyntaxInfo->keyword == keyword);
 }
 
