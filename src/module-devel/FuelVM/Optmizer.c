@@ -470,10 +470,12 @@ void IRBuilder_RemoveTrivialCondBranch(FuelIRBuilder *builder)
 						TargetBB  = Br->ElseBB;
 						RemovedBB = Br->ThenBB;
 					}
-					RemovedBB->base.Unused = 1;
-					INodePtr *Inst, *End;
-					FOR_EACH_ARRAY(RemovedBB->insts, Inst, End) {
-						(*Inst)->Unused = 1;
+					if(ARRAY_size(RemovedBB->preds) == 1) {
+						RemovedBB->base.Unused = 1;
+						INodePtr *Inst, *End;
+						FOR_EACH_ARRAY(RemovedBB->insts, Inst, End) {
+							(*Inst)->Unused = 1;
+						}
 					}
 					*NodePtr = (INode *) builder->API->newJump(builder, TargetBB);
 				}
