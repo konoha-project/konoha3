@@ -122,9 +122,12 @@ static Value *EmitConstant(IRBuilder<> *builder, void *ptr)
 static Value *EmitGlobalVariable(Type *Ty, const char *Name, void *addr)
 {
 	GlobalVariable *G;
-	if((G = GlobalModule->getNamedGlobal(Name)) == 0) {
-		G = new GlobalVariable(*GlobalModule, Ty, true, GlobalValue::ExternalLinkage, NULL, Name);
+	if((G = GlobalModule->getNamedGlobal(Name)) != 0) {
+		void *oldAddr = GlobalEngine->getPointerToGlobal(G);
+		if(oldAddr == addr)
+			return G;
 	}
+	G = new GlobalVariable(*GlobalModule, Ty, true, GlobalValue::ExternalLinkage, NULL, Name);
 	GlobalEngine->addGlobalMapping(G, addr);
 	return G;
 }
@@ -331,8 +334,6 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 	Value *Vsfp = GetStackTop(writer);
 	Value *Vtop = PrepareCallStack(writer, Vsfp);
 
-	kParam *params = kMethod_GetParam(method);
-
 	/* stack_top[-4].uline */
 	uint64_t uline = Inst->uline;
 	StoreValueToStack(builder, KClass_Int, getLongTy(), K_RTNIDX, Vtop,
@@ -352,10 +353,13 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 	/* stack_top[0..List.size()] */
 	StoreValueToStack(builder, KClass_(method->typeId), List[0]->getType(),
 			0, Vtop, List[0], "receiver");
-	for(unsigned i = 1; i < params->psize+1; ++i) {
-		ktypeattr_t type = params->paramtypeItems[i-1].attrTypeId;
-		Value *V = List[i];
-		StoreValueToStack(builder, KClass_(type), V->getType(), i, Vtop, V);
+
+	unsigned i;
+	INodePtr *x;
+	FOR_EACH_ARRAY__(Inst->Params, x, i, 2) {
+		ktypeattr_t type = ToKType(kctx, (*x)->Type);
+		Value *V = List[i-1];
+		StoreValueToStack(builder, KClass_(type), V->getType(), i-1, Vtop, V);
 	}
 
 	Value *FuncPtr;
@@ -682,6 +686,7 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 				if(*x == 0)
 					continue;
 				Value *V = GetValue(writer, *x);
+				assert(V != 0);
 				List.push_back(V);
 			}
 			EmitCall(writer, Inst, Mtd, List);

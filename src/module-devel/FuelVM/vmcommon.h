@@ -53,4 +53,12 @@ static inline enum TypeId ConvertToTypeId(KonohaContext *kctx, ktypeattr_t type)
 	return (enum TypeId) type;
 }
 
+static inline ktypeattr_t ToKType(KonohaContext *kctx, enum TypeId Type)
+{
+	if(FloatIsDefined(kctx) && Type == TYPE_float)
+		return KType_float;
+	return (ktypeattr_t) Type;
+}
+
+
 #endif /* end of include guard */

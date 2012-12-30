@@ -134,6 +134,9 @@ DEF_ARRAY_OP__(T, T)
 #define FOR_EACH_ARRAY_(a, x, i)\
     for(i=0, x = ARRAY_n(a, i); i < ARRAY_size(a); x = ARRAY_n(a,(++i)))
 
+#define FOR_EACH_ARRAY__(a, x, i, s)\
+    for(i=s, x = ARRAY_n(a, s); i < ARRAY_size(a); x = ARRAY_n(a,(++i)))
+
 #define ARRAY_BEGIN(A) ARRAY_n(A, 0)
 #define ARRAY_END(A)   ARRAY_n(A,ARRAY_size(A))
 
