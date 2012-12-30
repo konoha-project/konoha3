@@ -426,9 +426,7 @@ static const char *OPTEXT[] = {
 #undef IR_TEXT_DECL
 };
 
-#define DEBUG_TYPE_ID 1
-
-static const char *Type2String(enum TypeId Type)
+static const char *Type2String(FuelIRBuilder *builder, enum TypeId Type)
 {
 	switch(Type) {
 #define CASE(X) case TYPE_##X: return #X
@@ -448,13 +446,12 @@ static const char *Type2String(enum TypeId Type)
 		CASE(FloatObj);
 #undef CASE
 	}
-#ifdef DEBUG_TYPE_ID
-	static char buf[128];
-	snprintf(buf, 128, "%d", Type);
+
+	KonohaContext *kctx = builder->Context;
+	static char buf[256];
+	KClass *kclass = KClass_(ToKType(kctx, Type));
+	snprintf(buf, 256, "%s", KClass_text(kclass));
 	return buf;
-#else
-	return "Undef";
-#endif
 }
 
 static void Block_DumpName(Block *BB)
@@ -487,7 +484,7 @@ static void IRBuilder_DumpLocalVariable(FuelIRBuilder *builder)
 		if(i != 0) {
 			debug(", ");
 		}
-		debug("{Type:%s, Id:$%d}", Type2String(Node->Type), Node->Id);
+		debug("{Type:%s, Id:$%d}", Type2String(builder, Node->Type), Node->Id);
 	}
 	debug("]\n");
 }
@@ -505,7 +502,8 @@ static void printHeader(FuelIRBuilder *builder, INode *Inst, const char *Tag)
 		Tag = "";
 		Padding = "";
 	}
-	debug("    %02d: $%02d = %s%s%s [", builder->InstructionId++, Inst->Id,
+	debug("    %02d: $%02d = %s %s%s%s [", builder->InstructionId++, Inst->Id,
+			Type2String(builder, Inst->Type),
 			OPTEXT[Inst->Kind], Padding, Tag);
 }
 
@@ -524,13 +522,14 @@ static void Dump_visitList(Visitor *visitor, INode *Inst, const char *Tag, unsig
 
 static void Dump_visitValue(Visitor *visitor, INode *Node, const char *Tag, SValue Val)
 {
-	printHeader((FuelIRBuilder *)visitor->Context, Node, Tag);
+	FuelIRBuilder *builder = (FuelIRBuilder *)visitor->Context;
+	printHeader(builder, Node, Tag);
 	IField *Inst;
 	if((Inst = CHECK_KIND(Node, IField)) != 0 && Inst->Op != LocalScope) {
 		printNode(Inst->Node);
-		debug(", Type:%s, %d]\n", Type2String(Node->Type), Inst->FieldIndex);
+		debug(", Type:%s, %d]\n", Type2String(builder, Node->Type), Inst->FieldIndex);
 	} else {
-		debug("Type:%s, 0x%llx]\n", Type2String(Node->Type), (unsigned long long) Val.bits);
+		debug("Type:%s, 0x%llx]\n", Type2String(builder, Node->Type), (unsigned long long) Val.bits);
 	}
 }
 #endif
@@ -1129,7 +1128,7 @@ ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option, bo
 	IRBuilder_FlattenICond(builder);
 	Flag = IRBuilder_Optimize(builder, BB, Flag);
 
-	IRBuilder_RemoveRedundantConstants(builder);
+	//IRBuilder_RemoveRedundantConstants(builder);
 	IRBuilder_RemoveUnusedVariable(builder);
 
 	ByteCode *code = NULL;

@@ -17,10 +17,10 @@ enum TypeId {
 	TYPE_Method = KType_Method,
 	TYPE_NameSpace = KType_NameSpace,
 	TYPE_Any = KType_0,
-	TYPE_float,
-	TYPE_BoolObj,
-	TYPE_IntObj,
-	TYPE_FloatObj
+	TYPE_float = -1,
+	TYPE_BoolObj = -2,
+	TYPE_IntObj = -3,
+	TYPE_FloatObj = -4
 };
 
 typedef union SValue {

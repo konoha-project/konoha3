@@ -361,6 +361,7 @@ static INode *SimplifyICall(FuelIRBuilder *builder, ICall *Inst)
 	KStackCall(lsfp);
 	END_UnusedStack();
 
+	Type = Inst->base.Type;
 	if(IsUnBoxedType(Type)) {
 		val.bits = lsfp[K_RTNIDX].unboxValue;
 	} else {

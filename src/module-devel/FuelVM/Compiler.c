@@ -160,9 +160,7 @@ static INode *FetchINode(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kE
 	DBG_ASSERT(IS_Expr(exprN));
 	SUGAR VisitExpr(kctx, builder, stmt, exprN);
 	INode *Node = FuelVM_getExpression(builder);
-	if(Node->Type == KType_void) {
-		INode_setType(Node, ConvertToTypeId(kctx, reqTy));
-	}
+	assert(Node->Type != TYPE_void);
 	return Node;
 }
 
@@ -488,7 +486,6 @@ static void FuelVM_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt *
 		int i, s = kMethod_Is(Static, mtd) ? 2 : 1;
 		int argc = CallExpr_getArgCount(expr);
 		INode *Params[argc+2];
-		kParam *params = kMethod_GetParam(mtd);
 
 		if(kMethod_Is(Static, mtd)) {
 			kObject *obj = KLIB Knull(kctx, KClass_(mtd->typeId));
@@ -500,10 +497,7 @@ static void FuelVM_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt *
 			DBG_ASSERT(IS_Expr(exprN));
 			SUGAR VisitExpr(kctx, builder, stmt, exprN);
 			INode *Node = FuelVM_getExpression(builder);
-			if(Node->Type == TYPE_void) {
-				ktypeattr_t type = params->paramtypeItems[i-2].attrTypeId;
-				INode_setType(Node, type);
-			}
+			assert(Node->Type != TYPE_void);
 			Params[i] = Node;
 		}
 
@@ -579,7 +573,11 @@ static void FuelVM_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt *s
 			IField_setHash((IField *) Node, leftHandExpr->index);
 		}
 		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
-		CreateUpdate(BLD(builder), Node, FuelVM_getExpression(builder));
+		INode *RHS = FuelVM_getExpression(builder);
+		if(RHS->Type != Node->Type) {
+			INode_setType(Node, RHS->Type);
+		}
+		CreateUpdate(BLD(builder), Node, RHS);
 	}
 	else if(leftHandExpr->node == TEXPR_STACKTOP) {
 		assert(0 && "TODO");

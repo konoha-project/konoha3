@@ -242,7 +242,7 @@ static void DeleteControlFlowGraph(CFG *cfg)
 /* Print Dominator Tree */
 static void printdomtree(BlockNode *node, int level)
 {
-#if 1
+#if 0
 	int i;
 	BlockNodePtr *x, *e;
 	for(i = 0; i < level; i++)

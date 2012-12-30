@@ -287,20 +287,10 @@ static Value *PrepareCallStack(LLVMIRBuilder *writer, Value *Vsfp, unsigned Para
 	return Vstack_top;
 }
 
-static bool IsUnboxType(KClass *ct, Type *Type)
+static void StoreValueToStack(IRBuilder<> *builder, enum TypeId Ty, Type *ReqTy, int Idx, Value *Vsfp, Value *V, const char *Name = "")
 {
-	if(KClass_Is(UnboxType, ct)) {
-		if(ct->typeId == KType_0 && Type->isPointerTy())
-			return false;
-		return true;
-	}
-	return false;
-}
+	int fieldIdx = IsUnBoxedType(Ty) ? KonohaValueVar_unboxValue : KonohaValueVar_asObject;
 
-static void StoreValueToStack(IRBuilder<> *builder, KClass *ct, Type *ReqTy, int Idx, Value *Vsfp, Value *V, const char *Name = "")
-{
-	int fieldIdx = IsUnboxType(ct, ReqTy) ?
-		KonohaValueVar_unboxValue : KonohaValueVar_asObject;
 	Value *Dst = builder->CreateConstInBoundsGEP2_32(Vsfp, Idx, fieldIdx, Name);
 	if(V->getType() == builder->getInt1Ty()) {
 		V = builder->CreateZExt(V, GetLLVMType(ID_long));
@@ -311,10 +301,9 @@ static void StoreValueToStack(IRBuilder<> *builder, KClass *ct, Type *ReqTy, int
 	builder->CreateStore(V, Dst, false);
 }
 
-static Value *LoadValueFromStack(IRBuilder<> *builder, KClass *ct, Type *ReqTy, int Idx, Value *Vsfp)
+static Value *LoadValueFromStack(IRBuilder<> *builder, enum TypeId Ty, Type *ReqTy, int Idx, Value *Vsfp)
 {
-	int fieldIdx = IsUnboxType(ct, ReqTy) ?
-		KonohaValueVar_unboxValue : KonohaValueVar_asObject;
+	int fieldIdx = IsUnBoxedType(Ty) ? KonohaValueVar_unboxValue : KonohaValueVar_asObject;
 	Value *Src = builder->CreateConstInBoundsGEP2_32(Vsfp, Idx, fieldIdx);
 	if(ReqTy == builder->getDoubleTy()) {
 		Type *Ty = PointerType::get(builder->getDoubleTy(), 0);
@@ -336,27 +325,28 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 
 	/* stack_top[-4].uline */
 	uint64_t uline = Inst->uline;
-	StoreValueToStack(builder, KClass_Int, getLongTy(), K_RTNIDX, Vtop,
+	StoreValueToStack(builder, TYPE_int, getLongTy(), K_RTNIDX, Vtop,
 			EmitConstant(builder, uline), "uline");
 
 	/* stack_top[-4].defaultObject */
 	KClass *NullType = KClass_(Inst->base.Type);
 	kObject *DefObj  = KLIB Knull(kctx, NullType);
 	Value *DefObjPtr = EmitConstant(builder, DefObj);
-	StoreValueToStack(builder, KClass_Object, convert_type(kctx, KClass_Object),
+	StoreValueToStack(builder, TYPE_Object, convert_type(kctx, KClass_Object),
 			K_RTNIDX, Vtop, DefObjPtr, "default");
 
 	/* stack_top[-2].calledMethod */
-	StoreValueToStack(builder, KClass_Int, getLongTy(), K_MTDIDX, Vtop,
+	StoreValueToStack(builder, TYPE_int, getLongTy(), K_MTDIDX, Vtop,
 			builder->CreateBitCast(MtdPtr, GetLLVMType(ID_long), "Method"));
 
 	/* stack_top[0..List.size()] */
 	unsigned i;
 	INodePtr *x;
+	enum TypeId Ty;
 	FOR_EACH_ARRAY__(Inst->Params, x, i, 1) {
-		ktypeattr_t type = ToKType(kctx, (*x)->Type);
+		Ty = (*x)->Type;
 		Value *V = List[i-1];
-		StoreValueToStack(builder, KClass_(type), V->getType(), i-1, Vtop, V);
+		StoreValueToStack(builder, Ty, V->getType(), i-1, Vtop, V);
 	}
 
 	Value *FuncPtr;
@@ -372,10 +362,12 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 
 	builder->CreateCall2(FuncPtr, Vctx, Vtop);
 
-	KClass *RetTy = kMethod_GetReturnType(method);
-	Value *Ret = LoadValueFromStack(builder, RetTy, ToLLVMType(ToINode(Inst)->Type), K_RTNIDX, Vtop);
+	Ty = Inst->base.Type;
+	if(Ty != TYPE_void) {
+		Value *Ret = LoadValueFromStack(builder, Ty, ToLLVMType(Ty), K_RTNIDX, Vtop);
+		SetValue(writer, ToINode(Inst), Ret);
+	}
 	RestoreStackTop(writer, Vsfp);
-	SetValue(writer, ToINode(Inst), Ret);
 }
 
 static void EmitRet(LLVMIRBuilder *writer, INode *Node)
@@ -602,7 +594,7 @@ static void EmitThrowInst(LLVMIRBuilder *writer, IThrow *Node)
 	Value *Vtop = PrepareCallStack(writer, Vsfp);
 	/* stack_top[-4].uline */
 	uint64_t uline = Node->uline;
-	StoreValueToStack(builder, KClass_Int, getLongTy(), K_RTNIDX, Vtop,
+	StoreValueToStack(builder, TYPE_int, getLongTy(), K_RTNIDX, Vtop,
 			EmitConstant(builder, uline), "uline");
 
 	Value *vsymbol = EmitConstant(builder, (int)KException_("RuntimeScript"));
@@ -867,18 +859,18 @@ static Function *EmitFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Func
 
 	std::vector<Value *> Params;
 	Params.push_back(Vctx);
-	KClass *kclass = KClass_(mtd->typeId);
-	Params.push_back(LoadValueFromStack(builder, kclass, convert_type(kctx, kclass), 0, Vsfp));
+	enum TypeId Type = ConvertToTypeId(kctx, mtd->typeId);
+	Params.push_back(LoadValueFromStack(builder, Type, ToLLVMType(Type), 0, Vsfp));
 	for(unsigned i = 0; i < params->psize; ++i) {
 		ktypeattr_t type = params->paramtypeItems[i].attrTypeId;
-		kclass = KClass_(type);
-		Value *V = LoadValueFromStack(builder, kclass, convert_type(kctx, kclass), i+1, Vsfp);
+		Type = ConvertToTypeId(kctx, type);
+		Value *V = LoadValueFromStack(builder, Type, ToLLVMType(Type), i+1, Vsfp);
 		Params.push_back(V);
 	}
-	KClass *RetTy = kMethod_GetReturnType(mtd);
+	Type = ConvertToTypeId(kctx, kMethod_GetReturnType(mtd)->typeId);
 	Value *Ret = builder->CreateCall(Func, Params);
-	if(RetTy != KClass_void) {
-		StoreValueToStack(builder, RetTy, convert_type(kctx, RetTy), K_RTNIDX, Vsfp, Ret);
+	if(Type != TYPE_void) {
+		StoreValueToStack(builder, Type, ToLLVMType(Type), K_RTNIDX, Vsfp, Ret);
 	}
 	builder->CreateRetVoid();
 	KLIB KBuffer_Free(&wb);
@@ -976,6 +968,7 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 	Builder.populateFunctionPassManager(FPM);
 	Builder.populateModulePassManager(MPM);
 
+	writer.Func->dump();
 	FPM.doInitialization();
 	FPM.run(*Wrapper);
 	FPM.run(*writer.Func);
@@ -984,7 +977,6 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 
 #ifdef USE_LLVMIR_DUMP
 	writer.Func->dump();
-	//Wrapper->dump();
 #endif
 	void *f = GlobalEngine->getPointerToFunction(Wrapper);
 	return (ByteCode *) f;
