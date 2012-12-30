@@ -381,7 +381,7 @@ static void RewriteNode(INode *Node, ARRAY(INodePtr) *stack)
 				case GlobalScope:
 				case EnvScope:
 				case FieldScope:
-					assert(0 && "TODO");
+					ReplaceValue((INode **)&(Inst->Node), stack);
 					break;
 				case LocalScope:
 					break;
@@ -402,7 +402,9 @@ static void RewriteNode(INode *Node, ARRAY(INodePtr) *stack)
 		CASE(IUpdate) {
 			IUpdate *Inst = (IUpdate *) Node;
 			ReplaceValue((INode **)&(Inst->RHS), stack);
-			NewName(Node, Inst->LHS, stack);
+			if(Inst->LHS->Op == LocalScope) {
+				NewName(Node, Inst->LHS, stack);
+			}
 			break;
 		}
 		case IR_TYPE_IBranch:
@@ -477,7 +479,8 @@ static void Rename(CFG *cfg, BlockNode *b, ARRAY(INodePtr) *stack)
 			PopStack((IField *) PHI->Val, stack);
 		}
 		if((Update = CHECK_KIND(*Inst, IUpdate))) {
-			PopStack(Update->LHS, stack);
+			if(Update->LHS->Op == LocalScope)
+				PopStack(Update->LHS, stack);
 		}
 	}
 }
@@ -511,7 +514,9 @@ static void InsertUndefinedVariables(BlockNode *Node, FuelIRBuilder *builder)
 	FOR_EACH_ARRAY(Node->block->insts, x, e) {
 		IUpdate *Update;
 		if((Update = CHECK_KIND(*x, IUpdate))) {
-			local[Update->LHS->Id] = Update->LHS->Id;
+			if(Update->LHS->Op == LocalScope) {
+				local[Update->LHS->Id] = Update->LHS->Id;
+			}
 		}
 	}
 

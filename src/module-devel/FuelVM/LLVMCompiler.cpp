@@ -200,9 +200,12 @@ static void SetConstant(LLVMIRBuilder *writer, INode *Node, SValue Val)
 	switch(Type) {
 		case TYPE_void:
 			assert(0 && "FIXME");
-		case TYPE_boolean: SetValue(writer, Node, EmitConstant(builder, Val.bval)); break;
-		case TYPE_int:     SetValue(writer, Node, EmitConstant(builder, Val.ival)); break;
-		case TYPE_float:   SetValue(writer, Node, EmitConstant(builder, Val.fval)); break;
+		case TYPE_boolean:
+			SetValue(writer, Node, EmitConstant(builder, Val.bval)); break;
+		case TYPE_int:
+			SetValue(writer, Node, EmitConstant(builder, Val.ival)); break;
+		case TYPE_float:
+			SetValue(writer, Node, EmitConstant(builder, Val.fval)); break;
 		default:
 			SetValue(writer, Node, EmitConstant(builder, (kObject *)Val.ptr));
 			break;
@@ -398,6 +401,18 @@ static void EmitJump(LLVMIRBuilder *writer, IJump *Node)
 	builder->CreateBr(Target);
 }
 
+static Value *ToBoolValue(IRBuilder<> *builder, Value *Val)
+{
+	if(Val->getType() != builder->getInt1Ty()) {
+		Val = builder->CreateTrunc(Val, builder->getInt1Ty());
+	}
+	return Val;
+}
+static Value *GetBoolValue(LLVMIRBuilder *writer, INode *Node)
+{
+	return ToBoolValue(writer->builder, GetValue(writer, Node));
+}
+
 static void EmitCondBranch(LLVMIRBuilder *writer, IBranch *Inst, ICond *Cond, int IsTopDecl)
 {
 	INodePtr *x, *e;
@@ -418,11 +433,7 @@ static void EmitCondBranch(LLVMIRBuilder *writer, IBranch *Inst, ICond *Cond, in
 
 		BasicBlock *BB = BasicBlock::Create(getGlobalContext(), "BB", writer->Func);
 
-		Value *Val = GetValue(writer, *x);
-		if(Val->getType() != builder->getInt1Ty()) {
-			Val = builder->CreateTrunc(Val, builder->getInt1Ty());
-		}
-
+		Value *Val = GetBoolValue(writer, *x);
 		if(Cond->Op == LogicalOr) {
 			builder->CreateCondBr(Val, ThenBB, BB);
 		} else {
@@ -443,7 +454,7 @@ static void EmitBranch(LLVMIRBuilder *writer, IBranch *Node)
 		assert(Cond->Branch != 0);
 		EmitCondBranch(writer, Node, Cond, true);
 	} else {
-		Value *Val = GetValue(writer, Node->Cond);
+		Value *Val = GetBoolValue(writer, Node->Cond);
 		BasicBlock *ThenBB = GetBlock(writer, Node->ThenBB);
 		BasicBlock *ElseBB = GetBlock(writer, Node->ElseBB);
 		builder->CreateCondBr(Val, ThenBB, ElseBB);
@@ -493,9 +504,7 @@ static void EmitUnaryInst(LLVMIRBuilder *writer, IUnary *Node)
 #define VSET(WRITER, NODE, FUNC) SetValue(WRITER, (INode *)NODE, (WRITER)->builder->FUNC)
 #define CASE(X, OP) case X: VSET(writer, Node, Create##OP(Val, #X));return
 	if(Type == TYPE_boolean) {
-		if(Val->getType() != builder->getInt1Ty()) {
-			Val = builder->CreateTrunc(Val, builder->getInt1Ty());
-		}
+		Val = ToBoolValue(builder, Val);
 		switch(Node->Op) {
 			CASE(Not, Not);
 			default:
@@ -530,12 +539,8 @@ static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 	enum TypeId Type = Node->LHS->Type;
 #define CASE(X, OP) case X: VSET(writer, Node, Create##OP(LHS, RHS, #X));return
 	if(Type == TYPE_boolean) {
-		if(LHS->getType() != builder->getInt1Ty()) {
-			LHS = builder->CreateTrunc(LHS, builder->getInt1Ty());
-		}
-		if(RHS->getType() != builder->getInt1Ty()) {
-			RHS = builder->CreateTrunc(RHS, builder->getInt1Ty());
-		}
+		LHS = ToBoolValue(builder, LHS);
+		RHS = ToBoolValue(builder, RHS);
 		switch(Node->Op) {
 			CASE(Eq, ICmpEQ); CASE(Nq, ICmpNE);
 			default:
@@ -626,6 +631,16 @@ static void EmitPHIInst(LLVMIRBuilder *writer, IPHI *Node)
 	}
 }
 
+static Value *GetFieldRef(LLVMIRBuilder *writer, IField *Inst)
+{
+	IRBuilder<> *builder = writer->builder;
+	Value *Val = GetValue(writer, Inst->Node);
+	Value *Dst = builder->CreateStructGEP(Val, kObjectVar_fieldObjectItems);
+	Dst =  builder->CreateConstInBoundsGEP1_32(Dst, Inst->FieldIndex);
+	Dst = builder->CreateBitCast(Dst, PointerType::get(ToLLVMType(Inst->base.Type), 0));
+	return Dst;
+}
+
 #define CASE(KIND) case IR_TYPE_##KIND:
 
 static void EmitNode(LLVMIRBuilder *writer, INode *Node)
@@ -638,16 +653,10 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 				Value *LHS, *RHS;
 				INodePtr *Inst0 = ARRAY_n(Inst->Insts, 0);
 				IRBuilder<> *builder = writer->builder;
-				LHS = GetValue(writer, *Inst0);
-				if(LHS->getType() != builder->getInt1Ty()) {
-					LHS = builder->CreateTrunc(LHS, builder->getInt1Ty());
-				}
+				LHS = GetBoolValue(writer, *Inst0);
 				FOR_EACH_ARRAY(Inst->Insts, x, e) {
 					if(x == Inst0) continue;
-					RHS = GetValue(writer, *x);
-					if(RHS->getType() != builder->getInt1Ty()) {
-						RHS = builder->CreateTrunc(RHS, builder->getInt1Ty());
-					}
+					RHS = GetBoolValue(writer, *x);
 					if(Inst->Op == LogicalOr) {
 						LHS = builder->CreateOr(LHS, RHS);
 					} else {
@@ -689,9 +698,14 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 			switch(LHS->Op) {
 				case GlobalScope:
 				case EnvScope:
-				case FieldScope:
 					assert(0 && "TODO");
+				case FieldScope: {
+					IRBuilder<> *builder = writer->builder;
+					Value *Dst = GetFieldRef(writer, Inst->LHS);
+					Value *Src = GetValue(writer, Inst->RHS);
+					builder->CreateStore(Src, Dst);
 					break;
+				}
 				case LocalScope: {
 					Value *NewVal = GetValue(writer, Inst->RHS);
 					SetValue(writer, Node, NewVal);
@@ -778,12 +792,9 @@ static void LLVMIRBuilder_visitValue(Visitor *visitor, INode *Node, const char *
 					assert(0 && "TODO");
 					break;
 				case FieldScope: {
-					/* TODO */
-					assert(0 && "TODO");
-					//unsigned Src = REGISTER_UNDEFINED;
-					//assert(Register_FindById(Allocator, NODE_ID(Inst->Node), &Src) == true);
-					//unsigned Dst = Register_FindByIdOrAllocate(Allocator, NODE_ID(Node));
-					//EMIT_LIR(writer, LoadField, Dst, Src, Inst->FieldIndex);
+					Value *Dst = GetFieldRef(writer, Inst);
+					Dst = writer->builder->CreateLoad(Dst);
+					SetValue(writer, Node, Dst);
 					return;
 				}
 				case LocalScope:
@@ -902,7 +913,6 @@ static void EmitPrologue(LLVMIRBuilder *writer, FuelIRBuilder *builder, IMethod 
 	BlockPtr *x, *e;
 	writer->Func = EmitInternalFunction(Mtd->Context, GlobalModule, Mtd->Method);
 	FOR_EACH_ARRAY(builder->Blocks, x, e) {
-		(*x)->Table = (void *)(new std::vector<ValueInfo>(builder->LastNodeId));
 		SetBlock(writer, *x, BasicBlock::Create(getGlobalContext(), "BB", writer->Func));
 	}
 

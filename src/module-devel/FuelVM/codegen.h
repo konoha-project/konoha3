@@ -139,7 +139,6 @@ struct Block {
 	ARRAY(BlockPtr) preds;
 	ARRAY(BlockPtr) succs;
 	ARRAY(INodePtr) insts;
-	void *Table; /* used at lowing */
 };
 
 /*$ Value Constant { Ptr, Double } */
