@@ -2,6 +2,7 @@
 #include <llvm/Module.h>
 #include <llvm/IRBuilder.h>
 #include <llvm/Support/TargetSelect.h>
+#include <llvm/Support/ManagedStatic.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/ExecutionEngine/Interpreter.h>
@@ -74,6 +75,15 @@ static void InitLLVM()
 		abort();
 	}
 	LLVMType_Init();
+}
+
+extern "C" void ExitLLVM()
+{
+	if(GlobalModule == 0)
+		return;
+	GlobalModule = 0;
+	delete GlobalEngine;
+	llvm_shutdown();
 }
 
 static const char *ConstructMethodName(KonohaContext *kctx, kMethod *mtd, KBuffer *wb, const char *suffix)
@@ -884,6 +894,7 @@ static Function *EmitFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Func
 	}
 	builder->CreateRetVoid();
 	KLIB KBuffer_Free(&wb);
+	delete builder;
 	return FWrap;
 }
 
@@ -987,6 +998,7 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 #ifdef USE_LLVMIR_DUMP
 	writer.Func->dump();
 #endif
+	delete writer.builder;
 	void *f = GlobalEngine->getPointerToFunction(Wrapper);
 	return (ByteCode *) f;
 }

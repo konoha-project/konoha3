@@ -22,12 +22,14 @@ static void RegisterAllocator_Init(RegisterAllocator *RegAlloc, unsigned MaxVari
 {
 	BitMap_Init(&(RegAlloc->AllocatedVariable), MaxVariables);
 	BitMap_Init(&(RegAlloc->AllocatedRegister), MaxVariables/2);
+	ARRAY_init(uintptr_t, &RegAlloc->RegTable, 0);
 }
 
 static void RegisterAllocator_Dispose(RegisterAllocator *RegAlloc)
 {
 	BitMap_Dispose(&RegAlloc->AllocatedVariable);
 	BitMap_Dispose(&RegAlloc->AllocatedRegister);
+	ARRAY_dispose(uintptr_t, &RegAlloc->RegTable);
 }
 
 static unsigned Register_Allocate(RegisterAllocator *RegAlloc, unsigned Id)

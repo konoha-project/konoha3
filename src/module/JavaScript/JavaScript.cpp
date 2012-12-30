@@ -737,6 +737,10 @@ static struct KVirtualCode* GetDefaultBootCode(void)
 	return NULL;
 }
 
+static void V8_DeleteVirtualMachine(KonohaContext *kctx)
+{
+}
+
 static void InitStaticBuilderApi(struct KBuilderAPI *builderApi)
 {
 	builderApi->target = "JavaScript";
@@ -767,6 +771,7 @@ kbool_t LoadJavaScriptModule(KonohaFactory *factory, ModuleType type)
 	factory->VirtualMachineInfo            = &ModuleInfo;
 	factory->GetDefaultBootCode            = GetDefaultBootCode;
 	factory->GetDefaultBuilderAPI          = GetDefaultBuilderAPI;
+	factory->DeleteVirtualMachine          = V8_DeleteVirtualMachine;
 #ifdef HAVE_LIBV8
 	globalJSContext = new JSContext();
 #endif

@@ -746,6 +746,14 @@ static struct KBuilderAPI *GetDefaultBuilderAPI(void)
 	return &builderApi;
 }
 
+static void FuelVMDeleteVirtualMachine(KonohaContext *kctx)
+{
+#ifdef FUELVM_USE_LLVM
+	extern void ExitLLVM();
+	ExitLLVM();
+#endif
+}
+
 // -------------------------------------------------------------------------
 
 kbool_t LoadFuelVMModule(KonohaFactory *factory, ModuleType type)
@@ -753,9 +761,10 @@ kbool_t LoadFuelVMModule(KonohaFactory *factory, ModuleType type)
 	static KModuleInfo ModuleInfo = {
 		"FuelVM", K_VERSION, 0, "FuelVM",
 	};
-	factory->VirtualMachineInfo            = &ModuleInfo;
-	factory->GetDefaultBootCode            = GetDefaultBootCode;
-	factory->GetDefaultBuilderAPI          = GetDefaultBuilderAPI;
+	factory->VirtualMachineInfo   = &ModuleInfo;
+	factory->GetDefaultBootCode   = GetDefaultBootCode;
+	factory->GetDefaultBuilderAPI = GetDefaultBuilderAPI;
+	factory->DeleteVirtualMachine = FuelVMDeleteVirtualMachine;
 	return true;
 }
 

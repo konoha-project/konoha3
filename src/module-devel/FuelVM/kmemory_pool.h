@@ -73,7 +73,7 @@ typedef struct MemoryPool {
     ARRAY(PageData)  array;
 } MemoryPool;
 
-static inline void JSONMemoryPool_Init(MemoryPool *pool)
+static inline void FuelVMMemoryPool_Init(MemoryPool *pool)
 {
     int i;
     ARRAY_init(PageData,  &pool->array, MAX_ALIGN_LOG2 - MIN_ALIGN_LOG2);
@@ -82,7 +82,7 @@ static inline void JSONMemoryPool_Init(MemoryPool *pool)
         PageData page;
         BlockInfo block;
         ARRAY_init(CharPtr, &page.block, 4);
-        ARRAY_add(CharPtr, &page.block, (char *) malloc(MEMORYBLOCK_SIZE));
+        ARRAY_add(CharPtr, &page.block, (char *) calloc(1, MEMORYBLOCK_SIZE));
         ARRAY_add(PageData, &pool->array, &page);
         block.base = ARRAY_get(CharPtr, &page.block, 0);
         block.current = block.base;
@@ -90,7 +90,7 @@ static inline void JSONMemoryPool_Init(MemoryPool *pool)
     }
 }
 
-static inline void *JSONMemoryPool_Alloc(MemoryPool *pool, size_t n)
+static inline void *FuelVMMemoryPool_Alloc(MemoryPool *pool, size_t n)
 {
     assert(n > 0 && n <= (1 << MAX_ALIGN_LOG2));
     size_t size = ALIGN(n, 1 << MIN_ALIGN_LOG2);
@@ -102,19 +102,22 @@ static inline void *JSONMemoryPool_Alloc(MemoryPool *pool, size_t n)
         return ((void *) ptr);
     }
     PageData *page = ARRAY_get(PageData, &pool->array, index);
-    void *newblock = malloc(MEMORYBLOCK_SIZE);
+    void *newblock = calloc(1, MEMORYBLOCK_SIZE);
     block->base    = (char *)newblock;
     block->current = (char *)newblock + size;
     ARRAY_add(CharPtr, &page->block, block->base);
     return (newblock);
 }
 
-static inline void JSONMemoryPool_Delete(MemoryPool *pool)
+typedef void (*FnDelete)(char *begin, char *end);
+
+static inline void FuelVMMemoryPool_Delete(MemoryPool *pool, FnDelete fn)
 {
     PageData *p, *end;
     FOR_EACH_ARRAY(pool->array, p, end) {
         CharPtr *x, *e;
         FOR_EACH_ARRAY(p->block, x, e) {
+            fn(*x, (*x)+MEMORYBLOCK_SIZE);
             free(*x);
         }
         ARRAY_dispose(CharPtr, &p->block);

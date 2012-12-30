@@ -205,8 +205,14 @@ static void visitIPHI(Visitor *visitor, INode *Node)
 	VISIT_N(Node, 0, Inst->Args); /* FIXME : trace Inst->Val */
 }
 
+static void visitERROR(Visitor *visitor, INode *Node)
+{
+	assert(0 && "unreachable");
+}
+
 typedef void (*VisitFn)(Visitor *visitor, INode *Node);
 static const VisitFn Fn[] = {
+	visitERROR,
 	visitBlock,
 #define IR_API_DECL(X) visit##X,
 	IR_LIST(IR_API_DECL)

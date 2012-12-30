@@ -94,12 +94,12 @@ typedef struct FuelIRBuilder FuelIRBuilder;
 	OP(IPHI)
 
 enum IRType {
+	TYPE_IR_ERROR = 0,
 	TYPE_IR_Block,
 #define IR_TYPE_DECL(X) IR_TYPE_##X,
 	IR_LIST(IR_TYPE_DECL)
 #undef IR_TYPE_DECL
-	TYPE_IR_MAX,
-	TYPE_IR_ERROR = -1
+	TYPE_IR_MAX
 };
 
 /*$ Node */
@@ -353,7 +353,6 @@ struct FuelIRBuilder {
 	};
 	KonohaContext *Context;
 	ARRAY(INodeArrayPtr) VariableTable;
-	struct ControlFlowGraph *cfg;
 	IMethod *Method;
 };
 

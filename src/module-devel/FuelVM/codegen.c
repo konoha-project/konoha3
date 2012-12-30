@@ -36,7 +36,6 @@ DEF_ARRAY_OP_NOPOINTER(INodeArrayPtr);
 
 #define CREATE_NODE(TYPE) ((TYPE *) newINode(builder, IR_TYPE_##TYPE))
 static INode *newINode(struct FuelIRBuilder *builder, enum IRType Kind);
-#define DISPOSE_NODE(NODE) (disposeINode((INode *)(NODE)))
 static void disposeINode(INode *Node);
 
 static void disposeINodeImpl(INode *Node)
@@ -58,10 +57,6 @@ static void disposeBlock(INode *Node)
 	Block *block = (Block *) Node;
 	ARRAY_dispose(BlockPtr, &block->preds);
 	ARRAY_dispose(BlockPtr, &block->succs);
-	INodePtr *x, *e;
-	FOR_EACH_ARRAY(block->insts, x, e) {
-		DISPOSE_NODE(*x);
-	}
 	ARRAY_dispose(INodePtr, &block->insts);
 }
 
@@ -112,10 +107,7 @@ static ICond *newICond(FuelIRBuilder *builder, enum ConditionalOp Op)
 static void disposeICond(INode *Node)
 {
 	ICond *Cond = (ICond *) Node;
-	INodePtr *x, *e;
-	FOR_EACH_ARRAY(Cond->Insts, x, e) {
-		DISPOSE_NODE(*x);
-	}
+	ARRAY_dispose(INodePtr, &Cond->Insts);
 }
 
 static INew *newINew(FuelIRBuilder *builder, uintptr_t Conf, enum TypeId Type)
@@ -130,10 +122,7 @@ static INew *newINew(FuelIRBuilder *builder, uintptr_t Conf, enum TypeId Type)
 static void disposeINew(INode *Node)
 {
 	INew *New = (INew *) Node;
-	INodePtr *x, *e;
-	FOR_EACH_ARRAY(New->Params, x, e) {
-		DISPOSE_NODE(*x);
-	}
+	ARRAY_dispose(INodePtr, &New->Params);
 }
 
 static ICall *newICall(FuelIRBuilder *builder, enum CallOp Op, uintptr_t uline)
@@ -148,10 +137,7 @@ static ICall *newICall(FuelIRBuilder *builder, enum CallOp Op, uintptr_t uline)
 static void disposeICall(INode *Node)
 {
 	ICall *Call = (ICall *) Node;
-	INodePtr *x, *e;
-	FOR_EACH_ARRAY(Call->Params, x, e) {
-		DISPOSE_NODE(*x);
-	}
+	ARRAY_dispose(INodePtr, &Call->Params);
 }
 
 static IFunction *newIFunction(FuelIRBuilder *builder)
@@ -163,10 +149,7 @@ static IFunction *newIFunction(FuelIRBuilder *builder)
 static void disposeIFunction(INode *Node)
 {
 	IFunction *Func = (IFunction *) Node;
-	INodePtr *x, *e;
-	FOR_EACH_ARRAY(Func->Env, x, e) {
-		DISPOSE_NODE(*x);
-	}
+	ARRAY_dispose(INodePtr, &Func->Env);
 }
 
 static IUpdate *newIUpdate(FuelIRBuilder *builder, IField *LHS, INode *RHS)
@@ -178,12 +161,7 @@ static IUpdate *newIUpdate(FuelIRBuilder *builder, IField *LHS, INode *RHS)
 	return (Node);
 }
 
-static void disposeIUpdate(INode *Node)
-{
-	IUpdate *Update = (IUpdate *) Node;
-	DISPOSE_NODE(Update->LHS);
-	DISPOSE_NODE(Update->RHS);
-}
+#define disposeIUpdate disposeINodeImpl
 
 static IBranch *newIBranch(FuelIRBuilder *builder, INode *Cond, Block *thenBB, Block *elseBB)
 {
@@ -194,11 +172,7 @@ static IBranch *newIBranch(FuelIRBuilder *builder, INode *Cond, Block *thenBB, B
 	return (Node);
 }
 
-static void disposeIBranch(INode *Node)
-{
-	IBranch *Inst = (IBranch *) Node;
-	DISPOSE_NODE(Inst->Cond);
-}
+#define disposeIBranch disposeINodeImpl
 
 static ITest *newITest(FuelIRBuilder *builder, enum TestOp Op, IField *Field, Block *Block)
 {
@@ -209,11 +183,7 @@ static ITest *newITest(FuelIRBuilder *builder, enum TestOp Op, IField *Field, Bl
 	return (Node);
 }
 
-static void disposeITest(INode *Node)
-{
-	ITest *Inst = (ITest *) Node;
-	DISPOSE_NODE(Inst->Value);
-}
+#define disposeITest disposeINodeImpl
 
 static IReturn *newIReturn(FuelIRBuilder *builder, INode *expr)
 {
@@ -222,11 +192,7 @@ static IReturn *newIReturn(FuelIRBuilder *builder, INode *expr)
 	return (Node);
 }
 
-static void disposeIReturn(INode *Node)
-{
-	IReturn *Inst = (IReturn *) Node;
-	DISPOSE_NODE(Inst->Inst);
-}
+#define disposeIReturn disposeINodeImpl
 
 static IJump *newIJump(FuelIRBuilder *builder, Block *Block)
 {
@@ -245,11 +211,7 @@ static IThrow *newIThrow(FuelIRBuilder *builder, INode *Val, uintptr_t uline)
 	return (Node);
 }
 
-static void disposeIThrow(INode *Node)
-{
-	IThrow *Inst = (IThrow *) Node;
-	DISPOSE_NODE(Inst->Val);
-}
+#define disposeIThrow disposeINodeImpl
 
 static ITry *newITry(FuelIRBuilder *builder, Block *tryBlock, Block *finallyBlock)
 {
@@ -270,11 +232,7 @@ static IYield *newIYield(FuelIRBuilder *builder, INode *INode)
 	return (Node);
 }
 
-static void disposeIYield(INode *Node)
-{
-	IYield *Inst = (IYield *) Node;
-	DISPOSE_NODE(Inst->Value);
-}
+#define disposeIYield disposeINodeImpl
 
 static IUnary *newIUnary(FuelIRBuilder *builder, enum UnaryOp Op, INode *Val)
 {
@@ -284,11 +242,7 @@ static IUnary *newIUnary(FuelIRBuilder *builder, enum UnaryOp Op, INode *Val)
 	return (Node);
 }
 
-static void disposeIUnary(INode *Node)
-{
-	IUnary *Inst = (IUnary *) Node;
-	DISPOSE_NODE(Inst->Node);
-}
+#define disposeIUnary disposeINodeImpl
 
 static IBinary *newIBinary(FuelIRBuilder *builder, enum BinaryOp Op, INode *LHS, INode *RHS)
 {
@@ -299,12 +253,7 @@ static IBinary *newIBinary(FuelIRBuilder *builder, enum BinaryOp Op, INode *LHS,
 	return (Node);
 }
 
-static void disposeIBinary(INode *Node)
-{
-	IBinary *Inst = (IBinary *) Node;
-	DISPOSE_NODE(Inst->LHS);
-	DISPOSE_NODE(Inst->RHS);
-}
+#define disposeIBinary disposeINodeImpl
 
 static IPHI *newIPHI(FuelIRBuilder *builder, INode *Val)
 {
@@ -321,18 +270,13 @@ static IPHI *newIPHI(FuelIRBuilder *builder, INode *Val)
 static void disposeIPHI(INode *Node)
 {
 	IPHI *Inst = (IPHI *) Node;
-	DISPOSE_NODE(Inst->Val);
-	INodePtr *x, *e;
-	FOR_EACH_ARRAY(Inst->Args, x, e) {
-		DISPOSE_NODE(*x);
-	}
 	ARRAY_dispose(INodePtr, &Inst->Args);
 }
 
 /* Builder API */
 static void *IRBuilder_AllocNode(FuelIRBuilder *builder, size_t Size)
 {
-	return JSONMemoryPool_Alloc(&builder->mp, Size);
+	return FuelVMMemoryPool_Alloc(&builder->mp, Size);
 }
 
 static INode *newINode(struct FuelIRBuilder *builder, enum IRType Kind)
@@ -348,28 +292,48 @@ static INode *newINode(struct FuelIRBuilder *builder, enum IRType Kind)
 	return (Node);
 }
 
-static void visitInit(FuelIRBuilder *builder)
+static void disposeERROR(INode *Node)
 {
-	JSONMemoryPool_Init(&builder->mp);
-	ARRAY_init(INodePtr, &builder->LocalVar, 0);
-}
-
-static void visitExit(FuelIRBuilder *builder)
-{
-	ARRAY_dispose(INodePtr, &builder->LocalVar);
-	JSONMemoryPool_Delete(&builder->mp);
+	assert(0 && "unreachable");
 }
 
 static void disposeINode(INode *Node)
 {
 	typedef void (*FnNode)(INode *);
 	static FnNode Fn[] = {
+		disposeERROR,
 		disposeBlock,
 #define IR_TYPE_DECL(X) dispose##X,
 		IR_LIST(IR_TYPE_DECL)
 #undef IR_TYPE_DECL
 	};
 	Fn[Node->Kind](Node);
+	Node->Kind = TYPE_IR_ERROR;
+}
+
+static void visitInit(FuelIRBuilder *builder)
+{
+	FuelVMMemoryPool_Init(&builder->mp);
+	ARRAY_init(INodePtr, &builder->LocalVar, 0);
+}
+
+static void PageDelete(char *begin, char *end)
+{
+	INodeImpl *p = (INodeImpl *) begin;
+	INodeImpl *e = (INodeImpl *) end;
+	while (p < e) {
+		INode *Node = (INode *) p;
+		if(Node->Kind != TYPE_IR_ERROR) {
+			disposeINode(Node);
+		}
+		p++;
+	}
+}
+
+static void visitExit(FuelIRBuilder *builder)
+{
+	ARRAY_dispose(INodePtr, &builder->LocalVar);
+	FuelVMMemoryPool_Delete(&builder->mp, PageDelete);
 }
 
 static const struct IRBuilderAPI API = {

@@ -635,11 +635,9 @@ struct KonohaFactory {
 
 	// VirtualMachine
 	KModuleInfo            *VirtualMachineInfo;
-//	struct KVirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
-//	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
-//	void *                (*GetVirtualMachineKMethodFunc)(void);
-	struct KVirtualCode*   (*GetDefaultBootCode)(void);
-	struct KBuilderAPI*  (*GetDefaultBuilderAPI)(void);
+	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
+	struct KVirtualCode*  (*GetDefaultBootCode)(void);
+	struct KBuilderAPI*   (*GetDefaultBuilderAPI)(void);
 
 	/* JSON_API */
 	KModuleInfo *JsonDataInfo;

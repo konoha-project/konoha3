@@ -234,6 +234,7 @@ static void DeleteControlFlowGraph(CFG *cfg)
 		ARRAY_dispose(BlockNodePtr, &node->children);
 		ARRAY_dispose(BlockNodePtr, &node->dfront);
 		ARRAY_dispose(INodePtr, &node->phis);
+		free(node);
 	}
 	ARRAY_dispose(BlockNodePtr, &cfg->BlockNodes);
 	free(cfg);
