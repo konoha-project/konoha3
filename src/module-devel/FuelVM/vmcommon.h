@@ -17,7 +17,10 @@ enum TypeId {
 	TYPE_Method = KType_Method,
 	TYPE_NameSpace = KType_NameSpace,
 	TYPE_Any = KType_0,
-	TYPE_float
+	TYPE_float,
+	TYPE_BoolObj,
+	TYPE_IntObj,
+	TYPE_FloatObj
 };
 
 typedef union SValue {
@@ -57,8 +60,26 @@ static inline ktypeattr_t ToKType(KonohaContext *kctx, enum TypeId Type)
 {
 	if(FloatIsDefined(kctx) && Type == TYPE_float)
 		return KType_float;
+	else if(Type == TYPE_BoolObj)  { return KType_Object; }
+	else if(Type == TYPE_IntObj)   { return KType_Object; }
+	else if(Type == TYPE_FloatObj) { return KType_Object; }
 	return (ktypeattr_t) Type;
 }
 
+static inline enum TypeId ToBoxType(enum TypeId Type)
+{
+	if(Type == TYPE_boolean) { return TYPE_BoolObj; }
+	if(Type == TYPE_int    ) { return TYPE_IntObj;  }
+	if(Type == TYPE_float  ) { return TYPE_FloatObj;}
+	return TYPE_Object;
+}
+
+static inline enum TypeId ToUnBoxType(enum TypeId Type)
+{
+	if(Type == TYPE_BoolObj ) { return TYPE_boolean; }
+	if(Type == TYPE_IntObj  ) { return TYPE_int;     }
+	if(Type == TYPE_FloatObj) { return TYPE_float;   }
+	return TYPE_Object;
+}
 
 #endif /* end of include guard */

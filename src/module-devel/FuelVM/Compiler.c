@@ -474,6 +474,7 @@ static void FuelVM_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt *
 {
 	kMethod *mtd = CallExpr_getMethod(expr);
 	DBG_ASSERT(IS_Method(mtd));
+	enum TypeId Type = ConvertToTypeId(kctx, expr->attrTypeId);
 
 	/*
 	 * [CallExpr] := this.method(arg1, arg2, ...)
@@ -527,11 +528,10 @@ static void FuelVM_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt *
 	}
 
 	L_finally:;
-	INode_setType(Inst, ConvertToTypeId(kctx, expr->attrTypeId));
-	if(mtd->mn == MN_box) { /* boxed value of unbox value must be shifted to OC */
-		asm volatile("int3");
-		((kExprVar *)expr)->attrTypeId = KType_Object;
+	if(mtd->mn == MN_box) {
+		Type = ToBoxType(Type);
 	}
+	INode_setType(Inst, Type);
 	builder->Value = Inst;
 }
 

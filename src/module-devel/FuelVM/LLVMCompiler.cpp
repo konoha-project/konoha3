@@ -351,12 +351,9 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 			builder->CreateBitCast(MtdPtr, GetLLVMType(ID_long), "Method"));
 
 	/* stack_top[0..List.size()] */
-	StoreValueToStack(builder, KClass_(method->typeId), List[0]->getType(),
-			0, Vtop, List[0], "receiver");
-
 	unsigned i;
 	INodePtr *x;
-	FOR_EACH_ARRAY__(Inst->Params, x, i, 2) {
+	FOR_EACH_ARRAY__(Inst->Params, x, i, 1) {
 		ktypeattr_t type = ToKType(kctx, (*x)->Type);
 		Value *V = List[i-1];
 		StoreValueToStack(builder, KClass_(type), V->getType(), i-1, Vtop, V);

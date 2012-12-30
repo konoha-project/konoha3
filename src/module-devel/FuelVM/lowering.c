@@ -301,11 +301,9 @@ static void TraceNode1(INode *Node)
 			ICall *Inst = (ICall *) Node;
 			INode_SetMarked(Node);
 			INodePtr *x;
-			unsigned i = 0;
-			FOR_EACH_ARRAY_(Inst->Params, x, i) {
-				if(i != 0) {
-					INode_SetMarked(*x);
-				}
+			unsigned i;
+			FOR_EACH_ARRAY__(Inst->Params, x, i, 1) {
+				INode_SetMarked(*x);
 			}
 			break;
 		}
@@ -445,6 +443,9 @@ static const char *Type2String(enum TypeId Type)
 		CASE(Method);
 		CASE(NameSpace);
 		CASE(Any);
+		CASE(BoolObj);
+		CASE(IntObj);
+		CASE(FloatObj);
 #undef CASE
 	}
 #ifdef DEBUG_TYPE_ID
@@ -769,9 +770,7 @@ static void EmitNode(ByteCodeWriter *writer, INode *Node)
 				unsigned Dst = RegAllocate(writer, NODE_ID(Inst));
 				INodePtr *Inst0 = ARRAY_n(Inst->Insts, 0);
 				assert(Register_FindById(&writer->RegAllocator, NODE_ID(*Inst0), &LHS) == true);
-				FOR_EACH_ARRAY_(Inst->Insts, x, i) {
-					if(i == 0)
-						continue;
+				FOR_EACH_ARRAY__(Inst->Insts, x, i, 1) {
 					assert(Register_FindById(&writer->RegAllocator, NODE_ID(*x), &RHS) == true);
 					if(Inst->Op == LogicalOr) {
 						EMIT_LIR(writer, LOr, Dst, LHS, RHS);

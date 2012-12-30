@@ -48,7 +48,7 @@ static inline const char *Opcode2String(ByteCode *code)
 #define CONV_Cache(OPCODE, F)      "Cache", CONV_DEFAULT(OPCODE,F)
 #define CONV_IArray(OPCODE, F)     "IAry", CONV_DEFAULT(OPCODE,F)
 #define CONV_TestFunc(OPCODE, F)   "TestF", CONV_DEFAULT(OPCODE,F)
-#define CONV_SValue(OPCODE, F)     "SVal", (((OP##OPCODE *)(code))->F.bits)
+#define CONV_SValue(OPCODE, F)     "SVal", ((unsigned long long) ((OP##OPCODE *)(code))->F.bits)
 #define CONV_uintptr_t(OPCODE, F)  "uline", (((OP##OPCODE *)(code))->F)
 
 #define DUMP(OPCODE, T, F) CONCAT(CONV_, T)(OPCODE, F)
@@ -75,16 +75,6 @@ static inline const char *Opcode2String(ByteCode *code)
 			CONCAT(FMT_, T0) " " CONCAT(FMT_, T1) " " CONCAT(FMT_, T2) " " CONCAT(FMT_, T3) "\n",\
 			index, Opcode2String(code),\
 			DUMP(OPCODE, T0, A0), DUMP(OPCODE, T1, A1), DUMP(OPCODE, T2, A2), DUMP(OPCODE, T3, A3))
-
-#if 0
-#define OP_5(OPCODE, T0, A0, T1, A1, T2, A2, T3, A3, T4, A4) \
-	fprintf(stderr, "%2d: %s "\
-			CONCAT(FMT_, T0) " " CONCAT(FMT_, T1) " " CONCAT(FMT_, T2) " " CONCAT(FMT_, T3) " "\
-			CONCAT(FMT_, T4) "\n",\
-			index, Opcode2String(code),\
-			DUMP(OPCODE, T0, A0), DUMP(OPCODE, T1, A1), DUMP(OPCODE, T2, A2),\
-			DUMP(OPCODE, T3, A3), DUMP(OPCODE, T4, A4))
-#endif
 
 static void dump(ByteCode *base, ByteCode *code, unsigned index)
 {

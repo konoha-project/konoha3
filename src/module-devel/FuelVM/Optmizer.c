@@ -335,13 +335,20 @@ static INode *SimplifyICall(FuelIRBuilder *builder, ICall *Inst)
 	}
 
 	KonohaContext *kctx = builder->Context;
-	KClass *kclass = kMethod_GetReturnType(mtd);
 	unsigned psize = ARRAY_size(Inst->Params) - 1;
 	BEGIN_UnusedStack(lsfp);
 
-	FOR_EACH_ARRAY_(Inst->Params, x, i) {
-		if(i == 0)
-			continue;
+	enum TypeId Type = Inst->base.Type;
+	if(Type == TYPE_BoolObj)       { Type = KType_boolean;}
+	else if(Type == TYPE_IntObj)   { Type = KType_int;    }
+	else if(Type == TYPE_FloatObj) { Type = KType_float;  }
+
+	KClass *kclass = KClass_(ToKType(kctx, Type));
+	kObject *DefObj = KLIB Knull(kctx, kclass);
+	KUnsafeFieldSet(lsfp[K_RTNIDX].asObject, DefObj);
+	lsfp[K_RTNIDX].unboxValue = kObject_Unbox(DefObj);
+
+	FOR_EACH_ARRAY__(Inst->Params, x, i, 1) {
 		IConstant *C = (IConstant *) *x;
 		if(IsUnBoxedType(C->base.Type)) {
 			lsfp[i-1].unboxValue = C->Value.bits;
@@ -350,11 +357,10 @@ static INode *SimplifyICall(FuelIRBuilder *builder, ICall *Inst)
 			lsfp[i-1].unboxValue = kObject_Unbox(C->Value.obj);
 		}
 	}
-	KStackSetMethodAll(lsfp, KLIB Knull(kctx, kclass), Inst->uline, mtd, psize);
+	KStackSetMethodAll(lsfp, DefObj, Inst->uline, mtd, psize);
 	KStackCall(lsfp);
 	END_UnusedStack();
 
-	enum TypeId Type = ConvertToTypeId(kctx, kclass->typeId);
 	if(IsUnBoxedType(Type)) {
 		val.bits = lsfp[K_RTNIDX].unboxValue;
 	} else {
