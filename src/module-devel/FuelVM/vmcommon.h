@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include "../../../include/minikonoha/minikonoha.h"
 #include "../../../include/minikonoha/konoha_common.h"
+#include "../../../include/minikonoha/sugar.h"
 
 #ifndef VMCOMMON_H
 #define VMCOMMON_H
@@ -53,6 +54,9 @@ static inline enum TypeId ConvertToTypeId(KonohaContext *kctx, ktypeattr_t type)
 {
 	if(FloatIsDefined(kctx) && type == KType_float)
 		return TYPE_float;
+	if(type == KType_Symbol) {
+		return TYPE_int;
+	}
 	return (enum TypeId) type;
 }
 

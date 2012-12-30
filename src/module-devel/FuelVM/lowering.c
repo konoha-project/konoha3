@@ -807,7 +807,7 @@ static void EmitNode(ByteCodeWriter *writer, INode *Node)
 				}
 			}
 			KonohaContext *kctx = writer->kctx;
-			kObject *Obj = KLIB Knull(kctx, KClass_(Node->Type));
+			kObject *Obj = KLIB Knull(kctx, KClass_(ToKType(kctx, Node->Type)));
 			EMIT_LIR(writer, Call, ARRAY_size(Inst->Params)-1, Mtd->Value.ptr, Obj, Inst->uline);
 			if(Node->Type != TYPE_void) {
 				unsigned Dst = RegAllocate(writer, NODE_ID(Inst));

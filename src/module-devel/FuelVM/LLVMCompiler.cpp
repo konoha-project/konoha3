@@ -147,13 +147,13 @@ static Value *EmitGlobalVariable(KonohaContext *kctx, Type *Ty, kMethod *mtd)
 static Value *EmitConstant(IRBuilder<> *builder, kObject *obj)
 {
 	Constant *V = static_cast<Constant*>(EmitConstant(builder, (void *) obj));
-	return builder->CreateBitCast(V, GetLLVMType(ID_PtrkObjectVar));
+	return builder->CreateBitCast(V, ToType(ID_PtrkObjectVar));
 }
 
 static Value *EmitConstant(IRBuilder<> *builder, kMethod *mtd)
 {
 	Constant *V = static_cast<Constant*>(EmitConstant(builder, (void *) mtd));
-	return builder->CreateBitCast(V, GetLLVMType(ID_PtrkMethodVar));
+	return builder->CreateBitCast(V, ToType(ID_PtrkMethodVar));
 }
 
 static ValueInfo &GetValueInfoFromParent(LLVMIRBuilder *writer, INode *Node)
@@ -293,7 +293,7 @@ static void StoreValueToStack(IRBuilder<> *builder, enum TypeId Ty, Type *ReqTy,
 
 	Value *Dst = builder->CreateConstInBoundsGEP2_32(Vsfp, Idx, fieldIdx, Name);
 	if(V->getType() == builder->getInt1Ty()) {
-		V = builder->CreateZExt(V, GetLLVMType(ID_long));
+		V = builder->CreateZExt(V, ToType(ID_long));
 	} else if(V->getType() == builder->getDoubleTy()) {
 		Type *Ty = PointerType::get(builder->getDoubleTy(), 0);
 		Dst = builder->CreateBitCast(Dst, Ty);
@@ -329,15 +329,15 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 			EmitConstant(builder, uline), "uline");
 
 	/* stack_top[-4].defaultObject */
-	KClass *NullType = KClass_(Inst->base.Type);
+	KClass *NullType = KClass_(ToKType(kctx, Inst->base.Type));
 	kObject *DefObj  = KLIB Knull(kctx, NullType);
 	Value *DefObjPtr = EmitConstant(builder, DefObj);
-	StoreValueToStack(builder, TYPE_Object, convert_type(kctx, KClass_Object),
+	StoreValueToStack(builder, TYPE_Object, ToLLVMType(TYPE_Object),
 			K_RTNIDX, Vtop, DefObjPtr, "default");
 
 	/* stack_top[-2].calledMethod */
 	StoreValueToStack(builder, TYPE_int, getLongTy(), K_MTDIDX, Vtop,
-			builder->CreateBitCast(MtdPtr, GetLLVMType(ID_long), "Method"));
+			builder->CreateBitCast(MtdPtr, ToType(ID_long), "Method"));
 
 	/* stack_top[0..List.size()] */
 	unsigned i;
@@ -351,7 +351,7 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 
 	Value *FuncPtr;
 	if(method->SourceToken->text == 0) {/* method is maybe 'Native' Method. */
-		Type *FnTy = GetLLVMType(ID_KMethodFunc);
+		Type *FnTy = ToType(ID_KMethodFunc);
 		FuncPtr = EmitGlobalVariable(kctx, FnTy, method);
 	} else {
 		FuncPtr = builder->CreateStructGEP(MtdPtr, kMethodVar_invokeKMethodFunc);
@@ -373,18 +373,18 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 static void EmitRet(LLVMIRBuilder *writer, INode *Node)
 {
 	IRBuilder<> *builder = writer->builder;
-	if(Node) {
-		Value *Ret = GetValue(writer, Node);
-		Type *RetTy = Ret->getType();
-		if(!RetTy->isPointerTy()) {
-			if(RetTy == builder->getInt1Ty()) {
-				Ret = builder->CreateZExt(Ret, GetLLVMType(ID_long));
-			}
-		}
-		builder->CreateRet(Ret);
-	} else {
+	if(Node == 0) {
 		builder->CreateRetVoid();
+		return;
 	}
+	Value *Ret = GetValue(writer, Node);
+	Type *RetTy = Ret->getType();
+	if(!RetTy->isPointerTy()) {
+		if(RetTy == builder->getInt1Ty()) {
+			Ret = builder->CreateZExt(Ret, ToType(ID_long));
+		}
+	}
+	builder->CreateRet(Ret);
 }
 
 static void EmitJump(LLVMIRBuilder *writer, IJump *Node)
@@ -464,11 +464,11 @@ static void EmitNewInst(LLVMIRBuilder *writer, INew *Node)
 	GlobalVariable *G;
 	if((G = GlobalModule->getNamedGlobal("new_kObject")) == 0) {
 		std::vector<Type *> Fields;
-		Fields.push_back(GetLLVMType(ID_PtrKonohaContextVar));
+		Fields.push_back(ToType(ID_PtrKonohaContextVar));
 		Fields.push_back(builder->getInt64Ty());
 		Fields.push_back(builder->getInt8PtrTy());
 		Fields.push_back(builder->getInt64Ty());
-		FunctionType *FnTy = FunctionType::get(GetLLVMType(ID_PtrkObjectVar), Fields, false);
+		FunctionType *FnTy = FunctionType::get(ToType(ID_PtrkObjectVar), Fields, false);
 		G = new GlobalVariable(*GlobalModule, FnTy, true,
 				GlobalValue::ExternalLinkage, NULL, "new_kObject");
 		typedef kObject *(*NewFunc)(KonohaContext *, kArray *, KClass *, uintptr_t);
@@ -578,11 +578,11 @@ static void EmitThrowInst(LLVMIRBuilder *writer, IThrow *Node)
 		} F;
 		F.KRuntime_raise = KLIB KRuntime_raise;
 
-		Args.push_back(GetLLVMType(ID_PtrKonohaContextVar));
-		Args.push_back(GetLLVMType(ID_int));
-		Args.push_back(GetLLVMType(ID_int));
-		Args.push_back(GetLLVMType(ID_PtrkObjectVar));
-		Args.push_back(GetLLVMType(ID_PtrKonohaValueVar));
+		Args.push_back(ToType(ID_PtrKonohaContextVar));
+		Args.push_back(ToType(ID_int));
+		Args.push_back(ToType(ID_int));
+		Args.push_back(ToType(ID_PtrkObjectVar));
+		Args.push_back(ToType(ID_PtrKonohaValueVar));
 		FunctionType *FnTy = FunctionType::get(Type::getVoidTy(LLVM_CONTEXT()), Args, false);
 		G = new GlobalVariable(*GlobalModule, FnTy, true, GlobalValue::ExternalLinkage, NULL, "KLIB_KRuntime_raise");
 
@@ -804,21 +804,22 @@ static void LLVMIRBuilder_visitValue(Visitor *visitor, INode *Node, const char *
 /* Emit Method Specific interface */
 static Function *EmitInternalFunction(KonohaContext *kctx, Module *M, kMethod *mtd)
 {
-	KClass *RetTy = kMethod_GetReturnType(mtd);
+	enum TypeId RetTy = ConvertToTypeId(kctx, kMethod_GetReturnType(mtd)->typeId);
 	std::vector<Type *> ParamTy;
 	kParam *params = kMethod_GetParam(mtd);
 
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 
-	ParamTy.push_back(GetLLVMType(ID_PtrKonohaContextVar));
-	ParamTy.push_back(convert_type(kctx, mtd->typeId));
+	enum TypeId Type = ConvertToTypeId(kctx, mtd->typeId);
+	ParamTy.push_back(ToType(ID_PtrKonohaContextVar));
+	ParamTy.push_back(ToLLVMType(Type));
 	for(unsigned i = 0; i < params->psize; ++i) {
-		Type *Ty = convert_type(kctx, params->paramtypeItems[i].attrTypeId);
-		ParamTy.push_back(Ty);
+		Type = ConvertToTypeId(kctx, params->paramtypeItems[i].attrTypeId);
+		ParamTy.push_back(ToLLVMType(Type));
 	}
 	const char *name = ConstructMethodName(kctx, mtd, &wb, "Impl");
-	FunctionType *FnTy = FunctionType::get(convert_type(kctx, RetTy), ParamTy, false);
+	FunctionType *FnTy = FunctionType::get(ToLLVMType(RetTy), ParamTy, false);
 	Function *F = Function::Create(FnTy, GlobalValue::ExternalLinkage, name, M);
 	Function::arg_iterator args = F->arg_begin();
 	SetName(args++, "kctx");
@@ -840,11 +841,11 @@ static Function *EmitFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Func
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 
 	std::vector<Type *> ParamTy;
-	ParamTy.push_back(GetLLVMType(ID_PtrKonohaContextVar));
-	ParamTy.push_back(GetLLVMType(ID_PtrKonohaValueVar));
+	ParamTy.push_back(ToType(ID_PtrKonohaContextVar));
+	ParamTy.push_back(ToType(ID_PtrKonohaValueVar));
 
 	const char *name = ConstructMethodName(kctx, mtd, &wb, "");
-	FunctionType *FnTy = FunctionType::get(GetLLVMType(ID_void), ParamTy, false);
+	FunctionType *FnTy = FunctionType::get(ToType(ID_void), ParamTy, false);
 	Function *FWrap = Function::Create(FnTy, GlobalValue::ExternalLinkage, name, M);
 	Function::arg_iterator args = FWrap->arg_begin();
 	Value *Vctx = args++;

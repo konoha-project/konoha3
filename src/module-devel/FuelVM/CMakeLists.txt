@@ -48,7 +48,7 @@ if(LLVM_CONFIG)
             )
 
     set(ORIG_CXX_FLAGS ${CMAKE_CXX_FLAGS_${uppercase_CMAKE_BUILD_TYPE}})
-    set(MODULE_CXX_FLAGS "${LLVM_CXXFLAGS} -Wno-variadic-macros ${ORIG_CXX_FLAGS} -UNDEBUG -O0 -g3")
+    set(MODULE_CXX_FLAGS "${LLVM_CXXFLAGS} -Wno-variadic-macros ${ORIG_CXX_FLAGS} -UNDEBUG")
     string(REPLACE "-l" "" tmp ${LLVM_JIT_LIBS})
     string(REPLACE " " ";" LLVMLIBS ${tmp})
     string(REPLACE " " ";" tmp ${LLVM_LDFLAGS})

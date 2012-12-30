@@ -198,18 +198,6 @@ static void LLVMType_Init()
 	LLVMTYPE_MethodPtr = llvm::PointerType::get(MethodTy, 0);
 }
 
-static llvm::Type *convert_type(KonohaContext *kctx, ktypeattr_t type)
-{
-	switch (type) {
-		case KType_void:    return llvm::Type::getVoidTy(LLVM_CONTEXT());
-		case KType_boolean: return getLongTy();
-		case KType_int:     return getLongTy();
-	}
-	if(FloatIsDefined() && type == KType_float)
-		return llvm::Type::getDoubleTy(LLVM_CONTEXT());
-	return LLVMTYPE_ObjectPtr;
-}
-
 static llvm::Type *ToLLVMType(enum TypeId type)
 {
 	switch (type) {
@@ -220,16 +208,6 @@ static llvm::Type *ToLLVMType(enum TypeId type)
 		default: break;
 	}
 	return LLVMTYPE_ObjectPtr;
-}
-
-static llvm::Type *convert_type(KonohaContext *kctx, KClass *kclass)
-{
-	return convert_type(kctx, kclass->typeId);
-}
-
-static inline llvm::Type *GetLLVMType(enum STRUCT_TYPE_ID Id)
-{
-	return ToType(Id);
 }
 
 #endif /* end of include guard */
