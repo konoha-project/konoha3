@@ -357,6 +357,10 @@ static INode *SimplifyICall(FuelIRBuilder *builder, ICall *Inst)
 			lsfp[i-1].unboxValue = kObject_Unbox(C->Value.obj);
 		}
 	}
+	if(Inst->Op == VirtualCall) {
+		kNameSpace *ns = builder->Method->ns;
+		KUnsafeFieldSet(lsfp[K_NSIDX].asNameSpace, ns);
+	}
 	KStackSetMethodAll(lsfp, DefObj, Inst->uline, mtd, psize);
 	KStackCall(lsfp);
 	END_UnusedStack();

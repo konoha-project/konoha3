@@ -339,6 +339,14 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 	StoreValueToStack(builder, TYPE_int, getLongTy(), K_MTDIDX, Vtop,
 			builder->CreateBitCast(MtdPtr, ToType(ID_long), "Method"));
 
+	if(Inst->Op == VirtualCall) {
+		/* stack_top[-2].asNameSpace */
+		kNameSpace *ns = writer->FuelBuilder->Method->ns;
+		Value *NSPtr = EmitConstant(builder, UPCAST(ns));
+		StoreValueToStack(builder, TYPE_Object, NSPtr->getType(),
+				K_NSIDX, Vtop, NSPtr, "NS");
+	}
+
 	/* stack_top[0..List.size()] */
 	unsigned i;
 	INodePtr *x;
@@ -969,7 +977,6 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 	Builder.populateFunctionPassManager(FPM);
 	Builder.populateModulePassManager(MPM);
 
-	writer.Func->dump();
 	FPM.doInitialization();
 	FPM.run(*Wrapper);
 	FPM.run(*writer.Func);

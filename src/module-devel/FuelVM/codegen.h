@@ -131,6 +131,7 @@ typedef struct IMethod {
 	KonohaContext *Context;
 	kMethod       *Method;
 	Block         *EntryBlock;
+	kNameSpace    *ns;
 } IMethod;
 
 /*$ BasicBlock */
@@ -353,6 +354,7 @@ struct FuelIRBuilder {
 	KonohaContext *Context;
 	ARRAY(INodeArrayPtr) VariableTable;
 	struct ControlFlowGraph *cfg;
+	IMethod *Method;
 };
 
 void IRBuilder_Init(FuelIRBuilder *builder, KonohaContext *kctx);

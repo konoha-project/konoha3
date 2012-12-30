@@ -502,18 +502,9 @@ static void FuelVM_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt *
 		}
 
 		INode *MtdObj = CreateObject(BLD(builder), KType_Method, (void *) mtd);
-		if(kMethod_Is(Virtual, mtd)) {
-			Inst = CreateCall(BLD(builder), VirtualCall, stmt->uline);
-			/* set namespace to enable method lookups */
-			INode *Node = CreateObject(BLD(builder), KType_NameSpace, (void *) Stmt_ns(stmt));
-			CallInst_addParam((ICall *)Inst, MtdObj);
-			CallInst_addParam((ICall *)Inst, Node);
-			DBG_P("TODO VirtualCall");
-			asm volatile("int3");
-		} else {
-			Inst = CreateCall(BLD(builder), DefaultCall, stmt->uline);
-			CallInst_addParam((ICall *)Inst, MtdObj);
-		}
+		enum CallOp Op = (kMethod_Is(Virtual, mtd)) ? VirtualCall : DefaultCall;
+		Inst = CreateCall(BLD(builder), Op, stmt->uline);
+		CallInst_addParam((ICall *)Inst, MtdObj);
 
 		for (i = 1; i < argc + 2; i++) {
 			INode *Node = Params[i];
@@ -682,7 +673,8 @@ static struct KVirtualCode *FuelVM_GenerateKVirtualCode(KonohaContext *kctx, kMe
 		}
 	}
 	RESET_GCSTACK();
-	IMethod Mtd = {kctx, mtd, EntryBlock};
+	IMethod Mtd = {kctx, mtd, EntryBlock, ns};
+	BLD(builder)->Method = &Mtd;
 	bool JITCompiled = false;
 	KLIB kMethod_SetFunc(kctx, mtd, 0);
 	union ByteCode *code = IRBuilder_Compile(BLD(builder), &Mtd, option, &JITCompiled);
