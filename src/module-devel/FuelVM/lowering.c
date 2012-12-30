@@ -1083,9 +1083,9 @@ static ByteCode *IRBuilder_Lowering(FuelIRBuilder *builder)
 
 static bool IRBuilder_Optimize(FuelIRBuilder *builder, Block *BB, bool Flag)
 {
+	unsigned i;
 	IRBuilder_RemoveIndirectJumpBlock(builder, BB, Flag); Flag = !Flag;
 	IRBuilder_LinkBlocks(builder, BB, Flag); Flag = !Flag;
-	unsigned i;
 	for(i = 0; i < 2; i++) {
 		IRBuilder_SimplifyStdCall(builder);
 	}
@@ -1093,6 +1093,7 @@ static bool IRBuilder_Optimize(FuelIRBuilder *builder, Block *BB, bool Flag)
 	IRBuilder_LinkBlocks(builder, BB, Flag); Flag = !Flag;
 	for(i = 0; i < 2; i++) {
 		IRBuilder_SimplifyCFG(builder);
+		IRBuilder_RemoveIndirectJumpBlock(builder, BB, Flag); Flag = !Flag;
 		IRBuilder_LinkBlocks(builder, BB, Flag); Flag = !Flag;
 	}
 	return Flag;

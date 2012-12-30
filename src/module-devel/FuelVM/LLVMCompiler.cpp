@@ -627,6 +627,7 @@ static void EmitPHIInst(LLVMIRBuilder *writer, IPHI *Node)
 		INode *block = *(x + 1);
 		Value *Val = GetValue(writer, Node);
 		BasicBlock *BB = GetBlock(writer, (Block *) block);
+		assert(Val != 0);
 		PHI->addIncoming(Val, BB);
 		++x;
 	}

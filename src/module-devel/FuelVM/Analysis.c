@@ -246,12 +246,12 @@ static void printdomtree(BlockNode *node, int level)
 	int i;
 	BlockNodePtr *x, *e;
 	for(i = 0; i < level; i++)
-		fputs("   ", stdout);
-	fprintf(stdout, "%d (", node->block->base.Id);
+		fputs("   ", stderr);
+	fprintf(stderr, "%d (", node->block->base.Id);
 	FOR_EACH_ARRAY(node->dfront, x, e) {
-		fprintf(stdout, "%d ", (*x)->block->base.Id);
+		fprintf(stderr, "%d ", (*x)->block->base.Id);
 	}
-	fprintf(stdout, ")\n");
+	fprintf(stderr, ")\n");
 
 	FOR_EACH_ARRAY(node->children, x, e) {
 		printdomtree(*x, level + 1);
@@ -280,7 +280,7 @@ static void AddIncoming(Block *BB, IPHI *phi, IField *Val)
 	}
 }
 
-static void addPHI(FuelIRBuilder *builder, BlockNode *block, IUpdate *Node)
+static void addPHI(FuelIRBuilder *builder, BlockNode *block, INode *Node)
 {
 	IPHI *phi;
 	INodePtr *x, *e;
@@ -288,16 +288,15 @@ static void addPHI(FuelIRBuilder *builder, BlockNode *block, IUpdate *Node)
 		phi = (IPHI *) *x;
 		INodePtr *Inst, *End;
 		FOR_EACH_ARRAY(phi->Args, Inst, End) {
-			if(*Inst == (INode *) Node->LHS) {
+			if(*Inst == Node) {
 				return;
 			}
 		}
 	}
-	phi = builder->API->newPHI(builder, (INode *) Node->LHS);
+	phi = builder->API->newPHI(builder, Node);
 	phi->base.Parent = (INode *) block->block;
 
-	AddIncoming(block->block, phi, Node->LHS);
-
+	AddIncoming(block->block, phi, (IField *) Node);
 	ARRAY_add(INodePtr, &block->phis, (INode *) phi);
 }
 
@@ -305,12 +304,9 @@ static void InsertPHI(FuelIRBuilder *builder, BlockNode *node)
 {
 	BlockNodePtr *x, *e;
 	INodePtr *Inst, *End;
-	FOR_EACH_ARRAY(node->block->insts, Inst, End) {
-		IUpdate *Update;
-		if((Update = CHECK_KIND(*Inst, IUpdate)) != 0) {
-			FOR_EACH_ARRAY(node->dfront, x, e) {
-				addPHI(builder, *x, Update);
-			}
+	FOR_EACH_ARRAY(builder->LocalVar, Inst, End) {
+		FOR_EACH_ARRAY(node->dfront, x, e) {
+			addPHI(builder, *x, *Inst);
 		}
 	}
 	FOR_EACH_ARRAY(node->children, x, e) {
@@ -433,8 +429,8 @@ static void RewriteNode(INode *Node, ARRAY(INodePtr) *stack)
 			ReplaceValue(&((IUnary *) Node)->Node, stack);
 			break;
 		case IR_TYPE_IBinary:
-			ReplaceValue(&(((IBinary *) Node)->LHS), stack);
-			ReplaceValue(&(((IBinary *) Node)->RHS), stack);
+			ReplaceValue(&((IBinary *) Node)->LHS, stack);
+			ReplaceValue(&((IBinary *) Node)->RHS, stack);
 			break;
 		case IR_TYPE_IPHI:
 			break;
@@ -487,7 +483,7 @@ static void Rename(CFG *cfg, BlockNode *b, ARRAY(INodePtr) *stack)
 
 static void RenamingVariables(CFG *cfg, FuelIRBuilder *builder)
 {
-	unsigned i = 0, size = ARRAY_size(builder->LocalVar);;
+	unsigned i = 0, size = ARRAY_size(builder->LocalVar);
 	ARRAY(INodePtr) *stack = (ARRAY(INodePtr) *) alloca(sizeof(*stack) * size);
 	for(i = 0; i < size; i++) {
 		ARRAY_init(INodePtr, &stack[i], 0);
@@ -514,9 +510,8 @@ static void InsertUndefinedVariables(BlockNode *Node, FuelIRBuilder *builder)
 	FOR_EACH_ARRAY(Node->block->insts, x, e) {
 		IUpdate *Update;
 		if((Update = CHECK_KIND(*x, IUpdate))) {
-			if(Update->LHS->Op == LocalScope) {
+			if(Update->LHS->Op == LocalScope)
 				local[Update->LHS->Id] = Update->LHS->Id;
-			}
 		}
 	}
 
@@ -545,7 +540,6 @@ static void InsertUndefinedVariables(BlockNode *Node, FuelIRBuilder *builder)
 	}
 }
 
-void IRBuilder_DumpFunction(FuelIRBuilder *builder);
 void InsertPHINode(FuelIRBuilder *builder)
 {
 	CFG *cfg = CreateControlFlowGraph(builder);

@@ -278,14 +278,16 @@ static INode *SimplifyICond(FuelIRBuilder *builder, ICond *Inst)
 		if(!CHECK_KIND(*x, IConstant))
 			return NULL;
 	}
+	unsigned i;
 	SValue val = {}; val.bval = true;
+	val.bval = ((IConstant *) *ARRAY_n(Inst->Insts, 0))->Value.bval;
 	if(Op == LogicalAnd) {
-		FOR_EACH_ARRAY(Inst->Insts, x, e) {
+		FOR_EACH_ARRAY__(Inst->Insts, x, i, 1) {
 			IConstant *C = (IConstant *) *x;
 			val.bval = val.bval && C->Value.bval;
 		}
 	} else if(Op == LogicalOr) {
-		FOR_EACH_ARRAY(Inst->Insts, x, e) {
+		FOR_EACH_ARRAY__(Inst->Insts, x, i, 1) {
 			IConstant *C = (IConstant *) *x;
 			val.bval = val.bval || C->Value.bval;
 		}
@@ -343,7 +345,7 @@ static INode *SimplifyICall(FuelIRBuilder *builder, ICall *Inst)
 	else if(Type == TYPE_IntObj)   { Type = KType_int;    }
 	else if(Type == TYPE_FloatObj) { Type = KType_float;  }
 
-	KClass *kclass = KClass_(ToKType(kctx, Type));
+	KClass  *kclass = KClass_(ToKType(kctx, Type));
 	kObject *DefObj = KLIB Knull(kctx, kclass);
 	KUnsafeFieldSet(lsfp[K_RTNIDX].asObject, DefObj);
 	lsfp[K_RTNIDX].unboxValue = kObject_Unbox(DefObj);
