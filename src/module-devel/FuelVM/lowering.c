@@ -318,7 +318,9 @@ static void TraceNode1(INode *Node)
 			break;
 		}
 		CASE(IUpdate) {
-			/* IUpdate Inst is Marked at TraceNode2() */
+			IUpdate *Inst = (IUpdate *) Node;
+			INode_SetMarked(Node);
+			INode_SetMarked(Inst->RHS);
 			break;
 		}
 		CASE(IBranch) {
@@ -387,34 +389,6 @@ static void TraceNode1(INode *Node)
 	}
 }
 
-static void TraceNode2(INode *Node)
-{
-	IUpdate *Inst;
-	if(Node->Unused) {
-		return;
-	}
-	if(INode_IsMarked(Node)) {
-		return;
-	}
-	if((Inst = CHECK_KIND(Node, IUpdate)) == 0) {
-		return;
-	}
-	IField *LHS = Inst->LHS;
-	switch(LHS->Op) {
-		case GlobalScope:
-		case EnvScope:
-			assert(0 && "TODO");
-			break;
-		case FieldScope:
-		case LocalScope:
-			if(INode_IsMarked((INode *)LHS)) {
-				INode_SetMarked(Node);
-				INode_SetMarked(Inst->RHS);
-			}
-			break;
-	}
-}
-
 static void IRBuilder_RemoveUnusedVariable(FuelIRBuilder *builder)
 {
 	BlockPtr *x, *e;
@@ -423,13 +397,6 @@ static void IRBuilder_RemoveUnusedVariable(FuelIRBuilder *builder)
 		INode_SetMarked((INode *)(*x));
 		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
 			TraceNode1(*Inst);
-		}
-	}
-
-	FOR_EACH_ARRAY(builder->Blocks, x, e) {
-		INodePtr *Inst, *End;
-		FOR_EACH_ARRAY((*x)->insts, Inst, End) {
-			TraceNode2(*Inst);
 		}
 	}
 

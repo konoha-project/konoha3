@@ -28,37 +28,37 @@ static inline SValue Div_int_int(SValue arg0, SValue arg1)
 
 static inline SValue Eq_int_int(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Eq(arg0.ival, arg1.ival);
+	SValue val; val.ival = __Eq(arg0.ival, arg1.ival);
 	return val;
 }
 
 static inline SValue Nq_int_int(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Nq(arg0.ival, arg1.ival);
+	SValue val; val.ival = __Nq(arg0.ival, arg1.ival);
 	return val;
 }
 
 static inline SValue Gt_int_int(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Gt(arg0.ival, arg1.ival);
+	SValue val; val.ival = __Gt(arg0.ival, arg1.ival);
 	return val;
 }
 
 static inline SValue Ge_int_int(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Ge(arg0.ival, arg1.ival);
+	SValue val; val.ival = __Ge(arg0.ival, arg1.ival);
 	return val;
 }
 
 static inline SValue Lt_int_int(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Lt(arg0.ival, arg1.ival);
+	SValue val; val.ival = __Lt(arg0.ival, arg1.ival);
 	return val;
 }
 
 static inline SValue Le_int_int(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Le(arg0.ival, arg1.ival);
+	SValue val; val.ival = __Le(arg0.ival, arg1.ival);
 	return val;
 }
 
@@ -88,37 +88,37 @@ static inline SValue Div_int_float(SValue arg0, SValue arg1)
 
 static inline SValue Eq_int_float(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Eq(arg0.ival, arg1.fval);
+	SValue val; val.ival = __Eq(arg0.ival, arg1.fval);
 	return val;
 }
 
 static inline SValue Nq_int_float(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Nq(arg0.ival, arg1.fval);
+	SValue val; val.ival = __Nq(arg0.ival, arg1.fval);
 	return val;
 }
 
 static inline SValue Gt_int_float(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Gt(arg0.ival, arg1.fval);
+	SValue val; val.ival = __Gt(arg0.ival, arg1.fval);
 	return val;
 }
 
 static inline SValue Ge_int_float(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Ge(arg0.ival, arg1.fval);
+	SValue val; val.ival = __Ge(arg0.ival, arg1.fval);
 	return val;
 }
 
 static inline SValue Lt_int_float(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Lt(arg0.ival, arg1.fval);
+	SValue val; val.ival = __Lt(arg0.ival, arg1.fval);
 	return val;
 }
 
 static inline SValue Le_int_float(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Le(arg0.ival, arg1.fval);
+	SValue val; val.ival = __Le(arg0.ival, arg1.fval);
 	return val;
 }
 
@@ -148,37 +148,37 @@ static inline SValue Div_float_int(SValue arg0, SValue arg1)
 
 static inline SValue Eq_float_int(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Eq(arg0.fval, arg1.ival);
+	SValue val; val.ival = __Eq(arg0.fval, arg1.ival);
 	return val;
 }
 
 static inline SValue Nq_float_int(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Nq(arg0.fval, arg1.ival);
+	SValue val; val.ival = __Nq(arg0.fval, arg1.ival);
 	return val;
 }
 
 static inline SValue Gt_float_int(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Gt(arg0.fval, arg1.ival);
+	SValue val; val.ival = __Gt(arg0.fval, arg1.ival);
 	return val;
 }
 
 static inline SValue Ge_float_int(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Ge(arg0.fval, arg1.ival);
+	SValue val; val.ival = __Ge(arg0.fval, arg1.ival);
 	return val;
 }
 
 static inline SValue Lt_float_int(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Lt(arg0.fval, arg1.ival);
+	SValue val; val.ival = __Lt(arg0.fval, arg1.ival);
 	return val;
 }
 
 static inline SValue Le_float_int(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Le(arg0.fval, arg1.ival);
+	SValue val; val.ival = __Le(arg0.fval, arg1.ival);
 	return val;
 }
 
@@ -208,37 +208,37 @@ static inline SValue Div_float_float(SValue arg0, SValue arg1)
 
 static inline SValue Eq_float_float(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Eq(arg0.fval, arg1.fval);
+	SValue val; val.ival = __Eq(arg0.fval, arg1.fval);
 	return val;
 }
 
 static inline SValue Nq_float_float(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Nq(arg0.fval, arg1.fval);
+	SValue val; val.ival = __Nq(arg0.fval, arg1.fval);
 	return val;
 }
 
 static inline SValue Gt_float_float(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Gt(arg0.fval, arg1.fval);
+	SValue val; val.ival = __Gt(arg0.fval, arg1.fval);
 	return val;
 }
 
 static inline SValue Ge_float_float(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Ge(arg0.fval, arg1.fval);
+	SValue val; val.ival = __Ge(arg0.fval, arg1.fval);
 	return val;
 }
 
 static inline SValue Lt_float_float(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Lt(arg0.fval, arg1.fval);
+	SValue val; val.ival = __Lt(arg0.fval, arg1.fval);
 	return val;
 }
 
 static inline SValue Le_float_float(SValue arg0, SValue arg1)
 {
-	SValue val; val.bval = __Le(arg0.fval, arg1.fval);
+	SValue val; val.ival = __Le(arg0.fval, arg1.fval);
 	return val;
 }
 
