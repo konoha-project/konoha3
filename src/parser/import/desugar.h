@@ -56,6 +56,7 @@ static KMETHOD PatternMatch_MethodName(KonohaContext *kctx, KonohaStack *sfp)
 		int returnIdx = -1;
 		kTokenVar *tk = tokenList->TokenVarItems[beginIdx];
 		kSyntax *syn = tk->resolvedSyntaxInfo;
+
 		if(syn->keyword != KSymbol_MemberPattern) {
 			if(syn->keyword == KSymbol_SymbolPattern || syn->precedence_op1 > 0 || syn->precedence_op2 > 0) {
 				kNode_AddParsedObject(kctx, stmt, name, UPCAST(tk));
@@ -1211,16 +1212,14 @@ static ktypeattr_t kNode_GetClassId(KonohaContext *kctx, kNode *stmt, kNameSpace
 	}
 }
 
-static ksymbol_t kNode_GetMethodSymbol(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ksymbol_t kw, kmethodn_t defmn)
+static ksymbol_t kNode_GetMethodName(KonohaContext *kctx, kNode *stmt, kmethodn_t defmn)
 {
-	kToken *tk = (kToken *)kNode_GetObjectNULL(kctx, stmt, kw);
-	//DBG_P(">>>>>>>>>>>>>>> node=%p, kw=%s%s tk=%p", stmt, KSymbol_Fmt2(kw), tk);
-	if(tk == NULL || !IS_Token(tk) || !IS_String(tk->text)) {
-		return defmn;
-	}
-	else {
+	kToken *tk = (kToken *)kNode_GetObjectNULL(kctx, stmt, KSymbol_MemberPattern);
+	if(tk != NULL) {
 		return tk->resolvedSymbol;
 	}
+	tk = (kToken *)kNode_GetObjectNULL(kctx, stmt, KSymbol_SymbolPattern);
+	return (tk == NULL) ? defmn : tk->resolvedSymbol;
 }
 
 static KMETHOD Statement_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
@@ -1242,7 +1241,7 @@ static KMETHOD Statement_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	uintptr_t flag      = kNode_ParseFlag(kctx, stmt, MethodDeclFlag, 0);
 	ktypeattr_t typeId  = kNode_GetClassId(kctx, stmt, ns, KSymbol_("ClassName"), kObject_typeId(ns));
-	kmethodn_t mn       = kNode_GetMethodSymbol(kctx, stmt, ns, KSymbol_SymbolPattern, MN_new);
+	kmethodn_t mn       = kNode_GetMethodName(kctx, stmt, MN_new);
 	kParam *pa          = kNode_GetParamNULL(kctx, stmt, ns);
 	if(KType_Is(Singleton, typeId)) { flag |= kMethod_Static; }
 	if(KType_Is(Final, typeId)) { flag |= kMethod_Final; }
@@ -1329,8 +1328,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	KPARSERM->methodTypeFunc = MethodCallFunc;
 	// Syntax Rule
 	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(TypeDecl), "$TypeDecl $Type $Expr", 0, NULL);
-	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(MethodDecl), "$MethodDecl $Type $Symbol $Param [$Block]", 0, NULL);
-	//kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(MethodDecl), "$MethodDecl $Type [ClassName: $Type \".\"] $Symbol $Param [$Block]", 0, NULL);
+	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(MethodDecl), "$MethodDecl $Type [ClassName: $Type $Member] [$Symbol] $Param [$Block]", 0, NULL);
 	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(if), "\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Expr]", 0, NULL);
 	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(else), "\"else\" $Block", 0, NULL);
 	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(return), "\"return\" [$Expr]", 0, NULL);

@@ -177,7 +177,7 @@ static int ParseAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeni
 //	if(isalnum(tokenizer->source[tok_start+1])) {  // tokenizer, tok_start is older style of tokneizer
 //		int pos = ParseSymbol(kctx, tk, tokenizer, tok_start+1);
 //		if(IS_NOTNULL(tk)) {  // pre-resolved
-//			tk->resolvedSymbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId) | SymbolAttr_Annotation;
+//			tk->resolvedSymbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId) | KSymbolAttr_Annotation;
 //			tk->resolvedSyntaxInfo = kSyntax_(tokenizer->ns, KSymbol_SymbolPattern);
 //		}
 //		KReturnUnboxValue(pos - tok_start);
