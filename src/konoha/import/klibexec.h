@@ -581,6 +581,7 @@ static void KProtoMap_Free(KonohaContext *kctx, KProtoMap* p)
 	p->refc--;
 	if(p->refc == 0) {
 		KDict_Free(kctx, &(p->dict));
+		KFree(p, sizeof(KProtoMap));
 	}
 }
 

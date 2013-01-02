@@ -496,6 +496,7 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 				}
 			}
 		}
+		free(simpleBuffer.buffer);
 		fclose(fp);
 	}
 	return isSuccessfullyLoading;
