@@ -575,7 +575,7 @@ typedef enum {
 	ParseExpressionOption = 0,
 	ParseMetaPatternOption = 1,
 	OnlyPatternMatch = 1 << 2,
-	ParseBlockOption = 1 << 3,
+	ParseBlockOption = 1 << 3
 } ParseOption;
 
 struct KBuilder;
