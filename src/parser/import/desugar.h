@@ -28,7 +28,6 @@ static KMETHOD PatternMatch_Expression(KonohaContext *kctx, KonohaStack *sfp)
 	int returnIdx = beginIdx;
 	kNode *expr = ParseNewNode(kctx, kNode_ns(stmt), tokenList, &returnIdx, endIdx, ParseExpressionOption|OnlyPatternMatch, NULL);
 	if(expr != K_NULLNODE) {
-		//KdumpNode(kctx, expr);
 		kNode_AddParsedObject(kctx, stmt, name, UPCAST(expr));
 	}
 	KReturnUnboxValue(returnIdx);
@@ -59,13 +58,6 @@ static KMETHOD PatternMatch_MethodName(KonohaContext *kctx, KonohaStack *sfp)
 			kNode_AddParsedObject(kctx, stmt, name, UPCAST(tk));
 			returnIdx = beginIdx + 1;
 		}
-//		kSyntax *syn = tk->resolvedSyntaxInfo;
-//		if(syn->keyword != KSymbol_MemberPattern) {
-//			if(syn->keyword == KSymbol_SymbolPattern || syn->precedence_op1 > 0 || syn->precedence_op2 > 0) {
-//				kNode_AddParsedObject(kctx, stmt, name, UPCAST(tk));
-//				returnIdx = beginIdx + 1;
-//			}
-//		}
 		KReturnUnboxValue(returnIdx);
 	}
 	else {
@@ -355,7 +347,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 /* Expression TyCheck */
 
-static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, size_t start)
+static kString *ResolveStringEscapeSequenceNULL(KonohaContext *kctx, kToken *tk, size_t start)
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
@@ -366,8 +358,7 @@ static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, si
 		int ch = *text;
 		if(ch == '\\' && *(text+1) != '\0') {
 			switch (*(text+1)) {
-			/*
-			 * compatible with ECMA-262
+			/* compatible with ECMA-262
 			 * http://ecma-international.org/ecma-262/5.1/#sec-7.8.4
 			 */
 			case 'b':  ch = '\b'; text++; break;
@@ -399,7 +390,7 @@ static KMETHOD TypeCheck_TextLiteral(KonohaContext *kctx, KonohaStack *sfp)
 	if(kToken_Is(RequiredReformat, tk)) {
 		const char *escape = strchr(kString_text(text), '\\');
 		DBG_ASSERT(escape != NULL);
-		text = kToken_ResolveEscapeSequence(kctx, tk, escape - kString_text(text));
+		text = ResolveStringEscapeSequenceNULL(kctx, tk, escape - kString_text(text));
 		if(text == NULL) {
 			KReturn(ERROR_UndefinedEscapeSequence(kctx, stmt, tk));
 		}
@@ -438,21 +429,27 @@ static KMETHOD TypeCheck_IntLiteral(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD TypeCheck_AndOperator(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
-	if(SUGAR TypeCheckNodeAt(kctx, expr, 1, ns, KClass_Boolean, 0) != K_NULLNODE) {
-		if(SUGAR TypeCheckNodeAt(kctx, expr, 2, ns, KClass_Boolean, 0) != K_NULLNODE) {
-			KReturn(kNode_Type(kctx, expr, KNode_And, KType_boolean));
+	kNode *returnNode = TypeCheckNodeAt(kctx, expr, 1, ns, KClass_Boolean, 0);
+	if(!kNode_IsError(returnNode)) {
+		returnNode = TypeCheckNodeAt(kctx, expr, 2, ns, KClass_Boolean, 0);
+		if(!kNode_IsError(returnNode)) {
+			returnNode = kNode_Type(kctx, expr, KNode_And, KType_boolean);
 		}
 	}
+	KReturn(returnNode);
 }
 
 static KMETHOD TypeCheck_OrOperator(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
-	if(SUGAR TypeCheckNodeAt(kctx, expr, 1, ns, KClass_Boolean, 0) != K_NULLNODE) {
-		if(SUGAR TypeCheckNodeAt(kctx, expr, 2, ns, KClass_Boolean, 0) != K_NULLNODE) {
-			KReturn(kNode_Type(kctx, expr, KNode_Or, KType_boolean));
+	kNode *returnNode = TypeCheckNodeAt(kctx, expr, 1, ns, KClass_Boolean, 0);
+	if(!kNode_IsError(returnNode)) {
+		returnNode = TypeCheckNodeAt(kctx, expr, 2, ns, KClass_Boolean, 0);
+		if(!kNode_IsError(returnNode)) {
+			returnNode = kNode_Type(kctx, expr, KNode_Or, KType_boolean);
 		}
 	}
+	KReturn(returnNode);
 }
 
 static kbool_t kNode_IsGetter(kNode *expr)
@@ -682,7 +679,7 @@ static kNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kNode *exp
 		KClass* paramType = ResolveTypeVariable(kctx, KClass_(pa->paramtypeItems[i].attrTypeId), thisClass);
 		int tycheckPolicy = TypeCheckPolicy_(pa->paramtypeItems[i].attrTypeId);
 		kNode *texpr = SUGAR TypeCheckNodeAt(kctx, expr, n, ns, paramType, tycheckPolicy);
-		if(kNode_IsError(texpr) /* texpr = K_NULLNODE */) {
+		if(kNode_IsError(texpr)) {
 			SUGAR MessageNode(kctx, expr, NULL, ns, InfoTag, "%s.%s%s accepts %s at the parameter %d", kMethod_Fmt3(mtd), KClass_text(paramType), (int)i+1);
 			return texpr;
 		}
@@ -774,9 +771,6 @@ static KMETHOD TypeCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp)
 	kNode *texpr = K_NULLNODE;
 	kMethod *mtd = expr->NodeList->MethodItems[0];
 	if(!IS_Method(mtd)) {
-		KDump(expr);
-		DBG_P("@");
-		KDump(kNode_At(expr, 1));
 		texpr = SUGAR TypeCheckNodeAt(kctx, expr, 1, ns, KClass_INFER, 0);
 		mtd = (kNode_IsError(texpr)) ? NULL : LookupMethod(kctx, expr, ns);
 	}

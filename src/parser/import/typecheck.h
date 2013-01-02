@@ -72,7 +72,7 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn0, kNode *expr, kNameSpa
 	kObject *reqType = KLIB Knull(kctx, reqtc);
 	int varsize = ns->genv->localScope.varsize;
 	expr->stackbase = varsize;
-	DBG_P(">>>>>>>>>> #stackbase = %d", varsize);
+//	DBG_P(">>>>>>>>>> #stackbase = %d", varsize);
 //	if(KFlag_Is(kshortflag_t, syn->flag, SYNFLAG_CallNode)) {
 //		KPushMethodCall(gma);
 //		KPushMethodCall(gma);
@@ -88,9 +88,6 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn0, kNode *expr, kNameSpa
 				if(!kNode_Is(OpenBlock, expr)) {
 					ns->genv->localScope.varsize = varsize;
 				}
-//				if(!kNode_IsValue(texpr)) {
-//					texpr->stackbase = varsize;
-//				}
 				return texpr;
 			}
 		}
@@ -98,7 +95,9 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn0, kNode *expr, kNameSpa
 		syn = syn->parentSyntaxNULL;
 	}
 	if(!kNode_IsError(expr)) {
+		KDump(expr);
 		expr = SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "undefined typing: %s%s %s", KSymbol_Fmt2(syn0->keyword), KToken_t(expr->KeyOperatorToken));
+		DBG_ASSERT(kctx == NULL);
 	}
 	ns->genv->localScope.varsize = varsize;
 	return expr;
@@ -207,7 +206,7 @@ static kNode* TypeCheckNodeAt(KonohaContext *kctx, kNode *node, size_t pos, kNam
 		KFieldSet(node->NodeList, node->NodeList->NodeItems[pos], texpr);
 		KFieldSet(texpr, texpr->Parent, node);
 	}
-	return expr;
+	return texpr;
 }
 
 static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t symbol, kNameSpace *ns, KClass *reqClass, int pol)
@@ -270,9 +269,7 @@ static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, 
 //		KDump(kNode_At(block, size));
 		kNode *stmt = TypeCheckNodeList(kctx, block->NodeList, size, ns, reqc);
 //		KDump(stmt);
-		if(!kNode_IsError(stmt)) {
-			kNode_Type(kctx, block, KNode_Block, stmt->attrTypeId);
-		}
+		kNode_Type(kctx, block, KNode_Block, stmt->attrTypeId == KType_var ? KType_void : stmt->attrTypeId);
 	}
 	else {
 		if(block != K_NULLBLOCK) {
