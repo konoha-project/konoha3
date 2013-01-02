@@ -80,6 +80,24 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer));
 }
 
+//## @Const method boolean Object.opEQ(Object x);
+static KMETHOD Object_opEQ(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kObject *self = sfp[0].asObject;
+	kObject *that = sfp[1].asObject;
+	KClass *ct = kObject_class(self);
+	KReturnUnboxValue(ct->compareObject(self, that) == 0);
+}
+
+//## @Const method boolean Object.opNEQ(Object x);
+static KMETHOD Object_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kObject *self = sfp[0].asObject;
+	kObject *that = sfp[1].asObject;
+	KClass *ct = kObject_class(self);
+	KReturnUnboxValue(ct->compareObject(self, that) != 0);
+}
+
 //## @Const method Object Boolean.box();
 static KMETHOD Boolean_box(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -307,6 +325,8 @@ static void LoadDefaultMethod(KonohaContext *kctx, kNameSpace *ns)
 {
 	int FN_x = KFieldName_("x");
 	KDEFINE_METHOD MethodData[] = {
+		_Public|_Im|_Const|_Virtual, _F(Object_opEQ),  KType_boolean, KType_Object, KKMethodName_("=="), 1, KType_Object, FN_x,
+		_Public|_Im|_Const|_Virtual, _F(Object_opNEQ), KType_boolean, KType_Object, KKMethodName_("!="), 1, KType_Object, FN_x,
 		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn|_Virtual, _F(Object_to), KType_Object, KType_Object, KKMethodName_("to"), 0,
 		_Public|_Im|_Const|_Virtual, _F(Object_toString), KType_String, KType_Object, KMethodName_To(KType_String), 0,
 		_Public|_Im|_Const, _F(Boolean_toString), KType_String, KType_boolean, KMethodName_To(KType_String), 0,
