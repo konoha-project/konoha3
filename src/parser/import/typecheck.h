@@ -237,8 +237,6 @@ static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t sy
 	return NULL; //error
 }
 
-/* ------------------------------------------------------------------------ */
-
 static kNode* TypeCheckNodeList(KonohaContext *kctx, kArray *nodeList, size_t n, kNameSpace *ns, KClass *reqc)
 {
 	kNode *stmt = nodeList->NodeItems[n];
@@ -261,6 +259,9 @@ static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, 
 	}
 	if(size >= 0) {
 		kNode *stmt = TypeCheckNodeList(kctx, block->NodeList, size, ns, reqc);
+		if(kNode_IsError(stmt)) {
+			return stmt;
+		}
 		kNode_Type(kctx, block, KNode_Block, stmt->attrTypeId == KType_var ? KType_void : stmt->attrTypeId);
 	}
 	else {
