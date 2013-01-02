@@ -232,6 +232,12 @@ static kbool_t AppendJsonArray(KonohaContext *kctx, struct JsonBuf *jsonbuf, str
 }
 
 // -------------------------------------------------------------------------
+static void UnloadJsonModule(KonohaContext *kctx)
+{
+	JSONMemoryPool *mp = (JSONMemoryPool *)(PLATAPI JsonHandler);
+	JSONMemoryPool_Delete(mp);
+	free(mp);
+}
 
 kbool_t LoadJsonModule(KonohaFactory *factory, ModuleType type)
 {
@@ -240,6 +246,7 @@ kbool_t LoadJsonModule(KonohaFactory *factory, ModuleType type)
 	};
 	factory->JsonDataInfo         = &ModuleInfo;
 	factory->IsJsonType           = IsJsonType;
+	factory->UnloadJsonModule     = UnloadJsonModule;
 	factory->CreateJson           = CreateJson;
 	factory->ParseJson            = ParseJson;
 	factory->FreeJson             = FreeJson;
