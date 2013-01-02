@@ -1,19 +1,24 @@
 #include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
 #include <llvm/IRBuilder.h>
+#include <llvm/Intrinsics.h>
+#include <llvm/DataLayout.h>
+#include <llvm/Pass.h>
+#include <llvm/PassManager.h>
+#include <llvm/Support/Host.h>
+#include <llvm/Support/DynamicLibrary.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/ManagedStatic.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/ExecutionEngine/Interpreter.h>
-#include <llvm/DataLayout.h>
-#include <llvm/Pass.h>
-#include <llvm/PassManager.h>
+#include <llvm/ExecutionEngine/JITMemoryManager.h>
 #include <llvm/Analysis/Verifier.h>
 #include <llvm/Analysis/Passes.h>
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
 #include <vector>
+#include <map>
 #include <string>
+#include <iostream>
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/konoha_common.h>
@@ -25,7 +30,9 @@
 #include "FuelVM.h"
 #include "LLVMType.h"
 
-#define USE_LLVMIR_DUMP 1
+//#define USE_LLVMIR_DUMP 1
+#include "KonohaRuntimeLib.h"
+
 using namespace llvm;
 
 namespace FuelVM {
@@ -59,20 +66,40 @@ typedef struct LLVMIRBuilder {
 
 static Module *GlobalModule = 0;
 static ExecutionEngine *GlobalEngine = 0;
+static std::map<kMethod *, Function *> CompiledCode;
+
+template<typename T>
+static void *void_cast(T *ptr) {
+	union { void *ptr; T *val; } Val;
+	Val.val = ptr;
+	return Val.ptr;
+}
 
 static void InitLLVM()
 {
 	if(GlobalModule)
 		return;
 	InitializeNativeTarget();
+	InitializeNativeTargetAsmPrinter();
 	GlobalModule = new Module("LLVM", getGlobalContext());
+	GlobalModule->setTargetTriple(LLVM_HOSTTRIPLE);
 	std::string Error;
 	GlobalEngine = EngineBuilder(GlobalModule)
 		.setEngineKind(EngineKind::JIT)
+		//.setUseMCJIT(true)
+		.setJITMemoryManager(JITMemoryManager::CreateDefaultMemManager())
 		.setErrorStr(&Error).create();
+
 	if(Error != "") {
 		fprintf(stderr, "[%s:%d] %s", __FILE__, __LINE__, Error.c_str());
 		abort();
+	}
+	if(sys::DynamicLibrary::LoadLibraryPermanently("FuelVM" K_OSDLLEXT, &Error)) {
+		fprintf(stderr, "%s\n", Error.c_str());
+	}
+	/*XXX LLVM need to dlopen libm for executing math intrinsics */
+	if(sys::DynamicLibrary::LoadLibraryPermanently("libm" K_OSDLLEXT, &Error)) {
+		fprintf(stderr, "%s\n", Error.c_str());
 	}
 	LLVMType_Init();
 }
@@ -86,6 +113,161 @@ extern "C" void ExitLLVM()
 	llvm_shutdown();
 }
 
+struct IntrinsicInfo {
+	const char *name;
+	unsigned len;
+	unsigned ParamSize;
+};
+
+static IntrinsicInfo MathIntrinsic[] = {
+#define DEFINE_INTRINSIC(IDX, X, N) {#X, sizeof(#X)-1, N}
+	DEFINE_INTRINSIC( 0, cos, 1),
+	DEFINE_INTRINSIC( 1, exp, 1),
+	DEFINE_INTRINSIC( 2, exp2, 1),
+	DEFINE_INTRINSIC( 3, fabs, 1),
+	DEFINE_INTRINSIC( 4, floor, 1),
+	DEFINE_INTRINSIC( 5, log, 1),
+	DEFINE_INTRINSIC( 6, log10, 1),
+	DEFINE_INTRINSIC( 7, log2, 1),
+	DEFINE_INTRINSIC( 8, sqrt, 1),
+	DEFINE_INTRINSIC( 9, pow, 2),
+	DEFINE_INTRINSIC(10, powi, 2)
+};
+
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
+static Function *CreateMathIntrinsic(unsigned Idx)
+{
+	std::vector<Type*> List;
+	Type *FloatTy = Type::getDoubleTy(getGlobalContext());
+	Type *IntTy   = ToLLVMType(TYPE_int);
+	List.push_back(FloatTy);
+#define CASE_INTRINSIC(N, X, P) case N:\
+	return Intrinsic::getDeclaration(GlobalModule, Intrinsic::X, List)
+	switch(Idx) {
+		CASE_INTRINSIC( 0, cos, 1);
+		CASE_INTRINSIC( 1, exp, 1);
+		CASE_INTRINSIC( 2, exp2, 1);
+		CASE_INTRINSIC( 3, fabs, 1);
+		CASE_INTRINSIC( 4, floor, 1);
+		CASE_INTRINSIC( 5, log, 1);
+		CASE_INTRINSIC( 6, log10, 1);
+		CASE_INTRINSIC( 7, log2, 1);
+		CASE_INTRINSIC( 8, sqrt, 1);
+		CASE_INTRINSIC( 9, pow, 2);
+		case 10:
+			List.push_back(IntTy);
+			return Intrinsic::getDeclaration(GlobalModule, Intrinsic::powi, List);
+		default:
+			break;
+	}
+	return 0;
+}
+
+static Value *GetValue(LLVMIRBuilder *writer, INode *Node);
+static void SetValue(LLVMIRBuilder *writer, INode *Node, Value *Val, bool Undef);
+
+static bool EmitMathAPI(LLVMIRBuilder *writer, ICall *Inst, kMethod *mtd, std::vector<Value *> &List)
+{
+	KonohaContext *kctx = writer->FuelBuilder->Context;
+
+	if(KClass_(mtd->typeId) != writer->FuelBuilder->ClassInfo.cMath)
+		return false;
+#define METHOD_NAME(INFO) KLIB Ksymbol(kctx, (INFO).name, (INFO).len, StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
+	for(unsigned i = 0; i < ARRAY_SIZE(MathIntrinsic); i++) {
+		if(mtd->mn == METHOD_NAME(MathIntrinsic[i]) &&
+				ARRAY_size(Inst->Params) == MathIntrinsic[i].ParamSize + 2) {
+			Value *Val;
+			Function *F = CreateMathIntrinsic(i);
+			if(MathIntrinsic[i].ParamSize == 1) {
+				Val = writer->builder->CreateCall(F, List[1]);
+			} else {
+				Val = writer->builder->CreateCall2(F, List[1], List[2]);
+			}
+			SetValue(writer, ToINode(Inst), Val, false);
+			return true;
+		}
+	}
+	return false;
+}
+
+static Value *GetFieldRef(LLVMIRBuilder *writer, IField *Inst);
+static Value *GetArrayRef(LLVMIRBuilder *writer, ICall *Inst, std::vector<Value *> &List);
+static void EmitWriteBarrier(LLVMIRBuilder *writer, Value *Parent, Value *OldRef, Value *New);
+
+static bool IsCharSequence(kMethod *mtd)
+{
+	return mtd->typeId == KType_Array || mtd->typeId == KType_String;
+}
+
+static bool EmitKonohaAPI(LLVMIRBuilder *writer, ICall *Inst, kMethod *mtd, std::vector<Value *> &List)
+{
+	IRBuilder<> *builder = writer->builder;
+	KonohaContext *kctx = writer->FuelBuilder->Context;
+
+	IField Node;
+	Node.base.Type = Inst->base.Type;
+	Node.Node = *(ARRAY_n(Inst->Params, 1));
+	Node.FieldIndex = mtd->delta;
+
+	/* Getter/Setter */
+	if(mtd->typeId == KType_Array && mtd->mn == KKMethodName_("get")) {
+		Value *Ref = GetArrayRef(writer, Inst, List);
+		Value *Val = builder->CreateLoad(Ref);
+		SetValue(writer, ToINode(Inst), Val, false);
+		return true;
+	}
+	if(mtd->typeId == KType_Array && mtd->mn == KKMethodName_("set")) {
+		Value *Ref = GetArrayRef(writer, Inst, List);
+		Value *Val = List[2];
+		EmitWriteBarrier(writer, List[0], Ref, Val);
+		builder->CreateStore(Val, Ref);
+		return true;
+	}
+	if(IsCharSequence(mtd) && mtd->mn == KKMethodName_("getSize")) {
+		Value *Val = GetValue(writer, Node.Node);
+		Val = builder->CreateBitCast(Val, ToType(ID_kCharSequence));
+		Val = builder->CreateStructGEP(Val, kCharSequence_bytesize);
+		Val = builder->CreateLoad(Val);
+		if(mtd->typeId == KType_Array) {
+			Val = builder->CreateSDiv(Val, builder->getInt64(sizeof(void*)));
+		}
+		SetValue(writer, ToINode(Inst), Val, false);
+		return true;
+	}
+	if(!KMethodName_IsGetter(mtd->mn) && !KMethodName_IsSetter(mtd->mn)) {
+		return false;
+	}
+
+	KClass *kclass = KClass_(ToKType(kctx, Node.Node->Type));
+	ktypeattr_t type = ToKType(kctx, Inst->base.Type);
+	Value *Ref = NULL;
+
+	if(Node.FieldIndex >= kclass->fieldsize) {
+		/* case prototype */
+		return false;
+	}
+	for(size_t i = 0; i < kclass->fieldsize; i++) {
+		if(type == kclass->fieldItems[i].attrTypeId && i == Node.FieldIndex) {
+			Ref = GetFieldRef(writer, &Node);
+			break;
+		}
+	}
+	if(Ref != NULL) {
+		if(KMethodName_IsGetter(mtd->mn)) {
+			Value *Val = builder->CreateLoad(Ref);
+			SetValue(writer, ToINode(Inst), Val, false);
+		}
+		else if(KMethodName_IsSetter(mtd->mn)) {
+			INode *RHS = *(ARRAY_n(Inst->Params, 2));
+			Value *Val = GetValue(writer, RHS);
+			EmitWriteBarrier(writer, List[0], Ref, Val);
+			builder->CreateStore(Val, Ref);
+		}
+		return true;
+	}
+	return false;
+}
+
 static const char *ConstructMethodName(KonohaContext *kctx, kMethod *mtd, KBuffer *wb, const char *suffix)
 {
 	KClass *kclass = KClass_(mtd->typeId);
@@ -96,7 +278,10 @@ static const char *ConstructMethodName(KonohaContext *kctx, kMethod *mtd, KBuffe
 
 static Value *EmitConstant(IRBuilder<> *builder, bool bval)
 {
-	return builder->getInt1(bval);
+	if(sizeof(void *) == 4)
+		return builder->getInt32((int)bval);
+	else
+		return builder->getInt64((int)bval);
 }
 
 static Value *EmitConstant(IRBuilder<> *builder, int ival)
@@ -147,9 +332,9 @@ static Value *EmitGlobalVariable(KonohaContext *kctx, Type *Ty, kMethod *mtd)
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	const char *name = ConstructMethodName(kctx, mtd, &wb, "_Native");
-	union { void *ptr; KMethodFunc func; } Val;
-	Val.func = mtd->invokeKMethodFunc;
-	Value *G = EmitGlobalVariable(Ty, name, Val.ptr);
+	void *addr = void_cast(mtd->invokeKMethodFunc);
+	sys::DynamicLibrary::AddSymbol(name, addr);
+	Value *G = EmitGlobalVariable(Ty, name, addr);
 	KLIB KBuffer_Free(&wb);
 	return G;
 }
@@ -185,6 +370,9 @@ static void SetValue(LLVMIRBuilder *writer, INode *Node, Value *Val, bool IsUnde
 		Value *OldVal = OldInfo.first();
 		if(OldVal && OldInfo.second()) {
 			OldVal->replaceAllUsesWith(Val);
+			if(Argument *A = cast<Argument>(OldVal)) {
+				delete A;
+			}
 		}
 		Node->Unused = 0;
 	}
@@ -195,14 +383,14 @@ static void SetValue(LLVMIRBuilder *writer, INode *Node, Value *Val, bool IsUnde
 
 static BasicBlock *GetBlock(LLVMIRBuilder *writer, Block *Target)
 {
-	ValueInfo &Info = GetValueInfoFromParent(writer, ToINode(Target));
+	ValueInfo &Info = GetValueInfoFromParent(writer, (INode *)Target);
 	assert(Info.second() == false);
 	return (BasicBlock *) Info.first();
 }
 
 static void SetBlock(LLVMIRBuilder *writer, Block *Target, BasicBlock *BB)
 {
-	SetValue(writer, ToINode(Target), (Value *) BB);
+	SetValue(writer, (INode *)Target, (Value *) BB);
 }
 
 static void SetConstant(LLVMIRBuilder *writer, INode *Node, SValue Val)
@@ -327,9 +515,28 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 	KonohaContext *kctx = writer->kctx;
 	IRBuilder<> *builder = writer->builder;
 	kMethod *method = (kMethod *) Mtd->Value.ptr;
-	Value *MtdPtr  = EmitConstant(builder, method);
+
+	if(EmitMathAPI(writer, Inst, method, List)) {
+		return;
+	}
+
+	if(EmitKonohaAPI(writer, Inst, method, List)) {
+		return;
+	}
 
 	Value *Vctx = GetContext(writer);
+
+	if(Inst->Op != VirtualCall) {
+		if(Function *F = CompiledCode[method]) {
+			List.insert(List.begin(), Vctx);
+			Value *Ret = builder->CreateCall(F, List);
+			if(Inst->base.Type != TYPE_void)
+				SetValue(writer, ToINode(Inst), Ret);
+			return;
+		}
+	}
+
+	Value *MtdPtr = EmitConstant(builder, method);
 	Value *Vsfp = GetStackTop(writer);
 	Value *Vtop = PrepareCallStack(writer, Vsfp);
 
@@ -339,15 +546,11 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 			EmitConstant(builder, uline), "uline");
 
 	/* stack_top[-4].defaultObject */
-	KClass *NullType = KClass_(ToKType(kctx, Inst->base.Type));
+	KClass *NullType = KClass_(ToKType(kctx, ToUnBoxType(Inst->base.Type)));
 	kObject *DefObj  = KLIB Knull(kctx, NullType);
 	Value *DefObjPtr = EmitConstant(builder, DefObj);
 	StoreValueToStack(builder, TYPE_Object, ToLLVMType(TYPE_Object),
 			K_RTNIDX, Vtop, DefObjPtr, "default");
-
-	/* stack_top[-2].calledMethod */
-	StoreValueToStack(builder, TYPE_int, getLongTy(), K_MTDIDX, Vtop,
-			builder->CreateBitCast(MtdPtr, ToType(ID_long), "Method"));
 
 	if(Inst->Op == VirtualCall) {
 		/* stack_top[-2].asNameSpace */
@@ -355,7 +558,28 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 		Value *NSPtr = EmitConstant(builder, UPCAST(ns));
 		StoreValueToStack(builder, TYPE_Object, NSPtr->getType(),
 				K_NSIDX, Vtop, NSPtr, "NS");
+		GlobalVariable *G;
+		if((G = GlobalModule->getNamedGlobal("FuelVM_LookupMethod")) == 0) {
+			std::vector<Type *> Fields;
+			Type *MethodTy = ToType(ID_PtrkMethodVar);
+			Type *ObjectTy = ToType(ID_PtrkObjectVar);
+			Fields.push_back(ToType(ID_PtrKonohaContextVar));
+			Fields.push_back(ObjectTy);
+			Fields.push_back(MethodTy);
+			Fields.push_back(ObjectTy);
+			FunctionType *FnTy = FunctionType::get(MethodTy, Fields, false);
+			G = new GlobalVariable(*GlobalModule, FnTy, true,
+					GlobalValue::ExternalLinkage, NULL, "FuelVM_LookupMethod");
+			void *ptr = void_cast(FuelVM_LookupMethod);
+			GlobalEngine->addGlobalMapping(G, ptr);
+		}
+		MtdPtr = builder->CreateCall4(G, Vctx, List[0], MtdPtr, NSPtr);
 	}
+
+	/* stack_top[-2].calledMethod */
+	StoreValueToStack(builder, TYPE_int, getLongTy(), K_MTDIDX, Vtop,
+			builder->CreatePtrToInt(MtdPtr, ToType(ID_long), "Method"));
+
 
 	/* stack_top[0..List.size()] */
 	unsigned i;
@@ -368,7 +592,8 @@ static void EmitCall(LLVMIRBuilder *writer, ICall *Inst, IConstant *Mtd, std::ve
 	}
 
 	Value *FuncPtr;
-	if(method->SourceToken->text == 0) {/* method is maybe 'Native' Method. */
+	if(Inst->Op != VirtualCall && method->SourceToken->text == 0) {
+		/* method is maybe 'Native' Method. */
 		Type *FnTy = ToType(ID_KMethodFunc);
 		FuncPtr = EmitGlobalVariable(kctx, FnTy, method);
 	} else {
@@ -419,57 +644,25 @@ static Value *ToBoolValue(IRBuilder<> *builder, Value *Val)
 	}
 	return Val;
 }
+static Value *ToIntValueIfBool(IRBuilder<> *builder, Value *Val)
+{
+	if(Val->getType() == builder->getInt1Ty()) {
+		Val = builder->CreateZExt(Val, ToType(ID_long));
+	}
+	return Val;
+}
 static Value *GetBoolValue(LLVMIRBuilder *writer, INode *Node)
 {
 	return ToBoolValue(writer->builder, GetValue(writer, Node));
 }
 
-static void EmitCondBranch(LLVMIRBuilder *writer, IBranch *Inst, ICond *Cond, int IsTopDecl)
-{
-	INodePtr *x, *e;
-	BasicBlock *ThenBB;
-	BasicBlock *ElseBB;
-	if(Cond->Op == LogicalOr) {
-		ThenBB = GetBlock(writer, Inst->ThenBB); ElseBB = GetBlock(writer, Inst->ElseBB);
-	} else {
-		ThenBB = GetBlock(writer, Inst->ElseBB); ElseBB = GetBlock(writer, Inst->ThenBB);
-	}
-
-	IRBuilder<> *builder = writer->builder;
-	FOR_EACH_ARRAY(Cond->Insts, x, e) {
-		if(CHECK_KIND(*x, ICond) != 0) {
-			EmitCondBranch(writer, Inst, (ICond *) *x, 0);
-			continue;
-		}
-
-		BasicBlock *BB = BasicBlock::Create(getGlobalContext(), "BB", writer->Func);
-
-		Value *Val = GetBoolValue(writer, *x);
-		if(Cond->Op == LogicalOr) {
-			builder->CreateCondBr(Val, ThenBB, BB);
-		} else {
-			builder->CreateCondBr(Val, BB, ThenBB);
-		}
-		builder->SetInsertPoint(BB);
-	}
-
-	if(IsTopDecl == true) {
-		builder->CreateBr(ElseBB);
-	}
-}
-
 static void EmitBranch(LLVMIRBuilder *writer, IBranch *Node)
 {
 	IRBuilder<> *builder = writer->builder;
-	if(ICond *Cond = CHECK_KIND(Node->Cond, ICond)) {
-		assert(Cond->Branch != 0);
-		EmitCondBranch(writer, Node, Cond, true);
-	} else {
-		Value *Val = GetBoolValue(writer, Node->Cond);
-		BasicBlock *ThenBB = GetBlock(writer, Node->ThenBB);
-		BasicBlock *ElseBB = GetBlock(writer, Node->ElseBB);
-		builder->CreateCondBr(Val, ThenBB, ElseBB);
-	}
+	Value *Val = GetBoolValue(writer, Node->Cond);
+	BasicBlock *ThenBB = GetBlock(writer, Node->ThenBB);
+	BasicBlock *ElseBB = GetBlock(writer, Node->ElseBB);
+	builder->CreateCondBr(Val, ThenBB, ElseBB);
 }
 
 static void EmitNewInst(LLVMIRBuilder *writer, INew *Node)
@@ -480,7 +673,7 @@ static void EmitNewInst(LLVMIRBuilder *writer, INew *Node)
 	IRBuilder<> *builder = writer->builder;
 
 	GlobalVariable *G;
-	if((G = GlobalModule->getNamedGlobal("new_kObject")) == 0) {
+	if((G = GlobalModule->getNamedGlobal("FuelVM_new_kObject")) == 0) {
 		std::vector<Type *> Fields;
 		Fields.push_back(ToType(ID_PtrKonohaContextVar));
 		Fields.push_back(builder->getInt64Ty());
@@ -488,13 +681,10 @@ static void EmitNewInst(LLVMIRBuilder *writer, INew *Node)
 		Fields.push_back(builder->getInt64Ty());
 		FunctionType *FnTy = FunctionType::get(ToType(ID_PtrkObjectVar), Fields, false);
 		G = new GlobalVariable(*GlobalModule, FnTy, true,
-				GlobalValue::ExternalLinkage, NULL, "new_kObject");
-		typedef kObject *(*NewFunc)(KonohaContext *, kArray *, KClass *, uintptr_t);
-		union {
-			void *ptr;
-			NewFunc f;
-		} Val; Val.f = KLIB new_kObject;
-		GlobalEngine->addGlobalMapping(G, Val.ptr);
+				GlobalValue::ExternalLinkage, NULL, "FuelVM_new_kObject");
+		void *ptr = void_cast(FuelVM_new_kObject);
+		GlobalEngine->addGlobalMapping(G, ptr);
+		sys::DynamicLibrary::AddSymbol("FuelVM_new_kObject", ptr);
 	}
 
 	/* kObject *new_kObject(KonohaContext *, uint64_t, void *, uint64_t); */
@@ -514,10 +704,17 @@ static void EmitUnaryInst(LLVMIRBuilder *writer, IUnary *Node)
 	IRBuilder<> *builder = writer->builder;
 #define VSET(WRITER, NODE, FUNC) SetValue(WRITER, (INode *)NODE, (WRITER)->builder->FUNC)
 #define CASE(X, OP) case X: VSET(writer, Node, Create##OP(Val, #X));return
+#define CASE_(X, OP) case X: do {\
+	Value *Val_ = (writer)->builder->Create##OP(Val, #X);\
+	Val_ = ToIntValueIfBool(writer->builder, Val_);\
+	SetValue(writer, (INode *)Node, Val_);\
+	return;\
+} while(0)
+
 	if(Type == TYPE_boolean) {
 		Val = ToBoolValue(builder, Val);
 		switch(Node->Op) {
-			CASE(Not, Not);
+			CASE_(Not, Not);
 			default:
 				assert(0 && "unreachable");
 				break;
@@ -525,7 +722,7 @@ static void EmitUnaryInst(LLVMIRBuilder *writer, IUnary *Node)
 	}
 	else if(Type == TYPE_int) {
 		switch(Node->Op) {
-			CASE(Not, Not); CASE(Neg, Neg);
+			CASE_(Not, Not); CASE(Neg, Neg);
 			default:
 				assert(0 && "unreachable");
 				break;
@@ -539,6 +736,7 @@ static void EmitUnaryInst(LLVMIRBuilder *writer, IUnary *Node)
 		}
 	}
 #undef CASE
+#undef CASE_
 }
 
 static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
@@ -548,12 +746,19 @@ static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 	assert(LHS != 0 && RHS != 0);
 	IRBuilder<> *builder = writer->builder;
 	enum TypeId Type = Node->LHS->Type;
-#define CASE(X, OP) case X: VSET(writer, Node, Create##OP(LHS, RHS, #X));return
+#define CASE(X, OP)  case X: VSET(writer, Node, Create##OP(LHS, RHS, #X));return
+#define CASE_(X, OP) case X: do {\
+	Value *Val_ = (writer)->builder->Create##OP(LHS, RHS, #X);\
+	Val_ = ToIntValueIfBool(writer->builder, Val_);\
+	SetValue(writer, (INode *)Node, Val_);\
+	return;\
+} while(0)
+
 	if(Type == TYPE_boolean) {
 		LHS = ToBoolValue(builder, LHS);
 		RHS = ToBoolValue(builder, RHS);
 		switch(Node->Op) {
-			CASE(Eq, ICmpEQ); CASE(Nq, ICmpNE);
+			CASE_(Eq, ICmpEQ); CASE_(Nq, ICmpNE);
 			default:
 				assert(0 && "unreachable");
 				break;
@@ -562,8 +767,8 @@ static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 		switch(Node->Op) {
 			CASE(Add, Add); CASE(Sub, Sub); CASE(Mul, Mul); CASE(Div, SDiv); CASE(Mod, SRem);
 			CASE(LShift, Shl); CASE(RShift, AShr); CASE(And, And); CASE(Or, Or); CASE(Xor, Xor);
-			CASE(Eq, ICmpEQ); CASE(Nq, ICmpNE); CASE(Gt, ICmpSGT);
-			CASE(Ge, ICmpSGE); CASE(Lt, ICmpSLT); CASE(Le, ICmpSLE);
+			CASE_(Eq, ICmpEQ);  CASE_(Nq, ICmpNE);  CASE_(Gt, ICmpSGT);
+			CASE_(Ge, ICmpSGE); CASE_(Lt, ICmpSLT); CASE_(Le, ICmpSLE);
 			default:
 				assert(0 && "unreachable");
 				break;
@@ -571,8 +776,8 @@ static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 	} else if(Type == TYPE_float) {
 		switch(Node->Op) {
 			CASE(Add, FAdd); CASE(Sub, FSub); CASE(Mul, FMul); CASE(Div, FDiv);
-			CASE(Eq, FCmpOEQ); CASE(Nq, FCmpONE); CASE(Gt, FCmpOGT);
-			CASE(Ge, FCmpOGE); CASE(Lt, FCmpOLT); CASE(Le, FCmpOLE);
+			CASE_(Eq, FCmpOEQ); CASE_(Nq, FCmpONE); CASE_(Gt, FCmpOGT);
+			CASE_(Ge, FCmpOGE); CASE_(Lt, FCmpOLT); CASE_(Le, FCmpOLE);
 			default:
 			assert(0 && "unreachable");
 			break;
@@ -580,6 +785,7 @@ static void EmitBinaryInst(LLVMIRBuilder *writer, IBinary *Node)
 	}
 	assert(0 && "unreachable");
 #undef CASE
+#undef CASE_
 }
 
 static void EmitThrowInst(LLVMIRBuilder *writer, IThrow *Node)
@@ -587,14 +793,13 @@ static void EmitThrowInst(LLVMIRBuilder *writer, IThrow *Node)
 	IRBuilder<> *builder = writer->builder;
 	Value *Err = GetValue(writer, Node->Val);
 	GlobalVariable *G;
-	KonohaContext *kctx = writer->kctx;
-	if((G = GlobalModule->getNamedGlobal("KLIB_KRuntime_raise")) == 0) {
+	if((G = GlobalModule->getNamedGlobal("FuelVM_KRuntime_raise")) == 0) {
 		std::vector<Type *> Args;
 		union {
 			void (*KRuntime_raise)(KonohaContext*, int, int, kString *, KonohaStack *);
 			void *ptr;
 		} F;
-		F.KRuntime_raise = KLIB KRuntime_raise;
+		F.KRuntime_raise = FuelVM_KRuntime_raise;
 
 		Args.push_back(ToType(ID_PtrKonohaContextVar));
 		Args.push_back(ToType(ID_int));
@@ -602,7 +807,7 @@ static void EmitThrowInst(LLVMIRBuilder *writer, IThrow *Node)
 		Args.push_back(ToType(ID_PtrkObjectVar));
 		Args.push_back(ToType(ID_PtrKonohaValueVar));
 		FunctionType *FnTy = FunctionType::get(Type::getVoidTy(LLVM_CONTEXT()), Args, false);
-		G = new GlobalVariable(*GlobalModule, FnTy, true, GlobalValue::ExternalLinkage, NULL, "KLIB_KRuntime_raise");
+		G = new GlobalVariable(*GlobalModule, FnTy, true, GlobalValue::ExternalLinkage, NULL, "FuelVM_KRuntime_raise");
 
 		GlobalEngine->addGlobalMapping(G, F.ptr);
 	}
@@ -615,8 +820,8 @@ static void EmitThrowInst(LLVMIRBuilder *writer, IThrow *Node)
 	StoreValueToStack(builder, TYPE_int, getLongTy(), K_RTNIDX, Vtop,
 			EmitConstant(builder, uline), "uline");
 
-	Value *vsymbol = EmitConstant(builder, (int)KException_("RuntimeScript"));
-	Value *vfault  = EmitConstant(builder, (int)SoftwareFault);
+	Value *vsymbol = EmitConstant(builder, Node->exception);
+	Value *vfault  = EmitConstant(builder, Node->fault);
 
 	builder->CreateCall5(G, Vctx, vsymbol, vfault, Err, Vtop);
 	builder->CreateUnreachable();
@@ -627,6 +832,8 @@ static void EmitPHIInst(LLVMIRBuilder *writer, IPHI *Node)
 	IRBuilder<> *builder = writer->builder;
 	unsigned Preds = ARRAY_size(writer->Current->preds);
 	Type *Ty = ToLLVMType(Node->Val->Type);
+	if(Node->Val->Type == TYPE_boolean)
+		Ty = ToType(ID_long);
 	PHINode *PHI = builder->CreatePHI(Ty, Preds, "PHI");
 	SetValue(writer, (INode *) Node, PHI);
 	SetValue(writer, Node->Val, PHI);
@@ -648,9 +855,58 @@ static Value *GetFieldRef(LLVMIRBuilder *writer, IField *Inst)
 	IRBuilder<> *builder = writer->builder;
 	Value *Val = GetValue(writer, Inst->Node);
 	Value *Dst = builder->CreateStructGEP(Val, kObjectVar_fieldObjectItems);
-	Dst =  builder->CreateConstInBoundsGEP1_32(Dst, Inst->FieldIndex);
+	Dst = builder->CreateConstInBoundsGEP1_32(Dst, Inst->FieldIndex);
 	Dst = builder->CreateBitCast(Dst, PointerType::get(ToLLVMType(Inst->base.Type), 0));
 	return Dst;
+}
+
+static Value *GetArrayRef(LLVMIRBuilder *writer, ICall *Inst, std::vector<Value *> &List)
+{
+	/* List = [This, Index, ...] */
+	Value *Val = List[0];
+	Value *Idx = List[1];
+	Type *ReqTy;
+	if(Inst->base.Type != TYPE_void) {
+		ReqTy = PointerType::get(ToLLVMType(Inst->base.Type), 0);
+	} else {
+		ReqTy = PointerType::get(List[2]->getType(), 0);
+	}
+	IRBuilder<> *builder = writer->builder;
+	Val = builder->CreateBitCast(Val, ToType(ID_kCharSequence));
+	Val = builder->CreateStructGEP(Val, kCharSequence_byteptr);
+	Val = builder->CreateLoad(Val);
+	Val = builder->CreateGEP(Val, Idx);
+	Val = builder->CreateBitCast(Val, ReqTy);
+	return Val;
+}
+
+static void EmitWriteBarrier(LLVMIRBuilder *writer, Value *Parent, Value *OldRef, Value *New)
+{
+	GlobalVariable *G;
+	if((G = GlobalModule->getNamedGlobal("FuelVM_UpdateObjectField")) == 0) {
+		std::vector<Type *> Fields;
+		Fields.push_back(ToType(ID_PtrKonohaContextVar));
+		Fields.push_back(ToType(ID_PtrkObjectVar));
+		Fields.push_back(ToType(ID_PtrkObjectVar));
+		Fields.push_back(ToType(ID_PtrkObjectVar));
+		FunctionType *FnTy = FunctionType::get(ToType(ID_void), Fields, false);
+		G = new GlobalVariable(*GlobalModule, FnTy, true,
+				GlobalValue::ExternalLinkage, NULL, "FuelVM_UpdateObjectField");
+		void *ptr = void_cast(FuelVM_UpdateObjectField);
+		GlobalEngine->addGlobalMapping(G, ptr);
+	}
+	if(!Parent->getType()->isPointerTy()) {
+		Parent->dump();
+		OldRef->dump();
+		New->dump();
+		asm volatile("int3");
+	}
+	if(New->getType()->isPointerTy()) {
+		IRBuilder<> *builder = writer->builder;
+		Value *Vctx = GetContext(writer);
+		Value *Old  = builder->CreateLoad(OldRef);
+		builder->CreateCall4(G, Vctx, Parent, Old, New);
+	}
 }
 
 #define CASE(KIND) case IR_TYPE_##KIND:
@@ -658,27 +914,6 @@ static Value *GetFieldRef(LLVMIRBuilder *writer, IField *Inst)
 static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 {
 	switch(Node->Kind) {
-		CASE(ICond) {
-			ICond *Inst = (ICond *) Node;
-			if(Inst->Branch == NULL) {
-				INodePtr *x, *e;
-				Value *LHS, *RHS;
-				INodePtr *Inst0 = ARRAY_n(Inst->Insts, 0);
-				IRBuilder<> *builder = writer->builder;
-				LHS = GetBoolValue(writer, *Inst0);
-				FOR_EACH_ARRAY(Inst->Insts, x, e) {
-					if(x == Inst0) continue;
-					RHS = GetBoolValue(writer, *x);
-					if(Inst->Op == LogicalOr) {
-						LHS = builder->CreateOr(LHS, RHS);
-					} else {
-						LHS = builder->CreateAnd(LHS, RHS);
-					}
-				}
-				SetValue(writer, Node, LHS);
-			}
-			break;
-		}
 		CASE(INew) {
 			EmitNewInst(writer, (INew *) Node);
 			break;
@@ -714,8 +949,10 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 					assert(0 && "TODO");
 				case FieldScope: {
 					IRBuilder<> *builder = writer->builder;
+					Value *Val = GetValue(writer, Inst->LHS->Node);
 					Value *Dst = GetFieldRef(writer, Inst->LHS);
 					Value *Src = GetValue(writer, Inst->RHS);
+					EmitWriteBarrier(writer, Val, Dst, Src);
 					builder->CreateStore(Src, Dst);
 					break;
 				}
@@ -832,7 +1069,9 @@ static Function *EmitInternalFunction(KonohaContext *kctx, Module *M, kMethod *m
 
 	enum TypeId Type = ConvertToTypeId(kctx, mtd->typeId);
 	ParamTy.push_back(ToType(ID_PtrKonohaContextVar));
-	ParamTy.push_back(ToLLVMType(Type));
+	if(Type != TYPE_void) {
+		ParamTy.push_back(ToLLVMType(Type));
+	}
 	for(unsigned i = 0; i < params->psize; ++i) {
 		Type = ConvertToTypeId(kctx, params->paramtypeItems[i].attrTypeId);
 		ParamTy.push_back(ToLLVMType(Type));
@@ -842,7 +1081,9 @@ static Function *EmitInternalFunction(KonohaContext *kctx, Module *M, kMethod *m
 	Function *F = Function::Create(FnTy, GlobalValue::ExternalLinkage, name, M);
 	Function::arg_iterator args = F->arg_begin();
 	SetName(args++, "kctx");
-	SetName(args++, "this");
+	if(Type != TYPE_void) {
+		SetName(args++, "this");
+	}
 
 	for(unsigned i = 0; i < params->psize; ++i) {
 		const char *name = KSymbol_text(params->paramtypeItems[i].name);
@@ -880,7 +1121,9 @@ static Function *EmitFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Func
 	std::vector<Value *> Params;
 	Params.push_back(Vctx);
 	enum TypeId Type = ConvertToTypeId(kctx, mtd->typeId);
-	Params.push_back(LoadValueFromStack(builder, Type, ToLLVMType(Type), 0, Vsfp));
+	if(Type != TYPE_void) {
+		Params.push_back(LoadValueFromStack(builder, Type, ToLLVMType(Type), 0, Vsfp));
+	}
 	for(unsigned i = 0; i < params->psize; ++i) {
 		ktypeattr_t type = params->paramtypeItems[i].attrTypeId;
 		Type = ConvertToTypeId(kctx, type);
@@ -888,6 +1131,7 @@ static Function *EmitFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Func
 		Params.push_back(V);
 	}
 	Type = ConvertToTypeId(kctx, kMethod_GetReturnType(mtd)->typeId);
+
 	Value *Ret = builder->CreateCall(Func, Params);
 	if(Type != TYPE_void) {
 		StoreValueToStack(builder, Type, ToLLVMType(Type), K_RTNIDX, Vsfp, Ret);
@@ -923,27 +1167,88 @@ static void PrepareLocalVariable(LLVMIRBuilder *writer, FuelIRBuilder *builder)
 	}
 }
 
-static void EmitPrologue(LLVMIRBuilder *writer, FuelIRBuilder *builder, IMethod *Mtd)
+static void EmitRecompilationCheck(LLVMIRBuilder *writer, Function *F, BasicBlock *BB0, kMethod *mtd)
+{
+	IRBuilder<> *builder = writer->builder;
+
+	Value *Vmtd = EmitConstant(builder, mtd);
+	Vmtd = builder->CreateIntToPtr(Vmtd, ToType(ID_PtrkMethodVar));
+
+	/* Vdelta = Vmtd->delta + 1 */
+	Value *VdeltaRef = builder->CreateStructGEP(Vmtd, kMethodVar_delta);
+	Value *Vdelta    = builder->CreateLoad(VdeltaRef);
+
+	Constant *C01 = ConstantInt::get(Vdelta->getType(),  1);
+	Constant *C10 = ConstantInt::get(Vdelta->getType(), 10);
+
+	Vdelta = builder->CreateAdd(Vdelta, C01);
+	builder->CreateStore(Vdelta, VdeltaRef);
+
+	/* if(Vdelta > 10) { goto ThenBB } */
+	BasicBlock *ThenBB  = BasicBlock::Create(getGlobalContext(), "Recompile", F);
+	BasicBlock *MergeBB = BasicBlock::Create(getGlobalContext(), "BB", F);
+	Value *Cond = builder->CreateICmpSGT(Vdelta, C10);
+	builder->CreateCondBr(Cond, ThenBB, MergeBB);
+	{
+		/* ThenBB:
+		 *   Recompile(Vkctx, Vmtd);
+		 *   goto MergeBB;
+		 **/
+		builder->SetInsertPoint(ThenBB);
+		GlobalVariable *G;
+		if((G = GlobalModule->getNamedGlobal("FuelVM_Recompile")) == 0) {
+			std::vector<Type *> Fields;
+			Fields.push_back(ToType(ID_PtrKonohaContextVar));
+			Fields.push_back(ToType(ID_PtrkMethodVar));
+			FunctionType *FnTy = FunctionType::get(ToType(ID_void), Fields, false);
+			G = new GlobalVariable(*GlobalModule, FnTy, true,
+					GlobalValue::ExternalLinkage, NULL, "FuelVM_Recompile");
+			void *ptr = void_cast(FuelVM_Recompile);
+			GlobalEngine->addGlobalMapping(G, ptr);
+		}
+		Value *Vctx = GetContext(writer);
+		builder->CreateCall2(G, Vctx, Vmtd);
+		builder->CreateBr(MergeBB);
+	}
+	builder->SetInsertPoint(MergeBB);
+	F->addFnAttr(Attributes::NoInline);
+}
+
+static void EmitPrologue(LLVMIRBuilder *writer, FuelIRBuilder *builder, IMethod *Mtd, int option)
 {
 	BlockPtr *x, *e;
+	LLVMContext &Context = getGlobalContext();
+
 	writer->Func = EmitInternalFunction(Mtd->Context, GlobalModule, Mtd->Method);
+
+	if(CompiledCode[Mtd->Method]) {
+		CompiledCode[Mtd->Method] = writer->Func;
+		//F->replaceAllUsesWith(writer->Func);
+	}
+	BasicBlock *EntryBB = BasicBlock::Create(Context, "EntryBB", writer->Func);
 	FOR_EACH_ARRAY(builder->Blocks, x, e) {
-		SetBlock(writer, *x, BasicBlock::Create(getGlobalContext(), "BB", writer->Func));
+		SetBlock(writer, *x, BasicBlock::Create(Context, "BB", writer->Func));
 	}
 
 	PrepareLocalVariable(writer, builder);
 
-	BasicBlock *EntryBB = GetBlock(writer, Mtd->EntryBlock);
 	writer->builder = new IRBuilder<>(EntryBB);
 	writer->builder->SetInsertPoint(EntryBB);
 	Value *Vsfp = GetStackTop(writer);
+
+	BasicBlock *BB0 = GetBlock(writer, Mtd->EntryBlock);
+	if(option != O2Compile && Mtd->Method->mn != 0) {
+		EmitRecompilationCheck(writer, writer->Func, BB0, Mtd->Method);
+	}
+	writer->builder->CreateBr(BB0);
+	writer->builder->SetInsertPoint(BB0);
 	PrepareCallStack(writer, Vsfp);
 }
 
 static void visitIBlock(LLVMIRBuilder *writer, Block *block)
 {
 	writer->Current = block;
-	block->base.Evaled = 1;
+	block->Evaled = 1;
 	BasicBlock *BB = GetBlock(writer, block);
 	writer->builder->SetInsertPoint(BB);
 	INodePtr *x, *e;
@@ -954,11 +1259,16 @@ static void visitIBlock(LLVMIRBuilder *writer, Block *block)
 
 } /* namespace FuelVM */
 
+using namespace FuelVM;
 extern "C" {
 
-ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
+bool FuelVM_HasOptimizedCode(kMethod *mtd)
 {
-	using namespace FuelVM;
+	return CompiledCode[mtd] != 0;
+}
+
+ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd, int option)
+{
 	InitLLVM();
 	LLVMIRBuilder writer = {{
 		0,
@@ -971,7 +1281,7 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 
 	std::vector<ValueInfo> Variables(builder->LastNodeId);
 	writer.Variables = &Variables;
-	EmitPrologue(&writer, builder, Mtd);
+	EmitPrologue(&writer, builder, Mtd, option);
 
 	BlockPtr *x, *e;
 	FOR_EACH_ARRAY(builder->Blocks, x, e) {
@@ -998,9 +1308,13 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd)
 #ifdef USE_LLVMIR_DUMP
 	writer.Func->dump();
 #endif
+
 	delete writer.builder;
-	void *f = GlobalEngine->getPointerToFunction(Wrapper);
-	return (ByteCode *) f;
+	void *fwrap = GlobalEngine->getPointerToFunction(Wrapper);
+	if(option == O2Compile && Mtd->Method->mn != 0) {
+		CompiledCode[Mtd->Method] = writer.Func;
+	}
+	return (ByteCode *) fwrap;
 }
 
 } /* extern "C" */

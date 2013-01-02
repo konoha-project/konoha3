@@ -385,9 +385,6 @@ static void RewriteNode(INode *Node, ARRAY(INodePtr) *stack)
 			}
 			break;
 		}
-		case IR_TYPE_ICond:
-			ReplaceArrayElementWith(&((ICond *)Node)->Insts, stack);
-			break;
 		case IR_TYPE_INew:
 			break;
 		case IR_TYPE_ICall:

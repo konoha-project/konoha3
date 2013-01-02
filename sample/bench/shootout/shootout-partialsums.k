@@ -16,8 +16,7 @@ void partial(int n) {
 	float a1 = 0.0, a2 = 0.0, a3 = 0.0, a4 = 0.0, a5 = 0.0;
 	float a6 = 0.0, a7 = 0.0, a8 = 0.0, a9 = 0.0, alt = -1.0;
 
-	int k=1;
-	while(k<=n) {
+	for (int k = 1; k <= n; k = k + 1) {
 		float k2 = k * k, k3 = k2 * k;
 		float sk = Math.sin(k), ck = Math.cos(k);
 		alt = -alt;
@@ -31,7 +30,6 @@ void partial(int n) {
 		a7 = a7 + 1.0/k2;
 		a8 = a8 + alt/k;
 		a9 = a9 + alt/(2.0*k -1.0);
-		k = k + 1;
 	}
 	System.p(""+a1/*.format("%0.9f")*/ + "\t(2/3)^k");
 	System.p(""+a2/*.format("%0.9f")*/ + "\tk^-0.5");

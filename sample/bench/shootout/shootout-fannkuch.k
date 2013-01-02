@@ -28,27 +28,26 @@ int fannkuch(int n) {
     int permCount = 0;
     int checksum = 0;
 
-    int i=0;
-    while(i<n) {
-        perm1[i] = i; i = i + 1;
+    for (int i=0; i < n; i = i + 1) {
+        perm1[i] = i;
     }
     int r = n;
 
     while (true) {
         while (r != 1) { count[r-1] = r; r = r - 1; }
 
-        i=0;
-        while(i<n) { perm[i] = perm1[i]; i = i + 1; }
+        for (int i=0; i < n; i = i + 1) {
+            perm[i] = perm1[i];
+        }
 
         int flipsCount = 0;
         int k;
 
         while ( !((k=perm[0]) == 0) ) {
             int k2 = (k+1) >> 1;
-            i=0;
-            while(i<k2) {
+
+            for (int i=0; i < k2; i = i + 1) {
                 int temp = perm[i]; perm[i] = perm[k-i]; perm[k-i] = temp;
-                i = i + 1;
             }
             flipsCount = flipsCount + 1;
         }
@@ -67,11 +66,9 @@ int fannkuch(int n) {
                 return maxFlipsCount;
             }
             int perm0 = perm1[0];
-            int i = 0;
-            while (i < r) {
-                int j = i + 1;
-                perm1[i] = perm1[j];
-                i = j;
+
+            for (int i=0; i < r; i = i + 1) {
+                perm1[i] = perm1[i+1];
             }
             perm1[r] = perm0;
 

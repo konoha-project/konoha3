@@ -30,17 +30,13 @@ extern "C" {
 
 DEF_ARRAY_OP_NOPOINTER(BlockPtr);
 DEF_ARRAY_OP_NOPOINTER(INodePtr);
-DEF_ARRAY_OP_NOPOINTER(INodeArrayPtr);
 
 /* Node API */
 
 #define CREATE_NODE(TYPE) ((TYPE *) newINode(builder, IR_TYPE_##TYPE))
 static INode *newINode(struct FuelIRBuilder *builder, enum IRType Kind);
 static void disposeINode(INode *Node);
-
-static void disposeINodeImpl(INode *Node)
-{
-}
+static void disposeINodeImpl(INode *Node) {}
 
 static Block *newBlock(FuelIRBuilder *builder)
 {
@@ -95,20 +91,6 @@ static IField *newIField(FuelIRBuilder *builder, enum ScopeOp Op, enum TypeId Ty
 }
 
 #define disposeIField disposeINodeImpl
-
-static ICond *newICond(FuelIRBuilder *builder, enum ConditionalOp Op)
-{
-	ICond *Node = CREATE_NODE(ICond);
-	Node->Op = Op;
-	ARRAY_init(INodePtr, &Node->Insts, 0);
-	return (Node);
-}
-
-static void disposeICond(INode *Node)
-{
-	ICond *Cond = (ICond *) Node;
-	ARRAY_dispose(INodePtr, &Cond->Insts);
-}
 
 static INew *newINew(FuelIRBuilder *builder, uintptr_t Conf, enum TypeId Type)
 {
@@ -203,11 +185,13 @@ static IJump *newIJump(FuelIRBuilder *builder, Block *Block)
 
 #define disposeIJump disposeINodeImpl
 
-static IThrow *newIThrow(FuelIRBuilder *builder, INode *Val, uintptr_t uline)
+static IThrow *newIThrow(FuelIRBuilder *builder, INode *Val, int exception, int fault, uintptr_t uline)
 {
 	IThrow *Node = CREATE_NODE(IThrow);
 	Node->Val = Val;
 	Node->uline = uline;
+	Node->exception = exception;
+	Node->fault = fault;
 	return (Node);
 }
 
@@ -234,22 +218,24 @@ static IYield *newIYield(FuelIRBuilder *builder, INode *INode)
 
 #define disposeIYield disposeINodeImpl
 
-static IUnary *newIUnary(FuelIRBuilder *builder, enum UnaryOp Op, INode *Val)
+static IUnary *newIUnary(FuelIRBuilder *builder, enum UnaryOp Op, INode *Val, uintptr_t uline)
 {
 	IUnary *Node = CREATE_NODE(IUnary);
 	Node->Op   = Op;
 	Node->Node = Val;
+	Node->uline = uline;
 	return (Node);
 }
 
 #define disposeIUnary disposeINodeImpl
 
-static IBinary *newIBinary(FuelIRBuilder *builder, enum BinaryOp Op, INode *LHS, INode *RHS)
+static IBinary *newIBinary(FuelIRBuilder *builder, enum BinaryOp Op, INode *LHS, INode *RHS, uintptr_t uline)
 {
 	IBinary *Node = CREATE_NODE(IBinary);
 	Node->Op = Op;
 	Node->LHS = LHS;
 	Node->RHS = RHS;
+	Node->uline = uline;
 	return (Node);
 }
 
@@ -369,39 +355,21 @@ void CallInst_addParam(ICall *Inst, INode *Param)
 	ARRAY_add(INodePtr, &Inst->Params, Param);
 }
 
-void CondInst_addParam(ICond *Inst, INode *Param)
-{
-	ARRAY_add(INodePtr, &Inst->Insts, Param);
-}
-
-void CondInst_SetBranchInst(ICond *Cond, IBranch *Branch)
-{
-	Cond->Branch = Branch;
-	INodePtr *x, *e;
-	FOR_EACH_ARRAY(Cond->Insts, x, e) {
-		ICond *Inst;
-		if((Inst = CHECK_KIND(*x, ICond)) != 0) {
-			CondInst_SetBranchInst(Inst, Branch);
-		}
-	}
-}
-
 void PHIInst_addParam(IPHI *Inst, IUpdate *Val)
 {
 	ARRAY_add(INodePtr, &Inst->Args, (INode *) Val);
 }
 
-void IRBuilder_Init(FuelIRBuilder *builder, KonohaContext *kctx)
+void IRBuilder_Init(FuelIRBuilder *builder, KonohaContext *kctx, kNameSpace *ns)
 {
 	builder->API = &API;
 	builder->API->Fn_Init(builder);
 	builder->Context = kctx;
-	ARRAY_init(INodeArrayPtr, &builder->VariableTable, 0);
+	builder->ClassInfo.cMath = KLIB kNameSpace_GetClassByFullName(kctx, ns, "Math", 4, NULL);
 }
 
 void IRBuilder_Exit(FuelIRBuilder *builder)
 {
-	ARRAY_dispose(INodeArrayPtr, &builder->VariableTable);
 	builder->API->Fn_Exit(builder);
 }
 

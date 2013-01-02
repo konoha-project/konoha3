@@ -11,7 +11,7 @@ import("js4.array");
 import("konoha.new");
 import("konoha.float");
 import("konoha.math");
-const N=550;
+const N=5500;
 
 class Spectralnorm {
 	/* return element i,j of infinite matrix A */
@@ -21,27 +21,21 @@ class Spectralnorm {
 
 	/* multiply vector v by matrix A */
 	void multiplyAv(int n, float[] v, float[] av){
-		int i=0; while(i<n) { 
+		for (int i=0; i < n; i= i + 1) {
 			av[i] = 0;
-			int j=0;
-			while(j<n) { 
+			for (int j=0; j < n; j= j + 1) {
 				av[i] += a(i,j)*v[j];
-				j = j + 1;
 			}
-			i = i + 1;
 		}
 	}
 
 	/* multiply vector v by matrix A transposed */
 	void multiplyAtv(int n, float[] v, float[] atv){
-		int i=0; while(i<n) {
+		for (int i=0; i < n; i= i + 1) {
 			atv[i] = 0;
-			int j=0;
-			while(j<n) {
+			for (int j=0; j < n; j= j + 1) {
 				atv[i] += a(j,i)*v[j];
-				j = j + 1;
 			}
-			i = i + 1;
 		}
 	}
 
@@ -55,32 +49,27 @@ class Spectralnorm {
 	float approximate(int n) {
 		// create unit vector
 		float[] u = new float[n];
-		int i=0;
-		while(i<n) {
-			u[i] = 1; i = i + 1;
+		for (int i=0; i < n; i= i + 1) {
+			u[i] = 1;
 		}
 
 		// 20 steps of the power method
 		float[] v = new float[n];
-		int i=0;
-		while(i<n) {
-			v[i]=0; i = i + 1;
+		for (int i=0; i < n; i= i + 1) {
+			v[i]=0;
 		}
 
-		int i=0; while( i<10) { 
+		for (int i=0; i < 10; i= i + 1) {
 			multiplyAtAv(n, u, v);
 			multiplyAtAv(n, v, u);
-			i = i + 1;
 		}
 
 		// B=AtA		 A multiplied by A transposed
 		// v.Bv /(v.v)   eigenvalue of v
 		float vBv = 0, vv = 0;
-		int i=0;
-		while( i<n) {
+		for (int i=0; i < n; i= i + 1) {
 			vBv = vBv + u[i]*v[i];
 			vv = vv + v[i]*v[i];
-			i = i + 1;
 		}
 		return Math.sqrt(vBv/vv);
 	}

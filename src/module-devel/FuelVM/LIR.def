@@ -40,14 +40,6 @@ def StoreField(Dst:VMRegister, FieldIdx:uint, Src:VMRegister) ::
 	Reg[Dst].obj->fields[FieldIdx] = Reg[Src];
 	DISPATCH_NEXT(PC);
 
-def LAnd(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
-	Reg[Dst].bval = Reg[LHS].bval && Reg[RHS].bval;
-	DISPATCH_NEXT(PC);
-
-def LOr(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
-	Reg[Dst].bval = Reg[LHS].bval || Reg[RHS].bval;
-	DISPATCH_NEXT(PC);
-
 def New(Dst:VMRegister, Param:uintptr_t, Type:TypeId) ::
 	Reg[Dst].obj = CreateObject(kctx, Param, Type);
 	DISPATCH_NEXT(PC);
@@ -107,8 +99,8 @@ def Jump(Block:Address) ::
 	PC = (ByteCode *)Block;
 	DISPATCH_JUMPTO(Block);
 
-def Throw(Src:VMRegister, uline:uintptr_t) ::
-	Raise(kctx, Stack, (kString *) Reg[Src].obj, uline);
+def Throw(Src:VMRegister, uline:uintptr_t, exception:uint, fault:uint) ::
+	Raise(kctx, Stack, (kString *) Reg[Src].obj, exception, fault, uline);
 
 def Try(Catch:Address, Finaly:Address) ::
 	Try_(Catch, Finaly, Stack);

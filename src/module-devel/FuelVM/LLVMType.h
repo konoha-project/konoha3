@@ -21,9 +21,11 @@ enum STRUCT_TYPE_ID {
 	ID_KMethodFunc,
 	ID_PtrKMethodFunc,
 	ID_PtrkMethodVar,
+	ID_kCharSequence,
 	ID_MAX,
 	ID_uint = ID_int,
 	ID_ulong = ID_long,
+	ID_ushort = ID_short,
 	ID_PtrKClassVar = ID_Ptrvoid,
 	ID_PtrKProtoMap = ID_Ptrvoid,
 	ID_PtrKonohaFactory = ID_Ptrvoid,
@@ -130,6 +132,7 @@ static llvm::Type *LLVMTYPE_KonohaValuePtr = NULL;
 static llvm::Type *LLVMTYPE_MethodPtr = NULL;
 static llvm::Type *LLVMTYPE_KMethodFunc = NULL;
 static llvm::Type *LLVMTYPE_KMethodFuncPtr = NULL;
+static llvm::Type *LLVMTYPE_CharSeqPtr = NULL;
 
 static llvm::Type *ToType(enum STRUCT_TYPE_ID ID)
 {
@@ -151,6 +154,7 @@ static llvm::Type *ToType(enum STRUCT_TYPE_ID ID)
 	case ID_KMethodFunc:       return LLVMTYPE_KMethodFunc;
 	case ID_PtrKMethodFunc:    return LLVMTYPE_KMethodFuncPtr;
 	case ID_PtrkMethodVar:     return LLVMTYPE_MethodPtr;
+	case ID_kCharSequence:     return LLVMTYPE_CharSeqPtr;
 	default:
 		return getLongTy();
 	}
@@ -193,9 +197,11 @@ static void LLVMType_Init()
 	LLVMTYPE_KMethodFunc = CreateType(KMethodFuncType);
 	LLVMTYPE_KMethodFuncPtr = llvm::PointerType::get(LLVMTYPE_KMethodFunc, 0);
 
-
 	llvm::Type *MethodTy = CreateType(kMethodVarType);
 	LLVMTYPE_MethodPtr = llvm::PointerType::get(MethodTy, 0);
+
+	llvm::Type *CharSeqTy = CreateType(kCharSequenceType);
+	LLVMTYPE_CharSeqPtr = llvm::PointerType::get(CharSeqTy, 0);
 }
 
 static llvm::Type *ToLLVMType(enum TypeId type)

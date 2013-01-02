@@ -75,7 +75,7 @@ static inline enum TypeId ToBoxType(enum TypeId Type)
 	if(Type == TYPE_boolean) { return TYPE_BoolObj; }
 	if(Type == TYPE_int    ) { return TYPE_IntObj;  }
 	if(Type == TYPE_float  ) { return TYPE_FloatObj;}
-	return TYPE_Object;
+	return Type;
 }
 
 static inline enum TypeId ToUnBoxType(enum TypeId Type)
@@ -83,7 +83,7 @@ static inline enum TypeId ToUnBoxType(enum TypeId Type)
 	if(Type == TYPE_BoolObj ) { return TYPE_boolean; }
 	if(Type == TYPE_IntObj  ) { return TYPE_int;     }
 	if(Type == TYPE_FloatObj) { return TYPE_float;   }
-	return TYPE_Object;
+	return Type;
 }
 
 #endif /* end of include guard */

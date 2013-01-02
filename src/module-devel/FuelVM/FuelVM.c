@@ -170,10 +170,10 @@ static SValue PopBoxedValue(KonohaContext *kctx)
 	return Val;
 }
 
-static void RaiseError(KonohaContext *kctx, KonohaStack *sfp, kString *ErrorInfo, kfileline_t uline)
+static void RaiseError(KonohaContext *kctx, KonohaStack *sfp, kString *ErrorInfo, int exception, int fault, kfileline_t uline)
 {
 	sfp[K_RTNIDX].calledFileLine = uline;
-	KLIB KRuntime_raise(kctx, KException_("RuntimeScript"), SoftwareFault, ErrorInfo, sfp);
+	KLIB KRuntime_raise(kctx, exception, fault, ErrorInfo, sfp);
 }
 
 #define CompileTimeAssert(...)
@@ -271,20 +271,6 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 		((kObjectVar *)Reg[Dst].obj)->fieldUnboxItems[FieldIdx] = Reg[Src].bits;
 		DISPATCH_NEXT(PC);
 	}
-	CASE(LAnd) {
-		VMRegister Dst = ((OPLAnd *)PC)->Dst;
-		VMRegister LHS = ((OPLAnd *)PC)->LHS;
-		VMRegister RHS = ((OPLAnd *)PC)->RHS;
-		Reg[Dst].ival = Reg[LHS].bval && Reg[RHS].bval;
-		DISPATCH_NEXT(PC);
-	}
-	CASE(LOr) {
-		VMRegister Dst = ((OPLOr *)PC)->Dst;
-		VMRegister LHS = ((OPLOr *)PC)->LHS;
-		VMRegister RHS = ((OPLOr *)PC)->RHS;
-		Reg[Dst].ival = Reg[LHS].bval || Reg[RHS].bval;
-		DISPATCH_NEXT(PC);
-	}
 	CASE(New) {
 		VMRegister Dst = ((OPNew *)PC)->Dst;
 		uintptr_t Param = ((OPNew *)PC)->Param;
@@ -379,8 +365,10 @@ void FuelVM_Exec(KonohaContext *kctx, KonohaStack *Stack, ByteCode *code)
 	}
 	CASE(Throw) {
 		VMRegister Src = ((OPThrow *)PC)->Src;
+		int exception = ((OPThrow *)PC)->exception;
+		int fault = ((OPThrow *)PC)->fault;
 		uintptr_t uline = ((OPThrow *)PC)->uline;
-		RaiseError(kctx, Stack, (kString *) Reg[Src].obj, uline);
+		RaiseError(kctx, Stack, (kString *) Reg[Src].obj, exception, fault, uline);
 	}
 	CASE(Try) {
 		Address Catch = ((OPTry *)PC)->Catch;

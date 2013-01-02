@@ -59,10 +59,11 @@ static void f()
     {
         INode *Sys = CreateObject(builder, TYPE_Any, 0);
         INode *Mtd = CreateObject(builder, TYPE_Method, (void *) System_Print);
-        INode *Val = CreateCall(builder, DefaultCall);
-        CallInst_addParam((ICall *)Val, Mtd);
-        CallInst_addParam((ICall *)Val, Sys);
-        CallInst_addParam((ICall *)Val, Field1);
+        INode *Param[3];
+        Param[0] = Mtd;
+        Param[1] = Sys;
+        Param[2] = Field1;
+        INode *Val = CreateCall(builder, DefaultCall, Param, 3);
         CreateReturn(builder, 0);
     }
 

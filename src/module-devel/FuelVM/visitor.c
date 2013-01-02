@@ -89,17 +89,6 @@ static void visitIField(Visitor *visitor, INode *Node)
 	VISIT_VALUE(Node, Tag, S);
 }
 
-static void visitICond(Visitor *visitor, INode *Node)
-{
-	ICond *Inst = (ICond *) Node;
-	const char *Tag = "";
-	switch(Inst->Op) {
-		CASE(LogicalOr);
-		CASE(LogicalAnd);
-	}
-	VISIT_N(Node, Tag, Inst->Insts);
-}
-
 static void visitINew(Visitor *visitor, INode *Node)
 {
 	INew *Inst = (INew *) Node;
@@ -109,7 +98,13 @@ static void visitINew(Visitor *visitor, INode *Node)
 static void visitICall(Visitor *visitor, INode *Node)
 {
 	ICall *Inst = (ICall *) Node;
-	VISIT_N(Node, 0, Inst->Params);
+	const char *Tag = "";
+	switch(Inst->Op) {
+		CASE(DefaultCall);
+		CASE(VirtualCall);
+		CASE(NeedTypeCheck);
+	}
+	VISIT_N(Node, Tag, Inst->Params);
 }
 
 static void visitIFunction(Visitor *visitor, INode *Node)
@@ -127,7 +122,7 @@ static void visitIUpdate(Visitor *visitor, INode *Node)
 static void visitIBranch(Visitor *visitor, INode *Node)
 {
 	IBranch *Inst = (IBranch *) Node;
-	VISIT_3(Node, 0, Inst->Cond, &Inst->ThenBB->base, &Inst->ElseBB->base);
+	VISIT_3(Node, 0, Inst->Cond, (INode *)Inst->ThenBB, (INode *)Inst->ElseBB);
 }
 
 static void visitITest(Visitor *visitor, INode *Node)
@@ -153,7 +148,7 @@ static void visitIReturn(Visitor *visitor, INode *Node)
 static void visitIJump(Visitor *visitor, INode *Node)
 {
 	IJump *Inst = (IJump *) Node;
-	VISIT_1(Node, 0, &Inst->TargetBlock->base);
+	VISIT_1(Node, 0, (INode *)Inst->TargetBlock);
 }
 
 static void visitIThrow(Visitor *visitor, INode *Node)

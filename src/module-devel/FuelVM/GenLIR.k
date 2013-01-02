@@ -22,7 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-import("js4.regexp");
 import("konoha.new");
 import("js4.string");
 import("konoha.foreach");
@@ -107,9 +106,9 @@ String printTypedef(IR ir) {
     ret = ("#define OPCODE_${ir.name} ${ir.opcode}\n");
     ret = ret + ("typedef struct OP${ir.name} {\n");
     int i = 0;
-    ret = ret + ("\tLIRHeader Header;\n");
+    ret = ret + ("    LIRHeader Header;\n");
     while (i < ir.types.length) {
-        ret = ret + ("\t${ir.types.get(i)} ${ir.args[i]};\n");
+        ret = ret + ("    ${ir.types.get(i)} ${ir.args[i]};\n");
         i = i + 1;
     }
     ret = ret + ("} PACKED OP${ir.name};\n\n");
@@ -134,7 +133,7 @@ String printMethodDef(IR ir) {
     ret = ("#define OPEXEC_${ir.name}(PC) do {\\\n");
     int i = 0;
     while (i < ir.types.length) {
-        ret = ret + "\t${ir.types[i]} ${ir.args[i]} = ((OP${ir.name} *)PC)->${ir.args[i]};\\\n";
+        ret = ret + "    ${ir.types[i]} ${ir.args[i]} = ((OP${ir.name} *)PC)->${ir.args[i]};\\\n";
         i = i + 1;
     }
     ret = ret + ("${ir.ops}} while(0)\n\n");
@@ -168,7 +167,7 @@ void main (String[] args) {
     String oplist = "#define BYTECODE_LIST(OP)\\\n";
     while (i < irs.length) {
         IR ir = irs[i];
-        oplist = oplist + "\tOP(${ir.name})";
+        oplist = oplist + "    OP(${ir.name})";
         if(i + 1 != irs.length) {
             oplist = oplist + "\\";
         }

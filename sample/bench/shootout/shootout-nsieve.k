@@ -36,7 +36,7 @@ int nsieve(int m, boolean[] isPrime) {
 
 String padNumber(int number, int fieldLen) {
 	String s = "" + number;
-	int numSpaces = fieldLen - s.size;
+	int numSpaces = fieldLen - s.length;
 
 	int i = 0; while( i < numSpaces) {
 		s = " " + s;

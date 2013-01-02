@@ -4,13 +4,10 @@
 */
 
 import("cstyle");
-// //import("konoha.assign"); Don't use any more
 import("konoha.new");
 import("konoha.class");
-import("cstyle"); // konoha.null is obsolate; use cstyle
 import("konoha.global");
-import("konoha.ns");  // konoha.const is obsolete
-import("cstyle"); // konoha.int was obsolete
+import("konoha.ns");
 
 const MINDEPTH = 4;
 const N=14;

@@ -31,9 +31,9 @@ int min(int n, int m) {
 }
 
 void arraycopy(Bytes src, int srcPos, Bytes dest, int destPos, int length) {
-	int i=0; while( i < length) { 
+
+	for (int i=0; i < length; i = i + 1) {
 		dest[i+destPos] = src[i + srcPos];
-		i = i + 1;
 	}
 }
 
@@ -160,8 +160,8 @@ class RandomFasta {
 	void make(String desc, Freq[] a, int n) {
 		int nn = n;
 		makeLookup(a);
-		arraycopy(desc.toBytes(), 0, ous.buf, ous.ct, desc.size);
-		ous.ct = ous.ct + desc.size;
+		arraycopy(desc.toBytes(), 0, ous.buf, ous.ct, desc.length);
+		ous.ct = ous.ct + desc.length;
 
 		while (nn > 0) {
 			int bytes = min(LINE_LENGTH, nn);
@@ -180,8 +180,8 @@ class RepeatFasta {
 
 	void make(String desc, Bytes alu, int n) {
 		int nn = n;
-		arraycopy(desc.toBytes(), 0, ous.buf, ous.ct, desc.size);
-		ous.ct = ous.ct + desc.size;
+		arraycopy(desc.toBytes(), 0, ous.buf, ous.ct, desc.length());
+		ous.ct = ous.ct + desc.length();
 
 		Bytes buf = new Bytes(alu.size + LINE_LENGTH);
 		int i = 0; while( i < buf.size) { 
