@@ -252,29 +252,19 @@ static kNode* TypeCheckNodeList(KonohaContext *kctx, kArray *nodeList, size_t n,
 
 static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, KClass *reqc)
 {
-//	DBG_P("########## starting block");
-//	KDump(block);
 	int i, size = kNode_GetNodeListSize(kctx, block) - 1;
 	for(i = 0; i < size; i++) {
-//		DBG_P("###### Block[%d]", i);
-//		KDump(kNode_At(block, i));
 		kNode *stmt = TypeCheckNodeList(kctx, block->NodeList, i, ns, KClass_void);
-//		KDump(stmt);
 		if(kNode_IsError(stmt)) {
 			return reqc->typeId == KType_void ? kNode_Type(kctx, block, KNode_Block, KType_void) : stmt;  // untyped
 		}
 	}
 	if(size >= 0) {
-//		DBG_P("###### Block[%d]", size);
-//		KDump(kNode_At(block, size));
 		kNode *stmt = TypeCheckNodeList(kctx, block->NodeList, size, ns, reqc);
-//		KDump(stmt);
 		kNode_Type(kctx, block, KNode_Block, stmt->attrTypeId == KType_var ? KType_void : stmt->attrTypeId);
 	}
 	else {
-		if(block != K_NULLBLOCK) {
-			kNode_Type(kctx, block, KNode_Block, KType_void);
-		}
+		kNode_Type(kctx, block, KNode_Block, KType_void);
 	}
 	return block;
 }
