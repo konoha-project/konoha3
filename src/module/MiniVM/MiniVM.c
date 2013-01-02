@@ -1010,6 +1010,12 @@ static struct KVirtualCode* GetDefaultBootCode(void)
 	return BOOTCODE_NCALL;
 }
 
+static void MiniVM_SetMethodCode(KonohaContext *kctx, kMethodVar *mtd, KVirtualCode *vcode, KMethodFunc func)
+{
+	KLIB kMethod_SetFunc(kctx, mtd, func);
+	mtd->vcode_start = vcode;
+}
+
 static void InitStaticBuilderApi(struct KBuilderAPI2 *builderApi)
 {
 	builderApi->target = "minivm";
@@ -1018,6 +1024,7 @@ static void InitStaticBuilderApi(struct KBuilderAPI2 *builderApi)
 #undef DEFINE_BUILDER_API
 	builderApi->GenerateKVirtualCode = MiniVM_GenerateKVirtualCode;
 	builderApi->GenerateKMethodFunc = MiniVM_GenerateKMethodFunc;
+	builderApi->SetMethodCode       = MiniVM_SetMethodCode;
 	builderApi->RunVirtualMachine   = KonohaVirtualMachine_Run;
 }
 
@@ -1028,6 +1035,10 @@ static struct KBuilderAPI2* GetDefaultBuilderAPI(void)
 		InitStaticBuilderApi(&builderApi);
 	}
 	return &builderApi;
+}
+
+static void MiniVMDeleteVirtualMachine(KonohaContext *kctx)
+{
 }
 
 // -------------------------------------------------------------------------
@@ -1042,6 +1053,7 @@ kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
 	factory->IsSupportedKVirtualCode        = IsSupportedKVirtualCode;
 	factory->GetDefaultBootCode            = GetDefaultBootCode;
 	factory->GetDefaultBuilderAPI          = GetDefaultBuilderAPI;
+	factory->DeleteVirtualMachine = MiniVMDeleteVirtualMachine;
 	return true;
 }
 

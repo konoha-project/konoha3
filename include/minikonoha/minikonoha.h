@@ -682,9 +682,7 @@ struct KonohaFactory {
 	// VirtualMachine
 	KModuleInfo            *VirtualMachineInfo;
 	kbool_t               (*IsSupportedKVirtualCode)(int opcode);
-//	struct KVirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
-//	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
-//	void *                (*GetVirtualMachineKMethodFunc)(void);
+	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
 	struct KVirtualCode*   (*GetDefaultBootCode)(void);
 	struct KBuilderAPI2*  (*GetDefaultBuilderAPI)(void);
 
