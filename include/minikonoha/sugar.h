@@ -231,8 +231,8 @@ struct kSyntaxVar {
 	kNameSpace                       *packageNameSpace;
 	ksymbol_t  keyword;               kshortflag_t  flag;
 	union {
-		kArray                           *syntaxPatternListNULL;
-		kArray                            *macroDataNULL;
+		kArray                       *syntaxPatternListNULL;
+		kArray                       *macroDataNULL;
 	};
 	union {
 		kFunc                        *sugarFuncTable[SugarFunc_SIZE];

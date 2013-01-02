@@ -55,14 +55,17 @@ static KMETHOD PatternMatch_MethodName(KonohaContext *kctx, KonohaStack *sfp)
 	if(opIdx == -1) {
 		int returnIdx = -1;
 		kTokenVar *tk = tokenList->TokenVarItems[beginIdx];
-		kSyntax *syn = tk->resolvedSyntaxInfo;
-
-		if(syn->keyword != KSymbol_MemberPattern) {
-			if(syn->keyword == KSymbol_SymbolPattern || syn->precedence_op1 > 0 || syn->precedence_op2 > 0) {
-				kNode_AddParsedObject(kctx, stmt, name, UPCAST(tk));
-				returnIdx = beginIdx + 1;
-			}
+		if(IS_String(tk->text)) {
+			kNode_AddParsedObject(kctx, stmt, name, UPCAST(tk));
+			returnIdx = beginIdx + 1;
 		}
+//		kSyntax *syn = tk->resolvedSyntaxInfo;
+//		if(syn->keyword != KSymbol_MemberPattern) {
+//			if(syn->keyword == KSymbol_SymbolPattern || syn->precedence_op1 > 0 || syn->precedence_op2 > 0) {
+//				kNode_AddParsedObject(kctx, stmt, name, UPCAST(tk));
+//				returnIdx = beginIdx + 1;
+//			}
+//		}
 		KReturnUnboxValue(returnIdx);
 	}
 	else {
@@ -255,12 +258,17 @@ static KMETHOD Expression_Operator(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Expression_Member(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Expression(node, tokenList, beginIdx, operatorIdx, endIdx);
-	if(beginIdx < operatorIdx) {
-		kNameSpace *ns = kNode_ns(node);
-		kNode_Op(kctx, node, tokenList->TokenItems[operatorIdx], 1, ParseNewNode(kctx, ns, tokenList, &beginIdx, operatorIdx, ParseExpressionOption, NULL));
-		KReturnUnboxValue(operatorIdx + 1);
+	VAR_Parse(node, name, tokenList, beginIdx, opIdx, endIdx);
+	if(opIdx == -1) {
+		kNode_AddParsedObject(kctx, node, name, tokenList->ObjectItems[beginIdx]);
+		KReturnUnboxValue(beginIdx + 1);
 	}
+	if(beginIdx < opIdx) {
+		kNameSpace *ns = kNode_ns(node);
+		kNode_Op(kctx, node, tokenList->TokenItems[opIdx], 1, ParseNewNode(kctx, ns, tokenList, &beginIdx, opIdx, ParseExpressionOption, NULL));
+		KReturnUnboxValue(opIdx + 1);
+	}
+	KReturnUnboxValue(PatternNoMatch);
 }
 
 static KMETHOD Expression_Parenthesis(KonohaContext *kctx, KonohaStack *sfp)
@@ -1214,11 +1222,7 @@ static ktypeattr_t kNode_GetClassId(KonohaContext *kctx, kNode *stmt, kNameSpace
 
 static ksymbol_t kNode_GetMethodName(KonohaContext *kctx, kNode *stmt, kmethodn_t defmn)
 {
-	kToken *tk = (kToken *)kNode_GetObjectNULL(kctx, stmt, KSymbol_MemberPattern);
-	if(tk != NULL) {
-		return tk->resolvedSymbol;
-	}
-	tk = (kToken *)kNode_GetObjectNULL(kctx, stmt, KSymbol_SymbolPattern);
+	kToken *tk = (kToken *)kNode_GetObjectNULL(kctx, stmt, KSymbol_SymbolPattern);
 	return (tk == NULL) ? defmn : tk->resolvedSymbol;
 }
 
@@ -1328,7 +1332,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	KPARSERM->methodTypeFunc = MethodCallFunc;
 	// Syntax Rule
 	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(TypeDecl), "$TypeDecl $Type $Expr", 0, NULL);
-	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(MethodDecl), "$MethodDecl $Type [ClassName: $Type $Member] [$Symbol] $Param [$Block]", 0, NULL);
+	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(MethodDecl), "$MethodDecl $Type [ClassName: $Type] [$Symbol] $Param [$Block]", 0, NULL);
 	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(if), "\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Expr]", 0, NULL);
 	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(else), "\"else\" $Block", 0, NULL);
 	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(return), "\"return\" [$Expr]", 0, NULL);

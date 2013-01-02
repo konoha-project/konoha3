@@ -22,6 +22,48 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+/***
+typedef struct KSyntaxList {
+	kSyntax *syntax;
+	struct KSyntaxList *next;
+} KSyntaxList;
+
+static KSyntaxList* MallocSyntaxList(KonohaContext *kctx, kSyntax *syn, KSyntaxList* next)
+{
+	KSyntaxList *slist = (KSyntaxList *)KMalloc_UNTRACED(sizeof(KSyntaxList));
+	slist->syntax = syn;
+	slist->next   = next;
+	return slist;
+}
+
+static void AppendSyntaxList(KonohaContext *kctx, KSyntaxList* slist, kSyntax *syn)
+{
+	while(slist->next != NULL) {
+		slist = slist->next;
+	}
+	slist->next = MallocSyntaxList(kctx, syn, NULL);
+}
+
+static void FreeSyntaxList(KonohaContext *kctx, KSyntaxList* slist)
+{
+	if(slist->next == NULL) {
+		FreeSyntaxList(kctx, slist->next);
+		slist->next = NULL;
+	}
+	slist->syntax = NULL;
+	free(slist);
+}
+
+static void kNameSpace_LookupSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, kSyntax **items)
+{
+	KKeyValue *kvs = kNameSpace_GetLocalConstNULL(kctx, ns, keyword);
+	if(kvs != NULL) {
+		kvs->attrTypeId;
+	}
+	return
+}
+***/
+
 // ---------------------------------------------------------------------------
 // Utils
 

@@ -380,7 +380,7 @@ static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 	ParseAnnotation, /* KonohaChar_AtMark */
 	ParseOperator, /* KonohaChar_Var */
 	ParseOperator, /* KonohaChar_Childer */
-	ParseBackSlash/*ParseUndefinedToken*/,  /* KonohaChar_BackSlash */
+	ParseBackSlash, /* KonohaChar_BackSlash */
 	ParseOperator, /* KonohaChar_Hat */
 	ParseSymbol,  /* KonohaChar_Underbar */
 };
@@ -442,7 +442,6 @@ static int Tokenizer_DoEach(KonohaContext *kctx, Tokenizer *tokenizer, int kchar
 	pos = tokenizer->cFuncItems[kchar](kctx, tk, tokenizer, tok_start);
 	return pos;
 }
-
 
 static void Tokenizer_Tokenize(KonohaContext *kctx, Tokenizer *tokenizer)
 {
