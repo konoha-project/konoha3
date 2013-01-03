@@ -1,0 +1,33 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.o.cmd
+
+# Compiled Dynamic libraries
+*.so
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+#
+*~
+*.orig
+*.py
+*.pyc
+GPATH
+GRTAGS
+GTAGS
+*.k.tested
+*_tested
+OLD
+
+.cproject
+.project
+.settings
+
+.DS_Store
+Debug
+Release
