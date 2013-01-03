@@ -567,7 +567,7 @@ static kNode* TypeCheckNodeVariableNULL(KonohaContext *kctx, kNode *stmt, kNodeV
 			return SUGAR kNode_SetVariable(kctx, expr, KNode_Local, genv->localScope.varItems[i].attrTypeId, i);
 		}
 	}
-	if(kNameSpace_IsAllowed(ImplicitField, ns)) {
+	if(kNameSpace_Is(ImplicitField, ns)) {
 		if(genv->localScope.varItems[0].attrTypeId != KType_void) {
 			KClass *ct = genv->thisClass;
 			if(ct->fieldsize > 0) {
@@ -583,7 +583,7 @@ static kNode* TypeCheckNodeVariableNULL(KonohaContext *kctx, kNode *stmt, kNodeV
 			}
 		}
 	}
-	if((Gamma_isTopLevel(ns) || kNameSpace_IsAllowed(ImplicitGlobalVariable, ns)) && ns->globalObjectNULL != NULL) {
+	if((Gamma_isTopLevel(ns) || kNameSpace_Is(ImplicitGlobalVariable, ns)) && ns->globalObjectNULL != NULL) {
 		KClass *globalClass = kObject_class(ns->globalObjectNULL);
 		kMethod *mtd = kNameSpace_GetGetterMethodNULL(kctx, ns, globalClass, symbol);
 		if(mtd != NULL) {
@@ -859,7 +859,7 @@ static kMethod* TypeFirstNodeAndLookupMethod(KonohaContext *kctx, kNodeVar *expr
 			return mtd;
 		}
 	}
-	if((Gamma_isTopLevel(ns) || kNameSpace_IsAllowed(ImplicitGlobalVariable,ns)) && ns->globalObjectNULL != NULL) {
+	if((Gamma_isTopLevel(ns) || kNameSpace_Is(ImplicitGlobalVariable,ns)) && ns->globalObjectNULL != NULL) {
 		KClass *globalClass = kObject_class(ns->globalObjectNULL);
 		kMethod *mtd = kNameSpace_GetGetterMethodNULL(kctx, ns, globalClass, funcName);
 		if(mtd != NULL && kMethod_IsReturnFunc(mtd)) {

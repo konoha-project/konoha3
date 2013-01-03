@@ -76,7 +76,7 @@ static int FindFirstStatementToken(KonohaContext *kctx, kArray *tokenList, int c
 
 static int FindEndOfStatement(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
-	int c, isNoSemiColon = kNameSpace_IsAllowed(NoSemiColon, ns);
+	int c, isNoSemiColon = kNameSpace_Is(NoSemiColon, ns);
 	for(c = beginIdx; c < endIdx; c++) {
 		kToken *tk = tokenList->TokenItems[c];
 		if(kToken_Is(StatementSeparator, tk)) return c;

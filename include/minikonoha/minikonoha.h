@@ -1520,14 +1520,17 @@ struct kNameSpaceVar {
 // NameSpace_syntaxOption
 
 #define kNameSpace_DefaultSyntaxOption               kNameSpace_ImplicitField|kNameSpace_NoSemiColon
-#define kNameSpace_IsAllowed(P, ns)                  (KFlag_Is(kshortflag_t, (ns)->syntaxOption, kNameSpace_##P))
+#define kNameSpace_Is(P, ns)                         (KFlag_Is(kshortflag_t, (ns)->syntaxOption, kNameSpace_##P))
 #define kNameSpace_Set(P, ns, B)                     KFlag_Set(kshortflag_t, ((kNameSpaceVar *)ns)->syntaxOption, kNameSpace_##P, B)
 
-#define kNameSpace_NoSemiColon                       ((kshortflag_t)(1<<1))
-#define kNameSpace_TypeInference                     ((kshortflag_t)(1<<2))
-#define kNameSpace_ImplicitField                     ((kshortflag_t)(1<<3))
-#define kNameSpace_ImplicitGlobalVariable            ((kshortflag_t)(1<<4))
-#define kNameSpace_ImplicitCoercion                  ((kshortflag_t)(1<<5))
+#define kNameSpace_Override                          ((kshortflag_t)(1<<1))
+#define kNameSpace_Ambigious                         ((kshortflag_t)(1<<2))
+
+#define kNameSpace_NoSemiColon                       ((kshortflag_t)(1<<3))
+#define kNameSpace_TypeInference                     ((kshortflag_t)(1<<4))
+#define kNameSpace_ImplicitField                     ((kshortflag_t)(1<<5))
+#define kNameSpace_ImplicitGlobalVariable            ((kshortflag_t)(1<<6))
+#define kNameSpace_ImplicitCoercion                  ((kshortflag_t)(1<<7))
 
 /* ------------------------------------------------------------------------ */
 /* System */

@@ -187,7 +187,7 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KC
 		if(kMethod_Is(Coercion, mtd) || FLAG_is(pol, TypeCheckPolicy_Coercion)) {
 			return new_MethodNode(kctx, ns, reqClass, mtd, 1, expr);
 		}
-		if(kNameSpace_IsAllowed(ImplicitCoercion, ns)) {
+		if(kNameSpace_Is(ImplicitCoercion, ns)) {
 			SUGAR MessageNode(kctx, expr, NULL, ns, InfoTag, "implicit type coercion: %s to %s", KClass_text(typedClass), KClass_text(reqClass));
 			return new_MethodNode(kctx, ns, reqClass, mtd, 1, expr);
 		}
