@@ -307,7 +307,6 @@ struct kTokenVar {
 		kushort_t   indent;               // indent when kw == TokenType_INDENT
 		kshort_t    hintChar;
 		ksymbol_t   stmtEntryKey;         // pattern name for 'setting key in Node'
-		ksymbol_t   groupTokenType;       // group token type
 	};
 };
 
@@ -321,14 +320,12 @@ typedef enum {
 	TokenType_ERR    = KSymbol_TokenPattern
 } kTokenType;
 
-
-
 #define kToken_IsIndent(T)  ((T)->tokenType == TokenType_INDENT && (T)->resolvedSyntaxInfo == NULL)
 
 #define kTokenFlag_BeforeWhiteSpace      kObjectFlag_Local1
 #define kTokenFlag_MatchPreviousPattern  kObjectFlag_Local2
 #define kTokenFlag_RequiredReformat      kObjectFlag_Local2
-#define kTokenFlag_HasIndent             kObjectFlag_Local2/*reserved*/
+#define kTokenFlag_GroupHasIndent        kObjectFlag_Local2/*reserved*/
 #define kTokenFlag_OpenGroup             kObjectFlag_Local3/*reserved*/
 #define kTokenFlag_CloseGroup            kObjectFlag_Local4/*reserved*/
 #define kTokenFlag_StatementSeparator    kObjectFlag_Local4/*obsolete*/
