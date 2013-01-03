@@ -670,7 +670,7 @@ typedef enum {
 	TypeCheckPolicy_AllowVoid      = (1 << 1),
 	TypeCheckPolicy_Coercion       = (1 << 2),
 	TypeCheckPolicy_CONST          = (1 << 4),  /* Reserved */
-	TypeCheckPolicy_Creation       = (1 << 6),  /* TypeCheckNodeByName */
+	TypeCheckPolicy_Creation       = (1 << 6)   /* TypeCheckNodeByName */
 } TypeCheckPolicy;
 
 #define KPushMethodCall(gma)   SUGAR kNameSpace_AddLocalVariable(kctx, ns, KType_var, 0)
