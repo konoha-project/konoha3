@@ -193,6 +193,16 @@ static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, con
 	return true;
 }
 
+// boolean NameSpace.SetConst(Symbol symbol, Object value);
+static KMETHOD NameSpace_DefineConst(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KMakeTrace(trace, sfp);
+	ksymbol_t symbol = (ksymbol_t)sfp[1].intValue;
+	KClass *c = kObject_class(sfp[2].asObject);
+	uintptr_t unboxValue = KClass_Is(UnboxType, c) ? kObject_Unbox(sfp[2].asObject) : (uintptr_t)sfp[2].asObject;
+	kNameSpace_SetConstData(kctx, sfp[0].asNameSpace, symbol, c->typeId, unboxValue, trace);
+}
+
 // ---------------------------------------------------------------------------
 // Utils
 
@@ -1124,4 +1134,7 @@ static kbool_t kNameSpace_ImportPackageSymbol(KonohaContext *kctx, kNameSpace *n
 }
 
 // --------------------------------------------------------------------------
+/* namespace method */
+
+
 
