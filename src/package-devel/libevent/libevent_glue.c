@@ -106,7 +106,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	int KType_Libevent = LibeventClass->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Libevent_new), KType_Libevent, KType_Libevent, KKMethodName_("new"),
+		_Public, _F(Libevent_new), KType_Libevent, KType_Libevent, KKMethodName_("new"), 0,
 #ifdef	CUTCUT
 		_Public, _F(Person_say), KType_String, KType_Person, KKMethodName_("say"), 0,
 #endif
@@ -114,12 +114,14 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
+#ifdef	CUTCUT
 	/* You can define constant variable with the following procedures. */
 	KDEFINE_INT_CONST IntData[] = {
 		{"NARUTO_AGE", KType_int, 18},
 		{} /* <= sentinel */
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
+#endif
 	return true;
 }
 
@@ -131,7 +133,7 @@ static kbool_t Libevent_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNa
 KDEFINE_PACKAGE *libevent_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "Libevent2", "0.1");
+	KSetPackageName(d, "libevent2", "0.1");
 	d.PackupNameSpace    = Libevent_PackupNameSpace;
 	d.ExportNameSpace   = Libevent_ExportNameSpace;
 	return &d;
