@@ -581,7 +581,7 @@ static void KTokenSeq_ApplyMacroGroup(KonohaContext *kctx, KTokenSeq *tokens, kA
 	int p = 0, start = 0;
 	for(i = 0; i < kArray_size(groupToken->GroupTokenList); i++) {
 		kToken *tk = groupToken->GroupTokenList->TokenItems[i];
-		if(tk->hintChar == ',') {
+		if(tk->resolvedSymbol == KSymbol_COMMA/*tk->hintChar == ','*/) {
 			mp[p].beginIdx = start;
 			mp[p].endIdx = i;
 			p++;
@@ -669,7 +669,7 @@ static int TokenUtils_Count(kArray *tokenList, int beginIdx, int endIdx, ksymbol
 static kToken* new_CommaToken(KonohaContext *kctx, kArray *gcstack)
 {
 	kTokenVar *tk = new_(TokenVar, KSymbol_COMMA, gcstack);
-	kToken_SetHintChar(tk, 0, ',');
+	//kToken_SetHintChar(tk, 0, ',');
 	return tk;
 }
 
@@ -1032,7 +1032,7 @@ static kbool_t kArray_AddSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 				continue;
 			}
 		}
-		if(i + 1 < patterns->endIdx && patterns->tokenList->TokenItems[i+1]->hintChar == ':' && IS_String(tk->text)) {
+		if(i + 1 < patterns->endIdx && patterns->tokenList->TokenItems[i+1]->resolvedSymbol == KSymbol_COLON && IS_String(tk->text)) {
 			stmtEntryKey = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewRaw);
 			i++;
 			continue;

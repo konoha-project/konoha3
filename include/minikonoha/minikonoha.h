@@ -1532,6 +1532,10 @@ struct kNameSpaceVar {
 #define kNameSpace_ImplicitGlobalVariable            ((kshortflag_t)(1<<6))
 #define kNameSpace_ImplicitCoercion                  ((kshortflag_t)(1<<7))
 
+#define KPushNameSpaceOption(ns)  kshortflag_t _syntaxOption = ns->syntaxOption
+#define KPopNameSpaceOption(ns)   ns->syntaxOption = _syntaxOption
+
+
 /* ------------------------------------------------------------------------ */
 /* System */
 
