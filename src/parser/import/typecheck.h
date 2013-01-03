@@ -435,7 +435,7 @@ static kstatus_t kNode_Eval(KonohaContext *kctx, kNode *stmt, kMethod *mtd, KTra
 	return K_CONTINUE;
 }
 
-static kbool_t KTokenSeq_PreprocessSingleStatement(KonohaContext *kctx, KTokenSeq *tokens, KTokenSeq *source)
+static kbool_t PreprocessSingleStatement(KonohaContext *kctx, KTokenSeq *tokens, KTokenSeq *source)
 {
 	int beginIdx, endIdx;
 	for(beginIdx = source->beginIdx; beginIdx < source->endIdx; beginIdx++) {
@@ -466,7 +466,7 @@ static kstatus_t KTokenSeq_Eval(KonohaContext *kctx, KTokenSeq *source, KTraceIn
 	INIT_GCSTACK();
 	KTokenSeq tokens = {source->ns, KGetParserContext(kctx)->preparedTokenList};
 	KTokenSeq_Push(kctx, tokens);
-	while(KTokenSeq_PreprocessSingleStatement(kctx, &tokens, source)) {
+	while(PreprocessSingleStatement(kctx, &tokens, source)) {
 		int currentIdx = FindFirstStatementToken(kctx, tokens.tokenList, tokens.beginIdx, tokens.endIdx);
 		while(currentIdx < tokens.endIdx) {
 			kNode *node = ParseNewNode(kctx, source->ns, tokens.tokenList, &currentIdx, tokens.endIdx, ParseMetaPatternOption, NULL);

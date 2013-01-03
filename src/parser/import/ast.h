@@ -798,6 +798,10 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 	}
 	RETURN_ERROR:;
 	KTokenSeq_End(kctx, tokens);
+	DBG_P(">>>>source");
+	SUGAR dumpTokenArray(kctx, 0, source->tokenList, beginIdx, source->endIdx);
+
+	DBG_P(">>>>tokens");
 	SUGAR dumpTokenArray(kctx, 0, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
 	return source->endIdx;
 }
@@ -1011,7 +1015,7 @@ static kbool_t kArray_AddSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 			KLIB kArray_Add(kctx, patternList, tk);
 			continue;
 		}
-		if(tk->hintChar == '$' && i+1 < patterns->endIdx) {  // $PatternName
+		if(tk->resolvedSymbol == KSymbol_DOLLAR/*tk->hintChar == '$'*/ && i+1 < patterns->endIdx) {  // $PatternName
 			tk = patterns->tokenList->TokenVarItems[++i];
 			if(IS_String(tk->text)) {
 				tk->resolvedSymbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewRaw) | KSymbolAttr_Pattern;
@@ -1028,7 +1032,7 @@ static kbool_t kArray_AddSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 			i++;
 			continue;
 		}
-		if(tk->hintChar == '*' && prevToken != NULL) {
+		if(tk->resolvedSymbol == KSymbol_MUL/*tk->hintChar == '*'*/ && prevToken != NULL) {
 			kToken_Set(MatchPreviousPattern, prevToken, true);
 			tk = NULL;
 			continue;
