@@ -733,7 +733,7 @@ static kbool_t Complex_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 //		{"FLOAT_EPSILON", KType_float, DBL_EPSILON},
 //		{NULL} /* <= sentinel */
 //	};
-//	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(FloatData), false/*isOverride*/, trace);
+//	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(FloatData), trace);
 	return true;
 }
 

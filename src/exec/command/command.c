@@ -148,7 +148,7 @@ static void CommandLine_Define(KonohaContext *kctx, char *keyvalue, KTraceInfo *
 			ty = VirtualType_Text;
 			unboxValue = (uintptr_t)(p+1);
 		}
-		KLIB kNameSpace_SetConstData(kctx, KNULL(NameSpace), key, ty, unboxValue, true/*isOverride*/, trace);
+		KLIB kNameSpace_SetConstData(kctx, KNULL(NameSpace), key, ty, unboxValue, trace);
 	}
 	else {
 		fprintf(stdout, "invalid define option: use -D<key>=<value>\n");
@@ -195,7 +195,7 @@ static void CommandLine_SetARGV(KonohaContext *kctx, int argc, char** argv, KTra
 			{"SCRIPT_ARGV", KClass_StringArray0->typeId, (kObject *)a},
 			{}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(ObjectData), true/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(ObjectData), trace);
 	RESET_GCSTACK();
 }
 

@@ -93,7 +93,7 @@ static kbool_t kNameSpace_InitGlobalObject(KonohaContext *kctx, kNameSpace *ns, 
 		defGlobalObject.cstruct_size = sizeof(kGlobalObject);
 		KClass *cGlobalObject = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defGlobalObject, trace);
 		((kNameSpaceVar *)ns)->globalObjectNULL =  KLIB Knull(kctx, cGlobalObject);
-		return KLIB kNameSpace_SetConstData(kctx, ns, KSymbol_("global"), cGlobalObject->typeId, (uintptr_t)ns->globalObjectNULL, true/*isOverride*/, trace);
+		return KLIB kNameSpace_SetConstData(kctx, ns, KSymbol_("global"), cGlobalObject->typeId, (uintptr_t)ns->globalObjectNULL, trace);
 	}
 	return true;
 }

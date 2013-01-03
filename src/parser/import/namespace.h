@@ -64,6 +64,138 @@ static void kNameSpace_LookupSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksy
 }
 ***/
 
+static kObject** ListObject(KonohaContext *kctx, kObject**list, int *size)
+{
+	if(list[0] == NULL) {
+		size[0] = 0;
+		return NULL;
+	}
+	else if(IS_Array(list[0])) {
+		kArray *a = (kArray*)list[0];
+		size[0] = kArray_size(a);
+		return a->ObjectItems;
+	}
+	else {
+		size[0] = 1;
+		return list;
+	}
+}
+
+// --------------------------------------------------------------------------
+/* ConstTable */
+
+static KKeyValue* kNameSpace_GetLocalConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t queryKey)
+{
+	KKeyValue *kvs = KLIB KDict_GetNULL(kctx, &(ns->constTable), queryKey);
+	if(kvs != NULL && kvs->attrTypeId == VirtualType_Text) {
+		const char *textData = (const char *)kvs->unboxValue;
+		kvs->attrTypeId = KType_String | KTypeAttr_Boxed;
+		kvs->StringValue = KLIB new_kString(kctx, ns->NameSpaceConstList, textData, strlen(textData), StringPolicy_TEXT);
+		KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs->StringValue);
+	}
+	return kvs;
+}
+
+static void SetKeyValue(KonohaContext *kctx, KKeyValue *kv, ksymbol_t key, ktypeattr_t ty, uintptr_t unboxValue)
+{
+	kv->key = key;
+	kv->unboxValue = unboxValue;
+	if(KType_Is(UnboxType, ty) || ty == VirtualType_KClass || ty == VirtualType_StaticMethod || ty == VirtualType_Text) {
+		kv->attrTypeId = ty;
+	}
+	else {
+		kv->attrTypeId = ty | KTypeAttr_Boxed;
+	}
+}
+
+static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t key, ktypeattr_t ty, uintptr_t unboxValue, KTraceInfo *trace)
+{
+	KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, key);
+	if(foundKeyValue == NULL) {
+		KKeyValue kvs;
+		SetKeyValue(kctx, &kvs, key, ty, unboxValue);
+		KLIB KDict_Set(kctx, &(ns->constTable), &kvs);
+		if(KTypeAttr_Is(Boxed, kvs.attrTypeId)) {
+			KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs.ObjectValue);
+		}
+		return true;
+	}
+	else if(kNameSpace_Is(Override, ns)) {
+		uintptr_t origUnboxValue = foundKeyValue->unboxValue;
+		SetKeyValue(kctx, foundKeyValue, key, ty, unboxValue);
+		if(KTypeAttr_Is(Boxed, foundKeyValue->attrTypeId) && origUnboxValue != unboxValue) {
+			KLIB kArray_Add(kctx, ns->NameSpaceConstList, foundKeyValue->ObjectValue);
+		}
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+#define kNameSpace_ListImportedNameSpace(kctx, NS, size) (kNameSpace**)ListObject(kctx, (kObject**)(&((NS)->parentNULL)), size)
+
+static KKeyValue* kNameSpace_GetConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t queryKey)
+{
+	KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
+	if(foundKeyValue == NULL) {
+		int i, size;
+		kNameSpace **list = kNameSpace_ListImportedNameSpace(kctx, ns, &size);
+		for(i = size - 1; i > 0; i--) {
+			foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, list[i], queryKey);
+			if(foundKeyValue != NULL) {
+				return foundKeyValue;
+			}
+		}
+		if(size == 1) {
+			return kNameSpace_GetConstNULL(kctx, list[0], queryKey);
+		}
+	}
+	return foundKeyValue;
+//	while(ns != NULL) {
+//		KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
+//		if(foundKeyValue != NULL) return foundKeyValue;
+//		ns = ns->parentNULL;
+//	}
+//	return NULL;
+}
+
+static kbool_t kNameSpace_MergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KKeyValue *kvs, size_t nitems, KTraceInfo *trace)
+{
+	size_t i;
+	for(i = 0; i < nitems; i++) {
+		if(KTypeAttr_Is(Boxed, kvs[i].attrTypeId)) {
+			KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs[i].ObjectValue);
+		}
+	}
+	KLIB KDict_MergeData(kctx, &(ns->constTable), kvs, nitems, kNameSpace_Is(Override, ns));
+	return true;
+}
+
+static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, const char **d, KTraceInfo *trace)
+{
+	KBuffer wb;
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+	while(d[0] != NULL) {
+		KKeyValue kvs;
+		SetKeyValue(kctx, &kvs, ksymbolSPOL(d[0], strlen(d[0]), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID), (ktypeattr_t)(uintptr_t)d[1], (uintptr_t)d[2]);
+		KLIB KBuffer_Write(kctx, &wb, (const char *)(&kvs), sizeof(KKeyValue));
+		d += 3;
+		if(KTypeAttr_Is(Boxed, kvs.attrTypeId)) {
+			KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs.ObjectValue);
+		}
+	}
+	size_t nitems = KBuffer_bytesize(&wb) / sizeof(KKeyValue);
+	if(nitems > 0) {
+		KLIB KDict_MergeData(kctx, &(ns->constTable), (KKeyValue *)KLIB KBuffer_text(kctx, &wb, 0), nitems, kNameSpace_Is(Override, ns));
+	}
+	KLIB KBuffer_Free(&wb);
+	return true;
+}
+
+
+
+
 // ---------------------------------------------------------------------------
 // Utils
 
@@ -314,86 +446,6 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 	}
 }
 
-// --------------------------------------------------------------------------
-/* ConstTable */
-
-static KKeyValue* kNameSpace_GetLocalConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t queryKey)
-{
-	KKeyValue *kvs = KLIB KDict_GetNULL(kctx, &(ns->constTable), queryKey);
-	if(kvs != NULL && kvs->attrTypeId == VirtualType_Text) {
-		const char *textData = (const char *)kvs->unboxValue;
-		kvs->attrTypeId = KType_String | KTypeAttr_Boxed;
-		kvs->StringValue = KLIB new_kString(kctx, ns->NameSpaceConstList, textData, strlen(textData), StringPolicy_TEXT);
-		KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs->StringValue);
-	}
-	return kvs;
-}
-
-static KKeyValue* kNameSpace_GetConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t queryKey)
-{
-	while(ns != NULL) {
-		KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
-		if(foundKeyValue != NULL) return foundKeyValue;
-		ns = ns->parentNULL;
-	}
-	return NULL;
-}
-
-static kbool_t kNameSpace_MergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KKeyValue *kvs, size_t nitems, int isOverride, KTraceInfo *trace)
-{
-	size_t i;
-	for(i = 0; i < nitems; i++) {
-		if(KTypeAttr_Is(Boxed, kvs[i].attrTypeId)) {
-			KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs[i].ObjectValue);
-		}
-	}
-	KLIB KDict_MergeData(kctx, &(ns->constTable), kvs, nitems, isOverride);
-	return true;
-}
-
-static void SetKeyValue(KonohaContext *kctx, KKeyValue *kv, ksymbol_t key, ktypeattr_t ty, uintptr_t unboxValue)
-{
-	kv->key = key;
-	kv->unboxValue = unboxValue;
-	if(KType_Is(UnboxType, ty) || ty == VirtualType_KClass || ty == VirtualType_StaticMethod || ty == VirtualType_Text) {
-		kv->attrTypeId = ty;
-	}
-	else {
-		kv->attrTypeId = ty | KTypeAttr_Boxed;
-	}
-}
-
-static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t key, ktypeattr_t ty, uintptr_t unboxValue, int isOverride, KTraceInfo *trace)
-{
-	KKeyValue kvs;
-	SetKeyValue(kctx, &kvs, key, ty, unboxValue);
-	KLIB KDict_Set(kctx, &(ns->constTable), &kvs);
-	if(KTypeAttr_Is(Boxed, kvs.attrTypeId)) {
-		KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs.ObjectValue);
-	}
-	return true;
-}
-
-static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, const char **d, int isOverride, KTraceInfo *trace)
-{
-	KBuffer wb;
-	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	while(d[0] != NULL) {
-		KKeyValue kvs;
-		SetKeyValue(kctx, &kvs, ksymbolSPOL(d[0], strlen(d[0]), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID), (ktypeattr_t)(uintptr_t)d[1], (uintptr_t)d[2]);
-		KLIB KBuffer_Write(kctx, &wb, (const char *)(&kvs), sizeof(KKeyValue));
-		d += 3;
-		if(KTypeAttr_Is(Boxed, kvs.attrTypeId)) {
-			KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs.ObjectValue);
-		}
-	}
-	size_t nitems = KBuffer_bytesize(&wb) / sizeof(KKeyValue);
-	if(nitems > 0) {
-		KLIB KDict_MergeData(kctx, &(ns->constTable), (KKeyValue *)KLIB KBuffer_text(kctx, &wb, 0), nitems, isOverride);
-	}
-	KLIB KBuffer_Free(&wb);
-	return true;
-}
 
 // ---------------------------------------------------------------------------
 /* ClassName in ConstTable */
@@ -442,7 +494,7 @@ static KClass *kNameSpace_GetClassByFullName(KonohaContext *kctx, kNameSpace *ns
 static KClass *kNameSpace_DefineClass(KonohaContext *kctx, kNameSpace *ns, kString *name, KDEFINE_CLASS *cdef, KTraceInfo *trace)
 {
 	KClass *ct = KLIB KClass_define(kctx, ns->packageId, name, cdef, trace);
-	if(!KLIB kNameSpace_SetConstData(kctx, ns, ct->classNameSymbol, VirtualType_KClass, (uintptr_t)ct, true/*isOverride*/, trace)) {
+	if(!KLIB kNameSpace_SetConstData(kctx, ns, ct->classNameSymbol, VirtualType_KClass, (uintptr_t)ct, trace)) {
 		return NULL;
 	}
 	return ct;
@@ -985,7 +1037,7 @@ static kbool_t kNameSpace_ImportSymbol(KonohaContext *kctx, kNameSpace *ns, kNam
 	else {
 		KKeyValue *kvs = kNameSpace_GetLocalConstNULL(kctx, packageNS, keyword);
 		if(kvs != NULL) {
-			if(kNameSpace_MergeConstData(kctx, (kNameSpaceVar *)ns, kvs, 1, false/*isOverride*/, trace)) {
+			if(kNameSpace_MergeConstData(kctx, (kNameSpaceVar *)ns, kvs, 1, trace)) {
 				if(KTypeAttr_Unmask(kvs->attrTypeId) == VirtualType_KClass) {
 					size_t i;
 					ktypeattr_t typeId = ((KClass *)kvs->unboxValue)->typeId;
@@ -1018,7 +1070,7 @@ static kbool_t kNameSpace_ImportAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	if(!kNameSpace_isImported(kctx, ns, packageNS, trace)) {
 		size_t i;
 		if(kNameSpace_sizeConstTable(packageNS) > 0) {
-			if(!kNameSpace_MergeConstData(kctx, (kNameSpaceVar *)ns, packageNS->constTable.data.keyValueItems, kNameSpace_sizeConstTable(packageNS), false/*isOverride*/, trace)) {
+			if(!kNameSpace_MergeConstData(kctx, (kNameSpaceVar *)ns, packageNS->constTable.data.keyValueItems, kNameSpace_sizeConstTable(packageNS), trace)) {
 				return false;
 			}
 		}
@@ -1031,7 +1083,7 @@ static kbool_t kNameSpace_ImportAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 			}
 		}
 		// record imported
-		return kNameSpace_SetConstData(kctx, ns, packageNS->packageId | KSymbolAttr_Pattern, KType_int, packageNS->packageId, 0, trace);
+		return kNameSpace_SetConstData(kctx, ns, packageNS->packageId | KSymbolAttr_Pattern, KType_int, packageNS->packageId, trace);
 	}
 	return false;
 }

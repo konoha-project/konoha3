@@ -298,7 +298,7 @@ static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		{"NaN", KType_float, NAN},
 		{NULL} /* sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(FloatData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(FloatData), trace);
 	return true;
 }
 
@@ -340,7 +340,7 @@ static kbool_t float_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 			{"double", VirtualType_KClass, (uintptr_t)KClass_Float},
 			{NULL},
 		};
-		KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(ClassData), false/*isOverride*/, trace);
+		KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(ClassData), trace);
 	}
 	return true;
 }

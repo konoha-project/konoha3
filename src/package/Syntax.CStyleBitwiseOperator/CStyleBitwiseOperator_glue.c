@@ -96,7 +96,7 @@ static kbool_t int_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		{"INT_MIN", KType_int, KINT_MIN},
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), trace);
 	return true;
 }
 
@@ -136,7 +136,7 @@ static kbool_t CStyleBitwiseOperator_ExportNameSpace(KonohaContext *kctx, kNameS
 		{"long", VirtualType_KClass, (uintptr_t)KClass_Int},
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(ClassData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(ClassData), trace);
 	return true;
 }
 

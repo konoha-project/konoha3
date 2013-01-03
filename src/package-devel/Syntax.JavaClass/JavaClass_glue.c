@@ -154,7 +154,7 @@ static KClassVar* kNameSpace_DefineClassName(KonohaContext *kctx, kNameSpace *ns
 		{kString_text(name), VirtualType_KClass, definedClass},
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(ClassData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(ClassData), trace);
 	return definedClass;
 }
 

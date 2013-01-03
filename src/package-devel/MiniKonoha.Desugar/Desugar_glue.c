@@ -1217,7 +1217,7 @@
 //		{"NameSpace", VirtualType_KClass, (uintptr_t)KClass_NameSpace},
 //		{NULL},
 //	};
-//	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(ClassData), false/*isOverride*/, 0);
+//	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(ClassData), 0);
 //	desugar_defineTokenFunc(kctx, ns, trace);
 //	desugar_defineMessageMethod(kctx, ns, trace);
 //	desugar_defineNodeMethod(kctx, ns, trace);
@@ -1266,7 +1266,7 @@
 //#undef DEFINE_KEYWORD
 //		{NULL},
 //	};
-//	KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(IntData), false/*isOverride*/, trace);
+//	KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(IntData), trace);
 //	return true;
 //}
 //

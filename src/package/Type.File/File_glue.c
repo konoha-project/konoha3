@@ -511,12 +511,12 @@ static void file_defineConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *tr
 		{"stderr", KType_File, KFileStdErr},
 		{NULL}, /* sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(FileData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(FileData), trace);
 	KDEFINE_INT_CONST IntData[] = {
 		{"EOF", KType_int,  EOF},
 		{NULL}, /* sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), trace);
 
 }
 
@@ -548,7 +548,7 @@ static kbool_t file_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 		{"FILE", VirtualType_KClass, (uintptr_t)KClass_File},
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(ClassData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(ClassData), trace);
 	return true;
 }
 

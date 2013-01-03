@@ -1269,9 +1269,9 @@ struct kIntVar /* extends kNumber */ {
 /* String */
 
 typedef enum {
-	VirtualType_Text                  =   KType_void,    /*special use for const char*/
+	VirtualType_Text             =   KType_void,    /*special use for const char*/
 	VirtualType_KClass           =   KType_var,     /*special use for KClass*/
-	VirtualType_StaticMethod          =   KType_0        /*special use for Method*/
+	VirtualType_StaticMethod     =   KType_0        /*special use for Method*/
 } VirtualType;
 
 #define IS_String(o)              (kObject_typeId(o) == KType_String)
@@ -1340,6 +1340,7 @@ struct kArrayVar {
 		kParam         **ParamItems;
 		kMethod        **MethodItems;
 		kFunc          **FuncItems;
+		kNameSpace     **NameSpaceItems;
 		kToken         **TokenItems;
 		kTokenVar      **TokenVarItems;
 		kNode          **NodeItems;
@@ -1502,7 +1503,10 @@ struct kNameSpaceVar {
 	kObjectHeader h;
 	kpackageId_t packageId;  	       kshortflag_t syntaxOption;
 	kArray                            *NameSpaceConstList;
-	kNameSpace                        *parentNULL;
+	union {
+		kNameSpace                        *parentNULL;
+		kArray                            *importedNameSpaceListNULL;
+	};
 	KDict                              constTable;
 	kObject                           *globalObjectNULL;
 	kArray                            *methodList_OnList;   // default K_EMPTYARRAY
@@ -1747,8 +1751,8 @@ struct KonohaLibVar {
 	KClass*        (*kNameSpace_GetClassByFullName)(KonohaContext*, kNameSpace *, const char *, size_t, KClass *);
 	KClass*        (*kNameSpace_DefineClass)(KonohaContext*, kNameSpace *, kString *, KDEFINE_CLASS *, KTraceInfo *);
 
-	kbool_t             (*kNameSpace_SetConstData)(KonohaContext *, kNameSpace *, ksymbol_t, ktypeattr_t, uintptr_t, int isOverride, KTraceInfo *);
-	kbool_t             (*kNameSpace_LoadConstData)(KonohaContext*, kNameSpace *, const char **d, int isOverride, KTraceInfo *);
+	kbool_t             (*kNameSpace_SetConstData)(KonohaContext *, kNameSpace *, ksymbol_t, ktypeattr_t, uintptr_t, KTraceInfo *);
+	kbool_t             (*kNameSpace_LoadConstData)(KonohaContext*, kNameSpace *, const char **d, KTraceInfo *);
 	KKeyValue*          (*kNameSpace_GetConstNULL)(KonohaContext *, kNameSpace *, ksymbol_t);
 	void                (*kNameSpace_LoadMethodData)(KonohaContext*, kNameSpace *, intptr_t *, KTraceInfo *);
 

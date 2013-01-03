@@ -84,7 +84,7 @@ static void namespace_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 //		{"INT_MIN", KType_int, KINT_MIN},
 //		{NULL},
 //	};
-//	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
+//	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), trace);
 }
 
 
@@ -136,7 +136,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		if(result) {
 			KMakeTraceUL(trace, sfp, kNode_uline(stmt));
-			result = KLIB kNameSpace_SetConstData(kctx, ns, unboxKey, type, unboxValue, false/*isOverride*/, trace);
+			result = KLIB kNameSpace_SetConstData(kctx, ns, unboxKey, type, unboxValue, trace);
 		}
 		else {
 			kNode_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", KSymbol_Fmt2(unboxKey));

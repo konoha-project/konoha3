@@ -151,7 +151,7 @@ static void path_defineAccessConst(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		{KDefineConstInt(F_OK)},
 		{NULL} /* sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(intData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(intData), trace);
 }
 
 // boolean System.access(String path, int mode);

@@ -358,7 +358,7 @@ static kbool_t process_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 		{KDefineConstInt(PRIO_USER)},
 		{}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(intData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(intData), trace);
 	return true;
 }
 
