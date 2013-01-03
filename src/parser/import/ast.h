@@ -106,46 +106,46 @@ static int SkipAnnotation(KonohaContext *kctx, kArray *tokenList, int currentIdx
 	return currentIdx;
 }
 
-//static int kNode_AddAnnotation(KonohaContext *kctx, kNodeVar *stmt, KTokenSeq *range, int currentIdx, int *indentRef)
-//{
-//	for(currentIdx = range->beginIdx; currentIdx < range->endIdx; currentIdx++) {
-//		kToken *tk = range->tokenList->TokenItems[currentIdx];
-//		if(kToken_IsIndent(tk)) {
-//			indentRef[0] = tk->indent;
-//			kNode_uline(stmt) = tk->uline;
-//			continue;
-//		}
-//		if(!KSymbol_IsAnnotation(tk->resolvedSymbol)) break;
-//		if(currentIdx + 1 < range->endIdx) {
-//			kToken *nextToken = range->tokenList->TokenItems[currentIdx+1];
-//			kObject *value = UPCAST(K_TRUE);
-//			if(nextToken->resolvedSyntaxInfo != NULL && nextToken->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {
-//				value = (kObject *)ParseNewNode(kctx, stmt, nextToken->GroupTokenList, 0, kArray_size(nextToken->GroupTokenList), "(");
-//				currentIdx++;
-//			}
-//			if(value != NULL) {
-//				KLIB kObjectProto_SetObject(kctx, stmt, tk->resolvedSymbol, kObject_typeId(value), value);
-//			}
-//		}
-//	}
-//	return currentIdx;
-//}
+static void kNode_AddAnnotation(KonohaContext *kctx, kNode *stmt, kArray *tokenList, int beginIdx, int endIdx)
+{
+	int currentIdx;
+	for(currentIdx = beginIdx; currentIdx < endIdx; currentIdx++) {
+		kToken *tk = tokenList->TokenItems[currentIdx];
+		if(kToken_IsIndent(tk)) {
+			continue;
+		}
+		if(KSymbol_IsAnnotation(tk->resolvedSymbol)) {
+			kObject *value = UPCAST(K_TRUE);
+			if(currentIdx + 1 < endIdx) {
+				kToken *nextToken = tokenList->TokenItems[currentIdx+1];
+				if(nextToken->resolvedSyntaxInfo != NULL && nextToken->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {
+					int start = 0;
+					value = (kObject *)SUGAR ParseNewNode(kctx, kNode_ns(stmt), nextToken->GroupTokenList, &start, kArray_size(nextToken->GroupTokenList), ParseExpressionOption, "(");
+					currentIdx++;
+				}
+			}
+			KLIB kObjectProto_SetObject(kctx, stmt, tk->resolvedSymbol, kObject_typeId(value), value);
+			continue;
+		}
+		break;
+	}
+}
 
-static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kArray *tokenList, int beginIdx, int endIdx)
+static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kArray *tokenList, int beginIdx0, int endIdx)
 {
 	int i;
-	SUGAR dumpTokenArray(kctx, 0, tokenList, beginIdx, endIdx);
-	for(i = beginIdx; i < endIdx; i++) {
+	SUGAR dumpTokenArray(kctx, 0, tokenList, beginIdx0, endIdx);
+	for(i = beginIdx0; i < endIdx; i++) {
 		kToken *tk = tokenList->TokenItems[i];
 		if(tk->resolvedSyntaxInfo->precedence_op2 == Precedence_CStyleStatementEnd) {
-			return ParseSyntaxNode(kctx, tk->resolvedSyntaxInfo, node, 0, tokenList, beginIdx, i, endIdx);
+			return ParseSyntaxNode(kctx, tk->resolvedSyntaxInfo, node, 0, tokenList, beginIdx0, i, endIdx);
 		}
 	}
-	beginIdx = SkipAnnotation(kctx, tokenList, beginIdx, endIdx);
-	if(!(beginIdx < endIdx)) {
+	int currentIdx = SkipAnnotation(kctx, tokenList, beginIdx0, endIdx);
+	if(!(currentIdx < endIdx)) {
 		return endIdx;  // empty
 	}
-	kToken *tk = tokenList->TokenItems[beginIdx];
+	kToken *tk = tokenList->TokenItems[currentIdx];
 	kSyntax *syn = tk->resolvedSyntaxInfo;
 	if(syn->syntaxPatternListNULL == NULL) {
 		kNameSpace *currentNameSpace = ns;
@@ -157,9 +157,14 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 				for(i = kArray_size(metaPatternList) - 1; i >=0; i--) {
 					kToken *patternToken = metaPatternList->TokenItems[i];
 					node->syn = patternToken->resolvedSyntaxInfo;
-					int nextIdx = ParseSyntaxNode(kctx, patternToken->resolvedSyntaxInfo, node, 0, tokenList, beginIdx, PatternNoMatch, endIdx);
+					int nextIdx = ParseSyntaxNode(kctx, patternToken->resolvedSyntaxInfo, node, 0, tokenList, currentIdx, PatternNoMatch, endIdx);
 					//DBG_P(">>>>>>>>>> searching meta pattern = %s%s index=%d,%d,%d", KSymbol_Fmt2(patternToken->resolvedSymbol), beginIdx, nextIdx, endIdx);
-					if(nextIdx != PatternNoMatch) return nextIdx;
+					if(nextIdx != PatternNoMatch) {
+						if(beginIdx0 < currentIdx) {
+							kNode_AddAnnotation(kctx, node, tokenList, beginIdx0, currentIdx);
+						}
+						return nextIdx;
+					}
 					if(kNode_IsError(node)) return endIdx;
 					node->syn = NULL;
 					kNode_Reset(kctx, node);
@@ -798,11 +803,11 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 	}
 	RETURN_ERROR:;
 	KTokenSeq_End(kctx, tokens);
-	DBG_P(">>>>source");
-	SUGAR dumpTokenArray(kctx, 0, source->tokenList, beginIdx, source->endIdx);
-
-	DBG_P(">>>>tokens");
-	SUGAR dumpTokenArray(kctx, 0, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
+//	DBG_P(">>>>source");
+//	SUGAR dumpTokenArray(kctx, 0, source->tokenList, beginIdx, source->endIdx);
+//
+//	DBG_P(">>>>tokens");
+//	SUGAR dumpTokenArray(kctx, 0, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
 	return source->endIdx;
 }
 
