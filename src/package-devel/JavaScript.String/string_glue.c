@@ -259,11 +259,12 @@ static kbool_t string_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	int FN_s = KFieldName_("s");
 	int FN_n = KFieldName_("n");
 
-	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_TextPattern, SYNFLAG_CTypeFunc, 0, 0, {NULL}, {SUGARFUNC TypeCheck_ExtendedTextLiteral}, },
-		{ KSymbol_END, },
-	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+//  This must be exported to Syntax.StringInterpolation
+//	KDEFINE_SYNTAX SYNTAX[] = {
+//		{ KSymbol_TextPattern, SYNFLAG_CTypeFunc, 0, 0, {NULL}, {SUGARFUNC TypeCheck_ExtendedTextLiteral}, },
+//		{ KSymbol_END, },
+//	};
+//	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 
 	KDEFINE_METHOD MethodData[] = {
 		_JS|_Public|_Const|_Im, _F(String_opLT),  KType_boolean, KType_String, KMethodName_("<"),  1, KType_String, FN_s,
