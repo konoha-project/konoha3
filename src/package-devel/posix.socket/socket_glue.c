@@ -90,70 +90,70 @@ void toSockaddr(struct sockaddr_in *addr, char *ip, const int port, const int fa
 //	}
 //}
 
-// for select :: kArray* => fd_set*
-static fd_set* toFd(fd_set* s, kArray *a )
-{
-	if(s == NULL || kArray_size(a) <= 0) {
-		return NULL;
-	}
-	FD_ZERO(s);
-	size_t indx;
-	int fd;
-	for(indx = 0; indx < kArray_size(a); indx++ ) {
-		fd = WORD2INT(a->kintItems[indx]);
-		if((fd >= 0) && (fd < FD_SETSIZE)) {
-			FD_SET(fd, s);
-		}
-	}
-	return s;
-}
+//// for select :: kArray* => fd_set*
+//static fd_set* toFd(fd_set* s, kArray *a )
+//{
+//	if(s == NULL || kArray_size(a) <= 0) {
+//		return NULL;
+//	}
+//	FD_ZERO(s);
+//	size_t indx;
+//	int fd;
+//	for(indx = 0; indx < kArray_size(a); indx++ ) {
+//		fd = WORD2INT(a->kintItems[indx]);
+//		if((fd >= 0) && (fd < FD_SETSIZE)) {
+//			FD_SET(fd, s);
+//		}
+//	}
+//	return s;
+//}
 
-// for select :: fd_set* => kArray*
-static void fromFd(KonohaContext *kctx, fd_set* s, kArray *a )
-{
-	if(s != NULL && kArray_size(a) > 0 ) {
-		size_t indx;
-		for(indx = 0; indx < kArray_size(a); indx++ ) {
-			if(!FD_ISSET(WORD2INT(a->kintItems[indx]), s) ) {
-//				kArray_Remove(a, indx);
-			}
-		}
-	}
-}
-
-// for select
-static int getArrayMax(kArray *a)
-{
-	int ret = -1;
-	if(kArray_size(a) > 0) {
-		size_t cnt;
-		int fd;
-		for(cnt = 0; cnt < kArray_size(a); cnt++) {
-			if((fd = WORD2INT(a->kintItems[cnt])) > ret) {
-				ret = fd;
-			}
-		}
-	}
-	return ret;
-}
+//// for select :: fd_set* => kArray*
+//static void fromFd(KonohaContext *kctx, fd_set* s, kArray *a )
+//{
+//	if(s != NULL && kArray_size(a) > 0 ) {
+//		size_t indx;
+//		for(indx = 0; indx < kArray_size(a); indx++ ) {
+//			if(!FD_ISSET(WORD2INT(a->kintItems[indx]), s) ) {
+////				kArray_Remove(a, indx);
+//			}
+//		}
+//	}
+//}
 
 // for select
-static int getNfd(kArray *a1, kArray *a2, kArray *a3)
-{
-	int ret = -1;
-	int tmp;
+//static int getArrayMax(kArray *a)
+//{
+//	int ret = -1;
+//	if(kArray_size(a) > 0) {
+//		size_t cnt;
+//		int fd;
+//		for(cnt = 0; cnt < kArray_size(a); cnt++) {
+//			if((fd = WORD2INT(a->kintItems[cnt])) > ret) {
+//				ret = fd;
+//			}
+//		}
+//	}
+//	return ret;
+//}
 
-	if((tmp=getArrayMax(a1)) > ret) {
-		ret = tmp;
-	}
-	if((tmp=getArrayMax(a2)) > ret) {
-		ret = tmp;
-	}
-	if((tmp=getArrayMax(a3)) > ret) {
-		ret = tmp;
-	}
-	return ret;
-}
+//// for select
+//static int getNfd(kArray *a1, kArray *a2, kArray *a3)
+//{
+//	int ret = -1;
+//	int tmp;
+//
+//	if((tmp=getArrayMax(a1)) > ret) {
+//		ret = tmp;
+//	}
+//	if((tmp=getArrayMax(a2)) > ret) {
+//		ret = tmp;
+//	}
+//	if((tmp=getArrayMax(a3)) > ret) {
+//		ret = tmp;
+//	}
+//	return ret;
+//}
 
 /* ======================================================================== */
 // [KMETHODS]

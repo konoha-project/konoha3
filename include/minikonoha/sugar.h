@@ -316,7 +316,7 @@ typedef enum {
 	TokenType_TEXT   = KSymbol_TextPattern,
 	TokenType_NUM    = KSymbol_NumberPattern,
 	TokenType_Member = KSymbol_MemberPattern,
-	TokenType_CODE   = KSymbol_BlockPattern,
+	TokenType_LazyBlock = KSymbol_BlockPattern,
 	TokenType_ERR    = KSymbol_TokenPattern
 } kTokenType;
 

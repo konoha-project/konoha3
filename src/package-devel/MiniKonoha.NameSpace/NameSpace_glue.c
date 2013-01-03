@@ -95,7 +95,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, ns, reqc);
 	kstatus_t result = K_CONTINUE;
 	kToken *tk = SUGAR kNode_GetToken(kctx, stmt, KSymbol_BlockPattern, NULL);
-	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
+	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_LazyBlock) {
 		INIT_GCSTACK();
 		kNameSpace *ns = new_(NameSpace, kNode_ns(stmt), _GcStack);
 		kArray *a = KGetParserContext(kctx)->preparedTokenList;

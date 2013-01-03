@@ -70,7 +70,7 @@ static KMETHOD PatternMatch_CStyleBlock(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
 	kToken *tk = tokenList->TokenItems[beginIdx];
 //	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
-	if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE || tk->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
+	if(tk->tokenType == TokenType_LazyBlock || tk->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
 		kNode_AddParsedObject(kctx, stmt, name, UPCAST(tk));
 		KReturnUnboxValue(beginIdx+1);
 	}
@@ -1082,9 +1082,9 @@ static KMETHOD KMethodFunc_LazyCompilation(KonohaContext *kctx, KonohaStack *sfp
 
 static void kMethod_SetLazyCompilation(KonohaContext *kctx, kMethodVar *mtd, kNode *stmt, kNameSpace *ns)
 {
-	kToken *tcode = SUGAR kNode_GetToken(kctx, stmt, KSymbol_BlockPattern, NULL);
-	if(tcode != NULL && tcode->resolvedSyntaxInfo->keyword == TokenType_CODE) {
-		KFieldSet(mtd, mtd->SourceToken, tcode);
+	kToken *sourceToken = SUGAR kNode_GetToken(kctx, stmt, KSymbol_BlockPattern, NULL);
+	if(sourceToken != NULL && sourceToken->tokenType == TokenType_LazyBlock) {
+		KFieldSet(mtd, mtd->SourceToken, sourceToken);
 		KFieldSet(mtd, mtd->LazyCompileNameSpace, ns);
 		KLIB kMethod_SetFunc(kctx, mtd, KMethodFunc_LazyCompilation);
 		KLIB kArray_Add(kctx, KGetParserContext(kctx)->definedMethodList, mtd);

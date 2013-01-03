@@ -90,14 +90,13 @@ static void kToken_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 static const char *kToken_t(KonohaContext *kctx, kToken *tk)
 {
 	if(IS_String(tk->text)) {
-		if(tk->tokenType == TokenType_CODE) {
+		if(tk->tokenType == TokenType_LazyBlock) {
 			return "{... }";
 		}
 		return kString_text(tk->text);
 	}
 	else {
 		switch(tk->resolvedSymbol) {
-			case TokenType_CODE:
 			case KSymbol_BraceGroup: return "{... }";
 			case KSymbol_ParenthesisGroup: return "(... )";
 			case KSymbol_BracketGroup: return "[... ]";

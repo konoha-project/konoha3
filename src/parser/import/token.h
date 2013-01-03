@@ -156,6 +156,46 @@ static int TokenizeSemiColon(KonohaContext *kctx, kTokenVar *tk, Tokenizer *toke
 	return tok_start+1;
 }
 
+static int TokenizeOpenParenthesis(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+{
+	if(IS_NOTNULL(tk)) {  // pre-resolved
+		kToken_SetSymbolText(kctx, tk, tokenizer->source + tok_start, 1);
+		tk->tokenType = KSymbol_ParenthesisGroup;
+		kToken_Set(OpenGroup, tk, true);
+	}
+	return tok_start+1;
+}
+
+static int TokenizeCloseParenthesis(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+{
+	if(IS_NOTNULL(tk)) {  // pre-resolved
+		kToken_SetSymbolText(kctx, tk, tokenizer->source + tok_start, 1);
+		tk->tokenType = KSymbol_ParenthesisGroup;
+		kToken_Set(CloseGroup, tk, true);
+	}
+	return tok_start+1;
+}
+
+static int TokenizeOpenBracket(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+{
+	if(IS_NOTNULL(tk)) {  // pre-resolved
+		kToken_SetSymbolText(kctx, tk, tokenizer->source + tok_start, 1);
+		tk->tokenType = KSymbol_BracketGroup;
+		kToken_Set(OpenGroup, tk, true);
+	}
+	return tok_start+1;
+}
+
+static int TokenizeCloseBracket(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+{
+	if(IS_NOTNULL(tk)) {  // pre-resolved
+		kToken_SetSymbolText(kctx, tk, tokenizer->source + tok_start, 1);
+		tk->tokenType = KSymbol_BracketGroup;
+		kToken_Set(CloseGroup, tk, true);
+	}
+	return tok_start+1;
+}
+
 static int TokenizeAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	// parse @Annotation:
@@ -351,10 +391,10 @@ static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 	TokenizeLineFeed,
 	TokenizeWhiteSpace,
 	TokenizeWhiteSpace,      /* KonohaChar_Space */
-	TokenizeSingleOperator, /* KonohaChar_OpenParenthesis */
-	TokenizeSingleOperator, /* KonohaChar_CloseParenthesis */
-	TokenizeSingleOperator, /* KonohaChar_OpenBracket */
-	TokenizeSingleOperator, /* KonohaChar_CloseBracket */
+	TokenizeOpenParenthesis, /*TokenizeSingleOperator,  KonohaChar_OpenParenthesis */
+	TokenizeCloseParenthesis, /*TokenizeSingleOperator,  KonohaChar_CloseParenthesis */
+	TokenizeOpenBracket, /*TokenizeSingleOperator, KonohaChar_OpenBracket */
+	TokenizeCloseBracket, /*TokenizeSingleOperator, KonohaChar_CloseBracket */
 	TokenizeLazyBlock, /* KonohaChar_OpenBrace */
 	TokenizeSingleOperator, /* KonohaChar_CloseBrace */
 	TokenizeOperator,  /* KonohaChar_LessThan */
@@ -470,7 +510,7 @@ static int TokenizeLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *toke
 			if(level == 0) {
 				if(IS_NOTNULL(tk)) {
 					KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, tokenizer->source + tok_start + 1, ((pos-2)-(tok_start)+1), 0));
-					tk->tokenType = TokenType_CODE;
+					tk->tokenType = TokenType_LazyBlock;
 				}
 				return pos + 1;
 			}

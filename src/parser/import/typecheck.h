@@ -216,7 +216,7 @@ static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t sy
 		if(IS_Token(expr)) {
 			kTokenVar *tk = (kTokenVar *)expr;
 			kNameSpace *ns = kNode_ns(stmt);
-			if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
+			if(tk->tokenType == TokenType_LazyBlock) {
 				kToken_ToBraceGroup(kctx, (kTokenVar *)tk, ns, NULL);
 			}
 			if(tk->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {

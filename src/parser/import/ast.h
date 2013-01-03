@@ -689,7 +689,7 @@ static int KTokenSeq_ApplyMacroSyntax(KonohaContext *kctx, KTokenSeq *tokens, kS
 				nextIdx = TokenUtils_SkipIndent(source->tokenList, nextIdx+1, source->endIdx);
 				if(nextIdx < source->endIdx) {
 					kTokenVar *tk = source->tokenList->TokenVarItems[nextIdx];
-					if(tk->tokenType == TokenType_CODE) {
+					if(tk->tokenType == TokenType_LazyBlock) {
 						tk = kToken_ToBraceGroup(kctx, tk, tokens->ns, macroParam);
 						new_CommaToken(kctx, groupToken->GroupTokenList);
 						KLIB kArray_Add(kctx, groupToken->GroupTokenList, tk);
@@ -725,7 +725,7 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 		if(tk->tokenType == TokenType_INDENT && tokens->TargetPolicy.RemovingIndent) {
 			continue;  /* filtering indent; */
 		}
-		if(tk->tokenType == TokenType_CODE && (tokens->TargetPolicy.ExpandingBraceGroup || macroParam != NULL)) {
+		if(tk->tokenType == TokenType_LazyBlock && (tokens->TargetPolicy.ExpandingBraceGroup || macroParam != NULL)) {
 			tk = kToken_ToBraceGroup(kctx, tk, tokens->ns, macroParam);
 			DBG_ASSERT(tk->resolvedSyntaxInfo != NULL);
 			KLIB kArray_Add(kctx, tokens->tokenList, tk);
@@ -739,7 +739,7 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 			if(keyword == KSymbol_ParenthesisGroup || keyword == KSymbol_BracketGroup || keyword == KSymbol_BraceGroup) {
 				tk = kToken_ExpandGroupMacro(kctx, tk, tokens->ns, macroParam, OnGcStack);
 			}
-			if(keyword == TokenType_CODE) {
+			if(keyword == KSymbol_BlockPattern) {
 				tk = kToken_ToBraceGroup(kctx, tk, tokens->ns, macroParam);
 			}
 		}

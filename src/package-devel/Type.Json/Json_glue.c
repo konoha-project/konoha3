@@ -267,16 +267,16 @@ static KMETHOD Json_SetJson(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
-//## void Json.setJson(int key, Json value);
-static KMETHOD Json_SetJson_index(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kJson *jo  = (kJson *)sfp[0].asObject;
-	kJson *val = (kJson *)sfp[2].asObject;
-	if(!PLATAPI SetJsonArrayAt(kctx, &jo->jsonbuf, sfp[1].unboxValue, val)) {
-		DBG_P("[WARNING] Json cannot set target object");
-	}
-	KReturnVoid();
-}
+////## void Json.setJson(int key, Json value);
+//static KMETHOD Json_SetJson_index(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	kJson *jo  = (kJson *)sfp[0].asObject;
+//	kJson *val = (kJson *)sfp[2].asObject;
+//	if(!PLATAPI SetJsonArrayAt(kctx, &jo->jsonbuf, sfp[1].unboxValue, val)) {
+//		DBG_P("[WARNING] Json cannot set target object");
+//	}
+//	KReturnVoid();
+//}
 
 //## void Json.add(Json value);
 static KMETHOD Json_AddJson(KonohaContext *kctx, KonohaStack *sfp)
