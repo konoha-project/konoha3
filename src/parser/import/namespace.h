@@ -135,10 +135,10 @@ static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksym
 
 #define kNameSpace_ListImportedNameSpace(kctx, NS, size) (kNameSpace**)ListObject(kctx, (kObject**)(&((NS)->parentNULL)), size)
 
-static KKeyValue* kNameSpace_GetConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t queryKey)
+static KKeyValue* kNameSpace_GetConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t queryKey, int isLocalOnly)
 {
 	KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
-	if(foundKeyValue == NULL) {
+	if(foundKeyValue == NULL && !isLocalOnly) {
 		int i, size;
 		kNameSpace **list = kNameSpace_ListImportedNameSpace(kctx, ns, &size);
 		for(i = size - 1; i > 0; i--) {
@@ -148,7 +148,7 @@ static KKeyValue* kNameSpace_GetConstNULL(KonohaContext *kctx, kNameSpace *ns, k
 			}
 		}
 		if(size == 1) {
-			return kNameSpace_GetConstNULL(kctx, list[0], queryKey);
+			return kNameSpace_GetConstNULL(kctx, list[0], queryKey, isLocalOnly);
 		}
 	}
 	return foundKeyValue;
@@ -192,9 +192,6 @@ static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, con
 	KLIB KBuffer_Free(&wb);
 	return true;
 }
-
-
-
 
 // ---------------------------------------------------------------------------
 // Utils
@@ -483,7 +480,7 @@ static KClass *kNameSpace_GetClassByFullName(KonohaContext *kctx, kNameSpace *ns
 		packageId = KLIB KpackageId(kctx, name, plen, 0, KSymbol_Noname);
 	}
 	if(packageId != KSymbol_Noname) {
-		KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, un);
+		KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, un, false/*isLocalOnly*/);
 		if(kvs != NULL && KTypeAttr_Unmask(kvs->attrTypeId) == VirtualType_KClass) {
 			return (KClass *)kvs->unboxValue;
 		}

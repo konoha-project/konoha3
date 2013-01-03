@@ -599,7 +599,7 @@ static kNode* TypeCheckNodeVariableNULL(KonohaContext *kctx, kNode *stmt, kNodeV
 		return new_ConstNode(kctx, ns, ct, UPCAST(fo));
 	}
 	if(symbol != KSymbol_Noname) {
-		KKeyValue *kv = kNameSpace_GetConstNULL(kctx, ns, symbol);
+		KKeyValue *kv = kNameSpace_GetConstNULL(kctx, ns, symbol, false/*isLocalOnly*/);
 		if(kv != NULL) {
 			if(KTypeAttr_Is(Boxed, kv->attrTypeId)) {
 				SUGAR kNode_SetConst(kctx, expr, NULL, kv->ObjectValue);
@@ -841,7 +841,7 @@ static kMethod* TypeFirstNodeAndLookupMethod(KonohaContext *kctx, kNodeVar *expr
 		}
 	}
 	{
-		KKeyValue* kvs = kNameSpace_GetConstNULL(kctx, ns, funcName);
+		KKeyValue* kvs = kNameSpace_GetConstNULL(kctx, ns, funcName, false/*isLocalOnly*/);
 		if(kvs != NULL && KTypeAttr_Unmask(kvs->attrTypeId) == VirtualType_StaticMethod) {
 			KClass *c = KClass_((ktypeattr_t)kvs->unboxValue);
 			ksymbol_t alias = (ksymbol_t)(kvs->unboxValue >> (sizeof(ktypeattr_t) * 8));

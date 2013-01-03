@@ -226,7 +226,7 @@ typedef struct {
 
 #define KTypeAttr_Boxed      KFLAG_H0    /* KeyValueStore, Field */
 #define KTypeAttr_ReadOnly   KFLAG_H1    /* Variable, Field */
-#define KTypeAttr_Temporary  KFLAG_H1    /* KeyValueStore */
+#define KTypeAttr_LocalOnly  KFLAG_H1    /* KeyValueStore */
 #define KTypeAttr_Coercion   KFLAG_H2    /* Variable, Field */
 
 #define KTypeAttr_Is(P, t)   (((t) & KTypeAttr_##P) == KTypeAttr_##P)
@@ -1753,7 +1753,7 @@ struct KonohaLibVar {
 
 	kbool_t             (*kNameSpace_SetConstData)(KonohaContext *, kNameSpace *, ksymbol_t, ktypeattr_t, uintptr_t, KTraceInfo *);
 	kbool_t             (*kNameSpace_LoadConstData)(KonohaContext*, kNameSpace *, const char **d, KTraceInfo *);
-	KKeyValue*          (*kNameSpace_GetConstNULL)(KonohaContext *, kNameSpace *, ksymbol_t);
+	KKeyValue*          (*kNameSpace_GetConstNULL)(KonohaContext *, kNameSpace *, ksymbol_t, int isLocalOnly);
 	void                (*kNameSpace_LoadMethodData)(KonohaContext*, kNameSpace *, intptr_t *, KTraceInfo *);
 
 	kMethod*            (*kNameSpace_GetGetterMethodNULL)(KonohaContext*, kNameSpace *, KClass*, ksymbol_t mn);
