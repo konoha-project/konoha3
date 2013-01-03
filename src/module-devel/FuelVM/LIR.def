@@ -1,0 +1,248 @@
+def ThreadedCode(InvokedCount:uchar, StackSize:uchar, CodeSize:ushort) ::
+	InvokedCount += 1;
+	CodeThreading(PC, JUMP_TABLE);
+	((OPPrologue *)PC)->InvokedCount = InvokedCount;
+	(void)CodeSize;
+	return Val;
+
+def Prologue(InvokedCount:uchar, StackSize:uchar, CodeSize:ushort) ::
+	InvokedCount += 1;
+	((OPPrologue *)PC)->InvokedCount = InvokedCount;
+	Stack += StackSize;
+	(void)CodeSize;
+	return Val;
+
+def LoadConstant(Dst:VMRegister, Src:SValue) ::
+	Reg[Dst] = Src;
+	DISPATCH_NEXT(PC);
+
+def LoadArgumentI(Dst:VMRegister, SrcIdx:uint) ::
+	Reg[Dst].ival = Stack[SrcIdx].intValue;
+	DISPATCH_NEXT(PC);
+
+def LoadArgumentO(Dst:VMRegister, SrcIdx:uint) ::
+	Reg[Dst].obj = Stack[SrcIdx].asObject;
+	DISPATCH_NEXT(PC);
+
+def LoadLocal(Dst:VMRegister, Src:VMRegister) ::
+	Reg[Dst] = Reg[Src];
+	DISPATCH_NEXT(PC);
+
+def LoadField(Dst:VMRegister, Src:VMRegister, FieldIdx:uint) ::
+	Reg[Dst] = Reg[Src].obj->fields[FieldIdx];
+	DISPATCH_NEXT(PC);
+
+def StoreLocal(Dst:VMRegister, Src:VMRegister) ::
+	Reg[Dst] = Reg[Src];
+	DISPATCH_NEXT(PC);
+
+def StoreField(Dst:VMRegister, FieldIdx:uint, Src:VMRegister) ::
+	Reg[Dst].obj->fields[FieldIdx] = Reg[Src];
+	DISPATCH_NEXT(PC);
+
+def New(Dst:VMRegister, Param:uintptr_t, Type:TypeId) ::
+	Reg[Dst].obj = CreateObject(kctx, Param, Type);
+	DISPATCH_NEXT(PC);
+
+def Call(ParamSize:uchar, Mtd:kMethodPtr, Obj:kObjectPtr, uline:uintptr_t) ::
+	Reg[Dst] = CallMethod(kctx, Mtd, ParamSize, ReturnType, Obj, uline);
+	DISPATCH_NEXT(PC);
+
+def VCall(ParamSize:uint, CacheInfo:Cache, uline:uintptr_t) ::
+	Reg[Dst] = CallMethodWithCache(kctx, Mtd, ParamSize, CacheInfo, uline);
+	DISPATCH_NEXT(PC);
+
+def PushI(Src:VMRegister) ::
+	PushUnboxedValue(kctx, Reg[Src]);
+	DISPATCH_NEXT(PC);
+
+def PushO(Src:VMRegister) ::
+	PushBoxedValue(kctx, Reg[Src]);
+	DISPATCH_NEXT(PC);
+
+def PopI(Dst:VMRegister) ::
+	Reg[Dst] = PopUnboxedValue(kctx);
+	DISPATCH_NEXT(PC);
+
+def PopO(Dst:VMRegister) ::
+	Reg[Dst] = PopBoxedValue(kctx);
+	DISPATCH_NEXT(PC);
+
+def Func(Dst:VMRegister, StackLayout:IArray) ::
+	Reg[Dst].obj = CreateFunction(Stack, StackLayout);
+	DISPATCH_NEXT(PC);
+
+def Test(Src:VMRegister, Func:TestFunc, CacheInfo:Cache) ::
+	AppendCache(Func, Reg[Src], CacheInfo);
+	DISPATCH_NEXT(PC);
+
+def ReturnI(Src:VMRegister) ::
+	Stack[K_RTNIDX].intValue = Reg[Src].ival;
+	return;
+
+def ReturnO(Src:VMRegister) ::
+	Stack[K_RTNIDX].asObject = Reg[Src].obj;
+	return;
+
+def ReturnVoid() ::
+	return Val;
+
+def CondBrTrue(Src:VMRegister, Block:Address) ::
+	if(Reg[Src].bval) { PC = (ByteCode *)Block; DISPATCH_JUMPTO(Block); } else {}
+	DISPATCH_NEXT(PC);
+
+def CondBrFalse(Src:VMRegister, Block:Address) ::
+	if(!Reg[Src].bval) { PC = (ByteCode *)Block; DISPATCH_JUMPTO(Block); } else {}
+	DISPATCH_NEXT(PC);
+
+def Jump(Block:Address) ::
+	PC = (ByteCode *)Block;
+	DISPATCH_JUMPTO(Block);
+
+def Throw(Src:VMRegister, uline:uintptr_t, exception:uint, fault:uint) ::
+	Raise(kctx, Stack, (kString *) Reg[Src].obj, exception, fault, uline);
+
+def Try(Catch:Address, Finaly:Address) ::
+	Try_(Catch, Finaly, Stack);
+
+def Yield(Src:VMRegister) ::
+	Yield(Reg[Src], Stack);
+	DISPATCH_NEXT(PC);
+
+def Not(Dst:VMRegister, Src:VMRegister) ::
+	CompileTimeAssert((TypeOf(Src) == int));
+	Reg[Dst].ival = !(Reg[Src].ival);
+	DISPATCH_NEXT(PC);
+
+def Neg(Dst:VMRegister, Src:VMRegister) ::
+	CompileTimeAssert((TypeOf(Src) == int));
+	Reg[Dst].ival = -Reg[Src].ival;
+	DISPATCH_NEXT(PC);
+
+def Add(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));
+	Reg[Dst].ival = Reg[LHS].ival + Reg[RHS].ival;
+	DISPATCH_NEXT(PC);
+
+def Sub(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));
+	Reg[Dst].ival = Reg[LHS].ival - Reg[RHS].ival;
+	DISPATCH_NEXT(PC);
+
+def Mul(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));
+	Reg[Dst].ival = Reg[LHS].ival * Reg[RHS].ival;
+	DISPATCH_NEXT(PC);
+
+def Div(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert((TypeOf(LHS) == int && TypeOf(RHS) == int));
+	Reg[Dst].ival = Reg[LHS].ival / Reg[RHS].ival;
+	DISPATCH_NEXT(PC);
+
+def Mod(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
+	Reg[Dst].ival = Reg[LHS].ival % Reg[RHS].ival;
+	DISPATCH_NEXT(PC);
+
+def LShift(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
+	Reg[Dst].ival = Reg[LHS].ival << Reg[RHS].ival;
+	DISPATCH_NEXT(PC);
+
+def RShift(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
+	Reg[Dst].ival = Reg[LHS].ival >> Reg[RHS].ival;
+	DISPATCH_NEXT(PC);
+
+def And(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
+	Reg[Dst].ival = Reg[LHS].ival & Reg[RHS].ival;
+	DISPATCH_NEXT(PC);
+
+def Or(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
+	Reg[Dst].ival = Reg[LHS].ival | Reg[RHS].ival;
+	DISPATCH_NEXT(PC);
+
+def Xor(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert(TypeOf(LHS) == int && TypeOf(RHS) == int);
+	Reg[Dst].ival = Reg[LHS].ival ^ Reg[RHS].ival;
+	DISPATCH_NEXT(PC);
+
+def Eq(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].ival == Reg[RHS].ival);
+	DISPATCH_NEXT(PC);
+
+def Nq(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].ival != Reg[RHS].ival);
+	DISPATCH_NEXT(PC);
+
+def Gt(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].ival >  Reg[RHS].ival);
+	DISPATCH_NEXT(PC);
+
+def Ge(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].ival >= Reg[RHS].ival);
+	DISPATCH_NEXT(PC);
+
+def Lt(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].ival <  Reg[RHS].ival);
+	DISPATCH_NEXT(PC);
+
+def Le(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].ival <= Reg[RHS].ival);
+	DISPATCH_NEXT(PC);
+
+def FNeg(Dst:VMRegister, Src:VMRegister) ::
+	CompileTimeAssert((TypeOf(Src) == float));
+	Reg[Dst].fval = -Reg[Src].fval;
+	DISPATCH_NEXT(PC);
+
+def FAdd(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert((TypeOf(LHS) == float && TypeOf(RHS) == float));
+			(TypeOf(LHS) == float || TypeOf(RHS) == float));
+	Reg[Dst].fval = Reg[LHS].fval + Reg[RHS].fval;
+	DISPATCH_NEXT(PC);
+
+def FSub(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert((TypeOf(LHS) == float && TypeOf(RHS) == float));
+			(TypeOf(LHS) == float || TypeOf(RHS) == float));
+	Reg[Dst].fval = Reg[LHS].fval - Reg[RHS].fval;
+	DISPATCH_NEXT(PC);
+
+def FMul(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert((TypeOf(LHS) == float && TypeOf(RHS) == float));
+	Reg[Dst].fval = Reg[LHS].fval * Reg[RHS].fval;
+	DISPATCH_NEXT(PC);
+
+def FDiv(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	CompileTimeAssert(TypeOf(LHS) == float || TypeOf(RHS) == float);
+	Reg[Dst].fval = Reg[LHS].fval / Reg[RHS].fval;
+	DISPATCH_NEXT(PC);
+
+def FEq(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].fval == Reg[RHS].fval);
+	DISPATCH_NEXT(PC);
+
+def FNq(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].fval != Reg[RHS].fval);
+	DISPATCH_NEXT(PC);
+
+def FGt(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].fval >  Reg[RHS].fval);
+	DISPATCH_NEXT(PC);
+
+def FGe(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].fval >= Reg[RHS].fval);
+	DISPATCH_NEXT(PC);
+
+def FLt(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].fval <  Reg[RHS].fval);
+	DISPATCH_NEXT(PC);
+
+def FLe(Dst:VMRegister, LHS:VMRegister, RHS:VMRegister) ::
+	Reg[Dst].bval = (Reg[LHS].ival <= Reg[RHS].ival);
+	DISPATCH_NEXT(PC);
+
+def Nop() ::
+	DISPATCH_NEXT(PC);
