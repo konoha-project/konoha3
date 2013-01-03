@@ -24,9 +24,7 @@
 
 /* ************************************************************************ */
 
-#define USE_NODE  1
-
-#define USING_SUGAR_AS_BUILTIN 1
+//#define USING_SUGAR_AS_BUILTIN 1
 #define USE_AsciiToKonohaChar
 
 #include <minikonoha/minikonoha.h>

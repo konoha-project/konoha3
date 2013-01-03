@@ -230,10 +230,8 @@ struct kSyntaxVar {
 	const struct kSyntaxVar          *parentSyntaxNULL;
 	kNameSpace                       *packageNameSpace;
 	ksymbol_t  keyword;               kshortflag_t  flag;
-	union {
-		kArray                       *syntaxPatternListNULL;
-		kArray                       *macroDataNULL;
-	};
+	kArray                       *syntaxPatternListNULL;
+	kArray                       *macroDataNULL;
 	union {
 		kFunc                        *sugarFuncTable[SugarFunc_SIZE];
 		kArray                       *sugarFuncListTable[SugarFunc_SIZE];
@@ -653,7 +651,6 @@ typedef struct {
 
 	void (*dumpToken)(KonohaContext *kctx, kToken *tk, int n);
 	void (*dumpTokenArray)(KonohaContext *kctx, int nest, kArray *a, int s, int e);
-//	void (*dumpNode)(KonohaContext *kctx, int n, int nest, kNode *expr);
 	void (*dumpNode)(KonohaContext *kctx, kNode *stmt);
 
 } KParserModule;

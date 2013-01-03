@@ -83,23 +83,25 @@ static KMETHOD Parse_Block(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Parse(block, name, tokenList, beginIdx, opIdx, endIdx);
 	kNameSpace *ns = kNode_ns(block);
-	int i;
-	for(i = opIdx; i < endIdx; i++) {
-		kToken *tk = tokenList->TokenVarItems[i];
-		if(tk->resolvedSyntaxInfo->precedence_op2 == Precedence_CStyleStatementEnd) {
-			if(beginIdx < i) {
-				kNode *stmt = ParseNewNode(kctx, ns, tokenList, &beginIdx, i, ParseMetaPatternOption, NULL);
-				kNode_AddNode(kctx, block, stmt);
+	if(opIdx != -1) {
+		int i;
+		for(i = opIdx; i < endIdx; i++) {
+			kToken *tk = tokenList->TokenVarItems[i];
+			if(tk->resolvedSyntaxInfo->precedence_op2 == Precedence_CStyleStatementEnd) {
+				if(beginIdx < i) {
+					kNode *stmt = ParseNewNode(kctx, ns, tokenList, &beginIdx, i, ParseMetaPatternOption, NULL);
+					kNode_AddNode(kctx, block, stmt);
+				}
+				beginIdx = i + 1;
 			}
-			beginIdx = i + 1;
 		}
+		if(beginIdx < endIdx) {
+			kNode *stmt = ParseNewNode(kctx, ns, tokenList, &beginIdx, endIdx, ParseMetaPatternOption, NULL);
+			kNode_AddNode(kctx, block, stmt);
+		}
+		DBG_P("create block size=%d", kArray_size(block->NodeList));
+		KReturnUnboxValue(endIdx);
 	}
-	if(beginIdx < endIdx) {
-		kNode *stmt = ParseNewNode(kctx, ns, tokenList, &beginIdx, endIdx, ParseMetaPatternOption, NULL);
-		kNode_AddNode(kctx, block, stmt);
-	}
-	DBG_P("create block size=%d", kArray_size(block->NodeList));
-	KReturnUnboxValue(endIdx);
 }
 
 static KMETHOD PatternMatch_Token(KonohaContext *kctx, KonohaStack *sfp)

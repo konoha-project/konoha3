@@ -134,6 +134,7 @@ static int SkipAnnotation(KonohaContext *kctx, kArray *tokenList, int currentIdx
 static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kArray *tokenList, int beginIdx, int endIdx)
 {
 	int i;
+	SUGAR dumpTokenArray(kctx, 0, tokenList, beginIdx, endIdx);
 	for(i = beginIdx; i < endIdx; i++) {
 		kToken *tk = tokenList->TokenItems[i];
 		if(tk->resolvedSyntaxInfo->precedence_op2 == Precedence_CStyleStatementEnd) {
@@ -512,6 +513,10 @@ static kArray* new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, 
 	for(i = beginIdx; i < endIdx; i++) {
 		KLIB kArray_Add(kctx, newa, a->ObjectItems[i]);
 	}
+//	DBG_P(">>>>>>>>>> beginIdx=%d,%d", beginIdx, endIdx);
+//	SUGAR dumpTokenArray(kctx, 0, newa, 0, kArray_size(newa));
+//	DBG_P("macroTokenList=%p", newa);
+//	kArray_Set(Debug, ((kArrayVar*)newa), true);
 	return newa;
 }
 
@@ -548,9 +553,11 @@ static kbool_t KTokenSeq_ApplyMacro(KonohaContext *kctx, KTokenSeq *tokens, kArr
 {
 	KTokenSeq macro = {tokens->ns, macroTokenList, beginIdx + paramsize, endIdx};
 	KdumpTokenArray(kctx, macro.tokenList, macro.beginIdx, macro.endIdx);
+	SUGAR dumpTokenArray(kctx, 0, macroTokenList, 0, kArray_size(macroTokenList));
+	DBG_P("macroTokenList=%p", macroTokenList);
 	int dstart = kArray_size(tokens->tokenList);
 	KTokenSeq_Preprocess(kctx, tokens, macroParam, &macro, beginIdx + paramsize);
-	DBG_P("dstart=%d, tokens->begin,end=%d, %d", dstart, tokens->beginIdx, tokens->endIdx);
+	DBG_P("<<<<<<<<<<< dstart=%d, tokens->begin,end=%d, %d", dstart, tokens->beginIdx, tokens->endIdx);
 	KdumpTokenArray(kctx, tokens->tokenList, dstart, tokens->endIdx);
 	return true;
 }
@@ -720,6 +727,7 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 		}
 		if(tk->tokenType == TokenType_CODE && (tokens->TargetPolicy.ExpandingBraceGroup || macroParam != NULL)) {
 			tk = kToken_ToBraceGroup(kctx, tk, tokens->ns, macroParam);
+			DBG_ASSERT(tk->resolvedSyntaxInfo != NULL);
 			KLIB kArray_Add(kctx, tokens->tokenList, tk);
 			continue;
 		}
@@ -780,6 +788,7 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 				}
 			}
 		}
+		DBG_ASSERT(tk->resolvedSyntaxInfo != NULL);
 		KLIB kArray_Add(kctx, tokens->tokenList, tk);
 	}
 	if(source->SourceConfig.openToken != NULL) {
@@ -789,6 +798,7 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 	}
 	RETURN_ERROR:;
 	KTokenSeq_End(kctx, tokens);
+	SUGAR dumpTokenArray(kctx, 0, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
 	return source->endIdx;
 }
 

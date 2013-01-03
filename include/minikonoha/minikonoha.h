@@ -1322,6 +1322,7 @@ typedef enum { NonZero, EnsureZero } StringfyPolicy;
 #define IS_Array(o)              (kObject_baseTypeId(o) == KType_Array)
 
 #define kArrayFlag_UnboxData     kObjectFlag_Local1
+#define kArrayFlag_Debug         kObjectFlag_Local2
 #define kArray_Is(P, o)          (KFlag_Is(uintptr_t,(o)->h.magicflag, kArrayFlag_##P))
 #define kArray_Set(P, o, b)      KFlag_Set(uintptr_t,(o)->h.magicflag, kArrayFlag_##P,b)
 
