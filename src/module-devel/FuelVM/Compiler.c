@@ -838,9 +838,11 @@ static struct KVirtualCode *FuelVM_GenerateKVirtualCode(KonohaContext *kctx, kMe
 
 void FuelVM_Recompile(KonohaContext *kctx, kMethod *mtd)
 {
+#ifdef FUELVM_USE_LLVM
 	if(FuelVM_HasOptimizedCode(mtd) == false) {
 		KLIB kMethod_GenCode(kctx, mtd, mtd->CompiledNode, O2Compile);
 	}
+#endif
 }
 
 static void FuelVM_SetMethodCode(KonohaContext *kctx, kMethodVar *mtd, struct KVirtualCode *vcode, KMethodFunc func)

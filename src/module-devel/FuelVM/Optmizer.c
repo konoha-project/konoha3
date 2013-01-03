@@ -866,6 +866,7 @@ static void RemoveUnusedVariable(FuelIRBuilder *builder)
 /* ------------------------------------------------------------------------- */
 /* FoldPHIInst */
 
+#ifdef FUELVM_USE_LLVM
 static void FoldPHIInst1(IPHI *PHI)
 {
 	INodePtr *x, *e;
@@ -895,10 +896,12 @@ static void FoldPHIInst(FuelIRBuilder *builder)
 		}
 	}
 }
+#endif
 
 /* ------------------------------------------------------------------------- */
 /* ConstantPropagation */
 
+#ifdef FUELVM_USE_LLVM
 static void ConstantPropagation(FuelIRBuilder *builder)
 {
 	/* FIXME(ide) This rountine is very very slow with complicated control flow. */
@@ -923,6 +926,7 @@ static void ConstantPropagation(FuelIRBuilder *builder)
 	CommitReplaceValue(&Repl);
 #endif
 }
+#endif
 
 /* ------------------------------------------------------------------------- */
 extern void InsertPHINode(FuelIRBuilder *builder);
