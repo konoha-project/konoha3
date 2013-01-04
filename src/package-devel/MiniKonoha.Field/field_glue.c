@@ -237,10 +237,10 @@ static kbool_t field_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* field_Init(void)
+KDEFINE_PACKAGE* Field_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "field", "1.0");
+	KSetPackageName(d, "MiniKonoha", K_VERSION);
 	d.PackupNameSpace    = field_PackupNameSpace;
 	d.ExportNameSpace   = field_ExportNameSpace;
 	return &d;

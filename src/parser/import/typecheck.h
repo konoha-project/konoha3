@@ -53,7 +53,7 @@ static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kNameSpa
 	INIT_GCSTACK();
 	BEGIN_UnusedStack(lsfp);
 	KUnsafeFieldSet(lsfp[1].asNode, expr);
-//	KUnsafeFieldSet(lsfp[2].asGamma, gma);
+	KUnsafeFieldSet(lsfp[2].asNameSpace, ns);
 	KUnsafeFieldSet(lsfp[3].asObject, reqType);
 	CallSugarMethod(kctx, lsfp, fo, 4, UPCAST(K_NULLNODE));
 	END_UnusedStack();
@@ -278,14 +278,14 @@ static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, 
 
 /* ------------------------------------------------------------------------ */
 
-static struct KGammaLocalData *kNameSpace_Push(KonohaContext *kctx, kNameSpace *ns, struct KGammaLocalData *newone)
+static struct KGammaLocalData *kNameSpace_PushGamma(KonohaContext *kctx, kNameSpace *ns, struct KGammaLocalData *newone)
 {
 	struct KGammaLocalData *oldone = ns->genv;
 	ns->genv = newone;
 	return oldone;
 }
 
-static struct KGammaLocalData *kNameSpace_Pop(KonohaContext *kctx, kNameSpace *ns, struct KGammaLocalData *oldone, struct KGammaLocalData *checksum)
+static struct KGammaLocalData *kNameSpace_PopGamma(KonohaContext *kctx, kNameSpace *ns, struct KGammaLocalData *oldone, struct KGammaLocalData *checksum)
 {
 	struct KGammaLocalData *newone = ns->genv;
 	assert(checksum == newone);
@@ -296,8 +296,8 @@ static struct KGammaLocalData *kNameSpace_Pop(KonohaContext *kctx, kNameSpace *n
 	return newone;
 }
 
-#define KPushGammaStack(G,B) struct KGammaLocalData *oldbuf_ = kNameSpace_Push(kctx, G, B)
-#define KPopGammaStack(G,B)  kNameSpace_Pop(kctx, G, oldbuf_, B)
+#define KPushGammaStack(G,B) struct KGammaLocalData *oldbuf_ = kNameSpace_PushGamma(kctx, G, B)
+#define KPopGammaStack(G,B)  kNameSpace_PopGamma(kctx, G, oldbuf_, B)
 
 // --------------------------------------------------------------------------
 
