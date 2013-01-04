@@ -7,10 +7,10 @@
 import("cstyle");
 import("konoha.ns");
 import("konoha.class");
-import("js4.array");
+import("JavaScript.Array");
 import("konoha.new");
-import("konoha.float");
-import("konoha.math");
+import("Type.Float");
+import("JavaScript.Math");
 const N=5500;
 
 class Spectralnorm {

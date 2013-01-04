@@ -2,7 +2,7 @@
 // Reported at ML #598
 // SEGV at git:c4b1feb97a58bef08bf1472fad346689cf9ac4a0
 import("cstyle", "null");
-import("js4.array");
+import("JavaScript.Array");
 import("java2.string");
 
 String[] extractNoun() {

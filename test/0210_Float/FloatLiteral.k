@@ -1,5 +1,5 @@
 /* this test is written by masahiro ide */
-import("konoha.float");
+import("Type.Float");
 
 System.p("0.0 == "+ 0.0);
 System.p("12345.0 == "+ 12345.0);

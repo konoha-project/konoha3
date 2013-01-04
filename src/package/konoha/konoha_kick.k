@@ -30,8 +30,8 @@ import("konoha.var");
 import("konoha.global");
 import("konoha.ns");
 import("java2.string");
-import("js4.regexp");
-import("js4.array");
+import("JavaScript.Regexp");
+import("JavaScript.Array");
 import("konoha.map");
 import("konoha.iterator");
 

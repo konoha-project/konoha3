@@ -1,5 +1,5 @@
 import("java2.string");
-import("js4.regexp");
+import("JavaScript.Regexp");
 
 @Public String[] String.split() {
     /* XXX(ide)

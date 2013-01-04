@@ -1,6 +1,6 @@
 // written by wakamori
 
-import("konoha.float"); // Int.== is Overloaded
+import("Type.Float"); // Int.== is Overloaded
 
 void test() {
 	System.p(2 == a); // a is undefined

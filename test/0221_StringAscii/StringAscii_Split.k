@@ -1,7 +1,7 @@
 //written by Joseph
 
-import("js4.array");
-import("js4.string");
+import("JavaScript.Array");
+import("JavaScript.String");
 
 void test() {
 	String[] ma = "How are you doing today?".split(" ");

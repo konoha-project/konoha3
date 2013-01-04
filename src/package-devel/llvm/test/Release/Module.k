@@ -1,5 +1,5 @@
 // written by imasahiro
-import("konoha.float");
+import("Type.Float");
 import("llvm");
 
 void f() {

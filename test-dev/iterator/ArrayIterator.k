@@ -2,7 +2,7 @@
 import("cstyle", "while");
 import("konoha.new");
 import("konoha.iterator");
-import("js4.array");
+import("JavaScript.Array");
 
 void iteratorTest () {
 	Array[int] ia = [];

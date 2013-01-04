@@ -1,5 +1,5 @@
-import("js4.array");
-import("js4.regexp");
+import("JavaScript.Array");
+import("JavaScript.Regexp");
 
 void test() {
 	Array[String] r1 = "aa/bb/cc/dd/ee".split(/\//);

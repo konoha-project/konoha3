@@ -1,14 +1,14 @@
 
 // written by shinpei nakata
 
-import("konoha.float");
-import("konoha.math");
+import("Type.Float");
+import("JavaScript.Math");
 import("konoha.bytes");
 import("java2.string");
 import("konoha.global");
 import("konoha.ns");  // konoha.const is obsolete
 import("konoha.class");
-import("js4.array");
+import("JavaScript.Array");
 import("cstyle", "while");
 import("cstyle", "+=");
 import("konoha.new");

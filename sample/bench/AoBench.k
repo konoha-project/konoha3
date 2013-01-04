@@ -1,11 +1,11 @@
-import("konoha.float");
-import("konoha.math");
+import("Type.Float");
+import("JavaScript.Math");
 import("konoha.bytes");
 import("konoha.string");
 import("konoha.global");
 import("konoha.ns");
 import("konoha.class");
-import("js4.array");
+import("JavaScript.Array");
 import("konoha.file");
 import("cstyle", "while");
 import("cstyle", "+=");

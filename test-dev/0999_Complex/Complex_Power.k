@@ -1,6 +1,6 @@
 import("konoha.complex");
-import("konoha.math");
-import("konoha.float");
+import("JavaScript.Math");
+import("Type.Float");
 import("konoha.new");
 import("konoha.class");
 

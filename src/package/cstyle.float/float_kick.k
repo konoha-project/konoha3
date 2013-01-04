@@ -1,1 +1,1 @@
-import("konoha.float");
+import("Type.Float");

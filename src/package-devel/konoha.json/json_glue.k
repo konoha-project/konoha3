@@ -1,6 +1,6 @@
 
 import("konoha.class");
-import("konoha.float");
+import("Type.Float");
 
 @Public int Json.getInt(int index){
 	return this.get(index).toint();

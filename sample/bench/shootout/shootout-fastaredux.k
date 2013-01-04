@@ -6,10 +6,10 @@
 
 import("cstyle");
 import("konoha.ns");
-import("konoha.float");
+import("Type.Float");
 import("konoha.global");
 import("konoha.class");
-import("js4.array");
+import("JavaScript.Array");
 import("konoha.new");
 import("konoha.string");
 import("konoha.bytes");
