@@ -172,7 +172,7 @@ static void cstyle_DefineStatement(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("while"), "\"while\" \"(\" $Expr \")\" $Block", 0, trace);
-	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("do"), "\"do\" $Block \"while\" \"(\" $Expr \")\"", 0, trace);
+//	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("do"), "\"do\" $Block \"while\" \"(\" $Expr \")\"", 0, trace);
 	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("break"), "\"break\"", 0, trace);
 	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("continue"), "\"continue\"", 0, trace);
 }
