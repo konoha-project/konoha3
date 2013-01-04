@@ -88,6 +88,10 @@ static KMETHOD Parse_Block(KonohaContext *kctx, KonohaStack *sfp)
 		for(i = opIdx; i < endIdx; i++) {
 			kToken *tk = tokenList->TokenVarItems[i];
 			if(tk->resolvedSyntaxInfo->precedence_op2 == Precedence_CStyleStatementEnd) {
+				if(IS_NULL(tk->resolvedSyntaxInfo)) {
+					SUGAR MessageNode(kctx, block, tk, NULL, ErrTag, "undefined token: %s", KToken_t(tk));
+					KReturnUnboxValue(endIdx);
+				}
 				if(beginIdx < i) {
 					kNode *stmt = ParseNewNode(kctx, ns, tokenList, &beginIdx, i, ParseMetaPatternOption, NULL);
 					kNode_AddNode(kctx, block, stmt);
@@ -1276,9 +1280,13 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	kFunc *OperatorFunc = KSugarFunc(ns, Expression_Operator);
 	kFunc *MethodCallFunc = KSugarFunc(ns, TypeCheck_MethodCall);
 	kFunc *patternParseFunc = KSugarFunc(ns, Parse_Pattern);
+	kSyntaxVar *nullSyntax = (kSyntaxVar*)KNULL(Syntax);
+	nullSyntax->precedence_op2 = Precedence_CStyleStatementEnd;
+	nullSyntax->precedence_op1 = Precedence_CStyleStatementEnd;
+	nullSyntax->sugarFuncTable[KSugarParseFunc] = KSugarFunc(ns, Parse_Block);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ PATTERN(Indent), SYNFLAG_CFunc|SYNFLAG_NodeLeftJoinOp2, Precedence_CStyleStatementEnd, Precedence_CStyleStatementEnd, {SUGARFUNC Parse_Block}, {SUGARFUNC TypeCheck_Block}},
-		{ TOKEN(SEMICOLON), SYNFLAG_CFunc|SYNFLAG_NodeLeftJoinOp2, Precedence_CStyleStatementEnd, Precedence_CStyleStatementEnd, {SUGARFUNC Parse_Block}, {SUGARFUNC TypeCheck_Block}},
+		{ PATTERN(Indent), SYNFLAG_CTypeFunc|SYNFLAG_NodeLeftJoinOp2, Precedence_CStyleStatementEnd, Precedence_CStyleStatementEnd, {nullSyntax->sugarFuncTable[KSugarParseFunc]}, {SUGARFUNC TypeCheck_Block}},
+		{ TOKEN(SEMICOLON), SYNFLAG_CTypeFunc|SYNFLAG_NodeLeftJoinOp2, Precedence_CStyleStatementEnd, Precedence_CStyleStatementEnd, {nullSyntax->sugarFuncTable[KSugarParseFunc]}, {SUGARFUNC TypeCheck_Block}},
 		{ PATTERN(Symbol),  SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_MethodName}, {SUGARFUNC TypeCheck_Symbol},},
 		{ PATTERN(Text),    SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_TextLiteral},},
 		{ PATTERN(Number),  SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_IntLiteral},},

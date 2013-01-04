@@ -168,7 +168,7 @@ static void kNameSpace_ListSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t
 
 static kArray* kNameSpace_GetSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword)
 {
-	ksymbol_t queryKey = keyword | KSymbolAttr_Annotation;
+	ksymbol_t queryKey = keyword | KSymbolAttr_SyntaxList;
 	KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
 	kArray *syntaxList = NULL;
 	if(foundKeyValue != NULL) {
@@ -190,7 +190,7 @@ static kArray* kNameSpace_GetSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksy
 
 static kbool_t kNameSpace_ResetSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword)
 {
-	ksymbol_t queryKey = keyword | KSymbolAttr_Annotation;
+	ksymbol_t queryKey = keyword | KSymbolAttr_SyntaxList;
 	KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
 	if(foundKeyValue != NULL) {
 		kArray *syntaxList = (kArray*)foundKeyValue->ObjectValue;

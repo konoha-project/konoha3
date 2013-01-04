@@ -243,10 +243,11 @@ typedef struct {
 #define _NEWID                 KSymbol_NewId
 #define _NEWRAW                KSymbol_NewRaw
 
-//#define KSymbolAttr_Annotation        (KFLAG_H1|KFLAG_H2)
-//#define KSymbolAttr_Pattern           (KFLAG_H0|KFLAG_H1|KFLAG_H2)
-#define KSymbolAttr_Annotation        (KFLAG_H0|KFLAG_H1)
-#define KSymbolAttr_Pattern           (KFLAG_H0|KFLAG_H2)
+#define KSymbolAttr_Annotation        (KFLAG_H1|KFLAG_H2)
+#define KSymbolAttr_Pattern           (KFLAG_H0|KFLAG_H1|KFLAG_H2)
+#define KSymbolAttr_SyntaxList        (KFLAG_H3)
+//#define KSymbolAttr_Annotation        (KFLAG_H0|KFLAG_H1)
+//#define KSymbolAttr_Pattern           (KFLAG_H0|KFLAG_H2)
 #define KSymbol_IsAnnotation(S)       ((S & KSymbolAttr_Pattern) == KSymbolAttr_Annotation)
 #define KSymbol_IsPattern(S)          ((S & KSymbolAttr_Pattern) == KSymbolAttr_Pattern)
 
