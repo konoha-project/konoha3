@@ -216,9 +216,9 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->AddParamNode                 = AddParamNode;
 	mod->kNode_RightJoinNode          = kNode_RightJoinNode;
 	mod->kToken_ToError               = kToken_ToError;
-	mod->MessageNode               = MessageNode;
+	mod->MessageNode                  = MessageNode;
 
-	mod->VisitNode                  = VisitNode;
+	mod->VisitNode                    = VisitNode;
 
 #ifndef USE_SMALLBUILD
 	mod->dumpToken      = dumpToken;
