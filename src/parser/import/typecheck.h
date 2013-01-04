@@ -151,10 +151,9 @@ static kNode* MakeNodeConst(KonohaContext *kctx, kNode *expr, KClass *rtype)
 
 static kNode *BoxNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KClass* reqClass)
 {
-	kNode *node = KNewNode(kNode_ns(node));
-	KFieldSet(node, node->NodeToPush, node);
-	DBG_ASSERT(kctx == NULL);
-	return kNode_Type(kctx, node, KNode_And, node->attrTypeId);
+	kNode *node = KNewNode(ns);
+	KFieldSet(node, node->NodeToPush, expr);
+	return kNode_Type(kctx, node, KNode_Box, expr->attrTypeId);
 }
 
 static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KClass* reqClass, int pol)
