@@ -1,4 +1,4 @@
-// import("konoha.desugar");
+// import("MiniKonoha.Syntax");
 // import("cstyle"); // use cstyle
 // import("JavaScript.String");
 // // //import("konoha.assign"); Don't use any more

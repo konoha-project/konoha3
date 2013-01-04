@@ -34,7 +34,7 @@ import("JavaScript.Math");
 import("JavaStyle.Object");
 import("JavaScript.String");
 import("dscript.subproc");
-import("konoha.desugar");
+import("MiniKonoha.Syntax");
 
 @Public String FILE.readAll() {
 	String ret = "";
