@@ -542,9 +542,6 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 	KClass *KClass_ArrayT0 = KClass_p0(kctx, KClass_Array, KType_0);
 	ktypeattr_t KType_ArrayT0 = KClass_ArrayT0->typeId;
 
-	kparamtype_t p[] = {{KType_0}};
-	ktypeattr_t KType_FuncMap = (KLIB KClass_Generics(kctx, KClass_Func, KType_0 , 1, p))->typeId;
-
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im,    _F(Array_get), KType_0,   KType_Array, KMethodName_("get"), 1, KType_int, KFieldName_("index"),
 		_Public,        _F(Array_set), KType_void, KType_Array, KMethodName_("set"), 2, KType_int, KFieldName_("index"),  KType_0, KFieldName_("value"),
@@ -623,7 +620,7 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 		KReturn(SUGAR AddParamNode(kctx, ns, arrayNode, currentToken->GroupTokenList, 0, kArray_size(currentToken->GroupTokenList), NULL));
 	}
 	else {
-		kNode *leftNode = SUGAR ParseNewNode(kctx, ns, tokenList, beginIdx, operatorIdx, 0, NULL);
+		kNode *leftNode = SUGAR ParseNewNode(kctx, ns, tokenList, &beginIdx, operatorIdx, 0, NULL);
 		if(leftNode == K_NULLNODE) {
 			KReturn(leftNode);
 		}

@@ -201,7 +201,7 @@ static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTrac
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ KSymbol_("namespace"), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {NULL}, {SUGARFUNC Statement_namespace}},
 		{ KSymbol_("const"), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {NULL}, {SUGARFUNC Statement_ConstDecl}},
-		{ KSymbol_("defined"), 0,0, Precedence_CStylePrefixOperator, {SUGARFUNC Expression_Defined}, {SUGARFUNC TypeCheck_Defined},},
+		{ KSymbol_("defined"), SYNFLAG_CFunc,0, Precedence_CStylePrefixOperator, {SUGARFUNC Expression_Defined}, {SUGARFUNC TypeCheck_Defined},},
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
