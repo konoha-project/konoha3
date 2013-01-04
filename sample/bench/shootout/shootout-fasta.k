@@ -5,14 +5,14 @@
  */
 
 import("cstyle");
-import("konoha.ns");  // konoha.const is obsolete
-import("konoha.global");
-import("konoha.class");
+import("MiniKonoha.NameSpace");  // konoha.const is obsolete
+import("Syntax.GlobalVariable");
+import("Syntax.JavaStyleClass");
 import("Type.Float");
 import("JavaScript.Array");
 // //import("konoha.assign"); Don't use any more
-import("konoha.bytes");
-import("konoha.file");
+import("Type.Bytes");
+import("Type.File");
 
 AllowImplicitGlobalVariable(true);
 

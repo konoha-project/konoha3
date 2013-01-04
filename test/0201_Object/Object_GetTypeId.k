@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.object");
+import("JavaStyle.Object");
 
 assert(("").getTypeId() == 5/*TY_String*/);
 

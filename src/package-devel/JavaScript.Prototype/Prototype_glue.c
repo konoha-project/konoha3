@@ -68,14 +68,14 @@ static KMETHOD Prototype_get(KonohaContext *kctx, KonohaStack *sfp)
 				KReturnField(kvs->ObjectValue);
 			}
 		}
-		DBG_P("requesting type=%s <: %s ? %d", KClass_text(c), KClass_text(targetClass), c->isSubType(kctx, c, targetClass));
+		DBG_P("requesting type=%s instanceof %s ? %d", KClass_text(c), KClass_text(targetClass), c->isSubType(kctx, c, targetClass));
 		if(c->isSubType(kctx, c, targetClass)) {
 			if(KClass_Is(UnboxType, c)) {
 				if(KClass_Is(UnboxType, targetClass)) {
 					KReturnUnboxValue(kvs->unboxValue);
 				}
 				else {
-					DBG_P("boxing type=%s <: %s ? %d", KClass_text(c), KClass_text(targetClass), c->isSubType(kctx, c, targetClass));
+					DBG_P("boxing type=%s instanceof %s ? %d", KClass_text(c), KClass_text(targetClass), c->isSubType(kctx, c, targetClass));
 					KReturn(KLIB new_kObject(kctx, OnStack, c, kvs->unboxValue));
 				}
 			}
@@ -185,7 +185,6 @@ static void prototype_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 static kbool_t prototype_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
-	KImportPackage(ns, "konoha.field", trace);
 	prototype_defineClass(kctx, ns, option, trace);
 	prototype_defineMethod(kctx, ns, trace);
 	return true;
@@ -201,7 +200,7 @@ static kbool_t prototype_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kN
 KDEFINE_PACKAGE* Prototype_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "JavaScript", K_VERSION);
+	KSetPackageName(d, "JavaScript", "1.4");
 	d.PackupNameSpace = prototype_PackupNameSpace;
 	d.ExportNameSpace = prototype_ExportNameSpace;
 	return &d;

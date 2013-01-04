@@ -1,5 +1,5 @@
 import("konoha");
-import("konoha.bytes");
+import("Type.Bytes");
 import("konoha.mpi");
 
 float fabs(float f) {

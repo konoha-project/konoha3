@@ -1,5 +1,5 @@
 // written by wakamatsu
-import("konoha.bytes");
+import("Type.Bytes");
 import("Type.Float");
 import("JavaScript.String");
 import("konoha.mpi");

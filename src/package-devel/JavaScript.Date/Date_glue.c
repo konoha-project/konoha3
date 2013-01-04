@@ -675,7 +675,7 @@ static kbool_t date_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 KDEFINE_PACKAGE* Date_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "date", "1.0");
+	KSetPackageName(d, "JavaScript", "1.4");
 	d.PackupNameSpace    = date_PackupNameSpace;
 	d.ExportNameSpace   = date_ExportNameSpace;
 	return &d;

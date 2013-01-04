@@ -1,6 +1,6 @@
 // written by wakamatsu
 import("konoha");
-import("konoha.bytes");
+import("Type.Bytes");
 import("JavaScript.String");
 import("konoha.mpi");
 

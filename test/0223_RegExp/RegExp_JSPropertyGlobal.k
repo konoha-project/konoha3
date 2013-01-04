@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 import("JavaScript.Regexp");
 
 void test() {

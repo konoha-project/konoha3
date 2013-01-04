@@ -1,13 +1,13 @@
 // written by kimio kuramitsu
 
-import("konoha.object");
+import("JavaStyle.Object");
 
 void test() {
 	Object o = 1;
-	assert(o <: Object);
-	assert(o <: int);
-	assert(!(o <: String));
-	assert(!(o <: String[]));
+	assert(o instanceof Object);
+	assert(o instanceof int);
+	assert(!(o instanceof String));
+	assert(!(o instanceof String[]));
 }
 
 test();

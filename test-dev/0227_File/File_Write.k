@@ -1,7 +1,7 @@
 //Written by shinpei
 //Modified by Joseph
 
-import("konoha.bytes");
+import("Type.Bytes");
 import("JavaScript.String");
 import("posix.file");
 

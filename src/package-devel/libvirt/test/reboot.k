@@ -1,5 +1,5 @@
-import("konoha.new");
-import("konoha.class");
+//import("konoha.new"); Don't use this
+import("Syntax.JavaStyleClass");
 import("konoha.foreach");
 import("JavaScript.Array");
 import("cstyle");

@@ -1,8 +1,8 @@
 // written by shinpei
 
 import("JavaScript.Array");
-import("konoha.class");
-import("konoha.new");
+import("Syntax.JavaStyleClass");
+//import("konoha.new"); Don't use this
 
 class Person {
 	int age;

@@ -24,10 +24,10 @@
 
 import("java2.string");
 import("konoha.foreach");
-import("konoha.ns");
+import("MiniKonoha.NameSpace");
 import("js4.array");
-import("konoha.file");
-import("konoha.class");
+import("Type.File");
+import("Syntax.JavaStyleClass");
 import("cstyle");
 import("konoha.field", ".");
 

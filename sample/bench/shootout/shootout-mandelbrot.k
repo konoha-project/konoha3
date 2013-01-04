@@ -5,13 +5,13 @@
  */
 
 import("cstyle");
-import("konoha.ns");  // konoha.const is obsolete
-import("konoha.class");
+import("MiniKonoha.NameSpace");  // konoha.const is obsolete
+import("Syntax.JavaStyleClass");
 import("Type.Float");
 // //import("konoha.assign"); Don't use any more
 import("JavaScript.Array");
-import("konoha.bytes");
-import("konoha.file");
+import("Type.Bytes");
+import("Type.File");
 
 const BUFFER_SIZE=8192;
 const EOL = "\n";

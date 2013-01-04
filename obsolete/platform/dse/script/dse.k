@@ -2,12 +2,12 @@
 // reviewed by nakata
 
 import("jansson"); // Replace to konoha.json
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 import("JavaScript.Array");
-import("konoha.ns");  // konoha.const is obsolete
+import("MiniKonoha.NameSpace");  // konoha.const is obsolete
 import("JavaScript.String");
-import("konoha.bytes");
-import("konoha.file");
+import("Type.Bytes");
+import("Type.File");
 import("JavaScript.Date");
 import("posix.process");
 import("dscript.subproc");

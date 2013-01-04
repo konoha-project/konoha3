@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 
 class C0 {
 	int x0;

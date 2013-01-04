@@ -1,6 +1,6 @@
 // written by shinpei
 import("cstyle", "while");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("konoha.iterator");
 import("JavaScript.Array");
 

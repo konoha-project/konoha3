@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.untyped");
+import("Syntax.UntypedVariable");
 
 int succ(int n) {
 	return n+1;

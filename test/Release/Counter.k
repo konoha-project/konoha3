@@ -1,7 +1,7 @@
 // written by kimio
 
 // //import("konoha.assign"); Don't use any more
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 
 class Counter {
 	int count;

@@ -1,4 +1,4 @@
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("cstyle", "while");
 import("cstyle"); // konoha.int was obsolete
 import("Type.Float");

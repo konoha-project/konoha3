@@ -2,8 +2,8 @@
 // modified shinpei nakata
 
 import("JavaScript.String");
-import("konoha.bytes");
-import("konoha.new");
+import("Type.Bytes");
+//import("konoha.new"); Don't use this
 
 void test() {
     String a  = "aaaaaaaaaaaaaaaa";

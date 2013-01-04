@@ -1,6 +1,6 @@
 // written by imasahiro
 import("konoha.exception");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 
 void f() {
     System.p("try-start");

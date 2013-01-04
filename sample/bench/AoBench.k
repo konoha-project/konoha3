@@ -3,10 +3,10 @@
 
 import("Type.Float");
 import("JavaScript.Math");
-import("konoha.class");
-import("konoha.bytes");
+import("Syntax.JavaStyleClass");
+import("Type.Bytes");
 import("JavaScript.String");
-import("konoha.file");
+import("Type.File");
 
 int width = 256;
 int height = 256;

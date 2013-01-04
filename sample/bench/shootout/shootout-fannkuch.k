@@ -6,10 +6,10 @@
 
 import("cstyle");
 // //import("konoha.assign"); Don't use any more
-import("konoha.ns");  // konoha.const is obsolete
+import("MiniKonoha.NameSpace");  // konoha.const is obsolete
 import("JavaScript.Array");
-import("konoha.new");
-import("konoha.class");
+//import("konoha.new"); Don't use this
+import("Syntax.JavaStyleClass");
 import("cstyle"); // konoha.int was obsolete
 
 const N=9;

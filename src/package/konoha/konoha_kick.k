@@ -24,11 +24,11 @@
 
 import("cstyle");
 
-import("konoha.object");
-import("konoha.class");
-import("konoha.var");
-import("konoha.global");
-import("konoha.ns");
+import("JavaStyle.Object");
+import("Syntax.JavaStyleClass");
+import("Type.StaticVar");
+import("Syntax.GlobalVariable");
+import("MiniKonoha.NameSpace");
 import("JavaScript.String");
 import("JavaScript.Regexp");
 import("JavaScript.Array");

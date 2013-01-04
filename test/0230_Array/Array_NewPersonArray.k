@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 import("konoha.new")
-import("konoha.class")
+import("Syntax.JavaStyleClass")
 import("JavaScript.Array");
 
 class Person {

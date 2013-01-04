@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.prototype");
+import("JavaScript.Prototype");
 
 void test() {
 	Prototype p = new Prototype();

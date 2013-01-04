@@ -1,7 +1,7 @@
 // written by shinpei nakata
 
 import("cstyle"); // konoha.null is obsolate; use cstyle
-import("konoha.object");
+import("JavaStyle.Object");
 
 void test () {
 	Object obj = null;

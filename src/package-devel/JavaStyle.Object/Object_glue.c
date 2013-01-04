@@ -63,7 +63,7 @@ static void object_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im|_Const|_Final, _F(Object_getTypeId), KType_int, KType_Object, KMethodName_("getTypeId"), 0,
-		_Public|_Hidden|_Im|_Const|_Final, _F(Object_instanceOf), KType_boolean, KType_Object, KMethodName_("<:"), 1, KType_Object, KFieldName_("type"),
+		_Public|_Hidden|_Im|_Const|_Final, _F(Object_instanceOf), KType_boolean, KType_Object, KMethodName_("instanceof"), 1, KType_Object, KFieldName_("type"),
 		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn|_Final, _F(Object_as), KType_Object, KType_Object, KMethodName_("as"), 0,
 		DEND,
 	};
@@ -84,7 +84,7 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 			KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_boolean, staticSubType));
 		}
 		kNameSpace *ns = kNode_ns(stmt);
-		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, KMethodName_("<:"), 1, KMethodMatch_NoOption);
+		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, KMethodName_("instanceof"), 1, KMethodMatch_NoOption);
 		DBG_ASSERT(mtd != NULL);
 		kNode *classValue = SUGAR kNode_SetConst(kctx, expr->NodeList->NodeVarItems[2], NULL, KLIB Knull(kctx, targetClass));
 		KFieldSet(expr->NodeList, expr->NodeList->NodeItems[2], classValue);
@@ -140,7 +140,7 @@ static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t subtype_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("<:"), SYNFLAG_CTypeFunc, Precedence_CStyleMUL, 0, {SUGAR opParseFunc}, {SUGARFUNC TypeCheck_InstanceOf}},
+		{ KSymbol_("instanceof"), SYNFLAG_CTypeFunc, Precedence_CStyleMUL, 0, {SUGAR opParseFunc}, {SUGARFUNC TypeCheck_InstanceOf}},
 		{ KSymbol_("as"), SYNFLAG_CTypeFunc, Precedence_CStyleMUL, 0, {SUGAR opParseFunc}, {SUGARFUNC TypeCheck_as}},
 		{ KSymbol_("to"), SYNFLAG_CTypeFunc, Precedence_CStyleMUL, 0, {SUGAR opParseFunc}, {SUGARFUNC TypeCheck_to}},
 		{ KSymbol_END, },
@@ -171,10 +171,10 @@ static kbool_t object_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* object_Init(void)
+KDEFINE_PACKAGE* Object_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "konoha", K_VERSION);
+	KSetPackageName(d, "JavaStyle", K_VERSION);
 	d.PackupNameSpace    = object_PackupNameSpace;
 	d.ExportNameSpace   = object_ExportNameSpace;
 	return &d;

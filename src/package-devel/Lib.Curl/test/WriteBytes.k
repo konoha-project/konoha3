@@ -1,7 +1,7 @@
 //// written by unknown
 //
-//import("konoha.new");
-//import("konoha.bytes");
+////import("konoha.new"); Don't use this
+//import("Type.Bytes");
 //import("curl");
 //
 //void test() {

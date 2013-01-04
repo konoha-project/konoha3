@@ -1,5 +1,5 @@
 import("gmp");
-import("konoha.class")
+import("Syntax.JavaStyleClass")
 import("cstyle")
 
 void main() {

@@ -1,11 +1,11 @@
 import("cstyle");
 import("konoha.null");
-import("konoha.file");
+import("Type.File");
 import("JavaScript.String");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("JavaScript.Array");
 import("konoha.foreach");
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 
 String varid_type(String orig) {
     String type = orig;

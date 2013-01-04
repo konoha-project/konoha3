@@ -1,6 +1,6 @@
 //Written by Joseph
 
-import("konoha.bytes");
+import("Type.Bytes");
 import("posix.socket");
 
 void test() {

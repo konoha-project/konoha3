@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-import("konoha.bytes");
-import("konoha.file");
+import("Type.Bytes");
+import("Type.File");
 
 @Public @Static Bytes System.malloc(int size) {
 	return new Bytes(size);

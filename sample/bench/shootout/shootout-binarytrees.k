@@ -5,11 +5,11 @@
 
 import("cstyle");
 // //import("konoha.assign"); Don't use any more
-import("konoha.new");
-import("konoha.class");
+//import("konoha.new"); Don't use this
+import("Syntax.JavaStyleClass");
 import("cstyle"); // konoha.null is obsolate; use cstyle
-import("konoha.global");
-import("konoha.ns");  // konoha.const is obsolete
+import("Syntax.GlobalVariable");
+import("MiniKonoha.NameSpace");  // konoha.const is obsolete
 import("cstyle"); // konoha.int was obsolete
 
 const MINDEPTH = 4;

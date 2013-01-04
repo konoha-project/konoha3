@@ -1,10 +1,10 @@
 import("JavaScript.Regexp");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("JavaScript.String");
 import("konoha.foreach");
-import("konoha.ns");  // konoha.const is obsolete
+import("MiniKonoha.NameSpace");  // konoha.const is obsolete
 import("JavaScript.Array");
-import("konoha.file");
+import("Type.File");
 import("cstyle");
 
 const dest = "./minikonoha/";

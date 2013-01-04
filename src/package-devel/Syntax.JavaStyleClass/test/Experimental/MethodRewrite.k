@@ -1,8 +1,8 @@
 // written by kimio kuramitsu
 
-import("konoha.global");
-import("konoha.new");
-import("konoha.class");
+import("Syntax.GlobalVariable");
+//import("konoha.new"); Don't use this
+import("Syntax.JavaStyleClass");
 
 class Person {
 	String name;

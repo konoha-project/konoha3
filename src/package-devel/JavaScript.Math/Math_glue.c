@@ -277,7 +277,7 @@ static kbool_t math_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 KDEFINE_PACKAGE *Math_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "konoha", K_VERSION);
+	KSetPackageName(d, "JavaScript", "1.4");
 	d.PackupNameSpace    = math_PackupNameSpace;
 	d.ExportNameSpace   = math_ExportNameSpace;
 	return &d;

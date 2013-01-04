@@ -1,2 +1,2 @@
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 AllowImplicitField(true);

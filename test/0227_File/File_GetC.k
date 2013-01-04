@@ -1,7 +1,7 @@
 // written by kimio
 
 import("cstyle");
-import("konoha.file");
+import("Type.File");
 
 void test() {
 	String file = FILE.scriptPath("files/ascii.txt");

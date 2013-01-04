@@ -1,5 +1,5 @@
 
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 import("Type.Float");
 
 @Public int Json.getInt(int index){

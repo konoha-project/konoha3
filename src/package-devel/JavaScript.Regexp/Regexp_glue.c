@@ -726,7 +726,7 @@ static kbool_t regexp_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 KDEFINE_PACKAGE* Regexp_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("konoha", "1.0"),
+		KPACKNAME("JavaScript", "1.4"),
 		.PackupNameSpace    = regexp_PackupNameSpace,
 		.ExportNameSpace   = regexp_ExportNameSpace,
 	};

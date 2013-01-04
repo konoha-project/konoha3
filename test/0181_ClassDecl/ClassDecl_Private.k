@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 
 @Private class Point {  // @Test 
 	int x;

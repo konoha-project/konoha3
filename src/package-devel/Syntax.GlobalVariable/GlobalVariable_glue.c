@@ -123,7 +123,6 @@ static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 static	kbool_t global_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.field", trace);
 	global_defineMethod(kctx, ns, trace);
 	global_defineSyntax(kctx, ns, trace);
 	return true;
@@ -131,7 +130,6 @@ static	kbool_t global_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 
 static kbool_t global_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
-	KImportPackage(exportNS, "konoha.field", trace);
 	return kNameSpace_InitGlobalObject(kctx, exportNS, trace);
 }
 

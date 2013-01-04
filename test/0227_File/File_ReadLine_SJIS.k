@@ -1,7 +1,7 @@
 // written by kimio
 import("cstyle");
 import("cstyle"); // konoha.null is obsolate; use cstyle
-import("konoha.file");
+import("Type.File");
 void test() {
 	String file = FILE.scriptPath("files/sjis_kanji.txt");
 	FILE fp = new FILE(file, "r");

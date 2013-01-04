@@ -1,5 +1,5 @@
 // written by kimio
 
-import("konoha.global");
+import("Syntax.GlobalVariable");
 global
 

@@ -1,5 +1,5 @@
 /* written by shinpei */
-import("konoha.new");
+//import("konoha.new"); Don't use this
 // //import("konoha.assign"); Don't use any more
 import("JavaScript.Array");
 

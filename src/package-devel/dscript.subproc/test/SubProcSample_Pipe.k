@@ -1,7 +1,7 @@
 // written by kimio
 
 import("dscript.subproc");
-import("konoha.file");
+import("Type.File");
 import("JavaScript.String");
 
 void test() {

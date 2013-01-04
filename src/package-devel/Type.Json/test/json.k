@@ -1,4 +1,4 @@
-import("konoha.json");
+import("Type.Json");
 
 void main(){
 	Json json = Json.parse("{\"n\": 1, \"s\": \"str\", \"b\":true, \"a\":[1,2,3], \"o\":{\"n\": 2} }");

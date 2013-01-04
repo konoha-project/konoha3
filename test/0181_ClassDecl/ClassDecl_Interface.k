@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 // //import("konoha.assign"); Don't use any more
 
 @Interface class Point {

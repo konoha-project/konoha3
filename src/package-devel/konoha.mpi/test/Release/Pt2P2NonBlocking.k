@@ -1,5 +1,5 @@
 // written by wakamatsu
-import("konoha.bytes");
+import("Type.Bytes");
 import("Type.Float");
 import("konoha.mpi");
 

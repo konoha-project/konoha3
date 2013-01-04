@@ -1,11 +1,11 @@
 // //import("konoha.assign"); Don't use any more
 import("cstyle", "while");
-import("konoha.class");
-import("konoha.global");
+import("Syntax.JavaStyleClass");
+import("Syntax.GlobalVariable");
 import("cstyle"); // konoha.null is obsolate; use cstyle
 import("cstyle"); // konoha.int was obsolete
 import("JavaScript.Array");
-import("konoha.ns");  // konoha.const is obsolete
+import("MiniKonoha.NameSpace");  // konoha.const is obsolete
 AllowImplicitGlobalVariable(true);
 
 /* The Great Computer Language Shootout

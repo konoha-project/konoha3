@@ -1,2 +1,2 @@
-import("konoha.global");
+import("Syntax.GlobalVariable");
 import("posix.process");

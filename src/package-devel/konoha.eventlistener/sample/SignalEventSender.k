@@ -1,8 +1,8 @@
-import("konoha.new");
-import("konoha.ns");  // konoha.const is obsolete
-import("konoha.bytes");
+//import("konoha.new"); Don't use this
+import("MiniKonoha.NameSpace");  // konoha.const is obsolete
+import("Type.Bytes");
 import("JavaScript.String");
-import("konoha.file");
+import("Type.File");
 import("dscript.subproc");
 import("jansson");
 

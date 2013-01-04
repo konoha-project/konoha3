@@ -70,7 +70,7 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t untyped_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.var", trace);
+	KRequirePackage("Type.StaticVar", trace);
 	KTODO(SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_("="), KSugarTypeFunc, KSugarFunc(ns, TypeCheck_UntypedAssign)));
 	return true;
 }

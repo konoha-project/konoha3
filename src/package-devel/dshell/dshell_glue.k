@@ -26,12 +26,12 @@ import("cstyle", "while");
 import("cstyle", "break");
 import("cstyle", "null");
 import("JavaScript.Array");
-import("konoha.console");
-import("konoha.ns");  // konoha.defined is obsolete
-import("konoha.eval");
-import("konoha.file");
+import("MiniKonoha.Console");
+import("MiniKonoha.NameSpace");  // konoha.defined is obsolete
+import("MiniKonoha.Eval");
+import("Type.File");
 import("JavaScript.Math");
-import("konoha.object");
+import("JavaStyle.Object");
 import("JavaScript.String");
 import("dscript.subproc");
 import("konoha.desugar");

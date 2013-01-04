@@ -3,15 +3,15 @@
 
 import("Type.Float");
 import("JavaScript.Math");
-import("konoha.bytes");
+import("Type.Bytes");
 import("JavaScript.String");
-import("konoha.global");
-import("konoha.ns");  // konoha.const is obsolete
-import("konoha.class");
+import("Syntax.GlobalVariable");
+import("MiniKonoha.NameSpace");  // konoha.const is obsolete
+import("Syntax.JavaStyleClass");
 import("JavaScript.Array");
 import("cstyle", "while");
 import("cstyle", "+=");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 AllowImplicitGlobalVariable(true);
 
 const width = 64;

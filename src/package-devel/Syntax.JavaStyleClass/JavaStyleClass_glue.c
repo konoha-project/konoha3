@@ -398,7 +398,7 @@ static kbool_t class_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 
 static kbool_t class_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KImportPackage(ns, "konoha.field", trace);
+	//KImportPackage(ns, "konoha.field", trace);
 	class_defineSyntax(kctx, ns, trace);
 	class_defineMethod(kctx, ns, trace);
 	return true;
@@ -411,10 +411,10 @@ static kbool_t class_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* JavaClass_Init(void)
+KDEFINE_PACKAGE* JavaStyleClass_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "class", "1.0");
+	KSetPackageName(d, "JavaStyle", "1.2");
 	d.PackupNameSpace   = class_PackupNameSpace;
 	d.ExportNameSpace   = class_ExportNameSpace;
 	return &d;

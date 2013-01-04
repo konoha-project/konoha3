@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
-import("konoha.untyped");
-import("konoha.global");
+import("Syntax.UntypedVariable");
+import("Syntax.GlobalVariable");
 
 int succ(int n) {
 	return n+1;

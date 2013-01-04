@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.global");
+import("Syntax.GlobalVariable");
 AllowImplicitGlobalVariable(true);
 int v0 = 0;
 int v1 = 1;

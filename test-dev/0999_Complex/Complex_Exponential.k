@@ -1,8 +1,8 @@
-import("konoha.complex");
+import("Type.Complex");
 import("JavaScript.Math");
 import("Type.Float");
-import("konoha.new");
-import("konoha.class");
+//import("konoha.new"); Don't use this
+import("Syntax.JavaStyleClass");
 
 
 

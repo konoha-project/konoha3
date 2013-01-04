@@ -1,13 +1,13 @@
 // written by kimio kuramitsu
 
 
-import("konoha.untyped");
-import("konoha.object");
+import("Syntax.UntypedVariable");
+import("JavaStyle.Object");
 import("cstyle");
 
 void test() {
 	o = null;
-	assert(o <: Object);
+	assert(o instanceof Object);
 }
 
 test();

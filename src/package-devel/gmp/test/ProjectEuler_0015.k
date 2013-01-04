@@ -8,7 +8,7 @@ How many routes are there through a 20^20 grid?
 
 */
 import("cstyle");
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 import("gmp")
 
 Mpz fact(int n){

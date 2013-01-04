@@ -1,2 +1,2 @@
-import("konoha.object");
+import("JavaStyle.Object");
 
