@@ -22,22 +22,22 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-static kObject** ListObject(KonohaContext *kctx, kObject**list, int *size)
-{
-	if(list[0] == NULL) {
-		size[0] = 0;
-		return NULL;
-	}
-	else if(IS_Array(list[0])) {
-		kArray *a = (kArray*)list[0];
-		size[0] = kArray_size(a);
-		return a->ObjectItems;
-	}
-	else {
-		size[0] = 1;
-		return list;
-	}
-}
+//static kObject** ListObject(KonohaContext *kctx, kObject**list, int *size)
+//{
+//	if(list[0] == NULL) {
+//		size[0] = 0;
+//		return NULL;
+//	}
+//	else if(IS_Array(list[0])) {
+//		kArray *a = (kArray*)list[0];
+//		size[0] = kArray_size(a);
+//		return a->ObjectItems;
+//	}
+//	else {
+//		size[0] = 1;
+//		return list;
+//	}
+//}
 
 // --------------------------------------------------------------------------
 /* ConstTable */
@@ -97,25 +97,18 @@ static KKeyValue* kNameSpace_GetConstNULL(KonohaContext *kctx, kNameSpace *ns, k
 {
 	KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
 	if(foundKeyValue == NULL && !isLocalOnly) {
-		int i, size;
-		kNameSpace **list = kNameSpace_ListImportedNameSpace(kctx, ns, &size);
-		for(i = size - 1; i > 0; i--) {
-			foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, list[i], queryKey);
+		size_t i;
+		for(i = 0; i < kArray_size(ns->importedNameSpaceList); i++) {
+			foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns->NameSpaceConstList->NameSpaceItems[i], queryKey);
 			if(foundKeyValue != NULL) {
 				return foundKeyValue;
 			}
 		}
-		if(size == 1) {
-			return kNameSpace_GetConstNULL(kctx, list[0], queryKey, isLocalOnly);
+		if(ns->parentNULL != NULL) {
+			return kNameSpace_GetConstNULL(kctx, ns->parentNULL, queryKey, isLocalOnly);
 		}
 	}
 	return foundKeyValue;
-//	while(ns != NULL) {
-//		KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
-//		if(foundKeyValue != NULL) return foundKeyValue;
-//		ns = ns->parentNULL;
-//	}
-//	return NULL;
 }
 
 static kbool_t kNameSpace_MergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KKeyValue *kvs, size_t nitems, KTraceInfo *trace)
@@ -167,19 +160,20 @@ static void kNameSpace_ListSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t
 {
 	ktypeattr_t tSyntax = KClass_Syntax->typeId;
 	while(ns != NULL) {
+		size_t i;
 		KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, keyword);
 		if(foundKeyValue != NULL && KTypeAttr_Unmask(foundKeyValue->attrTypeId) == tSyntax) {
 			KLIB kArray_Add(kctx, a, foundKeyValue->ObjectValue);
 		}
-		int i, size;
-		kNameSpace **list = kNameSpace_ListImportedNameSpace(kctx, ns, &size);
-		for(i = size - 1; i > 0; i--) {
-			foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, list[i], keyword);
+		for(i = 0; i < kArray_size(ns->importedNameSpaceList); i++) {
+			foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns->NameSpaceConstList->NameSpaceItems[i], keyword);
 			if(foundKeyValue != NULL && KTypeAttr_Unmask(foundKeyValue->attrTypeId) == tSyntax) {
 				KLIB kArray_Add(kctx, a, foundKeyValue->ObjectValue);
 			}
 		}
-		ns = (size == 1) ? list[0] : NULL;
+		if(ns->parentNULL != NULL) {
+			kNameSpace_ListSyntax(kctx, ns->parentNULL, keyword, a);
+		}
 	}
 }
 
@@ -216,17 +210,30 @@ static void kNameSpace_ResetSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksym
 	}
 }
 
+static void kNameSpace_ImportSyntax2(KonohaContext *kctx, kNameSpace *ns, kSyntax *syn)
+{
+	kNameSpace_ResetSyntaxList(kctx, ns, syn->keyword);
+}
+
+static void kNameSpace_ImportSyntaxAsKeyValue(KonohaContext *kctx, void */*kNameSpace*/ns, KKeyValue *kvs)
+{
+	if(KTypeAttr_Unmask(kvs->attrTypeId) == KType_Syntax) {
+		kNameSpace_ImportSyntax2(kctx, (kNameSpace*)ns, (kSyntax*)kvs->ObjectValue);
+	}
+}
+
 static void kNameSpace_Import2(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS)
 {
-	if(IS_NameSpace(ns->parentNULL)) {
-
+	if(ns->importedNameSpaceList == K_EMPTYARRAY) {
+		ns->importedNameSpaceList = new_(Array, 0, ns->NameSpaceConstList);
 	}
-	KLIB kArray_Add(kctx, ns->importedNameSpaceListNULL, targetNS);
+	KLIB kArray_Add(kctx, ns->importedNameSpaceList, targetNS);
+	KLIB KDict_DoEach(kctx, &(targetNS->constTable), ns, kNameSpace_ImportSyntaxAsKeyValue);
 }
 
 static void kNameSpace_AddSyntax(KonohaContext *kctx, kNameSpace *ns, kSyntax *syn, KTraceInfo *trace)
 {
-	if(kNameSpace_SetConstData(kctx, ns, syn->keyword, KType_Syntax, syn, trace)) {
+	if(kNameSpace_SetConstData(kctx, ns, syn->keyword, KType_Symbol, (uintptr_t)syn, trace)) {
 		kNameSpace_ResetSyntaxList(kctx, ns, syn->keyword);
 	}
 }
@@ -477,6 +484,7 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 		}
 		DBG_ASSERT(syn == kSyntax_(ns, syndef->keyword));
 		KLIB ReportScriptMessage(kctx, trace, DebugTag, "@%s new syntax %s%s", KPackage_text(ns->packageId), KSymbol_Fmt2(syn->keyword));
+		kNameSpace_AddSyntax(kctx, ns, syn, trace);
 		syndef++;
 	}
 }

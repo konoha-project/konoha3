@@ -680,10 +680,10 @@ typedef enum {
 #define new_VariableNode(CTX, NS, BLD, TY, IDX)   SUGAR kNode_SetVariable(CTX, KNewNode(NS), BLD, TY, IDX)
 
 #define SUGAR                                   ((const KParserModule *)KPARSERM)->
+#define KType_Syntax                            SUGAR cSyntax->typeId
 #define KType_Symbol                            SUGAR cSymbol->typeId
 #define KType_Token                             SUGAR cToken->typeId
 #define KType_Node                              SUGAR cNode->typeId
-#define KType_Gamma                             SUGAR cGamma->typeId
 #define KType_TokenArray                        SUGAR cTokenArray->typeId
 
 //#define KSymbol_(T)                               _e->keyword(kctx, T, sizeof(T)-1, KSymbol_Noname)

@@ -1506,10 +1506,8 @@ struct kNameSpaceVar {
 	kObjectHeader h;
 	kpackageId_t packageId;  	       kshortflag_t syntaxOption;
 	kArray                            *NameSpaceConstList;
-	union {
-		kNameSpace                        *parentNULL;
-		kArray                            *importedNameSpaceListNULL;
-	};
+	kNameSpace                        *parentNULL;
+	kArray                            *importedNameSpaceList;
 	KDict                              constTable;
 	kObject                           *globalObjectNULL;
 	kArray                            *methodList_OnList;   // default K_EMPTYARRAY

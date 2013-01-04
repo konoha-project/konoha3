@@ -530,6 +530,7 @@ static void kNameSpace_Init(KonohaContext *kctx, kObject *o, void *conf)
 		ns->packageId     = ns->parentNULL->packageId;
 		ns->syntaxOption  = ns->parentNULL->syntaxOption;
 	}
+	ns->importedNameSpaceList = K_EMPTYARRAY;
 	ns->methodList_OnList = K_EMPTYARRAY;
 	ns->builderApi = PLATAPI GetDefaultBuilderAPI();
 }
