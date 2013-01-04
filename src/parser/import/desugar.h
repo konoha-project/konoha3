@@ -1301,7 +1301,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(DIV), 0, Precedence_CStyleMUL, 0, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(MOD), 0, Precedence_CStyleMUL, 0, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(MUL), 0, Precedence_CStyleMUL, 0, {OperatorFunc}, {MethodCallFunc}},
-		{ TOKEN(ADD), 0, Precedence_CStyleADD, 0, {OperatorFunc}, {MethodCallFunc}},
+		{ TOKEN(ADD), 0, Precedence_CStyleADD, Precedence_CStylePrefixOperator, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(SUB), 0, Precedence_CStyleADD, Precedence_CStylePrefixOperator, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(LT),  0, Precedence_CStyleCOMPARE, 0, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(LTE), 0, Precedence_CStyleCOMPARE, 0, {OperatorFunc}, {MethodCallFunc}},

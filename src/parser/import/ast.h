@@ -352,39 +352,15 @@ static int MatchSyntaxPattern(KonohaContext *kctx, kNode *node, KTokenSeq *token
 	return tokenIdx;
 }
 
-static int SelectSyntaxPattern(KonohaContext *kctx, KTokenSeq *patterns, kArray *patternList, int endIdx)
-{
-	int i;
-	for(i = endIdx - 1; i >= 0; i--) {
-		kToken *tk = patternList->TokenItems[i];
-		if(IS_NULL(tk)) {
-			patterns->endIdx = endIdx;
-			patterns->beginIdx = i + 1;
-			if(KSymbol_IsPattern(patternList->TokenItems[patterns->beginIdx]->resolvedSymbol)) {
-				patterns->beginIdx += 1; /* skip headding meta pattern */
-			}
-			return i - 1;
-		}
-	}
-	return -1;
-}
-
 static int ParseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kSyntax *stmtSyntax, kArray *tokenList, int beginIdx, int endIdx)
 {
-	kToken *errRule[2] = {};
-	kSyntax *currentSyntax = stmtSyntax;
-	DBG_ASSERT(currentSyntax->syntaxPatternListNULL != NULL);
-	int patternEndIdx = kArray_size(currentSyntax->syntaxPatternListNULL);
+	kToken *errRule[2] = {NULL, NULL};
+	DBG_ASSERT(stmtSyntax->syntaxPatternListNULL != NULL);
 	KTokenSeq tokens = {ns, tokenList, beginIdx, endIdx};
-	KTokenSeq nrule  = {ns, currentSyntax->syntaxPatternListNULL, 0, kArray_size(currentSyntax->syntaxPatternListNULL)};
-	do {
-		patternEndIdx = SelectSyntaxPattern(kctx, &nrule, currentSyntax->syntaxPatternListNULL, patternEndIdx);
-		errRule[0] = NULL; errRule[1] = NULL;
-		int nextIdx = MatchSyntaxPattern(kctx, node, &tokens, &nrule, errRule);
-		if(kNode_IsError(node)) return endIdx;
-		if(nextIdx != PatternNoMatch) return nextIdx;
-		kNode_Reset(kctx, node/*, ns*/);
-	} while(patternEndIdx > 0);
+	KTokenSeq nrule  = {ns, stmtSyntax->syntaxPatternListNULL, 0, kArray_size(stmtSyntax->syntaxPatternListNULL)};
+	int nextIdx = MatchSyntaxPattern(kctx, node, &tokens, &nrule, errRule);
+	if(nextIdx != PatternNoMatch) return nextIdx;
+	if(kNode_IsError(node)) return endIdx;
 	if(!kNode_IsError(node)) {
 		DBG_ASSERT(errRule[0] != NULL);
 //		KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
@@ -799,7 +775,6 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 		ERROR_UnclosedToken(kctx, (kTokenVar *)source->SourceConfig.openToken, (const char *)buf);
 		source->SourceConfig.foundErrorToken = source->SourceConfig.openToken;
 	}
-	RETURN_ERROR:;
 	KTokenSeq_End(kctx, tokens);
 //	DBG_P(">>>>source");
 //	SUGAR dumpTokenArray(kctx, 0, source->tokenList, beginIdx, source->endIdx);

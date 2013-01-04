@@ -415,14 +415,6 @@ static kstatus_t kNode_Eval(KonohaContext *kctx, kNode *stmt, kMethod *mtd, KTra
 	if(kNode_IsError(stmt)) {
 		return K_BREAK;  // to avoid duplicated error message
 	}
-//	kNode *stmt = block->NodeList->NodeItems[0];
-//	if(stmt->syn == NULL && kArray_size(block->NodeList) == 1) {
-//		kctx->stack->evalty = KType_void;
-//		return K_CONTINUE;
-//	}
-//	if(stmt->syn != NULL && stmt->syn->keyword == KSymbol_ERR) {
-//		return K_BREAK;
-//	}
 	kbool_t isTryEval = true;
 	if(KonohaContext_Is(CompileOnly, kctx)) {
 		isTryEval = false;
