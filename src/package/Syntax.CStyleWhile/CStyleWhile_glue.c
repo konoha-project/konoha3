@@ -42,9 +42,9 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 	if(kNode_IsError(exprNode)) {
 		KReturn(exprNode);
 	}
-	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
 	kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 	kNode_Set(CatchBreak, stmt, true);
+	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
 	KReturn(kNode_Type(kctx, stmt, KNode_While, KType_void));
 }
 
@@ -135,11 +135,12 @@ static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
 	kNode *p = stmt;
-	while((p = kNode_GetParentNULL(p)) != NULL) {
+	while(p != NULL) {
 		if(kNode_Is(CatchBreak, p)) {
 			KLIB kObjectProto_SetObject(kctx, stmt, stmt->syn->keyword, KType_Node, p);
 			KReturn(kNode_Type(kctx, stmt, KNode_Break, KType_void));
 		}
+		p = kNode_GetParentNULL(p);
 	}
 	SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "break statement not within a loop");
 }
@@ -148,11 +149,12 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
 	kNode *p = stmt;
-	while((p = kNode_GetParentNULL(p)) != NULL) {
+	while(p != NULL) {
 		if(kNode_Is(CatchContinue, p)) {
 			KLIB kObjectProto_SetObject(kctx, stmt, stmt->syn->keyword, KType_Node, p);
 			KReturn(kNode_Type(kctx, stmt, KNode_Continue, KType_void));
 		}
+		p = kNode_GetParentNULL(p);
 	}
 	SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "continue statement not within a loop");
 }
@@ -180,20 +182,6 @@ static void cstyle_DefineStatement(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 //// --------------------------------------------------------------------------
 ///* null */
-//
-////## Boolean Object.isNull();
-//static KMETHOD Object_isNull(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kObject *o = sfp[0].asObject;
-//	KReturnUnboxValue(IS_NULL(o));
-//}
-//
-////## Boolean Object.isNotNull();
-//static KMETHOD Object_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kObject *o = sfp[0].asObject;
-//	KReturnUnboxValue(!IS_NULL(o));
-//}
 //
 //static kbool_t null_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 //{
