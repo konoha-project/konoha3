@@ -163,7 +163,9 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 			intptr_t i;
 			for(i = kArray_size(metaPatternList) - 1; i >=0; i--) {
 				kSyntax *patternSyntax = metaPatternList->SyntaxItems[i];
+				DBG_ASSERT(IS_Syntax(patternSyntax));
 				node->syn = patternSyntax;
+				DBG_P(">>>>>>>>>> searching meta i=%d, pattern = %s%s index=%d,%d", i, KSymbol_Fmt2(patternSyntax->keyword), beginIdx, endIdx);
 				int nextIdx = ParseSyntaxNode(kctx, patternSyntax, node, 0, tokenList, currentIdx, PatternNoMatch, endIdx);
 				//DBG_P(">>>>>>>>>> searching meta pattern = %s%s index=%d,%d,%d", KSymbol_Fmt2(patternToken->resolvedSymbol), beginIdx, nextIdx, endIdx);
 				if(nextIdx != PatternNoMatch) {

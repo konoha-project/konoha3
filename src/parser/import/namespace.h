@@ -22,23 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-//static kObject** ListObject(KonohaContext *kctx, kObject**list, int *size)
-//{
-//	if(list[0] == NULL) {
-//		size[0] = 0;
-//		return NULL;
-//	}
-//	else if(IS_Array(list[0])) {
-//		kArray *a = (kArray*)list[0];
-//		size[0] = kArray_size(a);
-//		return a->ObjectItems;
-//	}
-//	else {
-//		size[0] = 1;
-//		return list;
-//	}
-//}
-
 // --------------------------------------------------------------------------
 /* ConstTable */
 
@@ -109,17 +92,17 @@ static KKeyValue* kNameSpace_GetConstNULL(KonohaContext *kctx, kNameSpace *ns, k
 	return foundKeyValue;
 }
 
-static kbool_t kNameSpace_MergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KKeyValue *kvs, size_t nitems, KTraceInfo *trace)
-{
-	size_t i;
-	for(i = 0; i < nitems; i++) {
-		if(KTypeAttr_Is(Boxed, kvs[i].attrTypeId)) {
-			KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs[i].ObjectValue);
-		}
-	}
-	KLIB KDict_MergeData(kctx, &(ns->constTable), kvs, nitems, kNameSpace_Is(Override, ns));
-	return true;
-}
+//static kbool_t kNameSpace_MergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KKeyValue *kvs, size_t nitems, KTraceInfo *trace)
+//{
+//	size_t i;
+//	for(i = 0; i < nitems; i++) {
+//		if(KTypeAttr_Is(Boxed, kvs[i].attrTypeId)) {
+//			KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs[i].ObjectValue);
+//		}
+//	}
+//	KLIB KDict_MergeData(kctx, &(ns->constTable), kvs, nitems, kNameSpace_Is(Override, ns));
+//	return true;
+//}
 
 static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, const char **d, KTraceInfo *trace)
 {
@@ -220,7 +203,7 @@ static kbool_t kNameSpace_ResetSyntaxList(KonohaContext *kctx, kNameSpace *ns, k
 
 static void kNameSpace_ImportSyntax2(KonohaContext *kctx, kNameSpace *ns, kSyntax *syn)
 {
-	if(KFlag_Is(kshortflag_t, SYNFLAG_MetaPattern, syn->flag)) {
+	if(kSyntax_Is(MetaPattern, syn)) {
 		if(ns->metaPatternList == K_EMPTYARRAY) {
 			ns->metaPatternList = new_(Array, 0, ns->NameSpaceConstList);
 		}

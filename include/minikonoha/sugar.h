@@ -225,8 +225,8 @@ typedef enum {
 
 #define SYNFLAG_CallNode            ((kshortflag_t)1 << 13)
 
-#define kSyntax_Is(P, o)       (KFlag_Is(uintptr_t,(o)->flag, SYNFLAG_##P))
-#define kSyntax_Set(P,o,B)     KFlag_Set(uintptr_t,(o)->flag, SYNFLAG_##P, B)
+#define kSyntax_Is(P, o)       (KFlag_Is(kshortflag_t,(o)->flag, SYNFLAG_##P))
+#define kSyntax_Set(P,o,B)     KFlag_Set(kshortflag_t,(o)->flag, SYNFLAG_##P, B)
 
 struct kSyntaxVar {
 	kObjectHeader h;
