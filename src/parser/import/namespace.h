@@ -77,12 +77,14 @@ static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksym
 static KKeyValue* kNameSpace_GetConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t queryKey, int isLocalOnly)
 {
 	KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
-	if(foundKeyValue == NULL && !isLocalOnly) {
-		size_t i;
-		for(i = 0; i < kArray_size(ns->importedNameSpaceList); i++) {
-			foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns->NameSpaceConstList->NameSpaceItems[i], queryKey);
-			if(foundKeyValue != NULL) {
-				return foundKeyValue;
+	if(foundKeyValue == NULL) {
+		if(!isLocalOnly) {
+			size_t i;
+			for(i = 0; i < kArray_size(ns->importedNameSpaceList); i++) {
+				foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns->importedNameSpaceList->NameSpaceItems[i], queryKey);
+				if(foundKeyValue != NULL) {
+					return foundKeyValue;
+				}
 			}
 		}
 		if(ns->parentNULL != NULL) {
@@ -141,9 +143,13 @@ static kSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbo
 {
 	KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, keyword, false/*isLocalOnly*/);
 	if(kvs != NULL && KTypeAttr_Unmask(kvs->attrTypeId) == KType_Syntax) {
+		//DBG_P(">>>>>>> ns=%p kvs=%p keyword=%s%s has defined syntax", ns, kvs, KSymbol_Fmt2(keyword));
 		return (kSyntax*)kvs->ObjectValue;
 	}
-	DBG_P(">>>>>>> keyword=%s%s has no defined syntax", KSymbol_Fmt2(keyword));
+	DBG_P(">>>>>>> ns=%p kvs=%p keyword=%s%s has no defined syntax", ns, kvs, KSymbol_Fmt2(keyword));
+	if(kvs != NULL) {
+		DBG_P(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> type=%s", KType_text(kvs->attrTypeId));
+	}
 	return KNULL(Syntax);
 }
 
@@ -157,7 +163,7 @@ static void kNameSpace_ListSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t
 			KLIB kArray_Add(kctx, a, foundKeyValue->ObjectValue);
 		}
 		for(i = 0; i < kArray_size(ns->importedNameSpaceList); i++) {
-			foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns->NameSpaceConstList->NameSpaceItems[i], keyword);
+			foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns->importedNameSpaceList->NameSpaceItems[i], keyword);
 			if(foundKeyValue != NULL && KTypeAttr_Unmask(foundKeyValue->attrTypeId) == tSyntax) {
 				KLIB kArray_Add(kctx, a, foundKeyValue->ObjectValue);
 			}
@@ -919,31 +925,34 @@ static KPackage *GetPackageNULL(KonohaContext *kctx, kpackageId_t packageId, int
 //	return false;
 //}
 
-static kbool_t kNameSpace_isImported(KonohaContext *kctx, kNameSpace *ns, kNameSpace *packageNS, KTraceInfo *trace)
-{
-	KKeyValue *value = kNameSpace_GetLocalConstNULL(kctx, ns, packageNS->packageId | KSymbolAttr_Pattern);
-	if(value != NULL) {
-		KLIB ReportScriptMessage(kctx, trace, DebugTag, "package %s has already imported in %s", KPackage_text(ns->packageId), KPackage_text(packageNS->packageId));
-		return true;
-	}
-	return false;
-}
+//static kbool_t kNameSpace_isImported(KonohaContext *kctx, kNameSpace *ns, kNameSpace *packageNS, KTraceInfo *trace)
+//{
+//	KKeyValue *value = kNameSpace_GetLocalConstNULL(kctx, ns, packageNS->packageId | KSymbolAttr_SyntaxList | KSymbolAttr_Pattern);
+//	if(value != NULL) {
+//		KLIB ReportScriptMessage(kctx, trace, DebugTag, "package %s has already imported in %s", KPackage_text(ns->packageId), KPackage_text(packageNS->packageId));
+//		return true;
+//	}
+//	return false;
+//}
 
 static kbool_t kNameSpace_ImportAll(KonohaContext *kctx, kNameSpace *ns, kNameSpace *packageNS, KTraceInfo *trace)
 {
-	if(!kNameSpace_isImported(kctx, ns, packageNS, trace)) {
-//		size_t i;
-		kNameSpace_ImportSyntaxAll(kctx, ns, packageNS, trace);
+	size_t i;
+	for(i = 0; i < kArray_size(ns->importedNameSpaceList); i++) {
+		kNameSpace *importedNS = ns->importedNameSpaceList->NameSpaceItems[i];
+		if(importedNS == packageNS) {
+			KLIB ReportScriptMessage(kctx, trace, DebugTag, "package %s has already imported in %s", KPackage_text(ns->packageId), KPackage_text(packageNS->packageId));
+			return false;
+		}
+	}
+	kNameSpace_ImportSyntaxAll(kctx, ns, packageNS, trace);
 //		for(i = 0; i < kArray_size(packageNS->methodList_OnList); i++) {
 //			kMethod *mtd = packageNS->methodList_OnList->MethodItems[i];
 //			if(kMethod_Is(Public, mtd) && mtd->packageId == packageNS->packageId) {
 //				KLIB kArray_Add(kctx, ns->methodList_OnList, mtd);
 //			}
 //		}
-		// record imported
-		return kNameSpace_SetConstData(kctx, ns, packageNS->packageId | KSymbolAttr_Pattern, KType_int, packageNS->packageId, trace);
-	}
-	return false;
+	return true;
 }
 
 static KPackage *kNameSpace_RequirePackage(KonohaContext *kctx, const char *name, KTraceInfo *trace)
