@@ -31,12 +31,7 @@
 extern "C" {
 #endif
 
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Im       kMethod_Immutable
-#define _Final    kMethod_Final
-#define _F(F)   (intptr_t)(F)
-
+#include <minikonoha/import/methoddecl.h>
 
 static KMETHOD Int_opPlus(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -141,7 +136,7 @@ static kbool_t CStyleBitwiseOperator_ExportNameSpace(KonohaContext *kctx, kNameS
 KDEFINE_PACKAGE* CStyleBitwiseOperator_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "CStyle", "1.0");
+	KSetPackageName(d, "CStyle", K_VERSION);
 	d.PackupNameSpace   = CStyleBitwiseOperator_PackupNameSpace;
 	d.ExportNameSpace   = CStyleBitwiseOperator_ExportNameSpace;
 	return &d;

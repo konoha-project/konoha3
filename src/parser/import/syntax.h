@@ -384,39 +384,31 @@ static KMETHOD Expression_COMMA(KonohaContext *kctx, KonohaStack *sfp)
 //		}
 //	}
 //}
-
-static kNode* NewNode(KonohaContext *kctx, kSyntax *syn, kToken *tk, ktypeattr_t ty)
-{
-	kNodeVar *expr = new_(NodeVar, syn, OnGcStack);
-	KFieldSet(expr, expr->TermToken, tk);
-	expr->node = KNode_New;
-	expr->attrTypeId = ty;
-	return (kNode *)expr;
-}
+//
+//static kNode* NewNode(KonohaContext *kctx, kSyntax *syn, kToken *tk, ktypeattr_t ty)
+//{
+//	kNodeVar *expr = new_(NodeVar, syn, OnGcStack);
+//	KFieldSet(expr, expr->TermToken, tk);
+//	expr->node = KNode_New;
+//	expr->attrTypeId = ty;
+//	return (kNode *)expr;
+//}
 
 static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Expression(stmt, tokenList, beginIdx, currentIdx, endIdx);
-	DBG_ASSERT(beginIdx == currentIdx);
-	if(beginIdx + 1 < endIdx) {
-		kTokenVar *newToken = tokenList->TokenVarItems[beginIdx];   // new Class (
+	VAR_Expression(expr, tokenList, beginIdx, opIdx, endIdx);
+	if(beginIdx == opIdx && beginIdx + 1 < endIdx) {
+		kNameSpace *ns = kNode_ns(expr);
+//		kTokenVar *newToken = tokenList->TokenVarItems[beginIdx];   // new Class (
 		KClass *foundClass = NULL;
-		kNameSpace *ns = kNode_ns(stmt);
 		int nextIdx = SUGAR ParseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
-		if(foundClass == NULL) {
-			kToken *classNameToken = tokenList->TokenVarItems[beginIdx+1];
-			KReturn(SUGAR MessageNode(kctx, stmt, classNameToken, NULL, ErrTag, "not class: %s", KToken_t(classNameToken)));
-		}
-		if((size_t)nextIdx < kArray_size(tokenList)) {
-			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
-			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // new C (...)
-				kSyntax *syn = kSyntax_(ns, KSymbol_ParamPattern/*MethodCall*/);
-				kNode *expr = SUGAR new_UntypedOperatorNode(kctx, syn, 2, newToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
-				newToken->resolvedSymbol = MN_new;
-				KReturn(expr);
-			}
+		if(foundClass != NULL) {
+			expr->node = KNode_New;
+			expr->attrTypeId = foundClass->typeId;
+			KReturnUnboxValue(nextIdx);
 		}
 	}
+	KReturnUnboxValue(-1);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -628,7 +620,7 @@ static kNode* new_GetterNode(KonohaContext *kctx, kToken *tkU, kMethod *mtd, kNo
 	return new_TypedNode(kctx, kNode_ns(expr), KNode_MethodCall, kMethod_GetReturnType(mtd), 2, mtd, expr);
 }
 
-static kNode* TypeCheckNodeVariableNULL(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kNameSpace *ns, KClass *reqClass)
+static kNode* TypeVariableNULL(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KClass *reqc)
 {
 	DBG_ASSERT(expr->attrTypeId == KType_var);
 	kToken *tk = expr->TermToken;
@@ -663,7 +655,7 @@ static kNode* TypeCheckNodeVariableNULL(KonohaContext *kctx, kNode *stmt, kNodeV
 			return new_GetterNode(kctx, tk, mtd, new_ConstNode(kctx, ns, globalClass, ns->globalObjectNULL));
 		}
 	}
-	kMethod *mtd = kNameSpace_GetNameSpaceFuncNULL(kctx, ns, symbol, reqClass);  // finding function
+	kMethod *mtd = kNameSpace_GetNameSpaceFuncNULL(kctx, ns, symbol, reqc);  // finding function
 	if(mtd != NULL) {
 		kParam *pa = kMethod_GetParam(mtd);
 		KClass *ct = KLIB KClass_Generics(kctx, KClass_Func, pa->rtype, pa->psize, (kparamtype_t *)pa->paramtypeItems);
@@ -689,7 +681,7 @@ static kNode* TypeCheckNodeVariableNULL(KonohaContext *kctx, kNode *stmt, kNodeV
 static KMETHOD TypeCheck_Symbol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
-	kNode *texpr = TypeCheckNodeVariableNULL(kctx, stmt, expr, ns, reqc);
+	kNode *texpr = TypeVariableNULL(kctx, expr, ns, reqc);
 	if(texpr == NULL) {
 		kToken *tk = expr->TermToken;
 		texpr = kNodeToken_Message(kctx, stmt, tk, ErrTag, "undefined name: %s", KToken_t(tk));
@@ -1073,59 +1065,57 @@ static KMETHOD Statement_return(KonohaContext *kctx, KonohaStack *sfp)
 
 /* TypeDecl */
 
-static kNode* TypeDeclLocalVariable(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ktypeattr_t attrTypeId, kNode *termNode, kNode *vexpr, kObject *thunk)
+static kNode* TypeDeclLocalVariable(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ktypeattr_t attrTypeId, kNode *termNode, kNode *exprNode, kObject *thunk)
 {
-	DBG_ASSERT(kNode_isSymbolTerm(termNode));
 	int index = kNameSpace_AddLocalVariable(kctx, ns, attrTypeId, termNode->TermToken->resolvedSymbol);
-	SUGAR kNode_SetVariable(kctx, (kNodeVar *)termNode, KNode_Local, attrTypeId, index);
-	return new_TypedNode(kctx, kNode_ns(termNode), KNode_Assign, KClass_void, 3, K_NULLTOKEN, termNode, vexpr);
+	SUGAR kNode_SetVariable(kctx, termNode, KNode_Local, attrTypeId, index);
+	return new_TypedNode(kctx, ns, KNode_Assign, KClass_void, 3, K_NULLTOKEN, termNode, exprNode);
 }
 
-static kbool_t kNode_DeclType(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ktypeattr_t attrTypeId, kNode *declNode, kObject *thunk, KTypeDeclFunc TypeDecl)
+static void kNode_DeclType(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ktypeattr_t attrTypeId, kNode *declNode, kObject *thunk, KTypeDeclFunc TypeDecl)
 {
 	kNode *newstmt = NULL;
 	if(TypeDecl == NULL) TypeDecl = TypeDeclLocalVariable;
 	if(declNode->syn->keyword == KSymbol_COMMA) {
 		size_t i;
 		for(i = 1; i < kArray_size(declNode->NodeList); i++) {
-			if(!kNode_DeclType(kctx, stmt, ns, attrTypeId, kNode_At(declNode, i), thunk, TypeDecl)) return false;
+			kNode_DeclType(kctx, stmt, ns, attrTypeId, kNode_At(declNode, i), thunk, TypeDecl);
+			if(kNode_IsError(stmt)) break;
 		}
-		return true;
 	}
 	else if(declNode->syn->keyword == KSymbol_LET && kNode_isSymbolTerm(kNode_At(declNode, 1))) {
-		if(SUGAR TypeCheckNodeAt(kctx, declNode, 2, ns, KClass_(attrTypeId), 0) == K_NULLNODE) {
+		kNode *exprNode = TypeCheckNodeAt(kctx, declNode, 2, ns, KClass_(attrTypeId), 0);
+		if(kNode_IsError(exprNode)) {
 			// this is neccesarry to avoid 'int a = a + 1;';
-			return false;
+			kNode_ToError(kctx, stmt, exprNode->ErrorMessage);
+			return;
 		}
+		kNode *nameNode = kNode_At(declNode, 1);
 		if(KTypeAttr_Unmask(attrTypeId) == KType_var) {
 			ktypeattr_t attr = KTypeAttr_Attr(attrTypeId);
-			kToken *termToken = kNode_At(declNode, 1)->TermToken;
-			attrTypeId = kNode_At(declNode, 2)->attrTypeId | attr;
+			kToken *termToken = nameNode->TermToken;
+			attrTypeId = exprNode->attrTypeId | attr;
 			kNodeToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", KSymbol_Fmt2(termToken->resolvedSymbol), KType_text(attrTypeId));
 		}
-		newstmt = TypeDecl(kctx, stmt, ns, attrTypeId, kNode_At(declNode, 1), kNode_At(declNode, 2), thunk);
+		newstmt = TypeDecl(kctx, stmt, ns, attrTypeId, nameNode, exprNode, thunk);
 	}
 	else if(kNode_isSymbolTerm(declNode)) {
 		if(attrTypeId == KType_var  || !KType_Is(Nullable, attrTypeId)) {
 			kNode_Message(kctx, stmt, ErrTag, "%s %s%s: initial value is expected", KType_text(attrTypeId), KSymbol_Fmt2(declNode->TermToken->resolvedSymbol));
-			return false;
+			return;
 		}
-		else {
-			kNode *vexpr = new_VariableNode(kctx, ns, KNode_Null, attrTypeId, 0);
-			newstmt = TypeDecl(kctx, stmt, ns, attrTypeId, declNode, vexpr, thunk);
-		}
+		kNode *exprNode = new_VariableNode(kctx, ns, KNode_Null, attrTypeId, 0);
+		newstmt = TypeDecl(kctx, stmt, ns, attrTypeId, declNode, exprNode, thunk);
 	}
 	else {
 		kNode_Message(kctx, stmt, ErrTag, "type declaration: variable name is expected");
-		return false;
+		return;
 	}
-	if(newstmt != NULL) {
-		kNode_AddNode(kctx, stmt, newstmt);
+	if(newstmt != NULL && !kNode_IsError(stmt)) {
 		kNode_Set(OpenBlock, stmt, true);
+		kNode_AddNode(kctx, stmt, newstmt);
 		kNode_Type(kctx, stmt, KNode_Block, KType_void);
-		return true;
 	}
-	return false;
 }
 
 static KMETHOD Statement_TypeDecl(KonohaContext *kctx, KonohaStack *sfp)
@@ -1376,8 +1366,8 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(LTE), 0, Precedence_CStyleCOMPARE, 0, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(GT),  0, Precedence_CStyleCOMPARE, 0, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(GTE), 0, Precedence_CStyleCOMPARE, 0, {OperatorFunc}, {MethodCallFunc}},
-		{ TOKEN(EQ),  0, Precedence_CStyleEQUALS, 0, {OperatorFunc}, {MethodCallFunc}},
-		{ TOKEN(NEQ), 0, Precedence_CStyleEQUALS, 0, {OperatorFunc}, {MethodCallFunc}},
+		{ TOKEN(EQ),  0, Precedence_CStyleEquals, 0, {OperatorFunc}, {MethodCallFunc}},
+		{ TOKEN(NEQ), 0, Precedence_CStyleEquals, 0, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(LET), SYNFLAG_CTypeFunc|SYNFLAG_NodeLeftJoinOp2, Precedence_CStyleAssign, 0, {OperatorFunc}, {SUGARFUNC TypeCheck_Assign}, },
 		{ TOKEN(AND), SYNFLAG_CTypeFunc, Precedence_CStyleAND, 0, {OperatorFunc}, {SUGARFUNC TypeCheck_AndOperator}, },
 		{ TOKEN(OR),  SYNFLAG_CTypeFunc, Precedence_CStyleOR,  0, {OperatorFunc}, {SUGARFUNC TypeCheck_OrOperator}, },

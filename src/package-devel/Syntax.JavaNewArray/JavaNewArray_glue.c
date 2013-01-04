@@ -44,48 +44,48 @@ static kNode* NewNode(KonohaContext *kctx, kSyntax *syn, kToken *tk, ktypeattr_t
 static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, currentIdx, endIdx);
-	DBG_ASSERT(beginIdx == currentIdx);
-	if(beginIdx + 1 < endIdx) {
-		kTokenVar *newToken = tokenList->TokenVarItems[beginIdx];
-		KClass *foundClass = NULL;
-		kNameSpace *ns = kNode_ns(stmt);
-		int nextIdx = SUGAR ParseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
-		if((size_t)nextIdx < kArray_size(tokenList)) {
-			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
-			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // new C (...)
-				kSyntax *syn = kSyntax_(ns, KSymbol_ParamPattern/*MethodCall*/);
-				kNode *expr = SUGAR new_UntypedOperatorNode(kctx, syn, 2, newToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
-				newToken->resolvedSymbol = MN_new;
-				KReturn(expr);
-			}
-			kSyntax *newsyn = kSyntax_(ns, KSymbol_("new"));
-			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup) {     // new int [100]
-				kArray *GroupTokenList = nextTokenAfterClassName->GroupTokenList;
-				KClass *classT0 = NULL;
-				kNode *expr;
-				int hasGenerics = -1;
-				if(kArray_size(GroupTokenList) > 0) {
-					hasGenerics = SUGAR ParseTypePattern(kctx, ns, GroupTokenList, 0, kArray_size(GroupTokenList), &classT0);
-				}
-				if(hasGenerics != -1) {
-					/* new Type1[Type2[]] => Type1<Type2>.new Or Type1<Type2>.newList */
-					KClass *realType = KClass_p0(kctx, foundClass, classT0->typeId);
-					kSyntax *syn;// = (realType->baseTypeId != KType_Array) ? kSyntax_(ns, KSymbol_ParamPattern/*MethodCall*/) : newsyn;
-					syn = newsyn;
-					newToken->resolvedSymbol = (realType->baseTypeId != KType_Array) ? MN_new : KMethodName_("newArray");
-					expr = SUGAR new_UntypedOperatorNode(kctx, syn, 2, newToken,
-							NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], realType->typeId));
-				} else {
-					/* new Type1[] => Array<Type1>.newList */
-					KClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
-					newToken->resolvedSymbol = KMethodName_("newArray");
-					expr = SUGAR new_UntypedOperatorNode(kctx, newsyn, 2, newToken,
-							NewNode(kctx, newsyn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));
-				}
-				KReturn(expr);
-			}
-		}
-	}
+//	DBG_ASSERT(beginIdx == currentIdx);
+//	if(beginIdx + 1 < endIdx) {
+//		kTokenVar *newToken = tokenList->TokenVarItems[beginIdx];
+//		KClass *foundClass = NULL;
+//		kNameSpace *ns = kNode_ns(stmt);
+//		int nextIdx = SUGAR ParseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
+//		if((size_t)nextIdx < kArray_size(tokenList)) {
+//			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
+//			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // new C (...)
+//				kSyntax *syn = kSyntax_(ns, KSymbol_ParamPattern/*MethodCall*/);
+//				kNode *expr = SUGAR new_UntypedOperatorNode(kctx, syn, 2, newToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
+//				newToken->resolvedSymbol = MN_new;
+//				KReturn(expr);
+//			}
+//			kSyntax *newsyn = kSyntax_(ns, KSymbol_("new"));
+//			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup) {     // new int [100]
+//				kArray *GroupTokenList = nextTokenAfterClassName->GroupTokenList;
+//				KClass *classT0 = NULL;
+//				kNode *expr;
+//				int hasGenerics = -1;
+//				if(kArray_size(GroupTokenList) > 0) {
+//					hasGenerics = SUGAR ParseTypePattern(kctx, ns, GroupTokenList, 0, kArray_size(GroupTokenList), &classT0);
+//				}
+//				if(hasGenerics != -1) {
+//					/* new Type1[Type2[]] => Type1<Type2>.new Or Type1<Type2>.newList */
+//					KClass *realType = KClass_p0(kctx, foundClass, classT0->typeId);
+//					kSyntax *syn;// = (realType->baseTypeId != KType_Array) ? kSyntax_(ns, KSymbol_ParamPattern/*MethodCall*/) : newsyn;
+//					syn = newsyn;
+//					newToken->resolvedSymbol = (realType->baseTypeId != KType_Array) ? MN_new : KMethodName_("newArray");
+//					expr = SUGAR new_UntypedOperatorNode(kctx, syn, 2, newToken,
+//							NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], realType->typeId));
+//				} else {
+//					/* new Type1[] => Array<Type1>.newList */
+//					KClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
+//					newToken->resolvedSymbol = KMethodName_("newArray");
+//					expr = SUGAR new_UntypedOperatorNode(kctx, newsyn, 2, newToken,
+//							NewNode(kctx, newsyn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));
+//				}
+//				KReturn(expr);
+//			}
+//		}
+//	}
 }
 
 // ----------------------------------------------------------------------------

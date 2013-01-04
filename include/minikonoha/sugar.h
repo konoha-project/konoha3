@@ -252,7 +252,7 @@ typedef enum {
 	Precedence_CStyleADD      = 500,  /* x + x, x - x */
 	Precedence_CStyleSHIFT    = 600,  /* x << x, x >> x */
 	Precedence_CStyleCOMPARE  = 700,
-	Precedence_CStyleEQUALS   = 800,
+	Precedence_CStyleEquals   = 800,
 	Precedence_CStyleBITAND   = 900,
 	Precedence_CStyleBITXOR   = 1000,
 	Precedence_CStyleBITOR    = 1100,
@@ -615,8 +615,9 @@ typedef struct {
 	kNode*       (*kNode_GetNode)(KonohaContext *, kNode *, ksymbol_t kw, kNode *def);
 	void         (*kNode_InsertAfter)(KonohaContext *, kNode *, kNode *target, kNode *);
 
-	kNode*       (*kNode_Termnize)(KonohaContext *, kNode *, kToken *);
-	kNodeVar*    (*new_UntypedOperatorNode)(KonohaContext *, kSyntax *syn, int n, ...);
+//	kNode*       (*kNode_Termnize)(KonohaContext *, kNode *, kToken *);
+	kNode*       (*kNode_Op)(KonohaContext *kctx, kNode *, kToken *keyToken, int n, ...);
+//	kNodeVar*    (*new_UntypedOperatorNode)(KonohaContext *, kSyntax *syn, int n, ...);
 	int          (*ParseSyntaxNode)(KonohaContext *, kSyntax *, kNode *, ksymbol_t, kArray *, int beginIdx, int opIdx, int endIdx);
 
 	kNode*       (*kNode_ParseOperatorNode)(KonohaContext *, kNode *, kSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);

@@ -54,21 +54,23 @@ static KMETHOD Expression_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(endIdx);
 }
 
-static kbool_t cstyle_defineAssign(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+// --------------------------------------------------------------------------
+
+static kbool_t CStyleSelfAssignment_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	kFunc *binaryParseFunc = KSugarFunc(ns, Expression_BinarySugar);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("+="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
-		{ KSymbol_("-="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
-		{ KSymbol_("*="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
-		{ KSymbol_("/="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
-		{ KSymbol_("%="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
-		{ KSymbol_("|="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
-		{ KSymbol_("&="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
-		{ KSymbol_("<<="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
-		{ KSymbol_(">>="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
-		{ KSymbol_("^="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
-		{ KSymbol_END, },
+			{ KSymbol_("+="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
+			{ KSymbol_("-="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
+			{ KSymbol_("*="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
+			{ KSymbol_("/="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
+			{ KSymbol_("%="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
+			{ KSymbol_("|="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
+			{ KSymbol_("&="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
+			{ KSymbol_("<<="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
+			{ KSymbol_(">>="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
+			{ KSymbol_("^="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
+			{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("+="), 2,  "X Y X = (X) + (Y)", false);
@@ -84,14 +86,6 @@ static kbool_t cstyle_defineAssign(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 	return true;
 }
 
-// --------------------------------------------------------------------------
-
-static kbool_t CStyleSelfAssignment_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
-{
-	cstyle_defineAssign(kctx, ns, trace);
-	return true;
-}
-
 static kbool_t CStyleSelfAssignment_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
@@ -102,7 +96,7 @@ static kbool_t CStyleSelfAssignment_ExportNameSpace(KonohaContext *kctx, kNameSp
 KDEFINE_PACKAGE* CStyleSelfAssignment_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "CStyle", "1.0");
+	KSetPackageName(d, "CStyle", K_VERSION);
 	d.PackupNameSpace   = CStyleSelfAssignment_PackupNameSpace;
 	d.ExportNameSpace   = CStyleSelfAssignment_ExportNameSpace;
 	return &d;
