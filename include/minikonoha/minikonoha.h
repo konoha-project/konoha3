@@ -36,9 +36,9 @@ extern "C" {
 #define K_CLASSTABLE_INITSIZE 64
 #define K_PAGESIZE        4096
 
-#define K_VERSION   "0.2"
+#define K_VERSION   "0.3"
 #define K_MAJOR_VERSION 0
-#define K_MINOR_VERSION 2
+#define K_MINOR_VERSION 3
 #define K_PATCH_LEVEL   0
 
 #include <minikonoha/stardate.h>
@@ -198,7 +198,7 @@ typedef kushort_t        kshortflag_t;    /* flag field */
 #define KFlag_Set0(T,f,op)        f = (((T)(f)) & (~((T)(op))))
 #define KFlag_Set(T,f,op,b)       if(b) {KFlag_Set1(T,f,op);} else {KFlag_Set0(T,f,op);}
 
-#define FLAG_set(f,op)            KFlag_Set1(kshortflag_t,f,op)
+#define FLAG_Set(f,op)            KFlag_Set1(kshortflag_t,f,op)
 #define FLAG_unset(f,op)          KFlag_Set0(kshortflag_t,f,op)
 #define FLAG_is(f,op)             KFlag_Is(kshortflag_t,f,op)
 
@@ -226,6 +226,7 @@ typedef struct {
 
 #define KTypeAttr_Boxed      KFLAG_H0    /* KeyValueStore, Field */
 #define KTypeAttr_ReadOnly   KFLAG_H1    /* Variable, Field */
+#define KTypeAttr_Temporary  KFLAG_H1    /* KeyValueStore */
 #define KTypeAttr_Coercion   KFLAG_H2    /* Variable, Field */
 
 #define KTypeAttr_Is(P, t)   (((t) & KTypeAttr_##P) == KTypeAttr_##P)
@@ -244,6 +245,72 @@ typedef struct {
 #define KSymbolAttr_Pattern           (KFLAG_H0|KFLAG_H1|KFLAG_H2)
 #define KSymbol_IsAnnotation(S)       ((S & KSymbolAttr_Pattern) == KSymbolAttr_Annotation)
 #define KSymbol_IsPattern(S)          ((S & KSymbolAttr_Pattern) == KSymbolAttr_Pattern)
+
+#ifdef USE_KEYWORD_LIST
+static const char *KEYWORD_LIST[] = {
+	"", "$Indent", "$Symbol", "$Text", "$Number", "$Member", "$Type",
+	"()", "[]", "{}", "$Expr", "$Block", "$Param", "$TypeDecl", "$MethodDecl", "$Token",
+	".", "/", "%", "*", "+", "-", "<", "<=", ">", ">=", "==", "!=",
+	"&&", "||", "!", "=", ",", "$", ":", ";", /*"@",*/
+	"true", "false", "if", "else", "return", // syn
+	"new", "void"
+};
+#endif
+
+#define KSymbol_END              ((ksymbol_t)-1)
+#define KSymbol_IndentPattern    (((ksymbol_t)1)|KSymbolAttr_Pattern) /*$Indent*/
+#define KSymbol_SymbolPattern    (((ksymbol_t)2)|KSymbolAttr_Pattern) /*$Symbol*/
+#define KSymbol_TextPattern      (((ksymbol_t)3)|KSymbolAttr_Pattern) /*$Text*/
+#define KSymbol_NumberPattern    (((ksymbol_t)4)|KSymbolAttr_Pattern) /*$Number*/
+#define KSymbol_MemberPattern    (((ksymbol_t)5)|KSymbolAttr_Pattern) /*$Member*/
+#define KSymbol_TypePattern      (((ksymbol_t)6)|KSymbolAttr_Pattern) /*$Type*/
+
+#define KSymbol_ParenthesisGroup (((ksymbol_t)7)) /*()*/
+#define KSymbol_BracketGroup     (((ksymbol_t)8)) /*[]*/
+#define KSymbol_BraceGroup       (((ksymbol_t)9)) /*{}*/
+#define KSymbol_TypeCastGroup    (((ksymbol_t)7)|KSymbolAttr_Pattern)    /*$()*/
+#define KSymbol_TypeParamGroup   (((ksymbol_t)8)|KSymbolAttr_Pattern)    /*$[]*/
+#define KSymbol_OptionalGroup    (((ksymbol_t)8)|KSymbol_ATMARK)         /*@[]*/
+#define KSymbol_ExprPattern      (((ksymbol_t)10)|KSymbolAttr_Pattern)    /*$Block*/
+#define KSymbol_BlockPattern     (((ksymbol_t)11)|KSymbolAttr_Pattern)    /*$Block*/
+#define KSymbol_ParamPattern     (((ksymbol_t)12)|KSymbolAttr_Pattern)   /*$Param*/
+#define KSymbol_TypeDeclPattern  (((ksymbol_t)13)|KSymbolAttr_Pattern)   /*$TypeDecl*/
+#define KSymbol_MethodDeclPattern  (((ksymbol_t)14)|KSymbolAttr_Pattern) /*$MethodDecl*/
+#define KSymbol_TokenPattern     (((ksymbol_t)15)|KSymbolAttr_Pattern)   /*$Token*/
+
+//#define KSymbol_NodeOperator        KSymbol_ParamPattern
+//#define KSymbol_NodeTerm            KSymbol_SymbolPattern
+//#define KSymbol_ParamPattern/*MethodCall*/      KSymbol_ParamPattern
+
+#define KSymbol_DOT     16
+#define KSymbol_DIV     (1+KSymbol_DOT)
+#define KSymbol_MOD     (2+KSymbol_DOT)
+#define KSymbol_MUL     (3+KSymbol_DOT)
+#define KSymbol_ADD     (4+KSymbol_DOT)
+#define KSymbol_SUB     (5+KSymbol_DOT)
+#define KSymbol_LT      (6+KSymbol_DOT)
+#define KSymbol_LTE     (7+KSymbol_DOT)
+#define KSymbol_GT      (8+KSymbol_DOT)
+#define KSymbol_GTE     (9+KSymbol_DOT)
+#define KSymbol_EQ      (10+KSymbol_DOT)
+#define KSymbol_NEQ     (11+KSymbol_DOT)
+#define KSymbol_AND     (12+KSymbol_DOT)
+#define KSymbol_OR      (13+KSymbol_DOT)
+#define KSymbol_NOT     (14+KSymbol_DOT)
+#define KSymbol_LET     (15+KSymbol_DOT)
+#define KSymbol_COMMA   (16+KSymbol_DOT)
+#define KSymbol_DOLLAR  KSymbolAttr_Pattern
+#define KSymbol_ATMARK  KSymbolAttr_Annotation
+#define KSymbol_COLON   (17+KSymbol_DOT)
+#define KSymbol_SEMICOLON (18+KSymbol_DOT)
+
+#define KSymbol_true      35
+#define KSymbol_false     (1+KSymbol_true)
+#define KSymbol_if        (2+KSymbol_true)
+#define KSymbol_else      (3+KSymbol_true)
+#define KSymbol_return    (4+KSymbol_true)
+#define KSymbol_new       (5+KSymbol_true)
+#define KSymbol_void      (6+KSymbol_true)
 
 /* MethodName
  * 110   to$(TypeId)
@@ -304,11 +371,11 @@ typedef KPackageHandler* (*PackageLoadFunc)(void);
 #if defined(__MINGW64__)
 static inline int setjmp_mingw(_JBTYPE* t)
 {
-	return _setjmp(t, NULL);
+	return _Setjmp(t, NULL);
 }
 #define ksetjmp  setjmp_mingw
 #elif defined(__MINGW32__) || defined(_MSC_VER)
-#define ksetjmp  _setjmp
+#define ksetjmp  _Setjmp
 #else
 #define ksetjmp  setjmp
 #endif
@@ -471,34 +538,12 @@ typedef struct kNameSpaceVar            kNameSpaceVar;
 
 typedef const struct kTokenVar          kToken;
 typedef struct kTokenVar                kTokenVar;
-
-#ifdef USE_NODE
-typedef const struct kNodeVar           kNode;
+typedef struct kNodeVar                 kNode;
 typedef struct kNodeVar                 kNodeVar;
-typedef struct kUNode                   kUNode;
 
-typedef const struct kNodeVar           kExpr;
-typedef struct kNodeVar                 kExprVar;
-typedef const struct kNodeVar           kStmt;
-typedef const struct kNodeVar           kStmtNULL;  // Nullable
-typedef struct kNodeVar                 kStmtVar;
-typedef const struct kNodeVar          kBlock;
-typedef struct kNodeVar                kBlockVar;
-#endif
-
-#ifndef USE_NODE
-typedef const struct kExprVar           kExpr;
-typedef struct kExprVar                 kExprVar;
-typedef const struct kStmtVar           kStmt;
-typedef const struct kStmtVar           kStmtNULL;  // Nullable
-typedef struct kStmtVar                 kStmtVar;
-typedef const struct kBlockVar          kBlock;
-typedef struct kBlockVar                kBlockVar;
-#endif
-
-typedef struct kGammaVar                kGamma;
-typedef struct kGammaVar                kGammaVar;
-
+#define kTokenNULL kToken
+#define kNodeNULL  kNode
+#define kNameSpaceNULL kNameSpace
 
 struct KonohaFactory {
 	// settings
@@ -631,7 +676,7 @@ struct KonohaFactory {
 	// CodeGenerator
 	KModuleInfo  *CodeGeneratorInfo;
 	void*       (*GetCodeGenerateKMethodFunc)(void);
-	void*       (*GenerateCode)(KonohaContext *kctx, kMethod *mtd, kBlock *bk, int options);
+	void*       (*GenerateCode)(KonohaContext *kctx, kMethod *mtd, kNode *bk, int options);
 
 	// VirtualMachine
 	KModuleInfo            *VirtualMachineInfo;
@@ -938,10 +983,8 @@ struct KContextModule {
 	kFunc       *asFunc; \
 	kNameSpace  *asNameSpace;\
 	kToken      *asToken;\
-	kStmt       *asStmt;\
-	kExpr       *asExpr;\
-	kBlock      *asBlock;\
-	kGamma      *asGamma;\
+	kNode       *asNode;\
+	kNameSpace      *asGamma;\
 	const struct kExceptionVar  *asException;\
 	const struct kFloatVar      *asFloat; \
 	struct kDateVar             *asDate;\
@@ -1085,6 +1128,7 @@ struct KClassField {
 #define KClass_Func                 KClass_(KType_Func)
 #define KClass_NameSpace            KClass_(KType_NameSpace)
 #define KClass_System               KClass_(KType_System)
+#define KClass_var                  KClass_(KType_var)
 
 #define KClass_StringArray          KClass_Array
 #define kStringArray                kArray
@@ -1275,6 +1319,7 @@ typedef enum { NonZero, EnsureZero } StringfyPolicy;
 #define IS_Array(o)              (kObject_baseTypeId(o) == KType_Array)
 
 #define kArrayFlag_UnboxData     kObjectFlag_Local1
+#define kArrayFlag_Debug         kObjectFlag_Local2
 #define kArray_Is(P, o)          (KFlag_Is(uintptr_t,(o)->h.magicflag, kArrayFlag_##P))
 #define kArray_Set(P, o, b)      KFlag_Set(uintptr_t,(o)->h.magicflag, kArrayFlag_##P,b)
 
@@ -1294,10 +1339,8 @@ struct kArrayVar {
 		kFunc          **FuncItems;
 		kToken         **TokenItems;
 		kTokenVar      **TokenVarItems;
-		kExpr          **ExprItems;
-		kExprVar       **ExprVarItems;
-		kStmt          **StmtItems;
-		kStmtVar       **StmtVarItems;
+		kNode          **NodeItems;
+		kNodeVar       **NodeVarItems;
 	};
 	size_t bytemax;
 };
@@ -1398,7 +1441,7 @@ struct kMethodVar {
 	kToken           *SourceToken;
 	union {
 		kNameSpace   *LazyCompileNameSpace;       // lazy compilation
-		kBlock       *CompiledBlock;
+		kNode       *CompiledNode;
 	};
 	uintptr_t         serialNumber;
 };
@@ -1458,20 +1501,21 @@ struct kFuncVar {
 
 struct kNameSpaceVar {
 	kObjectHeader h;
-	kpackageId_t packageId; kshortflag_t syntaxOption;
-	kArray                  *NameSpaceConstList;
-	kNameSpace              *parentNULL;
-	KDict                    constTable;
-	kObject                 *globalObjectNULL_OnList;
-	kArray                  *methodList_OnList;   // default K_EMPTYARRAY
-	size_t                   sortedMethodList;
+	kpackageId_t packageId;  	       kshortflag_t syntaxOption;
+	kArray                            *NameSpaceConstList;
+	kNameSpace                        *parentNULL;
+	KDict                              constTable;
+	kObject                           *globalObjectNULL;
+	kArray                            *methodList_OnList;   // default K_EMPTYARRAY
+	size_t                             sortedMethodList;
 	// the below references are defined in sugar
-	void                    *tokenMatrix;
-	KHashMap                *syntaxMapNN;
-	kArray                  *stmtPatternListNULL_OnList;
-	struct KBuilderAPI      *builderApi;
-	KKeyValue               *typeVariableItems;
-	size_t                   typesize;
+	void                              *tokenMatrix;
+	KHashMap                          *syntaxMapNN;
+	kArray                            *metaPatternListNULL;
+	struct KBuilderAPI                *builderApi;
+	KKeyValue                         *typeVariableItems;
+	size_t                             typesize;
+	struct KGammaLocalData            *genv;
 };
 
 // NameSpace_syntaxOption
@@ -1683,10 +1727,10 @@ struct KonohaLibVar {
 	kMethodVar*         (*new_kMethod)(KonohaContext*, kArray *gcstack, uintptr_t, ktypeattr_t, kmethodn_t, KMethodFunc);
 	kParam*             (*kMethod_SetParam)(KonohaContext*, kMethod *, ktypeattr_t, kushort_t, const kparamtype_t *);
 	void                (*kMethod_SetFunc)(KonohaContext*, kMethod*, KMethodFunc);
-	void                (*kMethod_GenCode)(KonohaContext*, kMethod*, kBlock *, int options);
+	void                (*kMethod_GenCode)(KonohaContext*, kMethod*, kNode *, int options);
 	intptr_t            (*kMethod_indexOfField)(kMethod *);
 
-	kbool_t             (*KRuntime_setModule)(KonohaContext*, int, struct KRuntimeModule *, KTraceInfo *);
+	kbool_t             (*KRuntime_SetModule)(KonohaContext*, int, struct KRuntimeModule *, KTraceInfo *);
 
 	void                (*kNameSpace_FreeSugarExtension)(KonohaContext *, kNameSpaceVar *);
 
@@ -1754,8 +1798,7 @@ struct KonohaLibVar {
 #define KMethodName_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 #define MN_box                             KMethodName_("box")
 
-#define MN_new                    38  /* @see KSymbol_return + 1*/
-#define KSymbol_void              39
+#define MN_new                             KSymbol_new  /* @see KSymbol_return + 1*/
 
 #define new_(C, A, STACK)                 (k##C *)(KLIB new_kObject(kctx, STACK, KClass_##C, ((uintptr_t)A)))
 #define GcUnsafe                          NULL

@@ -132,7 +132,7 @@ static KMETHOD Request_getHandler(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(KLIB new_kString(kctx, OnStack, self->r->handler, strlen(self->r->handler), 0));
 }
 // ## void Request.setContentType(String type);
-static KMETHOD Request_setContentType(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Request_SetContentType(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
 	kString *type = sfp[1].asString;
@@ -140,7 +140,7 @@ static KMETHOD Request_setContentType(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 // ##void Request.setContentEncoding(String enc);
-static KMETHOD Request_setContentEncoding(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Request_SetContentEncoding(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
 	kString *enc = sfp[1].asString;
@@ -180,12 +180,12 @@ static KMETHOD AprTable_Add(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 // ## void AprTable.set(String key, String val)
-static KMETHOD AprTable_set(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD AprTable_Set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTable *self = (kAprTable *) sfp[0].asObject;
 	const char *key = kString_text(sfp[1].asString);
 	const char *val = kString_text(sfp[2].asString);
-	apr_table_set(self->tbl, key, val);
+	apr_table_Set(self->tbl, key, val);
 	KReturnVoid();
 }
 // ## Array[AprTableEntry] AprTable.getElts()

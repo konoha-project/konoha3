@@ -29,7 +29,7 @@ import("konoha.class");
 import("konoha.var");
 import("konoha.global");
 import("konoha.ns");
-import("java2.string");
+import("JavaScript.String");
 import("JavaScript.Regexp");
 import("JavaScript.Array");
 import("konoha.map");

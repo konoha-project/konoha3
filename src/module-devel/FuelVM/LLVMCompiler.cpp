@@ -210,20 +210,20 @@ static bool EmitKonohaAPI(LLVMIRBuilder *writer, ICall *Inst, kMethod *mtd, std:
 	Node.FieldIndex = mtd->delta;
 
 	/* Getter/Setter */
-	if(mtd->typeId == KType_Array && mtd->mn == KKMethodName_("get")) {
+	if(mtd->typeId == KType_Array && mtd->mn == KMethodName_("get")) {
 		Value *Ref = GetArrayRef(writer, Inst, List);
 		Value *Val = builder->CreateLoad(Ref);
 		SetValue(writer, ToINode(Inst), Val, false);
 		return true;
 	}
-	if(mtd->typeId == KType_Array && mtd->mn == KKMethodName_("set")) {
+	if(mtd->typeId == KType_Array && mtd->mn == KMethodName_("set")) {
 		Value *Ref = GetArrayRef(writer, Inst, List);
 		Value *Val = List[2];
 		EmitWriteBarrier(writer, List[0], Ref, Val);
 		builder->CreateStore(Val, Ref);
 		return true;
 	}
-	if(IsCharSequence(mtd) && mtd->mn == KKMethodName_("getSize")) {
+	if(IsCharSequence(mtd) && mtd->mn == KMethodName_("getSize")) {
 		Value *Val = GetValue(writer, Node.Node);
 		Val = builder->CreateBitCast(Val, ToType(ID_kCharSequence));
 		Val = builder->CreateStructGEP(Val, kCharSequence_bytesize);

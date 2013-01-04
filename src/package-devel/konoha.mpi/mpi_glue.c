@@ -420,7 +420,7 @@ static KMETHOD MPIData_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void MPIData.setOffset(int offset)
-static KMETHOD MPIData_setOffset(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD MPIData_SetOffset(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMPIData *d = toRawPtr(kMPIData *, sfp[0].asObject);
 	d->offset = sfp[1].intValue;
@@ -477,7 +477,7 @@ static KMETHOD MPIData_getf(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void MPIData.setf(int n, float v)
-static KMETHOD MPIData_setf(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD MPIData_Setf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMPIData *sdata = toRawPtr(kMPIData *, sfp[0].asObject);
 	int n = sfp[1].intValue + sdata->offset;
@@ -495,7 +495,7 @@ static KMETHOD MPIData_geti(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void MPIData.seti(int n, int v)
-static KMETHOD MPIData_seti(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD MPIData_Seti(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMPIData *sdata = toRawPtr(kMPIData *, sfp[0].asObject);
 	int n = sfp[1].intValue + sdata->offset;
@@ -524,12 +524,12 @@ static void MpiModule_Free(KonohaContext *kctx, struct KRuntimeModule *baseh)
 static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("konoha.bytes", trace);
-	KRequirePackage("konoha.float", trace);
+	KRequirePackage("Type.Float", trace);
 	KModuleMpi *mod = (KModuleMpi *)KCalloc_UNTRACE(sizeof(KModuleMpi), 1);
 	mod->h.name     = "mpi";
 	mod->h.setupModuleContext    = MpiModule_Setup;
 	mod->h.freeModule     = MpiModule_Free;
-	KLIB KRuntime_setModule(kctx, MOD_mpi, (KRuntimeModule *)mod, trace);
+	KLIB KRuntime_SetModule(kctx, MOD_mpi, (KRuntimeModule *)mod, trace);
 
 	int argc = 0;
 	char *args[1] = {};
@@ -617,10 +617,10 @@ static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 		//_Public, _F(MPIData_toIntArray), KType_Array, KType_MPIData, KMethodName_("toIntArray"), 0,
 		//_Public, _F(MPIData_toFloatArray), KType_Array, KType_MPIData, KMethodName_("toFloatArray"), 0,
 		_Public, _F(MPIData_getf), KType_float, KType_MPIData, KMethodName_("getf"), 1, KType_int, KFieldName_("n"),
-		_Public, _F(MPIData_setf), KType_void, KType_MPIData, KMethodName_("setf"), 2, KType_int, KFieldName_("n"), KType_float, KFieldName_("v"),
+		_Public, _F(MPIData_Setf), KType_void, KType_MPIData, KMethodName_("setf"), 2, KType_int, KFieldName_("n"), KType_float, KFieldName_("v"),
 		_Public, _F(MPIData_geti), KType_int, KType_MPIData, KMethodName_("geti"), 1, KType_int, KFieldName_("n"),
-		_Public, _F(MPIData_seti), KType_void, KType_MPIData, KMethodName_("seti"), 2, KType_int, KFieldName_("n"), KType_int, KFieldName_("v"),
-		_Public, _F(MPIData_setOffset), KType_void, KType_MPIData, KMethodName_("setOffset"), 1, KType_int, KFieldName_("offset"),
+		_Public, _F(MPIData_Seti), KType_void, KType_MPIData, KMethodName_("seti"), 2, KType_int, KFieldName_("n"), KType_int, KFieldName_("v"),
+		_Public, _F(MPIData_SetOffset), KType_void, KType_MPIData, KMethodName_("setOffset"), 1, KType_int, KFieldName_("offset"),
 		_Public, _F(MPIData_getOffset), KType_int, KType_MPIData, KMethodName_("getOffset"), 0,
 		_Public, _F(MPIData_getSize), KType_int, KType_MPIData, KMethodName_("getSize"), 0, 
 		DEND,

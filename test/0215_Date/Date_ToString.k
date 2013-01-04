@@ -1,6 +1,6 @@
 // written by okamoto
 
-import("java2.string");
+import("JavaScript.String");
 import("JavaScript.Regexp");
 import("JavaScript.Date");
 

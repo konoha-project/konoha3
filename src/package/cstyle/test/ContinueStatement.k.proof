@@ -1,3 +1,0 @@
- - (error) (ContinueStatement.k:4) undefined name: continue
- ** RuntimeScriptException (ContinueStatement.k:4)
-Q.E.D.

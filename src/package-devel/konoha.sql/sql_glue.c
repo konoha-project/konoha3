@@ -221,25 +221,25 @@ static void ResultSet_InitColumn(KonohaContext *kctx, kResultSet *rs, unsigned c
 	}
 }
 
-static void ResultSet_setNull(KonohaContext *kctx, kResultSet *rs, unsigned Idx)
+static void ResultSet_SetNull(KonohaContext *kctx, kResultSet *rs, unsigned Idx)
 {
 	rs->column[Idx].type = KType_void;
 	rs->column[Idx].val.unboxValue = 0;
 }
 
-static void ResultSet_setText(KonohaContext *kctx, kResultSet *rs, unsigned Idx, const char *text, size_t len)
+static void ResultSet_SetText(KonohaContext *kctx, kResultSet *rs, unsigned Idx, const char *text, size_t len)
 {
 	rs->column[Idx].type = KType_String;
 	KFieldInit(rs, rs->column[Idx].val.asString, KLIB new_kString(kctx, GcUnsafe, text, len, 0));
 }
 
-static void ResultSet_setInt(KonohaContext *kctx, kResultSet *rs, unsigned Idx, kint_t val)
+static void ResultSet_SetInt(KonohaContext *kctx, kResultSet *rs, unsigned Idx, kint_t val)
 {
 	rs->column[Idx].type = KType_int;
 	rs->column[Idx].val.intValue = val;
 }
 
-static void ResultSet_setFloat(KonohaContext *kctx, kResultSet *rs, unsigned Idx, kfloat_t val)
+static void ResultSet_SetFloat(KonohaContext *kctx, kResultSet *rs, unsigned Idx, kfloat_t val)
 {
 	rs->column[Idx].type = KType_float;
 	rs->column[Idx].val.floatValue = val;
@@ -479,7 +479,7 @@ static KMETHOD ResultSet_get(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t sql_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.float", trace);
+	KRequirePackage("Type.Float", trace);
 
 	static KDEFINE_CLASS ConnectionDef = {
 		STRUCTNAME(Connection),

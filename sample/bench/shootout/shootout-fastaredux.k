@@ -11,7 +11,7 @@ import("konoha.global");
 import("konoha.class");
 import("JavaScript.Array");
 import("konoha.new");
-import("konoha.string");
+import("JavaScript.String");
 import("konoha.bytes");
 import("konoha.file");
 

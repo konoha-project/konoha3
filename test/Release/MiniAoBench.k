@@ -6,7 +6,7 @@ import("JavaScript.Math");
 import("konoha.bytes");
 import("java2.string");
 import("konoha.global");
-import("konoha.ns");  // konoha.const is obsolete
+import("konoha.ns");
 import("konoha.class");
 import("JavaScript.Array");
 import("cstyle", "while");

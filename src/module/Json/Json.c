@@ -137,7 +137,7 @@ static kbool_t SetJsonKeyValue(KonohaContext *kctx, struct JsonBuf *jsonbuf, con
 		return false;
 	}
 	size_t keylen = KeyLen(key, keylen_or_zero);
-	JSONObject_set((JSONMemoryPool *)(PLATAPI JsonHandler), json, key, keylen, AsJSON(otherbuf));
+	JSONObject_Set((JSONMemoryPool *)(PLATAPI JsonHandler), json, key, keylen, AsJSON(otherbuf));
 	return true;
 }
 
@@ -149,7 +149,7 @@ static kbool_t SetJsonValue(KonohaContext *kctx, struct JsonBuf *jsonbuf, const 
 	kbool_t ret = true;
 	if(key != NULL) {
 		size_t keylen = KeyLen(key, keylen_or_zero);
-		JSONObject_set((JSONMemoryPool *)(PLATAPI JsonHandler), AsJSON(jsonbuf), key, keylen, val);
+		JSONObject_Set((JSONMemoryPool *)(PLATAPI JsonHandler), AsJSON(jsonbuf), key, keylen, val);
 	}
 	else {
 		jsonbuf->json_i = val.bits;

@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("java2.string");
+import("JavaScript.String");
 
 void test() {
 	assert("こんにちは、世界".charCodeAt(0) == 12371);

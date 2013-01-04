@@ -215,7 +215,7 @@ static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv
 		KonohaContext_Set(Interactive, kctx);
 	}
 	if(interactive_flag) {
-		CommandLine_Import(kctx, "konoha.i", trace);
+		CommandLine_Import(kctx, "MiniKonoha.Man", trace);
 		ret = konoha_shell(kctx);
 	}
 }

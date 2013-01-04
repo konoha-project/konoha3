@@ -11,7 +11,8 @@ import("JavaScript.Array");
 import("konoha.new");
 import("Type.Float");
 import("JavaScript.Math");
-const N=5500;
+const N=550;
+//const N=5500;
 
 class Spectralnorm {
 	/* return element i,j of infinite matrix A */

@@ -33,10 +33,10 @@ static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 		if(n < 0) n = (short)tk->uline;
 		if(tk->resolvedSyntaxInfo == NULL) {
 			if(kToken_IsIndent(tk)) {
-				DUMP_P("Token[%d] '%s' TokenType=%s%s indent=%d\n", n, KToken_t(tk), KSymbol_Fmt2(tk->unresolvedTokenType), tk->indent);
+				DUMP_P("Token[%d] '%s' TokenType=%s%s indent=%d\n", n, KToken_t(tk), KSymbol_Fmt2(tk->tokenType), tk->indent);
 			}
 			else {
-				DUMP_P("Token[%d] '%s' TokenType=``%s%s''\n", n, KToken_t(tk), KSymbol_Fmt2(tk->unresolvedTokenType));
+				DUMP_P("Token[%d] '%s' TokenType=``%s%s''\n", n, KToken_t(tk), KSymbol_Fmt2(tk->tokenType));
 			}
 		}
 //		else if(Token_isRule(tk)) {
@@ -85,10 +85,10 @@ static void dumpTokenArray(KonohaContext *kctx, int nest, kArray *a, int s, int 
 		while(s < e) {
 			kToken *tk = a->TokenItems[s];
 			dumpIndent(kctx, nest);
-			if(IS_Array(tk->subTokenList)) {
+			if(IS_Array(tk->GroupTokenList)) {
 				ksymbol_t closure = (tk->resolvedSyntaxInfo == NULL) ? tk->resolvedSymbol : tk->resolvedSyntaxInfo->keyword;
 				DUMP_P("%c\n", dumpBeginTokenList(closure));
-				dumpTokenArray(kctx, nest+1, tk->subTokenList, 0, kArray_size(tk->subTokenList));
+				dumpTokenArray(kctx, nest+1, tk->GroupTokenList, 0, kArray_size(tk->GroupTokenList));
 				dumpIndent(kctx, nest);
 				DUMP_P("%c\n", dumpEndTokenList(closure));
 			}
@@ -101,31 +101,31 @@ static void dumpTokenArray(KonohaContext *kctx, int nest, kArray *a, int s, int 
 	}
 }
 
-static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
+static void dumpExpr(KonohaContext *kctx, int n, int nest, kNode *expr)
 {
-	DBG_ASSERT(IS_Expr(expr));
+	DBG_ASSERT(IS_Node(expr));
 	if(verbose_sugar) {
 		dumpIndent(kctx, nest);
-		if(expr == K_NULLEXPR) {
+		if(expr == K_NULLNODE) {
 			DUMP_P("[%d] NullObject", n);
 		}
-		else if(kExpr_IsTerm(expr)) {
+		else if(kNode_IsTerm(expr)) {
 			DUMP_P("[%d] TermToken: ", n);
 			dumpToken(kctx, expr->TermToken, -1);
 		}
 		else {
 			if(expr->syn == NULL) {
-				DUMP_P("[%d] Expr: kw=NULL, size=%ld", n, kArray_size(expr->NodeList));
+				DUMP_P("[%d] Node: kw=NULL, size=%ld", n, kArray_size(expr->NodeList));
 				DBG_ASSERT(IS_Array(expr->NodeList));
 			}
 			else {
-				DUMP_P("[%d] Expr: kw='%s%s', syn=%p, size=%ld", n, KSymbol_Fmt2(expr->syn->keyword), expr->syn, kArray_size(expr->NodeList));
+				DUMP_P("[%d] Node: kw='%s%s', syn=%p, size=%ld", n, KSymbol_Fmt2(expr->syn->keyword), expr->syn, kArray_size(expr->NodeList));
 				DUMP_P("\n");
 				size_t i;
 				for(i=0; i < kArray_size(expr->NodeList); i++) {
 					kObject *o = expr->NodeList->ObjectItems[i];
-					if(IS_Expr(o)) {
-						dumpExpr(kctx, i, nest+1, (kExpr *)o);
+					if(IS_Node(o)) {
+						dumpExpr(kctx, i, nest+1, (kNode *)o);
 					}
 					else {
 						dumpIndent(kctx, nest+1);

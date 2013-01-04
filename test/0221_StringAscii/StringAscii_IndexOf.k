@@ -1,7 +1,7 @@
 // written by Joseph
 // modified by chenji
 
-import("java2.string");
+import("JavaScript.String");
 
 void test() {
 	//NOTE: The length of "Hello world." is 12

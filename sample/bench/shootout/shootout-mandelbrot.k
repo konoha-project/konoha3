@@ -5,6 +5,8 @@
  */
 
 import("konoha.class");
+import("Type.Float");
+import("JavaScript.Array");
 import("konoha.file");
 import("konoha.ns");
 import("konoha.bytes");
