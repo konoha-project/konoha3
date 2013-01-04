@@ -46,7 +46,7 @@ int verbose_sugar = 0;
 #include "import/token.h"
 #include "import/ast.h"
 #include "import/typecheck.h"
-#include "import/desugar.h"
+#include "import/syntax.h"
 #include "import/parser_dump.h"
 #include "import/visitor.h"
 
@@ -196,11 +196,11 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->TypeCheckNodeAt        = TypeCheckNodeAt;
 	mod->TypeCheckNodeByName        = TypeCheckNodeByName;
 //	mod->TypeCheckBlock               = TypeCheckBlock;
-	mod->TypeCheckMethodParam           = TypeCheckMethodParam;
-	mod->new_MethodNode            = new_MethodNode;
-	mod->kNameSpace_AddLocalVariable      = kNameSpace_AddLocalVariable;
+	mod->TypeCheckMethodParam         = TypeCheckMethodParam;
+	mod->new_MethodNode               = new_MethodNode;
+	mod->kNameSpace_AddLocalVariable  = kNameSpace_AddLocalVariable;
 	mod->kNode_DeclType               = kNode_DeclType;
-	mod->TypeCheckNodeVariableNULL  = TypeCheckNodeVariableNULL;
+	mod->TypeCheckNodeVariableNULL    = TypeCheckNodeVariableNULL;
 
 	mod->kNameSpace_DefineSyntax      = kNameSpace_DefineSyntax;
 	mod->kNameSpace_GetSyntax         = kNameSpace_GetSyntax;
