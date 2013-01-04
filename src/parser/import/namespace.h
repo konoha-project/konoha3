@@ -154,9 +154,19 @@ static KMETHOD NameSpace_DefineConst(KonohaContext *kctx, KonohaStack *sfp)
 
 // ---------------------------------------------------------------------------
 
+static kSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword)
+{
+	KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, keyword, false/*isLocalOnly*/);
+	if(kvs != NULL && KTypeAttr_Unmask(kvs->attrTypeId) == KType_Syntax) {
+		return (kSyntax*)kvs->ObjectValue;
+	}
+	DBG_P(">>>>>>> keyword=%s%s has no defined syntax", KSymbol_Fmt2(keyword));
+	return KNULL(Syntax);
+}
+
 static void kNameSpace_ListSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, kArray *a)
 {
-	ktypeattr_t tSyntax = KClass_Syntax->typeId;
+	ktypeattr_t tSyntax = KType_Syntax;
 	while(ns != NULL) {
 		size_t i;
 		KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, keyword);
@@ -169,9 +179,7 @@ static void kNameSpace_ListSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t
 				KLIB kArray_Add(kctx, a, foundKeyValue->ObjectValue);
 			}
 		}
-		if(ns->parentNULL != NULL) {
-			kNameSpace_ListSyntax(kctx, ns->parentNULL, keyword, a);
-		}
+		ns = ns->parentNULL;
 	}
 }
 
@@ -249,7 +257,7 @@ static kbool_t kNameSpace_RemoveSyntax(KonohaContext *kctx, kNameSpace *ns, ksym
 
 static void kNameSpace_AddSyntax(KonohaContext *kctx, kNameSpace *ns, kSyntax *syn, KTraceInfo *trace)
 {
-	if(kNameSpace_SetConstData(kctx, ns, syn->keyword, KType_Symbol, (uintptr_t)syn, trace)) {
+	if(kNameSpace_SetConstData(kctx, ns, syn->keyword, KType_Syntax, (uintptr_t)syn, trace)) {
 		kNameSpace_ImportSyntax2(kctx, ns, syn);
 	}
 }
@@ -258,6 +266,7 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 {
 	while(syndef->keyword != KSymbol_END) {
 		kSyntaxVar* syn = new_(SyntaxVar, ns, ns->NameSpaceConstList);
+		syn->keyword = syndef->keyword;
 		syn->packageNameSpace = ns;
 		syn->flag = ((kshortflag_t)syndef->flag);
 		if(syndef->precedence_op1 > 0) {
@@ -276,23 +285,20 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 			DBG_ASSERT(IS_Func(fo));
 			KFieldInit(ns, syn->sugarFuncTable[KSugarTypeFunc], fo);
 		}
-		DBG_ASSERT(syn == kSyntax_(ns, syndef->keyword));
+		if(syndef->tokenChar != 0) {
+			syn->tokenKonohaChar = syndef->tokenChar;
+			DBG_ASSERT(syndef->tokenFunc != NULL);
+			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CTokenFunc)) ? KSugarFunc(ns, syndef->tokenMethodFunc) : syndef->tokenFunc;
+			DBG_ASSERT(IS_Func(fo));
+			KFieldInit(ns, syn->sugarFuncTable[KSugarTokenFunc], fo);
+		}
 		KLIB ReportScriptMessage(kctx, trace, DebugTag, "@%s new syntax %s%s", KPackage_text(ns->packageId), KSymbol_Fmt2(syn->keyword));
 		kNameSpace_AddSyntax(kctx, ns, syn, trace);
+		DBG_ASSERT(syn == kSyntax_(ns, syndef->keyword));
 		syndef++;
 	}
 }
 
-//#define kToken_IsFirstPattern(tk)   (KSymbol_IsPattern(tk->resolvedSymbol) && tk->stmtEntryKey != KSymbol_ExprPattern)
-
-static kSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword)
-{
-	KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, keyword, false/*isLocalOnly*/);
-	if(kvs != NULL && KTypeAttr_Unmask(kvs->attrTypeId) == KType_Syntax) {
-		return (kSyntax*)kvs->ObjectValue;
-	}
-	return KNULL(Syntax);
-}
 
 //static kbool_t kNameSpace_ImportSyntax(KonohaContext *kctx, kNameSpace *ns, kSyntax *target, KTraceInfo *trace)
 //{
