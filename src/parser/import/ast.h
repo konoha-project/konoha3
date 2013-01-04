@@ -771,7 +771,7 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 					continue;
 				}
 				kSyntax *syn = kSyntax_(source->ns, symbol);
-				if(syn != NULL && FLAG_is(syn->flag, SYNFLAG_Macro)) {
+				if(IS_NOTNULL(syn) && FLAG_is(syn->flag, SYNFLAG_Macro)) {
 					if(syn->macroParamSize == 0) {
 						KTokenSeq_ApplyMacro(kctx, tokens, syn->macroDataNULL, 0, kArray_size(syn->macroDataNULL), 0, NULL);
 					}
@@ -781,15 +781,10 @@ static int KTokenSeq_Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSe
 					continue;
 				}
 				tk->resolvedSymbol = symbol;
-				tk->resolvedSyntaxInfo = (syn != NULL) ? syn : tokens->TargetPolicy.syntaxSymbolPattern;
+				tk->resolvedSyntaxInfo = IS_NOTNULL(syn) ? syn : tokens->TargetPolicy.syntaxSymbolPattern;
 			}
 			else {
 				tk->resolvedSyntaxInfo = kSyntax_(tokens->ns, tk->tokenType);
-				if(tk->resolvedSyntaxInfo == NULL) {
-					kToken_ToError(kctx, tk, ErrTag, "undefined pattern: %s%s", KSymbol_Fmt2(tk->tokenType));
-					source->SourceConfig.foundErrorToken = tk;
-					goto RETURN_ERROR;
-				}
 				if(tk->tokenType == KSymbol_MemberPattern) {
 					const char *t = kString_text(tk->text);
 					tk->resolvedSymbol = KAsciiSymbol(t, kString_size(tk->text), KSymbol_NewId);
@@ -1065,15 +1060,7 @@ static void kNameSpace_AddSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, ksy
 	patterns.TargetPolicy.RemovingIndent = true;
 	KTokenSeq_Preprocess(kctx, &patterns, NULL, &source, source.beginIdx);
 //	KLIB kArray_Add(kctx, syn->syntaxPatternListNULL, K_NULLTOKEN);  // delim
-//	size_t firstPatternIdx = kArray_size(syn->syntaxPatternListNULL);
 	kArray_AddSyntaxPattern(kctx, syn->syntaxPatternListNULL, &patterns);
-//	if(firstPatternIdx < kArray_size(syn->syntaxPatternListNULL)) {
-//		kToken *firstPattern = syn->syntaxPatternListNULL->TokenItems[firstPatternIdx];
-//		//DBG_P(">>>>>> firstPattern=%d", kToken_IsFirstPattern(firstPattern));
-//		if(kToken_IsFirstPattern(firstPattern)) {
-//			kNameSpace_AppendArrayRef(kctx, ns, &((kNameSpaceVar *)ns)->metaPatternListNULL, UPCAST(firstPattern));
-//		}
-//	}
 	KTokenSeq_Pop(kctx, source);
 	//KdumpTokenArray(kctx, patternList, 0, kArray_size(patternList));
 }
