@@ -22,48 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-/***
-typedef struct KSyntaxList {
-	kSyntax *syntax;
-	struct KSyntaxList *next;
-} KSyntaxList;
-
-static KSyntaxList* MallocSyntaxList(KonohaContext *kctx, kSyntax *syn, KSyntaxList* next)
-{
-	KSyntaxList *slist = (KSyntaxList *)KMalloc_UNTRACED(sizeof(KSyntaxList));
-	slist->syntax = syn;
-	slist->next   = next;
-	return slist;
-}
-
-static void AppendSyntaxList(KonohaContext *kctx, KSyntaxList* slist, kSyntax *syn)
-{
-	while(slist->next != NULL) {
-		slist = slist->next;
-	}
-	slist->next = MallocSyntaxList(kctx, syn, NULL);
-}
-
-static void FreeSyntaxList(KonohaContext *kctx, KSyntaxList* slist)
-{
-	if(slist->next == NULL) {
-		FreeSyntaxList(kctx, slist->next);
-		slist->next = NULL;
-	}
-	slist->syntax = NULL;
-	free(slist);
-}
-
-static void kNameSpace_LookupSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, kSyntax **items)
-{
-	KKeyValue *kvs = kNameSpace_GetLocalConstNULL(kctx, ns, keyword);
-	if(kvs != NULL) {
-		kvs->attrTypeId;
-	}
-	return
-}
-***/
-
 static kObject** ListObject(KonohaContext *kctx, kObject**list, int *size)
 {
 	if(list[0] == NULL) {
@@ -200,7 +158,77 @@ static KMETHOD NameSpace_DefineConst(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t symbol = (ksymbol_t)sfp[1].intValue;
 	KClass *c = kObject_class(sfp[2].asObject);
 	uintptr_t unboxValue = KClass_Is(UnboxType, c) ? kObject_Unbox(sfp[2].asObject) : (uintptr_t)sfp[2].asObject;
-	kNameSpace_SetConstData(kctx, sfp[0].asNameSpace, symbol, c->typeId, unboxValue, trace);
+	KReturnUnboxValue(kNameSpace_SetConstData(kctx, sfp[0].asNameSpace, symbol, c->typeId, unboxValue, trace));
+}
+
+// ---------------------------------------------------------------------------
+
+static void kNameSpace_ListSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, kArray *a)
+{
+	ktypeattr_t tSyntax = KClass_Syntax->typeId;
+	while(ns != NULL) {
+		KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, keyword);
+		if(foundKeyValue != NULL && KTypeAttr_Unmask(foundKeyValue->attrTypeId) == tSyntax) {
+			KLIB kArray_Add(kctx, a, foundKeyValue->ObjectValue);
+		}
+		int i, size;
+		kNameSpace **list = kNameSpace_ListImportedNameSpace(kctx, ns, &size);
+		for(i = size - 1; i > 0; i--) {
+			foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, list[i], keyword);
+			if(foundKeyValue != NULL && KTypeAttr_Unmask(foundKeyValue->attrTypeId) == tSyntax) {
+				KLIB kArray_Add(kctx, a, foundKeyValue->ObjectValue);
+			}
+		}
+		ns = (size == 1) ? list[0] : NULL;
+	}
+}
+
+static kArray* kNameSpace_GetSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword)
+{
+	ksymbol_t queryKey = keyword | KSymbolAttr_Annotation;
+	KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
+	kArray *syntaxList = NULL;
+	if(foundKeyValue != NULL) {
+		syntaxList = (kArray*)foundKeyValue->ObjectValue;
+		DBG_ASSERT(IS_Array(syntaxList));
+		if(kArray_size(syntaxList) != 0) {
+			return syntaxList;
+		}
+		/* recheck if size(syntaxList) == 0 */
+	}
+	if(syntaxList == NULL) {
+		syntaxList = new_(Array, 0, NULL);
+		kNameSpace_SetConstData(kctx, ns, queryKey, KType_Array, (uintptr_t)syntaxList, NULL);
+	}
+	kNameSpace_ListSyntax(kctx, ns, keyword, syntaxList);
+	DBG_P(">>>> new Syntax List=%s%s size=%d", KSymbol_Fmt2(keyword), kArray_size(syntaxList));
+	return syntaxList;
+}
+
+static void kNameSpace_ResetSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword)
+{
+	ksymbol_t queryKey = keyword | KSymbolAttr_Annotation;
+	KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
+	if(foundKeyValue != NULL) {
+		kArray *syntaxList = (kArray*)foundKeyValue->ObjectValue;
+		DBG_ASSERT(IS_Array(syntaxList));
+		KLIB kArray_Clear(kctx, syntaxList, 0);
+	}
+}
+
+static void kNameSpace_Import2(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS)
+{
+	if(IS_NameSpace(ns->parentNULL)) {
+
+	}
+	KLIB kArray_Add(kctx, ns->importedNameSpaceListNULL, targetNS);
+}
+
+static void kNameSpace_AddSyntax(KonohaContext *kctx, kNameSpace *ns, kSyntax *syn, KTraceInfo *trace)
+{
+	if(kNameSpace_SetConstData(kctx, ns, syn->keyword, KType_Syntax, syn, trace)) {
+		kNameSpace_ResetSyntaxList(kctx, ns, syn->keyword);
+	}
 }
 
 // ---------------------------------------------------------------------------
