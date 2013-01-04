@@ -1321,7 +1321,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ KSymbol_END, },
 	};
 	kNameSpace_DefineSyntax(kctx, ns, SYNTAX, NULL);
-	((kTokenVar *)K_NULLTOKEN)->resolvedSyntaxInfo = kNameSpace_GetSyntax(kctx, ns, KSymbol_SEMICOLON, 0/*already created*/);
+	((kTokenVar *)K_NULLTOKEN)->resolvedSyntaxInfo = kNameSpace_GetSyntax(kctx, ns, KSymbol_SEMICOLON);
 	KPARSERM->termParseFunc     = TermFunc;
 	KPARSERM->opParseFunc       = OperatorFunc;
 	KPARSERM->patternParseFunc  = patternParseFunc;

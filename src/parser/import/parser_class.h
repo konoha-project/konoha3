@@ -34,9 +34,9 @@
 
 static void kNameSpace_FreeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns)
 {
-	if(ns->syntaxMapNN != NULL) {
-		KLIB KHashMap_Free(kctx, ns->syntaxMapNN, NULL/*syntaxMap_Free*/);
-	}
+//	if(ns->syntaxMapNN != NULL) {
+//		KLIB KHashMap_Free(kctx, ns->syntaxMapNN, NULL/*syntaxMap_Free*/);
+//	}
 	if(ns->tokenMatrix != NULL) {
 		KFree((void *)ns->tokenMatrix, SIZEOF_TOKENMATRIX);
 	}
@@ -48,7 +48,7 @@ static void kNameSpace_FreeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns
 static void kSyntax_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kSyntaxVar *syn = (kSyntaxVar *)o;
-	bzero(&syn->parentSyntaxNULL, sizeof(kSyntax) - sizeof(kObjectHeader));
+	bzero(&syn->packageNameSpace, sizeof(kSyntax) - sizeof(kObjectHeader));
 	kNameSpace *ns = conf == NULL ? KNULL(NameSpace) : (kNameSpace *)conf;
 	KFieldInit(syn, syn->packageNameSpace, ns);
 }

@@ -210,35 +210,34 @@ typedef enum {
 #define SUGARFUNC   (kFunc *)
 
 #define SYNFLAG_Macro               ((kshortflag_t)1)
-#define SYNFLAG_CFunc               (SYNFLAG_CParseFunc|SYNFLAG_CTypeFunc)
-#define SYNFLAG_CParseFunc          ((kshortflag_t)1 << 3)
-#define SYNFLAG_CTypeFunc      ((kshortflag_t)1 << 4)
+#define SYNFLAG_MetaPattern         ((kshortflag_t)1 << 1)
+#define SYNFLAG_NodeLeftJoinOp2     ((kshortflag_t)1 << 2)
+#define SYNFLAG_Suffix              ((kshortflag_t)1 << 3)
 
-#define SYNFLAG_NodeLeftJoinOp2     ((kshortflag_t)1 << 1)
-#define SYNFLAG_Suffix      ((kshortflag_t)1 << 2)
-#define SYNFLAG_CallNode            ((kshortflag_t)1 << 11)
+#define SYNFLAG_NodeBreakExec       ((kshortflag_t)1 << 4)  /* return, throw */
+#define SYNFLAG_NodeJumpAhead0      ((kshortflag_t)1 << 5)  /* continue */
+#define SYNFLAG_NodeJumpSkip0       ((kshortflag_t)1 << 6)  /* break */
 
-#define SYNFLAG_NodeBreakExec       ((kshortflag_t)1 << 8)  /* return, throw */
-#define SYNFLAG_NodeJumpAhead0      ((kshortflag_t)1 << 9)  /* continue */
-#define SYNFLAG_NodeJumpSkip0       ((kshortflag_t)1 << 10)  /* break */
+#define SYNFLAG_CFunc               (SYNFLAG_CParseFunc|SYNFLAG_CTypeFunc|SYNFLAG_CTokenFunc)
+#define SYNFLAG_CParseFunc          ((kshortflag_t)1 << 10)
+#define SYNFLAG_CTypeFunc           ((kshortflag_t)1 << 11)
+#define SYNFLAG_CTokenFunc          ((kshortflag_t)1 << 12)
+
+#define SYNFLAG_CallNode            ((kshortflag_t)1 << 13)
 
 #define kSyntax_Is(P, o)       (KFlag_Is(uintptr_t,(o)->flag, SYNFLAG_##P))
 #define kSyntax_Set(P,o,B)     KFlag_Set(uintptr_t,(o)->flag, SYNFLAG_##P, B)
 
 struct kSyntaxVar {
 	kObjectHeader h;
-	const struct kSyntaxVar          *parentSyntaxNULL;
+//	const struct kSyntaxVar          *parentSyntaxNULL;
 	kNameSpace                       *packageNameSpace;
 	ksymbol_t  keyword;               kshortflag_t  flag;
-	kArray                       *syntaxPatternListNULL;
-	kArray                       *macroDataNULL;
-	union {
-		kFunc                        *sugarFuncTable[SugarFunc_SIZE];
-		kArray                       *sugarFuncListTable[SugarFunc_SIZE];
-	};
-	kshort_t tokenKonohaChar;         kshort_t lastLoadedPackageId;
+	kArray                           *syntaxPatternListNULL;
+	kArray                           *macroDataNULL;
+	kFunc                            *sugarFuncTable[SugarFunc_SIZE];
+	kshort_t tokenKonohaChar;         kshort_t macroParamSize;
 	kshort_t precedence_op2;          kshort_t precedence_op1;
-	kshort_t macroParamSize;
 };
 
 // operator prcedence
@@ -277,7 +276,12 @@ typedef struct KDEFINE_SYNTAX {
 	};
 	union {
 		kFunc* typeFunc;
-		KMethodFunc typeCheckMethodFunc;
+		KMethodFunc typeMethodFunc;
+	};
+	int tokenChar;
+	union {
+		kFunc* tokenFunc;
+		KMethodFunc tokenMethodFunc;
 	};
 } KDEFINE_SYNTAX;
 
@@ -588,32 +592,27 @@ typedef struct {
 	kFunc  *patternParseFunc;
 	kFunc  *methodTypeFunc;
 	//
-	kSyntax*      (*kNameSpace_GetSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
+	kSyntax*      (*kNameSpace_GetSyntax)(KonohaContext *, kNameSpace *, ksymbol_t);
 	void          (*kNameSpace_DefineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *, KTraceInfo *);
 	void          (*kNameSpace_AddSyntaxPattern)(KonohaContext *, kNameSpace *, ksymbol_t, const char *rule, kfileline_t uline, KTraceInfo *);
-	kSyntaxVar*   (*kNameSpace_SetTokenFunc)(KonohaContext *, kNameSpace *, ksymbol_t, int ch, kFunc *);
-	kSyntaxVar*   (*kNameSpace_AddSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
+//	kSyntaxVar*   (*kNameSpace_SetTokenFunc)(KonohaContext *, kNameSpace *, ksymbol_t, int ch, kFunc *);
+//	kSyntaxVar*   (*kNameSpace_AddSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 	kbool_t       (*kNameSpace_SetMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *, int optionMacro);
 
-	void        (*KTokenSeq_Tokenize)(KonohaContext *, KTokenSeq *, const char *, kfileline_t);
-	kbool_t     (*KTokenSeq_ApplyMacro)(KonohaContext *, KTokenSeq *, kArray *, int, int, size_t, KMacroSet *);
-	int         (*KTokenSeq_Preprocess)(KonohaContext *, KTokenSeq *, KMacroSet *, KTokenSeq *, int);
-	kstatus_t   (*KTokenSeq_Eval)(KonohaContext *, KTokenSeq *, KTraceInfo *);
+	void         (*KTokenSeq_Tokenize)(KonohaContext *, KTokenSeq *, const char *, kfileline_t);
+	kbool_t      (*KTokenSeq_ApplyMacro)(KonohaContext *, KTokenSeq *, kArray *, int, int, size_t, KMacroSet *);
+	int          (*KTokenSeq_Preprocess)(KonohaContext *, KTokenSeq *, KMacroSet *, KTokenSeq *, int);
+	kstatus_t    (*KTokenSeq_Eval)(KonohaContext *, KTokenSeq *, KTraceInfo *);
 
-	int         (*ParseTypePattern)(KonohaContext *, kNameSpace *, kArray *, int , int , KClass **classRef);
-	kTokenVar*  (*kToken_ToBraceGroup)(KonohaContext *, kTokenVar *, kNameSpace *, KMacroSet *);
+	int          (*ParseTypePattern)(KonohaContext *, kNameSpace *, kArray *, int , int , KClass **classRef);
+	kTokenVar*   (*kToken_ToBraceGroup)(KonohaContext *, kTokenVar *, kNameSpace *, KMacroSet *);
 
-	void        (*kNode_AddParsedObject)(KonohaContext *, kNode *, ksymbol_t, kObject *o);
-	int         (*FindEndOfStatement)(KonohaContext *, kNameSpace *, kArray *, int, int);
+	void         (*kNode_AddParsedObject)(KonohaContext *, kNode *, ksymbol_t, kObject *o);
+	int          (*FindEndOfStatement)(KonohaContext *, kNameSpace *, kArray *, int, int);
 
-	uintptr_t   (*kNode_ParseFlag)(KonohaContext *kctx, kNode *stmt, KFlagSymbolData *flagData, uintptr_t flag);
-	kToken*     (*kNode_GetToken)(KonohaContext *, kNode *, ksymbol_t kw, kToken *def);
-	kNode*      (*kNode_GetNode)(KonohaContext *, kNode *, ksymbol_t kw, kNode *def);
-//	const char* (*kNode_GetText)(KonohaContext *, kNode *, ksymbol_t kw, const char *def);
-//	kNode*      (*kNode_GetBlock)(KonohaContext *, kNode *, kNameSpace *, ksymbol_t kw, kNode *def);
-
-//	kNode*      (*new_BlockNode)(KonohaContext *, kNode *, KMacroSet *, KTokenSeq *);
-//	kNodeVar*    (*new_BlockNode)(KonohaContext *kctx, kArray *gcstack, kSyntax *syn, ...);
+	uintptr_t    (*kNode_ParseFlag)(KonohaContext *kctx, kNode *stmt, KFlagSymbolData *flagData, uintptr_t flag);
+	kToken*      (*kNode_GetToken)(KonohaContext *, kNode *, ksymbol_t kw, kToken *def);
+	kNode*       (*kNode_GetNode)(KonohaContext *, kNode *, ksymbol_t kw, kNode *def);
 	void         (*kNode_InsertAfter)(KonohaContext *, kNode *, kNode *target, kNode *);
 
 	kNode*       (*kNode_Termnize)(KonohaContext *, kNode *, kToken *);
@@ -687,8 +686,8 @@ typedef enum {
 #define KType_TokenArray                        SUGAR cTokenArray->typeId
 
 //#define KSymbol_(T)                               _e->keyword(kctx, T, sizeof(T)-1, KSymbol_Noname)
-#define kSyntax_(KS, KW)                        SUGAR kNameSpace_GetSyntax(kctx, KS, KW, 0)
-#define NEWkSyntax_(KS, KW)                     (kSyntaxVar *)(SUGAR kNameSpace_GetSyntax(kctx, KS, KW, 1))
+#define kSyntax_(NS, KW)                        SUGAR kNameSpace_GetSyntax(kctx, NS, KW)
+//#define NEWkSyntax_(KS, KW)                     (kSyntaxVar *)(SUGAR kNameSpace_GetSyntax(kctx, KS, KW, 1))
 
 #ifdef USE_SMALLBUILD
 #define KDump(O)
@@ -736,7 +735,7 @@ struct KBuilderAPI2 {
 static inline void kToken_SetTypeId(KonohaContext *kctx, kToken *tk, kNameSpace *ns, ktypeattr_t type)
 {
 	((kTokenVar *)tk)->resolvedTypeId = type;
-	((kTokenVar *)tk)->resolvedSyntaxInfo = KPARSERM->kNameSpace_GetSyntax(kctx, ns, KSymbol_TypePattern, 0);
+	((kTokenVar *)tk)->resolvedSyntaxInfo = SUGAR kNameSpace_GetSyntax(kctx, ns, KSymbol_TypePattern);
 }
 
 #define kNode_isSymbolTerm(expr)   1

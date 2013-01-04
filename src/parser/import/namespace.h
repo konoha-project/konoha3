@@ -91,8 +91,6 @@ static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksym
 	}
 }
 
-#define kNameSpace_ListImportedNameSpace(kctx, NS, size) (kNameSpace**)ListObject(kctx, (kObject**)(&((NS)->parentNULL)), size)
-
 static KKeyValue* kNameSpace_GetConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t queryKey, int isLocalOnly)
 {
 	KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
@@ -199,7 +197,7 @@ static kArray* kNameSpace_GetSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksy
 	return syntaxList;
 }
 
-static void kNameSpace_ResetSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword)
+static kbool_t kNameSpace_ResetSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword)
 {
 	ksymbol_t queryKey = keyword | KSymbolAttr_Annotation;
 	KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
@@ -207,11 +205,19 @@ static void kNameSpace_ResetSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksym
 		kArray *syntaxList = (kArray*)foundKeyValue->ObjectValue;
 		DBG_ASSERT(IS_Array(syntaxList));
 		KLIB kArray_Clear(kctx, syntaxList, 0);
+		return true;
 	}
+	return false;
 }
 
 static void kNameSpace_ImportSyntax2(KonohaContext *kctx, kNameSpace *ns, kSyntax *syn)
 {
+	if(KFlag_Is(kshortflag_t, SYNFLAG_MetaPattern, syn->flag)) {
+		if(ns->metaPatternList == K_EMPTYARRAY) {
+			ns->metaPatternList = new_(Array, 0, ns->NameSpaceConstList);
+		}
+		KLIB kArray_Add(kctx, ns->metaPatternList, syn);
+	}
 	kNameSpace_ResetSyntaxList(kctx, ns, syn->keyword);
 }
 
@@ -222,21 +228,132 @@ static void kNameSpace_ImportSyntaxAsKeyValue(KonohaContext *kctx, void */*kName
 	}
 }
 
-static void kNameSpace_Import2(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS)
+static kbool_t kNameSpace_ImportSyntaxAll(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, KTraceInfo *trace)
 {
 	if(ns->importedNameSpaceList == K_EMPTYARRAY) {
 		ns->importedNameSpaceList = new_(Array, 0, ns->NameSpaceConstList);
 	}
 	KLIB kArray_Add(kctx, ns->importedNameSpaceList, targetNS);
 	KLIB KDict_DoEach(kctx, &(targetNS->constTable), ns, kNameSpace_ImportSyntaxAsKeyValue);
+	return true;
+}
+
+static kbool_t kNameSpace_RemoveSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, KTraceInfo *trace)
+{
+	if(kNameSpace_ResetSyntaxList(kctx, ns, keyword)) {
+		//TODO
+		return kNameSpace_SetConstData(kctx, ns, keyword, KType_Symbol, (uintptr_t)KNULL(Syntax), trace);
+	}
+	return true;
 }
 
 static void kNameSpace_AddSyntax(KonohaContext *kctx, kNameSpace *ns, kSyntax *syn, KTraceInfo *trace)
 {
 	if(kNameSpace_SetConstData(kctx, ns, syn->keyword, KType_Symbol, (uintptr_t)syn, trace)) {
-		kNameSpace_ResetSyntaxList(kctx, ns, syn->keyword);
+		kNameSpace_ImportSyntax2(kctx, ns, syn);
 	}
 }
+
+static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef, KTraceInfo *trace)
+{
+	while(syndef->keyword != KSymbol_END) {
+		kSyntaxVar* syn = new_(SyntaxVar, ns, ns->NameSpaceConstList);
+		syn->packageNameSpace = ns;
+		syn->flag = ((kshortflag_t)syndef->flag);
+		if(syndef->precedence_op1 > 0) {
+			syn->precedence_op1 = syndef->precedence_op1;
+		}
+		if(syndef->precedence_op2 > 0) {
+			syn->precedence_op2 = syndef->precedence_op2;
+		}
+		if(syndef->parseFunc != NULL) {
+			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CParseFunc)) ? KSugarFunc(ns, syndef->parseMethodFunc) : syndef->parseFunc;
+			DBG_ASSERT(IS_Func(fo));
+			KFieldInit(ns, syn->sugarFuncTable[KSugarParseFunc], fo);
+		}
+		if(syndef->typeFunc != NULL) {
+			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CTypeFunc)) ? KSugarFunc(ns, syndef->typeMethodFunc) : syndef->typeFunc;
+			DBG_ASSERT(IS_Func(fo));
+			KFieldInit(ns, syn->sugarFuncTable[KSugarTypeFunc], fo);
+		}
+		DBG_ASSERT(syn == kSyntax_(ns, syndef->keyword));
+		KLIB ReportScriptMessage(kctx, trace, DebugTag, "@%s new syntax %s%s", KPackage_text(ns->packageId), KSymbol_Fmt2(syn->keyword));
+		kNameSpace_AddSyntax(kctx, ns, syn, trace);
+		syndef++;
+	}
+}
+
+//#define kToken_IsFirstPattern(tk)   (KSymbol_IsPattern(tk->resolvedSymbol) && tk->stmtEntryKey != KSymbol_ExprPattern)
+
+static kSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword)
+{
+	KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, keyword, false/*isLocalOnly*/);
+	if(kvs != NULL && KTypeAttr_Unmask(kvs->attrTypeId) == KType_Syntax) {
+		return (kSyntax*)kvs->ObjectValue;
+	}
+	return KNULL(Syntax);
+}
+
+//static kbool_t kNameSpace_ImportSyntax(KonohaContext *kctx, kNameSpace *ns, kSyntax *target, KTraceInfo *trace)
+//{
+//	kSyntaxVar *syn = (kSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, target->keyword, true/*isNew*/);
+//	//DBG_P("<<<< packageId=%s,%s >>>>", KPackage_text(syn->lastLoadedPackageId), KPackage_text(target->lastLoadedPackageId));
+//	if(syn->lastLoadedPackageId != target->lastLoadedPackageId) {
+//		int index;
+//		KLIB ReportScriptMessage(kctx, trace, DebugTag, "@%s importing syntax %s%s", KPackage_text(ns->packageId), KSymbol_Fmt2(syn->keyword));
+//		syn->flag = target->flag;
+//		syn->precedence_op1 = target->precedence_op1;
+//		syn->precedence_op2 = target->precedence_op2;
+//		syn->macroParamSize = target->macroParamSize;
+//		kNameSpace_AppendArrayRefArray(kctx, ns, &syn->macroDataNULL, target->macroDataNULL);
+//		kNameSpace_AppendArrayRefArray(kctx, ns, &syn->syntaxPatternListNULL, target->syntaxPatternListNULL);
+//		if(syn->syntaxPatternListNULL != NULL && SAFECHECK(0 < kArray_size(syn->syntaxPatternListNULL))) {
+//			kToken *patternToken = syn->syntaxPatternListNULL->TokenItems[0];
+//			if(kToken_IsFirstPattern(patternToken)) {
+//				kNameSpace_AppendArrayRef(kctx, ns, &((kNameSpaceVar *)ns)->metaPatternListNULL, UPCAST(patternToken));
+//			}
+//		}
+//		for(index = 0; index < SugarFunc_SIZE; index++) {
+//			int j, size;
+//			kFunc **FuncItems = kSyntax_funcTable(kctx, target, index, &size);
+//			for(j = 0; j < size; j++) {
+//				kNameSpace_AddFuncList(kctx, ns, syn->sugarFuncListTable, index, FuncItems[j]);
+//			}
+//		}
+//		if(target->tokenKonohaChar != 0) {
+//			int j, size;
+//			kFunc **FuncItems = kSyntax_funcTable(kctx, target, KSugarTokenFunc, &size);
+//			for(j = 0; j < size; j++) {
+//				kNameSpace_SetTokenFuncMatrix(kctx, ns, target->tokenKonohaChar, FuncItems[j]);
+//			}
+//			syn->tokenKonohaChar = target->tokenKonohaChar;
+//		}
+//		syn->lastLoadedPackageId = target->lastLoadedPackageId;
+//	}
+//	return true;
+//}
+
+//static kSyntaxVar *kNameSpace_AddSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *funcObject)
+//{
+//	kSyntaxVar *syn = (kSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, keyword, 1/*new*/);
+//	DBG_ASSERT(idx < SugarFunc_SIZE);
+//	kNameSpace_AddFuncList(kctx, ns, syn->sugarFuncListTable, idx, funcObject);
+//	KLIB kMethod_DoLazyCompilation(kctx, (funcObject)->method, NULL, HatedLazyCompile);
+//	syn->lastLoadedPackageId = ns->packageId;
+//	return syn;
+//}
+//
+//static kSyntaxVar *kNameSpace_SetTokenFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int konohaChar, kFunc *fo)
+//{
+//	kSyntaxVar *syn = (kSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, keyword, 1/*new*/);
+//	kArray **list = (kArray**)kNameSpace_tokenFuncMatrix(kctx, ns);
+//	kNameSpace_AddFuncList(kctx, ns, list, konohaChar, fo);
+//	KLIB kMethod_DoLazyCompilation(kctx, (fo)->method, NULL, HatedLazyCompile);
+//	syn->tokenKonohaChar = konohaChar;
+//	syn->sugarFuncTable[KSugarTokenFunc] = fo;  // added in addFuncList
+//	syn->lastLoadedPackageId = ns->packageId;
+//	return syn;
+//}
 
 // ---------------------------------------------------------------------------
 // Utils
@@ -297,6 +414,7 @@ static void kNameSpace_SetTokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns, i
 // ---------------------------------------------------------------------------
 // Syntax Management
 
+#ifdef OLD
 #define kToken_IsFirstPattern(tk)   (KSymbol_IsPattern(tk->resolvedSymbol) && tk->stmtEntryKey != KSymbol_ExprPattern)
 
 static kSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, kSyntax *parentSyntax, ksymbol_t keyword)
@@ -478,7 +596,7 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 			KFieldInit(ns, syn->sugarFuncTable[KSugarParseFunc], fo);
 		}
 		if(syndef->typeFunc != NULL) {
-			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CTypeFunc)) ? KSugarFunc(ns, syndef->typeCheckMethodFunc) : syndef->typeFunc;
+			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CTypeFunc)) ? KSugarFunc(ns, syndef->typeMethodFunc) : syndef->typeFunc;
 			DBG_ASSERT(IS_Func(fo));
 			KFieldInit(ns, syn->sugarFuncTable[KSugarTypeFunc], fo);
 		}
@@ -488,7 +606,7 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 		syndef++;
 	}
 }
-
+#endif
 
 // ---------------------------------------------------------------------------
 /* ClassName in ConstTable */
@@ -1071,32 +1189,32 @@ static KPackage *GetPackageNULL(KonohaContext *kctx, kpackageId_t packageId, int
 	return pack;
 }
 
-static kbool_t kNameSpace_ImportSymbol(KonohaContext *kctx, kNameSpace *ns, kNameSpace *packageNS, ksymbol_t keyword, KTraceInfo *trace)
-{
-	kSyntax *syn = kSyntax_(packageNS, keyword);
-	if(syn != NULL) {
-		return kNameSpace_ImportSyntax(kctx, ns, syn, trace);
-	}
-	else {
-		KKeyValue *kvs = kNameSpace_GetLocalConstNULL(kctx, packageNS, keyword);
-		if(kvs != NULL) {
-			if(kNameSpace_MergeConstData(kctx, (kNameSpaceVar *)ns, kvs, 1, trace)) {
-				if(KTypeAttr_Unmask(kvs->attrTypeId) == VirtualType_KClass) {
-					size_t i;
-					ktypeattr_t typeId = ((KClass *)kvs->unboxValue)->typeId;
-					for(i = 0; i < kArray_size(packageNS->methodList_OnList); i++) {
-						kMethod *mtd = packageNS->methodList_OnList->MethodItems[i];
-						if(mtd->typeId == typeId /*&& !kMethod_Is(Private, mtd)*/) {
-							KLIB kArray_Add(kctx, ns->methodList_OnList, mtd);
-						}
-					}
-				}
-				return true;
-			}
-		}
-	}
-	return false;
-}
+//static kbool_t kNameSpace_ImportSymbol(KonohaContext *kctx, kNameSpace *ns, kNameSpace *packageNS, ksymbol_t keyword, KTraceInfo *trace)
+//{
+//	kSyntax *syn = kSyntax_(packageNS, keyword);
+//	if(syn != NULL) {
+//		return kNameSpace_ImportSyntax(kctx, ns, syn, trace);
+//	}
+//	else {
+//		KKeyValue *kvs = kNameSpace_GetLocalConstNULL(kctx, packageNS, keyword);
+//		if(kvs != NULL) {
+//			if(kNameSpace_MergeConstData(kctx, (kNameSpaceVar *)ns, kvs, 1, trace)) {
+//				if(KTypeAttr_Unmask(kvs->attrTypeId) == VirtualType_KClass) {
+//					size_t i;
+//					ktypeattr_t typeId = ((KClass *)kvs->unboxValue)->typeId;
+//					for(i = 0; i < kArray_size(packageNS->methodList_OnList); i++) {
+//						kMethod *mtd = packageNS->methodList_OnList->MethodItems[i];
+//						if(mtd->typeId == typeId /*&& !kMethod_Is(Private, mtd)*/) {
+//							KLIB kArray_Add(kctx, ns->methodList_OnList, mtd);
+//						}
+//					}
+//				}
+//				return true;
+//			}
+//		}
+//	}
+//	return false;
+//}
 
 static kbool_t kNameSpace_isImported(KonohaContext *kctx, kNameSpace *ns, kNameSpace *packageNS, KTraceInfo *trace)
 {
@@ -1111,20 +1229,14 @@ static kbool_t kNameSpace_isImported(KonohaContext *kctx, kNameSpace *ns, kNameS
 static kbool_t kNameSpace_ImportAll(KonohaContext *kctx, kNameSpace *ns, kNameSpace *packageNS, KTraceInfo *trace)
 {
 	if(!kNameSpace_isImported(kctx, ns, packageNS, trace)) {
-		size_t i;
-		if(kNameSpace_sizeConstTable(packageNS) > 0) {
-			if(!kNameSpace_MergeConstData(kctx, (kNameSpaceVar *)ns, packageNS->constTable.data.keyValueItems, kNameSpace_sizeConstTable(packageNS), trace)) {
-				return false;
-			}
-		}
-		kNameSpace_AppendArrayRefArray(kctx, ns, &ns->metaPatternListNULL, packageNS->metaPatternListNULL);
+//		size_t i;
 		kNameSpace_ImportSyntaxAll(kctx, ns, packageNS, trace);
-		for(i = 0; i < kArray_size(packageNS->methodList_OnList); i++) {
-			kMethod *mtd = packageNS->methodList_OnList->MethodItems[i];
-			if(kMethod_Is(Public, mtd) && mtd->packageId == packageNS->packageId) {
-				KLIB kArray_Add(kctx, ns->methodList_OnList, mtd);
-			}
-		}
+//		for(i = 0; i < kArray_size(packageNS->methodList_OnList); i++) {
+//			kMethod *mtd = packageNS->methodList_OnList->MethodItems[i];
+//			if(kMethod_Is(Public, mtd) && mtd->packageId == packageNS->packageId) {
+//				KLIB kArray_Add(kctx, ns->methodList_OnList, mtd);
+//			}
+//		}
 		// record imported
 		return kNameSpace_SetConstData(kctx, ns, packageNS->packageId | KSymbolAttr_Pattern, KType_int, packageNS->packageId, trace);
 	}
@@ -1156,18 +1268,18 @@ static kbool_t kNameSpace_ImportPackage(KonohaContext *kctx, kNameSpace *ns, con
 	return false;
 }
 
-static kbool_t kNameSpace_ImportPackageSymbol(KonohaContext *kctx, kNameSpace *ns, const char *name, ksymbol_t keyword, KTraceInfo *trace)
-{
-	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
-	int option = 0;
-	if(ns->packageId != packageId) {
-		KPackage *pack = GetPackageNULL(kctx, packageId, option, trace);
-		if(pack != NULL) {
-			return kNameSpace_ImportSymbol(kctx, ns, pack->packageNS, keyword, trace);
-		}
-	}
-	return false;
-}
+//static kbool_t kNameSpace_ImportPackageSymbol(KonohaContext *kctx, kNameSpace *ns, const char *name, ksymbol_t keyword, KTraceInfo *trace)
+//{
+//	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
+//	int option = 0;
+//	if(ns->packageId != packageId) {
+//		KPackage *pack = GetPackageNULL(kctx, packageId, option, trace);
+//		if(pack != NULL) {
+//			return kNameSpace_ImportSymbol(kctx, ns, pack->packageNS, keyword, trace);
+//		}
+//	}
+//	return false;
+//}
 
 // --------------------------------------------------------------------------
 /* namespace method */

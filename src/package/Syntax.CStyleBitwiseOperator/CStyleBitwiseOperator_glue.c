@@ -114,7 +114,7 @@ static kbool_t int_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 //	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_NumberPattern, KonohaChar_Digit, KSugarFunc(ns, TokenFunc_ExtendedIntLiteral));
-	kSyntaxVar *syn = (kSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, KSymbol_("+"), 0);
+	kSyntaxVar *syn = (kSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, KSymbol_("+"));
 	if(syn != NULL) {
 		syn->precedence_op1  = Precedence_CStylePrefixOperator;
 	}

@@ -33,6 +33,8 @@
 extern "C" {
 #endif
 
+#define NEWSYNTAX 1
+
 #define K_CLASSTABLE_INITSIZE 64
 #define K_PAGESIZE        4096
 
@@ -1343,6 +1345,7 @@ struct kArrayVar {
 		kMethod        **MethodItems;
 		kFunc          **FuncItems;
 		kNameSpace     **NameSpaceItems;
+		struct kSyntaxVar **SyntaxItems;
 		kToken         **TokenItems;
 		kTokenVar      **TokenVarItems;
 		kNode          **NodeItems;
@@ -1509,13 +1512,13 @@ struct kNameSpaceVar {
 	kNameSpace                        *parentNULL;
 	kArray                            *importedNameSpaceList;
 	KDict                              constTable;
+	kArray                            *metaPatternList;
 	kObject                           *globalObjectNULL;
 	kArray                            *methodList_OnList;   // default K_EMPTYARRAY
 	size_t                             sortedMethodList;
 	// the below references are defined in sugar
 	void                              *tokenMatrix;
-	KHashMap                          *syntaxMapNN;
-	kArray                            *metaPatternListNULL;
+//	KHashMap                          *syntaxMapNN;
 	struct KBuilderAPI2               *builderApi;
 	KKeyValue                         *typeVariableItems;
 	size_t                             typesize;
@@ -1747,7 +1750,7 @@ struct KonohaLibVar {
 
 	KPackage*           (*kNameSpace_RequirePackage)(KonohaContext*, const char *, KTraceInfo *);
 	kbool_t             (*kNameSpace_ImportPackage)(KonohaContext*, kNameSpace*, const char *, KTraceInfo *);
-	kbool_t             (*kNameSpace_ImportPackageSymbol)(KonohaContext *, kNameSpace *, const char *, ksymbol_t keyword, KTraceInfo *);
+//	kbool_t             (*kNameSpace_ImportPackageSymbol)(KonohaContext *, kNameSpace *, const char *, ksymbol_t keyword, KTraceInfo *);
 
 	KClass*        (*kNameSpace_GetClassByFullName)(KonohaContext*, kNameSpace *, const char *, size_t, KClass *);
 	KClass*        (*kNameSpace_DefineClass)(KonohaContext*, kNameSpace *, kString *, KDEFINE_CLASS *, KTraceInfo *);
@@ -1829,7 +1832,7 @@ struct KonohaLibVar {
 
 #define KRequirePackage(NAME, TRACE)       KLIB kNameSpace_RequirePackage(kctx, NAME, TRACE)
 #define KImportPackage(NS, NAME, TRACE)    KLIB kNameSpace_ImportPackage(kctx, NS, NAME, TRACE)
-#define KImportPackageSymbol(NS, NAME, SYMBOL, TRACE) KLIB kNameSpace_ImportPackageSymbol(kctx, NS, NAME, KSymbol_(SYMBOL), TRACE)
+//#define KImportPackageSymbol(NS, NAME, SYMBOL, TRACE) KLIB kNameSpace_ImportPackageSymbol(kctx, NS, NAME, KSymbol_(SYMBOL), TRACE)
 
 typedef intptr_t  KDEFINE_METHOD;
 
@@ -1986,6 +1989,7 @@ typedef struct {
 #endif
 
 #define FIXME_ASSERT(a)    assert(a)
+#define KTODO(A); KExit(EXIT_FAILURE);
 
 #ifndef USE_SMALLBUILD
 #ifdef _MSC_VER

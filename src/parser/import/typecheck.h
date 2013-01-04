@@ -66,9 +66,8 @@ static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kNameSpa
 	return (kNode *)lsfp[K_RTNIDX].asObject;
 }
 
-static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn0, kNode *expr, kNameSpace *ns, KClass* reqtc)
+static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn, kNode *expr, kNameSpace *ns, KClass* reqtc)
 {
-	kSyntax *syn = syn0;
 	kObject *reqType = KLIB Knull(kctx, reqtc);
 	int varsize = ns->genv->localScope.varsize;
 	expr->stackbase = varsize;
@@ -79,11 +78,21 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn0, kNode *expr, kNameSpa
 //		KPushMethodCall(gma);
 //		KPushMethodCall(gma);
 //	}
-	while(true) {
-		int index, size;
-		kFunc **FuncItems = kSyntax_funcTable(kctx, syn, KSugarTypeFunc, &size);
-		for(index = size - 1; index >= 0; index--) {
-			kNode *texpr = CallTypeFunc(kctx, FuncItems[index], expr, ns, reqType);
+	if(syn->sugarFuncTable[KSugarTypeFunc] != NULL) {
+		kNode *texpr = CallTypeFunc(kctx, syn->sugarFuncTable[KSugarTypeFunc], expr, ns, reqType);
+		if(kNode_IsError(texpr) || texpr->attrTypeId != KType_var) {
+			if(!kNode_Is(OpenBlock, expr)) {
+				ns->genv->localScope.varsize = varsize;
+			}
+			return texpr;
+		}
+	}
+	size_t i;
+	kArray *syntaxList = kNameSpace_GetSyntaxList(kctx, ns, syn->keyword);
+	for(i = 1; i < kArray_size(syntaxList); i++) { /* ObjectItems[0] == syn */
+		kSyntax *syn2 = syntaxList->SyntaxItems[i];
+		if(syn2->sugarFuncTable[KSugarTypeFunc] != NULL) {
+			kNode *texpr = CallTypeFunc(kctx, syn2->sugarFuncTable[KSugarTypeFunc], expr, ns, reqType);
 			if(kNode_IsError(texpr) || texpr->attrTypeId != KType_var) {
 				if(!kNode_Is(OpenBlock, expr)) {
 					ns->genv->localScope.varsize = varsize;
@@ -91,13 +100,11 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn0, kNode *expr, kNameSpa
 				return texpr;
 			}
 		}
-		if(syn->parentSyntaxNULL == NULL) break;
-		syn = syn->parentSyntaxNULL;
 	}
 	if(!kNode_IsError(expr)) {
 		KDump(expr);
-		expr = SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "undefined typing: %s%s %s", KSymbol_Fmt2(syn0->keyword), KToken_t(expr->KeyOperatorToken));
-		DBG_ASSERT(kctx == NULL);
+		expr = SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "undefined typing: %s%s %s", KSymbol_Fmt2(syn->keyword), KToken_t(expr->KeyOperatorToken));
+		//DBG_ASSERT(kctx == NULL);
 	}
 	ns->genv->localScope.varsize = varsize;
 	return expr;
