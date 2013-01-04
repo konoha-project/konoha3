@@ -3,12 +3,12 @@
 
 import("jansson"); // Replace to konoha.json
 import("konoha.class");
-import("js4.array");
-import("konoha.ns");  // konoha.const is obsolete
-import("konoha.string");
+import("JavaScript.Array");
+import("konoha.ns");
+import("JavaScript.String");
 import("konoha.bytes");
 import("konoha.file");
-import("js4.date");
+import("JavaScript.Date");
 import("posix.process");
 import("dscript.subproc");
 

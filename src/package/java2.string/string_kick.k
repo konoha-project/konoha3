@@ -1,5 +1,5 @@
 import("konoha.string");
-import("konoha.float");
+import("Type.Float");
 import("konoha.object");
 
 //## @Public int String.codePointAt(int index)

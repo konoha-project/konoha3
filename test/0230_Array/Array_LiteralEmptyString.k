@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("js4.array");
+import("JavaScript.Array");
 
 void test() {
 	String[] a = [];

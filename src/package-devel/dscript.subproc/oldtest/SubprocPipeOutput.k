@@ -1,7 +1,7 @@
 // written by shinpei
 import ("konoha.new");
 import( "dscript.subproc");
-import ("js4.array");
+import ("JavaScript.Array");
 
 void test () {
 	Subproc p = new Subproc("echo hoge", false);

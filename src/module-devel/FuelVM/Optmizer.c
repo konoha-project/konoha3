@@ -322,7 +322,7 @@ static INode *FoldAssert(FuelIRBuilder *builder, ICall *Inst)
 	KonohaContext *kctx = builder->Context;
 	INode **MtdPtr = ARRAY_n(Inst->Params, 0);
 	kMethod *mtd = (kMethod *) ((IConstant *) *MtdPtr)->Value.obj;
-	if(mtd->typeId == TYPE_NameSpace && mtd->mn == KKMethodName_("assert")) {
+	if(mtd->typeId == TYPE_NameSpace && mtd->mn == KMethodName_("assert")) {
 		if(ARRAY_size(Inst->Params) != 3) {
 			return 0;
 		}
@@ -866,6 +866,7 @@ static void RemoveUnusedVariable(FuelIRBuilder *builder)
 /* ------------------------------------------------------------------------- */
 /* FoldPHIInst */
 
+#ifdef FUELVM_USE_LLVM
 static void FoldPHIInst1(IPHI *PHI)
 {
 	INodePtr *x, *e;
@@ -895,10 +896,12 @@ static void FoldPHIInst(FuelIRBuilder *builder)
 		}
 	}
 }
+#endif
 
 /* ------------------------------------------------------------------------- */
 /* ConstantPropagation */
 
+#ifdef FUELVM_USE_LLVM
 static void ConstantPropagation(FuelIRBuilder *builder)
 {
 	/* FIXME(ide) This rountine is very very slow with complicated control flow. */
@@ -923,6 +926,7 @@ static void ConstantPropagation(FuelIRBuilder *builder)
 	CommitReplaceValue(&Repl);
 #endif
 }
+#endif
 
 /* ------------------------------------------------------------------------- */
 extern void InsertPHINode(FuelIRBuilder *builder);

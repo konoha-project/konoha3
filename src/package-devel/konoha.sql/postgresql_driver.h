@@ -110,18 +110,18 @@ static int POSTGRESQL_qnext(KonohaContext *kctx, KCursor *qcur, kResultSet *rs, 
 				case INT4OID:
 					ptr = PQgetvalue(res, 0, i);
 					ival = parseInt(ptr, strlen(ptr));
-					ResultSet_setInt(kctx, rs, i, ival);
+					ResultSet_SetInt(kctx, rs, i, ival);
 					break;
 				case FLOAT4OID:
 				case FLOAT8OID:
 					ptr = PQgetvalue(res, 0, i);
 					fval = parseFloat(ptr, strlen(ptr));
-					ResultSet_setFloat(kctx, rs, i, fval);
+					ResultSet_SetFloat(kctx, rs, i, fval);
 					break;
 				case TEXTOID:
 				case VARCHAROID:
 					ptr = PQgetvalue(res, 0, i);
-					ResultSet_setText(kctx, rs, i, ptr, strlen(ptr));
+					ResultSet_SetText(kctx, rs, i, ptr, strlen(ptr));
 					break;
 				case DATEOID:
 					break;

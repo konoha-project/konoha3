@@ -1,6 +1,6 @@
 //written by takeo onoda
 
-import("java2.string");
+import("JavaScript.String");
 
 void test() {
 	assert("hoge".get(0) == "h");

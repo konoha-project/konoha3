@@ -600,7 +600,7 @@ static kunused int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 		return UserFault | SystemFault;  /* running software can be wrong.. */
 	case EFAULT: /* 14 Bad address */
 		return userFault | SoftwareFault; /* At the C-Level */
-	case ENOTBLK: /* 15 Block device required */
+	case ENOTBLK: /* 15 Node device required */
 		return SystemFault; /* in case of unmount device */
 	case EBUSY: /* 16 Device or resource busy */
 		return SystemFault;

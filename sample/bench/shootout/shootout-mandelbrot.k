@@ -5,10 +5,12 @@
  */
 
 import("konoha.class");
+import("Type.Float");
+import("JavaScript.Array");
 import("konoha.file");
 import("konoha.ns");
 import("konoha.bytes");
-import("konoha.float");
+import("Type.Float");
 import("cstyle");
 
 const BUFFER_SIZE = 8192;

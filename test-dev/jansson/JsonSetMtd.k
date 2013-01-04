@@ -1,10 +1,9 @@
 import("konoha.new");
 import("cstyle", "while");
-import("cstyle"); // konoha.int was obsolete
-import("konoha.float");
-import("java2.string");
-import("js4.array");
-// //import("konoha.assign"); Don't use any more
+import("cstyle", "+=");
+import("Type.Float");
+import("JavaScript.String");
+import("JavaScript.Array");
 import("jansson");
 
 void main() {

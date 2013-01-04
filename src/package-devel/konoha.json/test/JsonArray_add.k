@@ -1,5 +1,5 @@
 import("konoha.json");
-import("konoha.float");
+import("Type.Float");
 
 void test_string() {
 	Json j = Json.parse("[]");

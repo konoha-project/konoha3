@@ -1,9 +1,9 @@
-import("js4.regexp");
+import("JavaScript.Regexp");
 import("konoha.new");
-import("js4.string");
+import("JavaScript.String");
 import("konoha.foreach");
 import("konoha.ns");
-import("js4.array");
+import("JavaScript.Array");
 import("konoha.file");
 import("konoha.bytes");
 import("cstyle");

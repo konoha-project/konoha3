@@ -6,7 +6,7 @@
 
 import("cstyle");
 import("konoha.ns");
-import("js4.array");
+import("JavaScript.Array");
 import("konoha.new");
 import("konoha.class");
 

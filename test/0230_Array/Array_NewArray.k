@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 import("konoha.new")
 import("konoha.class")
-import("js4.array");
+import("JavaScript.Array");
 
 void test() {
 	Array a = new Array(10);  // Empty

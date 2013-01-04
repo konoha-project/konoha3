@@ -1,4 +1,4 @@
-import("konoha.float")
+import("Type.Float")
 
 boolean float_operator_Add() { 
 	float f1000000 = 1.000000;

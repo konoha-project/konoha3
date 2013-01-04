@@ -1,11 +1,12 @@
-import("konoha.float");
-import("konoha.math");
+// written by shinpei nakata
+import("Type.Float");
+import("JavaScript.Math");
 import("konoha.bytes");
-import("konoha.string");
 import("konoha.global");
 import("konoha.ns");
 import("konoha.class");
-import("js4.array");
+import("JavaScript.Array");
+import("JavaScript.String");
 import("konoha.file");
 import("cstyle", "while");
 import("cstyle", "+=");

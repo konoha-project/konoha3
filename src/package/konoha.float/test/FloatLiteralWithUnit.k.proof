@@ -1,7 +1,0 @@
- - (FloatLiteralWithUnit.k:4) 0.0km == 0.000000e+00
- - (FloatLiteralWithUnit.k:5) 12345.0kg == 1.234500e+04
- - (FloatLiteralWithUnit.k:6) 1.2345e27cm == 1.234500e+27
- - (FloatLiteralWithUnit.k:7) 1e21m == 1.000000e+21
- - (FloatLiteralWithUnit.k:8) 1e20mm == 1.000000e+20
- - (FloatLiteralWithUnit.k:9) -0.1eV == -1.000000e-01
-Q.E.D.

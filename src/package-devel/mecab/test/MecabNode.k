@@ -1,6 +1,6 @@
 import("konoha");
 import("mecab");
-//import("konoha.float");
+//import("Type.Float");
 
 void main() {
 	Tagger m = new Tagger();

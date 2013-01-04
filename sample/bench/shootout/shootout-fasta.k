@@ -8,8 +8,8 @@ import("cstyle");
 import("konoha.ns");
 import("konoha.global");
 import("konoha.class");
-import("konoha.float");
-import("js4.array");
+import("Type.Float");
+import("JavaScript.Array");
 import("konoha.bytes");
 import("konoha.file");
 

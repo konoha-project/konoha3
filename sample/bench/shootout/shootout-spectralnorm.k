@@ -7,11 +7,12 @@
 import("cstyle");
 import("konoha.ns");
 import("konoha.class");
-import("js4.array");
+import("JavaScript.Array");
 import("konoha.new");
-import("konoha.float");
-import("konoha.math");
-const N=5500;
+import("Type.Float");
+import("JavaScript.Math");
+const N=550;
+//const N=5500;
 
 class Spectralnorm {
 	/* return element i,j of infinite matrix A */

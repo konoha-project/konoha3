@@ -169,7 +169,7 @@ static inline void JSON_Retain(JSON json)
 
 static inline void JSONObject_Retain(JSON json)
 {
-    if ((JSON_type(json) & 1) == 1) {
+    if((JSON_type(json) & 1) == 1) {
         JSON_Retain(json);
     }
 }
@@ -222,8 +222,8 @@ static inline JSON *JSON_getArray(JSON json, const char *key, size_t *len)
 }
 
 /* [Other API] */
-KJSON_API void JSONObject_setObject(JSONMemoryPool *jm, JSON obj, JSON key, JSON value);
-KJSON_API void JSONObject_set(JSONMemoryPool *jm, JSON obj, const char *key, size_t len, JSON value);
+KJSON_API void JSONObject_SetObject(JSONMemoryPool *jm, JSON obj, JSON key, JSON value);
+KJSON_API void JSONObject_Set(JSONMemoryPool *jm, JSON obj, const char *key, size_t len, JSON value);
 KJSON_API void JSONArray_append(JSONMemoryPool *jm, JSON ary, JSON o);
 KJSON_API void JSON_free(JSON o);
 

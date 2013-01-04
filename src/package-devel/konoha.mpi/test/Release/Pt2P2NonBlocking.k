@@ -1,6 +1,6 @@
 // written by wakamatsu
 import("konoha.bytes");
-import("konoha.float");
+import("Type.Float");
 import("konoha.mpi");
 
 void test_bytes() {

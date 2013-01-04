@@ -1,9 +1,9 @@
 import("cstyle");
 import("konoha.null");
 import("konoha.file");
-import("java2.string");
+import("JavaScript.String");
 import("konoha.new");
-import("js4.array");
+import("JavaScript.Array");
 import("konoha.foreach");
 import("konoha.class");
 

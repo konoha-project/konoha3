@@ -1,4 +1,4 @@
-import("konoha.float")
+import("Type.Float")
 
 void float_operator_int_cmpLessThanEqual_IntCmpLessThanEqual() { 
 	int i1 = 1;

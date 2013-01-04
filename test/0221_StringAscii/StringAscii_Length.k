@@ -1,7 +1,7 @@
 //written by Joseph
 
 import("konoha.class");
-import("java2.string");
+import("JavaScript.String");
 
 void test() {
 	assert("Hello World!".length == 12);

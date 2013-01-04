@@ -1,6 +1,6 @@
 // written by wakamatsu
 import("konoha.bytes");
-import("konoha.float");
+import("Type.Float");
 import("java2.string");
 import("konoha.mpi");
 

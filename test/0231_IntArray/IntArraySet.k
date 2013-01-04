@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 import("konoha.new");
-import("js4.array");
+import("JavaScript.Array");
 
 void test() {
 	int[] a = new int[0];
