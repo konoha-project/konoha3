@@ -246,6 +246,38 @@ typedef struct OPNLL {
 } while(0)
 #endif
 
+/* BOX */
+#define VPARAM_BOX       3, VMT_R, VMT_R, VMT_C
+typedef struct OPBOX {
+	KCODE_HEAD;
+	kreg_t a;
+	kreg_t b;
+	KClass* ty;
+} OPBOX;
+
+#ifndef OPEXEC_BOX
+#define OPEXEC_BOX() do {\
+	OPBOX *op = (OPBOX *)pc;\
+	rbp[op->a].asObject = KLIB new_kObject(kctx, OnStack, op->ty, rbp[op->b].unboxValue);\
+} while(0)
+#endif
+
+/* BBOX */
+#define VPARAM_BBOX       3, VMT_R, VMT_R, VMT_C
+typedef struct OPBBOX {
+	KCODE_HEAD;
+	kreg_t a;
+	kreg_t b;
+	KClass* ty;
+} OPBBOX;
+
+#ifndef OPEXEC_BBOX
+#define OPEXEC_BBOX() do {\
+	OPBBOX *op = (OPBBOX *)pc;\
+	rbp[op->a].asBoolean = rbp[op->b].boolValue ? K_TRUE : K_FALSE;\
+} while(0)
+#endif
+
 /* OPLOOKUP */
 #define VPARAM_LOOKUP    3, VMT_R, VMT_Object, VMT_Object
 typedef struct OPLOOKUP {

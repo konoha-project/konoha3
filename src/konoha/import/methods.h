@@ -80,23 +80,23 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer));
 }
 
-//## @Const method Object Boolean.box();
-static KMETHOD Boolean_box(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kBoolean *o = !!(sfp[0].unboxValue) ? K_TRUE : K_FALSE;
-	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
-	KReturn(o);
-}
-
-//## @Const @SmartReturn method Object Int.box();
-static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
-{
-	KClass *c = KGetReturnType(sfp);
-	DBG_ASSERT(KClass_Is(UnboxType, c));
-	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
-//	DBG_P(">>>>>>>>>>> boxing %s %lld\n", KType_text(c->typeId), sfp[0].unboxValue);
-	KReturn(KLIB new_kObject(kctx, OnStack, c, sfp[0].unboxValue));
-}
+////## @Const method Object Boolean.box();
+//static KMETHOD Boolean_box(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	kBoolean *o = !!(sfp[0].unboxValue) ? K_TRUE : K_FALSE;
+//	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
+//	KReturn(o);
+//}
+//
+////## @Const @SmartReturn method Object Int.box();
+//static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	KClass *c = KGetReturnType(sfp);
+//	DBG_ASSERT(KClass_Is(UnboxType, c));
+//	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
+////	DBG_P(">>>>>>>>>>> boxing %s %lld\n", KType_text(c->typeId), sfp[0].unboxValue);
+//	KReturn(KLIB new_kObject(kctx, OnStack, c, sfp[0].unboxValue));
+//}
 
 /* String */
 
@@ -327,8 +327,8 @@ static void LoadDefaultMethod(KonohaContext *kctx, kNameSpace *ns)
 		_Public|_Im|_Const, _F(Int_opGT),  KType_boolean, KType_int, KMethodName_(">"),  1, KType_int, FN_x,
 		_Public|_Im|_Const, _F(Int_opGTE), KType_boolean, KType_int, KMethodName_(">="), 1, KType_int, FN_x,
 		_Public|_Im|_Const,  _F(Int_toString), KType_String, KType_int, KMethodName_To(KType_String), 0,
-		_Public|_Im|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Boolean_box), KType_Object, KType_boolean, MN_box, 0,
-		_Public|_Im|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Int_box), KType_Object, KType_int, MN_box, 0,
+//		_Public|_Im|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Boolean_box), KType_Object, KType_boolean, MN_box, 0,
+//		_Public|_Im|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Int_box), KType_Object, KType_int, MN_box, 0,
 		_Public|_Im|_Const, _F(String_opEQ),  KType_boolean, KType_String, KMethodName_("=="),  1, KType_String, FN_x ,
 		_Public|_Im|_Const, _F(String_opNEQ), KType_boolean, KType_String, KMethodName_("!="), 1, KType_String, FN_x ,
 		_Public|_Im|_Const, _F(String_toInt), KType_int, KType_String, KMethodName_To(KType_int), 0,

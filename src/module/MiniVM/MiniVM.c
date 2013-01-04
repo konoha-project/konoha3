@@ -43,6 +43,8 @@ extern "C" {
 	MACRO(XNMOV)\
 	MACRO(NEW)\
 	MACRO(NUL)\
+	MACRO(BOX)\
+	MACRO(BBOX)\
 	MACRO(LOOKUP)\
 	MACRO(CALL)\
 	MACRO(RET)\
@@ -807,9 +809,6 @@ static kbool_t KBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *build
 
 	int esp_ = SFP_(espidx + argc + K_CALLDELTA + 1);
 	ASM(CALL, builder->common.uline, SFP_(thisidx), esp_, KLIB Knull(kctx, KClass_(expr->attrTypeId)));
-//	if(mtd->mn == MN_box) {  /* boxed value of unbox value must be shifted to OC */
-//		((kNodeVar *)expr)->attrTypeId = KType_Object;
-//	}
 	AssignLocal(kctx, builder, expr, thunk);
 	return true;
 }
@@ -863,21 +862,19 @@ static kbool_t KBuilder_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, 
 	return true;
 }
 
-static kbool_t KBuilder_VisitPushNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
-{
-	SUGAR VisitNode(kctx, builder, expr->NodeToPush, &(expr->stackbase));
-	return true;
-}
+//static kbool_t KBuilder_VisitPushNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
+//{
+//	SUGAR VisitNode(kctx, builder, expr->NodeToPush, &(expr->stackbase));
+//	return true;
+//}
 
 static kbool_t KBuilder_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
+	intptr_t a = ((intptr_t*)thunk)[0];
 	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);
-
+	ASM(BOX, OC_(a), NC_(a), KClass_(expr->attrTypeId));
 	return true;
-
 }
-
-
 
 // end of Visitor
 

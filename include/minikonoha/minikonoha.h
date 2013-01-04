@@ -984,6 +984,7 @@ struct KContextModule {
 	kObject     *asObject;\
 	kObjectVar  *asObjectVar; \
 	const struct kNumberVar     *asNumber;\
+	kBoolean    *asBoolean;\
 	kInt        *asInt; \
 	kString     *asString;\
 	kArray      *asArray;\
@@ -1812,7 +1813,6 @@ struct KonohaLibVar {
 #define KException_(T)                     KLIB Ksymbol(kctx, (T "Exception"), (sizeof(T "Exception")-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 #define KFieldName_(T)                     KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 #define KMethodName_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
-#define MN_box                             KMethodName_("box")
 
 #define MN_new                             KSymbol_new  /* @see KSymbol_return + 1*/
 
