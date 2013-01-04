@@ -110,23 +110,23 @@ static INode *FuelVM_getExpression(KBuilder *builder)
 	return Expr;
 }
 
-#define MN_opNOT  KKMethodName_("!")
-#define MN_opADD  KKMethodName_("+")
-#define MN_opSUB  KKMethodName_("-")
-#define MN_opMUL  KKMethodName_("*")
-#define MN_opDIV  KKMethodName_("/")
-#define MN_opMOD  KKMethodName_("%")
-#define MN_opEQ   KKMethodName_("==")
-#define MN_opNEQ  KKMethodName_("!=")
-#define MN_opLT   KKMethodName_("<")
-#define MN_opLTE  KKMethodName_("<=")
-#define MN_opGT   KKMethodName_(">")
-#define MN_opGTE  KKMethodName_(">=")
-#define MN_opLAND KKMethodName_("&")
-#define MN_opLOR  KKMethodName_("|")
-#define MN_opLXOR KKMethodName_("^")
-#define MN_opLSFT KKMethodName_("<<")
-#define MN_opRSFT KKMethodName_(">>")
+#define MN_opNOT  KMethodName_("!")
+#define MN_opADD  KMethodName_("+")
+#define MN_opSUB  KMethodName_("-")
+#define MN_opMUL  KMethodName_("*")
+#define MN_opDIV  KMethodName_("/")
+#define MN_opMOD  KMethodName_("%")
+#define MN_opEQ   KMethodName_("==")
+#define MN_opNEQ  KMethodName_("!=")
+#define MN_opLT   KMethodName_("<")
+#define MN_opLTE  KMethodName_("<=")
+#define MN_opGT   KMethodName_(">")
+#define MN_opGTE  KMethodName_(">=")
+#define MN_opLAND KMethodName_("&")
+#define MN_opLOR  KMethodName_("|")
+#define MN_opLXOR KMethodName_("^")
+#define MN_opLSFT KMethodName_("<<")
+#define MN_opRSFT KMethodName_(">>")
 
 static enum BinaryOp KMethodName_toBinaryOperator(KonohaContext *kctx, kmethodn_t mn)
 {
@@ -778,7 +778,7 @@ static struct KVirtualCode *FuelVM_GenerateKVirtualCode(KonohaContext *kctx, kMe
 		mtd->virtualCodeApi_plus1[-1]->FreeVirtualCode(kctx, mtd->vcode_start);
 	}
 	KLIB kMethod_SetFunc(kctx, mtd, 0);
-	if (JITCompiled) {
+	if(JITCompiled) {
 		KLIB kMethod_SetFunc(kctx, mtd, (KMethodFunc) code);
 	}
 	KFieldSet(mtd, ((kMethodVar *)mtd)->CompiledBlock, block);

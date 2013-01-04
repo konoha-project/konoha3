@@ -120,7 +120,7 @@ static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t i_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_man), KType_void, KType_NameSpace, KKMethodName_("man"), 1, KType_Object, KFieldName_("x"),
+		_Public, _F(NameSpace_man), KType_void, KType_NameSpace, KMethodName_("man"), 1, KType_Object, KFieldName_("x"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

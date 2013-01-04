@@ -367,18 +367,18 @@ static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t LoadRopeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	int FN_s = KFieldName_("s");
-	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_String, KKMethodName_("+"), 1, KMethodMatch_NoOption);
+	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_String, KMethodName_("+"), 1, KMethodMatch_NoOption);
 	if(concat != NULL) {
 		KLIB kMethod_SetFunc(kctx, concat, Rope_opADD);
 	} else {
 		KDEFINE_METHOD MethodData[] = {
-			_Public|_Const|_Im, _F(Rope_opADD), KType_String, KType_String, KKMethodName_("+"), 1, KType_String, FN_s,
+			_Public|_Const|_Im, _F(Rope_opADD), KType_String, KType_String, KMethodName_("+"), 1, KType_String, FN_s,
 			DEND
 		};
 		KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	}
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(Rope_opADD), KType_String, KType_String, KKMethodName_("concat"), 1, KType_String, FN_s,
+		_Public|_Const|_Im, _F(Rope_opADD), KType_String, KType_String, KMethodName_("concat"), 1, KType_String, FN_s,
 		DEND
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

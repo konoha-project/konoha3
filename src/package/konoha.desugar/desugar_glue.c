@@ -210,18 +210,18 @@ static KMETHOD Token_isBeforeWhiteSpace(KonohaContext *kctx, KonohaStack *sfp)
 static void desugar_defineTokenFunc(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im|_Const|_Static, _F(NameSpace_Ascii), KType_String, KType_NameSpace, KKMethodName_("Ascii"), 1, TP_source,
-		_Public, _F(String_AsciiAt), KType_int, KType_String, KKMethodName_("AsciiAt"), 1, TP_pos,
-		_Public, _F(Token_setText), KType_int, KType_Token, KKMethodName_("SetText"), 4, TP_kw, TP_source, TP_begin, TP_end,
-		_Public, _F(Token_setError), KType_int, KType_Token, KKMethodName_("SetError"), 4, TP_message, TP_source, TP_begin, TP_end,
+		_Public|_Im|_Const|_Static, _F(NameSpace_Ascii), KType_String, KType_NameSpace, KMethodName_("Ascii"), 1, TP_source,
+		_Public, _F(String_AsciiAt), KType_int, KType_String, KMethodName_("AsciiAt"), 1, TP_pos,
+		_Public, _F(Token_setText), KType_int, KType_Token, KMethodName_("SetText"), 4, TP_kw, TP_source, TP_begin, TP_end,
+		_Public, _F(Token_setError), KType_int, KType_Token, KMethodName_("SetError"), 4, TP_message, TP_source, TP_begin, TP_end,
 		_Public|_Coercion|_Im|_Const, _F(Token_toString), KType_String, KType_Token, KMethodName_To(KType_String), 0,
-		_Public|_Const, _F(Token_Is), KType_boolean, KType_Token, KKMethodName_("Is"), 1, TP_kw,
-		_Public|_Const, _F(Token_getText), KType_String, KType_Token, KKMethodName_("GetText"), 0,
-		_Public|_Const, _F(Token_getSubTokenList), KType_TokenArray, KType_Token, KKMethodName_("GetSubTokenList"), 0,
-		_Public, _F(Token_isBeforeWhiteSpace), KType_boolean, KType_Token, KKMethodName_("isBeforeWhiteSpace"), 0,
-		_Public, _F(Token_new), KType_Token, KType_Token, KKMethodName_("new"), 1, TP_kw,
-		_Public|_Im, _F(NameSpace_Tokenize), KType_TokenArray, KType_NameSpace, KKMethodName_("Tokenize"), 1, TP_source,
-		_Public|_Im, _F(NameSpace_Preprocess), KType_TokenArray, KType_NameSpace, KKMethodName_("Preprocess"), 1, TP_source,
+		_Public|_Const, _F(Token_Is), KType_boolean, KType_Token, KMethodName_("Is"), 1, TP_kw,
+		_Public|_Const, _F(Token_getText), KType_String, KType_Token, KMethodName_("GetText"), 0,
+		_Public|_Const, _F(Token_getSubTokenList), KType_TokenArray, KType_Token, KMethodName_("GetSubTokenList"), 0,
+		_Public, _F(Token_isBeforeWhiteSpace), KType_boolean, KType_Token, KMethodName_("isBeforeWhiteSpace"), 0,
+		_Public, _F(Token_new), KType_Token, KType_Token, KMethodName_("new"), 1, TP_kw,
+		_Public|_Im, _F(NameSpace_Tokenize), KType_TokenArray, KType_NameSpace, KMethodName_("Tokenize"), 1, TP_source,
+		_Public|_Im, _F(NameSpace_Preprocess), KType_TokenArray, KType_NameSpace, KMethodName_("Preprocess"), 1, TP_source,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -268,9 +268,9 @@ static KMETHOD StmtExpr_Message(KonohaContext *kctx, KonohaStack *sfp)
 static void desugar_defineMessageMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Stmt_Message), KType_Expr, KType_Stmt, KKMethodName_("message"), 2, TP_level, TP_message,
-		_Public, _F(StmtToken_Message), KType_Expr, KType_Stmt, KKMethodName_("message"), 3, TP_level, TP_token, TP_message,
-		_Public, _F(StmtExpr_Message), KType_Expr, KType_Stmt, KKMethodName_("message"), 3, TP_level, TP_expr, TP_message,
+		_Public, _F(Stmt_Message), KType_Expr, KType_Stmt, KMethodName_("message"), 2, TP_level, TP_message,
+		_Public, _F(StmtToken_Message), KType_Expr, KType_Stmt, KMethodName_("message"), 3, TP_level, TP_token, TP_message,
+		_Public, _F(StmtExpr_Message), KType_Expr, KType_Stmt, KMethodName_("message"), 3, TP_level, TP_expr, TP_message,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -321,11 +321,11 @@ static KMETHOD Block_GetParentStmt(KonohaContext *kctx, KonohaStack *sfp)
 static void desugar_defineBlockMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const, _F(Block_new), KType_Block, KType_Block, KKMethodName_("new"), 1, KType_NameSpace, KFieldName_("namespace"),
-		_Public, _F(Block_TypeCheckAll), KType_boolean, KType_Block, KKMethodName_("TypeCheckAll"), 1, TP_gma,
-		_Public, _F(Stmt_newBlock), KType_Block, KType_Stmt, KKMethodName_("newBlock"), 3, TP_tokens, TP_begin, TP_end,
-		_Public, _F(Block_GetNodeList), KType_StmtArray, KType_Block, KKMethodName_("GetNodeList"), 0,
-		_Public, _F(Block_GetParentStmt), KType_Stmt, KType_Block, KKMethodName_("GetParentStmt"), 0,
+		_Public|_Const, _F(Block_new), KType_Block, KType_Block, KMethodName_("new"), 1, KType_NameSpace, KFieldName_("namespace"),
+		_Public, _F(Block_TypeCheckAll), KType_boolean, KType_Block, KMethodName_("TypeCheckAll"), 1, TP_gma,
+		_Public, _F(Stmt_newBlock), KType_Block, KType_Stmt, KMethodName_("newBlock"), 3, TP_tokens, TP_begin, TP_end,
+		_Public, _F(Block_GetNodeList), KType_StmtArray, KType_Block, KMethodName_("GetNodeList"), 0,
+		_Public, _F(Block_GetParentStmt), KType_Stmt, KType_Block, KMethodName_("GetParentStmt"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -674,30 +674,30 @@ static void desugar_defineStmtMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 {
 	int FN_key = KFieldName_("key"), FN_defval = KFieldName_("defval");
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Stmt_opEQ), KType_boolean, KType_Stmt, KKMethodName_("=="), 1, KType_Stmt, KFieldName_("other"),
-		_Public, _F(Stmt_TypeCheckExpr), KType_boolean, KType_Stmt, KKMethodName_("TypeCheckExpr"), 4, TP_kw, TP_gma, TP_type, TP_pol,
-		_Public, _F(Stmt_newExpr), KType_Expr, KType_Stmt, KKMethodName_("newExpr"), 3, TP_tokens, TP_begin, TP_end,
-		_Public, _F(Stmt_setType), KType_void, KType_Stmt, KKMethodName_("setType"), 1, TP_type,
-		_Public, _F(Stmt_LookupStmt), KType_Stmt, KType_Stmt, KKMethodName_("lookupStmt"), 1, TP_kw,
-//////		_Public, _F(kStmt_Message2arsedExpr), KType_Expr, KType_Stmt, KKMethodName_("parseExpr"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
-		_Public, _F(Stmt_newUntypedCallStyleExpr1), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 1, TP_token,
-		_Public, _F(Stmt_newUntypedCallStyleExpr2), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 2, TP_token, TP_ArgExpr(1),
-		_Public, _F(Stmt_newUntypedCallStyleExpr3), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 3, TP_token, TP_ArgExpr(1), TP_ArgExpr(2),
-		_Public, _F(Stmt_newUntypedCallStyleExpr4), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 4, TP_token, TP_ArgExpr(1), TP_ArgExpr(2), TP_ArgExpr(3),
-		_Public, _F(Stmt_newUntypedCallStyleExpr5), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 5, TP_token, TP_ArgExpr(1), TP_ArgExpr(2), TP_ArgExpr(3), TP_ArgExpr(4),
-		_Public, _F(Stmt_newUntypedCallStyleExpr6), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 6, TP_token, TP_ArgExpr(1), TP_ArgExpr(2), TP_ArgExpr(3), TP_ArgExpr(4), TP_ArgExpr(5),
-		_Public, _F(Stmt_newUntypedCallStyleExpr7), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 7, TP_token, TP_ArgExpr(1), TP_ArgExpr(2), TP_ArgExpr(3), TP_ArgExpr(4), TP_ArgExpr(5), TP_ArgExpr(6),
-		_Public, _F(Stmt_newTypedCallExpr1), KType_Expr, KType_Stmt, KKMethodName_("newTypedCallExpr"), 4, TP_gma, TP_type, KType_Symbol, KFieldName_("methodName"), KType_Expr, KFieldName_("firstExpr"),
-		_Public, _F(Stmt_newTypedCallExpr2), KType_Expr, KType_Stmt, KKMethodName_("newTypedCallExpr"), 5, TP_gma, TP_type, KType_Symbol, KFieldName_("methodName"), KType_Expr, KFieldName_("firstExpr"), KType_Expr, KFieldName_("secondExpr"),
-		_Public, _F(Stmt_setObject), KType_void, KType_Stmt, KKMethodName_("setExpr"), 2, KType_Symbol, FN_key, KType_Expr, KFieldName_("expr"),
-		_Public, _F(Stmt_setObject), KType_void, KType_Stmt, KKMethodName_("setBlock"), 2, KType_Symbol, FN_key, KType_Block, KFieldName_("block"),
-		_Public, _F(Stmt_getObject), KType_Block, KType_Stmt, KKMethodName_("getBlock"), 1, KType_Symbol, FN_key,
-		_Public, _F(Stmt_getParentBlock), KType_Block, KType_Stmt, KKMethodName_("getParentBlock"), 0,
-		_Public, _F(Stmt_getTokenList), KType_TokenArray, KType_Stmt, KKMethodName_("getTokenList"), 2, KType_Symbol, FN_key, KType_TokenArray, FN_defval,
-		_Public, _F(Stmt_getToken), KType_Token, KType_Stmt, KKMethodName_("getToken"), 2, KType_Symbol, FN_key, KType_Token, FN_defval,
-		_Public, _F(Stmt_done), KType_void, KType_Stmt, KKMethodName_("done"), 0,
-		_Public, _F(Stmt_keywordIs), KType_boolean, KType_Stmt, KKMethodName_("keywordIs"), 1, KType_Symbol, FN_key,
-		_Public, _F(Stmt_getNameSpace), KType_NameSpace, KType_Stmt, KKMethodName_("getNameSpace"), 0,
+		_Public, _F(Stmt_opEQ), KType_boolean, KType_Stmt, KMethodName_("=="), 1, KType_Stmt, KFieldName_("other"),
+		_Public, _F(Stmt_TypeCheckExpr), KType_boolean, KType_Stmt, KMethodName_("TypeCheckExpr"), 4, TP_kw, TP_gma, TP_type, TP_pol,
+		_Public, _F(Stmt_newExpr), KType_Expr, KType_Stmt, KMethodName_("newExpr"), 3, TP_tokens, TP_begin, TP_end,
+		_Public, _F(Stmt_setType), KType_void, KType_Stmt, KMethodName_("setType"), 1, TP_type,
+		_Public, _F(Stmt_LookupStmt), KType_Stmt, KType_Stmt, KMethodName_("lookupStmt"), 1, TP_kw,
+//////		_Public, _F(kStmt_Message2arsedExpr), KType_Expr, KType_Stmt, KMethodName_("parseExpr"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
+		_Public, _F(Stmt_newUntypedCallStyleExpr1), KType_Expr, KType_Stmt, KMethodName_("newUntypedCallStyleExpr"), 1, TP_token,
+		_Public, _F(Stmt_newUntypedCallStyleExpr2), KType_Expr, KType_Stmt, KMethodName_("newUntypedCallStyleExpr"), 2, TP_token, TP_ArgExpr(1),
+		_Public, _F(Stmt_newUntypedCallStyleExpr3), KType_Expr, KType_Stmt, KMethodName_("newUntypedCallStyleExpr"), 3, TP_token, TP_ArgExpr(1), TP_ArgExpr(2),
+		_Public, _F(Stmt_newUntypedCallStyleExpr4), KType_Expr, KType_Stmt, KMethodName_("newUntypedCallStyleExpr"), 4, TP_token, TP_ArgExpr(1), TP_ArgExpr(2), TP_ArgExpr(3),
+		_Public, _F(Stmt_newUntypedCallStyleExpr5), KType_Expr, KType_Stmt, KMethodName_("newUntypedCallStyleExpr"), 5, TP_token, TP_ArgExpr(1), TP_ArgExpr(2), TP_ArgExpr(3), TP_ArgExpr(4),
+		_Public, _F(Stmt_newUntypedCallStyleExpr6), KType_Expr, KType_Stmt, KMethodName_("newUntypedCallStyleExpr"), 6, TP_token, TP_ArgExpr(1), TP_ArgExpr(2), TP_ArgExpr(3), TP_ArgExpr(4), TP_ArgExpr(5),
+		_Public, _F(Stmt_newUntypedCallStyleExpr7), KType_Expr, KType_Stmt, KMethodName_("newUntypedCallStyleExpr"), 7, TP_token, TP_ArgExpr(1), TP_ArgExpr(2), TP_ArgExpr(3), TP_ArgExpr(4), TP_ArgExpr(5), TP_ArgExpr(6),
+		_Public, _F(Stmt_newTypedCallExpr1), KType_Expr, KType_Stmt, KMethodName_("newTypedCallExpr"), 4, TP_gma, TP_type, KType_Symbol, KFieldName_("methodName"), KType_Expr, KFieldName_("firstExpr"),
+		_Public, _F(Stmt_newTypedCallExpr2), KType_Expr, KType_Stmt, KMethodName_("newTypedCallExpr"), 5, TP_gma, TP_type, KType_Symbol, KFieldName_("methodName"), KType_Expr, KFieldName_("firstExpr"), KType_Expr, KFieldName_("secondExpr"),
+		_Public, _F(Stmt_setObject), KType_void, KType_Stmt, KMethodName_("setExpr"), 2, KType_Symbol, FN_key, KType_Expr, KFieldName_("expr"),
+		_Public, _F(Stmt_setObject), KType_void, KType_Stmt, KMethodName_("setBlock"), 2, KType_Symbol, FN_key, KType_Block, KFieldName_("block"),
+		_Public, _F(Stmt_getObject), KType_Block, KType_Stmt, KMethodName_("getBlock"), 1, KType_Symbol, FN_key,
+		_Public, _F(Stmt_getParentBlock), KType_Block, KType_Stmt, KMethodName_("getParentBlock"), 0,
+		_Public, _F(Stmt_getTokenList), KType_TokenArray, KType_Stmt, KMethodName_("getTokenList"), 2, KType_Symbol, FN_key, KType_TokenArray, FN_defval,
+		_Public, _F(Stmt_getToken), KType_Token, KType_Stmt, KMethodName_("getToken"), 2, KType_Symbol, FN_key, KType_Token, FN_defval,
+		_Public, _F(Stmt_done), KType_void, KType_Stmt, KMethodName_("done"), 0,
+		_Public, _F(Stmt_keywordIs), KType_boolean, KType_Stmt, KMethodName_("keywordIs"), 1, KType_Symbol, FN_key,
+		_Public, _F(Stmt_getNameSpace), KType_NameSpace, KType_Stmt, KMethodName_("getNameSpace"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -793,9 +793,9 @@ static KMETHOD Expr_setConstValue(KonohaContext *kctx, KonohaStack *sfp)
 static void desugar_defineExprMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Expr_new), KType_Expr, KType_Expr, KKMethodName_("new"), 1, KType_Object, KFieldName_("value"),
-		_Public, _F(Expr_getTermToken), KType_Token, KType_Expr, KKMethodName_("getTermToken"), 0,
-		_Public, _F(Expr_setConstValue), KType_Expr, KType_Expr, KKMethodName_("setConstValue"), 1, KType_Object, KFieldName_("value") | KTypeAttr_Coercion,
+		_Public, _F(Expr_new), KType_Expr, KType_Expr, KMethodName_("new"), 1, KType_Object, KFieldName_("value"),
+		_Public, _F(Expr_getTermToken), KType_Token, KType_Expr, KMethodName_("getTermToken"), 0,
+		_Public, _F(Expr_setConstValue), KType_Expr, KType_Expr, KMethodName_("setConstValue"), 1, KType_Object, KFieldName_("value") | KTypeAttr_Coercion,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -935,46 +935,46 @@ static void desugar_defineExprMethod(KonohaContext *kctx, kNameSpace *ns, KTrace
 //
 //	KDEFINE_METHOD MethodData[] = {
 //		/* Token */
-//		_Public, _F(Token_new), KType_Token, KType_Token, KKMethodName_("new"), 1, KType_Symbol, FN_key,
-//		_Public, _F(Token_setUnresolvedTokenType),  KType_void, KType_Token, KKMethodName_("setUnresolvedTokenType"),  1, KType_Symbol, FN_x,
-//		_Public, _F(Token_setText),  KType_void, KType_Token, KKMethodName_("setText"),  1, KType_String, FN_x,
-//		_Public, _F(Token_setSubArray), KType_void, KType_Token, KKMethodName_("setSubArray"), 1, KType_StringArray, FN_x,
-////		_Public, _F(Token_isTypeName), KType_boolean, KType_Token, KKMethodName_("isTypeName"), 0,
-//		_Public, _F(Token_isParenthesis), KType_boolean, KType_Token, KKMethodName_("isParenthesis"), 0,
-//		_Public, _F(Token_newUntypedExpr), KType_Expr, KType_Token, KKMethodName_("newUntypedExpr"), 0,
+//		_Public, _F(Token_new), KType_Token, KType_Token, KMethodName_("new"), 1, KType_Symbol, FN_key,
+//		_Public, _F(Token_setUnresolvedTokenType),  KType_void, KType_Token, KMethodName_("setUnresolvedTokenType"),  1, KType_Symbol, FN_x,
+//		_Public, _F(Token_setText),  KType_void, KType_Token, KMethodName_("setText"),  1, KType_String, FN_x,
+//		_Public, _F(Token_setSubArray), KType_void, KType_Token, KMethodName_("setSubArray"), 1, KType_StringArray, FN_x,
+////		_Public, _F(Token_isTypeName), KType_boolean, KType_Token, KMethodName_("isTypeName"), 0,
+//		_Public, _F(Token_isParenthesis), KType_boolean, KType_Token, KMethodName_("isParenthesis"), 0,
+//		_Public, _F(Token_newUntypedExpr), KType_Expr, KType_Token, KMethodName_("newUntypedExpr"), 0,
 //
 //		/* Stmt */
-//		_Public, _F(Stmt_getBuild), KType_int, KType_Stmt,  KKMethodName_("getBuild"), 0,
-//		_Public, _F(Stmt_setBuild), KType_void, KType_Stmt, KKMethodName_("setBuild"), 1, KType_int, FN_buildid,
-//		_Public, _F(Stmt_getBlock), KType_Block, KType_Stmt, KKMethodName_("getBlock"), 2, KType_Symbol, FN_key, KType_Block, FN_defval,
-//		_Public, _F(Stmt_getToken), KType_Token, KType_Stmt, KKMethodName_("getToken"), 2, KType_Symbol, FN_key, KType_Token, FN_defval,
-//		_Public, _F(Stmt_getExpr), KType_Expr, KType_Stmt, KKMethodName_("getExpr"), 2, KType_Symbol, FN_key, KType_Expr, FN_defval,
-//		_Public, _F(Stmt_TypeCheckExpr), KType_boolean, KType_Stmt, KKMethodName_("TypeCheckExpr"), 3, KType_Symbol, FN_key, KType_Gamma, FN_gma, KType_cid, FN_typeid,
-//		_Public, _F(Stmt_TypeCheckExprPol), KType_boolean, KType_Stmt, KKMethodName_("TypeCheckExpr"), 4, KType_Symbol, FN_key, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_int, FN_pol,
-//		_Public, _F(Stmt_Message2rintError), KType_Expr, KType_Stmt, KKMethodName_("printError"), 1, KType_String, FN_msg,
+//		_Public, _F(Stmt_getBuild), KType_int, KType_Stmt,  KMethodName_("getBuild"), 0,
+//		_Public, _F(Stmt_setBuild), KType_void, KType_Stmt, KMethodName_("setBuild"), 1, KType_int, FN_buildid,
+//		_Public, _F(Stmt_getBlock), KType_Block, KType_Stmt, KMethodName_("getBlock"), 2, KType_Symbol, FN_key, KType_Block, FN_defval,
+//		_Public, _F(Stmt_getToken), KType_Token, KType_Stmt, KMethodName_("getToken"), 2, KType_Symbol, FN_key, KType_Token, FN_defval,
+//		_Public, _F(Stmt_getExpr), KType_Expr, KType_Stmt, KMethodName_("getExpr"), 2, KType_Symbol, FN_key, KType_Expr, FN_defval,
+//		_Public, _F(Stmt_TypeCheckExpr), KType_boolean, KType_Stmt, KMethodName_("TypeCheckExpr"), 3, KType_Symbol, FN_key, KType_Gamma, FN_gma, KType_cid, FN_typeid,
+//		_Public, _F(Stmt_TypeCheckExprPol), KType_boolean, KType_Stmt, KMethodName_("TypeCheckExpr"), 4, KType_Symbol, FN_key, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_int, FN_pol,
+//		_Public, _F(Stmt_Message2rintError), KType_Expr, KType_Stmt, KMethodName_("printError"), 1, KType_String, FN_msg,
 //
-//		_Public, _F(Stmt_newExpr), KType_Expr, KType_Stmt, KKMethodName_("newExpr"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
-//		_Public, _F(Stmt_setType), KType_void, KType_Stmt, KKMethodName_("setType"), 1, KType_int, FN_x,
-////		_Public, _F(kStmt_Message2arsedExpr), KType_Expr, KType_Stmt, KKMethodName_("parseExpr"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
-//		_Public, _F(Stmt_newUntypedCallStyleExpr2), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 2, KType_Token, KFieldName_("token"), KType_Expr, KFieldName_("expr1"),
-//		_Public, _F(Stmt_newUntypedCallStyleExpr3), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 3, KType_Token, KFieldName_("token"), KType_Expr, KFieldName_("expr1"), KType_Expr, KFieldName_("expr2"),
-//		_Public, _F(Stmt_newUntypedCallStyleExpr4), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 4, KType_Token, KFieldName_("token"), KType_Expr, KFieldName_("expr1"), KType_Expr, KFieldName_("expr2"), KType_Expr, KFieldName_("expr3"),
-//		_Public, _F(Stmt_newUntypedCallStyleExpr5), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 5, KType_Token, KFieldName_("token"), KType_Expr, KFieldName_("expr1"), KType_Expr, KFieldName_("expr2"), KType_Expr, KFieldName_("expr3"), KType_Expr, KFieldName_("expr4"),
-//		_Public, _F(Stmt_newUntypedCallStyleExpr6), KType_Expr, KType_Stmt, KKMethodName_("newUntypedCallStyleExpr"), 6, KType_Token, KFieldName_("token"), KType_Expr, KFieldName_("expr1"), KType_Expr, KFieldName_("expr2"), KType_Expr, KFieldName_("expr3"), KType_Expr, KFieldName_("expr4"), KType_Expr, KFieldName_("expr5"),
-//		_Public, _F(Stmt_rightJoinExpr), KType_Expr, KType_Stmt, KKMethodName_("rightJoinExpr"), 4, KType_Expr, FN_expr, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
-//		_Public, _F(Stmt_getTokenList), KType_TokenArray, KType_Stmt, KKMethodName_("getTokenList"), 2, KType_Symbol, FN_key, KType_TokenArray, FN_defval,
-//		_Public, _F(Stmt_declType), KType_boolean, KType_Stmt, KKMethodName_("declType"), 3, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_Expr, KFieldName_("declExpr"),
-//		_Public, _F(Stmt_newBlock), KType_Block, KType_Stmt, KKMethodName_("newBlock"), 1, KType_String, KFieldName_("macro"),
+//		_Public, _F(Stmt_newExpr), KType_Expr, KType_Stmt, KMethodName_("newExpr"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
+//		_Public, _F(Stmt_setType), KType_void, KType_Stmt, KMethodName_("setType"), 1, KType_int, FN_x,
+////		_Public, _F(kStmt_Message2arsedExpr), KType_Expr, KType_Stmt, KMethodName_("parseExpr"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
+//		_Public, _F(Stmt_newUntypedCallStyleExpr2), KType_Expr, KType_Stmt, KMethodName_("newUntypedCallStyleExpr"), 2, KType_Token, KFieldName_("token"), KType_Expr, KFieldName_("expr1"),
+//		_Public, _F(Stmt_newUntypedCallStyleExpr3), KType_Expr, KType_Stmt, KMethodName_("newUntypedCallStyleExpr"), 3, KType_Token, KFieldName_("token"), KType_Expr, KFieldName_("expr1"), KType_Expr, KFieldName_("expr2"),
+//		_Public, _F(Stmt_newUntypedCallStyleExpr4), KType_Expr, KType_Stmt, KMethodName_("newUntypedCallStyleExpr"), 4, KType_Token, KFieldName_("token"), KType_Expr, KFieldName_("expr1"), KType_Expr, KFieldName_("expr2"), KType_Expr, KFieldName_("expr3"),
+//		_Public, _F(Stmt_newUntypedCallStyleExpr5), KType_Expr, KType_Stmt, KMethodName_("newUntypedCallStyleExpr"), 5, KType_Token, KFieldName_("token"), KType_Expr, KFieldName_("expr1"), KType_Expr, KFieldName_("expr2"), KType_Expr, KFieldName_("expr3"), KType_Expr, KFieldName_("expr4"),
+//		_Public, _F(Stmt_newUntypedCallStyleExpr6), KType_Expr, KType_Stmt, KMethodName_("newUntypedCallStyleExpr"), 6, KType_Token, KFieldName_("token"), KType_Expr, KFieldName_("expr1"), KType_Expr, KFieldName_("expr2"), KType_Expr, KFieldName_("expr3"), KType_Expr, KFieldName_("expr4"), KType_Expr, KFieldName_("expr5"),
+//		_Public, _F(Stmt_rightJoinExpr), KType_Expr, KType_Stmt, KMethodName_("rightJoinExpr"), 4, KType_Expr, FN_expr, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
+//		_Public, _F(Stmt_getTokenList), KType_TokenArray, KType_Stmt, KMethodName_("getTokenList"), 2, KType_Symbol, FN_key, KType_TokenArray, FN_defval,
+//		_Public, _F(Stmt_declType), KType_boolean, KType_Stmt, KMethodName_("declType"), 3, KType_Gamma, FN_gma, KType_cid, FN_typeid, KType_Expr, KFieldName_("declExpr"),
+//		_Public, _F(Stmt_newBlock), KType_Block, KType_Stmt, KMethodName_("newBlock"), 1, KType_String, KFieldName_("macro"),
 //
 //		/* Expr */
-//		_Public, _F(Expr_setVariable), KType_Expr, KType_Expr, KKMethodName_("setVariable"), 4, KType_Gamma, FN_gma, KType_int, FN_buildid, KType_cid, FN_typeid, KType_int, KFieldName_("index"),
-//		_Public, _F(Expr_newVariableExpr), KType_Expr, KType_Expr, KKMethodName_("new"), 4, KType_Gamma, FN_gma, KType_int, FN_buildid, KType_cid, FN_typeid, KType_int, KFieldName_("index"),
-//		_Public, _F(Expr_new), KType_Expr, KType_Expr, KKMethodName_("new"), 1, KType_Object, KFieldName_("value") | FN_COERCION,
-//		_Public, _F(Expr_setType), KType_void, KType_Expr, KKMethodName_("setType"), 2, KType_int, FN_buildid, KType_cid, FN_typeid,
-//		_Public, _F(kExpr_AddExpr), KType_Expr, KType_Expr, KKMethodName_("addExpr"), 1, KType_Expr, FN_expr,
+//		_Public, _F(Expr_setVariable), KType_Expr, KType_Expr, KMethodName_("setVariable"), 4, KType_Gamma, FN_gma, KType_int, FN_buildid, KType_cid, FN_typeid, KType_int, KFieldName_("index"),
+//		_Public, _F(Expr_newVariableExpr), KType_Expr, KType_Expr, KMethodName_("new"), 4, KType_Gamma, FN_gma, KType_int, FN_buildid, KType_cid, FN_typeid, KType_int, KFieldName_("index"),
+//		_Public, _F(Expr_new), KType_Expr, KType_Expr, KMethodName_("new"), 1, KType_Object, KFieldName_("value") | FN_COERCION,
+//		_Public, _F(Expr_setType), KType_void, KType_Expr, KMethodName_("setType"), 2, KType_int, FN_buildid, KType_cid, FN_typeid,
+//		_Public, _F(kExpr_AddExpr), KType_Expr, KType_Expr, KMethodName_("addExpr"), 1, KType_Expr, FN_expr,
 //
 //		/* Gamma */
-//		_Public, _F(Gamma_declareLocalVariable), KType_int, KType_Gamma, KKMethodName_("declareLocalVariable"), 2, KType_cid, FN_typeid, KType_Symbol, FN_key,
+//		_Public, _F(Gamma_declareLocalVariable), KType_int, KType_Gamma, KMethodName_("declareLocalVariable"), 2, KType_cid, FN_typeid, KType_Symbol, FN_key,
 //		DEND,
 //	};
 //	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -1108,17 +1108,17 @@ static void desugar_defineNameSpaceMethod(KonohaContext *kctx, kNameSpace *ns, K
 	int KType_FuncTypeCheck = (KLIB KClass_Generics(kctx, KClass_Func, KType_Expr, 4, P_FuncTypeCheck))->typeId;
 	//DBG_P("func=%s", KType_text(KType_FuncTypeCheck));
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im, _F(NameSpace_DefinedSyntax), KType_boolean, KType_NameSpace, KKMethodName_("DefinedSyntax"), 1, TP_kw,
-		_Public|_Im, _F(NameSpace_DefinedLiteral), KType_boolean, KType_NameSpace, KKMethodName_("DefinedLiteral"), 1, TP_kw,
-		_Public|_Im, _F(NameSpace_DefinedStatement), KType_boolean, KType_NameSpace, KKMethodName_("DefinedStatement"), 1, TP_kw,
-		_Public|_Im, _F(NameSpace_DefinedExpression), KType_boolean, KType_NameSpace, KKMethodName_("DefinedExpression"), 1, TP_kw,
-		_Public|_Im, _F(NameSpace_DefinedBinaryOperator), KType_boolean, KType_NameSpace, KKMethodName_("DefinedBinaryOperator"), 1, TP_kw,
-		_Public, _F(NameSpace_AddTokenizer),         KType_void, KType_NameSpace, KKMethodName_("AddTokenizer"), 3, TP_kw, KType_int, KFieldName_("kchar"), KType_FuncToken, FN_func,
-		_Public, _F(NameSpace_AddPatternMatch),      KType_void, KType_NameSpace, KKMethodName_("AddPatternMatch"), 2, TP_kw, KType_FuncPatternMatch, FN_func,
-		_Public, _F(NameSpace_AddExpression),        KType_void, KType_NameSpace, KKMethodName_("AddExpression"), 2, TP_kw, KType_FuncExpression, FN_func,
-		_Public, _F(NameSpace_AddTopLevelStatement), KType_void, KType_NameSpace, KKMethodName_("AddTopLevelStatement"), 2, TP_kw, KType_FuncStatement, FN_func,
-		_Public, _F(NameSpace_AddStatement),         KType_void, KType_NameSpace, KKMethodName_("AddStatement"), 2, TP_kw, KType_FuncStatement, FN_func,
-		_Public, _F(NameSpace_AddTypeCheck),         KType_void, KType_NameSpace, KKMethodName_("AddTypeCheck"), 2, TP_kw, KType_FuncTypeCheck, FN_func,
+		_Public|_Im, _F(NameSpace_DefinedSyntax), KType_boolean, KType_NameSpace, KMethodName_("DefinedSyntax"), 1, TP_kw,
+		_Public|_Im, _F(NameSpace_DefinedLiteral), KType_boolean, KType_NameSpace, KMethodName_("DefinedLiteral"), 1, TP_kw,
+		_Public|_Im, _F(NameSpace_DefinedStatement), KType_boolean, KType_NameSpace, KMethodName_("DefinedStatement"), 1, TP_kw,
+		_Public|_Im, _F(NameSpace_DefinedExpression), KType_boolean, KType_NameSpace, KMethodName_("DefinedExpression"), 1, TP_kw,
+		_Public|_Im, _F(NameSpace_DefinedBinaryOperator), KType_boolean, KType_NameSpace, KMethodName_("DefinedBinaryOperator"), 1, TP_kw,
+		_Public, _F(NameSpace_AddTokenizer),         KType_void, KType_NameSpace, KMethodName_("AddTokenizer"), 3, TP_kw, KType_int, KFieldName_("kchar"), KType_FuncToken, FN_func,
+		_Public, _F(NameSpace_AddPatternMatch),      KType_void, KType_NameSpace, KMethodName_("AddPatternMatch"), 2, TP_kw, KType_FuncPatternMatch, FN_func,
+		_Public, _F(NameSpace_AddExpression),        KType_void, KType_NameSpace, KMethodName_("AddExpression"), 2, TP_kw, KType_FuncExpression, FN_func,
+		_Public, _F(NameSpace_AddTopLevelStatement), KType_void, KType_NameSpace, KMethodName_("AddTopLevelStatement"), 2, TP_kw, KType_FuncStatement, FN_func,
+		_Public, _F(NameSpace_AddStatement),         KType_void, KType_NameSpace, KMethodName_("AddStatement"), 2, TP_kw, KType_FuncStatement, FN_func,
+		_Public, _F(NameSpace_AddTypeCheck),         KType_void, KType_NameSpace, KMethodName_("AddTypeCheck"), 2, TP_kw, KType_FuncTypeCheck, FN_func,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

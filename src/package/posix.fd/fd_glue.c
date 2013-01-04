@@ -282,19 +282,19 @@ static KMETHOD System_ttyname(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t fd_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static, _F(System_lseek),     KType_int,     KType_System, KKMethodName_("lseek"),     3, KType_int, KFieldName_("fd"), KType_int, KFieldName_("offset"), KType_int, KFieldName_("whence"),
-		_Public|_Static, _F(System_ftruncate), KType_boolean, KType_System, KKMethodName_("ftruncate"), 2, KType_int, KFieldName_("fd"), KType_int, KFieldName_("length"),
-		_Public|_Static, _F(System_fchmod),    KType_boolean, KType_System, KKMethodName_("fchmod"),    2, KType_int, KFieldName_("fd"), KType_int, KFieldName_("length"),
-		_Public|_Static, _F(System_flock),     KType_boolean, KType_System, KKMethodName_("flock"),     2, KType_int, KFieldName_("fd"), KType_int, KFieldName_("operation"),
-		_Public|_Static, _F(System_sync),      KType_boolean, KType_System, KKMethodName_("sync"),      1, KType_int, KFieldName_("fd"),
-		_Public|_Static, _F(System_fchown),    KType_boolean, KType_System, KKMethodName_("fchown"),    3, KType_int, KFieldName_("pd"), KType_int, KFieldName_("owner"),  KType_int, KFieldName_("group"),
-		_Public|_Static, _F(System_fsync),     KType_boolean, KType_System, KKMethodName_("fsync"),     1, KType_int, KFieldName_("fd"),
-		_Public|_Static|_Const|_Im, _F(System_getdtablesize), KType_int, KType_System, KKMethodName_("getdtablesize"), 0,
-		_Public|_Static|_Im, _F(System_open),      KType_int,     KType_System, KKMethodName_("open"),   2, KType_String, KFieldName_("pathname"), KType_int, KFieldName_("flags"),
-		_Public|_Static|_Im, _F(System_open_mode), KType_int,     KType_System, KKMethodName_("open"),   3, KType_String, KFieldName_("pathname"), KType_int, KFieldName_("flags"), KType_int, KFieldName_("mode"),
-		_Public|_Static|_Im, _F(System_fchdir),    KType_boolean, KType_System, KKMethodName_("fchdir"), 1, KType_int,    KFieldName_("fd"),
-		_Public|_Static|_Im, _F(System_isatty),    KType_boolean, KType_System, KKMethodName_("isatty"), 1, KType_int,    KFieldName_("fd"),
-		_Public|_Static|_Im, _F(System_ttyname),   KType_String, KType_System, KKMethodName_("ttyname"), 1, KType_int,    KFieldName_("fd"),
+		_Public|_Static, _F(System_lseek),     KType_int,     KType_System, KMethodName_("lseek"),     3, KType_int, KFieldName_("fd"), KType_int, KFieldName_("offset"), KType_int, KFieldName_("whence"),
+		_Public|_Static, _F(System_ftruncate), KType_boolean, KType_System, KMethodName_("ftruncate"), 2, KType_int, KFieldName_("fd"), KType_int, KFieldName_("length"),
+		_Public|_Static, _F(System_fchmod),    KType_boolean, KType_System, KMethodName_("fchmod"),    2, KType_int, KFieldName_("fd"), KType_int, KFieldName_("length"),
+		_Public|_Static, _F(System_flock),     KType_boolean, KType_System, KMethodName_("flock"),     2, KType_int, KFieldName_("fd"), KType_int, KFieldName_("operation"),
+		_Public|_Static, _F(System_sync),      KType_boolean, KType_System, KMethodName_("sync"),      1, KType_int, KFieldName_("fd"),
+		_Public|_Static, _F(System_fchown),    KType_boolean, KType_System, KMethodName_("fchown"),    3, KType_int, KFieldName_("pd"), KType_int, KFieldName_("owner"),  KType_int, KFieldName_("group"),
+		_Public|_Static, _F(System_fsync),     KType_boolean, KType_System, KMethodName_("fsync"),     1, KType_int, KFieldName_("fd"),
+		_Public|_Static|_Const|_Im, _F(System_getdtablesize), KType_int, KType_System, KMethodName_("getdtablesize"), 0,
+		_Public|_Static|_Im, _F(System_open),      KType_int,     KType_System, KMethodName_("open"),   2, KType_String, KFieldName_("pathname"), KType_int, KFieldName_("flags"),
+		_Public|_Static|_Im, _F(System_open_mode), KType_int,     KType_System, KMethodName_("open"),   3, KType_String, KFieldName_("pathname"), KType_int, KFieldName_("flags"), KType_int, KFieldName_("mode"),
+		_Public|_Static|_Im, _F(System_fchdir),    KType_boolean, KType_System, KMethodName_("fchdir"), 1, KType_int,    KFieldName_("fd"),
+		_Public|_Static|_Im, _F(System_isatty),    KType_boolean, KType_System, KMethodName_("isatty"), 1, KType_int,    KFieldName_("fd"),
+		_Public|_Static|_Im, _F(System_ttyname),   KType_String, KType_System, KMethodName_("ttyname"), 1, KType_int,    KFieldName_("fd"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
