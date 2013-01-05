@@ -37,17 +37,14 @@ extern "C" {
 static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
-	DBG_P("while statement .. ");
+	//DBG_P("while statement .. ");
 	kNode *exprNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
 	if(kNode_IsError(exprNode)) {
 		KReturn(exprNode);
 	}
 	kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
-	DBG_P(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> stmt B = %p, %d", stmt, kNode_Is(CatchBreak, stmt));
 	kNode_Set(CatchBreak, stmt, true);
-	DBG_P(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> stmt A= %p, %d", stmt, kNode_Is(CatchBreak, stmt));
 	kNode *block = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
-	DBG_P(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> while=%p, block=%p", stmt, block);
 	KReturn(kNode_Type(kctx, stmt, KNode_While, KType_void));
 }
 
@@ -74,13 +71,11 @@ static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, ns, reqc);
 	kNode *p = stmt;
 	while(p != NULL) {
-		DBG_P(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> stmt = %p, %d", p, kNode_Is(CatchBreak, p));
 		if(kNode_Is(CatchBreak, p)) {
-			KLIB kObjectProto_SetObject(kctx, stmt, stmt->syn->keyword, KType_Node, p);
+			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_("break"), KType_Node, p);
 			KReturn(kNode_Type(kctx, stmt, KNode_Break, KType_void));
 		}
 		p = kNode_GetParentNULL(p);
-		DBG_P(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> stmtnext = %p", p);
 	}
 	KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "break statement not within a loop"));
 }
@@ -91,7 +86,7 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 	kNode *p = stmt;
 	while(p != NULL) {
 		if(kNode_Is(CatchContinue, p)) {
-			KLIB kObjectProto_SetObject(kctx, stmt, stmt->syn->keyword, KType_Node, p);
+			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_("continue"), KType_Node, p);
 			KReturn(kNode_Type(kctx, stmt, KNode_Continue, KType_void));
 		}
 		p = kNode_GetParentNULL(p);

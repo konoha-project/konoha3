@@ -234,7 +234,7 @@ static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t sy
 			}
 		}
 		if(IS_Node(expr)) {
-			//kNode_SetParent(kctx, expr, stmt);
+			kNode_SetParent(kctx, expr, stmt);
 			kNode *texpr = TypeCheckNode(kctx, expr, ns, reqClass, pol);
 			if(kNode_IsError(texpr)) {
 				kNode_ToError(kctx, stmt, texpr->ErrorMessage);
@@ -250,14 +250,18 @@ static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t sy
 	return NULL; //error
 }
 
-static kNode* TypeCheckNodeList(KonohaContext *kctx, kArray *nodeList, size_t n, kNameSpace *ns, KClass *reqc)
+static kNode* TypeCheckNodeList(KonohaContext *kctx, kNode *block, size_t n, kNameSpace *ns, KClass *reqc)
 {
+	kArray *nodeList = block->NodeList;
 	kNode *stmt = nodeList->NodeItems[n];
-	DBG_P("stmt->syn->keyword=%s%s ", KSymbol_Fmt2(stmt->syn->keyword));
+	kNode_SetParent(kctx, stmt, block);
 	if(stmt->attrTypeId != KType_var) return stmt;
 	if(!kNode_IsError(stmt)) {
-		stmt = TypeNode(kctx, stmt->syn, stmt, ns, reqc);
-		KFieldSet(nodeList, nodeList->NodeItems[n], stmt);
+		kNode *tstmt = TypeNode(kctx, stmt->syn, stmt, ns, reqc);
+		if(tstmt != stmt) {
+			KFieldSet(nodeList, nodeList->NodeItems[n], tstmt);
+			kNode_SetParent(kctx, tstmt, block);
+		}
 	}
 	return stmt;
 }
@@ -268,13 +272,13 @@ static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, 
 	KDump(block);
 	int i, size = kNode_GetNodeListSize(kctx, block) - 1;
 	for(i = 0; i < size; i++) {
-		kNode *stmt = TypeCheckNodeList(kctx, block->NodeList, i, ns, KClass_void);
+		kNode *stmt = TypeCheckNodeList(kctx, block, i, ns, KClass_void);
 		if(kNode_IsError(stmt)) {
 			return reqc->typeId == KType_void ? kNode_Type(kctx, block, KNode_Block, KType_void) : stmt;  // untyped
 		}
 	}
 	if(size >= 0) {
-		kNode *stmt = TypeCheckNodeList(kctx, block->NodeList, size, ns, reqc);
+		kNode *stmt = TypeCheckNodeList(kctx, block, size, ns, reqc);
 		if(kNode_IsError(stmt)) {
 			return stmt;
 		}
