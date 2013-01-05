@@ -384,22 +384,12 @@ static KMETHOD Expression_COMMA(KonohaContext *kctx, KonohaStack *sfp)
 //		}
 //	}
 //}
-//
-//static kNode* NewNode(KonohaContext *kctx, kSyntax *syn, kToken *tk, ktypeattr_t ty)
-//{
-//	kNodeVar *expr = new_(NodeVar, syn, OnGcStack);
-//	KFieldSet(expr, expr->TermToken, tk);
-//	expr->node = KNode_New;
-//	expr->attrTypeId = ty;
-//	return (kNode *)expr;
-//}
 
 static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(expr, tokenList, beginIdx, opIdx, endIdx);
 	if(beginIdx == opIdx && beginIdx + 1 < endIdx) {
 		kNameSpace *ns = kNode_ns(expr);
-//		kTokenVar *newToken = tokenList->TokenVarItems[beginIdx];   // new Class (
 		KClass *foundClass = NULL;
 		int nextIdx = SUGAR ParseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
 		if(foundClass != NULL) {
@@ -950,6 +940,13 @@ static KMETHOD TypeCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp)
 		KFieldSet(expr, expr->KeyOperatorToken, firstNode->KeyOperatorToken);
 		KFieldSet(expr->NodeList, expr->NodeList->ObjectItems[1], firstNode->NodeList->ObjectItems[1]);
 		KFieldSet(expr->NodeList, expr->NodeList->ObjectItems[0], firstNode->NodeList->ObjectItems[0]);
+		TypeCheck_MethodCall(kctx, sfp);
+		return;
+	}
+	else if(firstNode->syn->keyword == KSymbol_new) {
+		KFieldSet(expr, expr->KeyOperatorToken, firstNode->KeyOperatorToken);
+		KFieldSet(expr->NodeList, expr->NodeList->NodeItems[1], firstNode);
+		KFieldSet(expr->NodeList, expr->NodeList->TokenItems[0], firstNode->KeyOperatorToken);
 		TypeCheck_MethodCall(kctx, sfp);
 		return;
 	}

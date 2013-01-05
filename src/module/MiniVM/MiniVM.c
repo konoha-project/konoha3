@@ -148,7 +148,7 @@ static void WriteVirtualCode(KonohaContext *kctx, KBuffer *wb, KVirtualCode *c)
 	}
 }
 
-static void DumpKVirtualCode(KonohaContext *kctx, KVirtualCode *c)
+static void DumpVirtualCode(KonohaContext *kctx, KVirtualCode *c)
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
@@ -921,7 +921,7 @@ static struct KVirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *bu
 	BasicNode_SetJumpAddr(kctx, BasicNode_FindById(kctx, beginId), (char *)vcode);
 	KLIB KBuffer_Free(&wb);
 	vcode = MakeThreadedCode(kctx, builder, vcode, codesize);
-	DumpKVirtualCode(kctx, vcode);
+	DumpVirtualCode(kctx, vcode);
 	return vcode;
 }
 

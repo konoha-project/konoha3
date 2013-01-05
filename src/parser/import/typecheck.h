@@ -172,7 +172,6 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KC
 	if(typedClass->typeId == KType_void) {
 		if(!FLAG_is(pol, TypeCheckPolicy_AllowVoid)) {
 			expr = SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "void is unacceptable");
-			DBG_ASSERT(kctx==NULL);
 		}
 		return expr;
 	}
@@ -428,12 +427,14 @@ static kstatus_t kNode_Eval(KonohaContext *kctx, kNode *stmt, kMethod *mtd, KTra
 	if(kNode_IsError(stmt)) {
 		return K_BREAK;  // to avoid duplicated error message
 	}
+	KDump(stmt);
 	kbool_t isTryEval = true;
 	if(KonohaContext_Is(CompileOnly, kctx)) {
 		isTryEval = false;
 		if(stmt->node == KNode_MethodCall) {
 			kMethod *callMethod = stmt->NodeList->MethodItems[0];
-			if(callMethod->typeId == KType_NameSpace && kMethod_Is(Public, callMethod) && !kMethod_Is(Static, callMethod)) {
+			DBG_ASSERT(IS_Method(callMethod));
+			if(kMethod_Is(Compilation, callMethod)) {
 				isTryEval = true;
 			}
 		}
