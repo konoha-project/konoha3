@@ -207,10 +207,12 @@ static kNode* TypeCheckNodeAt(KonohaContext *kctx, kNode *node, size_t pos, kNam
 	DBG_ASSERT(IS_Array(node->NodeList));
 	DBG_ASSERT(pos < kArray_size(node->NodeList));
 	kNode *expr = node->NodeList->NodeItems[pos];
+	//kNode_SetParent(kctx, expr, node);
+	//DBG_ASSERT(kNode_GetParentNULL(expr) == node);
 	kNode *texpr = TypeCheckNode(kctx, expr, ns, reqClass, pol);
 	if(texpr != expr) {
 		KFieldSet(node->NodeList, node->NodeList->NodeItems[pos], texpr);
-		KFieldSet(texpr, texpr->Parent, node);
+		kNode_SetParent(kctx, texpr, node);
 	}
 	return texpr;
 }
@@ -232,10 +234,15 @@ static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t sy
 			}
 		}
 		if(IS_Node(expr)) {
+			//kNode_SetParent(kctx, expr, stmt);
 			kNode *texpr = TypeCheckNode(kctx, expr, ns, reqClass, pol);
+			if(kNode_IsError(texpr)) {
+				kNode_ToError(kctx, stmt, texpr->ErrorMessage);
+				return texpr;
+			}
 			if(texpr != expr) {
 				KLIB kObjectProto_SetObject(kctx, stmt, symbol, KType_Node, texpr);
-				KFieldSet(texpr, texpr->Parent, stmt);
+				kNode_SetParent(kctx, texpr, stmt);
 			}
 			return texpr;
 		}
@@ -246,6 +253,7 @@ static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t sy
 static kNode* TypeCheckNodeList(KonohaContext *kctx, kArray *nodeList, size_t n, kNameSpace *ns, KClass *reqc)
 {
 	kNode *stmt = nodeList->NodeItems[n];
+	DBG_P("stmt->syn->keyword=%s%s ", KSymbol_Fmt2(stmt->syn->keyword));
 	if(stmt->attrTypeId != KType_var) return stmt;
 	if(!kNode_IsError(stmt)) {
 		stmt = TypeNode(kctx, stmt->syn, stmt, ns, reqc);
@@ -256,6 +264,8 @@ static kNode* TypeCheckNodeList(KonohaContext *kctx, kArray *nodeList, size_t n,
 
 static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, KClass *reqc)
 {
+	DBG_P(">>>>>>>>");
+	KDump(block);
 	int i, size = kNode_GetNodeListSize(kctx, block) - 1;
 	for(i = 0; i < size; i++) {
 		kNode *stmt = TypeCheckNodeList(kctx, block->NodeList, i, ns, KClass_void);

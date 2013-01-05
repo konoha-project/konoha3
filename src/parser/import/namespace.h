@@ -146,10 +146,7 @@ static kSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbo
 		//DBG_P(">>>>>>> ns=%p kvs=%p keyword=%s%s has defined syntax", ns, kvs, KSymbol_Fmt2(keyword));
 		return (kSyntax*)kvs->ObjectValue;
 	}
-	DBG_P(">>>>>>> ns=%p kvs=%p keyword=%s%s has no defined syntax", ns, kvs, KSymbol_Fmt2(keyword));
-	if(kvs != NULL) {
-		DBG_P(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> type=%s", KType_text(kvs->attrTypeId));
-	}
+	//DBG_P(">>>>>>> ns=%p kvs=%p keyword=%s%s has no defined syntax", ns, kvs, KSymbol_Fmt2(keyword));
 	return KNULL(Syntax);
 }
 
@@ -190,7 +187,7 @@ static kArray* kNameSpace_GetSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksy
 		kNameSpace_SetConstData(kctx, ns, queryKey, KType_Array, (uintptr_t)syntaxList, NULL);
 	}
 	kNameSpace_ListSyntax(kctx, ns, keyword, syntaxList);
-	DBG_P(">>>> new Syntax List=%s%s size=%d", KSymbol_Fmt2(keyword), kArray_size(syntaxList));
+	//DBG_P(">>>> new Syntax List=%s%s size=%d", KSymbol_Fmt2(keyword), kArray_size(syntaxList));
 	return syntaxList;
 }
 

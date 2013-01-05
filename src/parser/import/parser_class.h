@@ -386,7 +386,6 @@ static kNodeVar* kNode_AddSeveral0(KonohaContext *kctx, kNodeVar *expr, int n, v
                KLIB kArray_Add(kctx, expr->NodeList, v);
         }
        return expr;
-
 }
 
 //#define kNode_Termnize(kctx, node, tk) kNode_Op(kctx, node, tk, 0)

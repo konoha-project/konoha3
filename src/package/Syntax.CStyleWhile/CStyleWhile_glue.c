@@ -43,8 +43,11 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 		KReturn(exprNode);
 	}
 	kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
+	DBG_P(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> stmt B = %p, %d", stmt, kNode_Is(CatchBreak, stmt));
 	kNode_Set(CatchBreak, stmt, true);
-	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
+	DBG_P(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> stmt A= %p, %d", stmt, kNode_Is(CatchBreak, stmt));
+	kNode *block = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
+	DBG_P(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> while=%p, block=%p", stmt, block);
 	KReturn(kNode_Type(kctx, stmt, KNode_While, KType_void));
 }
 
@@ -65,84 +68,21 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 //	}
 //	KReturnUnboxValue(ret);
 //}
-//
-//static KMETHOD PatternMatch_ForNode(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
-//	int i;
-//	for(i = beginIdx; i < endIdx; i++) {
-//		kTokenVar *tk = tokenList->TokenVarItems[i];
-//		if(tk->resolvedSymbol == KSymbol_SEMICOLON) {
-//			kToken_Set(StatementSeparator, tk, false);
-//			break;
-//		}
-//	}
-//	if(beginIdx < i) {
-//		KTokenSeq tokens = {kNode_ns(stmt), tokenList, beginIdx, i};
-//		kNode *bk = SUGAR new_BlockNode(kctx, stmt, NULL, &tokens);
-//		SUGAR kNode_AddParsedObject(kctx, stmt, name, UPCAST(bk));
-//	}
-//	KReturnUnboxValue(i);
-//}
-//
-//static void kNode_copy(KonohaContext *kctx, kNodeVar *dNode, ksymbol_t kw, kNode *sNode)
-//{
-//	kObject *o = kNode_GetObject(kctx, sNode, kw, NULL);
-//	if(o != NULL) {
-//		kNode_SetObject(kctx, dNode, kw, o);
-//	}
-//}
-//
-//static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	VAR_TypeCheck(stmt, ns, reqc);
-//	int ret = true;
-//	int KSymbol_InitNode = KSymbol_("init"), KSymbol_IteratorNode = KSymbol_("Iterator");
-//	kNode *initNode = SUGAR kNode_GetNode(kctx, stmt, NULL/*defaultNS*/, KSymbol_InitNode, NULL);
-//	if(initNode == NULL) {  // with out init
-//		DBG_P(">>>>>>>>> Without init block");
-//		if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, ns, KClass_Boolean, 0)) {
-//			kNode *bk = SUGAR kNode_GetNode(kctx, stmt, NULL/*DefaultNameSpace*/, KSymbol_NodePattern, K_NULLBLOCK);
-//			kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
-//			kNode_Set(CatchBreak, stmt, true);
-//			SUGAR TypeCheckBlock(kctx, bk, gma);
-//			kNode *iterNode = SUGAR kNode_GetNode(kctx, stmt, NULL/*defaultNS*/, KSymbol_IteratorNode, NULL);
-//			if(iterNode != NULL) {
-//				SUGAR TypeCheckBlock(kctx, iterNode, gma);
-//			}
-//			kNode_Set(RedoLoop, stmt, true);
-//			kNode_Type(kctx, stmt, LOOP);
-//		}
-//	}
-//	else {
-//		kNodeVar *forNode = SUGAR new_BlockNode(kctx, OnGcStack, stmt->syn, 0);
-//		DBG_ASSERT(IS_Node(initNode));
-//		SUGAR kNode_InsertAfter(kctx, initNode, NULL, forNode);
-//		forNode->uline = kNode_uline(stmt);
-//		kNode_copy(kctx, forNode, KSymbol_NodePattern, stmt);
-//		kNode_copy(kctx, forNode, KSymbol_NodePattern, stmt);
-//		kNode_copy(kctx, forNode, KSymbol_IteratorNode, stmt);
-//		SUGAR TypeCheckBlock(kctx, initNode, gma);
-//		kNode_SetObject(kctx, stmt, KSymbol_NodePattern, initNode);
-//		kNode_Type(kctx, stmt, BLOCK);
-//	}
-//	KReturnUnboxValue(ret);
-//}
-
-#define kNode_GetParentNULL(stmt)  IS_Node(stmt->Parent) ? stmt->Parent : NULL
 
 static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
 	kNode *p = stmt;
 	while(p != NULL) {
+		DBG_P(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> stmt = %p, %d", p, kNode_Is(CatchBreak, p));
 		if(kNode_Is(CatchBreak, p)) {
 			KLIB kObjectProto_SetObject(kctx, stmt, stmt->syn->keyword, KType_Node, p);
 			KReturn(kNode_Type(kctx, stmt, KNode_Break, KType_void));
 		}
 		p = kNode_GetParentNULL(p);
+		DBG_P(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> stmtnext = %p", p);
 	}
-	SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "break statement not within a loop");
+	KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "break statement not within a loop"));
 }
 
 static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
@@ -156,7 +96,7 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		p = kNode_GetParentNULL(p);
 	}
-	SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "continue statement not within a loop");
+	KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "continue statement not within a loop"));
 }
 
 static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)

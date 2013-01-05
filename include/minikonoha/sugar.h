@@ -143,7 +143,7 @@ struct Tokenizer {
 	kString            *preparedString;
 };
 
-//#define VAR_TRACE
+#define VAR_TRACE
 #ifndef VAR_TRACE
 #define VAR_TRACE DBG_P("tracing..")
 #endif
@@ -464,7 +464,10 @@ static inline kNameSpace *kNode_GetNameSpace(KonohaContext *kctx, kNode *node)
 	return ns;
 }
 
-#define kNode_GetParent(kctx, node)  (IS_Node(node->Parent)) ? node->Parent : K_NULLNODE
+#define kNode_GetParent(kctx, node)  ((IS_Node(node->Parent)) ? node->Parent : K_NULLNODE)
+#define kNode_GetParentNULL(stmt)    ((IS_Node(stmt->Parent)) ? stmt->Parent : NULL)
+#define kNode_SetParent(kctx, node, parent)   KFieldSet(node, node->Parent, parent)
+
 
 static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeType, ktypeattr_t attrTypeId)
 {

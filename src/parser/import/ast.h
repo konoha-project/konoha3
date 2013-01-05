@@ -142,7 +142,7 @@ static void kNode_AddAnnotation(KonohaContext *kctx, kNode *stmt, kArray *tokenL
 static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kArray *tokenList, int beginIdx, int endIdx)
 {
 	int i;
-	SUGAR dumpTokenArray(kctx, 0, tokenList, beginIdx, endIdx);
+	//SUGAR dumpTokenArray(kctx, 0, tokenList, beginIdx, endIdx);
 	for(i = beginIdx; i < endIdx; i++) {
 		kToken *tk = tokenList->TokenItems[i];
 		if(tk->resolvedSyntaxInfo->precedence_op2 == Precedence_CStyleStatementEnd) {
@@ -165,7 +165,7 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 				kSyntax *patternSyntax = metaPatternList->SyntaxItems[i];
 				DBG_ASSERT(IS_Syntax(patternSyntax));
 				node->syn = patternSyntax;
-				DBG_P(">>>>>>>>>> searching meta i=%d, pattern = %s%s index=%d,%d", i, KSymbol_Fmt2(patternSyntax->keyword), beginIdx, endIdx);
+				//DBG_P(">>>>>>>>>> searching meta i=%d, pattern = %s%s index=%d,%d", i, KSymbol_Fmt2(patternSyntax->keyword), beginIdx, endIdx);
 				int nextIdx = ParseSyntaxNode(kctx, patternSyntax, node, 0, tokenList, currentIdx, PatternNoMatch, endIdx);
 				//DBG_P(">>>>>>>>>> searching meta pattern = %s%s index=%d,%d,%d", KSymbol_Fmt2(patternToken->resolvedSymbol), beginIdx, nextIdx, endIdx);
 				if(nextIdx != PatternNoMatch) {
@@ -220,8 +220,7 @@ static int ParseNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int be
 	if(beginIdx < endIdx) {
 		int opIdx = FindOperator(kctx, node, tokenList, beginIdx, endIdx);
 		kToken *keyOperator = tokenList->TokenItems[opIdx];
-		DBG_P("KeyOperator >>>>>>>> %d<%d<%d, %s", beginIdx, opIdx, endIdx, KToken_t(keyOperator));
-		//kNode_Termnize(kctx, node, keyOperator);
+		//DBG_P("KeyOperator >>>>>>>> %d<%d<%d, %s", beginIdx, opIdx, endIdx, KToken_t(keyOperator));
 		return ParseSyntaxNode(kctx, keyOperator->resolvedSyntaxInfo, node, 0, tokenList, beginIdx, opIdx, endIdx);
 	}
 	else {
@@ -243,7 +242,7 @@ static kNode* ParseNewNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLis
 		nextIdx = ParseNode(kctx, node, tokenList, beginIdx[0], endIdx, option, hintBeforeText);
 	}
 	beginIdx[0] = nextIdx;
-	KDump(node);
+	//KDump(node);
 	return node;
 }
 
@@ -497,10 +496,6 @@ static kArray* new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, 
 	for(i = beginIdx; i < endIdx; i++) {
 		KLIB kArray_Add(kctx, newa, a->ObjectItems[i]);
 	}
-//	DBG_P(">>>>>>>>>> beginIdx=%d,%d", beginIdx, endIdx);
-//	SUGAR dumpTokenArray(kctx, 0, newa, 0, kArray_size(newa));
-//	DBG_P("macroTokenList=%p", newa);
-//	kArray_Set(Debug, ((kArrayVar*)newa), true);
 	return newa;
 }
 
@@ -536,13 +531,12 @@ static kTokenVar* kToken_ExpandGroupMacro(KonohaContext *kctx, kTokenVar *tk, kN
 static kbool_t KTokenSeq_ApplyMacro(KonohaContext *kctx, KTokenSeq *tokens, kArray *macroTokenList, int beginIdx, int endIdx, size_t paramsize, KMacroSet *macroParam)
 {
 	KTokenSeq macro = {tokens->ns, macroTokenList, beginIdx + paramsize, endIdx};
-	KdumpTokenArray(kctx, macro.tokenList, macro.beginIdx, macro.endIdx);
-	SUGAR dumpTokenArray(kctx, 0, macroTokenList, 0, kArray_size(macroTokenList));
-	DBG_P("macroTokenList=%p", macroTokenList);
+	//SUGAR dumpTokenArray(kctx, 0, macroTokenList, 0, kArray_size(macroTokenList));
+	//DBG_P("macroTokenList=%p", macroTokenList);
 	int dstart = kArray_size(tokens->tokenList);
 	KTokenSeq_Preprocess(kctx, tokens, macroParam, &macro, beginIdx + paramsize);
-	DBG_P("<<<<<<<<<<< dstart=%d, tokens->begin,end=%d, %d", dstart, tokens->beginIdx, tokens->endIdx);
-	KdumpTokenArray(kctx, tokens->tokenList, dstart, tokens->endIdx);
+	//DBG_P("<<<<<<<<<<< dstart=%d, tokens->begin,end=%d, %d", dstart, tokens->beginIdx, tokens->endIdx);
+	//KdumpTokenArray(kctx, tokens->tokenList, dstart, tokens->endIdx);
 	return true;
 }
 
@@ -625,7 +619,7 @@ static kTokenVar* kToken_ToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameS
 {
 	KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
 	KTokenSeq_Push(kctx, source);
-	KdumpToken(kctx, tk);
+	//KdumpToken(kctx, tk);
 	KTokenSeq_Tokenize(kctx, &source, kString_text(tk->text), tk->uline);
 	KFieldSet(tk, tk->GroupTokenList, new_(TokenArray, 0, OnField));
 	tk->resolvedSyntaxInfo = kSyntax_(ns, KSymbol_BraceGroup);
