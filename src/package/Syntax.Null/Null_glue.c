@@ -84,8 +84,8 @@ static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ KSymbol_("null"), 0, 0, 0, {SUGAR termParseFunc}, {nullTypeFunc}, },
 		{ KSymbol_("NULL"), 0, 0, 0, {SUGAR termParseFunc}, {nullTypeFunc}, },
-		{ KSymbol_("=="),  0, Precedence_CStyleEquals, 0, {KSugarFunc(ns, Expression_isNull)}, {SUGAR methodTypeFunc}},
-		{ KSymbol_("!="), 0, Precedence_CStyleEquals, 0, {KSugarFunc(ns, Expression_isNotNull)}, {SUGAR methodTypeFunc}},
+//		{ KSymbol_("=="),  0, Precedence_CStyleEquals, 0, {KSugarFunc(ns, Expression_isNull)}, {SUGAR methodTypeFunc}},
+//		{ KSymbol_("!="), 0, Precedence_CStyleEquals, 0, {KSugarFunc(ns, Expression_isNotNull)}, {SUGAR methodTypeFunc}},
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

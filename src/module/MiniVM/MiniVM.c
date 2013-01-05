@@ -748,15 +748,22 @@ static kbool_t KBuilder_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder,
 //	return true;
 //}
 
-#define KBuilder_VisitContinueNode KBuilder_VisitJumpNode
-#define KBuilder_VisitBreakNode    KBuilder_VisitJumpNode
-
-static kbool_t KBuilder_VisitJumpNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
+static kbool_t KBuilder_VisitContinueNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
-	kSyntax *syn = stmt->syn;
-	kNode *jump = kNode_GetNode(kctx, stmt, syn->keyword);
+	ksymbol_t label = KSymbol_("continue");
+	kNode *jump = kNode_GetNode(kctx, stmt, label);
 	DBG_ASSERT(jump != NULL && IS_Node(jump));
-	bblock_t lbJUMP = kNode_GetLabelNode(kctx, jump, syn->keyword);
+	bblock_t lbJUMP = kNode_GetLabelNode(kctx, jump, label);
+	ASM_JMP(kctx, builder, lbJUMP);
+	return false;
+}
+
+static kbool_t KBuilder_VisitBreakNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
+{
+	ksymbol_t label = KSymbol_("break");
+	kNode *jump = kNode_GetNode(kctx, stmt, label);
+	DBG_ASSERT(jump != NULL && IS_Node(jump));
+	bblock_t lbJUMP = kNode_GetLabelNode(kctx, jump, label);
 	ASM_JMP(kctx, builder, lbJUMP);
 	return false;
 }
