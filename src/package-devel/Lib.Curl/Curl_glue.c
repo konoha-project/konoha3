@@ -214,7 +214,7 @@ static KMETHOD Curl_new(KonohaContext *kctx, KonohaStack *sfp)  // Don't remove
 }
 
 //## void Curl.setOpt(int type, boolean data);
-static KMETHOD Curl_setOptBoolean(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Curl_SetOptBoolean(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCurl* kcurl = (kCurl *)sfp[0].asObject;
 	CURLoption curlopt = (CURLoption)sfp[1].intValue;
@@ -262,7 +262,7 @@ static KMETHOD Curl_setOptBoolean(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Curl.setOpt(int type, int data);
-static KMETHOD Curl_setOptInt(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Curl_SetOptInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCurl* kcurl = (kCurl *)sfp[0].asObject;
 	CURLoption curlopt = (CURLoption)sfp[1].intValue;
@@ -302,7 +302,7 @@ static KMETHOD Curl_setOptInt(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Curl.setOpt(int type, String data);
-static KMETHOD Curl_setOptString(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Curl_SetOptString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCurl* kcurl = (kCurl *)sfp[0].asObject;
 	CURLoption curlopt = (CURLoption)sfp[1].intValue;
@@ -351,7 +351,7 @@ static KMETHOD Curl_setOptString(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Curl.setOpt(int type, FILE data);
-static KMETHOD Curl_setOptFile(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Curl_SetOptFile(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCurl* kcurl = (kCurl *)sfp[0].asObject;
 	CURLoption curlopt = (CURLoption)sfp[1].intValue;
@@ -370,7 +370,7 @@ static KMETHOD Curl_setOptFile(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
-//static KMETHOD Curl_setOptFunc(KonohaContext *kctx, KonohaStack *sfp)
+//static KMETHOD Curl_SetOptFunc(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kCurl* kcurl = (kCurl *)sfp[0].asObject;
 //	CURLoption curlopt = (CURLoption)sfp[1].intValue;
@@ -762,10 +762,10 @@ static kbool_t curl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Curl_new), KType_Curl, KType_Curl, KMethodName_("new"), 0,
-		_Public, _F(Curl_setOptBoolean), KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_boolean, KFieldName_("data"),
-		_Public, _F(Curl_setOptInt),     KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_int,     KFieldName_("data"),
-		_Public, _F(Curl_setOptString),  KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_String,  KFieldName_("data"),
-		_Public, _F(Curl_setOptFile),    KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_File,    KFieldName_("data"),
+		_Public, _F(Curl_SetOptBoolean), KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_boolean, KFieldName_("data"),
+		_Public, _F(Curl_SetOptInt),     KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_int,     KFieldName_("data"),
+		_Public, _F(Curl_SetOptString),  KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_String,  KFieldName_("data"),
+		_Public, _F(Curl_SetOptFile),    KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_File,    KFieldName_("data"),
 		_Public, _F(Curl_appendHeader), KType_void, KType_Curl, KMethodName_("appendHeader"), 1, KType_String, KFieldName_("header"),
 		_Public, _F(Curl_perform), KType_boolean, KType_Curl, KMethodName_("perform"), 0,
 		_Public, _F(Curl_receiveString), KType_String, KType_Curl, KMethodName_("receiveString"), 0,

@@ -527,7 +527,7 @@ static KMETHOD Mpf_getprec(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(mpf_get_prec(self->mpf));
 }
 
-static KMETHOD Mpf_setprec(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Mpf_Setprec(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpf *self = (kMpf *)sfp[0].asObject;
 	mpf_set_prec(self->mpf, sfp[1].intValue);
@@ -1010,7 +1010,7 @@ static kbool_t gmp_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 		_Public|_Const,     _F(Mpf_new_mpz),    KType_Mpf,     KType_Mpf, KMethodName_("new"), 1, KType_Mpz, FN_x,
 		_Public|_Const,     _F(Mpf_new_str),    KType_Mpf,     KType_Mpf, KMethodName_("new"), 1, KType_String, FN_x,
 		_Public|_Im,        _F(Mpf_getprec),    KType_Mpf,     KType_int, KMethodName_("getprec"), 0,
-		_Public,            _F(Mpf_setprec),    KType_Mpf,     KType_void,KMethodName_("setprec"), 1, KType_int, FN_x,
+		_Public,            _F(Mpf_Setprec),    KType_Mpf,     KType_void,KMethodName_("setprec"), 1, KType_int, FN_x,
 		_Public|_Im|_Const          , _F(Mpf_toString),   KType_String,  KType_Mpf, KMethodName_To(KType_String),   0,
 		_Public|_Im|_Const|_Coercion, _F(Mpf_toInt),      KType_int,     KType_Mpf, KMethodName_To(KType_int),   0,
 		_Public|_Im|_Const|_Coercion, _F(Mpf_toFloat),    KType_float,   KType_Mpf, KMethodName_To(KType_float), 0,

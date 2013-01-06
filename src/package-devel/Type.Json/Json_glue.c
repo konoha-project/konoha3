@@ -250,7 +250,7 @@ static KMETHOD Json_getString(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Json.setString(String key, String val);
-static KMETHOD Json_setString(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Json_SetString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
 	if(!PLATAPI SetJsonValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), KJSON_STRING, kString_text(sfp[2].asString))) {
@@ -260,7 +260,7 @@ static KMETHOD Json_setString(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Json.setJson(String key, Json value);
-static KMETHOD Json_setJson(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Json_SetJson(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo  = (kJson *)sfp[0].asObject;
 	kJson *val = (kJson *)sfp[2].asObject;
@@ -271,7 +271,7 @@ static KMETHOD Json_setJson(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Json.setJson(int key, Json value);
-static KMETHOD Json_setJson_index(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Json_SetJson_index(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo  = (kJson *)sfp[0].asObject;
 	kJson *val = (kJson *)sfp[2].asObject;
@@ -293,7 +293,7 @@ static KMETHOD Json_AddJson(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Json.setBoolean(String key, boolean value);
-static KMETHOD Json_setBoolean(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Json_SetBoolean(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
 	if(!PLATAPI SetJsonValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), KJSON_BOOLEAN, sfp[2].unboxValue)) {
@@ -303,7 +303,7 @@ static KMETHOD Json_setBoolean(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Json.setFloat(String key, Float value);
-static KMETHOD Json_setFloat(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Json_SetFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
 	if(!PLATAPI SetJsonValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), KJSON_DOUBLE, sfp[2].floatValue)) {
@@ -313,7 +313,7 @@ static KMETHOD Json_setFloat(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Json.setInt(String key, int value);
-static KMETHOD Json_setInt(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Json_SetInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
 	if(!PLATAPI SetJsonValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), KJSON_INT, sfp[2].unboxValue)) {
@@ -359,13 +359,13 @@ static kbool_t json_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		_Public|_Const|_Im, _F(Json_getString), KType_String,     KType_Json, KMethodName_("getString"),  1, KType_String, FN_k,
 		_Public,            _F(Json_new),       KType_Json,       KType_Json, KMethodName_("new"),        0,
 		_Public|_Static|_Im, _F(Json_Parse), KType_Json,   KType_Json, KMethodName_("parse"),      1, KType_String, FN_v,
-		_Public,            _F(Json_setJson),   KType_void,       KType_Json, KMethodName_("set"),        2, KType_String, FN_k, KType_Json, FN_v,
-		_Public,            _F(Json_setJson_index),   KType_void,       KType_Json, KMethodName_("set"),        2, KType_int,    FN_k, KType_Json, FN_v,
+		_Public,            _F(Json_SetJson),   KType_void,       KType_Json, KMethodName_("set"),        2, KType_String, FN_k, KType_Json, FN_v,
+		_Public,            _F(Json_SetJson_index),   KType_void,       KType_Json, KMethodName_("set"),        2, KType_int,    FN_k, KType_Json, FN_v,
 		_Public,            _F(Json_AddJson),   KType_void,       KType_Json, KMethodName_("add"),        1, KType_Json,   FN_v,
-		_Public,            _F(Json_setBoolean),   KType_void,       KType_Json, KMethodName_("setBoolean"),    2, KType_String, FN_k, KType_boolean, FN_v,
-		_Public,            _F(Json_setFloat),  KType_void,       KType_Json, KMethodName_("setFloat"),   2, KType_String, FN_k, KType_float, FN_v,
-		_Public,            _F(Json_setInt),    KType_void,       KType_Json, KMethodName_("setInt"),     2, KType_String, FN_k, KType_int, FN_v,
-		_Public,            _F(Json_setString), KType_void,       KType_Json, KMethodName_("setString"),  2, KType_String, FN_k, KType_String, FN_v,
+		_Public,            _F(Json_SetBoolean),   KType_void,       KType_Json, KMethodName_("setBoolean"),    2, KType_String, FN_k, KType_boolean, FN_v,
+		_Public,            _F(Json_SetFloat),  KType_void,       KType_Json, KMethodName_("setFloat"),   2, KType_String, FN_k, KType_float, FN_v,
+		_Public,            _F(Json_SetInt),    KType_void,       KType_Json, KMethodName_("setInt"),     2, KType_String, FN_k, KType_int, FN_v,
+		_Public,            _F(Json_SetString), KType_void,       KType_Json, KMethodName_("setString"),  2, KType_String, FN_k, KType_String, FN_v,
 
 		DEND,
 	};
@@ -378,7 +378,7 @@ static kbool_t json_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE* Json_Init(void)
+KDEFINE_PACKAGE *Json_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("json", "1.0"),
