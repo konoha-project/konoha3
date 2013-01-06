@@ -1,6 +1,6 @@
 // written by unknown
 
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("Syntax.JavaStyleClass");
 
 class A;

@@ -1,4 +1,4 @@
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("JavaScript.Regexp");
 
 void f() {

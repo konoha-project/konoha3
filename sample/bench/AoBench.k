@@ -1,3 +1,6 @@
+
+// written by shinpei nakata
+
 import("Type.Float");
 import("JavaScript.Math");
 import("Type.Bytes");
@@ -9,7 +12,7 @@ import("JavaScript.Array");
 import("Type.File");
 import("Syntax.CStyleWhile);
 import("cstyle", "+=");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 
 AllowImplicitGlobalVariable(true);
 

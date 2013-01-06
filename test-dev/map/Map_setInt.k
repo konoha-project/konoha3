@@ -1,7 +1,7 @@
 // written by masahiro ide
 
 import("konoha.map");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("JavaScript.Array");
 
 void test() {

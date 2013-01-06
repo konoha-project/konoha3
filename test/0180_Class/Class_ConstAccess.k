@@ -1,6 +1,6 @@
 // written by Atsushi Uchida
 
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("MiniKonoha.NameSpace");  // konoha.const is obsolete
 import("Syntax.JavaStyleClass");
 

@@ -1,4 +1,4 @@
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("MiniKonoha.NameSpace");  // konoha.const is obsolete
 import("Type.Bytes");
 import("Java.String");

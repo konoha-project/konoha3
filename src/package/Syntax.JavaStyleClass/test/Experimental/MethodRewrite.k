@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
 import("Syntax.GlobalVariable");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("Syntax.JavaStyleClass");
 
 class Person {

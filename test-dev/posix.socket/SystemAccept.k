@@ -1,7 +1,7 @@
 //Written by Joseph
 
 import("Type.Bytes");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("posix.socket");
 
 void test() {

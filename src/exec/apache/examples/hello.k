@@ -1,4 +1,4 @@
-import("Syntax.CStyleWhile);
+import("Syntax.CStyleWhile");
 import("JavaScript.Array");
 import("Lib.Apache");
 

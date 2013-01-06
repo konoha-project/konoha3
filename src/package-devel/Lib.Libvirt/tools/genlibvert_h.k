@@ -2,7 +2,7 @@ import("cstyle");
 import("konoha.null");
 import("Type.File");
 import("Java.String");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("JavaScript.Array");
 import("konoha.foreach");
 import("Syntax.JavaStyleClass");

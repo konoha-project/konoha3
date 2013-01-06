@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("Syntax.JavaStyleClass");
 
 class C0 {int x0;}

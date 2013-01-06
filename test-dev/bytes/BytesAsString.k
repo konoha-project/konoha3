@@ -3,7 +3,7 @@
 
 import("Java.String");
 import("Type.Bytes");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 
 void test() {
     String a  = "aaaaaaaaaaaaaaaa";

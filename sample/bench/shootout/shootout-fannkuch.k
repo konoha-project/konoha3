@@ -7,7 +7,7 @@
 import("cstyle");
 import("MiniKonoha.NameSpace");
 import("JavaScript.Array");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("Syntax.JavaStyleClass");
 
 const N=9;

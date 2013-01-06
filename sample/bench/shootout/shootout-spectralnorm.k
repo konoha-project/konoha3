@@ -8,7 +8,7 @@ import("cstyle");
 import("MiniKonoha.NameSpace");
 import("Syntax.JavaStyleClass");
 import("JavaScript.Array");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("Type.Float");
 import("JavaScript.Math");
 const N=5500;

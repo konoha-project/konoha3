@@ -1,7 +1,7 @@
 // written by shunsuke shida
 // modified by kimio kuramitsu
 
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("Syntax.JavaStyleClass");
 
 class C {

@@ -11,7 +11,7 @@ import("Syntax.JavaStyleClass");
 import("JavaScript.Array");
 import("Syntax.CStyleWhile);
 import("cstyle", "+=");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 AllowImplicitGlobalVariable(true);
 
 const width = 64;

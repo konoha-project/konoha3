@@ -1,6 +1,6 @@
 /* written by motoki yoan */
 
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("Type.Bytes");
 
 void test() {

@@ -2,7 +2,7 @@
 
 import("JavaScript.Array");
 import("Syntax.JavaStyleClass");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 void f () {
 	int[] ia = new int[0];
 	ia.add(4);

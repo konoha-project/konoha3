@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("JavaScript.String");
 import("konoha.foreach");
 import("MiniKonoha.NameSpace");

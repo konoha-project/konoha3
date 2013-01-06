@@ -10,7 +10,7 @@ import("Type.Float");
 import("Syntax.GlobalVariable");
 import("Syntax.JavaStyleClass");
 import("JavaScript.Array");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("Java.String");
 import("Type.Bytes");
 import("Type.File");

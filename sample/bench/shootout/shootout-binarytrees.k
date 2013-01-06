@@ -4,7 +4,7 @@
 */
 
 import("cstyle");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("Syntax.JavaStyleClass");
 import("Syntax.GlobalVariable");
 import("MiniKonoha.NameSpace");

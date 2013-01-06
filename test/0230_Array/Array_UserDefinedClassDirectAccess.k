@@ -2,7 +2,7 @@
 
 import("JavaScript.Array");
 import("Syntax.JavaStyleClass");
-import("konoha.new");
+//import("konoha.new"); Don't use this
 
 class Person {
 	int age;
