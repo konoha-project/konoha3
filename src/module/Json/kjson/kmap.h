@@ -95,7 +95,7 @@ static inline map_record_t *kmap_get(kmap_t *m, struct JSONString *key)
     return m->h.base.api->_get(m, key);
 }
 
-static inline map_status_t kmap_Set(kmap_t *m, struct JSONString *key, uint64_t val)
+static inline map_status_t kmap_set(kmap_t *m, struct JSONString *key, uint64_t val)
 {
     return m->h.base.api->_Set(m, key, val);
 }

@@ -107,7 +107,7 @@ static KMETHOD Bytes_get(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Bytes.set(int index, int c);
-static KMETHOD Bytes_set(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Bytes_Set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].asBytes;
 	size_t n = (size_t)sfp[1].intValue;
@@ -117,7 +117,7 @@ static KMETHOD Bytes_set(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Bytes.setAll(int c);
-static KMETHOD Bytes_setAll(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Bytes_SetAll(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].asBytes;
 	int bytesize = ba->bytesize;
@@ -241,7 +241,7 @@ static KMETHOD String_new_fromBytes_withSpecifiedDecode(KonohaContext *kctx, Kon
 static kbool_t bytes_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
-	KImportPackageSymbol(ns, "cstyle", "$SingleQuotedChar", trace);
+	//KImportPackageSymbol(ns, "cstyle", "$SingleQuotedChar", trace);
 	if(KClass_Bytes == NULL) {
 		KDEFINE_CLASS defBytes = {0};
 		SETSTRUCTNAME(defBytes, Bytes);
@@ -258,8 +258,8 @@ static kbool_t bytes_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 		_Public,     _F(Bytes_new),     KType_Bytes,  KType_Bytes, KMethodName_("new"),     1, KType_int, FN_size,
 		_Public|_Im, _F(Bytes_getSize), KType_int,    KType_Bytes, KMethodName_("getSize"), 0,
 		_Public|_Im, _F(Bytes_get),     KType_int,    KType_Bytes, KMethodName_("get"),     1, KType_int, FN_index,
-		_Public,     _F(Bytes_set),     KType_void,   KType_Bytes, KMethodName_("set"),     2, KType_int, FN_index, KType_int, FN_c,
-		_Public,     _F(Bytes_setAll),  KType_void,   KType_Bytes, KMethodName_("setAll"),  1, KType_int, FN_c,
+		_Public,     _F(Bytes_Set),     KType_void,   KType_Bytes, KMethodName_("set"),     2, KType_int, FN_index, KType_int, FN_c,
+		_Public,     _F(Bytes_SetAll),  KType_void,   KType_Bytes, KMethodName_("setAll"),  1, KType_int, FN_c,
 		_Public|_Im|_Coercion, _F(String_toBytes), KType_Bytes, KType_String, KMethodName_To(KType_Bytes),   0,
 		//_Public|_Im|_Coercion, _F(Bytes_toString), KType_String, KType_Bytes,  KMethodName_To(KType_String),  0,
 		//_Public|_Const, _F(Bytes_encodeTo),   KType_Bytes,  KType_Bytes,  KMethodName_("encodeTo"),    1, KType_String, FN_encoding,

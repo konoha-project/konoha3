@@ -50,7 +50,7 @@ static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## method void Array.set(Int n, T0 v);
-static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Array_Set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
 	size_t n = (size_t)sfp[1].intValue;
@@ -146,7 +146,7 @@ static KMETHOD Array_Add1(KonohaContext *kctx, KonohaStack *sfp)
 
 // JavaScript Array.push accepts variable length arguments.
 //## int Array.push(T0 value);
-static KMETHOD Array_push(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Array_Push(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
 	Array_Add1(kctx, sfp);
@@ -167,7 +167,7 @@ static KMETHOD Array_unshift(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## T0 Array.pop();
-static KMETHOD Array_pop(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Array_Pop(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
 	if(kArray_size(a) == 0)
@@ -634,28 +634,22 @@ static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
-	KImportPackageSymbol(ns, "cstyle", "[]", trace);
+	//KImportPackageSymbol(ns, "cstyle", "[]", trace);
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
 		{"Array", VirtualType_KClass, (uintptr_t)KClass_(KType_Array)},
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(ClassData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(ClassData), trace);
 
 	KClass *KClass_ArrayT0 = KClass_p0(kctx, KClass_Array, KType_0);
 	ktypeattr_t KType_ArrayT0 = KClass_ArrayT0->typeId;
 
-	//kparamtype_t p[] = {{KType_0}};
-	//ktypeattr_t KType_FuncMap = (KLIB KClass_Generics(kctx, KClass_Func, KType_0 , 1, p))->typeId;
-
-	//kparamtype_t P_inject[] = {{KType_0},{KType_0}};
-	//ktypeattr_t KType_FuncInject = (KLIB KClass_Generics(kctx, KClass_Func, KType_0 , 2, P_inject))->typeId;
-
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im,    _F(Array_get), KType_0,   KType_Array, KMethodName_("get"), 1, KType_int, KFieldName_("index"),
-		_Public,        _F(Array_set), KType_void, KType_Array, KMethodName_("set"), 2, KType_int, KFieldName_("index"),  KType_0, KFieldName_("value"),
+		_Public,        _F(Array_Set), KType_void, KType_Array, KMethodName_("set"), 2, KType_int, KFieldName_("index"),  KType_0, KFieldName_("value"),
 		/* Mutator Methods */
-		_JS|_Public,        _F(Array_pop), KType_0, KType_Array, KMethodName_("pop"), 0,
-		_JS|_Public,        _F(Array_push), KType_int, KType_Array, KMethodName_("push"), 1, KType_0, KFieldName_("value"),
+		_JS|_Public,        _F(Array_Pop), KType_0, KType_Array, KMethodName_("pop"), 0,
+		_JS|_Public,        _F(Array_Push), KType_int, KType_Array, KMethodName_("push"), 1, KType_0, KFieldName_("value"),
 		_JS|_Public,        _F(Array_reverse), KType_Array, KType_Array, KMethodName_("reverse"), 0,
 		_JS|_Public,        _F(Array_shift), KType_0, KType_Array, KMethodName_("shift"), 0,
 		_JS|_Public,        _F(Array_splice), KType_ArrayT0, KType_Array, KMethodName_("splice"), 2, KType_int, KFieldName_("index"), KType_int, KFieldName_("length"),
@@ -677,9 +671,6 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		_Public|_Const, _F(Array_getSize), KType_int, KType_Array, KMethodName_("getlength"), 0,
 		_Public,        _F(Array_clear), KType_void, KType_Array, KMethodName_("clear"), 0,
 		_Public,        _F(Array_Add1), KType_void, KType_Array, KMethodName_("add"), 1, KType_0, KFieldName_("value"),
-//		_Public|_Im,    _F(Array_map), KType_ArrayT0, KType_Array, KMethodName_("map"), 1, KType_FuncMap, KFieldName_("func"),
-//		_Public|_Im,    _F(Array_inject), KType_0, KType_Array, KMethodName_("inject"), 1, KType_FuncInject, KFieldName_("func"),
-
 		_Public|_Im,    _F(Array_new), KType_void, KType_Array, KMethodName_("new"), 1, KType_int, KFieldName_("size"),
 		_Public,        _F(Array_newArray), KType_Array, KType_Array, KMethodName_("newArray"), 1, KType_int, KFieldName_("size"),
 		_Public|kMethod_Hidden, _F(Array_newList), KType_Array, KType_Array, KMethodName_("[]"), 0,
@@ -692,93 +683,93 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 // ---------------------------------------------------------------------------
 /* Syntax */
 
-static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_TypeCheck(stmt, expr, gma, reqty);
-	// [0] currentToken, [1] NULL, [2] ....
-	size_t i;
-	KClass *requestClass = KClass_(reqty);
-	KClass *paramType = (requestClass->baseTypeId == KType_Array) ? KClass_(requestClass->p0) : KClass_INFER;
-	for(i = 2; i < kArray_size(expr->NodeList); i++) {
-		kExpr *typedExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, i, gma, paramType, 0);
-		if(typedExpr == K_NULLEXPR) {
-			KReturn(typedExpr);
-		}
-		if(paramType->typeId == KType_var) {
-			paramType = KClass_(typedExpr->attrTypeId);
-		}
-	}
-	if(requestClass->baseTypeId != KType_Array) {
-		requestClass = (paramType->typeId == KType_var) ? KClass_Array : KClass_p0(kctx, KClass_Array, paramType->typeId);
-	}
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), KClass_Array, KMethodName_("[]"), -1, KMethodMatch_NoOption);
-	DBG_ASSERT(mtd != NULL);
-	KFieldSet(expr, expr->NodeList->MethodItems[0], mtd);
-	KFieldSet(expr, expr->NodeList->ExprItems[1], SUGAR kExpr_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, kArray_size(expr->NodeList) - 2));
-	KReturn(Expr_typed(expr, TEXPR_CALL, requestClass->typeId));
-}
-
-static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
-	KClass *genericsClass = NULL;
-	kNameSpace *ns = Stmt_ns(stmt);
-	int nextIdx = SUGAR TokenUtils_ParseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, &genericsClass);
-	if(nextIdx != -1) {  // to avoid Func[T]
-		KReturn(SUGAR kStmt_ParseOperatorExpr(kctx, stmt, tokenList->TokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
-	}
-	kToken *currentToken = tokenList->TokenItems[operatorIdx];
-	if(beginIdx == operatorIdx) {
-		/* transform '[ Value1, Value2, ... ]' to '(Call Untyped new (Value1, Value2, ...))' */
-		DBG_ASSERT(currentToken->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup);
-		kExpr *arrayExpr = SUGAR new_UntypedCallStyleExpr(kctx, currentToken->resolvedSyntaxInfo, 2, currentToken, K_NULL);
-		KReturn(SUGAR kStmt_AddExprParam(kctx, stmt, arrayExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), NULL));
-	}
-	else {
-		kExpr *leftExpr = SUGAR kStmt_ParseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
-		if(leftExpr == K_NULLEXPR) {
-			KReturn(leftExpr);
-		}
-		if(leftExpr->syn->keyword == KSymbol_("new")) {  // new int[100], new int[]();
-			DBG_P("cur:%d, beg:%d, endIdx:%d", operatorIdx, beginIdx, endIdx);
-			size_t subTokenSize = kArray_size(currentToken->subTokenList);
-			if(subTokenSize == 0) {
-				/* transform 'new Type0 [ ]' => (Call Type0 new) */
-				kExpr_Setsyn(leftExpr, KSyntax_(ns, KSymbol_ExprMethodCall));
-			} else {
-				/* transform 'new Type0 [ Type1 ] (...) => new 'Type0<Type1>' (...) */
-				KClass *classT0 = NULL;
-				kArray *subTokenList = currentToken->subTokenList;
-				int beginIdx = -1;
-				if(kArray_size(subTokenList) > 0) {
-					beginIdx = SUGAR TokenUtils_ParseTypePattern(kctx, ns, subTokenList, 0, kArray_size(subTokenList), &classT0);
-				}
-				beginIdx = (beginIdx == -1) ? 0 : beginIdx;
-				kExpr_Setsyn(leftExpr, KSyntax_(ns, KSymbol_ExprMethodCall));
-				DBG_P("currentToken->subtoken:%d", kArray_size(subTokenList));
-				leftExpr = SUGAR kStmt_AddExprParam(kctx, stmt, leftExpr, subTokenList, beginIdx, kArray_size(subTokenList), "[");
-			}
-		}
-		else {
-			/* transform 'Value0 [ Value1 ]=> (Call Value0 get (Value1)) */
-			kTokenVar *tkN = /*G*/new_(TokenVar, 0, OnGcStack);
-			tkN->resolvedSymbol= KMethodName_ToGetter(0);
-			tkN->uline = currentToken->uline;
-			KSyntax *syn = KSyntax_(Stmt_ns(stmt), KSymbol_ExprMethodCall);
-			leftExpr  = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, tkN, leftExpr);
-			leftExpr = SUGAR kStmt_AddExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), "[");
-		}
-		KReturn(SUGAR kStmt_RightJoinExpr(kctx, stmt, leftExpr, tokenList, operatorIdx + 1, endIdx));
-	}
-}
+//static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	VAR_TypeCheck2(stmt, expr, ns, reqc);
+//	// [0] currentToken, [1] NULL, [2] ....
+//	size_t i;
+//	KClass *requestClass = reqc;
+//	KClass *paramType = (requestClass->baseTypeId == KType_Array) ? KClass_(requestClass->p0) : KClass_INFER;
+//	for(i = 2; i < kArray_size(expr->NodeList); i++) {
+//		kNode *typedNode = SUGAR TypeCheckNodeAt(kctx, expr, i, ns, paramType, 0);
+//		if(typedNode == K_NULLNODE) {
+//			KReturn(typedNode);
+//		}
+//		if(paramType->typeId == KType_var) {
+//			paramType = KClass_(typedNode->attrTypeId);
+//		}
+//	}
+//	if(requestClass->baseTypeId != KType_Array) {
+//		requestClass = (paramType->typeId == KType_var) ? KClass_Array : KClass_p0(kctx, KClass_Array, paramType->typeId);
+//	}
+//	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Array, KMethodName_("[]"), -1, KMethodMatch_NoOption);
+//	DBG_ASSERT(mtd != NULL);
+//	KFieldSet(expr, expr->NodeList->MethodItems[0], mtd);
+//	KFieldSet(expr, expr->NodeList->NodeItems[1], SUGAR kNode_SetVariable(kctx, KNewNode(ns), KNode_New, requestClass->typeId, kArray_size(expr->NodeList) - 2));
+//	KReturn(kNode_Type(kctx, expr, KNode_MethodCall, requestClass->typeId));
+//}
+//
+//static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+//	KClass *genericsClass = NULL;
+//	kNameSpace *ns = kNode_ns(stmt);
+//	int nextIdx = SUGAR ParseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, &genericsClass);
+//	if(nextIdx != -1) {  // to avoid Func[T]
+//		KReturn(SUGAR kNode_ParseOperatorNode(kctx, stmt, tokenList->TokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
+//	}
+//	kToken *currentToken = tokenList->TokenItems[operatorIdx];
+//	if(beginIdx == operatorIdx) {
+//		/* transform '[ Value1, Value2, ... ]' to '(Call Untyped new (Value1, Value2, ...))' */
+//		DBG_ASSERT(currentToken->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup);
+//		kNode *arrayNode = SUGAR new_UntypedOperatorNode(kctx, currentToken->resolvedSyntaxInfo, 2, currentToken, K_NULL);
+//		KReturn(SUGAR AddParamNode(kctx, ns, arrayNode, RangeGroup(currentToken->GroupTokenList), NULL));
+//	}
+//	else {
+//		kNode *leftNode = SUGAR ParseNewNode(kctx, ns, tokenList, beginIdx, operatorIdx, 0, NULL);
+//		if(leftNode == K_NULLNODE) {
+//			KReturn(leftNode);
+//		}
+//		if(leftNode->syn->keyword == KSymbol_("new")) {  // new int[100], new int[]();
+//			DBG_P("cur:%d, beg:%d, endIdx:%d", operatorIdx, beginIdx, endIdx);
+//			size_t subTokenSize = kArray_size(currentToken->GroupTokenList);
+//			if(subTokenSize == 0) {
+//				/* transform 'new Type0 [ ]' => (Call Type0 new) */
+//				leftNode->syn = kSyntax_(ns, KSymbol_ParamPattern/*MethodCall*/);
+//			} else {
+//				/* transform 'new Type0 [ Type1 ] (...) => new 'Type0<Type1>' (...) */
+//				KClass *classT0 = NULL;
+//				kArray *GroupTokenList = currentToken->GroupTokenList;
+//				int beginIdx = -1;
+//				if(kArray_size(GroupTokenList) > 0) {
+//					beginIdx = SUGAR ParseTypePattern(kctx, ns, RangeGroup(currentToken->GroupTokenList), &classT0);
+//				}
+//				beginIdx = (beginIdx == -1) ? 0 : beginIdx;
+//				leftNode->syn = kSyntax_(ns, KSymbol_ParamPattern/*MethodCall*/);
+//				DBG_P("currentToken->subtoken:%d", kArray_size(GroupTokenList));
+//				leftNode = SUGAR AddParamNode(kctx, ns, leftNode, GroupTokenList, beginIdx, kArray_size(GroupTokenList) CHECK RANGE, "[");
+//			}
+//		}
+//		else {
+//			/* transform 'Value0 [ Value1 ]=> (Call Value0 get (Value1)) */
+//			kTokenVar *tkN = /*G*/new_(TokenVar, 0, OnGcStack);
+//			tkN->symbol= KMethodName_ToGetter(0);
+//			tkN->uline = currentToken->uline;
+//			kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/);
+//			leftNode  = SUGAR new_UntypedOperatorNode(kctx, syn, 2, tkN, leftNode);
+//			leftNode = SUGAR AddParamNode(kctx, ns, leftNode, RangeGroup(currentToken->GroupTokenList), "[");
+//		}
+//		KReturn(SUGAR kNode_RightJoinNode(kctx, stmt, leftNode, tokenList, operatorIdx + 1, endIdx));
+//	}
+//}
 
 static kbool_t array_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_BracketGroup, SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, Expression_Bracket, NULL, NULL, TypeCheck_Bracket, },
-		{ KSymbol_END, },
-	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+//	KDEFINE_SYNTAX SYNTAX[] = {
+//		{ KSymbol_BracketGroup, SYNFLAG_Suffix|SYNFLAG_CFunc, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Bracket}, {SUGARFUNC TypeCheck_Bracket}, },
+//		{ KSymbol_END, },
+//	};
+//	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 
@@ -797,9 +788,9 @@ static kbool_t array_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 KDEFINE_PACKAGE* Array_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "js4", K_VERSION);
-	d.PackupNameSpace = array_PackupNameSpace;
-	d.ExportNameSpace = array_ExportNameSpace;
+	KSetPackageName(d, "JavaScript", "1.4");
+	d.PackupNameSpace   = array_PackupNameSpace;
+	d.ExportNameSpace   = array_ExportNameSpace;
 	return &d;
 }
 

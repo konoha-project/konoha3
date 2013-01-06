@@ -1,6 +1,6 @@
 import("Common.StringUtil");
 import("Type.Float");
-import("konoha.object");
+import("JavaStyle.Object");
 
 
 @Override @Public String String.charAt(int pos) {

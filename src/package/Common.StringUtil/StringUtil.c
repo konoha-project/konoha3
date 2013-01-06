@@ -164,12 +164,6 @@ static kbool_t string_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 
 static kbool_t string_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
-	KDEFINE_INT_CONST ClassData[] = {
-		{"StringUtil", VirtualType_KClass, (uintptr_t)KClass_String},
-		{NULL},
-	};
-	KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(ClassData), false/*isOverride*/, trace);
-
 	return true;
 }
 

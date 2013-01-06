@@ -28,6 +28,7 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
 #include <minikonoha/konoha_common.h>
+#include <minikonoha/import/methoddecl.h>
 #include <pcre.h>
 
 #ifdef __cplusplus
@@ -53,7 +54,6 @@ extern "C" {
 
 typedef void kregexp_t;
 
-/* REGEXP_SPI */
 #ifndef KREGEXP_MATCHSIZE
 #define KREGEXP_MATCHSIZE    16
 #endif
@@ -609,11 +609,6 @@ static KMETHOD RegExp_test(KonohaContext *kctx, KonohaStack *sfp)
 
 // --------------------------------------------------------------------------
 
-#define _Public kMethod_Public
-#define _Const  kMethod_Const
-#define _Im     kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
-
 static kbool_t regexp_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	if(KClass_RegExp == NULL) {
@@ -725,11 +720,10 @@ static kbool_t regexp_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 
 KDEFINE_PACKAGE* Regexp_Init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("JavaScript", "1.4"),
-		.PackupNameSpace    = regexp_PackupNameSpace,
-		.ExportNameSpace   = regexp_ExportNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSetPackageName(d, "JavaScript", "1.4");
+	d.PackupNameSpace = regexp_PackupNameSpace;
+	d.ExportNameSpace = regexp_ExportNameSpace;
 	return &d;
 }
 

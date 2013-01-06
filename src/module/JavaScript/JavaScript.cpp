@@ -785,12 +785,6 @@ static KMethodFunc V8_GenerateKMethodFunc(KonohaContext *kctx, KVirtualCode *vco
 	return KMethodFunc_RunVirtualMachine;
 }
 
-static void V8_SetMethodCode(KonohaContext *kctx, kMethodVar *mtd, KVirtualCode *vcode, KMethodFunc func)
-{
-	KLIB kMethod_SetFunc(kctx, mtd, func);
-	mtd->vcode_start = vcode;
-}
-
 static struct KVirtualCode* GetDefaultBootCode(void)
 {
 	return NULL;

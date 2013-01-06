@@ -651,7 +651,7 @@ static kbool_t xml_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 		{KDefineConstInt(XML_READER_TYPE_XML_DECLARATION)},
 		{} // end of const data
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), trace);
 	return true;
 }
 
