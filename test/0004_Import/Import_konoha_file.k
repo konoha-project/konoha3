@@ -1,4 +1,4 @@
 // written by kimio
 
-import("konoha.file");  // this test for importing this package
+import("Type.File");  // this test for importing this package
 

@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("js4.array"); // if Ok
+import("JavaScript.Array"); // if Ok
 import("cstyle");
 
 void test() {

@@ -1,6 +1,6 @@
 /* written by shinpei nakata */
 
-import("konoha.bytes");
+import("Type.Bytes");
 
 void test () {
 	 assert("hoge".toBytes().encodeTo("SHIFT_JIS").decodeFrom("SHIFT_JIS") == "hoge");

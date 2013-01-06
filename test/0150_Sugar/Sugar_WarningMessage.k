@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.desugar");
+import("MiniKonoha.Syntax");
 
 Expr TypeCheckTrue(Stmt stmt, Expr expr, Gamma gma, int typeid) {
 	return stmt.message(WarnTag, "true was redefined");

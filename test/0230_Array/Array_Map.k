@@ -1,6 +1,6 @@
 // written by imasahiro
 
-import("js4.array");
+import("JavaScript.Array");
 
 int f(int x) { return x + 1; }
 int g(int x) { return x - 1; }

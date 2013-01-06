@@ -1,6 +1,6 @@
 // written by kimio
 
-import("konoha.desugar");
+import("MiniKonoha.Syntax");
 
 void test() {
 	Symbol keyword = "$Symbol";

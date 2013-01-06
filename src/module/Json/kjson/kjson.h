@@ -169,7 +169,7 @@ static inline void JSON_Retain(JSON json)
 
 static inline void JSONObject_Retain(JSON json)
 {
-    if ((JSON_type(json) & 1) == 1) {
+    if((JSON_type(json) & 1) == 1) {
         JSON_Retain(json);
     }
 }
@@ -186,7 +186,7 @@ static inline int64_t JSON_getInt(JSON json, const char *key, size_t len)
 {
     JSON v = JSON_get(json, key, len);
     return JSON_isValid(v) ?
-        (JSON_type(json) == JSON_Int32) ?
+        (JSON_type(v) == JSON_Int32) ?
             toInt32(v.val) : toInt64(v.val)->val : 0;
 }
 

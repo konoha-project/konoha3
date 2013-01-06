@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.math");
+import("JavaScript.Math");
 import("konoha");
 
 Math

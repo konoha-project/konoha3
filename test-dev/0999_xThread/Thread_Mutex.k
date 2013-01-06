@@ -1,5 +1,5 @@
 // written by wakamatsu
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("posix.thread");
 
 void test() {

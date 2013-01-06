@@ -1,7 +1,7 @@
 // written by shinpei
-import ("konoha.new");
-import( "dscript.subproc");
-import ("js4.array");
+//import("konoha.new"); Don't use this
+import("dscript.subproc");
+import("JavaScript.Array");
 
 // echo 'hello world' | cat
 void test () {

@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("cstyle");
+import("Syntax.CStyleWhile");
 
 void test() {
 	int i = 0;

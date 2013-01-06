@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
-import("js4.array");
-import("konoha.object");
+import("JavaScript.Array");
+import("JavaStyle.Object");
 
 void test() {
 	Object[] a = ["1", "2", "3"]; // boxing

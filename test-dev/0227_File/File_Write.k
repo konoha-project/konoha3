@@ -1,8 +1,8 @@
 //Written by shinpei
 //Modified by Joseph
 
-import("konoha.bytes");
-import("java2.string");
+import("Type.Bytes");
+import("Java.String");
 import("posix.file");
 
 void test() {

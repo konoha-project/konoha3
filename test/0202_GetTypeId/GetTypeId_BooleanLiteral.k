@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.object");
+import("JavaStyle.Object");
 
 assert((true).getTypeId() == 3/*TY_boolean*/);
 

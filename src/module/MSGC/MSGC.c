@@ -64,7 +64,7 @@ extern "C" {
 #define ArenaTable_InitSize     32
 
 #define Object_unsetMark(o) KFlag_Set0(uintptr_t,(o)->h.magicflag,kObjectFlag_GCFlag)
-#define Object_setMark(o)   KFlag_Set1(uintptr_t,(o)->h.magicflag,kObjectFlag_GCFlag)
+#define Object_SetMark(o)   KFlag_Set1(uintptr_t,(o)->h.magicflag,kObjectFlag_GCFlag)
 #define Object_isMark(o)   (KFlag_Is(uintptr_t,(o)->h.magicflag, kObjectFlag_GCFlag))
 //static int verbose_gc = 0;
 static inline void *do_malloc(size_t size);
@@ -181,8 +181,8 @@ typedef struct gc_stat {
 	size_t markingTime;
 	size_t sweepingTime;
 	size_t current_request_size;
-	//AllocationBlock *managed_heap;
-	//AllocationBlock *managed_heap_end;
+	//AllocationNode *managed_heap;
+	//AllocationNode *managed_heap_end;
 	FILE *fp;
 } msgc_stat;
 
@@ -713,7 +713,7 @@ static int marked = 0;
 static void mark_mstack(GcManager *mng, kObject *ref, MarkStack *mstack)
 {
 	if(!Object_isMark(ref)) {
-		Object_setMark((kObjectVar *)ref);
+		Object_SetMark((kObjectVar *)ref);
 		++marked;
 		mstack_Push(mstack, ref);
 	}

@@ -1,6 +1,7 @@
 // written by kimio kuramitsu
 
-import("cstyle");
+import("Syntax.CStyleCompoundAssignment");
+import("Syntax.CStyleBitwiseOperator");
 
 void test() {
 	int a = 2;

@@ -1,7 +1,7 @@
 //written by Joseph
 
-import("js4.array");
-import("js4.regexp");
+import("JavaScript.Array");
+import("JavaScript.Regexp");
 
 void test() {
 	String str = "Hello world!";

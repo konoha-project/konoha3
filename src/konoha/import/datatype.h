@@ -483,6 +483,12 @@ static void kMethod_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
+static void kMethod_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+{
+	kMethod *mtd = v[pos].asMethod;
+	KBuffer_printf(kctx, wb, "%s.%s%s", kMethod_Fmt3(mtd));
+}
+
 #define KClass_MethodVar KClass_Method
 static kMethodVar* new_kMethod(KonohaContext *kctx, kArray *gcstack, uintptr_t flag, ktypeattr_t cid, kmethodn_t mn, KMethodFunc func)
 {
@@ -524,7 +530,9 @@ static void kNameSpace_Init(KonohaContext *kctx, kObject *o, void *conf)
 		ns->packageId     = ns->parentNULL->packageId;
 		ns->syntaxOption  = ns->parentNULL->syntaxOption;
 	}
+	ns->importedNameSpaceList = K_EMPTYARRAY;
 	ns->methodList_OnList = K_EMPTYARRAY;
+	ns->metaPatternList = K_EMPTYARRAY;
 	ns->builderApi = PLATAPI GetDefaultBuilderAPI();
 }
 
@@ -842,7 +850,7 @@ static kString* KClass_shortName(KonohaContext *kctx, KClass *ct)
 	return ct->shortClassNameNULL;
 }
 
-static void KClass_setName(KonohaContext *kctx, KClassVar *ct, KTraceInfo *trace)
+static void KClass_SetName(KonohaContext *kctx, KClassVar *ct, KTraceInfo *trace)
 {
 	if(trace != NULL) {
 		/* To avoid SEGV, because this message is called at the initial time. */
@@ -869,7 +877,7 @@ static KClass *KClass_define(KonohaContext *kctx, kpackageId_t packageId, kStrin
 	else {
 		ct->classNameSymbol = KAsciiSymbol(kString_text(name), kString_size(name), _NEWID);
 	}
-	KClass_setName(kctx, ct, trace);
+	KClass_SetName(kctx, ct, trace);
 	return (KClass *)ct;
 }
 
@@ -948,6 +956,7 @@ static void loadInitStructData(KonohaContext *kctx)
 	defMethod.init = kMethod_Init;
 	defMethod.reftrace = kMethod_Reftrace;
 	defMethod.free     = kMethod_Free;
+	defMethod.p        = kMethod_p;
 
 	KDEFINE_CLASS defFunc = {0};
 	SETTYNAME(defFunc, Func);
@@ -997,25 +1006,17 @@ static void loadInitStructData(KonohaContext *kctx)
 	ct->p0 = KType_Object;    // don't move (ide)
 }
 
-static void defineDefaultKeywordSymbol(KonohaContext *kctx)
+static void DefineDefaultKeywordSymbol(KonohaContext *kctx)
 {
 	size_t i;
-	static const char *keywords[] = {
-		"", "$Expr", "$Symbol", "$Text", "$Number", "$Type",
-		"()", "[]", "{}", "$Block", "$Param", "$TypeDecl", "$MethodDecl", "$Token",
-		".", "/", "%", "*", "+", "-", "<", "<=", ">", ">=", "==", "!=",
-		"&&", "||", "!", "=", ",", "$", ":", ";", /*"@",*/
-		"true", "false", "if", "else", "return", // syn
-		"new", "void"
-	};
-	for(i = 0; i < sizeof(keywords) / sizeof(const char *); i++) {
-		ksymbolSPOL(keywords[i], strlen(keywords[i]), StringPolicy_TEXT|StringPolicy_ASCII, KSymbol_NewId);
+	for(i = 0; i < sizeof(KEYWORD_LIST) / sizeof(const char *); i++) {
+		ksymbolSPOL(KEYWORD_LIST[i], strlen(KEYWORD_LIST[i]), StringPolicy_TEXT|StringPolicy_ASCII, KSymbol_NewId);
 		//ksymbol_t sym = ksymbolSPOL(keywords[i], strlen(keywords[i]), StringPolicy_TEXT|StringPolicy_ASCII, KSymbol_NewId);
 		//fprintf(stdout, "#define KSymbol_%s (((ksymbol_t)%d)|0) /*%s*/\n", KSymbol_text(sym), KSymbol_Unmask(sym), keywords[i]);
 	}
 }
 
-static void initStructData(KonohaContext *kctx)
+static void InitStructData(KonohaContext *kctx)
 {
 	KClass **ctt = (KClass**)kctx->share->classTable.classItems;
 	size_t i;//, size = kctx->share->classTable.bytesize/sizeof(KClassVar *);
@@ -1023,7 +1024,7 @@ static void initStructData(KonohaContext *kctx)
 		KClassVar *ct = (KClassVar *)ctt[i];
 		const char *name = ct->DBG_NAME;
 		ct->classNameSymbol = ksymbolSPOL(name, strlen(name), StringPolicy_ASCII|StringPolicy_TEXT, _NEWID);
-		KClass_setName(kctx, ct, 0);
+		KClass_SetName(kctx, ct, 0);
 	}
 	KLIB Knull(kctx, KClass_NameSpace);
 }
@@ -1093,8 +1094,8 @@ static void KRuntime_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	FILEID_("(konoha.c)");
 	PN_("konoha");                   // PN_konoha
 	PN_("sugar");                    // PKG_sugar
-	defineDefaultKeywordSymbol(kctx);
-	initStructData(kctx);
+	DefineDefaultKeywordSymbol(kctx);
+	InitStructData(kctx);
 }
 
 static void KRuntime_Reftrace(KonohaContext *kctx, KonohaContextVar *ctx, KObjectVisitor *visitor)

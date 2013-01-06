@@ -947,7 +947,7 @@ static kExpr *kExpr_TypeCheckFuncParams(KonohaContext *kctx, kStmt *stmt, kExprV
 			return texpr;
 		}
 	}
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), KClass_Func, KKMethodName_("invoke"), -1, KMethodMatch_NoOption);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), KClass_Func, KMethodName_("invoke"), -1, KMethodMatch_NoOption);
 	DBG_ASSERT(mtd != NULL);
 	KFieldSet(expr->NodeList, expr->NodeList->ExprItems[1], expr->NodeList->ExprItems[0]);
 	return TypeMethodCallExpr(kctx, expr, mtd, KClass_(thisClass->p0));

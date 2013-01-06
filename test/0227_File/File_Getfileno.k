@@ -1,6 +1,6 @@
 // written by chenji
 
-import("konoha.file");
+import("Type.File");
 
 void test() {
 	assert(stdin.getfileno() != -1);

@@ -1,6 +1,6 @@
 // generated with geninttest by kimio kurmaitsu
 
-import("cstyle"); // konoha.int was obsolete
+import("Syntax.CStyleBitwiseOperator"); // konoha.int was obsolete
 int succ(int n) {
 	return n+1;
 }

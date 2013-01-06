@@ -1,14 +1,14 @@
 // written by kimio
 
-import("konoha.object");
+import("JavaStyle.Object");
 
 void test() {
 	String[] o;
-	assert(!(o <: boolean[]));
-	assert(!(o <: int[]));
-	assert((o <: String[]));
-	assert(!(o <: System[]));
-	assert(!(o <: Func[]));
+	assert(!(o instanceof boolean[]));
+	assert(!(o instanceof int[]));
+	assert((o instanceof String[]));
+	assert(!(o instanceof System[]));
+	assert(!(o instanceof Func[]));
 }
 
 test();

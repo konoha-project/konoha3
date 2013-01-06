@@ -22,10 +22,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "minikonoha/minikonoha.h"
-#include "minikonoha/klib.h"
-#include "minikonoha/local.h"
-#include "minikonoha/sugar.h"
+#define USE_KEYWORD_LIST 1
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/klib.h>
+#include <minikonoha/local.h>
+#include <minikonoha/sugar.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,7 +38,7 @@ extern "C" {
 
 // -------------------------------------------------------------------------
 
-static void konoha_Init(void)
+static void InitKonoha(void)
 {
 	static int isInit = 0;
 	if(isInit == 0) {
@@ -88,7 +89,7 @@ static void KRuntimeContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KFree(ctx->stack, sizeof(KRuntimeContextVar));
 }
 
-static kbool_t KRuntime_setModule(KonohaContext *kctx, int x, KRuntimeModule *d, KTraceInfo *trace)
+static kbool_t KRuntime_SetModule(KonohaContext *kctx, int x, KRuntimeModule *d, KTraceInfo *trace)
 {
 	if(kctx->modshare[x] != NULL) {
 		KLIB ReportScriptMessage(kctx, trace, ErrTag, "module %s already registered", kctx->modshare[x]->name);
@@ -115,7 +116,7 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 	if(kctx == NULL) {  // NULL means first one
 		KonohaLibVar *klib = (KonohaLibVar *)calloc(sizeof(KonohaLib) + sizeof(KonohaContextVar), 1);
 		klib_Init(klib);
-		klib->KRuntime_setModule  = KRuntime_setModule;
+		klib->KRuntime_SetModule  = KRuntime_SetModule;
 		klib->KonohaContext_Init = new_KonohaContext;
 		klib->KonohaContext_Free = KonohaContext_Free;
 		klib->ReftraceAll = ReftraceAll;
@@ -223,7 +224,7 @@ static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 KonohaContext* konoha_open(const PlatformApi *platform)
 {
 	assert(0);  // obsolate
-	konoha_Init();
+	InitKonoha();
 	return (KonohaContext *)new_KonohaContext(NULL, platform);
 }
 
@@ -386,7 +387,7 @@ KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory)
 	KonohaFactory *platapi = (KonohaFactory *)factory->malloc_i(sizeof(KonohaFactory));
 	KonohaFactory_Check(factory);
 	memcpy(platapi, factory, sizeof(KonohaFactory));
-	konoha_Init();
+	InitKonoha();
 	return (KonohaContext *)new_KonohaContext(NULL, (PlatformApi *)platapi);
 }
 

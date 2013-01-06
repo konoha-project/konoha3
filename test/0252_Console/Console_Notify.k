@@ -1,5 +1,5 @@
 // written by kimio
 
-import("konoha.console");
+import("MiniKonoha.Console");
 Console.notify("The status is critical");
 

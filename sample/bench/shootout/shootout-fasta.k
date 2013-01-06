@@ -5,13 +5,13 @@
  */
 
 import("cstyle");
-import("konoha.ns");
-import("konoha.global");
-import("konoha.class");
-import("konoha.float");
-import("js4.array");
-import("konoha.bytes");
-import("konoha.file");
+import("MiniKonoha.NameSpace");
+import("Syntax.GlobalVariable");
+import("Syntax.JavaStyleClass");
+import("Type.Float");
+import("JavaScript.Array");
+import("Type.Bytes");
+import("Type.File");
 
 AllowImplicitGlobalVariable(true);
 

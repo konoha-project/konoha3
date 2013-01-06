@@ -1,7 +1,7 @@
 /* written by shinpei nakata */
 
-import("konoha.new");
-import("konoha.bytes");
+//import("konoha.new"); Don't use this
+import("Type.Bytes");
 import("cstyle.libc");
 
 void test() {

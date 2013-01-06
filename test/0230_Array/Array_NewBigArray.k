@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 import("konoha.new")
-import("js4.array");
-import("konoha.class");
+import("JavaScript.Array");
+import("Syntax.JavaStyleClass");
 
 
 void test() {

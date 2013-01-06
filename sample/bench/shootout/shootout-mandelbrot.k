@@ -4,11 +4,11 @@
  *
  */
 
-import("konoha.class");
-import("konoha.file");
-import("konoha.ns");
-import("konoha.bytes");
-import("konoha.float");
+import("Syntax.JavaStyleClass");
+import("Type.File");
+import("MiniKonoha.NameSpace");
+import("Type.Bytes");
+import("Type.Float");
 import("cstyle");
 
 const BUFFER_SIZE = 8192;

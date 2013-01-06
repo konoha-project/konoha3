@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("cstyle");
+import("Syntax.CStyleFor");
 
 void test() {
 	int c = 0;

@@ -1,6 +1,6 @@
 // written by kimio
 
-import("konoha.desugar");
+import("MiniKonoha.Syntax");
 
 assert(DefinedSyntax("if"));
 assert(DefinedSyntax("$Token"));

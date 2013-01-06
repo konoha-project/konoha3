@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("js4.regexp");
+import("JavaScript.Regexp");
 
 void test() {
 	String str = "Hello world!";

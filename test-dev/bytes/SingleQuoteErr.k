@@ -1,6 +1,6 @@
 /* written by shinpei nakata */
 
-import("konoha.bytes");
+import("Type.Bytes");
 
 void f() {
 	int s = 'hogehoge';

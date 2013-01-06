@@ -64,7 +64,7 @@ static inline void KonohaCommonModule_Init(KonohaContext *kctx, KTraceInfo *trac
 	KonohaCommonModule *base = (KonohaCommonModule *)KCalloc(sizeof(KonohaCommonModule), 1, trace);
 	base->h.name      = "KonohaCommon";
 	base->h.allocSize = sizeof(KonohaCommonModule);
-	KLIB KRuntime_setModule(kctx, MOD_konoha, &base->h, trace);
+	KLIB KRuntime_SetModule(kctx, MOD_konoha, &base->h, trace);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -149,7 +149,7 @@ struct kIteratorVar {
 
 #define kFileFlag_ChangeLessStream    kObjectFlag_Local1
 #define kFile_is(P, o)        (KFlag_Is(uintptr_t,(o)->h.magicflag, kFileFlag_##P))
-#define kFile_set(P, o, b)     KFlag_Set(uintptr_t,(o)->h.magicflag, kFileFlag_##P, b)
+#define kFile_Set(P, o, b)     KFlag_Set(uintptr_t,(o)->h.magicflag, kFileFlag_##P, b)
 
 typedef struct kFileVar kFile;
 

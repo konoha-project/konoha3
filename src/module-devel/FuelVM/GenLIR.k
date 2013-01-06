@@ -22,13 +22,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-import("konoha.new");
-import("js4.string");
+//import("konoha.new"); Don't use this
+import("JavaScript.String");
 import("konoha.foreach");
-import("konoha.ns");
-import("js4.array");
-import("konoha.file");
-import("konoha.class");
+import("MiniKonoha.NameSpace");
+import("JavaScript.Array");
+import("Type.File");
+import("Syntax.JavaStyleClass");
 import("cstyle");
 import("konoha.field", ".");
 

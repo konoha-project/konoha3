@@ -1,7 +1,7 @@
 // written by ide
 // modified by chenji
 
-import("dshell");
+import("Syntax.StringInterpolation");
 
 int add(int n) {
     return n + 1;

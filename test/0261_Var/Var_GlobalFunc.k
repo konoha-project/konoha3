@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
-import("konoha.var");
-import("konoha.global");
+import("Type.StaticVar");
+import("Syntax.GlobalVariable");
 
 int succ(int n) {
 	return n+1;

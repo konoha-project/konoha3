@@ -1,4 +1,4 @@
-import("js4.regexp");
+import("JavaScript.Regexp");
 
 void test() {
 	assert("hoge1234".replace(/123/, "xxx") == "hogexxx4");
