@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("js4.string");
+import("JavaScript.String");
 
 void test() {
 	assert("こんにちは、世界!".slice(1, 5) == "んにちは");

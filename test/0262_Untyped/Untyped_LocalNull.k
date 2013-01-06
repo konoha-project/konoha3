@@ -1,9 +1,9 @@
 // written by kimio kuramitsu
 
 
-import("konoha.untyped");
+import("Syntax.UntypedVariable");
 import("konoha.object");
-import("cstyle");
+import("Syntax.Null");
 
 void test() {
 	o = null;

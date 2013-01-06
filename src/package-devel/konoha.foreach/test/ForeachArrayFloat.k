@@ -1,8 +1,8 @@
 // written by chenji
 
 import("konoha.foreach");
-import("js4.array");
-import("konoha.float");
+import("JavaScript.Array");
+import("Type.Float");
 
 void test() {
 	float[] flist = [1.0, 2.0, 3.0, 4.0];

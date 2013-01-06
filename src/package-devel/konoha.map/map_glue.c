@@ -208,15 +208,15 @@ static kbool_t map_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 	defMap.free      = kMap_Free;
 
 	KClass *cMap = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defMap, trace);
-	int FN_key = KKMethodName_("key");
+	int FN_key = KMethodName_("key");
 	int KType_Array0 = KClass_p0(kctx, KClass_Array, KType_0)->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Map_new), KType_Map, KType_Map, KKMethodName_("new"), 0,
-		_Public|_Im|_Const, _F(Map_has), KType_boolean, KType_Map, KKMethodName_("has"), 1, KType_String, FN_key,
-		_Public|_Im|_Const, _F(Map_get), KType_0, KType_Map, KKMethodName_("get"), 1, KType_String, FN_key,
-		_Public, _F(Map_set), KType_void, KType_Map, KKMethodName_("set"), 2, KType_String, FN_key, KType_0, KFieldName_("value"),
-		_Public, _F(Map_Remove), KType_void, KType_Map, KKMethodName_("remove"), 1, KType_String, FN_key,
-		_Public|_Im|_Const, _F(Map_keys), KType_Array0, KType_Map, KKMethodName_("keys"), 0,
+		_Public, _F(Map_new), KType_Map, KType_Map, KMethodName_("new"), 0,
+		_Public|_Im|_Const, _F(Map_has), KType_boolean, KType_Map, KMethodName_("has"), 1, KType_String, FN_key,
+		_Public|_Im|_Const, _F(Map_get), KType_0, KType_Map, KMethodName_("get"), 1, KType_String, FN_key,
+		_Public, _F(Map_set), KType_void, KType_Map, KMethodName_("set"), 2, KType_String, FN_key, KType_0, KFieldName_("value"),
+		_Public, _F(Map_Remove), KType_void, KType_Map, KMethodName_("remove"), 1, KType_String, FN_key,
+		_Public|_Im|_Const, _F(Map_keys), KType_Array0, KType_Map, KMethodName_("keys"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -253,7 +253,7 @@ static kbool_t map_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpa
 	return true;
 }
 
-KDEFINE_PACKAGE *map_Init(void)
+KDEFINE_PACKAGE* map_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "map", "1.0");

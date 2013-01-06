@@ -1,6 +1,6 @@
 // written by kimio
 
-import("cstyle");
+import("Syntax.CStyleFor");
 
 void test() {
 	int i;

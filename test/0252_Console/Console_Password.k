@@ -1,6 +1,6 @@
 // written by kimio
 
-import("konoha.console");
+import("MiniKonoha.Console");
 
 void test() {
 	String line = Console.inputUserPassword("Password: ");  // OutputTest returns null;

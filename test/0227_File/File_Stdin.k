@@ -1,6 +1,6 @@
 // written by kimio
 
-import("konoha.file");
+import("Type.File");
 void test() {
 	FILE f = stdin;  // just checking if stdin is available
 }

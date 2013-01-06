@@ -230,7 +230,7 @@ KonohaContext* konoha_create(KClass **cRequest)
 	KonohaContext* kctx = KonohaFactory_CreateKonoha(&factory);
 	KBaseTrace(trace);
 	kNameSpace *ns = KNULL(NameSpace);
-	KImportPackage(ns, "apache", trace);
+	KImportPackage(ns, "Lib.Apache", trace);
 	*cRequest = KClass_Request;
 #define KType_Req  (KClass_Request->typeId)
 #define KType_Tbl  (KClass_AprTable->typeId)
@@ -241,22 +241,22 @@ KonohaContext* konoha_create(KClass **cRequest)
 
 	int FN_x = KFieldName_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Request_puts), KType_void, KType_Req, KKMethodName_("puts"), 1, KType_String, FN_x,
-		_Public, _F(Request_getMethod), KType_String, KType_Req, KKMethodName_("getMethod"), 0,
-		_Public, _F(Request_getArgs), KType_String, KType_Req, KKMethodName_("getArgs"), 0,
-		_Public, _F(Request_getUri), KType_String, KType_Req, KKMethodName_("getUri"), 0,
-		_Public, _F(Request_getPathInfo), KType_String, KType_Req, KKMethodName_("getPathInfo"), 0,
-		_Public, _F(Request_getHandler), KType_String, KType_Req, KKMethodName_("getHandler"), 0,
-		_Public, _F(Request_setContentType), KType_void, KType_Req, KKMethodName_("setContentType"), 1, KType_String, KFieldName_("type"),
-		_Public, _F(Request_setContentEncoding), KType_void, KType_Req, KKMethodName_("setContentEncoding"), 1, KType_String, KFieldName_("enc"),
-		_Public, _F(Request_logError), KType_void, KType_Req, KKMethodName_("logError"), 3, KType_int, KFieldName_("level"), KType_int, KFieldName_("status"), KType_String, KFieldName_("msg"),
-		_Public, _F(Request_getHeadersIn), KType_Tbl, KType_Req, KKMethodName_("getHeadersIn"), 0,
-		_Public, _F(Request_getHeadersOut), KType_Tbl, KType_Req, KKMethodName_("getHeadersOut"), 0,
-		_Public, _F(AprTable_Add), KType_void, KType_Tbl, KKMethodName_("add"), 2, KType_String, KFieldName_("key"), KType_String, KFieldName_("val"),
-		_Public, _F(AprTable_set), KType_void, KType_Tbl, KKMethodName_("set"), 2, KType_String, KFieldName_("key"), KType_String, KFieldName_("val"),
-		_Public, _F(AprTable_getElts), KType_TblEntryArray, KType_Tbl, KKMethodName_("getElts"), 0,
-		_Public, _F(AprTableEntry_getKey), KType_String, KType_TblEntry, KKMethodName_("getKey"), 0,
-		_Public, _F(AprTableEntry_getVal), KType_String, KType_TblEntry, KKMethodName_("getVal"), 0,
+		_Public, _F(Request_puts), KType_void, KType_Req, KMethodName_("puts"), 1, KType_String, FN_x,
+		_Public, _F(Request_getMethod), KType_String, KType_Req, KMethodName_("getMethod"), 0,
+		_Public, _F(Request_getArgs), KType_String, KType_Req, KMethodName_("getArgs"), 0,
+		_Public, _F(Request_getUri), KType_String, KType_Req, KMethodName_("getUri"), 0,
+		_Public, _F(Request_getPathInfo), KType_String, KType_Req, KMethodName_("getPathInfo"), 0,
+		_Public, _F(Request_getHandler), KType_String, KType_Req, KMethodName_("getHandler"), 0,
+		_Public, _F(Request_setContentType), KType_void, KType_Req, KMethodName_("setContentType"), 1, KType_String, KFieldName_("type"),
+		_Public, _F(Request_setContentEncoding), KType_void, KType_Req, KMethodName_("setContentEncoding"), 1, KType_String, KFieldName_("enc"),
+		_Public, _F(Request_logError), KType_void, KType_Req, KMethodName_("logError"), 3, KType_int, KFieldName_("level"), KType_int, KFieldName_("status"), KType_String, KFieldName_("msg"),
+		_Public, _F(Request_getHeadersIn), KType_Tbl, KType_Req, KMethodName_("getHeadersIn"), 0,
+		_Public, _F(Request_getHeadersOut), KType_Tbl, KType_Req, KMethodName_("getHeadersOut"), 0,
+		_Public, _F(AprTable_Add), KType_void, KType_Tbl, KMethodName_("add"), 2, KType_String, KFieldName_("key"), KType_String, KFieldName_("val"),
+		_Public, _F(AprTable_set), KType_void, KType_Tbl, KMethodName_("set"), 2, KType_String, KFieldName_("key"), KType_String, KFieldName_("val"),
+		_Public, _F(AprTable_getElts), KType_TblEntryArray, KType_Tbl, KMethodName_("getElts"), 0,
+		_Public, _F(AprTableEntry_getKey), KType_String, KType_TblEntry, KMethodName_("getKey"), 0,
+		_Public, _F(AprTableEntry_getVal), KType_String, KType_TblEntry, KMethodName_("getVal"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -286,7 +286,7 @@ static int konoha_handler(request_rec *r)
 
 	KonohaContext *kctx = konoha;
 	kNameSpace *ns = KNULL(NameSpace);
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_System, KKMethodName_("handler"), -1, KMethodMatch_NoOption);  // fixme
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_System, KMethodName_("handler"), -1, KMethodMatch_NoOption);  // fixme
 	if(mtd == NULL) {
 		ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "System.handler() not found");
 		return -1;

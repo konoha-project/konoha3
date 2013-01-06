@@ -1,15 +1,15 @@
 
 // written by shinpei nakata
 
-import("konoha.float");
-import("konoha.math");
-import("konoha.bytes");
-import("java2.string");
-import("konoha.global");
-import("konoha.ns");  // konoha.const is obsolete
-import("konoha.class");
-import("js4.array");
-import("cstyle", "while");
+import("Type.Float");
+import("JavaScript.Math");
+import("Type.Bytes");
+import("Java.String");
+import("Syntax.GlobalVariable");
+import("MiniKonoha.NameSpace");  // konoha.const is obsolete
+import("Syntax.JavaStyleClass");
+import("JavaScript.Array");
+import("Syntax.CStyleWhile);
 import("cstyle", "+=");
 import("konoha.new");
 AllowImplicitGlobalVariable(true);

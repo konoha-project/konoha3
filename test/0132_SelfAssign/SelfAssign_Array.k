@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
-import("js4.array"); // if Ok
-import("cstyle");
+import("JavaScript.Array"); // if Ok
+import("Syntax.CStyleCompoundAssignment");
 
 void test() {
 	int[] a = [0, 0];

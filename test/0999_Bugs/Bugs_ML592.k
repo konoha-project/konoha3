@@ -2,8 +2,8 @@
 // Reported at ML #592
 // SEGV at git:01cdf4c9d7504c9d98fc1412556481b665eb4922
 //FIXME(imasahiro) Move this test case the right directory
-import("js4.array");
-import("java2.string");
+import("JavaScript.Array");
+import("JavaScript.String");
 
 int test(String src) {
     if(false) {

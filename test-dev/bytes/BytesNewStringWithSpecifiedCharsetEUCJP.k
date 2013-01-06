@@ -1,7 +1,7 @@
 /* written by shinpei nakata */
 
 import("konoha.new");
-import("konoha.bytes");
+import("Type.Bytes");
 import("cstyle.libc");
 
 void test() {

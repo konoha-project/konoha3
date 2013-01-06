@@ -1,6 +1,6 @@
 // written by okamoto
 
-import("js4.date");
+import("JavaScript.Date");
 
 void test() {
 	Date d = new Date(2012, 9, 10, 18, 46, 30, 10);

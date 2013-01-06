@@ -2,7 +2,7 @@
 
 import("konoha.map");
 import("konoha.new");
-import("js4.array");
+import("JavaScript.Array");
 
 void test() {
 	Map[int] m = new Map[int]();

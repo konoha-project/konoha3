@@ -6,11 +6,11 @@
  */
 
 import("cstyle");
-import("konoha.ns");
-import("konoha.float");
-import("konoha.class");
-import("js4.array");
-import("konoha.math");
+import("MiniKonoha.NameSpace");
+import("Type.Float");
+import("Syntax.JavaStyleClass");
+import("JavaScript.Array");
+import("JavaScript.Math");
 
 const PI = 3.141592653589793;
 const SOLAR_MASS = 4 * PI * PI;

@@ -1,6 +1,6 @@
 // written by kimio
 
-import("konoha.file");
+import("Type.File");
 void test() {
 	FILE f = stderr;
 	f.println("hello,world");

@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.6)
+set(PACKAGE_SOURCE_CODE File_glue.c)
+if(NOT MINGW AND NOT MSVC)
+add_konoha_package(Type.File)
+endif()

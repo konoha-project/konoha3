@@ -1,0 +1,2 @@
+set(PACKAGE_SOURCE_CODE CommonLogicalOperator.c)
+add_konoha_package(Syntax.CommonLogicalOperator)

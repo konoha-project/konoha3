@@ -1,8 +1,8 @@
 // written by imasahiro
 // modified shinpei nakata
 
-import("java2.string");
-import("konoha.bytes");
+import("Java.String");
+import("Type.Bytes");
 import("konoha.new");
 
 void test() {

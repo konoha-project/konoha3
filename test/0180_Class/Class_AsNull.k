@@ -1,7 +1,7 @@
 // written by kimio
 
-import("konoha.class");
-import("cstyle"); // konoha.null is obsolate; use cstyle
+import("Syntax.JavaStyleClass");
+import("Syntax.Null");
 
 class C {
 	int x;

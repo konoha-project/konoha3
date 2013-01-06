@@ -1,4 +1,4 @@
-import("konoha.global");
+import("Syntax.GlobalVariable");
 AllowImplicitGlobalVariable(true);
 
 

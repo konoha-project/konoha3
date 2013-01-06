@@ -1,6 +1,6 @@
 // written by unknown (maybe ide)
 
-import("cstyle", "while");
+import("Syntax.CStyleWhile");
 
 void f() {
 	int i = 0;

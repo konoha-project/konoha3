@@ -1,6 +1,6 @@
 // written by shinpei
 
-import ("konoha.new");
+import("konoha.new");
 import("dscript.subproc");
 
 void test () {

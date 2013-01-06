@@ -1,5 +1,5 @@
-import("konoha.bytes");
-import("konoha.file");
+import("Type.Bytes");
+import("Type.File");
 
 /* file */
 

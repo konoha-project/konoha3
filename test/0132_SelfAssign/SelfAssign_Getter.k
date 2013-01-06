@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
-import("konoha.class");
-import("cstyle");
+import("Syntax.JavaStyleClass");
+import("Syntax.CStyleCompoundAssignment");
 
 class C {
 	int x;

@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
-import("konoha.var");
-import("cstyle");
+import("Type.StaticVar");
+import("Syntax.Null");
 import("konoha.object");
 
 void test() {

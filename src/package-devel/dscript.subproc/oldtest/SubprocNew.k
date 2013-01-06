@@ -1,7 +1,7 @@
 //Written by Joseph
 
 import("konoha.new");
-import("js4.array");
+import("JavaScript.Array");
 import("dscript.subproc");
 
 void test() {

@@ -216,8 +216,8 @@
 //	mod->cException = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defException, trace);
 //
 //	KDEFINE_METHOD MethodData[] = {
-//		_Public, _F(Exception_new), KType_Exception,  KType_Exception, KKMethodName_("new"), 0, _Public|_Hidden, _F(System_throw), KType_void,  KType_System, KKMethodName_("throw"), 1, KType_Exception, KFieldName_("e"),
-//		_Public|_Hidden, _F(System_getThrownException), KType_Exception, KType_System, KKMethodName_("getThrownException"), 0,
+//		_Public, _F(Exception_new), KType_Exception,  KType_Exception, KMethodName_("new"), 0, _Public|_Hidden, _F(System_throw), KType_void,  KType_System, KMethodName_("throw"), 1, KType_Exception, KFieldName_("e"),
+//		_Public|_Hidden, _F(System_getThrownException), KType_Exception, KType_System, KMethodName_("getThrownException"), 0,
 //		DEND,
 //	};
 //	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -340,7 +340,7 @@
 //	return true;
 //}
 //
-//KDEFINE_PACKAGE *exception_Init(void)
+//KDEFINE_PACKAGE* exception_Init(void)
 //{
 //	static KDEFINE_PACKAGE d = {
 //		KPACKNAME("konoha", "1.0"),

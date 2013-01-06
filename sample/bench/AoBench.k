@@ -1,13 +1,13 @@
-import("konoha.float");
-import("konoha.math");
-import("konoha.bytes");
-import("konoha.string");
-import("konoha.global");
-import("konoha.ns");
-import("konoha.class");
-import("js4.array");
-import("konoha.file");
-import("cstyle", "while");
+import("Type.Float");
+import("JavaScript.Math");
+import("Type.Bytes");
+import("Java.String");
+import("Syntax.GlobalVariable");
+import("MiniKonoha.NameSpace");
+import("Syntax.JavaStyleClass");
+import("JavaScript.Array");
+import("Type.File");
+import("Syntax.CStyleWhile);
 import("cstyle", "+=");
 import("konoha.new");
 

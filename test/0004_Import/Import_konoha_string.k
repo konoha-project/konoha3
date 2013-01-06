@@ -1,4 +1,4 @@
 // written by kimio
 
-import("java2.string");
+import("Java.String");
 

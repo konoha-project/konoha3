@@ -22,19 +22,29 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-import("cstyle", "while");
-import("cstyle", "break");
-import("cstyle", "null");
-import("js4.array");
-import("konoha.console");
-import("konoha.ns");
-import("konoha.eval");
-import("konoha.file");
-import("konoha.math");
+import("Syntax.CStyleWhile");
+import("Syntax.StringInterpolation");
+import("Syntax.Null");
+import("JavaScript.Array");
+import("MiniKonoha.Console");
+import("MiniKonoha.NameSpace");
+import("MiniKonoha.Eval");
+import("Type.File");
+import("JavaScript.Math");
 import("konoha.object");
-import("js4.string");
+import("JavaScript.String");
 import("dscript.subproc");
-import("konoha.desugar");
+import("MiniKonoha.Syntax");
+
+@Override @Public int String.indexOf(String str) {
+	return StringUtil.indexOf(this, str, 0);
+}
+@Override @Public boolean String.startsWith(String str) {
+	return StringUtil.startsWith(this, str, 0);
+}
+@Override @Public boolean String.endsWith(String str) {
+	return StringUtil.endsWith(this, str);
+}
 
 String[] concatTokenList(Token[] tokenList) {
 	if(defined(DEBUG)) {
@@ -420,7 +430,7 @@ AddPatternMatch("$Shell", patternMatchShell);
 AddStatement("$Shell", statementShell);
 AddTopLevelStatement("$Shell", statementShell);
 AddExpression("ask", expressionAsk);
-AddTypeCheck("$Text", typeCheckStringInterpolation);
+//AddTypeCheck("$Text", typeCheckStringInterpolation);
 
 syntax $Shell $Token*
 

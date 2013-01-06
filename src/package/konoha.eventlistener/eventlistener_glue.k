@@ -1,9 +1,9 @@
 import("konoha.new");
-import("konoha.class");
-import("js4.array");
+import("Syntax.JavaStyleClass");
+import("JavaScript.Array");
 import("konoha.map");
-import("konoha.global");
-import("konoha.ns");  // konoha.const is obsolete
+import("Syntax.GlobalVariable");
+import("MiniKonoha.NameSpace");  // konoha.const is obsolete
 import("konoha.object");
 import("posix.thread");
 

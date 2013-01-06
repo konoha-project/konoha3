@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
 import("konoha.new");
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 
 class C {
 	int a0, b0, c0, d0, e0, f0, g0, h0, i0, j0, k0;

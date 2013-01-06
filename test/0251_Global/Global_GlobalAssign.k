@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.global");
+import("Syntax.GlobalVariable");
 
 int x;
 assert(x == 0);

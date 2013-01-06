@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
 import("konoha.new");
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 
 class A {
 	int x, y;

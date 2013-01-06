@@ -1,10 +1,10 @@
 import("konoha.new");
-import("konoha.ns");  // konoha.const is obsolete
-import("konoha.bytes");
-import("java2.string");
-import("konoha.file");
+import("MiniKonoha.NameSpace");  // konoha.const is obsolete
+import("Type.Bytes");
+import("Java.String");
+import("Type.File");
 import("dscript.subproc");
-import("konoha.json");
+import("Type.Json");
 
 const BUFSIZ = 8;
 

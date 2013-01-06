@@ -1,4 +1,4 @@
-import("konoha.float")
+import("Type.Float")
 
 void float_operator_intDiv_IntDiv() { 
 	int i1 = 1;

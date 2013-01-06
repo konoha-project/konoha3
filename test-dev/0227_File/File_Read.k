@@ -2,7 +2,7 @@
 //Modified by Joseph
 
 import("konoha.new");
-import("konoha.bytes");
+import("Type.Bytes");
 import("posix.file");
 
 void test() {

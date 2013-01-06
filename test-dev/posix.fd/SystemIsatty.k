@@ -1,6 +1,6 @@
 // written by chenji
 
-import("konoha.file");
+import("Type.File");
 import("posix.fd");
 
 void test() {

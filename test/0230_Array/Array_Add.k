@@ -1,7 +1,7 @@
 // written by shinpei
 
-import("js4.array");
-import("konoha.class");
+import("JavaScript.Array");
+import("Syntax.JavaStyleClass");
 import("konoha.new");
 void f () {
 	int[] ia = new int[0];

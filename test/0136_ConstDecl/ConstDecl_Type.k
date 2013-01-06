@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.ns");  // konoha.const is obsolete
+import("MiniKonoha.NameSpace");  // konoha.const is obsolete
 
 const Integer = int;
 

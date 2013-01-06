@@ -1,6 +1,6 @@
 // written by imasahiro
 
-import("js4.regexp");
+import("JavaScript.Regexp");
 
 void regex_literal() {
     /Hello/;

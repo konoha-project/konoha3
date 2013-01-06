@@ -322,7 +322,7 @@ static INode *FoldAssert(FuelIRBuilder *builder, ICall *Inst)
 	KonohaContext *kctx = builder->Context;
 	INode **MtdPtr = ARRAY_n(Inst->Params, 0);
 	kMethod *mtd = (kMethod *) ((IConstant *) *MtdPtr)->Value.obj;
-	if(mtd->typeId == TYPE_NameSpace && mtd->mn == KKMethodName_("assert")) {
+	if(mtd->typeId == TYPE_NameSpace && mtd->mn == KMethodName_("assert")) {
 		if(ARRAY_size(Inst->Params) != 3) {
 			return 0;
 		}

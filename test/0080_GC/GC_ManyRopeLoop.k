@@ -1,8 +1,8 @@
 // written by unknown (maybe ide)
 // added by kimio
 
-import("cstyle");
-import("java2.string");
+import("Syntax.CStyleWhile");
+import("Java.String");
 
 void f() {
 	int i = 0;

@@ -1,5 +1,5 @@
 // reported at ML667
-import("konoha.json");
+import("Type.Json");
 
 void main() {
     int i = 12345678901;

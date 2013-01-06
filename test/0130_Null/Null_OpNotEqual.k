@@ -1,6 +1,6 @@
 // written by shinpei nakata
 
-import("cstyle"); // konoha.null is obsolate; use cstyle
+import("Syntax.Null")
 import("konoha.object");
 
 void test () {

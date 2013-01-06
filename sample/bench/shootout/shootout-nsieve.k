@@ -6,10 +6,10 @@
 
 import("cstyle");
 import("konoha.new");
-import("js4.array");
-import("konoha.class");
-import("konoha.ns");
-import("konoha.string");
+import("JavaScript.Array");
+import("Syntax.JavaStyleClass");
+import("MiniKonoha.NameSpace");
+import("Java.String");
 
 const N=8;
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 DEFAULT=Debug
-for i in Debug Compressed Release
+for i in Debug #Compressed Release
 do
 (
   mkdir -p $i

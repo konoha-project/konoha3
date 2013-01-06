@@ -1,6 +1,5 @@
 // written by kimio kuramitsu
-// //import("konoha.assign"); Don't use any more
-import("js4.array");
+import("JavaScript.Array");
 
 void test() {
 	int[] a = [1, 2, 9];

@@ -123,8 +123,8 @@ static kbool_t HelloWorld_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, i
 	int FN_x = KFieldName_("x");
 	int FN_y = KFieldName_("y");
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Person_new), KType_Person, KType_Person, KKMethodName_("new"), 2, KType_String, FN_x, KType_int, FN_y,
-		_Public, _F(Person_say), KType_String, KType_Person, KKMethodName_("say"), 0,
+		_Public, _F(Person_new), KType_Person, KType_Person, KMethodName_("new"), 2, KType_String, FN_x, KType_int, FN_y,
+		_Public, _F(Person_say), KType_String, KType_Person, KMethodName_("say"), 0,
 		DEND, /* <= sentinel */
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -143,7 +143,7 @@ static kbool_t HelloWorld_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, k
 	return true;
 }
 
-KDEFINE_PACKAGE *hello_world_Init(void)
+KDEFINE_PACKAGE* hello_world_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "/* SET LIBRARY NAME */", "/* SET LIBRARY VERSION */");

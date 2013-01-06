@@ -1,7 +1,7 @@
 /* written by motoki yoan */
 
 import("konoha.new");
-import("konoha.bytes");
+import("Type.Bytes");
 
 void test() {
 	int size = 8;

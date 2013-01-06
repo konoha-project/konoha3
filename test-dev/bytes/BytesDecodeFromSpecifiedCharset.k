@@ -1,5 +1,5 @@
 import("konoha.new");
-import("konoha.bytes");
+import("Type.Bytes");
 
 void test() {
 	Bytes ba = "hello world".toBytes();

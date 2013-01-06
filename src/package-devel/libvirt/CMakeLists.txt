@@ -1,8 +1,0 @@
-cmake_minimum_required(VERSION 2.6)
-find_library(HAVE_LIBVIRT NAMES libvirt)
-if(HAVE_LIBVIRT)
-	set(PACKAGE_EXTRA_LIBRARY ${HAVE_LIBVIRT})
-	set(PACKAGE_SOURCE_CODE libvirt_glue.c)
-	set(PACKAGE_SCRIPT_CODE libvirt_glue.k)
-	add_konoha_package(libvirt)
-endif(HAVE_LIBVIRT)

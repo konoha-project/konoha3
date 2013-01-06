@@ -5,9 +5,9 @@
 
 import("cstyle");
 import("konoha.new");
-import("konoha.class");
-import("konoha.global");
-import("konoha.ns");
+import("Syntax.JavaStyleClass");
+import("Syntax.GlobalVariable");
+import("MiniKonoha.NameSpace");
 
 const MINDEPTH = 4;
 const N=14;

@@ -1,7 +1,7 @@
 //Written by Joseph
 
-import("konoha.file");
-import("konoha.bytes");
+import("Type.File");
+import("Type.Bytes");
 
 void test() {
 	FILE f = System.fopen("files/opentest.txt", "r+");

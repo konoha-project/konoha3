@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.desugar");
+import("MiniKonoha.Syntax");
 
 syntax "while" "(" $Expr ")" 
 	$Block;

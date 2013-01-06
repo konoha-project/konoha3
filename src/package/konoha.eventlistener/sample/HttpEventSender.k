@@ -1,6 +1,6 @@
 import("konoha.new");
-import("konoha.json");
-import("curl");
+import("Type.Json");
+import("Lib.Curl");
 
 void sendHttpEvent(String host, int port) {
 	Json sdata = new Json();

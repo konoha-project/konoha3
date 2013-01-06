@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("java2.string");
+import("Java.String");
 
 void test() {
 	assert("こんにちは、".concat("世界") == "こんにちは、世界");

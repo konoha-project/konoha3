@@ -1,7 +1,7 @@
 // written by wakamatsu
-import("konoha.global");
+import("Syntax.GlobalVariable");
 import("posix.thread");
-import("cstyle", "while");
+import("Syntax.CStyleWhile);
 AllowImplicitGlobalVariable(true);
 
 Mutex m = new Mutex();

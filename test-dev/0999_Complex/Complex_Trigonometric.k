@@ -1,8 +1,8 @@
-import("konoha.complex");
-import("konoha.math");
-import("konoha.float");
+import("Type.Complex");
+import("JavaScript.Math");
+import("Type.Float");
 import("konoha.new");
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 
 
 

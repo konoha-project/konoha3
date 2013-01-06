@@ -307,7 +307,7 @@ static void PageDelete(char *begin, char *end)
 {
 	INodeImpl *p = (INodeImpl *) begin;
 	INodeImpl *e = (INodeImpl *) end;
-	while (p < e) {
+	while(p < e) {
 		INode *Node = (INode *) p;
 		if(Node->Kind != TYPE_IR_ERROR) {
 			disposeINode(Node);
