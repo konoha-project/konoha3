@@ -286,7 +286,6 @@ static kArray* new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, 
 //	return source->endIdx;
 //}
 
-#define GroupRange(A)  A, 1, (kArray_size(A) - 1)
 typedef void (*TraverseFunc)(KonohaContext *kctx, kTokenVar *tk, void *thunk);
 typedef void (*Traverse2Func)(KonohaContext *kctx, kTokenVar *tk, kTokenVar *tk2, void *thunk);
 
@@ -297,7 +296,7 @@ static void TraverseTokenList(KonohaContext *kctx, kArray *tokenList, int beginI
 		kTokenVar *tk = tokenList->TokenVarItems[currentIdx];
 		f(kctx, tk, thunk);
 		if(IS_Array(tk->GroupTokenList)) {
-			TraverseTokenList(kctx, GroupRange(tk->GroupTokenList), f, thunk);
+			TraverseTokenList(kctx, RangeGroup(tk->GroupTokenList), f, thunk);
 		}
 	}
 }
@@ -309,13 +308,13 @@ static void TraverseTokenList2(KonohaContext *kctx, kArray *tokenList, int begin
 		kTokenVar *tk = tokenList->TokenVarItems[currentIdx];
 		f(kctx, tk, tokenList->TokenVarItems[currentIdx+1], thunk);
 		if(IS_Array(tk->GroupTokenList)) {
-			TraverseTokenList2(kctx, GroupRange(tk->GroupTokenList), f, thunk);
+			TraverseTokenList2(kctx, RangeGroup(tk->GroupTokenList), f, thunk);
 		}
 	}
 	if(beginIdx < endIdx - 1) {
 		kTokenVar *tk = tokenList->TokenVarItems[endIdx - 1];
 		if(IS_Array(tk->GroupTokenList)) {
-			TraverseTokenList2(kctx, GroupRange(tk->GroupTokenList), f, thunk);
+			TraverseTokenList2(kctx, RangeGroup(tk->GroupTokenList), f, thunk);
 		}
 	}
 }
@@ -328,6 +327,7 @@ static int GroupTokenList(KonohaContext *kctx, kToken *openToken, kArray *tokenL
 		if(kToken_Is(OpenGroup, tk)) {
 			kTokenVar *groupToken = new_(TokenVar, tk->tokenType, bufferList);
 			KFieldSet(groupToken, groupToken->GroupTokenList, new_(TokenArray, 0, OnField));
+			tk->symbol = tk->tokenType;
 			kToken_Set(OpenGroup, tk, false);
 			KLIB kArray_Add(kctx, groupToken->GroupTokenList, tk);
 			currentIdx = GroupTokenList(kctx, tk, tokenList, currentIdx + 1, endIdx, groupToken->GroupTokenList);
@@ -335,7 +335,7 @@ static int GroupTokenList(KonohaContext *kctx, kToken *openToken, kArray *tokenL
 		}
 		if(kToken_Is(CloseGroup, tk)) {
 			if(openToken != NULL && openToken->tokenType == tk->tokenType) {
-				kToken_Set(OpenGroup, tk, false);
+				kToken_Set(CloseGroup, tk, false);
 				KLIB kArray_Add(kctx, bufferList, tk);
 				return currentIdx;
 			}
@@ -447,7 +447,7 @@ static kTokenVar* kToken_ToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameS
 	Tokenize(kctx, ns, kString_text(tk->text), tk->uline, source.tokenList);
 	KTokenSeq_End(kctx, source);
 	KFieldSet(tk, tk->GroupTokenList, new_(TokenArray, 0, OnField));
-//	tk->resolvedSyntaxInfo = kSyntax_(ns, KSymbol_BraceGroup);
+	tk->resolvedSyntaxInfo = kSyntax_(ns, KSymbol_BraceGroup);
 	Preprocess(kctx, ns, RangeTokenSeq(source), macroSet, tk->GroupTokenList);
 	KTokenSeq_Pop(kctx, source);
 	return tk;

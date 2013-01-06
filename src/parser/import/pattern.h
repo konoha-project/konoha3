@@ -26,8 +26,8 @@ static int MatchSyntaxPattern(KonohaContext *kctx, kNode *node, KTokenSeq *token
 {
 	int patternIdx = patterns->beginIdx, tokenIdx = tokens->beginIdx;
 	kNameSpace *ns = kNode_ns(node);
-	SUGAR dumpTokenArray(kctx, 0, patterns->tokenList, patterns->beginIdx, patterns->endIdx);
-	SUGAR dumpTokenArray(kctx, 0, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
+	//SUGAR dumpTokenArray(kctx, 0, patterns->tokenList, patterns->beginIdx, patterns->endIdx);
+	//SUGAR dumpTokenArray(kctx, 0, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
 	for(; patternIdx < patterns->endIdx; patternIdx++) {
 		kToken *ruleToken = patterns->tokenList->TokenItems[patternIdx];
 		L_ReDo:;
@@ -64,7 +64,7 @@ static int MatchSyntaxPattern(KonohaContext *kctx, kNode *node, KTokenSeq *token
 					errRuleRef[0] = ruleToken;
 					return PatternNoMatch;
 				}
-				if(IS_Array(ruleToken) /*->tokenType == KSymbol_ParenthesisGroup || ruleToken->tokenType == KSymbol_BracketGroup */) {
+				if(ruleToken->tokenType == KSymbol_ParenthesisGroup || ruleToken->tokenType == KSymbol_BracketGroup) {
 					KTokenSeq nrule = {ns, RangeGroup(ruleToken->GroupTokenList)};
 					KTokenSeq ntokens = {ns, RangeGroup(tk->GroupTokenList)};
 					int next = MatchSyntaxPattern(kctx, node, &ntokens, &nrule, errRuleRef);
@@ -226,6 +226,7 @@ static void PreprocessSyntaxPattern(KonohaContext *kctx, kTokenVar *tk, void *th
 			if(topchar[0] == '[' || topchar[0] == ']') {
 				tk->tokenType = KSymbol_BracketGroup;
 			}
+			tk->symbol = tk->tokenType;
 		}
 	}
 	tk->ruleNameSymbol = tk->symbol;
