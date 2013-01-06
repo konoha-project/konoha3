@@ -30,7 +30,6 @@
 extern "C"{
 #endif
 
-
 /* Method */
 
 // void NameSpace_AllowImplicitField(boolean t)
@@ -187,32 +186,14 @@ static void KClass_InitField(KonohaContext *kctx, KClassVar *definedClass, KClas
 static kNode* kNode_ParseClassNodeNULL(KonohaContext *kctx, kNode *stmt, kToken *tokenClassName)
 {
 	kNode *block = NULL;
-//  TODO
-//	kToken *blockToken = (kToken *)kNode_GetObject(kctx, stmt, KSymbol_BlockPattern, NULL);
-//	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KSymbol_BlockPattern) {
-//		const char *cname = kString_text(tokenClassName->text);
-//		KTokenSeq range = {kNode_ns(stmt), KGetParserContext(kctx)->preparedTokenList};
-//		KTokenSeq_Push(kctx, range);
-//		SUGAR Tokenize(kctx, &range,  kString_text(blockToken->text), blockToken->uline);
-//		{
-//			KTokenSeq sourceRange = {range.ns, range.tokenList, range.endIdx};
-//			kToken *prevToken = blockToken;
-//			int i;
-//			for(i = range.beginIdx; i < range.endIdx; i++) {
-//				kToken *tk = range.tokenList->TokenItems[i];
-//				if(tk->hintChar == '(' && prevToken->tokenType == TokenType_Symbol && strcmp(cname, kString_text(prevToken->text)) == 0) {
-//					kTokenVar *newToken = new_(TokenVar, TokenType_Symbol, sourceRange.tokenList);
-//					KFieldSet(newToken, newToken->text, KSymbol_GetString(kctx, MN_new));
-//				}
-//				KLIB kArray_Add(kctx, sourceRange.tokenList, tk);
-//				prevToken = tk;
-//			}
-//			KTokenSeq_End(kctx, (&sourceRange));
-//			block = SUGAR ParseNewNode(kctx, range.ns, sourceRange.tokenList, &sourceRange.beginIdx, sourceRange.endIdx, ParseMetaPatternOption, NULL);
-//			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_BlockPattern, KType_Node, block);
-//		}
-//		KTokenSeq_Pop(kctx, range);
-//	}
+	kTokenVar *blockToken = (kTokenVar *)kNode_GetObject(kctx, stmt, KSymbol_BlockPattern, NULL);
+	if(blockToken != NULL) {
+		kNameSpace *ns = kNode_ns(stmt);
+		SUGAR kToken_ToBraceGroup(kctx, blockToken, ns, NULL);
+		KTokenSeq source = {ns, RangeGroup(blockToken->GroupTokenList)};
+		block = SUGAR ParseNewNode(kctx, ns, source.tokenList, &source.beginIdx, source.endIdx, ParseMetaPatternOption, NULL);
+		KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_BlockPattern, KType_Node, block);
+	}
 	return block;
 }
 

@@ -338,15 +338,20 @@ static void ResetPreprocess(KonohaContext *kctx, kTokenVar *tk, void *thunk)
 
 static kTokenVar* kToken_ToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, KMacroSet *macroSet)
 {
-	KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
-	KTokenSeq_Push(kctx, source);
-	//KdumpToken(kctx, tk);
-	Tokenize(kctx, ns, kString_text(tk->text), tk->uline, source.tokenList);
-	KTokenSeq_End(kctx, source);
-	KFieldSet(tk, tk->GroupTokenList, new_(TokenArray, 0, OnField));
-	tk->resolvedSyntaxInfo = kSyntax_(ns, KSymbol_BraceGroup);
-	Preprocess(kctx, ns, RangeTokenSeq(source), macroSet, tk->GroupTokenList);
-	KTokenSeq_Pop(kctx, source);
+	if(!IS_Array(tk->GroupTokenList)) {
+		DBG_ASSERT(IS_String(tk->text));
+		KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
+		KTokenSeq_Push(kctx, source);
+		//KdumpToken(kctx, tk);
+		Tokenize(kctx, ns, kString_text(tk->text), tk->uline, source.tokenList);
+		KTokenSeq_End(kctx, source);
+		KFieldSet(tk, tk->GroupTokenList, new_(TokenArray, 0, OnField));
+		tk->resolvedSyntaxInfo = kSyntax_(ns, KSymbol_BraceGroup);
+		KLIB kArray_Add(kctx, tk->GroupTokenList, K_NULLTOKEN);  // K_NULLTOKEN should be harmless
+		Preprocess(kctx, ns, RangeTokenSeq(source), macroSet, tk->GroupTokenList);
+		KLIB kArray_Add(kctx, tk->GroupTokenList, K_NULLTOKEN);
+		KTokenSeq_Pop(kctx, source);
+	}
 	return tk;
 }
 
