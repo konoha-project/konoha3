@@ -1179,13 +1179,13 @@ static void CheckCStyleParam(KonohaContext *kctx, KTokenSeq* tokens)
 			tokens->endIdx = i; //  f(void) = > f()
 			return;
 		}
-		if(tk->resolvedSyntaxInfo->keyword == KSymbol_COMMA) {
+		if(tk->symbol == KSymbol_COMMA) {
 			tk->resolvedSyntaxInfo = K_NULLTOKEN->resolvedSyntaxInfo;
 			count++;
 		}
 	}
 	if(count == 0 && tokens->beginIdx < tokens->endIdx) {
-		KLIB kArray_Add(kctx, tokens->tokenList, K_NULLTOKEN); // to ensure block
+		KFieldSet(tokens->tokenList, tokens->tokenList->TokenItems[tokens->endIdx], K_NULLTOKEN); // to ensure block
 		tokens->endIdx += 1;
 	}
 }

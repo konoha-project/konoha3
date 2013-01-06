@@ -247,13 +247,13 @@ static kNode* ParseNewNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLis
 	return node;
 }
 
-static kNode *AddParamNode(KonohaContext *kctx, kNameSpace *ns, kNode *node, kArray *tokenList, int s, int e, const char *hintBeforeText/* if NULL empty isAllowed */)
+static kNode *AddParamNode(KonohaContext *kctx, kNameSpace *ns, kNode *node, kArray *tokenList, int beginIdx, int endIdx, const char *hintBeforeText/* if NULL empty isAllowed */)
 {
-	int i, start = s;
-	DBG_P("s=%d, e=%d", s, e);
-	for(i = s; i < e; i++) {
+	int i, start = beginIdx;
+	DBG_P("beginIdx=%d, endIdx=%d", beginIdx, endIdx);
+	for(i = beginIdx; i < endIdx; i++) {
 		kToken *tk = tokenList->TokenItems[i];
-		if(tk->resolvedSyntaxInfo->keyword == KSymbol_COMMA) {
+		if(tk->symbol == KSymbol_COMMA) {
 			if(start < i || hintBeforeText != NULL) {
 				kNode_AddNode(kctx, node, ParseNewNode(kctx, ns, tokenList, &start, i, ParseExpressionOption, hintBeforeText));
 				if(hintBeforeText != NULL) hintBeforeText = ",";

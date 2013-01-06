@@ -144,7 +144,7 @@ static KClass* ParseGenericsType(KonohaContext *kctx, kNameSpace *ns, KClass *ba
 		}
 		p[psize].attrTypeId = paramClass->typeId;
 		psize++;
-		if(currentIdx < endIdx && tokenList->TokenItems[currentIdx]->resolvedSyntaxInfo->keyword == KSymbol_COMMA) {
+		if(currentIdx < endIdx && tokenList->TokenItems[currentIdx]->symbol == KSymbol_COMMA) {
 			currentIdx++;
 		}
 	}
