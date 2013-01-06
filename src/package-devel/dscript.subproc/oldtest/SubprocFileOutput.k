@@ -1,6 +1,6 @@
 // written by shinpei
-import ("konoha.new");
-import( "dscript.subproc");
+import("konoha.new");
+import("dscript.subproc");
 
 void test () {
 	Subproc p = new Subproc("echo hoge", false);

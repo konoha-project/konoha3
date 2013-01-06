@@ -1,6 +1,6 @@
 // written by imasahiro
 import("Type.Float");
-import("llvm");
+import("Lib.Llvm");
 
 void f() {
     Type.getVoidTy().dump();

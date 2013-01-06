@@ -7,7 +7,7 @@ Work out the first ten digits of the sum of the following one-hundred 50-digit n
 */
 import("Syntax.JavaStyleClass");
 import("JavaScript.String");
-import("gmp")
+import("Lib.Gmp")
 
 void main() {
 	Mpz sum = 0;

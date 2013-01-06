@@ -1,4 +1,4 @@
-import("gmp");
+import("Lib.Gmp");
 import("Syntax.JavaStyleClass")
 import("cstyle")
 

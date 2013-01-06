@@ -1,7 +1,7 @@
 // written by shinpei
-import ("konoha.new");
-import( "dscript.subproc");
-import ("JavaScript.Array");
+import("konoha.new");
+import("dscript.subproc");
+import("JavaScript.Array");
 
 // echo 'hello world' | cat
 void test () {

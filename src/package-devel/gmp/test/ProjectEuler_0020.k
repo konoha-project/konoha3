@@ -9,7 +9,7 @@
 import("Syntax.JavaStyleClass");
 import("JavaScript.Array");
 import("cstyle");
-import("gmp")
+import("Lib.Gmp")
 
 Mpz fact(int n){
 	Mpz f = new Mpz(1);

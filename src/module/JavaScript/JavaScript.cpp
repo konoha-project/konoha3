@@ -505,7 +505,6 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 
 static kbool_t JSBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
-	JSBuilder *jsBuilder = (JSBuilder *)builder;
 	kMethod *mtd = CallNode_getMethod(node);
 	kbool_t isArray = false;
 
@@ -791,7 +790,7 @@ static struct KVirtualCode* GetDefaultBootCode(void)
 	return NULL;
 }
 
-static void InitStaticBuilderApi(struct KBuilderAPI2 *builderApi)
+static void InitStaticBuilderApi(struct KBuilderAPI *builderApi)
 {
 	builderApi->target = "JavaScript";
 #define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME##Node = JSBuilder_Visit##NAME##Node;
@@ -803,18 +802,19 @@ static void InitStaticBuilderApi(struct KBuilderAPI2 *builderApi)
 	//builderApi->RunVirtualMachine   = KonohaVirtualMachine_Run;
 }
 
-static void V8_DeleteVirtualMachine(KonohaContext *kctx)
+static struct KBuilderAPI* GetDefaultBuilderAPI(void)
 {
-}
-
-static struct KBuilderAPI2* GetDefaultBuilderAPI(void)
-{
-	static struct KBuilderAPI2 builderApi = {};
+	static struct KBuilderAPI builderApi = {};
 	if(builderApi.target == NULL) {
 		InitStaticBuilderApi(&builderApi);
 	}
 	return &builderApi;
 }
+
+static void V8_DeleteVirtualMachine(KonohaContext *kctx)
+{
+}
+
 // -------------------------------------------------------------------------
 
 kbool_t LoadJavaScriptModule(KonohaFactory *factory, ModuleType type)
@@ -826,7 +826,6 @@ kbool_t LoadJavaScriptModule(KonohaFactory *factory, ModuleType type)
 	factory->GetDefaultBootCode            = GetDefaultBootCode;
 	factory->GetDefaultBuilderAPI          = GetDefaultBuilderAPI;
 	factory->DeleteVirtualMachine          = V8_DeleteVirtualMachine;
-
 #ifdef HAVE_LIBV8
 	globalJSContext = new JSContext();
 #endif

@@ -1,14 +1,14 @@
 //written by takeo onoda
 
-import("JavaScript.String");
+import("Java.String");
 
 void test() {
 	assert("foobar".endsWith("bar") == true);
 	assert("foobar".endsWith("foobar") == true);
 	assert("foobar".endsWith("0foobar") == false);
-	assert("a§¢i§§u§¶".endsWith("i§§u§¶") == true);
-	assert("a§¢i§§u§¶".endsWith("a§¢i§§u§¶") == true);
-	assert("a§¢i§§u§¶".endsWith("0a§¢i§§u§¶") == false);
+	assert("a„ÅÇi„ÅÑu„ÅÜ".endsWith("i„ÅÑu„ÅÜ") == true);
+	assert("a„ÅÇi„ÅÑu„ÅÜ".endsWith("a„ÅÇi„ÅÑu„ÅÜ") == true);
+	assert("a„ÅÇi„ÅÑu„ÅÜ".endsWith("0a„ÅÇi„ÅÑu„ÅÜ") == false);
 	assert("".endsWith("") == true);
 }
 

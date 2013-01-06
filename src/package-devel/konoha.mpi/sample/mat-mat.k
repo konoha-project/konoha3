@@ -1,6 +1,6 @@
 import("konoha");
 import("Type.Bytes");
-import("konoha.mpi");
+import("Lib.Mpi");
 
 float fabs(float f) {
 	if(f < 0.0) return 0.0 - f;

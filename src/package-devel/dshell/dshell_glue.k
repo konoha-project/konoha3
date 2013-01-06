@@ -22,9 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-import("cstyle", "while");
-import("cstyle", "break");
-import("cstyle", "null");
+import("Syntax.CStyleWhile");
+import("Syntax.CStyleWhile");
+import("Syntax.Null");
 import("JavaScript.Array");
 import("MiniKonoha.Console");
 import("MiniKonoha.NameSpace");  // konoha.defined is obsolete

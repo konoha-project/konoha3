@@ -6,7 +6,6 @@
 
 import("cstyle");
 import("Type.Float");
-// //import("konoha.assign"); Don't use any more
 import("MiniKonoha.NameSpace");  // konoha.const is obsolete
 import("JavaScript.Math");
 const N=2500000;

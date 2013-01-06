@@ -10,7 +10,6 @@ import("Syntax.GlobalVariable");
 import("Syntax.JavaStyleClass");
 import("Type.Float");
 import("JavaScript.Array");
-// //import("konoha.assign"); Don't use any more
 import("Type.Bytes");
 import("Type.File");
 

@@ -1,8 +1,8 @@
 // written by shinpei
 
-import ("konoha.new");
-import( "dscript.subproc");
-import ("JavaScript.Array");
+import("konoha.new");
+import("dscript.subproc");
+import("JavaScript.Array");
 
 void test () {
 	Subproc p = new Subproc("echo $SHELL", false);

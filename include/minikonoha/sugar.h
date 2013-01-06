@@ -724,19 +724,19 @@ typedef struct KBuilder KBuilder;
 typedef kbool_t (*KNodeVisitFunc)(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk);
 
 struct KBuilderCommon {
-	struct KBuilderAPI2* api;
+	struct KBuilderAPI *api;
 	int option;
 	kfileline_t uline;
 };
 
 #define DefineVisitFunc(NAME) KNodeVisitFunc visit##NAME##Node;
 
-struct KBuilderAPI2 {
+struct KBuilderAPI {
 	const char *target;
-	struct KVirtualCode*   (*GenerateKVirtualCode)(KonohaContext *, kMethod *mtd, kNode *block, int option);
-	KMethodFunc            (*GenerateKMethodFunc)(KonohaContext *, struct KVirtualCode *);
-	void                   (*SetMethodCode)(KonohaContext *, kMethodVar *mtd, struct KVirtualCode *, KMethodFunc func);
-	struct KVirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
+	struct KVirtualCode *(*GenerateKVirtualCode)(KonohaContext *, kMethod *mtd, kNode *block, int option);
+	KMethodFunc          (*GenerateKMethodFunc)(KonohaContext *, struct KVirtualCode *);
+	void                 (*SetMethodCode)(KonohaContext *, kMethodVar *mtd, struct KVirtualCode *, KMethodFunc func);
+	struct KVirtualCode *(*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
 
 	KNodeList(DefineVisitFunc)
 	size_t allocSize;

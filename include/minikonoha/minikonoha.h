@@ -658,10 +658,10 @@ struct KonohaFactory {
 	/* Event Handler API */
 	KModuleInfo *EventInfo;
 	struct EventContext *eventContext;
-	void (*StartEventHandler)(KonohaContext *kctx/*, void *args*/);
-	void (*StopEventHandler)(KonohaContext *kctx);
-	void (*EnterEventContext)(KonohaContext *kctx);
-	void (*ExitEventContext)(KonohaContext *kctx);
+	void (*StartEventHandler)(KonohaContext *kctx, void *args);
+	void (*StopEventHandler)(KonohaContext *kctx, void *args);
+	void (*EnterEventContext)(KonohaContext *kctx, void *args);
+	void (*ExitEventContext)(KonohaContext *kctx, void *args);
 	kbool_t (*EmitEvent)(KonohaContext *kctx, struct JsonBuf *json, KTraceInfo *);
 	void (*DispatchEvent)(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo *), KTraceInfo *);
 	void (*WaitEvent)(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo *), KTraceInfo *);
@@ -686,10 +686,9 @@ struct KonohaFactory {
 
 	// VirtualMachine
 	KModuleInfo            *VirtualMachineInfo;
-	kbool_t               (*IsSupportedKVirtualCode)(int opcode);
 	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
-	struct KVirtualCode*   (*GetDefaultBootCode)(void);
-	struct KBuilderAPI2*  (*GetDefaultBuilderAPI)(void);
+	struct KVirtualCode*  (*GetDefaultBootCode)(void);
+	struct KBuilderAPI*   (*GetDefaultBuilderAPI)(void);
 
 	/* JSON_API */
 	KModuleInfo *JsonDataInfo;
@@ -1521,7 +1520,7 @@ struct kNameSpaceVar {
 	// the below references are defined in sugar
 	void                              *tokenMatrix;
 //	KHashMap                          *syntaxMapNN;
-	struct KBuilderAPI2               *builderApi;
+	struct KBuilderAPI                *builderApi;
 	KKeyValue                         *typeVariableItems;
 	size_t                             typesize;
 	struct KGammaLocalData            *genv;

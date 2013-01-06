@@ -8,7 +8,6 @@ import("cstyle");
 import("MiniKonoha.NameSpace");  // konoha.const is obsolete
 import("Syntax.JavaStyleClass");
 import("Type.Float");
-// //import("konoha.assign"); Don't use any more
 import("JavaScript.Array");
 import("Type.Bytes");
 import("Type.File");

@@ -22,10 +22,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-import("java2.string");
+import("Java.String");
 import("konoha.foreach");
 import("MiniKonoha.NameSpace");
-import("js4.array");
+import("JavaScript.Array");
 import("Type.File");
 import("Syntax.JavaStyleClass");
 import("cstyle");
