@@ -35,11 +35,15 @@ static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 		if(kToken_IsIndent(tk)) {
 			DUMP_P(" indent=+%d", tk->indent);
 		}
-		if(tk->ruleNameSymbol > 0) {
-			DUMP_P(" ruleNameSymbol=%s%s", KSymbol_Fmt2(tk->ruleNameSymbol));
-		}
 		if(tk->symbol > 0) {
 			DUMP_P(" Symbol=%s%s", KSymbol_Fmt2(tk->symbol));
+		}
+		if(tk->resolvedSyntaxInfo != NULL && tk->resolvedSyntaxInfo->keyword == KSymbol_TypePattern) {
+			DUMP_P(" resolvedType=%s", KType_text(tk->resolvedTypeId));
+		}else {
+			if(tk->ruleNameSymbol > 0) {
+				DUMP_P(" ruleNameSymbol=%s%s", KSymbol_Fmt2(tk->ruleNameSymbol));
+			}
 		}
 		if(tk->resolvedSyntaxInfo == NULL) {
 			DUMP_P(" Syntax=NULL\n");

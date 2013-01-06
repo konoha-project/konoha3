@@ -274,8 +274,7 @@ static KMETHOD Expression_Parenthesis(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Expression(node, tokenList, beginIdx, opIdx, endIdx);
 	kToken *parenthesisToken = tokenList->TokenItems[opIdx];
 	if(beginIdx == opIdx) {
-		int nextIdx = 0;
-		ParseNode(kctx, node, parenthesisToken->GroupTokenList, nextIdx, kArray_size(parenthesisToken->GroupTokenList), ParseExpressionOption, "(");
+		ParseNode(kctx, node, RangeGroup(parenthesisToken->GroupTokenList), ParseExpressionOption, "(");
 	}
 	else {
 		kNameSpace *ns = kNode_ns(node);
@@ -283,7 +282,7 @@ static KMETHOD Expression_Parenthesis(KonohaContext *kctx, KonohaStack *sfp)
 		kNode_Termnize(kctx, node, parenthesisToken);
 		kNode_AddNode(kctx, node, lnode);
 		kNode_AddNode(kctx, node, K_NULLNODE);
-		if(kArray_size(parenthesisToken->GroupTokenList) > 0) {
+		if(kArray_size(parenthesisToken->GroupTokenList) > 2) {
 			AddParamNode(kctx, ns, node, RangeGroup(parenthesisToken->GroupTokenList), "(");
 		}
 	}

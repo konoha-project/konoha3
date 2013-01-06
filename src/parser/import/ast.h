@@ -226,6 +226,7 @@ static int ParseNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int be
 	else {
 		if(hintBeforeText == NULL) hintBeforeText = "";
 		kNode_Message(kctx, node, ErrTag, "expected expression after %s", hintBeforeText);
+		DBG_ASSERT(kctx==NULL);
 	}
 	return endIdx;
 }
@@ -249,7 +250,7 @@ static kNode* ParseNewNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLis
 static kNode *AddParamNode(KonohaContext *kctx, kNameSpace *ns, kNode *node, kArray *tokenList, int s, int e, const char *hintBeforeText/* if NULL empty isAllowed */)
 {
 	int i, start = s;
-//	e = kTokenArray_RemoveIndent(kctx, tokenList, s, e);
+	DBG_P("s=%d, e=%d", s, e);
 	for(i = s; i < e; i++) {
 		kToken *tk = tokenList->TokenItems[i];
 		if(tk->resolvedSyntaxInfo->keyword == KSymbol_COMMA) {

@@ -26,8 +26,8 @@ static int MatchSyntaxPattern(KonohaContext *kctx, kNode *node, KTokenSeq *token
 {
 	int patternIdx = patterns->beginIdx, tokenIdx = tokens->beginIdx;
 	kNameSpace *ns = kNode_ns(node);
-//	KdumpTokenArray(kctx, patterns->tokenList, patterns->beginIdx, patterns->endIdx);
-//	KdumpTokenArray(kctx, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
+	SUGAR dumpTokenArray(kctx, 0, patterns->tokenList, patterns->beginIdx, patterns->endIdx);
+	SUGAR dumpTokenArray(kctx, 0, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
 	for(; patternIdx < patterns->endIdx; patternIdx++) {
 		kToken *ruleToken = patterns->tokenList->TokenItems[patternIdx];
 		L_ReDo:;
@@ -165,12 +165,12 @@ static int ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 		foundClass = KClass_(tk->resolvedTypeId);
 		nextIdx = beginIdx + 1;
 	}
-	else if(tk->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern) { // check
-		foundClass = KLIB kNameSpace_GetClassByFullName(kctx, ns, kString_text(tk->text), kString_size(tk->text), NULL);
-		if(foundClass != NULL) {
-			nextIdx = beginIdx + 1;
-		}
-	}
+//	else if(tk->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern) { // check
+//		foundClass = KLIB kNameSpace_GetClassByFullName(kctx, ns, kString_text(tk->text), kString_size(tk->text), NULL);
+//		if(foundClass != NULL) {
+//			nextIdx = beginIdx + 1;
+//		}
+//	}
 	if(foundClass != NULL) {
 		int isAllowedGenerics = true;
 		for(; nextIdx < endIdx; nextIdx++) {
@@ -179,8 +179,8 @@ static int ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 				break;
 			}
 			int sizeofBracketTokens = kArray_size(tk->GroupTokenList);
-			if(isAllowedGenerics &&  sizeofBracketTokens > 0) {  // C[T][]
-				KClass *foundGenericClass = ParseGenericsType(kctx, ns, foundClass, tk->GroupTokenList, 1, sizeofBracketTokens);
+			if(isAllowedGenerics &&  sizeofBracketTokens > 2) {  // C[T][]
+				KClass *foundGenericClass = ParseGenericsType(kctx, ns, foundClass, RangeGroup(tk->GroupTokenList));
 				if(foundGenericClass == NULL) break;
 				foundClass = foundGenericClass;
 			}
@@ -205,7 +205,7 @@ static void PreprocessSyntaxPattern(KonohaContext *kctx, kTokenVar *tk, void *th
 		return;
 	}
 	if(tk->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup) {
-		tk->tokenType = KSymbol_OptionalGroup;
+		tk->symbol = KSymbol_OptionalGroup;
 		tk->resolvedSyntaxInfo = KNULL(Syntax); // no defined syntax
 		return;
 	}
@@ -267,5 +267,5 @@ static void kNameSpace_AddSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, ksy
 	TraverseTokenList2(kctx, RangeTokenSeq(step1), PreprocessSyntaxPattern2, NULL);
 	Preprocess(kctx, ns, RangeTokenSeq(step1), NULL, syntax->syntaxPatternListNULL);
 	KTokenSeq_Pop(kctx, source);
-	SUGAR dumpTokenArray(kctx, 0, RangeArray(syntax->syntaxPatternListNULL));
+	//SUGAR dumpTokenArray(kctx, 0, RangeArray(syntax->syntaxPatternListNULL));
 }

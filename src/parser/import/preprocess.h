@@ -415,6 +415,7 @@ static void Preprocess(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, i
 							TypeSyntax = kSyntax_(ns, KSymbol_TypePattern);
 						}
 						tk->resolvedSyntaxInfo = TypeSyntax;
+						tk->resolvedTypeId = ((KClass *)kvs->unboxValue)->typeId;
 					}
 				}
 				if(tk->resolvedSyntaxInfo == NULL) {
