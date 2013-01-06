@@ -58,6 +58,7 @@ static KMETHOD Libevent_new(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ======================================================================== */
 //## int System.event_add(Libevent_event event, Date tv);
+//TODO: this declaration may be made in Libevent_event_glue.c
 KMETHOD System_event_add(KonohaContext *kctx, KonohaStack* sfp)
 {
 #define Declare_kDate
@@ -72,6 +73,15 @@ KMETHOD System_event_add(KonohaContext *kctx, KonohaStack* sfp)
 	kLibevent_event *ev = (kLibevent_event *)sfp[1].asObject;
 	kDate *date = (kDate *)sfp[2].asObject;
 	int ret = event_add(ev->event, &date->tv);
+	KReturnUnboxValue(ret);
+}
+
+//## int System.event_del(Libevent_event event);
+//TODO: this declaration may be made in Libevent_event_glue.c
+KMETHOD System_event_del(KonohaContext *kctx, KonohaStack* sfp)
+{
+	kLibevent_event *ev = (kLibevent_event *)sfp[1].asObject;
+	int ret = event_del(ev->event);
 	KReturnUnboxValue(ret);
 }
 
@@ -92,6 +102,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Libevent_new), KType_Libevent, KType_Libevent, KKMethodName_("new"), 0,
 		_Public|_Static|_Const|_Im, _F(System_event_add), KType_int, KType_System, KKMethodName_("event_add"), 2, KType_Object, KFieldName_("Libevent_event"), KType_Object, KFieldName_("timeval"),	//TODO: param type should be "KType_Libevent_event" "KType_Date"
+		_Public|_Static|_Const|_Im, _F(System_event_del), KType_int, KType_System, KKMethodName_("event_del"), 1, KType_Object, KFieldName_("Libevent_event"),	//TODO: param type should be "KType_Libevent_event"
 
 
 
