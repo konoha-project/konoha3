@@ -1,4 +1,3 @@
-// //import("konoha.assign"); Don't use any more
 import("cstyle", "while");
 import("Syntax.JavaStyleClass");
 import("Syntax.GlobalVariable");

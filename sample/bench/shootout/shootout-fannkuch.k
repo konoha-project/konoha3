@@ -5,7 +5,6 @@
  */
 
 import("cstyle");
-// //import("konoha.assign"); Don't use any more
 import("MiniKonoha.NameSpace");  // konoha.const is obsolete
 import("JavaScript.Array");
 //import("konoha.new"); Don't use this

@@ -4,7 +4,6 @@
 */
 
 import("cstyle");
-// //import("konoha.assign"); Don't use any more
 //import("konoha.new"); Don't use this
 import("Syntax.JavaStyleClass");
 import("cstyle"); // konoha.null is obsolate; use cstyle

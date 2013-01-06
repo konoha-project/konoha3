@@ -1,7 +1,6 @@
 // writte by kimio kuramitsu
 
 import("Syntax.JavaStyleClass");
-// //import("konoha.assign"); Don't use any more
 
 class Person {
 	String name;

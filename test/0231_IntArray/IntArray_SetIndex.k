@@ -1,5 +1,4 @@
 // written by kimio kuramitsu
-// //import("konoha.assign"); Don't use any more
 import("JavaScript.Array");
 
 void test() {

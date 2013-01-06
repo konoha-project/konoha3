@@ -1,7 +1,6 @@
 // import("MiniKonoha.Syntax");
 // import("cstyle"); // use cstyle
 // import("JavaScript.String");
-// // //import("konoha.assign"); Don't use any more
 
 // int singleQuoteToken (Token tk, String source) {
 // 	String ch, prev = "'";
