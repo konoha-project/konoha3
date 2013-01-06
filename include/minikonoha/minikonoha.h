@@ -689,7 +689,7 @@ struct KonohaFactory {
 	kbool_t               (*IsSupportedKVirtualCode)(int opcode);
 	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
 	struct KVirtualCode*   (*GetDefaultBootCode)(void);
-	struct KBuilderAPI2*  (*GetDefaultBuilderAPI)(void);
+	struct KBuilderAPI*  (*GetDefaultBuilderAPI)(void);
 
 	/* JSON_API */
 	KModuleInfo *JsonDataInfo;
@@ -1521,7 +1521,7 @@ struct kNameSpaceVar {
 	// the below references are defined in sugar
 	void                              *tokenMatrix;
 //	KHashMap                          *syntaxMapNN;
-	struct KBuilderAPI2               *builderApi;
+	struct KBuilderAPI                *builderApi;
 	KKeyValue                         *typeVariableItems;
 	size_t                             typesize;
 	struct KGammaLocalData            *genv;

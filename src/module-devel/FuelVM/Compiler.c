@@ -853,7 +853,7 @@ static void FuelVM_SetMethodCode(KonohaContext *kctx, kMethodVar *mtd, struct KV
 	}
 }
 
-static void InitStaticBuilderApi(struct KBuilderAPI2 *builderApi)
+static void InitStaticBuilderApi(struct KBuilderAPI *builderApi)
 {
 	builderApi->target = "FuelVM";
 #define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME##Node = FuelVM_Visit##NAME##Node;
@@ -865,9 +865,9 @@ static void InitStaticBuilderApi(struct KBuilderAPI2 *builderApi)
 	builderApi->RunVirtualMachine    = FuelVM_Run;
 }
 
-static struct KBuilderAPI2 *GetDefaultBuilderAPI(void)
+static struct KBuilderAPI *GetDefaultBuilderAPI(void)
 {
-	static struct KBuilderAPI2 builderApi = {};
+	static struct KBuilderAPI builderApi = {};
 	if(builderApi.target == NULL) {
 		InitStaticBuilderApi(&builderApi);
 	}

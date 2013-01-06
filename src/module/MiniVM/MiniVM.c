@@ -1020,7 +1020,7 @@ static void MiniVM_SetMethodCode(KonohaContext *kctx, kMethodVar *mtd, KVirtualC
 	mtd->vcode_start = vcode;
 }
 
-static void InitStaticBuilderApi(struct KBuilderAPI2 *builderApi)
+static void InitStaticBuilderApi(struct KBuilderAPI *builderApi)
 {
 	builderApi->target = "minivm";
 #define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME##Node = KBuilder_Visit##NAME##Node;
@@ -1032,9 +1032,9 @@ static void InitStaticBuilderApi(struct KBuilderAPI2 *builderApi)
 	builderApi->RunVirtualMachine   = KonohaVirtualMachine_Run;
 }
 
-static struct KBuilderAPI2* GetDefaultBuilderAPI(void)
+static struct KBuilderAPI* GetDefaultBuilderAPI(void)
 {
-	static struct KBuilderAPI2 builderApi = {};
+	static struct KBuilderAPI builderApi = {};
 	if(builderApi.target == NULL) {
 		InitStaticBuilderApi(&builderApi);
 	}
