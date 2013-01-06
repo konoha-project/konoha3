@@ -1393,7 +1393,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	// Syntax Rule
 	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(TypeDecl), "$Type $Expr", 0, NULL);
 	kNameSpace_AddSyntaxPattern(kctx, ns, PATTERN(MethodDecl), "$Type [ClassName: $Type] [$Symbol] $Param [$Block]", 0, NULL);
-	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(if), "\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Expr]", 0, NULL);
+	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(if), "\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Block]", 0, NULL);
 	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(else), "\"else\" $Block", 0, NULL);
 	kNameSpace_AddSyntaxPattern(kctx, ns, TOKEN(return), "\"return\" [$Expr]", 0, NULL);
 }

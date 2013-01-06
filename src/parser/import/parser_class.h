@@ -27,16 +27,8 @@
 /* --------------- */
 /* NameSpace */
 
-//static void syntaxMap_Free(KonohaContext *kctx, void *p)
-//{
-//	KFree(p, sizeof(kSyntax));
-//}
-
 static void kNameSpace_FreeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns)
 {
-//	if(ns->syntaxMapNN != NULL) {
-//		KLIB KHashMap_Free(kctx, ns->syntaxMapNN, NULL/*syntaxMap_Free*/);
-//	}
 	if(ns->tokenMatrix != NULL) {
 		KFree((void *)ns->tokenMatrix, SIZEOF_TOKENMATRIX);
 	}
@@ -175,7 +167,6 @@ static void kNode_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visi
 	}
 }
 
-
 #ifndef USE_SMALLBUILD
 static void kNodeTerm_p(KonohaContext *kctx, kObject *o, KonohaValue *values, int pos, KBuffer *wb)
 {
@@ -295,7 +286,9 @@ static void kNode_AddParsedObject(KonohaContext *kctx, kNode *stmt, ksymbol_t ke
 			kArray *newList = new_(Array, 0, _GcStack);
 			KLIB kArray_Add(kctx, newList, valueList);
 			KLIB kObjectProto_SetObject(kctx, stmt, keyid, kObject_typeId(newList), newList);
+			DBG_P(">>>> value=%s, added=%s", KClass_text(kObject_class(valueList)), KClass_text(kObject_class(o)));
 			valueList = newList;
+			DBG_ASSERT(kctx == NULL);
 			RESET_GCSTACK();
 		}
 		KLIB kArray_Add(kctx, valueList, o);

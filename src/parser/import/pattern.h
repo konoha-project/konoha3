@@ -246,10 +246,15 @@ static void PreprocessSyntaxPattern2(KonohaContext *kctx, kTokenVar *tk, kTokenV
 {
 	if(tk->symbol == KSymbol_DOLLAR) {  // $PatternName
 		tk2->symbol = tk2->symbol | KSymbolAttr_Pattern;
-		tk2->ruleNameSymbol = tk2->symbol;
+		tk2->ruleNameSymbol = tk->ruleNameSymbol != KSymbol_DOLLAR ? tk->ruleNameSymbol : tk2->symbol;
 		tk->tokenType = TokenType_Skip;
 	}
-	if(tk->symbol == KSymbol_COLON || tk2->symbol == KSymbol_COLON) {
+	if(tk2->symbol == KSymbol_COLON) {
+		DBG_ASSERT(tk->ruleNameSymbol != 0);
+		tk2->ruleNameSymbol = tk->ruleNameSymbol;
+		tk->tokenType = TokenType_Skip;
+	}
+	if(tk->symbol == KSymbol_COLON) {
 		DBG_ASSERT(tk->ruleNameSymbol != 0);
 		tk2->ruleNameSymbol = tk->ruleNameSymbol;
 		tk->tokenType = TokenType_Skip;
@@ -278,5 +283,5 @@ static void kNameSpace_AddSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, ksy
 	TraverseTokenList2(kctx, RangeTokenSeq(step1), PreprocessSyntaxPattern2, NULL);
 	Preprocess(kctx, ns, RangeTokenSeq(step1), NULL, syntax->syntaxPatternListNULL);
 	KTokenSeq_Pop(kctx, source);
-	//SUGAR dumpTokenArray(kctx, 0, RangeArray(syntax->syntaxPatternListNULL));
+	SUGAR dumpTokenArray(kctx, 0, RangeArray(syntax->syntaxPatternListNULL));
 }
