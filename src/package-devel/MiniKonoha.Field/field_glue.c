@@ -188,7 +188,7 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	kToken *fieldToken = expr->NodeList->TokenItems[0];
-	ksymbol_t fn = fieldToken->resolvedSymbol;
+	ksymbol_t fn = fieldToken->symbol;
 	kNode *self = SUGAR TypeCheckNodeAt(kctx, expr, 1, ns, KClass_INFER, 0);
 	if(self != K_NULLNODE) {
 		kMethod *mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, KClass_(self->attrTypeId), fn);

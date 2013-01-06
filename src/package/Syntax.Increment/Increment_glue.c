@@ -82,9 +82,9 @@ static void cstyle_DefineStatement(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 //	if(operatorIdx + 2 == endIdx) {
 //		DBG_P("checking .. x == null");
 //		kTokenVar *tk = tokenList->TokenVarItems[operatorIdx+1];
-//		if(tk->resolvedSymbol == KSymbol_("null")) {
+//		if(tk->symbol == KSymbol_("null")) {
 //			kNode *leftHandNode = SUGAR ParseNewNode(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
-//			tk->resolvedSymbol = KSymbol_("isNull");
+//			tk->symbol = KSymbol_("isNull");
 //			KReturn(SUGAR new_UntypedOperatorNode(kctx, kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/), 2, tk, leftHandNode));
 //		}
 //	}
@@ -97,9 +97,9 @@ static void cstyle_DefineStatement(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 //	if(operatorIdx + 2 == endIdx) {
 //		DBG_P("checking .. x != null");
 //		kTokenVar *tk = tokenList->TokenVarItems[operatorIdx+1];
-//		if(tk->resolvedSymbol == KSymbol_("null")) {
+//		if(tk->symbol == KSymbol_("null")) {
 //			kNode *leftHandNode = SUGAR ParseNewNode(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
-//			tk->resolvedSymbol = KSymbol_("isNotNull");
+//			tk->symbol = KSymbol_("isNotNull");
 //			KReturn(SUGAR new_UntypedOperatorNode(kctx, kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/), 2, tk, leftHandNode));
 //		}
 //	}
@@ -133,10 +133,10 @@ static KMETHOD PatternMatch_Inc(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t KSymbol_Inc = KSymbol_("++"), KSymbol_Dec = KSymbol_("--");
 	for(i = beginIdx; i < endIdx; i++) {
 		kTokenVar *tk = tokenList->TokenVarItems[i];
-		if(tk->resolvedSymbol == KSymbol_Inc || tk->resolvedSymbol == KSymbol_Dec) {
+		if(tk->symbol == KSymbol_Inc || tk->symbol == KSymbol_Dec) {
 			KReturnUnboxValue(beginIdx);
 		}
-//		if(kToken_Is(StatementSeparator, tk) || kToken_IsIndent(tk)) {
+//		if(kToken_IsStatementSeparator(tk) || kToken_IsIndent(tk)) {
 //			break;
 //		}
 	}
@@ -150,7 +150,7 @@ static KMETHOD PatternMatch_IncStmt(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t KSymbol_Inc = KSymbol_("++"), KSymbol_Dec = KSymbol_("--");
 	for(i = beginIdx; i < endIdx; i++) {
 		kToken *tk = tokenList->TokenItems[i];
-		if(tk->resolvedSymbol == KSymbol_Inc || tk->resolvedSymbol == KSymbol_Dec) {
+		if(tk->symbol == KSymbol_Inc || tk->symbol == KSymbol_Dec) {
 			break;
 		}
 	}

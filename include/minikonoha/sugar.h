@@ -203,7 +203,7 @@ typedef struct kSyntaxVar         kSyntaxVar;
 typedef enum {
 	KSugarTokenFunc         = 0,
 	KSugarParseFunc         = 1,
-	KSugarTypeFunc     = 2,
+	KSugarTypeFunc          = 2,
 	SugarFunc_SIZE          = 3
 } SugerFunc;
 
@@ -289,10 +289,6 @@ typedef struct KDEFINE_SYNTAX {
 
 /* Token */
 
-#define kToken_SetHintChar(tk, ch, ch2)           tk->hintChar = ((ch << 8) | ((char)ch2))
-#define kToken_GetOpenHintChar(tk)                ((int)(tk->hintChar >> 8))
-#define kToken_GetCloseHintChar(tk)               ((char)tk->hintChar)
-
 struct kTokenVar {
 	kObjectHeader h;
 	kfileline_t     uline;
@@ -303,17 +299,23 @@ struct kTokenVar {
 	};
 	union {
 		ksymbol_t   tokenType;           // (resolvedSyntaxInfo == NULL)
-		ksymbol_t   resolvedSymbol;      // symbol (resolvedSyntaxInfo != NULL)
-		ktypeattr_t resolvedTypeId;      // typeid if KSymbol_TypePattern
+//		ksymbol_t   symbol;      // symbol (resolvedSyntaxInfo != NULL)
 	};
 	union {
 		kushort_t   indent;               // indent when kw == TokenType_Indent
-		kshort_t    hintChar;
-		ksymbol_t   stmtEntryKey;         // pattern name for 'setting key in Node'
+		kushort_t   openCloseChar;
 	};
-	kSyntax        *resolvedSyntaxInfo;
-	ksymbol_t symbol;
+	ksymbol_t   symbol;
+	union {
+		ktypeattr_t resolvedTypeId;      // typeid if KSymbol_TypePattern
+		ksymbol_t   ruleNameSymbol;      // pattern rule
+	};
+	kSyntax   *resolvedSyntaxInfo;
 };
+
+#define kToken_SetOpenCloseChar(tk, ch, ch2)           tk->openCloseChar = ((ch << 8) | ((char)ch2))
+#define kToken_GetOpenChar(tk)                         ((int)(tk->openCloseChar >> 8))
+#define kToken_GetCloseChar(tk)                        ((char)tk->openCloseChar)
 
 typedef enum {
 	TokenType_Skip      = 0,
@@ -326,15 +328,15 @@ typedef enum {
 	TokenType_Error     = KSymbol_TokenPattern
 } kTokenType;
 
-#define kToken_IsIndent(T)  ((T)->tokenType == TokenType_Indent && (T)->resolvedSyntaxInfo == NULL)
+#define kToken_IsIndent(T)  ((T)->tokenType == TokenType_Indent)
+#define kToken_IsStatementSeparator(T)  ((T)->resolvedSyntaxInfo->precedence_op2 == Precedence_CStyleStatementEnd)
 
 #define kTokenFlag_BeforeWhiteSpace      kObjectFlag_Local1
 #define kTokenFlag_MatchPreviousPattern  kObjectFlag_Local2
 #define kTokenFlag_RequiredReformat      kObjectFlag_Local2
-#define kTokenFlag_GroupHasIndent        kObjectFlag_Local2/*reserved*/
 #define kTokenFlag_OpenGroup             kObjectFlag_Local3/*reserved*/
 #define kTokenFlag_CloseGroup            kObjectFlag_Local4/*reserved*/
-#define kTokenFlag_StatementSeparator    kObjectFlag_Local4/*obsolete*/
+//#define kTokenFlag_StatementSeparator    kObjectFlag_Local4/*obsolete*/
 
 #define kToken_Is(P, o)      (KFlag_Is(uintptr_t,(o)->h.magicflag, kTokenFlag_##P))
 #define kToken_Set(P,o,B)    KFlag_Set(uintptr_t,(o)->h.magicflag, kTokenFlag_##P, B)
@@ -381,6 +383,7 @@ typedef struct KTokenSeq {
 
 #define KTokenSeq_End(kctx, T)   T.endIdx = kArray_size(T.tokenList)
 
+#define RangeGroup(A)                 A, 1, (kArray_size(A)-1)
 #define RangeArray(A)                 A, 0, kArray_size(A)
 #define RangeTokenSeq(T)              T.tokenList, T.beginIdx, T.endIdx
 

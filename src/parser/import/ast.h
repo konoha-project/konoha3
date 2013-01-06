@@ -76,7 +76,7 @@ static int FindFirstStatementToken(KonohaContext *kctx, kArray *tokenList, int c
 {
 	for(; currentIdx < endIdx; currentIdx++) {
 		kToken *tk = tokenList->TokenItems[currentIdx];
-		if((tk)->tokenType == TokenType_Indent || kToken_Is(StatementSeparator, tk)) continue;
+		if((tk)->tokenType == TokenType_Indent || kToken_IsStatementSeparator(tk)) continue;
 		break;
 	}
 	return currentIdx;
@@ -87,7 +87,7 @@ static int FindEndOfStatement(KonohaContext *kctx, kNameSpace *ns, kArray *token
 	int c, isNoSemiColon = kNameSpace_Is(NoSemiColon, ns);
 	for(c = beginIdx; c < endIdx; c++) {
 		kToken *tk = tokenList->TokenItems[c];
-		if(kToken_Is(StatementSeparator, tk)) return c;
+		if(kToken_IsStatementSeparator(tk)) return c;
 		if(isNoSemiColon && kToken_IsIndent(tk)) {
 			return c;
 		}
@@ -100,7 +100,7 @@ static int SkipAnnotation(KonohaContext *kctx, kArray *tokenList, int currentIdx
 	for(; currentIdx < endIdx; currentIdx++) {
 		kToken *tk = tokenList->TokenItems[currentIdx];
 		if(kToken_IsIndent(tk)) continue;
-		if(KSymbol_IsAnnotation(tk->resolvedSymbol)) {
+		if(KSymbol_IsAnnotation(tk->symbol)) {
 			if(currentIdx + 1 < endIdx) {
 				kToken *nextToken = tokenList->TokenItems[currentIdx+1];
 				if(nextToken->resolvedSyntaxInfo != NULL && nextToken->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {
@@ -122,7 +122,7 @@ static void kNode_AddAnnotation(KonohaContext *kctx, kNode *stmt, kArray *tokenL
 		if(kToken_IsIndent(tk)) {
 			continue;
 		}
-		if(KSymbol_IsAnnotation(tk->resolvedSymbol)) {
+		if(KSymbol_IsAnnotation(tk->symbol)) {
 			kObject *value = UPCAST(K_TRUE);
 			if(currentIdx + 1 < endIdx) {
 				kToken *nextToken = tokenList->TokenItems[currentIdx+1];
@@ -132,7 +132,7 @@ static void kNode_AddAnnotation(KonohaContext *kctx, kNode *stmt, kArray *tokenL
 					currentIdx++;
 				}
 			}
-			KLIB kObjectProto_SetObject(kctx, stmt, tk->resolvedSymbol, kObject_typeId(value), value);
+			KLIB kObjectProto_SetObject(kctx, stmt, tk->symbol, kObject_typeId(value), value);
 			continue;
 		}
 		break;
@@ -167,7 +167,7 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 				node->syn = patternSyntax;
 				//DBG_P(">>>>>>>>>> searching meta i=%d, pattern = %s%s index=%d,%d", i, KSymbol_Fmt2(patternSyntax->keyword), beginIdx, endIdx);
 				int nextIdx = ParseSyntaxNode(kctx, patternSyntax, node, 0, tokenList, currentIdx, PatternNoMatch, endIdx);
-				//DBG_P(">>>>>>>>>> searching meta pattern = %s%s index=%d,%d,%d", KSymbol_Fmt2(patternToken->resolvedSymbol), beginIdx, nextIdx, endIdx);
+				//DBG_P(">>>>>>>>>> searching meta pattern = %s%s index=%d,%d,%d", KSymbol_Fmt2(patternToken->symbol), beginIdx, nextIdx, endIdx);
 				if(nextIdx != PatternNoMatch) {
 					if(beginIdx < currentIdx) {
 						kNode_AddAnnotation(kctx, node, tokenList, beginIdx, currentIdx);

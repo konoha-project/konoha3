@@ -40,7 +40,7 @@ static KMETHOD PatternMatch_ForStmt(KonohaContext *kctx, KonohaStack *sfp)
 	int i;
 	for(i = beginIdx; i < endIdx; i++) {
 		kTokenVar *tk = tokenList->TokenVarItems[i];
-		if(tk->resolvedSymbol == KSymbol_SEMICOLON) {
+		if(tk->symbol == KSymbol_SEMICOLON) {
 //			kToken_Set(StatementSeparator, tk, false);
 			break;
 		}

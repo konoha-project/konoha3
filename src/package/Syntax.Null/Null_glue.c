@@ -48,15 +48,16 @@ static KMETHOD Expression_isNull(KonohaContext *kctx, KonohaStack *sfp)
 	if(opIdx + 2 == endIdx) {
 		DBG_P("checking .. x == null");
 		kTokenVar *tk = tokenList->TokenVarItems[opIdx+1];
-		if(tk->resolvedSymbol == KSymbol_("null") || tk->resolvedSymbol == KSymbol_("NULL")) {
+		if(tk->symbol == KSymbol_("null") || tk->symbol == KSymbol_("NULL")) {
 			kNameSpace *ns = kNode_ns(stmt);
-			tk->resolvedSymbol = KSymbol_("IsNull");
+			tk->symbol = KSymbol_("IsNull");
 			tk->resolvedSyntaxInfo = tokenList->TokenVarItems[opIdx]->resolvedSyntaxInfo;
 			SUGAR kNode_Op(kctx, stmt, tk, 1, SUGAR ParseNewNode(kctx, ns, tokenList, &beginIdx, opIdx, ParseExpressionOption, NULL));
 			KReturnUnboxValue(opIdx + 2);
 		}
 	}
 	DBG_P("checking parent .. == ..");
+	KReturnUnboxValue(-1);
 }
 
 static KMETHOD Expression_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
@@ -65,15 +66,16 @@ static KMETHOD Expression_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 	if(opIdx + 2 == endIdx) {
 		DBG_P("checking .. x != null");
 		kTokenVar *tk = tokenList->TokenVarItems[opIdx+1];
-		if(tk->resolvedSymbol == KSymbol_("null") || tk->resolvedSymbol == KSymbol_("NULL")) {
+		if(tk->symbol == KSymbol_("null") || tk->symbol == KSymbol_("NULL")) {
 			kNameSpace *ns = kNode_ns(stmt);
-			tk->resolvedSymbol = KSymbol_("IsNotNull");
+			tk->symbol = KSymbol_("IsNotNull");
 			tk->resolvedSyntaxInfo = tokenList->TokenVarItems[opIdx]->resolvedSyntaxInfo;
 			SUGAR kNode_Op(kctx, stmt, tk, 1, SUGAR ParseNewNode(kctx, ns, tokenList, &beginIdx, opIdx, ParseExpressionOption, NULL));
 			KReturnUnboxValue(opIdx + 2);
 		}
 	}
 	DBG_P("checking parent .. != ..");
+	KReturnUnboxValue(-1);
 }
 
 // --------------------------------------------------------------------------

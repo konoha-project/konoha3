@@ -41,12 +41,12 @@ static void DeclVariable(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ktype
 			kNodeToken_Message(kctx, stmt, termToken, ErrTag, "unavailable global variable");
 			return;
 		}
-		kNodeToken_Message(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", KSymbol_Fmt2(termToken->resolvedSymbol), KType_text(ty));
-		KLIB KClass_AddField(kctx, kObject_class(ns->globalObjectNULL), ty, termToken->resolvedSymbol);
+		kNodeToken_Message(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", KSymbol_Fmt2(termToken->symbol), KType_text(ty));
+		KLIB KClass_AddField(kctx, kObject_class(ns->globalObjectNULL), ty, termToken->symbol);
 	}
 	else {
-		kNodeToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", KSymbol_Fmt2(termToken->resolvedSymbol), KType_text(ty));
-		SUGAR kNameSpace_AddLocalVariable(kctx, ns, ty, termToken->resolvedSymbol);
+		kNodeToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", KSymbol_Fmt2(termToken->symbol), KType_text(ty));
+		SUGAR kNameSpace_AddLocalVariable(kctx, ns, ty, termToken->symbol);
 	}
 }
 

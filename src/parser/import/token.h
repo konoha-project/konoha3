@@ -115,18 +115,15 @@ static int TokenizeNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 static void kToken_SetSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *t, size_t len)
 {
 	if(IS_NOTNULL(tk)) {
-		ksymbol_t kw = KAsciiSymbol(t, len, _NEWID);
-		if(kw == KSymbol_Unmask(kw)) {
-			KFieldSet(tk, tk->text, KSymbol_GetString(kctx, kw));
+		ksymbol_t symbol = KAsciiSymbol(t, len, _NEWID);
+		if(symbol == KSymbol_Unmask(symbol)) {
+			KFieldSet(tk, tk->text, KSymbol_GetString(kctx, symbol));
 		}
 		else {
 			KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, t, len, StringPolicy_ASCII));
 		}
 		tk->tokenType = TokenType_Symbol;
-		tk->symbol = kw;
-		if(len == 1) {
-			kToken_SetHintChar(tk, 0, t[0]);
-		}
+		tk->symbol = symbol;
 	}
 }
 
@@ -150,10 +147,7 @@ static int TokenizeSingleOperator(KonohaContext *kctx, kTokenVar *tk, Tokenizer 
 
 static int TokenizeSemiColon(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
-	if(IS_NOTNULL(tk)) {
-		kToken_SetSymbolText(kctx, tk,  tokenizer->source + tok_start, 1);
-		kToken_Set(StatementSeparator, tk, true);
-	}
+	kToken_SetSymbolText(kctx, tk,  tokenizer->source + tok_start, 1);
 	return tok_start+1;
 }
 
@@ -204,8 +198,8 @@ static int TokenizeAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tok
 	if(isalnum(tokenizer->source[tok_start+1])) {
 		int pos = TokenizeSymbol(kctx, tk, tokenizer, tok_start+1);
 		if(IS_NOTNULL(tk)) {  // pre-resolved
-			tk->resolvedSymbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId) | KSymbolAttr_Annotation;
-			tk->resolvedSyntaxInfo = kSyntax_(tokenizer->ns, KSymbol_SymbolPattern);
+			tk->tokenType = KSymbol_SymbolPattern;
+			tk->symbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId) | KSymbolAttr_Annotation;
 		}
 		return pos;
 	}
@@ -218,7 +212,7 @@ static int TokenizeAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tok
 //	if(isalnum(tokenizer->source[tok_start+1])) {  // tokenizer, tok_start is older style of tokneizer
 //		int pos = TokenizeSymbol(kctx, tk, tokenizer, tok_start+1);
 //		if(IS_NOTNULL(tk)) {  // pre-resolved
-//			tk->resolvedSymbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId) | KSymbolAttr_Annotation;
+//			tk->symbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId) | KSymbolAttr_Annotation;
 //			tk->resolvedSyntaxInfo = kSyntax_(tokenizer->ns, KSymbol_SymbolPattern);
 //		}
 //		KReturnUnboxValue(pos - tok_start);

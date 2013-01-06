@@ -55,7 +55,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 //			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // new C (...)
 //				kSyntax *syn = kSyntax_(ns, KSymbol_ParamPattern/*MethodCall*/);
 //				kNode *expr = SUGAR new_UntypedOperatorNode(kctx, syn, 2, newToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
-//				newToken->resolvedSymbol = MN_new;
+//				newToken->symbol = MN_new;
 //				KReturn(expr);
 //			}
 //			kSyntax *newsyn = kSyntax_(ns, KSymbol_("new"));
@@ -72,13 +72,13 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 //					KClass *realType = KClass_p0(kctx, foundClass, classT0->typeId);
 //					kSyntax *syn;// = (realType->baseTypeId != KType_Array) ? kSyntax_(ns, KSymbol_ParamPattern/*MethodCall*/) : newsyn;
 //					syn = newsyn;
-//					newToken->resolvedSymbol = (realType->baseTypeId != KType_Array) ? MN_new : KMethodName_("newArray");
+//					newToken->symbol = (realType->baseTypeId != KType_Array) ? MN_new : KMethodName_("newArray");
 //					expr = SUGAR new_UntypedOperatorNode(kctx, syn, 2, newToken,
 //							NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], realType->typeId));
 //				} else {
 //					/* new Type1[] => Array<Type1>.newList */
 //					KClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
-//					newToken->resolvedSymbol = KMethodName_("newArray");
+//					newToken->symbol = KMethodName_("newArray");
 //					expr = SUGAR new_UntypedOperatorNode(kctx, newsyn, 2, newToken,
 //							NewNode(kctx, newsyn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));
 //				}

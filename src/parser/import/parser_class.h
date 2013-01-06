@@ -96,7 +96,7 @@ static const char *kToken_t(KonohaContext *kctx, kToken *tk)
 		return kString_text(tk->text);
 	}
 	else {
-		switch(tk->resolvedSymbol) {
+		switch(tk->tokenType) {
 			case KSymbol_BraceGroup: return "{... }";
 			case KSymbol_ParenthesisGroup: return "(... )";
 			case KSymbol_BracketGroup: return "[... ]";
@@ -108,21 +108,15 @@ static const char *kToken_t(KonohaContext *kctx, kToken *tk)
 #ifndef USE_SMALLBUILD
 static void KBuffer_WriteTokenSymbol(KonohaContext *kctx, KBuffer *wb, kToken *tk)
 {
-	if(tk->resolvedSymbol == TokenType_Indent) {
-		KLIB KBuffer_printf(kctx, wb, "$Indent ");
-	}
-	else {
-		ksymbol_t symbolType = tk->resolvedSyntaxInfo == NULL ? tk->resolvedSymbol : tk->resolvedSyntaxInfo->keyword;
-		KLIB KBuffer_printf(kctx, wb, "%s%s ", KSymbol_Fmt2(symbolType));
-	}
+	KLIB KBuffer_printf(kctx, wb, "%s%s %s%s ", KSymbol_Fmt2(tk->tokenType), KSymbol_Fmt2(tk->symbol));
 }
 
 static void KBuffer_WriteTokenText(KonohaContext *kctx, KBuffer *wb, kToken *tk)
 {
 	const char *text = IS_String(tk->text) ? kString_text(tk->text) : "...";
-	char c = kToken_GetOpenHintChar(tk);
+	char c = kToken_GetOpenChar(tk);
 	if(c != 0) {
-		KLIB KBuffer_printf(kctx, wb, "%c%s%c", c, text, kToken_GetCloseHintChar(tk));
+		KLIB KBuffer_printf(kctx, wb, "%c%s%c", c, text, kToken_GetCloseChar(tk));
 	}
 	else {
 		KLIB KBuffer_printf(kctx, wb, "%s", text);

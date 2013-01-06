@@ -22,77 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-///* ------------------------------------------------------------------------ */
-///* new ast parser */
-//
-//static int ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KClass **classRef);
-//static KClass* ParseGenericsType(KonohaContext *kctx, kNameSpace *ns, KClass *baseClass, kArray *tokenList, int beginIdx, int endIdx)
-//{
-//	int currentIdx = beginIdx;
-//	size_t psize = 0;
-//	kparamtype_t *p = ALLOCA(kparamtype_t, endIdx);
-//	while(currentIdx < endIdx) {
-//		KClass *paramClass = NULL;
-//		currentIdx = ParseTypePattern(kctx, ns, tokenList, currentIdx, endIdx, &paramClass);
-//		if(paramClass == NULL) {
-//			return NULL;
-//		}
-//		p[psize].attrTypeId = paramClass->typeId;
-//		psize++;
-//		if(currentIdx < endIdx && tokenList->TokenItems[currentIdx]->resolvedSyntaxInfo->keyword == KSymbol_COMMA) {
-//			currentIdx++;
-//		}
-//	}
-//	if(baseClass->baseTypeId == KType_Func) {
-//		return KLIB KClass_Generics(kctx, baseClass, p[0].attrTypeId, psize-1, p+1);
-//	}
-//	else {
-//		return KLIB KClass_Generics(kctx, baseClass, KType_void, psize, p);
-//	}
-//}
-//
-//static int ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KClass **classRef)
-//{
-//	int nextIdx = -1;
-//	kToken *tk = tokenList->TokenItems[beginIdx];
-//	KClass *foundClass = NULL;
-//	if(tk->resolvedSyntaxInfo->keyword == KSymbol_TypePattern) {
-//		foundClass = KClass_(tk->resolvedTypeId);
-//		nextIdx = beginIdx + 1;
-//	}
-//	else if(tk->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern) { // check
-//		foundClass = KLIB kNameSpace_GetClassByFullName(kctx, ns, kString_text(tk->text), kString_size(tk->text), NULL);
-//		if(foundClass != NULL) {
-//			nextIdx = beginIdx + 1;
-//		}
-//	}
-//	if(foundClass != NULL) {
-//		int isAllowedGenerics = true;
-//		for(; nextIdx < endIdx; nextIdx++) {
-//			tk = tokenList->TokenItems[nextIdx];
-//			if(tk->resolvedSyntaxInfo == NULL || tk->resolvedSyntaxInfo->keyword != KSymbol_BracketGroup) {
-//				break;
-//			}
-//			int sizeofBracketTokens = kArray_size(tk->GroupTokenList);
-//			if(isAllowedGenerics &&  sizeofBracketTokens > 0) {  // C[T][]
-//				KClass *foundGenericClass = ParseGenericsType(kctx, ns, foundClass, tk->GroupTokenList, 0, sizeofBracketTokens);
-//				if(foundGenericClass == NULL) break;
-//				foundClass = foundGenericClass;
-//			}
-//			else {
-//				if(sizeofBracketTokens > 0) break;   // C[100] is treated as C  and the token [100] is set to nextIdx;
-//				foundClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);  // C[] => Array[C]
-//			}
-//			isAllowedGenerics = false;
-//		}
-//	}
-//	if(classRef != NULL) {
-//		classRef[0] = foundClass;
-//		if(foundClass==NULL) nextIdx = -1;
-//	}
-//	return nextIdx;
-//}
-
 // ---------------------------------------------------------------------------
 /* macro */
 
@@ -139,7 +68,7 @@ static kArray* new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, 
 //			}
 //		}
 //		if(isChanged) {
-//			kTokenVar *groupToken = new_(TokenVar, tk->resolvedSymbol, gcstack);
+//			kTokenVar *groupToken = new_(TokenVar, tk->symbol, gcstack);
 //			KFieldSet(groupToken, groupToken->GroupTokenList, new_SubsetArray(kctx, gcstack, group.tokenList, group.beginIdx, group.endIdx));
 //			groupToken->resolvedSyntaxInfo = tk->resolvedSyntaxInfo;
 //			groupToken->uline = tk->uline;
@@ -168,7 +97,7 @@ static kArray* new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, 
 //	KMacroSet* mp = ALLOCA(KMacroSet, paramsize+1);
 //	DBG_ASSERT(paramsize < kArray_size(macroTokenList));
 //	for(i = 0; i < paramsize; i++) {
-//		mp[i].symbol = macroTokenList->TokenItems[i]->resolvedSymbol;
+//		mp[i].symbol = macroTokenList->TokenItems[i]->symbol;
 //		mp[i].tokenList = groupToken->GroupTokenList;
 //	}
 //	mp[paramsize].symbol = 0; /* sentinel */
@@ -176,7 +105,7 @@ static kArray* new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, 
 //	int p = 0, start = 0;
 //	for(i = 0; i < kArray_size(groupToken->GroupTokenList); i++) {
 //		kToken *tk = groupToken->GroupTokenList->TokenItems[i];
-//		if(tk->resolvedSymbol == KSymbol_COMMA/*tk->hintChar == ','*/) {
+//		if(tk->symbol == KSymbol_COMMA/*tk->hintChar == ','*/) {
 //			mp[p].beginIdx = start;
 //			mp[p].endIdx = i;
 //			p++;
@@ -199,7 +128,7 @@ static kArray* new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, 
 //	astToken->resolvedSyntaxInfo = kSyntax_(tokens->ns, AST_type);
 //	KFieldSet(astToken, astToken->GroupTokenList, new_(TokenArray, 0, OnField));
 //	astToken->uline = openToken->uline;
-//	kToken_SetHintChar(astToken, openToken->hintChar, closech);
+//	kToken_SetOpenCloseChar(astToken, openToken->hintChar, closech);
 //	{
 //		KTokenSeq nested = {source->ns, astToken->GroupTokenList};
 //		kToken *pushOpenToken = source->SourceConfig.openToken;
@@ -227,7 +156,7 @@ static kArray* new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, 
 //static kToken* new_CommaToken(KonohaContext *kctx, kArray *gcstack)
 //{
 //	kTokenVar *tk = new_(TokenVar, KSymbol_COMMA, gcstack);
-//	//kToken_SetHintChar(tk, 0, ',');
+//	//kToken_SetOpenCloseChar(tk, 0, ',');
 //	return tk;
 //}
 //
@@ -290,7 +219,7 @@ static kArray* new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, 
 //		}
 //		if(macroParam != NULL && tk->resolvedSyntaxInfo != NULL) {
 //			ksymbol_t keyword = tk->resolvedSyntaxInfo->keyword;
-//			if(keyword == KSymbol_SymbolPattern && KTokenSeq_ExpandMacro(kctx, tokens, tk->resolvedSymbol, macroParam)) {
+//			if(keyword == KSymbol_SymbolPattern && KTokenSeq_ExpandMacro(kctx, tokens, tk->symbol, macroParam)) {
 //				continue;
 //			}
 //			if(keyword == KSymbol_ParenthesisGroup || keyword == KSymbol_BracketGroup || keyword == KSymbol_BraceGroup) {
@@ -329,14 +258,14 @@ static kArray* new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, 
 //					}
 //					continue;
 //				}
-//				tk->resolvedSymbol = symbol;
+//				tk->symbol = symbol;
 //				tk->resolvedSyntaxInfo = IS_NOTNULL(syn) ? syn : tokens->TargetPolicy.syntaxSymbolPattern;
 //			}
 //			else {
 //				tk->resolvedSyntaxInfo = kSyntax_(tokens->ns, tk->tokenType);
 //				if(tk->tokenType == KSymbol_MemberPattern) {
 //					const char *t = kString_text(tk->text);
-//					tk->resolvedSymbol = KAsciiSymbol(t, kString_size(tk->text), KSymbol_NewId);
+//					tk->symbol = KAsciiSymbol(t, kString_size(tk->text), KSymbol_NewId);
 //				}
 //			}
 //		}
@@ -401,7 +330,7 @@ static int GroupTokenList(KonohaContext *kctx, kToken *openToken, kArray *tokenL
 			KFieldSet(groupToken, groupToken->GroupTokenList, new_(TokenArray, 0, OnField));
 			kToken_Set(OpenGroup, tk, false);
 			KLIB kArray_Add(kctx, groupToken->GroupTokenList, tk);
-			currentIdx = GroupTokenList(kctx, tk, tokenList, beginIdx + 1, endIdx, groupToken->GroupTokenList);
+			currentIdx = GroupTokenList(kctx, tk, tokenList, currentIdx + 1, endIdx, groupToken->GroupTokenList);
 			continue; // already added
 		}
 		if(kToken_Is(CloseGroup, tk)) {
@@ -442,7 +371,7 @@ static void Preprocess(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, i
 			KFieldSet(groupToken, groupToken->GroupTokenList, new_(TokenArray, 0, OnField));
 			kToken_Set(OpenGroup, tk, false);
 			KLIB kArray_Add(kctx, groupToken->GroupTokenList, tk);
-			currentIdx = GroupTokenList(kctx, tk, tokenList, beginIdx + 1, endIdx, groupToken->GroupTokenList);
+			currentIdx = GroupTokenList(kctx, tk, tokenList, currentIdx + 1, endIdx, groupToken->GroupTokenList);
 			tk = groupToken;
 		}
 		//		if(tk->tokenType == TokenType_LazyBlock && (tokens->TargetPolicy.ExpandingBraceGroup || macroParam != NULL)) {

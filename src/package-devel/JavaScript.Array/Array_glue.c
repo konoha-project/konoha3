@@ -598,7 +598,7 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 //		/* transform '[ Value1, Value2, ... ]' to '(Call Untyped new (Value1, Value2, ...))' */
 //		DBG_ASSERT(currentToken->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup);
 //		kNode *arrayNode = SUGAR new_UntypedOperatorNode(kctx, currentToken->resolvedSyntaxInfo, 2, currentToken, K_NULL);
-//		KReturn(SUGAR AddParamNode(kctx, ns, arrayNode, currentToken->GroupTokenList, 0, kArray_size(currentToken->GroupTokenList), NULL));
+//		KReturn(SUGAR AddParamNode(kctx, ns, arrayNode, RangeGroup(currentToken->GroupTokenList), NULL));
 //	}
 //	else {
 //		kNode *leftNode = SUGAR ParseNewNode(kctx, ns, tokenList, beginIdx, operatorIdx, 0, NULL);
@@ -617,22 +617,22 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 //				kArray *GroupTokenList = currentToken->GroupTokenList;
 //				int beginIdx = -1;
 //				if(kArray_size(GroupTokenList) > 0) {
-//					beginIdx = SUGAR ParseTypePattern(kctx, ns, GroupTokenList, 0, kArray_size(GroupTokenList), &classT0);
+//					beginIdx = SUGAR ParseTypePattern(kctx, ns, RangeGroup(currentToken->GroupTokenList), &classT0);
 //				}
 //				beginIdx = (beginIdx == -1) ? 0 : beginIdx;
 //				leftNode->syn = kSyntax_(ns, KSymbol_ParamPattern/*MethodCall*/);
 //				DBG_P("currentToken->subtoken:%d", kArray_size(GroupTokenList));
-//				leftNode = SUGAR AddParamNode(kctx, ns, leftNode, GroupTokenList, beginIdx, kArray_size(GroupTokenList), "[");
+//				leftNode = SUGAR AddParamNode(kctx, ns, leftNode, GroupTokenList, beginIdx, kArray_size(GroupTokenList) CHECK RANGE, "[");
 //			}
 //		}
 //		else {
 //			/* transform 'Value0 [ Value1 ]=> (Call Value0 get (Value1)) */
 //			kTokenVar *tkN = /*G*/new_(TokenVar, 0, OnGcStack);
-//			tkN->resolvedSymbol= KMethodName_ToGetter(0);
+//			tkN->symbol= KMethodName_ToGetter(0);
 //			tkN->uline = currentToken->uline;
 //			kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/);
 //			leftNode  = SUGAR new_UntypedOperatorNode(kctx, syn, 2, tkN, leftNode);
-//			leftNode = SUGAR AddParamNode(kctx, ns, leftNode, currentToken->GroupTokenList, 0, kArray_size(currentToken->GroupTokenList), "[");
+//			leftNode = SUGAR AddParamNode(kctx, ns, leftNode, RangeGroup(currentToken->GroupTokenList), "[");
 //		}
 //		KReturn(SUGAR kNode_RightJoinNode(kctx, stmt, leftNode, tokenList, operatorIdx + 1, endIdx));
 //	}

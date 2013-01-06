@@ -116,7 +116,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
 	kToken *symbolToken = SUGAR kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
-	ksymbol_t unboxKey = symbolToken->resolvedSymbol;
+	ksymbol_t unboxKey = symbolToken->symbol;
 	kNode *constNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_INFER, TypeCheckPolicy_CONST);
 	if(!kNode_IsError(constNode)) {
 		KClass *constClass = KClass_(constNode->attrTypeId);
@@ -179,8 +179,8 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *pToken = tokenList->TokenVarItems[beginIdx+1];
 		if(IS_Array(pToken->GroupTokenList)) {
 			SUGAR kNode_Op(kctx, expr, definedToken, 1, K_NULLNODE);
-			FilterDefinedParam(kctx, ns, pToken->GroupTokenList, 0, kArray_size(pToken->GroupTokenList));
-			KReturn(SUGAR AddParamNode(kctx, ns, expr, pToken->GroupTokenList, 0, kArray_size(pToken->GroupTokenList), "("));
+			FilterDefinedParam(kctx, ns, RangeGroup(pToken->GroupTokenList));
+			KReturn(SUGAR AddParamNode(kctx, ns, expr, RangeGroup(pToken->GroupTokenList), "("));
 		}
 	}
 }
