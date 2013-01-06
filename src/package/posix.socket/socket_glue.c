@@ -331,7 +331,7 @@ KMETHOD System_getsockopt(KonohaContext *kctx, KonohaStack* sfp)
 }
 
 //## int System.setsockopt(int socket, int option, int value);
-KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
+KMETHOD System_Setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 {
 	int ret = setsockopt(
 			WORD2INT(sfp[1].intValue),
@@ -634,7 +634,7 @@ static kbool_t socket_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		_Public|_Static|_Const|_Im, _F(System_listen), KType_int, KType_System, KMethodName_("listen"), 2, KType_int, KFieldName_("fd"), KType_int, KFieldName_("backlog"),
 //		_Public|_Static|_Const|_Im, _F(System_getsockname), KType_Map KType_System, KMethodName_("getsockname"),1, KType_int, KFieldName_("fd"),
 		_Public|_Static|_Const|_Im, _F(System_getsockopt), KType_int, KType_System, KMethodName_("getsockopt"), 2, KType_int, KFieldName_("fd"), KType_int, KFieldName_("opt"),
-		_Public|_Static|_Const|_Im, _F(System_setsockopt), KType_int, KType_System, KMethodName_("setsockopt"), 3, KType_int, KFieldName_("fd"), KType_int, KFieldName_("opt"), KType_int, KFieldName_("value"),
+		_Public|_Static|_Const|_Im, _F(System_Setsockopt), KType_int, KType_System, KMethodName_("setsockopt"), 3, KType_int, KFieldName_("fd"), KType_int, KFieldName_("opt"), KType_int, KFieldName_("value"),
 //		_Public|_Static|_Const|_Im, _F(System_getpeername), KType_Map, KType_System, KMethodName_("getpeername"), 1, KType_int, KFieldName_("fd"),
 //		_Public|_Static, _F(System_Select), KType_int, KType_System, KMethodName_("select"), 5, KType_intArray, KFieldName_("readsocks"), KType_intArray, KFieldName_("writesocks"), KType_intArray, KFieldName_("exceptsocks"), KType_int, KFieldName_("timeoutSec"), KType_int, KFieldName_("timeoutUSec"),
 		_Public|_Static|_Const|_Im, _F(System_shutdown), KType_int, KType_System, KMethodName_("shutdown"), 2, KType_int, KFieldName_("fd"), KType_int, KFieldName_("how"),

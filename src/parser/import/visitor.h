@@ -97,6 +97,7 @@ static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, in
 	struct KVirtualCode *vcode = ns->builderApi->GenerateKVirtualCode(kctx, mtd, block, option);
 	KMethodFunc func = ns->builderApi->GenerateKMethodFunc(kctx, vcode);
 	ns->builderApi->SetMethodCode(kctx, (kMethodVar *) mtd, vcode, func);
+
 }
 
 static KMETHOD KMethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp)

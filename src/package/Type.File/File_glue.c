@@ -446,8 +446,8 @@ static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *t
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static|_Const, _F(File_scriptPath), KType_String, KType_File, KMethodName_("scriptPath"), 1, KType_String, KFieldName_("filename"),
-		_Public, _F(File_setWriterCharset), KType_void, KType_File, KMethodName_("setWriterCharset"), 1, KType_String, KFieldName_("charset"),
-		_Public, _F(File_setReaderCharset), KType_void, KType_File, KMethodName_("setReaderCharset"), 1, KType_String, KFieldName_("charset"),
+		_Public, _F(File_SetWriterCharset), KType_void, KType_File, KMethodName_("setWriterCharset"), 1, KType_String, KFieldName_("charset"),
+		_Public, _F(File_SetReaderCharset), KType_void, KType_File, KMethodName_("setReaderCharset"), 1, KType_String, KFieldName_("charset"),
 
 		_Public, _F(File_new), KType_File, KType_File, KMethodName_("new"), 2, KType_String, KFieldName_("filename"), KType_String, KFieldName_("mode"),
 		_Public, _F(File_close), KType_void, KType_File, KMethodName_("close"), 0,
