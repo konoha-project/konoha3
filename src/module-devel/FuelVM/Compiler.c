@@ -523,7 +523,7 @@ static kbool_t FuelVM_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder
 	kMethod *mtd = CallNode_getMethod(expr);
 	DBG_ASSERT(IS_Method(mtd));
 	enum TypeId Type = ConvertToTypeId(kctx, expr->attrTypeId);
-	if(mtd->mn == MN_box) {
+	if(mtd->mn == KMethodName_("box")) {
 		Type = ToBoxType(Type);
 	}
 

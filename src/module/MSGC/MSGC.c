@@ -57,7 +57,7 @@ extern "C" {
 
 /* ------------------------------------------------------------------------ */
 #define ShiftPointer(p, size)   ((char *)p + (size))
-#define MemorySize(p, p2)      (((char *)p) - ((char *)p2))
+#define MemorySize(p, p2)      ((size_t)(((char *)p) - ((char *)p2)))
 
 #define PageObjectSize(i) (K_PAGESIZE / sizeof(kGCObject##i))
 
