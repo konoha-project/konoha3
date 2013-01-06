@@ -259,6 +259,7 @@ static void kNameSpace_AddSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, ksy
 	KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
 	KTokenSeq_Push(kctx, source);
 	Tokenize(kctx, ns, ruleSource, uline, source.tokenList);
+	KTokenSeq_End(kctx, source);
 	KTokenSeq step1 = {ns, source.tokenList, kArray_size(source.tokenList)};
 	Preprocess(kctx, ns, RangeTokenSeq(source), NULL, step1.tokenList);
 	KTokenSeq_End(kctx, step1);

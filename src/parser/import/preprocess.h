@@ -431,6 +431,7 @@ static kbool_t ExpandMacroParam(KonohaContext *kctx, kNameSpace *ns, ksymbol_t s
 
 static void Preprocess(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KMacroSet *macroParam, kArray *bufferList)
 {
+	DBG_ASSERT(beginIdx < endIdx);
 	int currentIdx;
 	kSyntax *SymbolSyntax = NULL, *TypeSyntax = NULL;
 	for(currentIdx = beginIdx; currentIdx < endIdx; currentIdx++) {
@@ -547,6 +548,7 @@ static kbool_t kNameSpace_SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksym
 		KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, source);
 		Tokenize(kctx, ns, data, 0, source.tokenList);
+		KTokenSeq_End(kctx, source);
 		KTokenSeq tokens = {source.ns, source.tokenList, kArray_size(source.tokenList)};
 		tokens.TargetPolicy.ExpandingBraceGroup = true;
 		Preprocess(kctx, ns, RangeTokenSeq(source), NULL, tokens.tokenList);
