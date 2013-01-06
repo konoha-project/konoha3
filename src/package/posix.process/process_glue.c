@@ -83,7 +83,7 @@ static KMETHOD System_getpgid(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-static KMETHOD System_setpgid(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD System_Setpgid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int pid = sfp[1].intValue;
 	int pgid = sfp[2].intValue;
@@ -106,7 +106,7 @@ static KMETHOD System_getpriority(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-static KMETHOD System_setpriority(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD System_Setpriority(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int which = sfp[1].intValue;
 	int who = sfp[2].intValue;
@@ -129,7 +129,7 @@ static KMETHOD System_getgroups(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-static KMETHOD System_setgroups(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD System_Setgroups(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int size = sfp[1].intValue;
 	kArray *list = sfp[2].asArray;
@@ -175,7 +175,7 @@ static KMETHOD System_waitpid(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int System.setuid(int uid)
-static KMETHOD System_setuid(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD System_Setuid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	uid_t uid = sfp[1].intValue;
 	int ret = setuid(uid);
@@ -186,7 +186,7 @@ static KMETHOD System_setuid(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int System.seteuid(int euid)
-static KMETHOD System_seteuid(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD System_Seteuid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	uid_t euid = sfp[1].intValue;
 	int ret = seteuid(euid);
@@ -197,7 +197,7 @@ static KMETHOD System_seteuid(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int System.setreuid(int ruid, int euid)
-static KMETHOD System_setreuid(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD System_Setreuid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	uid_t ruid = sfp[1].intValue;
 	uid_t euid = sfp[2].intValue;
@@ -209,7 +209,7 @@ static KMETHOD System_setreuid(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int System.setgid(int gid)
-static KMETHOD System_setgid(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD System_Setgid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	uid_t gid = sfp[1].intValue;
 	int ret = setgid(gid);
@@ -220,7 +220,7 @@ static KMETHOD System_setgid(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int System.setegid(int euid)
-static KMETHOD System_setegid(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD System_Setegid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	uid_t egid = sfp[1].intValue;
 	int ret = setegid(egid);
@@ -231,7 +231,7 @@ static KMETHOD System_setegid(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int System.setregid(int rgid, int egid)
-static KMETHOD System_setregid(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD System_Setregid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	uid_t rgid = sfp[1].intValue;
 	uid_t egid = sfp[2].intValue;
@@ -243,7 +243,7 @@ static KMETHOD System_setregid(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int System.setsid()
-static KMETHOD System_setsid(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD System_Setsid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	pid_t ret = setsid();
 	if(ret == -1) {
@@ -322,21 +322,21 @@ static kbool_t process_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 		_Public|_Static, _F(System_getgid), KType_int, KType_System, KMethodName_("getgid"), 0,
 		_Public|_Static, _F(System_getegid), KType_int, KType_System, KMethodName_("getegid"), 0,
 		_Public|_Static, _F(System_getpgid), KType_int, KType_System, KMethodName_("getpgid"), 1, KType_int, KFieldName_("pid"),
-		_Public|_Static, _F(System_setpgid), KType_int, KType_System, KMethodName_("setpgid"), 2, KType_int, KFieldName_("pid"), KType_int, KFieldName_("pgid"),
+		_Public|_Static, _F(System_Setpgid), KType_int, KType_System, KMethodName_("setpgid"), 2, KType_int, KFieldName_("pid"), KType_int, KFieldName_("pgid"),
 		_Public|_Static, _F(System_getpriority), KType_int, KType_System, KMethodName_("getpriority"), 2, KType_int, KFieldName_("which"), KType_int, KFieldName_("who"),
-		_Public|_Static, _F(System_setpriority), KType_int, KType_System, KMethodName_("setpriority"), 3, KType_int, KFieldName_("which"), KType_int, KFieldName_("who"), KType_int, KFieldName_("priority"),
+		_Public|_Static, _F(System_Setpriority), KType_int, KType_System, KMethodName_("setpriority"), 3, KType_int, KFieldName_("which"), KType_int, KFieldName_("who"), KType_int, KFieldName_("priority"),
 		_Public|_Static, _F(System_getgroups), KType_int, KType_System, KMethodName_("getgroups"), 2, KType_int, KFieldName_("size"), KType_intArray, KFieldName_("list[]"),
-		_Public|_Static, _F(System_setgroups), KType_int, KType_System, KMethodName_("setgroups"), 2, KType_int, KFieldName_("size"), KType_intArray, KFieldName_("*list"),
+		_Public|_Static, _F(System_Setgroups), KType_int, KType_System, KMethodName_("setgroups"), 2, KType_int, KFieldName_("size"), KType_intArray, KFieldName_("*list"),
 		_Public|_Static, _F(System_fork), KType_int, KType_System, KMethodName_("fork"), 0,
 		_Public|_Static, _F(System_wait), KType_int, KType_System, KMethodName_("wait"), 0,
 		_Public|_Static, _F(System_waitpid), KType_int, KType_System, KMethodName_("wait"), 2, KType_int, KFieldName_("pid"), KType_int, KFieldName_("options"),
-		_Public|_Static, _F(System_setuid), KType_int, KType_System, KMethodName_("setuid"), 1, KType_int, KFieldName_("uid"),
-		_Public|_Static, _F(System_seteuid), KType_int, KType_System, KMethodName_("seteuid"), 1, KType_int, KFieldName_("euid"),
-		_Public|_Static, _F(System_setreuid), KType_int, KType_System, KMethodName_("setreuid"), 2, KType_int, KFieldName_("ruid"), KType_int, KFieldName_("euid"),
-		_Public|_Static, _F(System_setgid), KType_int, KType_System, KMethodName_("setgid"), 1, KType_int, KFieldName_("gid"),
-		_Public|_Static, _F(System_setegid), KType_int, KType_System, KMethodName_("setguid"), 1, KType_int, KFieldName_("egid"),
-		_Public|_Static, _F(System_setregid), KType_int, KType_System, KMethodName_("setrguid"), 2, KType_int, KFieldName_("rgid"), KType_int, KFieldName_("egid"),
-		_Public|_Static, _F(System_setsid), KType_int, KType_System, KMethodName_("setsid"), 0,
+		_Public|_Static, _F(System_Setuid), KType_int, KType_System, KMethodName_("setuid"), 1, KType_int, KFieldName_("uid"),
+		_Public|_Static, _F(System_Seteuid), KType_int, KType_System, KMethodName_("seteuid"), 1, KType_int, KFieldName_("euid"),
+		_Public|_Static, _F(System_Setreuid), KType_int, KType_System, KMethodName_("setreuid"), 2, KType_int, KFieldName_("ruid"), KType_int, KFieldName_("euid"),
+		_Public|_Static, _F(System_Setgid), KType_int, KType_System, KMethodName_("setgid"), 1, KType_int, KFieldName_("gid"),
+		_Public|_Static, _F(System_Setegid), KType_int, KType_System, KMethodName_("setguid"), 1, KType_int, KFieldName_("egid"),
+		_Public|_Static, _F(System_Setregid), KType_int, KType_System, KMethodName_("setrguid"), 2, KType_int, KFieldName_("rgid"), KType_int, KFieldName_("egid"),
+		_Public|_Static, _F(System_Setsid), KType_int, KType_System, KMethodName_("setsid"), 0,
 		_Public|_Static, _F(System_getsid), KType_int, KType_System, KMethodName_("getsid"), 1, KType_int, KFieldName_("pid"),
 		_Public|_Static, _F(System_sleep), KType_int, KType_System, KMethodName_("sleep"), 1, KType_int, KFieldName_("sec"),
 		_Public|_Static, _F(System_usleep), KType_boolean, KType_System, KMethodName_("usleep"), 1, KType_int, KFieldName_("usec"),

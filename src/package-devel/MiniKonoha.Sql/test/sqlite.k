@@ -1,5 +1,5 @@
 import("MiniKonoha.Sql");
-import("Syntax.CStyleWhile);
+import("Syntax.CStyleWhile");
 
 void main() {
 	Connection con = new Connection("sqlite://" + FILE.scriptPath("./konoha.sqlite"));

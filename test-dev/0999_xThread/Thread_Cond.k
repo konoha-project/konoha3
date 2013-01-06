@@ -1,7 +1,7 @@
 // written by wakamatsu
 import("Syntax.GlobalVariable");
 import("posix.thread");
-import("Syntax.CStyleWhile);
+import("Syntax.CStyleWhile");
 AllowImplicitGlobalVariable(true);
 
 Mutex m = new Mutex();

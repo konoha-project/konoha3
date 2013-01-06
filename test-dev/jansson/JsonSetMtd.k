@@ -1,5 +1,5 @@
 //import("konoha.new"); Don't use this
-import("Syntax.CStyleWhile);
+import("Syntax.CStyleWhile");
 import("cstyle");
 import("Type.Float");
 import("Java.String");

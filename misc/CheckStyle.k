@@ -57,13 +57,20 @@ void main() {
         "java2.object", "konoha.prototype", "konoha.console", "konoha.desugar", "konoha.field", "konoha.i",
         "konoha.ns", "konoha.global", "konoha.class", "konoha.dynamic", "konoha.untyped", "konoha.var", "libxml.xmlreader",
         "mecab", "konoha.mpi", "openssl", "python", "konoha.sql", "konoha.defined", "konoha.import",
-        "java2.string"];
+        "java2.string", "konoha.eval"];
     String[] after  = ["JavaScript.Array","JavaScript.String","Type.Float","JavaScript.Math", "JavaScript.Regexp", "JavaScript.Date", "Type.Bytes", "Type.File",
         "Type.Complex", "Lib.Curl", "Lib.Libvirt", "Lib.Gmp", "Lib.Openssl", "Lib.Mecab", "Lib.Llvm", "Lib.Apache", "Type.Json", "Java.String",
         "Java.Object", "JavaScript.Prototype", "MiniKonoha.Console", "MiniKonoha.Syntax", "MiniKonoha.Field", "MiniKonoha.Man",
-        "MiniKonoha.NameSpace", "Syntax.GlobalVariable", "Syntax.JavaStyleClass", "Type.Dynamic", "Type.Untyped", "Type.StaticVar", "Lib.Libxml2.Xmlreader",
-        "Lib.Mecab", "Lib.Mpi", "Lib.Openssl", "Lib.Python", "MiniKonoha.Sql", "MiniKonoha.NameSpace", "Syntax.JavaImport", "Java.String"];
+        "MiniKonoha.NameSpace", "Syntax.GlobalVariable", "Syntax.JavaStyleClass", "Type.Dynamic", "Syntax.UntypedVariable", "Type.StaticVar", "Lib.Libxml2.Xmlreader",
+        "Lib.Mecab", "Lib.Mpi", "Lib.Openssl", "Lib.Python", "MiniKonoha.Sql", "MiniKonoha.NameSpace", "Syntax.JavaImport", "Java.String", "MiniKonoha.Eval"];
 
+
+    before.add("MiniKonoha.Desugar");
+    after.add( "MiniKonoha.Syntax");
+    before.add("Type.Var");
+    after.add( "Type.StaticVar");
+    before.add("Type.Untyped");
+    after.add( "Syntax.UntypedVariable");
 
     before.add("cstyle\", \"null");
     after.add( "Syntax.Null");
@@ -77,7 +84,6 @@ void main() {
     after.add( "Syntax.CStyleFor");
     before.add("cstyle\", \"$forStmt");
     after.add( "Syntax.CStyleFor");
-
 
     while (true) {
         if (i == args.getSize()) {

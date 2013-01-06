@@ -1,4 +1,4 @@
-import("Syntax.CStyleWhile);
+import("Syntax.CStyleWhile");
 import("posix.process");
 import("konoha.eventlistener");
 

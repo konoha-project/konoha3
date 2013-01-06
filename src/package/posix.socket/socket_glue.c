@@ -85,9 +85,9 @@ void toSockaddr(struct sockaddr_in *addr, const char *ip, const int port, const 
 //void fromSockaddr(KonohaContext *kctx, struct kMap* info, struct sockaddr_in addr)
 //{
 //	if(info != NULL) {
-//		knh_DataMap_setString(kctx, info, "addr", inet_ntoa(addr.sin_Addr));
-//		knh_DataMap_setInt(kctx, info, "port", ntohs(addr.sin_port));
-//		knh_DataMap_setInt(kctx, info, "family", addr.sin_family);
+//		knh_DataMap_SetString(kctx, info, "addr", inet_ntoa(addr.sin_Addr));
+//		knh_DataMap_SetInt(kctx, info, "port", ntohs(addr.sin_port));
+//		knh_DataMap_SetInt(kctx, info, "family", addr.sin_family);
 //	}
 //}
 
@@ -108,7 +108,7 @@ void toSockaddr(struct sockaddr_in *addr, const char *ip, const int port, const 
 //	}
 //	return s;
 //}
-//
+
 //// for select :: fd_set* => kArray*
 //static void fromFd(KonohaContext *kctx, fd_set *s, kArray *a)
 //{
@@ -121,7 +121,7 @@ void toSockaddr(struct sockaddr_in *addr, const char *ip, const int port, const 
 //		}
 //	}
 //}
-//
+
 //// for select
 //static int getArrayMax(kArray *a)
 //{
@@ -137,8 +137,8 @@ void toSockaddr(struct sockaddr_in *addr, const char *ip, const int port, const 
 //	}
 //	return ret;
 //}
-//
-//// for select
+
+// for select
 //static int getNfd(kArray *a1, kArray *a2, kArray *a3)
 //{
 //	int ret = -1;

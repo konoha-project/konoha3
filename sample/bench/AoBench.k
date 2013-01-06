@@ -10,7 +10,7 @@ import("MiniKonoha.NameSpace");
 import("Syntax.JavaStyleClass");
 import("JavaScript.Array");
 import("Type.File");
-import("Syntax.CStyleWhile);
+import("Syntax.CStyleWhile");
 import("cstyle", "+=");
 //import("konoha.new"); Don't use this
 
