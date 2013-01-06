@@ -145,7 +145,7 @@ static KMETHOD PatternMatch_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = kNode_ns(stmt);
 	KClass *foundClass = NULL;
 	int nextIdx = ParseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, &foundClass);
-	DBG_P("@ nextIdx = %d < %d found=%p", nextIdx, endIdx, foundClass);
+	//DBG_P("@ nextIdx = %d < %d found=%p", nextIdx, endIdx, foundClass);
 	SUGAR dumpTokenArray(kctx, 0, tokenList, beginIdx, endIdx);
 	if(nextIdx != -1) {
 		nextIdx = TokenUtils_SkipIndent(tokenList, nextIdx, endIdx);
@@ -157,10 +157,12 @@ static KMETHOD PatternMatch_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 			if(ParseTypePattern(kctx, ns, tokenList, nextIdx, endIdx, NULL) != -1) {
 				KReturnUnboxValue(ParseSyntaxPattern(kctx, ns, stmt, stmt->syn, tokenList, beginIdx, endIdx));
 			}
-
-			if(tk->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern) {
+			if(tk->tokenType == KSymbol_ParenthesisGroup) {
+				KReturnUnboxValue(ParseSyntaxPattern(kctx, ns, stmt, stmt->syn, tokenList, beginIdx, endIdx));
+			}
+			if(tk->tokenType == KSymbol_SymbolPattern) {
 				int symbolNextIdx = TokenUtils_SkipIndent(tokenList, nextIdx + 1, endIdx);
-				if(symbolNextIdx < endIdx && tokenList->TokenItems[symbolNextIdx]->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {
+				if(symbolNextIdx < endIdx && tokenList->TokenItems[symbolNextIdx]->tokenType == KSymbol_ParenthesisGroup) {
 					KReturnUnboxValue(ParseSyntaxPattern(kctx, ns, stmt, stmt->syn, tokenList, beginIdx, endIdx));
 				}
 				KReturnUnboxValue(-1);
