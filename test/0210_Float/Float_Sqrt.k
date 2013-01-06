@@ -1,7 +1,7 @@
 /* written by kimio? */
 
-import("cstyle");
-import("konoha.float");
+import("Syntax.CStyleWhile");
+import("Type.Float");
 
 float sqrt(float y) {
 	float x = y / 2;

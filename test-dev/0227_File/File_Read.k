@@ -1,8 +1,8 @@
 //Written by shinpei
 //Modified by Joseph
 
-import("konoha.new");
-import("konoha.bytes");
+//import("konoha.new"); Don't use this
+import("Type.Bytes");
 import("posix.file");
 
 void test() {

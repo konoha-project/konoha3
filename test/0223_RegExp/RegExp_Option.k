@@ -1,4 +1,4 @@
-import("js4.regexp");
+import("JavaScript.Regexp");
 
 void test() {
 	assert("hello".search(/[ABCDE]/i) == 1);

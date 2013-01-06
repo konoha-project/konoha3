@@ -22,81 +22,50 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-static kbool_t VisitStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+#define DefineVisitCase(NAME)  case KNode_##NAME:   ret = cbuilder->api->visit##NAME##Node(kctx, builder, node, thunk); break;
+
+static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
 	kbool_t ret = false;
 	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
-	switch(stmt->node) {
-		case TSTMT_ERR:   ret = cbuilder->api->visitErrStmt(kctx, builder, stmt); break;
-		case TSTMT_EXPR:  ret = cbuilder->api->visitExprStmt(kctx, builder, stmt);   break;
-		case TSTMT_BLOCK: ret = cbuilder->api->visitBlockStmt(kctx, builder, stmt);  break;
-		case TSTMT_RETURN: ret = cbuilder->api->visitReturnStmt(kctx, builder, stmt); break;
-		case TSTMT_IF:    ret = cbuilder->api->visitIfStmt(kctx, builder, stmt);     break;
-		case TSTMT_LOOP:  ret = cbuilder->api->visitLoopStmt(kctx, builder, stmt);   break;
-		case TSTMT_JUMP:  ret = cbuilder->api->visitJumpStmt(kctx, builder, stmt);   break;
-		case TSTMT_TRY:   ret = cbuilder->api->visitTryStmt(kctx, builder, stmt);    break;
-		default: cbuilder->api->visitUndefinedStmt(kctx, builder, stmt);        break;
+	switch(node->node) {
+		KNodeList(DefineVisitCase)
 	}
 	return ret;
 }
 
-static void VisitExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
-{
-	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
-	int a = cbuilder->a;
-	int espidx = cbuilder->espidx;
-	int shift = cbuilder->shift;
-	switch(expr->node) {
-		case TEXPR_CONST:    cbuilder->api->visitConstExpr(kctx, builder, stmt, expr);  break;
-		case TEXPR_NEW:      cbuilder->api->visitNewExpr(kctx, builder, stmt, expr);    break;
-		case TEXPR_NULL:     cbuilder->api->visitNullExpr(kctx, builder, stmt, expr);   break;
-		case TEXPR_NCONST:   cbuilder->api->visitNConstExpr(kctx, builder, stmt, expr); break;
-		case TEXPR_LOCAL:    cbuilder->api->visitLocalExpr(kctx, builder, stmt, expr);  break;
-		case TEXPR_BLOCK:    cbuilder->api->visitBlockExpr(kctx, builder, stmt, expr);  break;
-		case TEXPR_FIELD:    cbuilder->api->visitFieldExpr(kctx, builder, stmt, expr);  break;
-		case TEXPR_CALL:     cbuilder->api->visitCallExpr(kctx, builder, stmt, expr);   break;
-		case TEXPR_AND:      cbuilder->api->visitAndExpr(kctx, builder, stmt, expr);    break;
-		case TEXPR_OR:       cbuilder->api->visitOrExpr(kctx, builder, stmt, expr);     break;
-		case TEXPR_LET:      cbuilder->api->visitLetExpr(kctx, builder, stmt, expr);    break;
-		case TEXPR_STACKTOP: cbuilder->api->visitStackTopExpr(kctx, builder, stmt, expr);break;
-		default: DBG_ABORT("unknown expr=%d", expr->node);
-	}
-	cbuilder->a = a;
-	cbuilder->espidx = espidx;
-	cbuilder->shift = shift;
-}
+//static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *block)
+//{
+//	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
+//	int a = cbuilder->a;
+//	int espidx = cbuilder->espidx;
+//	int shift = cbuilder->shift;
+//	cbuilder->espidx = (block->esp->node == KNode_STACKTOP) ? shift + block->esp->index : block->esp->index;
+//	kbool_t ret = true;
+//	size_t i;
+//	for (i = 0; i < kArray_size(block->NodeList); i++) {
+//		kNode *stmt = block->NodeList->NodeItems[i];
+//		if(stmt->syn == NULL) continue;
+//		cbuilder->uline = kNode_uline(stmt);
+//		if(!VisitNode(kctx, builder, stmt)) {
+//			ret = false;
+//			break;
+//		}
+//	}
+//	cbuilder->a = a;
+//	cbuilder->espidx = espidx;
+//	cbuilder->shift = shift;
+//	return ret;
+//}
 
-static kbool_t VisitBlock(KonohaContext *kctx, KBuilder *builder, kBlock *block)
-{
-	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
-	int a = cbuilder->a;
-	int espidx = cbuilder->espidx;
-	int shift = cbuilder->shift;
-	cbuilder->espidx = (block->esp->node == TEXPR_STACKTOP) ? shift + block->esp->index : block->esp->index;
-	kbool_t ret = true;
-	size_t i;
-	for (i = 0; i < kArray_size(block->NodeList); i++) {
-		kStmt *stmt = block->NodeList->StmtItems[i];
-		if(stmt->syn == NULL) continue;
-		cbuilder->uline = stmt->uline;
-		if(!VisitStmt(kctx, builder, stmt)) {
-			ret = false;
-			break;
-		}
-	}
-	cbuilder->a = a;
-	cbuilder->espidx = espidx;
-	cbuilder->shift = shift;
-	return ret;
-}
-
-static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
+static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kNode *block, int option)
 {
 	DBG_P("START CODE GENERATION..");
-	kNameSpace *ns = block->BlockNameSpace;
+	kNameSpace *ns = kNode_ns(block);
 	struct KVirtualCode *vcode = ns->builderApi->GenerateKVirtualCode(kctx, mtd, block, option);
 	KMethodFunc func = ns->builderApi->GenerateKMethodFunc(kctx, vcode);
 	ns->builderApi->SetMethodCode(kctx, (kMethodVar *) mtd, vcode, func);
+
 }
 
 static KMETHOD KMethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp)

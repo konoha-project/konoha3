@@ -1,6 +1,6 @@
 // written by kimio 
 
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 
 class C;
 

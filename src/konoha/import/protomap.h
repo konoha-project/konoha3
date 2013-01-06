@@ -83,7 +83,7 @@ typedef enum map_status_t {
 
 struct map_api {
 	map_record_t *(*_get)(Kprotomap_t *m, unsigned hash);
-	map_status_t  (*_set)(Kprotomap_t *m, unsigned hash, unsigned type, void *val, Kprotomap_t **map);
+	map_status_t  (*_Set)(Kprotomap_t *m, unsigned hash, unsigned type, void *val, Kprotomap_t **map);
 	map_record_t *(*_next)(Kprotomap_t *m, protomap_iterator *itr);
 	void (*_Remove)(Kprotomap_t *m, unsigned hash);
 	void (*_Init)(Kprotomap_t *m, unsigned init);
@@ -103,9 +103,9 @@ static inline KKeyValue *protomap_get(Kprotomap_t *m, unsigned hash)
 	return (KKeyValue *) m->h.base.api->_get(m, hash);
 }
 
-static inline map_status_t protomap_set(Kprotomap_t **m, unsigned hash, unsigned type, void *val)
+static inline map_status_t protomap_Set(Kprotomap_t **m, unsigned hash, unsigned type, void *val)
 {
-	return (*m)->h.base.api->_set(*m, hash, type, val, m);
+	return (*m)->h.base.api->_Set(*m, hash, type, val, m);
 }
 
 static inline void protomap_Remove(Kprotomap_t *m, unsigned hash)
@@ -155,7 +155,7 @@ static void hashmap_record_reset(hashmap_t *m, size_t newsize)
 #define DELTA 8
 
 /* [HASHMAP] */
-static map_status_t hashmap_set_no_resize(hashmap_t *m, map_record_t *rec)
+static map_status_t hashmap_Set_no_resize(hashmap_t *m, map_record_t *rec)
 {
 	unsigned i, idx = rec->hash & m->record_size_mask;
 	for (i = 0; i < DELTA; ++i) {
@@ -188,18 +188,18 @@ static void hashmap_record_resize(hashmap_t *m)
 		hashmap_record_reset(m, newsize);
 		for (i = 0; i < oldsize; ++i) {
 			map_record_t *r = head + i;
-			if(r->hash != 0 && hashmap_set_no_resize(m, r) == PROTOMAP_FAILED)
+			if(r->hash != 0 && hashmap_Set_no_resize(m, r) == PROTOMAP_FAILED)
 				continue;
 		}
 	} while(0);
 	_FREE(head, oldsize*sizeof(map_record_t));
 }
 
-static map_status_t hashmap_set(hashmap_t *m, map_record_t *rec)
+static map_status_t hashmap_Set(hashmap_t *m, map_record_t *rec)
 {
 	map_status_t res;
 	do {
-		if((res = hashmap_set_no_resize(m, rec)) != PROTOMAP_FAILED)
+		if((res = hashmap_Set_no_resize(m, rec)) != PROTOMAP_FAILED)
 			return res;
 		hashmap_record_resize(m);
 	} while(1);
@@ -244,7 +244,7 @@ static map_record_t *hashmap_api_get(Kprotomap_t *_m, unsigned hash)
 	return r;
 }
 
-static map_status_t hashmap_api_set(Kprotomap_t *_m, unsigned hash, unsigned type, void *val, Kprotomap_t **ptr)
+static map_status_t hashmap_api_Set(Kprotomap_t *_m, unsigned hash, unsigned type, void *val, Kprotomap_t **ptr)
 {
 	(void)ptr;
 	hashmap_t *m = (hashmap_t *) _m;
@@ -252,7 +252,7 @@ static map_status_t hashmap_api_set(Kprotomap_t *_m, unsigned hash, unsigned typ
 	r.hash = hash;
 	r.type = type;
 	r.v  = (uintptr_t) val;
-	return hashmap_set(m, &r);
+	return hashmap_Set(m, &r);
 }
 
 static void hashmap_api_Remove(Kprotomap_t *_m, unsigned hash)
@@ -283,7 +283,7 @@ static map_record_t *hashmap_api_next(Kprotomap_t *_m, protomap_iterator *itr)
 
 static const protomap_api_t HASH_API = {
 	hashmap_api_get,
-	hashmap_api_set,
+	hashmap_api_Set,
 	hashmap_api_next,
 	hashmap_api_Remove,
 	hashmap_api_Init,
@@ -327,7 +327,7 @@ static inline map_record_t *dictmap_at(dictmap_t *m, unsigned idx)
 	return (map_record_t *)(m->base.records+idx);
 }
 
-static map_status_t dictmap_set_newentry(dictmap_t *m, map_record_t *rec, int i)
+static map_status_t dictmap_Set_newentry(dictmap_t *m, map_record_t *rec, int i)
 {
 	map_record_t *r = dictmap_at(m, i);
 	m->hash_list[i] = rec->hash;
@@ -337,14 +337,14 @@ static map_status_t dictmap_set_newentry(dictmap_t *m, map_record_t *rec, int i)
 	return PROTOMAP_ADDED;
 }
 
-static map_status_t dictmap_set(dictmap_t *m, map_record_t *rec)
+static map_status_t dictmap_Set(dictmap_t *m, map_record_t *rec)
 {
 	int i;
 	for (i = 0; i < DICTMAP_THRESHOLD; ++i) {
 		unsigned hash = m->hash_list[i];
 		map_record_t *r = dictmap_at(m, i);
 		if(hash == 0 && unlikely(r->type == 0)) {
-			return dictmap_set_newentry(m, rec, i);
+			return dictmap_Set_newentry(m, rec, i);
 		}
 		else if(hash == rec->hash) {
 			uintptr_t old = r->v;
@@ -354,7 +354,7 @@ static map_status_t dictmap_set(dictmap_t *m, map_record_t *rec)
 		}
 	}
 	dictmap_convert2hashmap(m);
-	return hashmap_set((hashmap_t *) m, rec);
+	return hashmap_Set((hashmap_t *) m, rec);
 }
 
 static map_record_t *dictmap_get(dictmap_t *m, unsigned hash)
@@ -369,7 +369,7 @@ static map_record_t *dictmap_get(dictmap_t *m, unsigned hash)
 	return NULL;
 }
 
-static map_status_t dictmap_api_set(Kprotomap_t *_m, unsigned hash, unsigned type, void *val, Kprotomap_t **ptr)
+static map_status_t dictmap_api_Set(Kprotomap_t *_m, unsigned hash, unsigned type, void *val, Kprotomap_t **ptr)
 {
 	(void)ptr;
 	dictmap_t *m = (dictmap_t *)_m;
@@ -377,7 +377,7 @@ static map_status_t dictmap_api_set(Kprotomap_t *_m, unsigned hash, unsigned typ
 	r.hash = hash;
 	r.type = type;
 	r.v  = (uintptr_t) val;
-	return dictmap_set(m, &r);
+	return dictmap_Set(m, &r);
 }
 
 static void dictmap_api_Remove(Kprotomap_t *_m, unsigned hash)
@@ -418,7 +418,7 @@ static void dictmap_api_dispose(Kprotomap_t *_m)
 
 static const protomap_api_t DIKClass_API = {
 	dictmap_api_get,
-	dictmap_api_set,
+	dictmap_api_Set,
 	dictmap_api_next,
 	dictmap_api_Remove,
 	dictmap_api_Init,
@@ -442,11 +442,11 @@ static void nullmap_api_Init(Kprotomap_t *m, unsigned init)
 	(void)m; (void) init;
 }
 
-static map_status_t nullmap_api_set(Kprotomap_t *_m, unsigned hash, unsigned type, void *val, Kprotomap_t **ptr)
+static map_status_t nullmap_api_Set(Kprotomap_t *_m, unsigned hash, unsigned type, void *val, Kprotomap_t **ptr)
 {
 	(void)_m;
 	*ptr = dictmap_new();
-	return dictmap_api_set(*ptr, hash, type, val, ptr);
+	return dictmap_api_Set(*ptr, hash, type, val, ptr);
 }
 
 static void nullmap_api_Remove(Kprotomap_t *_m, unsigned hash)
@@ -473,7 +473,7 @@ static void nullmap_api_dispose(Kprotomap_t *_m)
 
 static const protomap_api_t NULL_API = {
 	nullmap_api_get,
-	nullmap_api_set,
+	nullmap_api_Set,
 	nullmap_api_next,
 	nullmap_api_Remove,
 	nullmap_api_Init,

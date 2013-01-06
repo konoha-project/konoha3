@@ -118,7 +118,7 @@ static int DiagnosisSystemError(KonohaContext *kctx, int userFault)
 		return userFault | SystemFault;  /* running software can be wrong.. */
 	case EFAULT: /* 14 Bad address */
 		return userFault | SoftwareFault; /* At the C-Level */
-	case ENOTBLK: /* 15 Block device required */
+	case ENOTBLK: /* 15 Node device required */
 		return SystemFault; /* in case of unmount device */
 	case EBUSY: /* 16 Device or resource busy */
 		return SystemFault;
@@ -270,47 +270,47 @@ static int DiagnosisSystemError(KonohaContext *kctx, int userFault)
 	return userFault | SoftwareFault |SystemFault;
 }
 
-static kbool_t DiagnosisFetchCoverageLog(KonohaContext *kctx, const char *filename, int line)
-{
-#if HAVE_DB_H
-#define DATABASE "konoha_coverage.db"
-#define BUFSIZE 128
-
-	DB *db = NULL;
-	DBT DBkey = {};
-	DBT DBvalue = {};
-	char key[BUFSIZE];
-
-	if((db = dbopen(DATABASE, O_RDONLY, S_IRGRP | S_IWGRP, DB_BTREE, NULL)) == NULL) {
-		return false;
-	}
-
-	PLATAPI snprintf_i(key, BUFSIZE, "\"%s:%d\"", filename, line);
-
-	DBkey.data = key;
-	DBkey.size = strlen(key);
-
-	if(!db->get(db, &DBkey, &DBvalue, 0)) {
-		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"event\": \"DiagnosisErrorCode\", \"ScriptName\": \"%s\", \"ScriptLine:%d, \"Count\":%s, }", filename, line, (char *)DBvalue.data);
-		db->close(db);
-		return true;
-	}
-	else{
-		db->close(db);
-		return false;
-	}
-#else
-	return false;
-#endif
-}
+//static kbool_t DiagnosisFetchCoverageLog(KonohaContext *kctx, const char *filename, int line)
+//{
+//#if HAVE_DB_H
+//#define DATABASE "konoha_coverage.db"
+//#define BUFSIZE 128
+//
+//	DB *db = NULL;
+//	DBT DBkey = {};
+//	DBT DBvalue = {};
+//	char key[BUFSIZE];
+//
+//	if((db = dbopen(DATABASE, O_RDONLY, S_IRGRP | S_IWGRP, DB_BTREE, NULL)) == NULL) {
+//		return false;
+//	}
+//
+//	PLATAPI snprintf_i(key, BUFSIZE, "\"%s:%d\"", filename, line);
+//
+//	DBkey.data = key;
+//	DBkey.size = strlen(key);
+//
+//	if(!db->get(db, &DBkey, &DBvalue, 0)) {
+//		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"event\": \"DiagnosisErrorCode\", \"ScriptName\": \"%s\", \"ScriptLine:%d, \"Count\":%s, }", filename, line, (char *)DBvalue.data);
+//		db->close(db);
+//		return true;
+//	}
+//	else{
+//		db->close(db);
+//		return false;
+//	}
+//#else
+//	return false;
+//#endif
+//}
 
 static kbool_t DiagnosisCheckSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
 	DBG_P("filename='%s', line=%d", filename, line);
 	kbool_t res = false;
-#if HAVE_DB_H
-	res = DiagnosisFetchCoverageLog(kctx, filename, line);
-#endif
+//#if HAVE_DB_H
+//	res = DiagnosisFetchCoverageLog(kctx, filename, line);
+//#endif
 	return res;
 }
 

@@ -2,11 +2,11 @@
 
 import("jansson");
 import("curl");
-import("konoha.class");
-import("konoha.ns");  // konoha.const is obsolete
-import("konoha.string");
-import("konoha.bytes");
-import("konoha.file");
+import("Syntax.JavaStyleClass");
+import("MiniKonoha.NameSpace");  // konoha.const is obsolete
+import("JavaScript.String");
+import("Type.Bytes");
+import("Type.File");
 
 const BUFSIZ = 4096;
 

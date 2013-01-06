@@ -1,6 +1,6 @@
 //Written by Joseph
 
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("dscript.subproc");
 
 void test() {

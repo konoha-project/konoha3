@@ -5,10 +5,10 @@
  */
 
 import("cstyle");
-import("konoha.ns");
-import("js4.array");
-import("konoha.new");
-import("konoha.class");
+import("MiniKonoha.NameSpace");
+import("JavaScript.Array");
+//import("konoha.new"); Don't use this
+import("Syntax.JavaStyleClass");
 
 const N=9;
 int max(int a, int b) {

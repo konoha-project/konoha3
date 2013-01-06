@@ -1,9 +1,9 @@
 //Written by Joseph
 //Modified by Wakamori
 
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("cstyle"); // konoha.null is obsolate; use cstyle
-import("js4.array");
+import("JavaScript.Array");
 import("dscript.subproc");
 
 void test() {

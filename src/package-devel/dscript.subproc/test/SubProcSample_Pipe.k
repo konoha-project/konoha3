@@ -1,8 +1,9 @@
 // written by kimio
 
 import("dscript.subproc");
-import("konoha.file");
-import("js4.string");
+import("Type.File");
+import("JavaScript.String");
+import("JavaScript.Array");
 
 void test() {
 	// ls -la | cat -n

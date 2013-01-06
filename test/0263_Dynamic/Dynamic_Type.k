@@ -1,3 +1,3 @@
 // written by kimio
-import("konoha.dynamic");
+import("Type.Dynamic");
 dynamic

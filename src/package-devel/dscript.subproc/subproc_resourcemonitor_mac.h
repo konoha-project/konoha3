@@ -112,7 +112,7 @@ static void init_resourcemonitor(KonohaContext *kctx, subproc_resource_mon_t *mo
 static int setup_resourcemonitor (KonohaContext *kctx, subproc_resource_mon_t *mon) {
 	kern_return_t err;
 	if(setup_recv_port(&(mon->parent_recv_port)) != 0) return -1;
-	err = task_set_bootstrap_port(mach_task_self(), mon->parent_recv_port);
+	err = task_Set_bootstrap_port(mach_task_self(), mon->parent_recv_port);
 	if(err != KERN_SUCCESS) {
 		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 				LogText("@", "failed to setup resourcemonitor")
@@ -140,13 +140,13 @@ static int setup_resourcemonitor_for_chlid(KonohaContext *kctx, subproc_resource
 	if(send_port (mon->parent_recv_port, mach_task_self()) != 0) return -1;
 	if(send_port(mon->parent_recv_port, mon->child_recv_port) != 0) return -1;
 	if(recv_port(mon->child_recv_port, &bootstrap_port) != 0) return -1;
-	err = task_set_bootstrap_port(mach_task_self(), bootstrap_port);
+	err = task_Set_bootstrap_port(mach_task_self(), bootstrap_port);
 	return err;
 }
 
 
 static int attach_resourcemonitor_for_child(KonohaContext *kctx, subproc_resource_mon_t *mon, int pid) {
-	kern_return_t err = task_set_bootstrap_port(mach_task_self(), bootstrap_port);
+	kern_return_t err = task_Set_bootstrap_port(mach_task_self(), bootstrap_port);
 	if(recv_port(mon->parent_recv_port, &(mon->task)) != 0) return -1;
 	if(recv_port(mon->parent_recv_port, &(mon->child_recv_port)) != 0) return -1;
 	if(send_port(mon->child_recv_port, bootstrap_port) != 0) return -1;

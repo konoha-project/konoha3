@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 import("konoha.new")
-import("js4.array");
-import("konoha.object");
+import("JavaScript.Array");
+import("JavaStyle.Object");
 
 void test() {
 	Object[] a = new Object[10];

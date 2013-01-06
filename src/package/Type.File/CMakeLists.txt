@@ -1,0 +1,5 @@
+set(PACKAGE_SOURCE_CODE File_glue.c)
+##if(NOT MINGW AND NOT MSVC)
+##include_directories(${CMAKE_CURRENT_BINARY_DIR})
+add_konoha_package(Type.File)
+##endif()

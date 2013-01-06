@@ -5,9 +5,9 @@
  */
 
 import("cstyle");
-import("konoha.float");
-import("konoha.ns");
-import("konoha.math");
+import("Type.Float");
+import("MiniKonoha.NameSpace");
+import("JavaScript.Math");
 const N=2500000;
 
 void partial(int n) {

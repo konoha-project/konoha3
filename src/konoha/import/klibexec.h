@@ -708,7 +708,7 @@ static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *o, ksym
 {
 	kObjectVar *v = (kObjectVar *)o;
 	if(ty == 0) ty = kObject_class(v)->typeId;
-	protomap_set((Kprotomap_t **)&v->h.prototypePtr, key, ty | KTypeAttr_Boxed, (void *)val);
+	protomap_Set((Kprotomap_t **)&v->h.prototypePtr, key, ty | KTypeAttr_Boxed, (void *)val);
 	PLATAPI WriteBarrier(kctx, v);
 }
 
@@ -716,7 +716,7 @@ static void kObjectProto_SetUnboxValue(KonohaContext *kctx, kAbstractObject *o, 
 {
 	kObjectVar *v = (kObjectVar *)o;
 	//PLATAPI WriteBarrier(kctx, v);   // why ? need this? by kimio
-	protomap_set((Kprotomap_t **)&v->h.prototypePtr, key, ty, (void *)unboxValue);
+	protomap_Set((Kprotomap_t **)&v->h.prototypePtr, key, ty, (void *)unboxValue);
 }
 
 static void kObjectProto_RemoveKey(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key)
@@ -762,14 +762,21 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 	else {
 		w->values[w->pos].unboxValue = d->unboxValue;
 	}
-	kObject_class(d->ObjectValue)->p(kctx, w->values, w->pos, w->wb);
 	w->count++;
+	int i;
+	for(i = 0; i < w->pos; i++) {
+		if(w->values[i].asObject == d->ObjectValue) {
+			KLIB KBuffer_Write(kctx, w->wb, "...", 3);
+			return;
+		}
+	}
+	kObject_class(d->ObjectValue)->p(kctx, w->values, w->pos, w->wb);
 }
 
 static int kObjectProto_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb, int count)
 {
 	struct wbenv w = {values, pos+1, wb, count};
-	KLIB kObjectProto_DoEach(kctx, values[0].asObject, &w, dumpProto);
+	KLIB kObjectProto_DoEach(kctx, values[pos].asObject, &w, dumpProto);
 	return w.count;
 }
 

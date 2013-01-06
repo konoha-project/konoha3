@@ -2,7 +2,7 @@
 /*
    This script should be executed after running SystemAccept.k
    */
-import("konoha.bytes");
+import("Type.Bytes");
 import("posix.socket");
 
 void test() {

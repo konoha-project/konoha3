@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("js4.regexp");
+import("JavaScript.Regexp");
 
 void test() {
 	RegExp patt = /世界/gi;

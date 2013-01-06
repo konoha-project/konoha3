@@ -1,3 +1,3 @@
 // written by kimio
-import("konoha.var");
+import("Type.StaticVar");
 var

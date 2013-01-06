@@ -1,4 +1,4 @@
-import("js4.array");
+import("JavaScript.Array");
 
 void test() {
 	String[] sa = ["hello", "new", "world"];

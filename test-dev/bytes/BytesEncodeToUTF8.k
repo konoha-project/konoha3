@@ -1,6 +1,6 @@
 /* written by shinpei nakata */
 
-import("konoha.bytes");
+import("Type.Bytes");
 
 void test () {
 	 assert("hoge".toBytes().encodeTo("UTF-8").toString() == "hoge");

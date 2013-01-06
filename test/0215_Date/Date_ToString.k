@@ -1,8 +1,8 @@
 // written by okamoto
 
-import("java2.string");
-import("js4.regexp");
-import("js4.date");
+import("JavaScript.String");
+import("JavaScript.Regexp");
+import("JavaScript.Date");
 
 void test() {
 	Date d = new Date();

@@ -1,7 +1,7 @@
 //written by Joseph
 
-import("konoha.new");
-import("js4.regexp");
+//import("konoha.new"); Don't use this
+import("JavaScript.Regexp");
 
 void test() {
 	RegExp myExp = new RegExp("Hello, world!");

@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.i");
+import("MiniKonoha.Man");
 import("cstyle"); // konoha.int was obsolete
 man(int);
 

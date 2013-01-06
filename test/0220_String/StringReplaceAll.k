@@ -1,4 +1,4 @@
-import("java2.string")
+import("Java.String")
 
 void f() {
     String x = "あいうえああ";

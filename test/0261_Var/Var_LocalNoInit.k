@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.var");
+import("Type.StaticVar");
 
 void test() {
 	var n;

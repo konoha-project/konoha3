@@ -201,6 +201,13 @@ static const char _utf8len[] = {
 };
 #endif
 
+//static kinline void Method_SetProceedMethod(KonohaContext *kctx, kMethod *mtd, kMethod *mtd2)
+//{
+//	DBG_ASSERT(mtd != mtd2);
+//	DBG_ASSERT(mtd->proceedNUL == NULL);
+//	KFieldInit(mtd, ((kMethodVar *)mtd)->proceedNUL, mtd2);
+//}
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

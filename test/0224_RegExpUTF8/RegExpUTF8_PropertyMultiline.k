@@ -1,7 +1,7 @@
 //written by Joseph
 
-import("konoha.class");
-import("js4.regexp");
+import("Syntax.JavaStyleClass");
+import("JavaScript.Regexp");
 
 void test() {
 	RegExp patt = /世界/m;

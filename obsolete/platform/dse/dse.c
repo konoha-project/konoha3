@@ -232,7 +232,7 @@ static void DSE_delete(DSE *dse);
 //			ty = VirtualType_Text;
 //			unboxValue = (uintptr_t)(p+1);
 //		}
-//		KLIB kNameSpace_SetConstData(kctx, KNULL(NameSpace), key, ty, unboxValue, true/*isOverride*/, trace);
+//		KLIB kNameSpace_SetConstData(kctx, KNULL(NameSpace), key, ty, unboxValue, trace);
 //	}
 //	else {
 //		fprintf(stdout, "invalid define option: use -D<key>=<value>\n");
@@ -391,19 +391,19 @@ static void DSE_defineConstData(DSE *dse, KonohaContext *kctx, Message *msg)
 			{"DSE_SCRIPT_DIR", VirtualType_Text, dse->scriptdir},
 			{}
 		};
-		KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(TextData), false/*isOverride*/, 0);
+		KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(TextData), 0);
 	}
 	else {
 		KDEFINE_TEXT_CONST TextData[] = {
 			{"DSE_SCRIPT_DIR", VirtualType_Text, dse->scriptdir},
 			{}
 		};
-		KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(TextData), false/*isOverride*/, 0);
+		KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(TextData), 0);
 	}
 	KDEFINE_INT_CONST IntData[] = {
 		{"DSE_DEBUG", KType_int, verbose_debug}, {}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(IntData), false/*isOverride*/, 0);
+	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(IntData), 0);
 }
 
 KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);

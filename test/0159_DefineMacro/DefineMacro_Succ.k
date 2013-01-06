@@ -1,6 +1,6 @@
 // written by kimio
 
-import("konoha.ns");
+import("MiniKonoha.NameSpace");
 DefineMacro("succ", 1, "X (X) + 1");
 System.p(succ(1));
 

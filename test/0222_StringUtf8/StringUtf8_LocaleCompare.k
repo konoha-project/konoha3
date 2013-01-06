@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("java2.string");
+import("JavaScript.String");
 
 void test() {
 	assert("あ".localeCompare("あ") == 0);

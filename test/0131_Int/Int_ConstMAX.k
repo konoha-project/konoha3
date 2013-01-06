@@ -1,5 +1,6 @@
 // written by kimio kuramitsu
 
-import("cstyle"); // konoha.int was obsolete
+import("Syntax.CStyleBitwiseOperator");
+import("cstyle"); /* for INT_MAX */
 
 assert(0 < INT_MAX);

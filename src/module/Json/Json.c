@@ -85,7 +85,7 @@ static struct JsonBuf *CreateJson(KonohaContext *kctx, struct JsonBuf *jsonbuf, 
 static kbool_t ParseJson(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *text, size_t length, KTraceInfo *trace)
 {
 	JSON json = parseJSON((JSONMemoryPool *)(PLATAPI JsonHandler), text, text + length);
-	if (IsError(json.val)) {
+	if(IsError(json.val)) {
 		KLIB KRuntime_raise(kctx, KException_("InvalidJsonText"), SoftwareFault, NULL, trace->baseStack);
 	}
 	jsonbuf->json_i = json.bits;

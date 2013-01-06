@@ -1,6 +1,7 @@
 // written by kimio kuramitsu
 
-import("cstyle"); // konoha.int was obsolete
+import("Syntax.CStyleBitwiseOperator"); // konoha.int was obsolete
+import("cstyle", "$Number");
 
 void test() {
 	assert(1_000_000 == 1000000);

@@ -1,7 +1,7 @@
 //Written by Joseph
 //Modified by Wakamori
 
-import("konoha.new");
+//import("konoha.new"); Don't use this
 import("dscript.subproc");
 
 void test() {

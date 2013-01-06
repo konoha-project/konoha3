@@ -41,7 +41,7 @@ static void ERROR_UnclosedToken(KonohaContext *kctx, kTokenVar *tk, const char *
 	}
 }
 
-static int ParseFirstIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int pos)
+static int TokenizeFirstIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int pos)
 {
 	int ch, indent = 0;
 	while((ch = tokenizer->source[pos++]) != 0) {
@@ -50,14 +50,14 @@ static int ParseFirstIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *token
 		break;
 	}
 	if(IS_NOTNULL(tk) && (indent > 0 || tokenizer->currentLine != 0)) {
-		tk->unresolvedTokenType = TokenType_INDENT;
+		tk->tokenType = TokenType_Indent;
 		tk->indent = indent;
 		tk->uline = tokenizer->currentLine;
 	}
 	return pos-1;
 }
 
-static int ParseIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int pos)
+static int TokenizeIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int pos)
 {
 	int ch, indent = 0;
 	while((ch = tokenizer->source[pos++]) != 0) {
@@ -66,35 +66,35 @@ static int ParseIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer,
 		break;
 	}
 	if(IS_NOTNULL(tk)) {
-		tk->unresolvedTokenType = TokenType_INDENT;
+		tk->tokenType = TokenType_Indent;
 		tk->indent = indent;
 		tk->uline = tokenizer->currentLine;
 	}
 	return pos-1;
 }
 
-static int ParseLineFeed(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int pos)
+static int TokenizeLineFeed(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int pos)
 {
 	if(tokenizer->currentLine != 0) {
 		tokenizer->currentLine += 1;
 	}
-	return ParseIndent(kctx, tk, tokenizer, pos+1);
+	return TokenizeIndent(kctx, tk, tokenizer, pos+1);
 }
 
-static int ParseBackSlash(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int pos)
+static int TokenizeBackSlash(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int pos)
 {
 	if(tokenizer->source[pos+1] == '\n') {
 		if(tokenizer->currentLine != 0) {
 			tokenizer->currentLine += 1;
 		}
-		return ParseIndent(kctx, (kTokenVar *)KNULL(Token), tokenizer, pos+2);
+		return TokenizeIndent(kctx, (kTokenVar *)KNULL(Token), tokenizer, pos+2);
 	}
 	return pos+1;
 }
 
-static int ParseNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int TokenizeNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
-	int ch, pos = tok_start, tokenType = TokenType_INT;
+	int ch, pos = tok_start, tokenType = TokenType_Number;
 	const char *ts = tokenizer->source;
 	while((ch = ts[pos++]) != 0) {
 		if(ch == '.') {
@@ -107,7 +107,7 @@ static int ParseNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer,
 	}
 	if(IS_NOTNULL(tk)) {
 		KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, ts + tok_start, (pos-1)-tok_start, StringPolicy_ASCII));
-		tk->unresolvedTokenType = tokenType;
+		tk->tokenType = tokenType;
 	}
 	return pos - 1;  // next
 }
@@ -115,21 +115,19 @@ static int ParseNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer,
 static void kToken_SetSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *t, size_t len)
 {
 	if(IS_NOTNULL(tk)) {
-		ksymbol_t kw = KAsciiSymbol(t, len, KSymbol_Noname);
-		if(kw == KSymbol_Unmask(kw)) {
-			KFieldSet(tk, tk->text, KSymbol_GetString(kctx, kw));
+		ksymbol_t symbol = KAsciiSymbol(t, len, _NEWID);
+		if(symbol == KSymbol_Unmask(symbol)) {
+			KFieldSet(tk, tk->text, KSymbol_GetString(kctx, symbol));
 		}
 		else {
 			KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, t, len, StringPolicy_ASCII));
 		}
-		tk->unresolvedTokenType = TokenType_SYMBOL;
-		if(len == 1) {
-			kToken_SetHintChar(tk, 0, t[0]);
-		}
+		tk->tokenType = TokenType_Symbol;
+		tk->symbol = symbol;
 	}
 }
 
-static int ParseSymbol(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int TokenizeSymbol(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	int ch, pos = tok_start;
 	const char *ts = tokenizer->source;
@@ -141,51 +139,88 @@ static int ParseSymbol(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer,
 	return pos - 1;  // next
 }
 
-static int ParseSingleOperator(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int TokenizeSingleOperator(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	kToken_SetSymbolText(kctx, tk,  tokenizer->source + tok_start, 1);
 	return tok_start+1;
 }
 
-static int ParseSemiColon(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int TokenizeSemiColon(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	kToken_SetSymbolText(kctx, tk,  tokenizer->source + tok_start, 1);
-	if(IS_NOTNULL(tk)) {
-		kToken_Set(StatementSeparator, tk, true);
+	return tok_start+1;
+}
+
+static int TokenizeOpenParenthesis(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+{
+	if(IS_NOTNULL(tk)) {  // pre-resolved
+		kToken_SetSymbolText(kctx, tk, tokenizer->source + tok_start, 1);
+		tk->tokenType = KSymbol_ParenthesisGroup;
+		kToken_Set(OpenGroup, tk, true);
 	}
 	return tok_start+1;
 }
 
-static int ParseAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int TokenizeCloseParenthesis(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+{
+	if(IS_NOTNULL(tk)) {  // pre-resolved
+		kToken_SetSymbolText(kctx, tk, tokenizer->source + tok_start, 1);
+		tk->tokenType = KSymbol_ParenthesisGroup;
+		kToken_Set(CloseGroup, tk, true);
+	}
+	return tok_start+1;
+}
+
+static int TokenizeOpenBracket(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+{
+	if(IS_NOTNULL(tk)) {  // pre-resolved
+		kToken_SetSymbolText(kctx, tk, tokenizer->source + tok_start, 1);
+		tk->tokenType = KSymbol_BracketGroup;
+		kToken_Set(OpenGroup, tk, true);
+	}
+	return tok_start+1;
+}
+
+static int TokenizeCloseBracket(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+{
+	if(IS_NOTNULL(tk)) {  // pre-resolved
+		kToken_SetSymbolText(kctx, tk, tokenizer->source + tok_start, 1);
+		tk->tokenType = KSymbol_BracketGroup;
+		kToken_Set(CloseGroup, tk, true);
+	}
+	return tok_start+1;
+}
+
+static int TokenizeAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	// parse @Annotation:
 	// This is part of JStyle dependent. If you don't want to parse, override this.
 	if(isalnum(tokenizer->source[tok_start+1])) {
-		int pos = ParseSymbol(kctx, tk, tokenizer, tok_start+1);
+		int pos = TokenizeSymbol(kctx, tk, tokenizer, tok_start+1);
 		if(IS_NOTNULL(tk)) {  // pre-resolved
-			tk->resolvedSymbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId) | KSymbolAttr_Annotation;
-			tk->resolvedSyntaxInfo = KSyntax_(tokenizer->ns, KSymbol_SymbolPattern);
+			tk->tokenType = KSymbol_SymbolPattern;
+			tk->symbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId) | KSymbolAttr_Annotation;
 		}
 		return pos;
 	}
-	return ParseSingleOperator(kctx, tk, tokenizer, tok_start);
+	return TokenizeSingleOperator(kctx, tk, tokenizer, tok_start);
 }
 
 //static KMETHOD TokenFunc_JavaStyleAnnotation(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	VAR_TokenFunc(tk, source);
 //	if(isalnum(tokenizer->source[tok_start+1])) {  // tokenizer, tok_start is older style of tokneizer
-//		int pos = ParseSymbol(kctx, tk, tokenizer, tok_start+1);
+//		int pos = TokenizeSymbol(kctx, tk, tokenizer, tok_start+1);
 //		if(IS_NOTNULL(tk)) {  // pre-resolved
-//			tk->resolvedSymbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId) | SymbolAttr_Annotation;
-//			tk->resolvedSyntaxInfo = KSyntax_(tokenizer->ns, KSymbol_SymbolPattern);
+//			tk->symbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId) | KSymbolAttr_Annotation;
+//			tk->resolvedSyntaxInfo = kSyntax_(tokenizer->ns, KSymbol_SymbolPattern);
 //		}
 //		KReturnUnboxValue(pos - tok_start);
 //	}
 //	KReturnUnboxValue(0);
 //}
 
-static int ParseOperator(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int TokenizeOperator(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	int ch, pos = tok_start;
 	while((ch = tokenizer->source[pos++]) != 0) {
@@ -203,7 +238,7 @@ static int ParseOperator(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenize
 	return pos-1;
 }
 
-static int ParseLineComment(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int TokenizeLineComment(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	int ch, pos = tok_start;
 	while((ch = tokenizer->source[pos++]) != 0) {
@@ -212,7 +247,7 @@ static int ParseLineComment(KonohaContext *kctx, kTokenVar *tk, Tokenizer *token
 	return pos-1;/*EOF*/
 }
 
-static int ParseCStyleBlockComment(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int TokenizeCStyleBlockComment(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	int ch, prev = 0, level = 1, pos = tok_start + 2;
 	/*@#nnnn is line number */
@@ -236,19 +271,33 @@ static int ParseCStyleBlockComment(KonohaContext *kctx, kTokenVar *tk, Tokenizer
 	return pos-1;/*EOF*/
 }
 
-static int ParseSlash(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int TokenizeSlash(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	const char *ts = tokenizer->source + tok_start;
 	if(ts[1] == '/') {
-		return ParseLineComment(kctx, tk, tokenizer, tok_start);
+		return TokenizeLineComment(kctx, tk, tokenizer, tok_start);
 	}
 	if(ts[1] == '*') {
-		return ParseCStyleBlockComment(kctx, tk, tokenizer, tok_start);
+		return TokenizeCStyleBlockComment(kctx, tk, tokenizer, tok_start);
 	}
-	return ParseOperator(kctx, tk, tokenizer, tok_start);
+	return TokenizeOperator(kctx, tk, tokenizer, tok_start);
 }
 
-static int skipBackQuoteOrNewLineOrDoubleQuote(const char *source, int *posPtr, int *hasUTF8)
+static int TokenizeMember(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+{
+	const char *ts = tokenizer->source + tok_start;
+	if(isalpha(ts[1]) || ts[1] < 0) {
+		int pos = TokenizeSymbol(kctx, tk, tokenizer, tok_start+1);
+		tk->tokenType = TokenType_Member;
+		return pos;
+	}
+	if(isdigit(ts[1])) {
+		return TokenizeNumber(kctx, tk, tokenizer, tok_start);
+	}
+	return TokenizeOperator(kctx, tk, tokenizer, tok_start);
+}
+
+static int SkipBackQuoteOrNewLineOrDoubleQuote(const char *source, int *posPtr, int *hasUTF8)
 {
 	char ch;
 	int pos = *posPtr;
@@ -265,12 +314,12 @@ static int skipBackQuoteOrNewLineOrDoubleQuote(const char *source, int *posPtr, 
 	return ch;
 }
 
-static int ParseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int TokenizeDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	int pos = tok_start + 1, hasUTF8 = false, hasBQ = false;
 	int ch = 0;
 	while(true) {
-		ch = skipBackQuoteOrNewLineOrDoubleQuote(tokenizer->source, &pos, &hasUTF8);
+		ch = SkipBackQuoteOrNewLineOrDoubleQuote(tokenizer->source, &pos, &hasUTF8);
 		if(ch == 0 || ch == '"' || ch == '\n') {
 			break;
 		}
@@ -290,7 +339,7 @@ static int ParseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, Tokenizer *
 					tokenizer->source + tok_start + 1, length,
 					hasUTF8 ? StringPolicy_UTF8 : StringPolicy_ASCII);
 			KFieldSet(tk, tk->text, text);
-			tk->unresolvedTokenType = TokenType_TEXT;
+			tk->tokenType = TokenType_Text;
 		}
 		return pos;
 	}
@@ -298,24 +347,24 @@ static int ParseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, Tokenizer *
 	return pos - 1;
 }
 
-static int ParseWhiteSpace(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int TokenizeWhiteSpace(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	size_t size = kArray_size(tokenizer->tokenList);
 	if(size > 0) {
 		kTokenVar *tk = tokenizer->tokenList->TokenVarItems[size-1];
-		if(tk->uline == tokenizer->currentLine && tk->unresolvedTokenType != TokenType_INDENT) {
+		if(tk->uline == tokenizer->currentLine && tk->tokenType != TokenType_Indent) {
 			kToken_Set(BeforeWhiteSpace, tk, true);
 		}
 	}
 	return tok_start+1;
 }
 
-static int ParseSkip(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int TokenizeSkip(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	return tok_start+1;
 }
 
-static int ParseUndefinedToken(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int TokenizeUndefinedToken(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	if(IS_NOTNULL(tk)) {
 		kToken_ToError(kctx, tk, ErrTag, "undefined token character: %c (ascii=%x)", tokenizer->source[tok_start], tokenizer->source[tok_start]);
@@ -325,50 +374,50 @@ static int ParseUndefinedToken(KonohaContext *kctx, kTokenVar *tk, Tokenizer *to
 	return tok_start+1;
 }
 
-static int ParseLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start);
+static int TokenizeLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start);
 
 static const TokenizeFunc MiniKonohaTokenMatrix[] = {
-	ParseSkip,  /* KonohaChar_Null */
-	ParseSkip,  /* KonohaChar_Undefined */
-	ParseNumber,   /* KonohaChar_Digit */
-	ParseSymbol,
-	ParseSymbol,
-	ParseUndefinedToken,  /* KonohaChar_Unicode */
-	ParseLineFeed,
-	ParseWhiteSpace,
-	ParseWhiteSpace,      /* KonohaChar_Space */
-	ParseSingleOperator, /* KonohaChar_OpenParenthesis */
-	ParseSingleOperator, /* KonohaChar_CloseParenthesis */
-	ParseSingleOperator, /* KonohaChar_OpenBracket */
-	ParseSingleOperator, /* KonohaChar_CloseBracket */
-	ParseLazyBlock, /* KonohaChar_OpenBrace */
-	ParseSingleOperator, /* KonohaChar_CloseBrace */
-	ParseOperator,  /* KonohaChar_LessThan */
-	ParseOperator,  /* KonohaChar_LessThan */
-	ParseUndefinedToken,  /* parseUndefinedToken */
-	ParseDoubleQuotedText,  /* KonohaChar_DoubleQuote */
-	ParseUndefinedToken,  /* KonohaChar_BackQuote */
-	ParseOperator, /* KonohaChar_Okidoki */
-	ParseOperator, /* KonohaChar_Sharp */
-	ParseOperator, /* KonohaChar_Dollar */
-	ParseOperator, /* KonohaCharKonohaChar_Percent */
-	ParseOperator, /* KonohaChar_And */
-	ParseOperator, /* KonohaChar_Star */
-	ParseOperator, /* KonohaChar_Plus */
-	ParseSingleOperator,/* KonohaChar_Comma */
-	ParseOperator, /* KonohaChar_Minus */
-	ParseSingleOperator, /* KonohaChar_Dot */
-	ParseSlash, /* KonohaChar_Slash */
-	ParseOperator, /* KonohaChar_Colon */
-	ParseSemiColon, /* KonohaChar_SemiColon */
-	ParseOperator, /* KonohaChar_Equal */
-	ParseOperator, /* KonohaChar_Question */
-	ParseAnnotation, /* KonohaChar_AtMark */
-	ParseOperator, /* KonohaChar_Var */
-	ParseOperator, /* KonohaChar_Childer */
-	ParseBackSlash/*ParseUndefinedToken*/,  /* KonohaChar_BackSlash */
-	ParseOperator, /* KonohaChar_Hat */
-	ParseSymbol,  /* KonohaChar_Underbar */
+	TokenizeSkip,  /* KonohaChar_Null */
+	TokenizeSkip,  /* KonohaChar_Undefined */
+	TokenizeNumber,   /* KonohaChar_Digit */
+	TokenizeSymbol,
+	TokenizeSymbol,
+	TokenizeUndefinedToken,  /* KonohaChar_Unicode */
+	TokenizeLineFeed,
+	TokenizeWhiteSpace,
+	TokenizeWhiteSpace,      /* KonohaChar_Space */
+	TokenizeOpenParenthesis, /*TokenizeSingleOperator,  KonohaChar_OpenParenthesis */
+	TokenizeCloseParenthesis, /*TokenizeSingleOperator,  KonohaChar_CloseParenthesis */
+	TokenizeOpenBracket, /*TokenizeSingleOperator, KonohaChar_OpenBracket */
+	TokenizeCloseBracket, /*TokenizeSingleOperator, KonohaChar_CloseBracket */
+	TokenizeLazyBlock, /* KonohaChar_OpenBrace */
+	TokenizeSingleOperator, /* KonohaChar_CloseBrace */
+	TokenizeOperator,  /* KonohaChar_LessThan */
+	TokenizeOperator,  /* KonohaChar_LessThan */
+	TokenizeUndefinedToken,  /* parseUndefinedToken */
+	TokenizeDoubleQuotedText,  /* KonohaChar_DoubleQuote */
+	TokenizeUndefinedToken,  /* KonohaChar_BackQuote */
+	TokenizeOperator, /* KonohaChar_Okidoki */
+	TokenizeOperator, /* KonohaChar_Sharp */
+	TokenizeOperator, /* KonohaChar_Dollar */
+	TokenizeOperator, /* KonohaCharKonohaChar_Percent */
+	TokenizeOperator, /* KonohaChar_And */
+	TokenizeOperator, /* KonohaChar_Star */
+	TokenizeOperator, /* KonohaChar_Plus */
+	TokenizeSingleOperator,/* KonohaChar_Comma */
+	TokenizeOperator, /* KonohaChar_Minus */
+	TokenizeMember/*TokenizeSingleOperator*/, /* KonohaChar_Dot */
+	TokenizeSlash, /* KonohaChar_Slash */
+	TokenizeOperator, /* KonohaChar_Colon */
+	TokenizeSemiColon, /* KonohaChar_SemiColon */
+	TokenizeOperator, /* KonohaChar_Equal */
+	TokenizeOperator, /* KonohaChar_Question */
+	TokenizeAnnotation, /* KonohaChar_AtMark */
+	TokenizeOperator, /* KonohaChar_Var */
+	TokenizeOperator, /* KonohaChar_Childer */
+	TokenizeBackSlash, /* KonohaChar_BackSlash */
+	TokenizeOperator, /* KonohaChar_Hat */
+	TokenizeSymbol,  /* KonohaChar_Underbar */
 };
 
 static void CallSugarMethod(KonohaContext *kctx, KonohaStack *sfp, kFunc *fo, int argc, kObject *obj)
@@ -429,26 +478,25 @@ static int Tokenizer_DoEach(KonohaContext *kctx, Tokenizer *tokenizer, int kchar
 	return pos;
 }
 
-
 static void Tokenizer_Tokenize(KonohaContext *kctx, Tokenizer *tokenizer)
 {
 	int ch, pos = 0;
 	kTokenVar *tk = new_(TokenVar, 0, OnGcStack);
-	pos = ParseFirstIndent(kctx, tk, tokenizer, pos);
+	pos = TokenizeFirstIndent(kctx, tk, tokenizer, pos);
 	while((ch = AsciiToKonohaChar(tokenizer->source[pos])) != 0) {
-		if(tk->unresolvedTokenType != 0) {
+		if(tk->tokenType != 0) {
 			KLIB kArray_Add(kctx, tokenizer->tokenList, tk);
 			tk = new_(TokenVar, 0, OnGcStack);
 			tk->uline = tokenizer->currentLine;
 		}
 		pos = Tokenizer_DoEach(kctx, tokenizer, ch, pos, tk);
 	}
-	if(tk->unresolvedTokenType != 0) {
+	if(tk->tokenType != 0) {
 		KLIB kArray_Add(kctx, tokenizer->tokenList, tk);
 	}
 }
 
-static int ParseLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int TokenizeLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	int ch, level = 1, pos = tok_start + 1;
 	while((ch = AsciiToKonohaChar(tokenizer->source[pos])) != 0) {
@@ -457,7 +505,7 @@ static int ParseLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 			if(level == 0) {
 				if(IS_NOTNULL(tk)) {
 					KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, tokenizer->source + tok_start + 1, ((pos-2)-(tok_start)+1), 0));
-					tk->unresolvedTokenType = TokenType_CODE;
+					tk->tokenType = TokenType_LazyBlock;
 				}
 				return pos + 1;
 			}
@@ -499,21 +547,20 @@ static kFunc **kNameSpace_tokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns)
 	return funcMatrix + KCHAR_MAX;
 }
 
-static void KTokenSeq_Tokenize(KonohaContext *kctx, KTokenSeq *tokens, const char *source, kfileline_t uline)
+static void Tokenize(KonohaContext *kctx, kNameSpace *ns, const char *source, kfileline_t uline, kArray *bufferList)
 {
 	INIT_GCSTACK();
 	Tokenizer tenv = {};
 	tenv.source = source;
 	tenv.sourceLength = strlen(source);
 	tenv.currentLine  = uline;
-	tenv.tokenList    = tokens->tokenList;
+	tenv.tokenList    = bufferList;
 	tenv.tabsize = 4;
-	tenv.ns = tokens->ns;
-	tenv.cFuncItems = kNameSpace_tokenMatrix(kctx, tokens->ns);
-	tenv.FuncItems  = kNameSpace_tokenFuncMatrix(kctx, tokens->ns);
+	tenv.ns = ns;
+	tenv.cFuncItems = kNameSpace_tokenMatrix(kctx, ns);
+	tenv.FuncItems  = kNameSpace_tokenFuncMatrix(kctx, ns);
 	tenv.preparedString = KLIB new_kString(kctx, _GcStack, tenv.source, tenv.sourceLength, StringPolicy_ASCII|StringPolicy_TEXT|StringPolicy_NOPOOL);
 	Tokenizer_Tokenize(kctx, &tenv);
-	KTokenSeq_End(kctx, tokens);
 	RESET_GCSTACK();
 }
 

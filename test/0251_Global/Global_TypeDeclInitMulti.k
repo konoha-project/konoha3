@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.global");
+import("Syntax.GlobalVariable");
 
 int x=1,y=2,z=3;
 

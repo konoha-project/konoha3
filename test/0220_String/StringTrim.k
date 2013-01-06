@@ -1,6 +1,6 @@
 //written by takeo onoda
 
-import("java2.string");
+import("Java.String");
 
 void test() {
 	assert("  \t\n\t foo \t\n bar \t\n\t".trim() == "foo \t\n bar");

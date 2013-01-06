@@ -31,7 +31,7 @@ extern "C" {
 
 #ifdef K_USE_PTHREAD
 
-static int verbose_gc = 0;
+//static int verbose_gc = 0;
 
 #define USE_CONCURRENT_GC 1
 #include "../BitmapGC/bmgc.h"

@@ -1,6 +1,6 @@
 /* this test is written by shinpei nakata */
-import("cstyle"); // konoha.int was obsolete
-
+import("Syntax.CStyleBitwiseOperator");
+import("cstyle"); /* for INT_MAX, INT_MIN */
 void int_operator_boundaryOperation_boundaryOperation() { 
 	int max = INT_MAX;
 	int min = INT_MIN;
