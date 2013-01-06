@@ -80,14 +80,16 @@ static kbool_t Libevent_event_PackupNameSpace(KonohaContext *kctx, kNameSpace *n
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
-#ifdef	CUTCUT
-	/* You can define constant variable with the following procedures. */
 	KDEFINE_INT_CONST IntData[] = {
-		{"NARUTO_AGE", KType_int, 18},
+		{KDefineConstInt(EV_TIMEOUT)},
+		{KDefineConstInt(EV_READ)},
+		{KDefineConstInt(EV_WRITE)},
+		{KDefineConstInt(EV_SIGNAL)},
+		{KDefineConstInt(EV_PERSIST)},
+		{KDefineConstInt(EV_ET)},
 		{} /* <= sentinel */
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
-#endif
 	return true;
 }
 
@@ -106,23 +108,5 @@ KDEFINE_PACKAGE *libevent_event_Init(void)
 }
 
 #ifdef __cplusplus
-}
-#endif
-
-
-
-#if CUTCUT
-//## String Person.say();
-static KMETHOD Libevent_event_add(KonohaContext *kctx, KonohaStack *sfp)
-{
-	struct Libevent *ev = (struct Libevent *) sfp[0].asObject;
-
-	kString *name = p->name;
-	/* When you want to operate with a raw string, please use kString_text() macro
-	 * to acquire the pointer of a raw string. */
-	const char *text = kString_text(name);
-	char *buf = (char *)alloca(16 + kString_size(name));
-	sprintf(buf, "hello , %s!", text);
-	KReturn(KLIB new_kString(kctx, OnStack, buf, strlen(buf), StringPolicy_TEXT));
 }
 #endif
