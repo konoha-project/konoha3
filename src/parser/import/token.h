@@ -50,7 +50,7 @@ static int TokenizeFirstIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *to
 		break;
 	}
 	if(IS_NOTNULL(tk) && (indent > 0 || tokenizer->currentLine != 0)) {
-		tk->tokenType = TokenType_INDENT;
+		tk->tokenType = TokenType_Indent;
 		tk->indent = indent;
 		tk->uline = tokenizer->currentLine;
 	}
@@ -66,7 +66,7 @@ static int TokenizeIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 		break;
 	}
 	if(IS_NOTNULL(tk)) {
-		tk->tokenType = TokenType_INDENT;
+		tk->tokenType = TokenType_Indent;
 		tk->indent = indent;
 		tk->uline = tokenizer->currentLine;
 	}
@@ -94,7 +94,7 @@ static int TokenizeBackSlash(KonohaContext *kctx, kTokenVar *tk, Tokenizer *toke
 
 static int TokenizeNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
-	int ch, pos = tok_start, tokenType = TokenType_NUM;
+	int ch, pos = tok_start, tokenType = TokenType_Number;
 	const char *ts = tokenizer->source;
 	while((ch = ts[pos++]) != 0) {
 		if(ch == '.') {
@@ -115,14 +115,15 @@ static int TokenizeNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 static void kToken_SetSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *t, size_t len)
 {
 	if(IS_NOTNULL(tk)) {
-		ksymbol_t kw = KAsciiSymbol(t, len, KSymbol_Noname);
+		ksymbol_t kw = KAsciiSymbol(t, len, _NEWID);
 		if(kw == KSymbol_Unmask(kw)) {
 			KFieldSet(tk, tk->text, KSymbol_GetString(kctx, kw));
 		}
 		else {
 			KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, t, len, StringPolicy_ASCII));
 		}
-		tk->tokenType = TokenType_SYMBOL;
+		tk->tokenType = TokenType_Symbol;
+		tk->symbol = kw;
 		if(len == 1) {
 			kToken_SetHintChar(tk, 0, t[0]);
 		}
@@ -149,8 +150,8 @@ static int TokenizeSingleOperator(KonohaContext *kctx, kTokenVar *tk, Tokenizer 
 
 static int TokenizeSemiColon(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
-	kToken_SetSymbolText(kctx, tk,  tokenizer->source + tok_start, 1);
 	if(IS_NOTNULL(tk)) {
+		kToken_SetSymbolText(kctx, tk,  tokenizer->source + tok_start, 1);
 		kToken_Set(StatementSeparator, tk, true);
 	}
 	return tok_start+1;
@@ -344,7 +345,7 @@ static int TokenizeDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, Tokenize
 					tokenizer->source + tok_start + 1, length,
 					hasUTF8 ? StringPolicy_UTF8 : StringPolicy_ASCII);
 			KFieldSet(tk, tk->text, text);
-			tk->tokenType = TokenType_TEXT;
+			tk->tokenType = TokenType_Text;
 		}
 		return pos;
 	}
@@ -357,7 +358,7 @@ static int TokenizeWhiteSpace(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tok
 	size_t size = kArray_size(tokenizer->tokenList);
 	if(size > 0) {
 		kTokenVar *tk = tokenizer->tokenList->TokenVarItems[size-1];
-		if(tk->uline == tokenizer->currentLine && tk->tokenType != TokenType_INDENT) {
+		if(tk->uline == tokenizer->currentLine && tk->tokenType != TokenType_Indent) {
 			kToken_Set(BeforeWhiteSpace, tk, true);
 		}
 	}
@@ -552,21 +553,20 @@ static kFunc **kNameSpace_tokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns)
 	return funcMatrix + KCHAR_MAX;
 }
 
-static void KTokenSeq_Tokenize(KonohaContext *kctx, KTokenSeq *tokens, const char *source, kfileline_t uline)
+static void Tokenize(KonohaContext *kctx, kNameSpace *ns, const char *source, kfileline_t uline, kArray *bufferList)
 {
 	INIT_GCSTACK();
 	Tokenizer tenv = {};
 	tenv.source = source;
 	tenv.sourceLength = strlen(source);
 	tenv.currentLine  = uline;
-	tenv.tokenList    = tokens->tokenList;
+	tenv.tokenList    = bufferList;
 	tenv.tabsize = 4;
-	tenv.ns = tokens->ns;
-	tenv.cFuncItems = kNameSpace_tokenMatrix(kctx, tokens->ns);
-	tenv.FuncItems  = kNameSpace_tokenFuncMatrix(kctx, tokens->ns);
+	tenv.ns = ns;
+	tenv.cFuncItems = kNameSpace_tokenMatrix(kctx, ns);
+	tenv.FuncItems  = kNameSpace_tokenFuncMatrix(kctx, ns);
 	tenv.preparedString = KLIB new_kString(kctx, _GcStack, tenv.source, tenv.sourceLength, StringPolicy_ASCII|StringPolicy_TEXT|StringPolicy_NOPOOL);
 	Tokenizer_Tokenize(kctx, &tenv);
-	KTokenSeq_End(kctx, tokens);
 	RESET_GCSTACK();
 }
 

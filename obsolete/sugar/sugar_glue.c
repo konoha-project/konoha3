@@ -785,7 +785,7 @@ static KMETHOD Node_newNode(KonohaContext *kctx, KonohaStack *sfp)
 	kString *macro = sfp[1].asString;
 	KTokenSeq source = {kNode_ns(stmt), KGetParserContext(kctx)->preparedTokenList/*TODO: set appropriate tokenList to KTokenSeq*/};
 	KTokenSeq_Push(kctx, source);
-	SUGAR KTokenSeq_Tokenize(kctx, &source, kString_text(macro), 0);
+	SUGAR Tokenize(kctx, &source, kString_text(macro), 0);
 	kNode *bk = SUGAR new_BlockNode(kctx, stmt, NULL, &source);
 	KTokenSeq_Pop(kctx, source);
 	KReturn(bk);

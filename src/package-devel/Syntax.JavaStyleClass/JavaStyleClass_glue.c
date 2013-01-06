@@ -186,33 +186,34 @@ static void KClass_InitField(KonohaContext *kctx, KClassVar *definedClass, KClas
 
 static kNode* kNode_ParseClassNodeNULL(KonohaContext *kctx, kNode *stmt, kToken *tokenClassName)
 {
-	kNode *bk = NULL;
-	kToken *blockToken = (kToken *)kNode_GetObject(kctx, stmt, KSymbol_BlockPattern, NULL);
-	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KSymbol_BlockPattern) {
-		const char *cname = kString_text(tokenClassName->text);
-		KTokenSeq range = {kNode_ns(stmt), KGetParserContext(kctx)->preparedTokenList};
-		KTokenSeq_Push(kctx, range);
-		SUGAR KTokenSeq_Tokenize(kctx, &range,  kString_text(blockToken->text), blockToken->uline);
-		{
-			KTokenSeq sourceRange = {range.ns, range.tokenList, range.endIdx};
-			kToken *prevToken = blockToken;
-			int i;
-			for(i = range.beginIdx; i < range.endIdx; i++) {
-				kToken *tk = range.tokenList->TokenItems[i];
-				if(tk->hintChar == '(' && prevToken->tokenType == TokenType_SYMBOL && strcmp(cname, kString_text(prevToken->text)) == 0) {
-					kTokenVar *newToken = new_(TokenVar, TokenType_SYMBOL, sourceRange.tokenList);
-					KFieldSet(newToken, newToken->text, KSymbol_GetString(kctx, MN_new));
-				}
-				KLIB kArray_Add(kctx, sourceRange.tokenList, tk);
-				prevToken = tk;
-			}
-			KTokenSeq_End(kctx, (&sourceRange));
-			bk = SUGAR ParseNewNode(kctx, range.ns, sourceRange.tokenList, &sourceRange.beginIdx, sourceRange.endIdx, ParseMetaPatternOption, NULL);
-			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_BlockPattern, KType_Node, bk);
-		}
-		KTokenSeq_Pop(kctx, range);
-	}
-	return bk;
+	kNode *block = NULL;
+//  TODO
+//	kToken *blockToken = (kToken *)kNode_GetObject(kctx, stmt, KSymbol_BlockPattern, NULL);
+//	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KSymbol_BlockPattern) {
+//		const char *cname = kString_text(tokenClassName->text);
+//		KTokenSeq range = {kNode_ns(stmt), KGetParserContext(kctx)->preparedTokenList};
+//		KTokenSeq_Push(kctx, range);
+//		SUGAR Tokenize(kctx, &range,  kString_text(blockToken->text), blockToken->uline);
+//		{
+//			KTokenSeq sourceRange = {range.ns, range.tokenList, range.endIdx};
+//			kToken *prevToken = blockToken;
+//			int i;
+//			for(i = range.beginIdx; i < range.endIdx; i++) {
+//				kToken *tk = range.tokenList->TokenItems[i];
+//				if(tk->hintChar == '(' && prevToken->tokenType == TokenType_Symbol && strcmp(cname, kString_text(prevToken->text)) == 0) {
+//					kTokenVar *newToken = new_(TokenVar, TokenType_Symbol, sourceRange.tokenList);
+//					KFieldSet(newToken, newToken->text, KSymbol_GetString(kctx, MN_new));
+//				}
+//				KLIB kArray_Add(kctx, sourceRange.tokenList, tk);
+//				prevToken = tk;
+//			}
+//			KTokenSeq_End(kctx, (&sourceRange));
+//			block = SUGAR ParseNewNode(kctx, range.ns, sourceRange.tokenList, &sourceRange.beginIdx, sourceRange.endIdx, ParseMetaPatternOption, NULL);
+//			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_BlockPattern, KType_Node, block);
+//		}
+//		KTokenSeq_Pop(kctx, range);
+//	}
+	return block;
 }
 
 static size_t kNode_countFieldSize(KonohaContext *kctx, kNode *bk)
@@ -333,8 +334,8 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 		definedClass = kNameSpace_DefineClassName(kctx, ns, cflag, tokenClassName->text, trace);
 		isNewlyDefinedClass = true;
 	}
-	kNode *bk = kNode_ParseClassNodeNULL(kctx, stmt, tokenClassName);
-	size_t declsize = kNode_countFieldSize(kctx, bk);
+	kNode *block = kNode_ParseClassNodeNULL(kctx, stmt, tokenClassName);
+	size_t declsize = kNode_countFieldSize(kctx, block);
 	if(isNewlyDefinedClass) {   // Already defined
 		KClass *superClass = KClass_Object;
 		kToken *tokenSuperClass= SUGAR kNode_GetToken(kctx, stmt, KSymbol_("extends"), NULL);
@@ -350,7 +351,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 				KReturnUnboxValue(false);
 			}
 		}
-		size_t initsize = (bk != NULL) ? declsize : initFieldSizeOfVirtualClass(superClass);
+		size_t initsize = (block != NULL) ? declsize : initFieldSizeOfVirtualClass(superClass);
 		KClass_InitField(kctx, definedClass, superClass, initsize);
 	}
 	else {
@@ -359,14 +360,14 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 			KReturnUnboxValue(false);
 		}
 	}
-	if(bk != NULL) {
-		if(!kNode_declClassField(kctx, bk, ns, definedClass)) {
+	if(block != NULL) {
+		if(!kNode_declClassField(kctx, block, ns, definedClass)) {
 			KReturnUnboxValue(false);
 		}
 		KClass_Set(Virtual, definedClass, false);
 	}
 	kToken_SetTypeId(kctx, tokenClassName, ns, definedClass->typeId);
-	kNode_AddMethodDeclNode(kctx, bk, tokenClassName, stmt);
+	kNode_AddMethodDeclNode(kctx, block, tokenClassName, stmt);
 	KReturn(kNode_Type(kctx, stmt, KNode_Done, KType_void));
 }
 

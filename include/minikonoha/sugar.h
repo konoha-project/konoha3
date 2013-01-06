@@ -295,36 +295,38 @@ typedef struct KDEFINE_SYNTAX {
 
 struct kTokenVar {
 	kObjectHeader h;
+	kfileline_t     uline;
 	union {
 		kString *text;
 		kArray  *GroupTokenList;
 		kNode   *parsedNode;
 	};
-	kfileline_t     uline;
-	kSyntax        *resolvedSyntaxInfo;
 	union {
 		ksymbol_t   tokenType;           // (resolvedSyntaxInfo == NULL)
 		ksymbol_t   resolvedSymbol;      // symbol (resolvedSyntaxInfo != NULL)
 		ktypeattr_t resolvedTypeId;      // typeid if KSymbol_TypePattern
 	};
 	union {
-		kushort_t   indent;               // indent when kw == TokenType_INDENT
+		kushort_t   indent;               // indent when kw == TokenType_Indent
 		kshort_t    hintChar;
 		ksymbol_t   stmtEntryKey;         // pattern name for 'setting key in Node'
 	};
+	kSyntax        *resolvedSyntaxInfo;
+	ksymbol_t symbol;
 };
 
 typedef enum {
-	TokenType_INDENT = KSymbol_IndentPattern,
-	TokenType_SYMBOL = KSymbol_SymbolPattern,
-	TokenType_TEXT   = KSymbol_TextPattern,
-	TokenType_NUM    = KSymbol_NumberPattern,
-	TokenType_Member = KSymbol_MemberPattern,
+	TokenType_Skip      = 0,
+	TokenType_Indent    = KSymbol_IndentPattern,
+	TokenType_Symbol    = KSymbol_SymbolPattern,
+	TokenType_Text      = KSymbol_TextPattern,
+	TokenType_Number    = KSymbol_NumberPattern,
+	TokenType_Member    = KSymbol_MemberPattern,
 	TokenType_LazyBlock = KSymbol_BlockPattern,
-	TokenType_ERR    = KSymbol_TokenPattern
+	TokenType_Error     = KSymbol_TokenPattern
 } kTokenType;
 
-#define kToken_IsIndent(T)  ((T)->tokenType == TokenType_INDENT && (T)->resolvedSyntaxInfo == NULL)
+#define kToken_IsIndent(T)  ((T)->tokenType == TokenType_Indent && (T)->resolvedSyntaxInfo == NULL)
 
 #define kTokenFlag_BeforeWhiteSpace      kObjectFlag_Local1
 #define kTokenFlag_MatchPreviousPattern  kObjectFlag_Local2
@@ -377,7 +379,10 @@ typedef struct KTokenSeq {
 	DBG_ASSERT(_PopCheckIdx == kArray_size(tokens.tokenList));\
 } while(0)
 
-#define KTokenSeq_End(kctx, tokens)   tokens->endIdx = kArray_size(tokens->tokenList)
+#define KTokenSeq_End(kctx, T)   T.endIdx = kArray_size(T.tokenList)
+
+#define RangeArray(A)                 A, 0, kArray_size(A)
+#define RangeTokenSeq(T)              T.tokenList, T.beginIdx, T.endIdx
 
 #define Token_isVirtualTypeLiteral(TK)     ((TK)->resolvedSyntaxInfo->keyword == KSymbol_TypePattern)
 #define Token_typeLiteral(TK)              (TK)->resolvedTypeId
@@ -602,10 +607,10 @@ typedef struct {
 //	kSyntaxVar*   (*kNameSpace_AddSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 	kbool_t       (*kNameSpace_SetMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *, int optionMacro);
 
-	void         (*KTokenSeq_Tokenize)(KonohaContext *, KTokenSeq *, const char *, kfileline_t);
-	kbool_t      (*KTokenSeq_ApplyMacro)(KonohaContext *, KTokenSeq *, kArray *, int, int, size_t, KMacroSet *);
-	int          (*KTokenSeq_Preprocess)(KonohaContext *, KTokenSeq *, KMacroSet *, KTokenSeq *, int);
-	kstatus_t    (*KTokenSeq_Eval)(KonohaContext *, KTokenSeq *, KTraceInfo *);
+	void         (*Tokenize)(KonohaContext *, kNameSpace *, const char *, kfileline_t, kArray *bufferList);
+	void         (*ApplyMacroData)(KonohaContext *, kNameSpace *, kArray *, int, int, size_t, KMacroSet *, kArray *bufferList);
+	void         (*Preprocess)(KonohaContext *, kNameSpace *, kArray *, int, int, KMacroSet *, kArray *bufferList);
+	kstatus_t    (*EvalTokenList)(KonohaContext *, KTokenSeq *, KTraceInfo *);
 
 	int          (*ParseTypePattern)(KonohaContext *, kNameSpace *, kArray *, int , int , KClass **classRef);
 	kTokenVar*   (*kToken_ToBraceGroup)(KonohaContext *, kTokenVar *, kNameSpace *, KMacroSet *);
@@ -628,7 +633,7 @@ typedef struct {
 	kNode*       (*ParseNewNode)(KonohaContext *, kNameSpace *, kArray *tokenList, int* s, int e, ParseOption option, const char *hintBeforeText);
 
 	kNode*       (*AddParamNode)(KonohaContext *, kNameSpace *, kNode *, kArray *tokenList, int, int, const char *hintBeforeText);
-	kNode*       (*kNode_RightJoinNode)(KonohaContext *, kNode *, kNode *, kArray *, int, int);
+//	kNode*       (*kNode_RightJoinNode)(KonohaContext *, kNode *, kNode *, kArray *, int, int);
 
 	kNode*       (*kNode_SetConst)(KonohaContext *, kNode *, KClass *, kObject *);
 	kNode*       (*kNode_SetUnboxConst)(KonohaContext *, kNode *, ktypeattr_t, uintptr_t);

@@ -98,10 +98,12 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_LazyBlock) {
 		INIT_GCSTACK();
 		kNameSpace *ns = new_(NameSpace, kNode_ns(stmt), _GcStack);
-		kArray *a = KGetParserContext(kctx)->preparedTokenList;
-		KTokenSeq range = {ns, a, kArray_size(a), kArray_size(a)};
-		SUGAR KTokenSeq_Tokenize(kctx, &range, kString_text(tk->text), tk->uline);
-		result = SUGAR KTokenSeq_Eval(kctx, &range, NULL/*trace*/);
+		KTokenSeq range = {ns, KGetParserContext(kctx)->preparedTokenList};
+		KTokenSeq_Push(kctx, range);
+		SUGAR Tokenize(kctx, ns, kString_text(tk->text), tk->uline, range.tokenList);
+		KTokenSeq_End(kctx, range);
+		result = SUGAR EvalTokenList(kctx, &range, NULL/*trace*/);
+		KTokenSeq_Pop(kctx, range);
 		RESET_GCSTACK();
 		kNode_Type(kctx, stmt, KNode_Done, KType_void);
 	}

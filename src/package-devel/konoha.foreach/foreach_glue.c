@@ -84,7 +84,7 @@
 //	 * "T _ = E; if(_.hasNext()) { N = _.next(); }"
 //	 *                           ^^^^^^^^^^^^^^^^^
 //	 */
-//	SUGAR KTokenSeq_Tokenize(kctx, &source, "T _ = E; if(_.hasNext()) N = _.next();", 0);
+//	SUGAR Tokenize(kctx, &source, "T _ = E; if(_.hasNext()) N = _.next();", 0);
 //	KMacroSet macroSet[4] = {{0, NULL, 0, 0}};
 //	KMacroSet_SetTokenAt(kctx, macroSet, 0, source.tokenList, "T", IteratorTypeToken, NULL);
 //	KMacroSet_SetTokenAt(kctx, macroSet, 1, source.tokenList, "E", IteratorNodeToken, NULL);

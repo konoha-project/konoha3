@@ -44,9 +44,12 @@ int verbose_sugar = 0;
 #include "import/parser_class.h"
 #include "import/namespace.h"
 #include "import/token.h"
+#include "import/preprocess.h"
 #include "import/ast.h"
+#include "import/pattern.h"
 #include "import/typecheck.h"
 #include "import/syntax.h"
+#include "import/eval.h"
 #include "import/parser_dump.h"
 #include "import/visitor.h"
 
@@ -61,8 +64,9 @@ static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char
 	{
 		KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, tokens);
-		KTokenSeq_Tokenize(kctx, &tokens, script, uline);
-		result = KTokenSeq_Eval(kctx, &tokens, trace);
+		Tokenize(kctx, ns, script, uline, tokens.tokenList);
+		KTokenSeq_End(kctx, tokens);
+		result = SUGAR EvalTokenList(kctx, &tokens, trace);
 		KTokenSeq_Pop(kctx, tokens);
 	}
 	RESET_GCSTACK();
@@ -177,11 +181,11 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(ClassData), 0);
 
 //	mod->kNameSpace_SetTokenFunc       = kNameSpace_SetTokenFunc;
-	mod->KTokenSeq_Tokenize        = KTokenSeq_Tokenize;
-	mod->KTokenSeq_ApplyMacro      = KTokenSeq_ApplyMacro;
+//	mod->Tokenize            = Tokenize;
+	mod->ApplyMacroData                = ApplyMacroData;
 	mod->kNameSpace_SetMacroData       = kNameSpace_SetMacroData;
-	mod->KTokenSeq_Preprocess        = KTokenSeq_Preprocess;
-	mod->KTokenSeq_Eval            = KTokenSeq_Eval;
+	mod->Preprocess          = Preprocess;
+	mod->EvalTokenList                = EvalTokenList;
 	mod->ParseTypePattern     = ParseTypePattern;
 	mod->kToken_ToBraceGroup = kToken_ToBraceGroup;
 	mod->kNode_AddParsedObject      = kNode_AddParsedObject;
@@ -215,7 +219,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->ParseNode                    = ParseNode;
 	mod->ParseNewNode                 = ParseNewNode;
 	mod->AddParamNode                 = AddParamNode;
-	mod->kNode_RightJoinNode          = kNode_RightJoinNode;
+//	mod->kNode_RightJoinNode          = kNode_RightJoinNode;
 	mod->kToken_ToError               = kToken_ToError;
 	mod->MessageNode                  = MessageNode;
 

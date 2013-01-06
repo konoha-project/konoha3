@@ -172,8 +172,9 @@ static KMETHOD PatternMatch_IncStmt(KonohaContext *kctx, KonohaStack *sfp)
 			{0, NULL, 0, 0},   /* sentinel */
 		};
 		macro.TargetPolicy.RemovingIndent = true;
-		SUGAR KTokenSeq_ApplyMacro(kctx, &macro, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam);
-		SUGAR ParseNode(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, ParseExpressionOption, NULL);
+		SUGAR ApplyMacroData(kctx, macro.ns, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam, macro.tokenList);
+		KTokenSeq_End(kctx, macro);
+		SUGAR ParseNode(kctx, stmt, RangeTokenSeq(macro), ParseExpressionOption, NULL);
 		KTokenSeq_Pop(kctx, macro);
 		KReturnUnboxValue(endIdx);
 	}

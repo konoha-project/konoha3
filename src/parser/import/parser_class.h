@@ -108,7 +108,7 @@ static const char *kToken_t(KonohaContext *kctx, kToken *tk)
 #ifndef USE_SMALLBUILD
 static void KBuffer_WriteTokenSymbol(KonohaContext *kctx, KBuffer *wb, kToken *tk)
 {
-	if(tk->resolvedSymbol == TokenType_INDENT) {
+	if(tk->resolvedSymbol == TokenType_Indent) {
 		KLIB KBuffer_printf(kctx, wb, "$Indent ");
 	}
 	else {

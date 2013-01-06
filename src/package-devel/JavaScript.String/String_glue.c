@@ -222,12 +222,12 @@ static kString *remove_escapes(KonohaContext *kctx, kToken *tk)
 //		KTokenSeq range = {ns, KGetParserContext(kctx)->preparedTokenList};
 //		KTokenSeq_Push(kctx, range);
 //		const char *buf = KLIB KBuffer_text(kctx, &wb, EnsureZero);
-//		SUGAR KTokenSeq_Tokenize(kctx, &range, buf, 0);
+//		SUGAR Tokenize(kctx, &range, buf, 0);
 //
 //		{
 //			KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList};
 //			KTokenSeq_Push(kctx, tokens);
-//			SUGAR KTokenSeq_Preprocess(kctx, &tokens, NULL, &range, range.beginIdx);
+//			SUGAR Preprocess(kctx, &tokens, NULL, &range, range.beginIdx);
 //			kNode *newexpr = SUGAR ParseNewNode(kctx, ns, tokens.tokenList, tokens.beginIdx, tokens.endIdx, 0, NULL);
 //			KTokenSeq_Pop(kctx, tokens);
 //			if(start - str > 0) {

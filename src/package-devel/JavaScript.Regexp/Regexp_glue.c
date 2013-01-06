@@ -661,8 +661,8 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 	//int tokenListize = kArray_size(tenv->tokenList);
 	//if(tokenListize > 0) {
 	//	kToken *tkPrev = tenv->tokenList->TokenItems[tokenListize - 1];
-	//	if(tkPrev->tokenType == TokenType_NUM ||
-	//		(tkPrev->topCharHint != '(' && tkPrev->tokenType == TokenType_SYMBOL)) {
+	//	if(tkPrev->tokenType == TokenType_Number ||
+	//		(tkPrev->topCharHint != '(' && tkPrev->tokenType == TokenType_Symbol)) {
 	//		KReturnUnboxValue(0);
 	//	}
 	//}

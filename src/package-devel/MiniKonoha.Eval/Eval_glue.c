@@ -40,8 +40,9 @@ static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char
 	{
 		KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, tokens);
-		SUGAR KTokenSeq_Tokenize(kctx, &tokens, script, uline);
-		result = SUGAR KTokenSeq_Eval(kctx, &tokens, trace);
+		SUGAR Tokenize(kctx, ns, script, uline, tokens.tokenList);
+		KTokenSeq_End(kctx, tokens);
+		result = SUGAR EvalTokenList(kctx, &tokens, trace);
 		KTokenSeq_Pop(kctx, tokens);
 	}
 	RESET_GCSTACK();
