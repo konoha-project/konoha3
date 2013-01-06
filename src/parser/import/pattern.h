@@ -175,9 +175,7 @@ static int ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 		int isAllowedGenerics = true;
 		for(; nextIdx < endIdx; nextIdx++) {
 			tk = tokenList->TokenItems[nextIdx];
-			if(tk->resolvedSyntaxInfo == NULL || tk->resolvedSyntaxInfo->keyword != KSymbol_BracketGroup) {
-				break;
-			}
+			if(tk->resolvedSyntaxInfo->keyword != KSymbol_BracketGroup) break;
 			int sizeofBracketTokens = kArray_size(tk->GroupTokenList);
 			if(isAllowedGenerics &&  sizeofBracketTokens > 2) {  // C[T][]
 				KClass *foundGenericClass = ParseGenericsType(kctx, ns, foundClass, RangeGroup(tk->GroupTokenList));
@@ -185,7 +183,7 @@ static int ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 				foundClass = foundGenericClass;
 			}
 			else {
-				if(sizeofBracketTokens > 0) break;   // C[100] is treated as C  and the token [100] is set to nextIdx;
+				if(sizeofBracketTokens > 2) break;   // C[100] is treated as C  and the token [100] is set to nextIdx;
 				foundClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);  // C[] => Array[C]
 			}
 			isAllowedGenerics = false;

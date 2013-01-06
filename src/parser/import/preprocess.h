@@ -40,15 +40,15 @@
 //	return false;
 //}
 //
-static kArray* new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, int beginIdx, int endIdx)
-{
-	kArray *newa = new_(Array, endIdx - beginIdx, gcstack);
-	int i;
-	for(i = beginIdx; i < endIdx; i++) {
-		KLIB kArray_Add(kctx, newa, a->ObjectItems[i]);
-	}
-	return newa;
-}
+//static kArray* new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, int beginIdx, int endIdx)
+//{
+//	kArray *newa = new_(Array, endIdx - beginIdx, gcstack);
+//	int i;
+//	for(i = beginIdx; i < endIdx; i++) {
+//		KLIB kArray_Add(kctx, newa, a->ObjectItems[i]);
+//	}
+//	return newa;
+//}
 //
 //static kTokenVar* kToken_ExpandGroupMacro(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, KMacroSet *macroParam, kArray *gcstack)
 //{
@@ -118,31 +118,6 @@ static kArray* new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, 
 //	ApplyMacroData(kctx, tokens, macroTokenList, 0, kArray_size(macroTokenList), paramsize, mp);
 //}
 
-///* ------------------------------------------------------------------------ */
-//
-//static int KTokenSeq_AddGroup(KonohaContext *kctx, KTokenSeq *tokens, KMacroSet *macro, KTokenSeq *source, int currentIdx, kToken *openToken)
-//{
-//	ksymbol_t AST_type = openToken->hintChar == '(' ?  KSymbol_ParenthesisGroup : KSymbol_BracketGroup;
-//	int closech = (AST_type == KSymbol_ParenthesisGroup) ? ')': ']';
-//	kTokenVar *astToken = new_(TokenVar, AST_type, tokens->tokenList);
-//	astToken->resolvedSyntaxInfo = kSyntax_(tokens->ns, AST_type);
-//	KFieldSet(astToken, astToken->GroupTokenList, new_(TokenArray, 0, OnField));
-//	astToken->uline = openToken->uline;
-//	kToken_SetOpenCloseChar(astToken, openToken->hintChar, closech);
-//	{
-//		KTokenSeq nested = {source->ns, astToken->GroupTokenList};
-//		kToken *pushOpenToken = source->SourceConfig.openToken;
-//		int pushStopChar = source->SourceConfig.stopChar;
-//		source->SourceConfig.openToken = openToken;
-//		source->SourceConfig.stopChar = closech;
-//		nested.TargetPolicy.RemovingIndent = true;
-//		int returnIdx = Preprocess(kctx, &nested, macro, source, currentIdx);
-//		source->SourceConfig.openToken = pushOpenToken;
-//		source->SourceConfig.stopChar = pushStopChar;
-//		return returnIdx;
-//	}
-//}
-
 //static int TokenUtils_Count(kArray *tokenList, int beginIdx, int endIdx, ksymbol_t keyword)
 //{
 //	int i, count = 0;
@@ -205,87 +180,6 @@ static kArray* new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, 
 //	return nextIdx;
 //}
 
-//static int Preprocess(KonohaContext *kctx, KTokenSeq *tokens, KMacroSet *macroParam, KTokenSeq *source, int beginIdx)
-//{
-//	int currentIdx = beginIdx;
-//	if(tokens->TargetPolicy.syntaxSymbolPattern == NULL) {
-//		tokens->TargetPolicy.syntaxSymbolPattern = kSyntax_(tokens->ns, KSymbol_SymbolPattern);
-//	}
-//	for(; currentIdx < source->endIdx; currentIdx++) {
-//		kTokenVar *tk = source->tokenList->TokenVarItems[currentIdx];
-//		/* filter */
-//		if(tk->tokenType == TokenType_Indent && tokens->TargetPolicy.RemovingIndent) {
-//			continue;  /* filtering indent; */
-//		}
-//		if(macroParam != NULL && tk->resolvedSyntaxInfo != NULL) {
-//			ksymbol_t keyword = tk->resolvedSyntaxInfo->keyword;
-//			if(keyword == KSymbol_SymbolPattern && KTokenSeq_ExpandMacro(kctx, tokens, tk->symbol, macroParam)) {
-//				continue;
-//			}
-//			if(keyword == KSymbol_ParenthesisGroup || keyword == KSymbol_BracketGroup || keyword == KSymbol_BraceGroup) {
-//				tk = kToken_ExpandGroupMacro(kctx, tk, tokens->ns, macroParam, OnGcStack);
-//			}
-//			if(keyword == KSymbol_BlockPattern) {
-//				tk = kToken_ToBraceGroup(kctx, tk, tokens->ns, macroParam);
-//			}
-//		}
-//		if(tk->resolvedSyntaxInfo == NULL) {
-//			if(source->SourceConfig.openToken != NULL && source->SourceConfig.stopChar == tk->hintChar) {
-//				return currentIdx;
-//			}
-//			if(tk->hintChar == '(' || tk->hintChar == '[') {
-//				currentIdx = KTokenSeq_AddGroup(kctx, tokens, macroParam, source, currentIdx+1, tk);
-//				if(source->SourceConfig.foundErrorToken != NULL) return source->endIdx;
-//				continue; // already added
-//			}
-//			if(tk->tokenType == TokenType_Error) {
-//				source->SourceConfig.foundErrorToken = tk;
-//				return source->endIdx;  // resolved no more
-//			}
-//			if(tk->tokenType == TokenType_Symbol) {
-//				const char *t = kString_text(tk->text);
-//				ksymbol_t symbol = KAsciiSymbol(t, kString_size(tk->text), KSymbol_NewId);
-//				if(macroParam != NULL && KTokenSeq_ExpandMacro(kctx, tokens, symbol, macroParam)) {
-//					continue;
-//				}
-//				kSyntax *syn = kSyntax_(source->ns, symbol);
-//				if(IS_NOTNULL(syn) && FLAG_is(syn->flag, SYNFLAG_Macro)) {
-//					if(syn->macroParamSize == 0) {
-//						ApplyMacroData(kctx, tokens, syn->macroDataNULL, 0, kArray_size(syn->macroDataNULL), 0, NULL);
-//					}
-//					else {
-//						currentIdx = ApplyMacroDataSyntax(kctx, tokens, syn, macroParam, source, currentIdx);
-//					}
-//					continue;
-//				}
-//				tk->symbol = symbol;
-//				tk->resolvedSyntaxInfo = IS_NOTNULL(syn) ? syn : tokens->TargetPolicy.syntaxSymbolPattern;
-//			}
-//			else {
-//				tk->resolvedSyntaxInfo = kSyntax_(tokens->ns, tk->tokenType);
-//				if(tk->tokenType == KSymbol_MemberPattern) {
-//					const char *t = kString_text(tk->text);
-//					tk->symbol = KAsciiSymbol(t, kString_size(tk->text), KSymbol_NewId);
-//				}
-//			}
-//		}
-//		DBG_ASSERT(tk->resolvedSyntaxInfo != NULL);
-//		KLIB kArray_Add(kctx, tokens->tokenList, tk);
-//	}
-//	if(source->SourceConfig.openToken != NULL) {
-//		char buf[2] = {source->SourceConfig.stopChar, 0};
-//		ERROR_UnclosedToken(kctx, (kTokenVar *)source->SourceConfig.openToken, (const char *)buf);
-//		source->SourceConfig.foundErrorToken = source->SourceConfig.openToken;
-//	}
-//	KTokenSeq_End(kctx, tokens);
-////	DBG_P(">>>>source");
-////	SUGAR dumpTokenArray(kctx, 0, source->tokenList, beginIdx, source->endIdx);
-////
-////	DBG_P(">>>>tokens");
-////	SUGAR dumpTokenArray(kctx, 0, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
-//	return source->endIdx;
-//}
-
 typedef void (*TraverseFunc)(KonohaContext *kctx, kTokenVar *tk, void *thunk);
 typedef void (*Traverse2Func)(KonohaContext *kctx, kTokenVar *tk, kTokenVar *tk2, void *thunk);
 
@@ -328,6 +222,7 @@ static int GroupTokenList(KonohaContext *kctx, kToken *openToken, kArray *tokenL
 			kTokenVar *groupToken = new_(TokenVar, tk->tokenType, bufferList);
 			KFieldSet(groupToken, groupToken->GroupTokenList, new_(TokenArray, 0, OnField));
 			tk->symbol = tk->tokenType;
+			groupToken->uline = tk->uline;
 			kToken_Set(OpenGroup, tk, false);
 			KLIB kArray_Add(kctx, groupToken->GroupTokenList, tk);
 			currentIdx = GroupTokenList(kctx, tk, tokenList, currentIdx + 1, endIdx, groupToken->GroupTokenList);
@@ -370,6 +265,8 @@ static void Preprocess(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, i
 			kTokenVar *groupToken = new_(TokenVar, tk->tokenType, OnGcStack);
 			KFieldSet(groupToken, groupToken->GroupTokenList, new_(TokenArray, 0, OnField));
 			kToken_Set(OpenGroup, tk, false);
+			tk->symbol = tk->tokenType;
+			groupToken->uline = tk->uline;
 			KLIB kArray_Add(kctx, groupToken->GroupTokenList, tk);
 			currentIdx = GroupTokenList(kctx, tk, tokenList, currentIdx + 1, endIdx, groupToken->GroupTokenList);
 			tk = groupToken;
@@ -467,7 +364,7 @@ static kbool_t ExpandMacroParam(KonohaContext *kctx, kNameSpace *ns, ksymbol_t s
 
 static void ApplyMacroData(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, size_t paramsize, KMacroSet *macroParam, kArray *bufferList)
 {
-	TraverseTokenList(kctx, tokenList, beginIdx + paramsize, endIdx, ResetPreprocess, NULL);
+	//TraverseTokenList(kctx, tokenList, beginIdx + paramsize, endIdx, ResetPreprocess, NULL);
 	Preprocess(kctx, ns, tokenList, beginIdx + paramsize, endIdx, macroParam, bufferList);
 }
 
@@ -484,7 +381,7 @@ static kbool_t kNameSpace_SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksym
 		Preprocess(kctx, ns, RangeTokenSeq(source), NULL, tokens.tokenList);
 		KTokenSeq_End(kctx, tokens);
 		syn->macroParamSize = paramsize;
-		syn->macroDataNULL =  new_SubsetArray(kctx, ns->NameSpaceConstList, RangeTokenSeq(tokens));
+		syn->macroDataNULL =  kArray_AppendList(kctx, new_(Array, 0, ns->NameSpaceConstList), RangeTokenSeq(tokens));
 		if(optionMacro) syn->flag |= SYNFLAG_Macro;
 		KTokenSeq_Pop(kctx, source);
 		return true;
