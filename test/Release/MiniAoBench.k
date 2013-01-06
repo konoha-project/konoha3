@@ -9,7 +9,7 @@ import("Syntax.GlobalVariable");
 import("MiniKonoha.NameSpace");  // konoha.const is obsolete
 import("Syntax.JavaStyleClass");
 import("JavaScript.Array");
-import("cstyle", "while");
+import("Syntax.CStyleWhile");
 import("cstyle", "+=");
 //import("konoha.new"); Don't use this
 AllowImplicitGlobalVariable(true);

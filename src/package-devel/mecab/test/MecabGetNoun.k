@@ -1,4 +1,4 @@
-import("mecab");
+import("Lib.Mecab");
 import("JavaScript.Regexp");
 import("konoha");
 

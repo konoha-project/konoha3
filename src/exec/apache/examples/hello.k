@@ -1,6 +1,6 @@
-import("cstyle", "while");
+import("Syntax.CStyleWhile");
 import("JavaScript.Array");
-import("apache");
+import("Lib.Apache");
 
 @Public int System.handler(Request req) {
 	req.setContentType("text/html");

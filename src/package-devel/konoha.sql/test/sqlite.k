@@ -1,5 +1,5 @@
-import("konoha.sql");
-import("cstyle", "while");
+import("MiniKonoha.Sql");
+import("Syntax.CStyleWhile");
 
 
 void main() {

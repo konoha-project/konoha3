@@ -1,5 +1,5 @@
 import("konoha");
-import("mecab");
+import("Lib.Mecab");
 //import("Type.Float");
 
 void main() {

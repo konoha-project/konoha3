@@ -1,7 +1,7 @@
 // written by wakamatsu
 import("Type.Bytes");
 import("Type.Float");
-import("konoha.mpi");
+import("Lib.Mpi");
 
 void test_bytes() {
 	MPIComm w = MPIComm.getWorld();

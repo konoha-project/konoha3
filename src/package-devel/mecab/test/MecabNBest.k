@@ -1,4 +1,4 @@
-import("mecab");
+import("Lib.Mecab");
 import("konoha");
 
 void main() {

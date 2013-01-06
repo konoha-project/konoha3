@@ -1,5 +1,5 @@
 // written by Masahiro Ide
-import("openssl");
+import("Lib.Openssl");
 import("konoha");
 
 void f() {

@@ -3,7 +3,7 @@ import("Syntax.JavaStyleClass");
 import("konoha.foreach");
 import("JavaScript.Array");
 import("cstyle");
-import("libvirt");
+import("Lib.Libvirt");
 
 void main() {
 	Libvirt l = new Libvirt("qemu:///system");

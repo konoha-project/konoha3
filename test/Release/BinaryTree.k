@@ -1,4 +1,4 @@
-import("cstyle", "while");
+import("Syntax.CStyleWhile");
 import("Syntax.JavaStyleClass");
 import("Syntax.GlobalVariable");
 import("cstyle"); // konoha.null is obsolate; use cstyle

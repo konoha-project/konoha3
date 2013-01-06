@@ -2,7 +2,7 @@
 import("konoha");
 import("Type.Bytes");
 import("JavaScript.String");
-import("konoha.mpi");
+import("Lib.Mpi");
 
 void test_bytes() {
 	Bytes b = "hello".asBytes();

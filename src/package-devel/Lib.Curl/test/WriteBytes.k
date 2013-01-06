@@ -2,7 +2,7 @@
 //
 ////import("konoha.new"); Don't use this
 //import("Type.Bytes");
-//import("curl");
+//import("Lib.Curl");
 //
 //void test() {
 //	Curl c = new Curl();

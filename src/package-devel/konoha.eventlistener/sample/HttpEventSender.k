@@ -1,6 +1,6 @@
 //import("konoha.new"); Don't use this
 import("jansson");
-import("curl");
+import("Lib.Curl");
 
 void sendHttpEvent(String host, int port) {
 	Json sdata = new Json();

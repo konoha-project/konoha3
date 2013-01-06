@@ -1,5 +1,5 @@
 // written by wakamatsu
-import("konoha.mpi");
+import("Lib.Mpi");
 
 void test() {
 	MPIComm w = MPIComm.getWorld();

@@ -3,7 +3,7 @@ import("cstyle"); // konoha.int was obsolete
 import("Type.Float");
 import("JavaScript.String");
 import("JavaScript.Array");
-import("cstyle", "while");
+import("Syntax.CStyleWhile");
 
 import("jansson");
 

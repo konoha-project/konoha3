@@ -1,5 +1,5 @@
 //import("konoha.new"); Don't use this
-import("cstyle", "while");
+import("Syntax.CStyleWhile");
 import("cstyle"); // konoha.int was obsolete
 import("Type.Float");
 import("JavaScript.String");

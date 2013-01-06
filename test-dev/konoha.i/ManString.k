@@ -1,5 +1,5 @@
 // written by kimio kuramitsu
 
-import("konoha.i");
+import("MiniKonoha.Man");
 man(int);
 

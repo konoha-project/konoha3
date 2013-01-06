@@ -9,7 +9,7 @@ How many routes are there through a 20^20 grid?
 */
 import("cstyle");
 import("Syntax.JavaStyleClass");
-import("gmp")
+import("Lib.Gmp")
 
 Mpz fact(int n){
 	Mpz f = new Mpz(1);

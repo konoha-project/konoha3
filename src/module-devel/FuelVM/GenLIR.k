@@ -26,7 +26,7 @@
 import("JavaScript.String");
 import("konoha.foreach");
 import("MiniKonoha.NameSpace");
-import("js4.array");
+import("JavaScript.Array");
 import("Type.File");
 import("Syntax.JavaStyleClass");
 import("cstyle");
