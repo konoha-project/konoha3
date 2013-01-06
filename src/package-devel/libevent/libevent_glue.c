@@ -56,6 +56,14 @@ static KMETHOD Libevent_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(ev);
 }
 
+//## Libevent Libevent.dispatch();
+static KMETHOD Libevent_dispatch(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kLibevent *ev = (kLibevent *)sfp[0].asObject;
+	int ret = event_base_dispatch(ev->event_base);
+	KReturnUnboxValue(ret);
+}
+
 /* ======================================================================== */
 //## int System.event_add(Libevent_event event, Date tv);
 //TODO: this declaration may be made in Libevent_event_glue.c
@@ -101,6 +109,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Libevent_new), KType_Libevent, KType_Libevent, KKMethodName_("new"), 0,
+		_Public, _F(Libevent_dispatch), KType_Libevent, KType_Libevent, KKMethodName_("dispatch"), 0,
 		_Public|_Static|_Const|_Im, _F(System_event_add), KType_int, KType_System, KKMethodName_("event_add"), 2, KType_Object, KFieldName_("Libevent_event"), KType_Object, KFieldName_("timeval"),	//TODO: param type should be "KType_Libevent_event" "KType_Date"
 		_Public|_Static|_Const|_Im, _F(System_event_del), KType_int, KType_System, KKMethodName_("event_del"), 1, KType_Object, KFieldName_("Libevent_event"),	//TODO: param type should be "KType_Libevent_event"
 
@@ -113,14 +122,6 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
-#ifdef	CUTCUT
-	/* You can define constant variable with the following procedures. */
-	KDEFINE_INT_CONST IntData[] = {
-		{"NARUTO_AGE", KType_int, 18},
-		{} /* <= sentinel */
-	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
-#endif
 	return true;
 }
 
@@ -139,23 +140,5 @@ KDEFINE_PACKAGE *libevent_Init(void)
 }
 
 #ifdef __cplusplus
-}
-#endif
-
-
-
-#if CUTCUT
-//## String Person.say();
-static KMETHOD Libevent_event_add(KonohaContext *kctx, KonohaStack *sfp)
-{
-	struct Libevent *ev = (struct Libevent *) sfp[0].asObject;
-
-	kString *name = p->name;
-	/* When you want to operate with a raw string, please use kString_text() macro
-	 * to acquire the pointer of a raw string. */
-	const char *text = kString_text(name);
-	char *buf = (char *)alloca(16 + kString_size(name));
-	sprintf(buf, "hello , %s!", text);
-	KReturn(KLIB new_kString(kctx, OnStack, buf, strlen(buf), StringPolicy_TEXT));
 }
 #endif
