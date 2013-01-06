@@ -1350,7 +1350,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ PATTERN(Number),  SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_IntLiteral},},
 		{ PATTERN(Member),  SYNFLAG_CFunc|SYNFLAG_Suffix, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Member}, {SUGARFUNC TypeCheck_Getter}},
 		{ GROUP(Parenthesis), SYNFLAG_CFunc|SYNFLAG_Suffix, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Parenthesis}, {SUGARFUNC TypeCheck_FuncStyleCall}}, //KSymbol_ParenthesisGroup
-		{ GROUP(Bracket),  SYNFLAG_CParseFunc|SYNFLAG_Suffix, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Indexer}, {MethodCallFunc}}, //KSymbol_BracketGroup
+		{ GROUP(Bracket),  SYNFLAG_CParseFunc|SYNFLAG_Suffix|SYNFLAG_TypeSuffix, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Indexer}, {MethodCallFunc}}, //KSymbol_BracketGroup
 		{ GROUP(Brace),  },   // KSymbol_BraceGroup
 		{ PATTERN(Block), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_CStyleBlock}, {SUGARFUNC TypeCheck_Block}, },
 		{ PATTERN(Param), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_CStyleParam}, {SUGARFUNC Statement_ParamDecl},},

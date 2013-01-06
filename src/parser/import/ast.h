@@ -188,31 +188,38 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 static int FindOperator(KonohaContext *kctx, kNode *node, kArray *tokenList, int beginIdx, int endIdx)
 {
 	int isPrePosition = true;
-	int operatorIdx = beginIdx, i, precedence = 0;
+	int opIdx = beginIdx, i, precedence = 0;
+	kToken *typeToken = NULL;
 	for(i = beginIdx; i < endIdx; i++) {
 		kToken *tk = tokenList->TokenItems[i];
-		kSyntax *syn = tk->resolvedSyntaxInfo;
+		kSyntax *syntax = tk->resolvedSyntaxInfo;
 		if(isPrePosition) {
-			if(syn->precedence_op1 > 0) {
-				if(precedence < syn->precedence_op1) {
-					precedence = syn->precedence_op1;
-					operatorIdx = i;
+			if(syntax->precedence_op1 > 0) {
+				if(precedence < syntax->precedence_op1) {
+					precedence = syntax->precedence_op1;
+					opIdx = i;
 				}
 				continue;
 			}
 			isPrePosition = false;
 		}
 		else {
-			if(syn->precedence_op2 > 0) {
-				if(precedence < syn->precedence_op2 || (precedence == syn->precedence_op2 && !(FLAG_is(syn->flag, SYNFLAG_NodeLeftJoinOp2)) )) {
-					precedence = syn->precedence_op2;
-					operatorIdx = i;
+			if(syntax->precedence_op2 > 0) {
+				if(kSyntax_Is(TypeSuffix, syntax) && typeToken != NULL) {
+					continue;
 				}
-				if(!FLAG_is(syn->flag, SYNFLAG_Suffix)) isPrePosition = true;
+				if(precedence < syntax->precedence_op2 || (precedence == syntax->precedence_op2 && !(FLAG_is(syntax->flag, SYNFLAG_NodeLeftJoinOp2)) )) {
+					precedence = syntax->precedence_op2;
+					opIdx = i;
+				}
+				if(!FLAG_is(syntax->flag, SYNFLAG_Suffix)) {
+					isPrePosition = true;
+				}
 			}
 		}
+		typeToken = (tk->resolvedSyntaxInfo->keyword == KSymbol_TypePattern) ? tk : NULL;
 	}
-	return operatorIdx;
+	return opIdx;
 }
 
 static int ParseNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int beginIdx, int endIdx, ParseOption option, const char *hintBeforeText)

@@ -213,10 +213,11 @@ typedef enum {
 #define SYNFLAG_MetaPattern         ((kshortflag_t)1 << 1)
 #define SYNFLAG_NodeLeftJoinOp2     ((kshortflag_t)1 << 2)
 #define SYNFLAG_Suffix              ((kshortflag_t)1 << 3)
+#define SYNFLAG_TypeSuffix          ((kshortflag_t)1 << 4)
 
-#define SYNFLAG_NodeBreakExec       ((kshortflag_t)1 << 4)  /* return, throw */
-#define SYNFLAG_NodeJumpAhead0      ((kshortflag_t)1 << 5)  /* continue */
-#define SYNFLAG_NodeJumpSkip0       ((kshortflag_t)1 << 6)  /* break */
+#define SYNFLAG_NodeBreakExec       ((kshortflag_t)1 << 6)  /* return, throw */
+#define SYNFLAG_NodeJumpAhead0      ((kshortflag_t)1 << 7)  /* continue */
+#define SYNFLAG_NodeJumpSkip0       ((kshortflag_t)1 << 8)  /* break */
 
 #define SYNFLAG_CFunc               (SYNFLAG_CParseFunc|SYNFLAG_CTypeFunc|SYNFLAG_CTokenFunc)
 #define SYNFLAG_CParseFunc          ((kshortflag_t)1 << 10)
