@@ -1,6 +1,6 @@
 // written by kimio
 
-import("konoha.object");
+import("JavaStyle.Object");
 
 void test() {
 	Object o = "123";

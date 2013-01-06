@@ -1,16 +1,16 @@
 // written by kimio kuramitsu
 
-import("konoha.object");
+import("JavaStyle.Object");
 
 void test() {
 	System sys;
 	Object o = sys;
-	assert(!(o <: boolean));
-	assert(!(o <: int));
-	assert(!(o <: String));
-	assert((o <: System));
-	assert(!(o <: String[]));
-	assert(!(o <: Func));
+	assert(!(o instanceof boolean));
+	assert(!(o instanceof int));
+	assert(!(o instanceof String));
+	assert((o instanceof System));
+	assert(!(o instanceof String[]));
+	assert(!(o instanceof Func));
 }
 
 test();

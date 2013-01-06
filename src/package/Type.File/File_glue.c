@@ -411,7 +411,7 @@ static KMETHOD FILE_getfileno(KonohaContext *kctx , KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 
 //## void setReaderCharset(String charset);
-static KMETHOD File_setReaderCharset(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD File_SetReaderCharset(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFile   *file = sfp[0].asFile;
 	KMakeTrace(trace, sfp);
@@ -419,7 +419,7 @@ static KMETHOD File_setReaderCharset(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void setWriterCharset(String charset);
-static KMETHOD File_setWriterCharset(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD File_SetWriterCharset(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFile   *file = sfp[0].asFile;
 	KMakeTrace(trace, sfp);
@@ -482,7 +482,7 @@ static kFile* new_File(KonohaContext *kctx, kArray *gcstack, FILE *fp, const cha
 	kFile *file = new_(File, fp, gcstack);
 	file->fp = fp;
 	KFieldInit(file, file->PathInfoNULL, KLIB new_kString(kctx, OnField, pathInfo, len, StringPolicy_ASCII|StringPolicy_TEXT));
-	kFile_set(ChangeLessStream, file, true);
+	kFile_Set(ChangeLessStream, file, true);
 	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
 		if(fp == stdin) {
 			file->readerIconv = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
@@ -505,12 +505,12 @@ static void file_defineConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *tr
 		{"stderr", KType_File, KFileStdErr},
 		{NULL}, /* sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(FileData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(FileData), trace);
 	KDEFINE_INT_CONST IntData[] = {
 		{"EOF", KType_int,  EOF},
 		{NULL}, /* sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), trace);
 
 }
 
@@ -542,7 +542,7 @@ static kbool_t file_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 		{"FILE", VirtualType_KClass, (uintptr_t)KClass_File},
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(ClassData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(ClassData), trace);
 	return true;
 }
 

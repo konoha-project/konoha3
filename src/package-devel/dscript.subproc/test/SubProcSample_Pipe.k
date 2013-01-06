@@ -4,6 +4,7 @@ import("dscript.subproc");
 import("Type.File");
 import("JavaScript.String");
 import("JavaScript.Array");
+
 void test() {
 	// ls -la | cat -n
 	SubProc p = new SubProc("ls");

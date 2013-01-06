@@ -4,7 +4,7 @@
 
 import("jansson");
 import("konoha");
-import("Java.String");
+import("JavaScript.String");
 import("konoha.curl");
 
 load("rest.k");

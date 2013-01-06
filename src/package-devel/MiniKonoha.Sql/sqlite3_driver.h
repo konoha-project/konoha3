@@ -61,20 +61,20 @@ static int SQLITE3_qnext(KonohaContext* kctx, KCursor *qcur, kResultSet *rs, KTr
 			int type = sqlite3_column_type(stmt, i);
 			switch(type) {
 			case SQLITE_INTEGER:
-				ResultSet_setInt(kctx, rs, i, (kint_t)sqlite3_column_int64(stmt, i));
+				ResultSet_SetInt(kctx, rs, i, (kint_t)sqlite3_column_int64(stmt, i));
 				break;
 			case SQLITE_FLOAT:
-				ResultSet_setFloat(kctx, rs, i, (kfloat_t)sqlite3_column_double(stmt, i));
+				ResultSet_SetFloat(kctx, rs, i, (kfloat_t)sqlite3_column_double(stmt, i));
 				break;
 			case SQLITE_TEXT:
-				ResultSet_setText(kctx, rs, i, (char *)sqlite3_column_text(stmt,i), (size_t)sqlite3_column_bytes(stmt, i));
+				ResultSet_SetText(kctx, rs, i, (char *)sqlite3_column_text(stmt,i), (size_t)sqlite3_column_bytes(stmt, i));
 				break;
 			case SQLITE_BLOB:
-				//ResultSet_setBlob(kctx, rs, i, (const char *)sqlite3_column_blob(stmt, i), sqlite3_column_bytes(stmt, i));
+				//ResultSet_SetBlob(kctx, rs, i, (const char *)sqlite3_column_blob(stmt, i), sqlite3_column_bytes(stmt, i));
 				break;
 			case SQLITE_NULL:
 			default:
-				ResultSet_setNull(kctx, rs, i);
+				ResultSet_SetNull(kctx, rs, i);
 			}
 		}
 		return 1;

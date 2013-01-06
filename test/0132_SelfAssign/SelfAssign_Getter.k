@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
 import("Syntax.JavaStyleClass");
-import("Syntax.CStyleCompoundAssignment");
+import("cstyle");
 
 class C {
 	int x;

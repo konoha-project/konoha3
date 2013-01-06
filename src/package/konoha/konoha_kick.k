@@ -24,12 +24,12 @@
 
 import("cstyle");
 
-import("konoha.object");
+import("JavaStyle.Object");
 import("Syntax.JavaStyleClass");
 import("Type.StaticVar");
 import("Syntax.GlobalVariable");
 import("MiniKonoha.NameSpace");
-import("Java.String");
+import("JavaScript.String");
 import("JavaScript.Regexp");
 import("JavaScript.Array");
 import("konoha.map");

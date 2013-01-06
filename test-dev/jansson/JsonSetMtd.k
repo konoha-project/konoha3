@@ -2,7 +2,7 @@
 import("Syntax.CStyleWhile");
 import("cstyle");
 import("Type.Float");
-import("Java.String");
+import("JavaScript.String");
 import("JavaScript.Array");
 import("jansson");
 

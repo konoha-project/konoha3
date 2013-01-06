@@ -293,7 +293,7 @@ static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		{"NaN", KType_float, NAN},
 		{NULL} /* sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(FloatData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(FloatData), trace);
 	return true;
 }
 
@@ -301,16 +301,16 @@ static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 
 static KMETHOD TypeCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	kToken *tk = expr->TermToken;
 	sfp[4].floatValue = strtod(kString_text(tk->text), NULL);   // just using tramsformation float
-	KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_float, sfp[4].unboxValue));
+	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_float, sfp[4].unboxValue));
 }
 
 static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("$Float"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_Float, },
+		{ KSymbol_("$Float"), SYNFLAG_CTypeFunc, 0, 0, {SUGAR termParseFunc}, {SUGARFUNC TypeCheck_Float},},
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
@@ -322,7 +322,7 @@ static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 static kbool_t float_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	/* Use cstyle package's Parser to parsing FloatLiteral */
-	KImportPackageSymbol(ns, "cstyle", "$Number", trace);
+//	KImportPackageSymbol(ns, "cstyle", "$Number", trace);
 	float_defineMethod(kctx, ns, trace);
 	float_defineSyntax(kctx, ns, trace);
 	return true;
@@ -335,7 +335,7 @@ static kbool_t float_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 			{"double", VirtualType_KClass, (uintptr_t)KClass_Float},
 			{NULL},
 		};
-		KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(ClassData), false/*isOverride*/, trace);
+		KLIB kNameSpace_LoadConstData(kctx, exportNS, KConst_(ClassData), trace);
 	}
 	return true;
 }
@@ -344,7 +344,7 @@ static kbool_t float_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 KDEFINE_PACKAGE* Float_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "float", "1.0");
+	KSetPackageName(d, "konoha", K_VERSION);
 	d.PackupNameSpace    = float_PackupNameSpace;
 	d.ExportNameSpace   = float_ExportNameSpace;
 	return &d;

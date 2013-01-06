@@ -248,7 +248,7 @@ static void kSubProc_execOnChild(KonohaContext *kctx, kSubProc *sbp, KTraceInfo 
 	args[0] = (char *)kString_text(sbp->Command);
 	args[kArray_size(sbp->ArgumentList) + 1] = NULL;
 	for(i = 0; i < kArray_size(sbp->ArgumentList); i++) {
-		args[i+1] = (char *)kString_text(sbp->ArgumentList->StmtItems[i]);
+		args[i+1] = (char *)kString_text(sbp->ArgumentList->NodeItems[i]);
 	}
 	KTraceChangeSystemPoint(trace, "execvp", LogText("command", args[0]), LogTextArray("argv", args), LogUint("pid", getpid()));
 	//	shell mode execlp("sh", "sh", "-c", kString_text(command), NULL);

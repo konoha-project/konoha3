@@ -98,22 +98,18 @@ static KMETHOD Object_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ct->compareObject(self, that) != 0);
 }
 
-//## @Const method Object Boolean.box();
-static KMETHOD Boolean_box(KonohaContext *kctx, KonohaStack *sfp)
+//## Boolean Object.isNull();
+static KMETHOD Object_isNull(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBoolean *o = !!(sfp[0].unboxValue) ? K_TRUE : K_FALSE;
-	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
-	KReturn(o);
+	kObject *o = sfp[0].asObject;
+	KReturnUnboxValue(IS_NULL(o));
 }
 
-//## @Const @SmartReturn method Object Int.box();
-static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
+//## Boolean Object.isNotNull();
+static KMETHOD Object_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KClass *c = KGetReturnType(sfp);
-	DBG_ASSERT(KClass_Is(UnboxType, c));
-	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
-//	DBG_P(">>>>>>>>>>> boxing %s %lld\n", KType_text(c->typeId), sfp[0].unboxValue);
-	KReturn(KLIB new_kObject(kctx, OnStack, c, sfp[0].unboxValue));
+	kObject *o = sfp[0].asObject;
+	KReturnUnboxValue(!IS_NULL(o));
 }
 
 /* String */
@@ -329,6 +325,8 @@ static void LoadDefaultMethod(KonohaContext *kctx, kNameSpace *ns)
 		_Public|_Im|_Const|_Virtual, _F(Object_opNEQ), KType_boolean, KType_Object, KMethodName_("!="), 1, KType_Object, FN_x,
 		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn|_Virtual, _F(Object_to), KType_Object, KType_Object, KMethodName_("to"), 0,
 		_Public|_Im|_Const|_Virtual, _F(Object_toString), KType_String, KType_Object, KMethodName_To(KType_String), 0,
+		_Public|_Im|_Final|_Const, _F(Object_isNull),   KType_boolean, KType_Object, KMethodName_("IsNull"), 0,
+		_Public|_Im|_Final|_Const, _F(Object_isNotNull), KType_boolean, KType_Object, KMethodName_("IsNotNull"), 0,
 		_Public|_Im|_Const, _F(Boolean_toString), KType_String, KType_boolean, KMethodName_To(KType_String), 0,
 		_Public|_Im|_Const, _F(Boolean_opNOT), KType_boolean, KType_boolean, KMethodName_("!"), 0,
 		_Public|_Im|_Const, _F(Boolean_opEQ), KType_boolean, KType_boolean, KMethodName_("=="), 1, KType_boolean, FN_x,
@@ -347,15 +345,15 @@ static void LoadDefaultMethod(KonohaContext *kctx, kNameSpace *ns)
 		_Public|_Im|_Const, _F(Int_opGT),  KType_boolean, KType_int, KMethodName_(">"),  1, KType_int, FN_x,
 		_Public|_Im|_Const, _F(Int_opGTE), KType_boolean, KType_int, KMethodName_(">="), 1, KType_int, FN_x,
 		_Public|_Im|_Const,  _F(Int_toString), KType_String, KType_int, KMethodName_To(KType_String), 0,
-		_Public|_Im|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Boolean_box), KType_Object, KType_boolean, MN_box, 0,
-		_Public|_Im|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Int_box), KType_Object, KType_int, MN_box, 0,
+//		_Public|_Im|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Boolean_box), KType_Object, KType_boolean, MN_box, 0,
+//		_Public|_Im|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Int_box), KType_Object, KType_int, MN_box, 0,
 		_Public|_Im|_Const, _F(String_opEQ),  KType_boolean, KType_String, KMethodName_("=="),  1, KType_String, FN_x ,
 		_Public|_Im|_Const, _F(String_opNEQ), KType_boolean, KType_String, KMethodName_("!="), 1, KType_String, FN_x ,
 		_Public|_Im|_Const, _F(String_toInt), KType_int, KType_String, KMethodName_To(KType_int), 0,
 		_Public|_Im|_Const, _F(String_opADD), KType_String, KType_String, KMethodName_("+"), 1, KType_String | KTypeAttr_Coercion, FN_x,
 		_Public|_Const|_Hidden, _F(Func_new), KType_Func, KType_Func, MN_new, 2, KType_Object, FN_x, KType_Method, FN_x,
-		_Public|kMethod_SmartReturn|_Hidden, _F(Func_invoke), KType_Object, KType_Func, KMethodName_("invoke"), 0,
-		_Static|_Public|_Im, _F(NameSpace_assert), KType_void, KType_NameSpace, KMethodName_("assert"), 1, KType_boolean, FN_x,
+		_Public|kMethod_SmartReturn|_Hidden, _F(Func_invoke), KType_Object, KType_Func, KMethodName_("Invoke"), 0,
+		_Static|_Public|_Im, _F(NameSpace_assert), KType_void, KType_NameSpace, KMethodName_("Assert"), 1, KType_boolean, FN_x,
 		_Public|_Const, _F(NameSpace_AllowImplicitCoercion), KType_void, KType_NameSpace, KMethodName_("AllowImplicitCoercion"), 1, KType_boolean, KFieldName_("allow"),
 		_Static|_Public|_Im, _F(System_p), KType_void, KType_System, KMethodName_("p"), 1, KType_String | KTypeAttr_Coercion, KFieldName_("s"),
 		_Static|_Public|_Im, _F(System_gc), KType_void, KType_System, KMethodName_("gc"), 0,

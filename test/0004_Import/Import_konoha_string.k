@@ -1,4 +1,4 @@
 // written by kimio
 
-import("Java.String");
+import("JavaScript.String");
 

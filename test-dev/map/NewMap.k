@@ -2,7 +2,7 @@
 
 import("konoha.map");
 //import("konoha.new"); Don't use this
-import("konoha.object");
+import("JavaStyle.Object");
 
 void test() {
 	Map m = new Map();

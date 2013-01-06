@@ -82,7 +82,7 @@ static int MYSQL_qnext(KonohaContext *kctx, KCursor *qcursor, kResultSet *rs, KT
 	if((row = mysql_fetch_row(res)) != NULL) {
 		for (i = 0; i < num_fields; i++) {
 			if(row[i] == NULL) {
-				ResultSet_setNull(kctx, rs, i);
+				ResultSet_SetNull(kctx, rs, i);
 				continue;
 			}
 			kint_t ival;
@@ -92,11 +92,11 @@ static int MYSQL_qnext(KonohaContext *kctx, KCursor *qcursor, kResultSet *rs, KT
 			case MYSQL_TYPE_INT24:    case MYSQL_TYPE_LONG:
 			case MYSQL_TYPE_LONGLONG: case MYSQL_TYPE_YEAR:
 				ival = parseInt((char *)row[i], strlen((char *)row[i]));
-				ResultSet_setInt(kctx, rs, i, ival);
+				ResultSet_SetInt(kctx, rs, i, ival);
 				break;
 			case MYSQL_TYPE_FLOAT: case MYSQL_TYPE_DOUBLE:
 				fval = parseFloat((char *)row[i], strlen((char *)row[i]));
-				ResultSet_setFloat(kctx, rs, i, fval);
+				ResultSet_SetFloat(kctx, rs, i, fval);
 				break;
 			case MYSQL_TYPE_NEWDECIMAL: case MYSQL_TYPE_STRING:
 			case MYSQL_TYPE_VAR_STRING: case MYSQL_TYPE_TINY_BLOB:
@@ -104,11 +104,11 @@ static int MYSQL_qnext(KonohaContext *kctx, KCursor *qcursor, kResultSet *rs, KT
 			case MYSQL_TYPE_LONG_BLOB:  case MYSQL_TYPE_BIT:
 			case MYSQL_TYPE_TIME:       case MYSQL_TYPE_DATE:
 			case MYSQL_TYPE_DATETIME:   case MYSQL_TYPE_TIMESTAMP:
-				ResultSet_setText(kctx, rs, i, (char *)row[i], strlen((char *)row[i]));
+				ResultSet_SetText(kctx, rs, i, (char *)row[i], strlen((char *)row[i]));
 				break;
 			case MYSQL_TYPE_NULL:
 			default:
-				ResultSet_setNull(kctx, rs, i);
+				ResultSet_SetNull(kctx, rs, i);
 				break;
 			}
 		}

@@ -1,7 +1,8 @@
 //import("konoha.new"); Don't use this
 import("cstyle");
 import("Type.Float");
-import("Java.String");
+import("Type.Float");
+import("JavaScript.String");
 import("JavaScript.Array");
 import("Syntax.CStyleWhile");
 

@@ -2,11 +2,11 @@
 
 import("Type.StaticVar");
 import("Syntax.Null");
-import("konoha.object");
+import("JavaStyle.Object");
 
 void test() {
 	var o = null;
-	assert(o <: Object);
+	assert(o instanceof Object);
 }
 
 test();

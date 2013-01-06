@@ -115,7 +115,7 @@ static kbool_t apache_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	mod->h.allocSize          = sizeof(KModuleApache);
 	mod->h.setupModuleContext = ApacheModule_Setup;
 	mod->h.freeModule         = ApacheModule_Free;
-	KLIB KRuntime_setModule(kctx, MOD_APACHE, (KRuntimeModule *)mod, trace);
+	KLIB KRuntime_SetModule(kctx, MOD_APACHE, (KRuntimeModule *)mod, trace);
 	mod->cRequest       = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &Def, 0);
 	mod->cAprTable      = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &aprTableDef, 0);
 	mod->cAprTableEntry = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &aprTableEntryDef, 0);
@@ -134,7 +134,7 @@ static kbool_t apache_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		DEFINE_KEYWORD(APLOG_DEBUG),
 		{NULL, 0, 0}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), trace);
 	return true;
 }
 

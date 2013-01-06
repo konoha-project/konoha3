@@ -111,23 +111,23 @@ typedef struct kvirConnectPtr {
 }kvirConnectPtr;
 static int KType_virConnectPtr;
 
-typedef struct kvirDomainBlockInfoPtr {
+typedef struct kvirDomainNodeInfoPtr {
 	kObjectHeader h;
-	virDomainBlockInfoPtr p;
-}kvirDomainBlockInfoPtr;
-static int KType_virDomainBlockInfoPtr;
+	virDomainNodeInfoPtr p;
+}kvirDomainNodeInfoPtr;
+static int KType_virDomainNodeInfoPtr;
 
-typedef struct kvirDomainBlockJobInfoPtr {
+typedef struct kvirDomainNodeJobInfoPtr {
 	kObjectHeader h;
-	virDomainBlockJobInfoPtr p;
-}kvirDomainBlockJobInfoPtr;
-static int KType_virDomainBlockJobInfoPtr;
+	virDomainNodeJobInfoPtr p;
+}kvirDomainNodeJobInfoPtr;
+static int KType_virDomainNodeJobInfoPtr;
 
-typedef struct kvirDomainBlockStatsPtr {
+typedef struct kvirDomainNodeStatsPtr {
 	kObjectHeader h;
-	virDomainBlockStatsPtr p;
-}kvirDomainBlockStatsPtr;
-static int KType_virDomainBlockStatsPtr;
+	virDomainNodeStatsPtr p;
+}kvirDomainNodeStatsPtr;
+static int KType_virDomainNodeStatsPtr;
 
 typedef struct kvirDomainControlInfoPtr {
 	kObjectHeader h;
@@ -520,38 +520,38 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 	KClass *ctvirConnectPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirConnectPtr, trace);
 	KType_virConnectPtr = ctvirConnectPtr->typeId;
 
-	KDEFINE_CLASS defvirDomainBlockInfoPtr = {
-		.structname = "virDomainBlockInfoPtr",
+	KDEFINE_CLASS defvirDomainNodeInfoPtr = {
+		.structname = "virDomainNodeInfoPtr",
 		.typeId = KTypeAttr_NewId,
-		.cstruct_size = sizeof(kvirDomainBlockInfoPtr),
+		.cstruct_size = sizeof(kvirDomainNodeInfoPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
 		.free = virt_common_ptr_Free,
 	};
-	KClass *ctvirDomainBlockInfoPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainBlockInfoPtr, trace);
-	KType_virDomainBlockInfoPtr = ctvirDomainBlockInfoPtr->typeId;
+	KClass *ctvirDomainNodeInfoPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainNodeInfoPtr, trace);
+	KType_virDomainNodeInfoPtr = ctvirDomainNodeInfoPtr->typeId;
 
-	KDEFINE_CLASS defvirDomainBlockJobInfoPtr = {
-		.structname = "virDomainBlockJobInfoPtr",
+	KDEFINE_CLASS defvirDomainNodeJobInfoPtr = {
+		.structname = "virDomainNodeJobInfoPtr",
 		.typeId = KTypeAttr_NewId,
-		.cstruct_size = sizeof(kvirDomainBlockJobInfoPtr),
+		.cstruct_size = sizeof(kvirDomainNodeJobInfoPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
 		.free = virt_common_ptr_Free,
 	};
-	KClass *ctvirDomainBlockJobInfoPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainBlockJobInfoPtr, trace);
-	KType_virDomainBlockJobInfoPtr = ctvirDomainBlockJobInfoPtr->typeId;
+	KClass *ctvirDomainNodeJobInfoPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainNodeJobInfoPtr, trace);
+	KType_virDomainNodeJobInfoPtr = ctvirDomainNodeJobInfoPtr->typeId;
 
-	KDEFINE_CLASS defvirDomainBlockStatsPtr = {
-		.structname = "virDomainBlockStatsPtr",
+	KDEFINE_CLASS defvirDomainNodeStatsPtr = {
+		.structname = "virDomainNodeStatsPtr",
 		.typeId = KTypeAttr_NewId,
-		.cstruct_size = sizeof(kvirDomainBlockStatsPtr),
+		.cstruct_size = sizeof(kvirDomainNodeStatsPtr),
 		.cflag = KClassFlag_Final,
 		.init = virt_common_ptr_Init,
 		.free = virt_common_ptr_Free,
 	};
-	KClass *ctvirDomainBlockStatsPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainBlockStatsPtr, trace);
-	KType_virDomainBlockStatsPtr = ctvirDomainBlockStatsPtr->typeId;
+	KClass *ctvirDomainNodeStatsPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainNodeStatsPtr, trace);
+	KType_virDomainNodeStatsPtr = ctvirDomainNodeStatsPtr->typeId;
 
 	KDEFINE_CLASS defvirDomainControlInfoPtr = {
 		.structname = "virDomainControlInfoPtr",

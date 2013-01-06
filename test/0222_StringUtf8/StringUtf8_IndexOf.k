@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("Java.String");
+import("JavaScript.String");
 
 void test() {
 	assert("こんにちは、世界".indexOf("世界") == 6);

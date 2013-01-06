@@ -25,7 +25,6 @@
 //#include <minikonoha/minikonoha.h>
 //#include <minikonoha/sugar.h>
 //#include <minikonoha/klib.h>
-//#include <minikonoha/import/methoddecl.h>
 //
 //#ifdef __cplusplus
 //extern "C"{
@@ -40,14 +39,14 @@
 //};
 //
 //#define Map_isUnboxData(o)    (KFlag_Is(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1))
-//#define Map_setUnboxData(o,b) KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1,b)
+//#define Map_SetUnboxData(o,b) KFlag_Set(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1,b)
 //
 //static void kMap_Init(KonohaContext *kctx, kObject *o, void *conf)
 //{
 //	kMap *map = (kMap *)o;
 //	map->map = KLIB KHashMap_Init(kctx, 17);
 //	if(KType_Is(UnboxType, kObject_p0(map))) {
-//		Map_setUnboxData(map, true);
+//		Map_SetUnboxData(map, true);
 //	}
 //}
 //
@@ -144,7 +143,7 @@
 //}
 //
 ////## method void Map.set(String key, T0 value);
-//static KMETHOD Map_set(KonohaContext *kctx, KonohaStack *sfp)
+//static KMETHOD Map_Set(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kMap *m = (kMap *)sfp[0].asObject;
 //	KHashMapEntry *e = kMap_getEntry(kctx, m, sfp[1].asString, true/*new_if_NULL*/);
@@ -193,6 +192,11 @@
 //
 ///* ------------------------------------------------------------------------ */
 //
+//#define _Public   kMethod_Public
+//#define _Const    kMethod_Const
+//#define _Im       kMethod_Immutable
+//#define _F(F)     (intptr_t)(F)
+//
 //#define KType_Map cMap->typeId
 //
 //static kbool_t map_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
@@ -214,7 +218,7 @@
 //		_Public, _F(Map_new), KType_Map, KType_Map, KMethodName_("new"), 0,
 //		_Public|_Im|_Const, _F(Map_has), KType_boolean, KType_Map, KMethodName_("has"), 1, KType_String, FN_key,
 //		_Public|_Im|_Const, _F(Map_get), KType_0, KType_Map, KMethodName_("get"), 1, KType_String, FN_key,
-//		_Public, _F(Map_set), KType_void, KType_Map, KMethodName_("set"), 2, KType_String, FN_key, KType_0, KFieldName_("value"),
+//		_Public, _F(Map_Set), KType_void, KType_Map, KMethodName_("set"), 2, KType_String, FN_key, KType_0, KFieldName_("value"),
 //		_Public, _F(Map_Remove), KType_void, KType_Map, KMethodName_("remove"), 1, KType_String, FN_key,
 //		_Public|_Im|_Const, _F(Map_keys), KType_Array0, KType_Map, KMethodName_("keys"), 0,
 //		DEND,
@@ -227,9 +231,9 @@
 //
 //static KMETHOD TypeCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_TypeCheck(stmt, expr, gma, reqty);
+//	VAR_TypeCheck2(stmt, expr, ns, reqc);
 //	kToken *termToken = expr->TermToken;
-//	if(kExpr_IsTerm(expr) && IS_Token(termToken)) {
+//	if(kNode_IsTerm(expr) && IS_Token(termToken)) {
 //		DBG_P("termToken='%s'", kString_text(termToken->text));
 //
 //	}
@@ -237,7 +241,7 @@
 //
 //static kbool_t map_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 //{
-//	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_MapLiteral));
+//	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_NodePattern, KSugarTypeFunc, KSugarFunc(ns, TypeCheck_MapLiteral));
 //	return true;
 //}
 //

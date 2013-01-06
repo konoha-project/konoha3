@@ -1,7 +1,7 @@
 // written by kimio
 
 import("Syntax.Null")
-import("konoha.object");
+import("JavaStyle.Object");
 
 void test () {
 	Object obj;

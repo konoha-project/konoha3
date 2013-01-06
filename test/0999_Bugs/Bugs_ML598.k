@@ -3,7 +3,7 @@
 // SEGV at git:c4b1feb97a58bef08bf1472fad346689cf9ac4a0
 import("Syntax.Null");
 import("JavaScript.Array");
-import("Java.String");
+import("JavaScript.String");
 
 String[] extractNoun() {
     if(false) {

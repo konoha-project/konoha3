@@ -9,8 +9,8 @@ What is the sum of the digits of the number 21000?
 import("JavaScript.String");
 import("Syntax.CStyleWhile");
 import("Syntax.CStyleCompoundAssignment");
+import("Syntax.JavaStyleClass");
 import("Lib.Gmp");
-import("MiniKonoha.Field");
 
 Mpz factorial(Mpz m, int n) {
 	int i = 1;

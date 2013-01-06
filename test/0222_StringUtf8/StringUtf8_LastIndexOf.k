@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("Java.String");
+import("JavaScript.String");
 
 void test() {
 	assert("こんにちは、にほん".lastIndexOf("に") == 6);

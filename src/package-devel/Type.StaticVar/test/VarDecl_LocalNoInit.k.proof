@@ -1,0 +1,3 @@
+ - (error) (VarDecl_LocalNoInit.k:6) var n: initial value is expected
+ ** RuntimeScriptException (VarDecl_LocalNoInit.k:6)
+Q.E.D.

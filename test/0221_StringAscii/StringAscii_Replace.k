@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("Java.String");
+import("JavaScript.String");
 
 void test() {
 	assert("Hello World, hello world.".replace("world", "Japan") == "Hello World, hello Japan.");

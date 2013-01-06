@@ -23,15 +23,14 @@
  ***************************************************************************/
 
 import("Syntax.CStyleWhile");
-import("Syntax.StringInterpolation");
 import("Syntax.Null");
 import("JavaScript.Array");
 import("MiniKonoha.Console");
-import("MiniKonoha.NameSpace");
+import("MiniKonoha.NameSpace");  // konoha.defined is obsolete
 import("MiniKonoha.Eval");
 import("Type.File");
 import("JavaScript.Math");
-import("konoha.object");
+import("JavaStyle.Object");
 import("JavaScript.String");
 import("dscript.subproc");
 import("MiniKonoha.Syntax");

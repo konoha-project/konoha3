@@ -1,6 +1,5 @@
 // reported by Atsushi Uchida
 
-
 void f() {
     int i = 0;
     assert(i == 0);

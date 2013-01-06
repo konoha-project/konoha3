@@ -2,12 +2,12 @@
 
 
 import("Syntax.UntypedVariable");
-import("konoha.object");
+import("JavaStyle.Object");
 import("Syntax.Null");
 
 void test() {
 	o = null;
-	assert(o <: Object);
+	assert(o instanceof Object);
 }
 
 test();

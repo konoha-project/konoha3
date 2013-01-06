@@ -2,7 +2,7 @@
 // added by kimio
 
 import("Syntax.CStyleWhile");
-import("Java.String");
+import("JavaScript.String");
 
 void f() {
 	int i = 0;

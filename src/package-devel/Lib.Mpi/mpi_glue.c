@@ -639,7 +639,7 @@ static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 			{"BXOR", KType_MPIOp, (kint_t)MPI_BXOR},
 			{}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(OpData), true/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(OpData), trace);
 	return true;
 }
 

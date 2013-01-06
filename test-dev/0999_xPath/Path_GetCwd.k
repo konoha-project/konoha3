@@ -1,6 +1,6 @@
 //Written by Joseph
 
-import("Java.String");
+import("JavaScript.String");
 import("posix.path");
 
 void test() {

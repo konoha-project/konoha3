@@ -4,7 +4,7 @@
 import("Type.Float");
 import("JavaScript.Math");
 import("Type.Bytes");
-import("Java.String");
+import("JavaScript.String");
 import("Syntax.GlobalVariable");
 import("MiniKonoha.NameSpace");  // konoha.const is obsolete
 import("Syntax.JavaStyleClass");
