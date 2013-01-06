@@ -281,7 +281,7 @@ static void Preprocess(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, i
 			size_t pushBeginIdx = kArray_size(bufferList), groupsize = kArray_size(tk->GroupTokenList);
 			Preprocess(kctx, ns, tk->GroupTokenList, 0, groupsize, macroParam, bufferList);
 			size_t pushEndIdx = kArray_size(bufferList);
-			if(groupsize != (pushEndIdx - pushBeginIdx)) {
+			if(groupsize != (pushEndIdx - pushBeginIdx) || macroParam != NULL) {
 				KLIB kArray_Clear(kctx, tk->GroupTokenList, 0);
 				kArray_AppendList(kctx, tk->GroupTokenList, bufferList, pushBeginIdx, pushEndIdx);
 			}
@@ -369,8 +369,10 @@ static kbool_t ExpandMacroParam(KonohaContext *kctx, kNameSpace *ns, ksymbol_t s
 
 static void ApplyMacroData(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, size_t paramsize, KMacroSet *macroParam, kArray *bufferList)
 {
-	//TraverseTokenList(kctx, tokenList, beginIdx + paramsize, endIdx, ResetPreprocess, NULL);
+	TraverseTokenList(kctx, tokenList, beginIdx + paramsize, endIdx, ResetPreprocess, NULL);
+	//SUGAR dumpTokenArray(kctx, 0, tokenList, beginIdx + paramsize, endIdx);
 	Preprocess(kctx, ns, tokenList, beginIdx + paramsize, endIdx, macroParam, bufferList);
+	//SUGAR dumpTokenArray(kctx, 0, RangeArray(bufferList));
 }
 
 static kbool_t kNameSpace_SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data, int optionMacro)
