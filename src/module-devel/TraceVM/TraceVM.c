@@ -339,11 +339,6 @@
 //	}
 //}
 //
-//static kbool_t IsSupportedKVirtualCode(int opcode)
-//{
-//	return (((size_t)opcode) < OPCODE_MAX);
-//}
-//
 //static KMETHOD KMethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].calledMethod));
@@ -448,7 +443,6 @@
 //	};
 //	SetUpBootCode();
 //	factory->VirtualMachineInfo            = &ModuleInfo;
-//	factory->IsSupportedKVirtualCode        = IsSupportedKVirtualCode;
 ////	factory->RunVirtualMachine             = KonohaVirtualMachine_Run;
 ////	factory->DeleteVirtualMachine          = TraceVMDeleteVirtualMachine;
 ////	factory->GetVirtualMachineKMethodFunc   = GetVirtualMachineKMethodFunc;

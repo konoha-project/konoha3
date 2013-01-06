@@ -993,11 +993,6 @@ static void SetUpBootCode(void)
 	}
 }
 
-static kbool_t IsSupportedKVirtualCode(int opcode)
-{
-	return (((size_t)opcode) < OPCODE_MAX);
-}
-
 static KMETHOD KMethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
 	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].calledMethod));
@@ -1054,7 +1049,6 @@ kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
 	};
 	SetUpBootCode();
 	factory->VirtualMachineInfo            = &ModuleInfo;
-	factory->IsSupportedKVirtualCode        = IsSupportedKVirtualCode;
 	factory->GetDefaultBootCode            = GetDefaultBootCode;
 	factory->GetDefaultBuilderAPI          = GetDefaultBuilderAPI;
 	factory->DeleteVirtualMachine = MiniVMDeleteVirtualMachine;

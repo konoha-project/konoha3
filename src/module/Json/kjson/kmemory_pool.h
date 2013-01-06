@@ -60,21 +60,21 @@ DEF_ARRAY_T(CharPtr);
 DEF_ARRAY_OP_NOPOINTER(CharPtr);
 
 typedef struct PageData  { ARRAY(CharPtr) block; } PageData;
-typedef struct NodeInfo { char *current, *base; } NodeInfo;
+typedef struct BlockInfo { char *current, *base; } BlockInfo;
 
 DEF_ARRAY_STRUCT0(PageData, unsigned);
 DEF_ARRAY_T(PageData);
 DEF_ARRAY_OP(PageData);
 
-DEF_ARRAY_STRUCT0(NodeInfo, unsigned);
-DEF_ARRAY_T(NodeInfo);
-DEF_ARRAY_OP(NodeInfo);
+DEF_ARRAY_STRUCT0(BlockInfo, unsigned);
+DEF_ARRAY_T(BlockInfo);
+DEF_ARRAY_OP(BlockInfo);
 
 #undef KJSON_MALLOC
 #undef KJSON_FREE
 
 typedef struct JSONMemoryPool {
-    ARRAY(NodeInfo) current_block;
+    ARRAY(BlockInfo) current_block;
     ARRAY(PageData)  array;
 } JSONMemoryPool;
 
@@ -82,16 +82,16 @@ static inline void JSONMemoryPool_Init(JSONMemoryPool *pool)
 {
     int i;
     ARRAY_Init(PageData,  &pool->array, MAX_ALIGN_LOG2 - MIN_ALIGN_LOG2);
-    ARRAY_Init(NodeInfo, &pool->current_block, MAX_ALIGN_LOG2 - MIN_ALIGN_LOG2);
+    ARRAY_Init(BlockInfo, &pool->current_block, MAX_ALIGN_LOG2 - MIN_ALIGN_LOG2);
     for(i = MIN_ALIGN_LOG2; i <= MAX_ALIGN_LOG2; ++i) {
         PageData page;
-        NodeInfo block;
+        BlockInfo block;
         ARRAY_Init(CharPtr, &page.block, 4);
         ARRAY_Add(CharPtr, &page.block, (char *) malloc(MEMORYBLOCK_SIZE));
         ARRAY_Add(PageData, &pool->array, &page);
         block.base = ARRAY_get(CharPtr, &page.block, 0);
         block.current = block.base;
-        ARRAY_Add(NodeInfo, &pool->current_block, &block);
+        ARRAY_Add(BlockInfo, &pool->current_block, &block);
     }
 }
 
@@ -105,7 +105,7 @@ static void *JSONMemoryPool_Alloc(JSONMemoryPool *pool, size_t n, bool *malloced
 
     size_t size = ALIGN(n, 1 << MIN_ALIGN_LOG2);
     unsigned index = LOG2(size) - MIN_ALIGN_LOG2;
-    NodeInfo *block = ARRAY_get(NodeInfo, &pool->current_block, index);
+    BlockInfo *block = ARRAY_get(BlockInfo, &pool->current_block, index);
     if(likely((block->current + size - block->base) <= MEMORYBLOCK_SIZE)) {
         char *ptr = block->current;
         block->current = block->current + size;
@@ -130,7 +130,7 @@ static inline void JSONMemoryPool_Delete(JSONMemoryPool *pool)
         ARRAY_dispose(CharPtr, &p->block);
     }
     ARRAY_dispose(PageData, &pool->array);
-    ARRAY_dispose(NodeInfo,  &pool->current_block);
+    ARRAY_dispose(BlockInfo,  &pool->current_block);
 }
 
 #ifdef __cplusplus
