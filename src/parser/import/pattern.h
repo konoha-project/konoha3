@@ -159,10 +159,10 @@ static KClass* ParseGenericsType(KonohaContext *kctx, kNameSpace *ns, KClass *ba
 static int ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KClass **classRef)
 {
 	int nextIdx = -1;
-	kToken *tk = tokenList->TokenItems[beginIdx];
+	kTokenVar *typeToken = tokenList->TokenVarItems[beginIdx];
 	KClass *foundClass = NULL;
-	if(tk->resolvedSyntaxInfo->keyword == KSymbol_TypePattern) {
-		foundClass = KClass_(tk->resolvedTypeId);
+	if(typeToken->resolvedSyntaxInfo->keyword == KSymbol_TypePattern) {
+		foundClass = KClass_(typeToken->resolvedTypeId);
 		nextIdx = beginIdx + 1;
 	}
 //	else if(tk->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern) { // check
@@ -174,21 +174,31 @@ static int ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 	if(foundClass != NULL) {
 		int isAllowedGenerics = true;
 		for(; nextIdx < endIdx; nextIdx++) {
-			tk = tokenList->TokenItems[nextIdx];
-			if(tk->resolvedSyntaxInfo == NULL || tk->resolvedSyntaxInfo->keyword != KSymbol_BracketGroup) {
-				break;
+			kTokenVar *suffixToken = tokenList->TokenVarItems[nextIdx];
+			if(suffixToken->tokenType == TokenType_Skip) {
+				isAllowedGenerics = false;
+				continue;
 			}
-			int sizeofBracketTokens = kArray_size(tk->GroupTokenList);
+			if(suffixToken->resolvedSyntaxInfo->keyword != KSymbol_BracketGroup) break;
+			int sizeofBracketTokens = kArray_size(suffixToken->GroupTokenList);
 			if(isAllowedGenerics &&  sizeofBracketTokens > 2) {  // C[T][]
-				KClass *foundGenericClass = ParseGenericsType(kctx, ns, foundClass, RangeGroup(tk->GroupTokenList));
+				KClass *foundGenericClass = ParseGenericsType(kctx, ns, foundClass, RangeGroup(suffixToken->GroupTokenList));
 				if(foundGenericClass == NULL) break;
 				foundClass = foundGenericClass;
+				suffixToken->tokenType = TokenType_Skip;
 			}
 			else {
-				if(sizeofBracketTokens > 0) break;   // C[100] is treated as C  and the token [100] is set to nextIdx;
+				if(sizeofBracketTokens > 2) break;   // C[100] is treated as C  and the token [100] is set to nextIdx;
 				foundClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);  // C[] => Array[C]
+				suffixToken->tokenType = TokenType_Skip;
 			}
 			isAllowedGenerics = false;
+		}
+	}
+	if(foundClass != NULL) {
+		if(typeToken->resolvedTypeId != foundClass->typeId) {
+			typeToken->resolvedTypeId = foundClass->typeId;
+			DBG_P("Retype foundClass=%s", KClass_text(foundClass));
 		}
 	}
 	if(classRef != NULL) {

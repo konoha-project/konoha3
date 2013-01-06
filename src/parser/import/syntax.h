@@ -145,27 +145,31 @@ static KMETHOD PatternMatch_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = kNode_ns(stmt);
 	KClass *foundClass = NULL;
 	int nextIdx = ParseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, &foundClass);
-	//DBG_P("@ nextIdx = %d < %d", nextIdx, endIdx);
+	//DBG_P("@ nextIdx = %d < %d found=%p", nextIdx, endIdx, foundClass);
+	SUGAR dumpTokenArray(kctx, 0, tokenList, beginIdx, endIdx);
 	if(nextIdx != -1) {
 		nextIdx = TokenUtils_SkipIndent(tokenList, nextIdx, endIdx);
 		if(nextIdx < endIdx) {
 			kToken *tk = tokenList->TokenItems[nextIdx];
-			if(tk->resolvedSyntaxInfo->keyword == KSymbol_MemberPattern) {
-				KReturnUnboxValue(-1);
-			}
+//			if(tk->resolvedSyntaxInfo->keyword == KSymbol_MemberPattern) {
+//				KReturnUnboxValue(-1);
+//			}
 			if(ParseTypePattern(kctx, ns, tokenList, nextIdx, endIdx, NULL) != -1) {
 				KReturnUnboxValue(ParseSyntaxPattern(kctx, ns, stmt, stmt->syn, tokenList, beginIdx, endIdx));
 			}
-			if(tk->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern) {
+			if(tk->tokenType == KSymbol_ParenthesisGroup) {
+				KReturnUnboxValue(ParseSyntaxPattern(kctx, ns, stmt, stmt->syn, tokenList, beginIdx, endIdx));
+			}
+			if(tk->tokenType == KSymbol_SymbolPattern) {
 				int symbolNextIdx = TokenUtils_SkipIndent(tokenList, nextIdx + 1, endIdx);
-				if(symbolNextIdx < endIdx && tokenList->TokenItems[symbolNextIdx]->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {
+				if(symbolNextIdx < endIdx && tokenList->TokenItems[symbolNextIdx]->tokenType == KSymbol_ParenthesisGroup) {
 					KReturnUnboxValue(ParseSyntaxPattern(kctx, ns, stmt, stmt->syn, tokenList, beginIdx, endIdx));
 				}
 				KReturnUnboxValue(-1);
 			}
-			if(tk->resolvedSyntaxInfo->keyword != KSymbol_DOT && ((tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0))) {
-				KReturnUnboxValue(ParseSyntaxPattern(kctx, ns, stmt, stmt->syn, tokenList, beginIdx, endIdx));
-			}
+//			if(tk->resolvedSyntaxInfo->keyword != KSymbol_DOT && ((tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0))) {
+//				KReturnUnboxValue(ParseSyntaxPattern(kctx, ns, stmt, stmt->syn, tokenList, beginIdx, endIdx));
+//			}
 		}
 	}
 	KReturnUnboxValue(-1);
@@ -1350,7 +1354,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ PATTERN(Number),  SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_IntLiteral},},
 		{ PATTERN(Member),  SYNFLAG_CFunc|SYNFLAG_Suffix, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Member}, {SUGARFUNC TypeCheck_Getter}},
 		{ GROUP(Parenthesis), SYNFLAG_CFunc|SYNFLAG_Suffix, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Parenthesis}, {SUGARFUNC TypeCheck_FuncStyleCall}}, //KSymbol_ParenthesisGroup
-		{ GROUP(Bracket),  SYNFLAG_CParseFunc|SYNFLAG_Suffix, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Indexer}, {MethodCallFunc}}, //KSymbol_BracketGroup
+		{ GROUP(Bracket),  SYNFLAG_CParseFunc|SYNFLAG_Suffix|SYNFLAG_TypeSuffix, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Indexer}, {MethodCallFunc}}, //KSymbol_BracketGroup
 		{ GROUP(Brace),  },   // KSymbol_BraceGroup
 		{ PATTERN(Block), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_CStyleBlock}, {SUGARFUNC TypeCheck_Block}, },
 		{ PATTERN(Param), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_CStyleParam}, {SUGARFUNC Statement_ParamDecl},},
