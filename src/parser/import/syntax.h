@@ -103,7 +103,7 @@ static KMETHOD Parse_Block(KonohaContext *kctx, KonohaStack *sfp)
 			kNode *stmt = ParseNewNode(kctx, ns, tokenList, &beginIdx, endIdx, ParseMetaPatternOption, NULL);
 			kNode_AddNode(kctx, block, stmt);
 		}
-		DBG_P("create block size=%d", kArray_size(block->NodeList));
+		//DBG_P("create block size=%d", kArray_size(block->NodeList));
 		KReturnUnboxValue(endIdx);
 	}
 }
@@ -131,7 +131,7 @@ static KMETHOD PatternMatch_TypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 		nextIdx = TokenUtils_SkipIndent(tokenList, nextIdx, endIdx);
 		if(nextIdx < endIdx) {
 			kToken *tk = tokenList->TokenItems[nextIdx];
-			if(tk->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern) {
+			if(tk->tokenType == KSymbol_SymbolPattern) {
 				KReturnUnboxValue(ParseSyntaxPattern(kctx, ns, stmt, stmt->syn, tokenList, beginIdx, endIdx));
 			}
 		}
@@ -151,9 +151,6 @@ static KMETHOD PatternMatch_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 		nextIdx = TokenUtils_SkipIndent(tokenList, nextIdx, endIdx);
 		if(nextIdx < endIdx) {
 			kToken *tk = tokenList->TokenItems[nextIdx];
-//			if(tk->resolvedSyntaxInfo->keyword == KSymbol_MemberPattern) {
-//				KReturnUnboxValue(-1);
-//			}
 			if(ParseTypePattern(kctx, ns, tokenList, nextIdx, endIdx, NULL) != -1) {
 				KReturnUnboxValue(ParseSyntaxPattern(kctx, ns, stmt, stmt->syn, tokenList, beginIdx, endIdx));
 			}
@@ -167,9 +164,6 @@ static KMETHOD PatternMatch_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 				}
 				KReturnUnboxValue(-1);
 			}
-//			if(tk->resolvedSyntaxInfo->keyword != KSymbol_DOT && ((tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0))) {
-//				KReturnUnboxValue(ParseSyntaxPattern(kctx, ns, stmt, stmt->syn, tokenList, beginIdx, endIdx));
-//			}
 		}
 	}
 	KReturnUnboxValue(-1);
