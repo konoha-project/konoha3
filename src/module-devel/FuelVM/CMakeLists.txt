@@ -4,6 +4,7 @@ set(MODULE_SOURCE_CODE Compiler.c FuelVM.c codegen.c lowering.c visitor.c
         Optmizer.c Analysis.c)
 
 set(LLVM_INSTALL_DIR "" CACHE STRING "Install dir which llvm installed")
+
 FIND_PROGRAM(LLVM_CONFIG
    NAMES llvm-config
          llvm-config-3.1
@@ -11,6 +12,7 @@ FIND_PROGRAM(LLVM_CONFIG
          llvm-config-2.9
          llvm-config-2.8
    PATHS ${LLVM_INSTALL_DIR}/bin/
+         ${PROJECT_SOURCE_DIR}/llvm/bin/
          /usr/local/bin/
          /usr/bin/
    DOC "llvm-config")
