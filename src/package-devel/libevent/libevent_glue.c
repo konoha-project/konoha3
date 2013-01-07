@@ -90,7 +90,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	/* If you want to create Generic class like Array<T>, see konoha.map package */
 	KDEFINE_CLASS defLibevent = {0};
 	SETSTRUCTNAME(defLibevent, Libevent);
-	defLibevent.cflag     = KClassFlag_Final;
+	//defLibevent.cflag     = KClassFlag_Final;
 	defLibevent.init      = Libevent_Init;
 	defLibevent.free      = Libevent_Free;
 	KClass *LibeventClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defLibevent, trace);
