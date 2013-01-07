@@ -326,7 +326,7 @@ static void kNode_InsertAfter(KonohaContext *kctx, kNode *self, kNode *target, k
 	KFieldSet(node, ((kNodeVar *)node)->Parent, self);
 	if(target != NULL) {
 		size_t i;
-		for(i = 0; i < kArray_size(self->NodeList); i++) {
+		for(i = 0; i < 99999;++i){//kNode_GetNodeListSize(kctx, self); i++) {
 			if(self->NodeList->NodeItems[i] == target) {
 				KLIB kArray_Insert(kctx, self->NodeList, i+1, node);
 				return;
