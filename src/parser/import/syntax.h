@@ -575,7 +575,7 @@ static KMETHOD TypeCheck_Assign(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(returnNode);
 }
 
-static int kNameSpace_AddLocalVariable(KonohaContext *kctx, kNameSpace *ns, ktypeattr_t attrTypeId, ksymbol_t name)
+static int AddLocalVariable(KonohaContext *kctx, kNameSpace *ns, ktypeattr_t attrTypeId, ksymbol_t name)
 {
 	struct KGammaStack *s = &(ns->genv->localScope);
 	int index = s->varsize;
@@ -1064,7 +1064,7 @@ static KMETHOD Statement_return(KonohaContext *kctx, KonohaStack *sfp)
 
 static kNode* TypeDeclLocalVariable(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ktypeattr_t attrTypeId, kNode *termNode, kNode *exprNode, kObject *thunk)
 {
-	int index = kNameSpace_AddLocalVariable(kctx, ns, attrTypeId, termNode->TermToken->symbol);
+	int index = AddLocalVariable(kctx, ns, attrTypeId, termNode->TermToken->symbol);
 	SUGAR kNode_SetVariable(kctx, termNode, KNode_Local, attrTypeId, index);
 	return new_TypedNode(kctx, ns, KNode_Assign, KClass_void, 3, K_NULLTOKEN, termNode, exprNode);
 }

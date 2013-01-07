@@ -181,11 +181,11 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(ClassData), 0);
 
 //	mod->kNameSpace_SetTokenFunc       = kNameSpace_SetTokenFunc;
-//	mod->Tokenize            = Tokenize;
+	mod->Tokenize                      = Tokenize;
 	mod->ApplyMacroData                = ApplyMacroData;
-	mod->kNameSpace_SetMacroData       = kNameSpace_SetMacroData;
-	mod->Preprocess          = Preprocess;
-	mod->EvalTokenList                = EvalTokenList;
+	mod->SetMacroData                  = SetMacroData;
+	mod->Preprocess                    = Preprocess;
+	mod->EvalTokenList                 = EvalTokenList;
 	mod->ParseTypePattern     = ParseTypePattern;
 	mod->kToken_ToBraceGroup = kToken_ToBraceGroup;
 	mod->kNode_AddParsedObject      = kNode_AddParsedObject;
@@ -202,9 +202,9 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 //	mod->TypeCheckBlock               = TypeCheckBlock;
 	mod->TypeCheckMethodParam         = TypeCheckMethodParam;
 	mod->new_MethodNode               = new_MethodNode;
-	mod->kNameSpace_AddLocalVariable  = kNameSpace_AddLocalVariable;
+	mod->AddLocalVariable  = AddLocalVariable;
 	mod->kNode_DeclType               = kNode_DeclType;
-	mod->TypeCheckNodeVariableNULL    = TypeVariableNULL;
+	mod->TypeVariableNULL    = TypeVariableNULL;
 
 	mod->kNameSpace_DefineSyntax      = kNameSpace_DefineSyntax;
 	mod->kNameSpace_GetSyntax         = kNameSpace_GetSyntax;

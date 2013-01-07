@@ -872,7 +872,7 @@ static KMETHOD Gamma_declareLocalVariable(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns       = sfp[0].asGamma;
 	ktypeattr_t cid       = (ktypeattr_t)sfp[1].intValue;
 	ksymbol_t keyword = (ksymbol_t)sfp[2].intValue;
-	KReturnUnboxValue(SUGAR kNameSpace_AddLocalVariable(kctx, ns, cid, keyword));
+	KReturnUnboxValue(SUGAR AddLocalVariable(kctx, ns, cid, keyword));
 }
 
 //static kSyntax* get_syntax(KonohaContext *kctx, kNameSpace *ns, kString *key)

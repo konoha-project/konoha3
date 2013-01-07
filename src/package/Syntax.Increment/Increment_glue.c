@@ -202,8 +202,8 @@ static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("$Inc"), "$IncStmt", 0, trace);
-	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("++"), 1,  "X X = (X) + 1", false);
-	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("--"), 1,  "X X = (X) - 1", false);
+	SUGAR SetMacroData(kctx, ns, KSymbol_("++"), 1,  "X X = (X) + 1", false);
+	SUGAR SetMacroData(kctx, ns, KSymbol_("--"), 1,  "X X = (X) - 1", false);
 
 	return true;
 }

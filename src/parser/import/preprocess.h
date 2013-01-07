@@ -375,7 +375,7 @@ static void ApplyMacroData(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLis
 	//SUGAR dumpTokenArray(kctx, 0, RangeArray(bufferList));
 }
 
-static kbool_t kNameSpace_SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data, int optionMacro)
+static kbool_t SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data, int optionMacro)
 {
 	kSyntaxVar *syn = (kSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, keyword);
 	if(IS_NOTNULL(syn) && syn->macroDataNULL == NULL) {

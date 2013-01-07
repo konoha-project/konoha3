@@ -287,9 +287,9 @@ static void kNode_AddParsedObject(KonohaContext *kctx, kNode *stmt, ksymbol_t ke
 			kArray *newList = new_(Array, 0, _GcStack);
 			KLIB kArray_Add(kctx, newList, valueList);
 			KLIB kObjectProto_SetObject(kctx, stmt, keyid, kObject_typeId(newList), newList);
-			DBG_P(">>>> value=%s, added=%s", KClass_text(kObject_class(valueList)), KClass_text(kObject_class(o)));
+			//DBG_P(">>>> value=%s, added=%s", KClass_text(kObject_class(valueList)), KClass_text(kObject_class(o)));
 			valueList = newList;
-			DBG_ASSERT(kctx == NULL);
+			//DBG_ASSERT(kctx == NULL);
 			RESET_GCSTACK();
 		}
 		KLIB kArray_Add(kctx, valueList, o);
