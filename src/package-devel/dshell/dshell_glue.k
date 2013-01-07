@@ -265,8 +265,14 @@ boolean statementShell(Stmt stmt, Gamma gma) {
 int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, int endIdx) {
 	Token firstToken = tokenList[beginIdx];
 	if(firstToken.Is("$Symbol") && SubProc.isCommand(firstToken.getText())) {
+		if(firstToken.getText() == "Expr") {
+			return -1;
+		}
 		int i = beginIdx + 1;
 		while(i < endIdx) {
+			if(tokenList[i].is("$Indent") || tokenList[i].getText() == ";") {
+				break;
+			}
 			if(tokenList[i].Is("()")) {
 				return -1;
 			}
@@ -422,7 +428,7 @@ AddTopLevelStatement("$Shell", statementShell);
 AddExpression("ask", expressionAsk);
 AddTypeCheck("$Text", typeCheckStringInterpolation);
 
-syntax $Shell $Token*
+syntax $Shell $Token*;
 
 AddTokenizer("$DollarVariable", 36/*KonohaChar_Dollar*/, tokenFuncDollarVariable);
 AddExpression("$DollarVariable", expressionDollarVariable);
