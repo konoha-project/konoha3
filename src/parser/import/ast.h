@@ -84,13 +84,10 @@ static int FindFirstStatementToken(KonohaContext *kctx, kArray *tokenList, int c
 
 static int FindEndOfStatement(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
-	int c, isNoSemiColon = kNameSpace_Is(NoSemiColon, ns);
+	int c;
 	for(c = beginIdx; c < endIdx; c++) {
 		kToken *tk = tokenList->TokenItems[c];
 		if(kToken_IsStatementSeparator(tk)) return c;
-//		if(isNoSemiColon && kToken_IsIndent(tk)) {
-//			return c;
-//		}
 	}
 	return endIdx;
 }
@@ -250,7 +247,7 @@ static kNode* ParseNewNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLis
 		nextIdx = ParseNode(kctx, node, tokenList, beginIdx[0], endIdx, option, hintBeforeText);
 	}
 	beginIdx[0] = nextIdx;
-	//KDump(node);
+	KDump(node);
 	return node;
 }
 

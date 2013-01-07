@@ -266,6 +266,7 @@ static void kNode_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 static kNode* new_UntypedNode(KonohaContext *kctx, kArray *gcstack, kNameSpace *ns)
 {
 	kNode *unode = (kNode *)new_(Node, ns, gcstack);
+	unode->syn = KNULL(Syntax);
 	return unode;
 }
 
