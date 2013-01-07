@@ -606,6 +606,15 @@ static KMETHOD RegExp_test(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	KReturnUnboxValue(matched);
 }
+/* ------------------------------------------------------------------------ */
+//## @Const method RegExp RegExp.create(String patter, String option);
+
+static KMETHOD RegExp_create(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kRegExp *Reg = (kRegExp *) KLIB new_kObject(kctx, OnStack, KClass_RegExp, 0);
+	RegExp_Set(kctx, Reg, sfp[1].asString, sfp[2].asString);
+	KReturn(Reg);
+}
 
 // --------------------------------------------------------------------------
 
@@ -624,20 +633,21 @@ static kbool_t regexp_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 	ktypeattr_t KType_StringArray0 = KClass_StringArray0->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		/*JS*/_Public|_Const|_Im, _F(RegExp_getglobal), KType_boolean, KType_RegExp, KMethodName_("getglobal"), 0,
-		/*JS*/_Public|_Const|_Im, _F(RegExp_getignoreCase), KType_boolean, KType_RegExp, KMethodName_("getignoreCase"), 0,
-		/*JS*/_Public|_Const|_Im, _F(RegExp_getmultiline), KType_boolean, KType_RegExp, KMethodName_("getmultiline"), 0,
-		/*JS*/_Public|_Const|_Im, _F(RegExp_getsource), KType_String, KType_RegExp, KMethodName_("getsource"), 0,
-		/*JS*/_Public|_Const|_Im, _F(RegExp_getlastIndex), KType_int, KType_RegExp, KMethodName_("getlastIndex"), 0,
-		/*JS*/_Public|_Im, _F(String_Match), KType_StringArray0, KType_String, KMethodName_("match"), 1, KType_RegExp, KFieldName_("regexp"),
-		/*JS*/_Public|_Const|_Im, _F(String_replace), KType_String, KType_String, KMethodName_("replace"), 2, KType_RegExp, KFieldName_("searchvalue"), KType_String, KFieldName_("newvalue"),
-		/*JS*/_Public|_Const|_Im, _F(String_search), KType_int, KType_String, KMethodName_("search"), 1, KType_RegExp, KFieldName_("searchvalue"),
-		/*JS*/_Public|_Im, _F(String_split), KType_StringArray0, KType_String, KMethodName_("split"), 1, KType_RegExp, KFieldName_("separator"),
-		/*JS*/_Public|_Im, _F(String_splitWithLimit), KType_StringArray0, KType_String, KMethodName_("split"), 2, KType_RegExp, KFieldName_("separator"), KType_int, KFieldName_("limit"),
-		/*JS*/_Public|_Const, _F(RegExp_new),     KType_RegExp,  KType_RegExp,  KMethodName_("new"), 1, KType_String, KFieldName_("pattern"),
-		/*JS*/_Public|_Const, _F(RegExp_new2),     KType_RegExp,  KType_RegExp,  KMethodName_("new"), 2, KType_String, KFieldName_("pattern"), KType_String, KFieldName_("option"),
-		/*JS*/_Public|_Const, _F(RegExp_exec),    KType_StringArray0, KType_RegExp,  KMethodName_("exec"), 1, KType_String, KFieldName_("str"),
-		/*JS*/_Public|_Const|_Im, _F(RegExp_test),    KType_boolean, KType_RegExp,  KMethodName_("test"), 1, KType_String, KFieldName_("str"),
+		_Public|_Const|_Im, _F(RegExp_getglobal), KType_boolean, KType_RegExp, KMethodName_("getglobal"), 0,
+		_Public|_Const|_Im, _F(RegExp_getignoreCase), KType_boolean, KType_RegExp, KMethodName_("getignoreCase"), 0,
+		_Public|_Const|_Im, _F(RegExp_getmultiline), KType_boolean, KType_RegExp, KMethodName_("getmultiline"), 0,
+		_Public|_Const|_Im, _F(RegExp_getsource), KType_String, KType_RegExp, KMethodName_("getsource"), 0,
+		_Public|_Const|_Im, _F(RegExp_getlastIndex), KType_int, KType_RegExp, KMethodName_("getlastIndex"), 0,
+		_Public|_Im, _F(String_Match), KType_StringArray0, KType_String, KMethodName_("match"), 1, KType_RegExp, KFieldName_("regexp"),
+		_Public|_Const|_Im, _F(String_replace), KType_String, KType_String, KMethodName_("replace"), 2, KType_RegExp, KFieldName_("searchvalue"), KType_String, KFieldName_("newvalue"),
+		_Public|_Const|_Im, _F(String_search), KType_int, KType_String, KMethodName_("search"), 1, KType_RegExp, KFieldName_("searchvalue"),
+		_Public|_Im, _F(String_split), KType_StringArray0, KType_String, KMethodName_("split"), 1, KType_RegExp, KFieldName_("separator"),
+		_Public|_Im, _F(String_splitWithLimit), KType_StringArray0, KType_String, KMethodName_("split"), 2, KType_RegExp, KFieldName_("separator"), KType_int, KFieldName_("limit"),
+		_Public|_Const, _F(RegExp_new),     KType_RegExp,  KType_RegExp,  KMethodName_("new"), 1, KType_String, KFieldName_("pattern"),
+		_Public|_Const, _F(RegExp_new2),     KType_RegExp,  KType_RegExp,  KMethodName_("new"), 2, KType_String, KFieldName_("pattern"), KType_String, KFieldName_("option"),
+		_Public|_Const, _F(RegExp_exec),    KType_StringArray0, KType_RegExp,  KMethodName_("exec"), 1, KType_String, KFieldName_("str"),
+		_Public|_Const|_Im, _F(RegExp_test),    KType_boolean, KType_RegExp,  KMethodName_("test"), 1, KType_String, KFieldName_("str"),
+		_Static|_Public|_Const, _F(RegExp_create), KType_RegExp, KType_RegExp, KMethodName_("create"), 2, KType_String, KFieldName_("pattern"), KType_String, KFieldName_("option"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -666,13 +676,11 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 			break;
 		}
 		if(ch == '/' && prev != '\\') {
-			int pos0 = pos;
+			//int pos0 = pos;
 			while(isalpha(source[pos])) pos++;
 			if(IS_NOTNULL(tk)) {
-				kArray *a = (kArray *)KLIB new_kObject(kctx, OnField, KClass_StringArray0, 2); // FIXME
-				KFieldSet(tk, tk->GroupTokenList, a);
-				KLIB new_kString(kctx, a, source + 1, (pos0-2), 0);
-				KLIB new_kString(kctx, a, source + pos0, pos-pos0, 0);
+				KFieldSet(tk, tk->text,
+						KLIB new_kString(kctx, 0, source + 1, pos, 0));
 				tk->tokenType = KSymbol_("$RegExp");
 			}
 			KReturnUnboxValue(pos);
@@ -685,20 +693,45 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(pos-1);
 }
 
-static KMETHOD TypeCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Expression_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_TypeCheck2(stmt, expr, ns, reqc);
-	kToken *tk = expr->TermToken;
-	kRegExp *r = new_(RegExp, NULL, OnGcStack);
-	DBG_ASSERT(kArray_size(tk->GroupTokenList) == 2);
-	RegExp_Set(kctx, r, tk->GroupTokenList->stringItems[0], tk->GroupTokenList->stringItems[1]);
-	KReturn(SUGAR kNode_SetConst(kctx, expr, NULL, UPCAST(r)));
+	VAR_Expression(expr, tokenList, beginIdx, operatorIdx, endIdx);
+	KDump(expr);
+	INIT_GCSTACK();
+	kTokenVar *tk = tokenList->TokenVarItems[beginIdx];
+	const char *source = kString_text(tk->text);
+	int ch, pos = 0, prev = 0;
+	int returnIdx = -1;
+	while((ch = source[pos++]) != 0) {
+		if(ch == '\n') {
+			break;
+		}
+		if(ch == '/' && prev != '\\') {
+			int pos0 = pos;
+			while(isalpha(source[pos])) pos++;
+			kString *pattern = KLIB new_kString(kctx, 0, source, (pos0-1), 0);
+			kString *option  = KLIB new_kString(kctx, 0, source+pos0, pos-pos0, 0);
+
+			kNameSpace *ns = kNode_ns(expr);
+			tk->symbol = KSymbol_("create");
+			kNode *arg0 = new_ConstNode(kctx, ns, NULL, KLIB Knull(kctx, KClass_RegExp));
+			kNode *arg1 = new_ConstNode(kctx, ns, NULL, UPCAST(pattern));
+			kNode *arg2 = new_ConstNode(kctx, ns, NULL, UPCAST(option));
+			SUGAR kNode_Op(kctx, expr, tk, 3, arg0, arg1, arg2);
+			returnIdx = beginIdx+1;
+			break;
+		}
+		prev = ch;
+	}
+	KDump(expr);
+	RESET_GCSTACK();
+	KReturnUnboxValue(returnIdx);
 }
 
 static kbool_t regexp_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("$RegExp"), SYNFLAG_CTypeFunc|SYNFLAG_CTokenFunc, 0, 0, {SUGAR termParseFunc}, {SUGARFUNC TypeCheck_RegExp}, KonohaChar_Slash, {SUGARFUNC TokenFunc_JavaScriptRegExp}},
+		{ KSymbol_("$RegExp"), SYNFLAG_CParseFunc|SYNFLAG_CTokenFunc, 0, 0, {SUGARFUNC Expression_RegExp}, {SUGAR methodTypeFunc }, KonohaChar_Slash, {SUGARFUNC TokenFunc_JavaScriptRegExp}},
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
