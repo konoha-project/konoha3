@@ -31,3 +31,12 @@ typedef struct Libevent_event {
 	kObjectHeader h;
 	struct event *event;
 } kLibevent_event;
+
+#define Declare_kDate
+#ifdef Declare_kDate	//TODO:It should be declared in headerfile in js4.date package.
+	typedef struct kDateVar {
+		kObjectHeader h;
+		struct timeval tv;
+	} kDate;
+#endif	//Declare_kDate
+#undef Declare_kDate

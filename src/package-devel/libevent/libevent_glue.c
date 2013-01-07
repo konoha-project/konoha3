@@ -69,15 +69,6 @@ static KMETHOD Libevent_dispatch(KonohaContext *kctx, KonohaStack *sfp)
 //TODO: this declaration may be made in Libevent_event_glue.c
 KMETHOD System_event_add(KonohaContext *kctx, KonohaStack* sfp)
 {
-#define Declare_kDate
-#ifdef Declare_kDate	//TODO:It should be declared in headerfile in js4.date package.
-	typedef struct kDateVar {
-		kObjectHeader h;
-		struct timeval tv;
-	} kDate;
-#endif	//Declare_kDate
-#undef Declare_kDate
-
 	kLibevent_event *ev = (kLibevent_event *)sfp[1].asObject;
 	kDate *date = (kDate *)sfp[2].asObject;
 	int ret = event_add(ev->event, &date->tv);
