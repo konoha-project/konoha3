@@ -192,7 +192,6 @@ static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KRuntimeContext_Free(kctx, ctx);
 	if(IS_RootKonohaContext(ctx)){  // share
 		PLATAPI DeleteVirtualMachine(ctx);
-		PLATAPI UnloadJsonModule(ctx);
 		KonohaLibVar *kklib = (KonohaLibVar *)ctx - 1;
 		for(i = 0; i < KRuntimeModule_MAXSIZE; i++) {
 			KRuntimeModule *p = ctx->modshare[i];
@@ -205,6 +204,7 @@ static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 			}
 		}
 		PLATAPI DeleteGcContext(ctx);
+		PLATAPI UnloadJsonModule(ctx);
 		KRuntime_Free(kctx, ctx);
 		//MODGC_Check_malloced_size(kctx);
 		free(kctx->modlocal);
