@@ -46,7 +46,7 @@ static void DeclVariable(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ktype
 	}
 	else {
 		kNodeToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", KSymbol_Fmt2(termToken->symbol), KType_text(ty));
-		SUGAR kNameSpace_AddLocalVariable(kctx, ns, ty, termToken->symbol);
+		SUGAR AddLocalVariable(kctx, ns, ty, termToken->symbol);
 	}
 }
 
@@ -55,7 +55,7 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	kNodeVar *leftHandNode = (kNodeVar *)kNode_At(expr, 1);
 	if(kNode_isSymbolTerm(leftHandNode)) {
-		kNode *texpr = SUGAR TypeCheckNodeVariableNULL(kctx, stmt, leftHandNode, ns, KClass_INFER);
+		kNode *texpr = SUGAR TypeVariableNULL(kctx, leftHandNode, ns, KClass_INFER);
 		if(texpr == NULL) {
 			kNode *rightHandNode = SUGAR TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
 			if(rightHandNode != K_NULLNODE) {
@@ -71,7 +71,13 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t untyped_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("Type.StaticVar", trace);
-	KTODO(SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_("="), KSugarTypeFunc, KSugarFunc(ns, TypeCheck_UntypedAssign)));
+	kSyntax *assignSyntax = kSyntax_(KNULL(NameSpace), KSymbol_LET);
+	KDEFINE_SYNTAX SYNTAX[] = {
+		{ KSymbol_("="),   SYNFLAG_NodeLeftJoinOp2, assignSyntax->precedence_op2, assignSyntax->precedence_op1,
+			{assignSyntax->sugarFuncTable[KSugarParseFunc]}, {KSugarFunc(ns, TypeCheck_UntypedAssign)}},
+		{ KSymbol_END, }, /* sentinental */
+	};
+	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 
@@ -83,7 +89,7 @@ static kbool_t untyped_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 KDEFINE_PACKAGE* UntypedVariable_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "konoha", "1.0");
+	KSetPackageName(d, "DynamicLanguages", "1.0");
 	d.PackupNameSpace    = untyped_PackupNameSpace;
 	d.ExportNameSpace   = untyped_ExportNameSpace;
 	return &d;

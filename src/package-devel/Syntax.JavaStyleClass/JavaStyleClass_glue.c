@@ -30,7 +30,6 @@
 extern "C"{
 #endif
 
-
 /* Method */
 
 // void NameSpace_AllowImplicitField(boolean t)
@@ -187,32 +186,14 @@ static void KClass_InitField(KonohaContext *kctx, KClassVar *definedClass, KClas
 static kNode* kNode_ParseClassNodeNULL(KonohaContext *kctx, kNode *stmt, kToken *tokenClassName)
 {
 	kNode *block = NULL;
-//  TODO
-//	kToken *blockToken = (kToken *)kNode_GetObject(kctx, stmt, KSymbol_BlockPattern, NULL);
-//	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KSymbol_BlockPattern) {
-//		const char *cname = kString_text(tokenClassName->text);
-//		KTokenSeq range = {kNode_ns(stmt), KGetParserContext(kctx)->preparedTokenList};
-//		KTokenSeq_Push(kctx, range);
-//		SUGAR Tokenize(kctx, &range,  kString_text(blockToken->text), blockToken->uline);
-//		{
-//			KTokenSeq sourceRange = {range.ns, range.tokenList, range.endIdx};
-//			kToken *prevToken = blockToken;
-//			int i;
-//			for(i = range.beginIdx; i < range.endIdx; i++) {
-//				kToken *tk = range.tokenList->TokenItems[i];
-//				if(tk->hintChar == '(' && prevToken->tokenType == TokenType_Symbol && strcmp(cname, kString_text(prevToken->text)) == 0) {
-//					kTokenVar *newToken = new_(TokenVar, TokenType_Symbol, sourceRange.tokenList);
-//					KFieldSet(newToken, newToken->text, KSymbol_GetString(kctx, MN_new));
-//				}
-//				KLIB kArray_Add(kctx, sourceRange.tokenList, tk);
-//				prevToken = tk;
-//			}
-//			KTokenSeq_End(kctx, (&sourceRange));
-//			block = SUGAR ParseNewNode(kctx, range.ns, sourceRange.tokenList, &sourceRange.beginIdx, sourceRange.endIdx, ParseMetaPatternOption, NULL);
-//			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_BlockPattern, KType_Node, block);
-//		}
-//		KTokenSeq_Pop(kctx, range);
-//	}
+	kTokenVar *blockToken = (kTokenVar *)kNode_GetObject(kctx, stmt, KSymbol_BlockPattern, NULL);
+	if(blockToken != NULL) {
+		kNameSpace *ns = kNode_ns(stmt);
+		SUGAR kToken_ToBraceGroup(kctx, blockToken, ns, NULL);
+		KTokenSeq source = {ns, RangeGroup(blockToken->GroupTokenList)};
+		block = SUGAR ParseNewNode(kctx, ns, source.tokenList, &source.beginIdx, source.endIdx, ParseMetaPatternOption, NULL);
+		KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_BlockPattern, KType_Node, block);
+	}
 	return block;
 }
 
@@ -343,12 +324,10 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 			DBG_ASSERT(Token_isVirtualTypeLiteral(tokenSuperClass));
 			superClass = KClass_(Token_typeLiteral(tokenSuperClass));
 			if(KClass_Is(Final, superClass)) {
-				SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "%s is final", KClass_text(superClass));
-				KReturnUnboxValue(false);
+				KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "%s is final", KClass_text(superClass)));
 			}
 			if(KClass_Is(Virtual, superClass)) {
-				SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "%s is still virtual", KClass_text(superClass));
-				KReturnUnboxValue(false);
+				KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "%s is still virtual", KClass_text(superClass)));
 			}
 		}
 		size_t initsize = (block != NULL) ? declsize : initFieldSizeOfVirtualClass(superClass);
@@ -356,8 +335,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else {
 		if(declsize > 0 && !KClass_Is(Virtual, definedClass)) {
-			SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "%s has already defined", KClass_text(definedClass));
-			KReturnUnboxValue(false);
+			KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "%s has already defined", KClass_text(definedClass)));
 		}
 	}
 	if(block != NULL) {
@@ -376,7 +354,7 @@ static KMETHOD PatternMatch_ClassName(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
 	kTokenVar *tk = tokenList->TokenVarItems[beginIdx];
 	int returnIdx = -1;
-	if(tk->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern || tk->resolvedSyntaxInfo->keyword == KSymbol_TypePattern) {
+	if(tk->symbol == KSymbol_SymbolPattern || tk->resolvedSyntaxInfo->keyword == KSymbol_TypePattern) {
 		KLIB kObjectProto_SetObject(kctx, stmt, name, kObject_typeId(tk), tk);
 		returnIdx = beginIdx + 1;
 	}

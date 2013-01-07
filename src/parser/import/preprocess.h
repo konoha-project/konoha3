@@ -281,7 +281,7 @@ static void Preprocess(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, i
 			size_t pushBeginIdx = kArray_size(bufferList), groupsize = kArray_size(tk->GroupTokenList);
 			Preprocess(kctx, ns, tk->GroupTokenList, 0, groupsize, macroParam, bufferList);
 			size_t pushEndIdx = kArray_size(bufferList);
-			if(groupsize != (pushEndIdx - pushBeginIdx)) {
+			if(groupsize != (pushEndIdx - pushBeginIdx) || macroParam != NULL) {
 				KLIB kArray_Clear(kctx, tk->GroupTokenList, 0);
 				kArray_AppendList(kctx, tk->GroupTokenList, bufferList, pushBeginIdx, pushEndIdx);
 			}
@@ -338,15 +338,20 @@ static void ResetPreprocess(KonohaContext *kctx, kTokenVar *tk, void *thunk)
 
 static kTokenVar* kToken_ToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, KMacroSet *macroSet)
 {
-	KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
-	KTokenSeq_Push(kctx, source);
-	//KdumpToken(kctx, tk);
-	Tokenize(kctx, ns, kString_text(tk->text), tk->uline, source.tokenList);
-	KTokenSeq_End(kctx, source);
-	KFieldSet(tk, tk->GroupTokenList, new_(TokenArray, 0, OnField));
-	tk->resolvedSyntaxInfo = kSyntax_(ns, KSymbol_BraceGroup);
-	Preprocess(kctx, ns, RangeTokenSeq(source), macroSet, tk->GroupTokenList);
-	KTokenSeq_Pop(kctx, source);
+	if(!IS_Array(tk->GroupTokenList)) {
+		DBG_ASSERT(IS_String(tk->text));
+		KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
+		KTokenSeq_Push(kctx, source);
+		//KdumpToken(kctx, tk);
+		Tokenize(kctx, ns, kString_text(tk->text), tk->uline, source.tokenList);
+		KTokenSeq_End(kctx, source);
+		KFieldSet(tk, tk->GroupTokenList, new_(TokenArray, 0, OnField));
+		tk->resolvedSyntaxInfo = kSyntax_(ns, KSymbol_BraceGroup);
+		KLIB kArray_Add(kctx, tk->GroupTokenList, K_NULLTOKEN);  // K_NULLTOKEN should be harmless
+		Preprocess(kctx, ns, RangeTokenSeq(source), macroSet, tk->GroupTokenList);
+		KLIB kArray_Add(kctx, tk->GroupTokenList, K_NULLTOKEN);
+		KTokenSeq_Pop(kctx, source);
+	}
 	return tk;
 }
 
@@ -364,11 +369,13 @@ static kbool_t ExpandMacroParam(KonohaContext *kctx, kNameSpace *ns, ksymbol_t s
 
 static void ApplyMacroData(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, size_t paramsize, KMacroSet *macroParam, kArray *bufferList)
 {
-	//TraverseTokenList(kctx, tokenList, beginIdx + paramsize, endIdx, ResetPreprocess, NULL);
+	TraverseTokenList(kctx, tokenList, beginIdx + paramsize, endIdx, ResetPreprocess, NULL);
+	//SUGAR dumpTokenArray(kctx, 0, tokenList, beginIdx + paramsize, endIdx);
 	Preprocess(kctx, ns, tokenList, beginIdx + paramsize, endIdx, macroParam, bufferList);
+	//SUGAR dumpTokenArray(kctx, 0, RangeArray(bufferList));
 }
 
-static kbool_t kNameSpace_SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data, int optionMacro)
+static kbool_t SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data, int optionMacro)
 {
 	kSyntaxVar *syn = (kSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, keyword);
 	if(IS_NOTNULL(syn) && syn->macroDataNULL == NULL) {

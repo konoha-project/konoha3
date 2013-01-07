@@ -115,7 +115,12 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	KTODO(SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_TypeDeclPattern, KSugarTypeFunc, KSugarFunc(ns, Statement_GlobalTypeDecl)));
+	kSyntax *assignSyntax = kSyntax_(KNULL(NameSpace), KSymbol_TypeDeclPattern);
+	KDEFINE_SYNTAX SYNTAX[] = {
+		{ KSymbol_TypeDeclPattern, SYNFLAG_MetaPattern, 0, 0, {assignSyntax->sugarFuncTable[KSugarParseFunc]}, {KSugarFunc(ns, Statement_GlobalTypeDecl)}},
+		{ KSymbol_END, }, /* sentinental */
+	};
+	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 
@@ -136,7 +141,7 @@ static kbool_t global_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 KDEFINE_PACKAGE* GlobalVariable_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "konoha", K_VERSION);
+	KSetPackageName(d, "CStyleSyntax", K_VERSION);
 	d.PackupNameSpace   = global_PackupNameSpace;
 	d.ExportNameSpace   = global_ExportNameSpace;
 	return &d;

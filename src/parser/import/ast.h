@@ -76,7 +76,7 @@ static int FindFirstStatementToken(KonohaContext *kctx, kArray *tokenList, int c
 {
 	for(; currentIdx < endIdx; currentIdx++) {
 		kToken *tk = tokenList->TokenItems[currentIdx];
-		if((tk)->tokenType == TokenType_Indent || kToken_IsStatementSeparator(tk)) continue;
+		if(kToken_IsStatementSeparator(tk)) continue;
 		break;
 	}
 	return currentIdx;
@@ -84,13 +84,10 @@ static int FindFirstStatementToken(KonohaContext *kctx, kArray *tokenList, int c
 
 static int FindEndOfStatement(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
-	int c, isNoSemiColon = kNameSpace_Is(NoSemiColon, ns);
+	int c;
 	for(c = beginIdx; c < endIdx; c++) {
 		kToken *tk = tokenList->TokenItems[c];
 		if(kToken_IsStatementSeparator(tk)) return c;
-		if(isNoSemiColon && kToken_IsIndent(tk)) {
-			return c;
-		}
 	}
 	return endIdx;
 }
@@ -250,14 +247,14 @@ static kNode* ParseNewNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLis
 		nextIdx = ParseNode(kctx, node, tokenList, beginIdx[0], endIdx, option, hintBeforeText);
 	}
 	beginIdx[0] = nextIdx;
-	//KDump(node);
+	KDump(node);
 	return node;
 }
 
 static kNode *AddParamNode(KonohaContext *kctx, kNameSpace *ns, kNode *node, kArray *tokenList, int beginIdx, int endIdx, const char *hintBeforeText/* if NULL empty isAllowed */)
 {
 	int i, start = beginIdx;
-	DBG_P("beginIdx=%d, endIdx=%d", beginIdx, endIdx);
+	//DBG_P("beginIdx=%d, endIdx=%d", beginIdx, endIdx);
 	for(i = beginIdx; i < endIdx; i++) {
 		kToken *tk = tokenList->TokenItems[i];
 		if(tk->symbol == KSymbol_COMMA) {

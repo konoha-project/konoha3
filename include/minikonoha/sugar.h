@@ -609,7 +609,7 @@ typedef struct {
 	void          (*kNameSpace_AddSyntaxPattern)(KonohaContext *, kNameSpace *, ksymbol_t, const char *rule, kfileline_t uline, KTraceInfo *);
 //	kSyntaxVar*   (*kNameSpace_SetTokenFunc)(KonohaContext *, kNameSpace *, ksymbol_t, int ch, kFunc *);
 //	kSyntaxVar*   (*kNameSpace_AddSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
-	kbool_t       (*kNameSpace_SetMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *, int optionMacro);
+	kbool_t       (*SetMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *, int optionMacro);
 
 	void         (*Tokenize)(KonohaContext *, kNameSpace *, const char *, kfileline_t, kArray *bufferList);
 	void         (*ApplyMacroData)(KonohaContext *, kNameSpace *, kArray *, int, int, size_t, KMacroSet *, kArray *bufferList);
@@ -629,7 +629,7 @@ typedef struct {
 
 //	kNode*       (*kNode_Termnize)(KonohaContext *, kNode *, kToken *);
 	kNode*       (*kNode_Op)(KonohaContext *kctx, kNode *, kToken *keyToken, int n, ...);
-//	kNodeVar*    (*new_UntypedOperatorNode)(KonohaContext *, kSyntax *syn, int n, ...);
+	kNodeVar*    (*new_UntypedOperatorNode)(KonohaContext *, kSyntax *syn, int n, ...);
 	int          (*ParseSyntaxNode)(KonohaContext *, kSyntax *, kNode *, ksymbol_t, kArray *, int beginIdx, int opIdx, int endIdx);
 
 	kNode*       (*kNode_ParseOperatorNode)(KonohaContext *, kNode *, kSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
@@ -645,18 +645,18 @@ typedef struct {
 
 	kNode*       (*new_MethodNode)(KonohaContext *, kNameSpace *, KClass *, kMethod *mtd, int n, ...);
 
-//	kNode*      (*TypeCheckBlock)(KonohaContext *, kNode *, kNameSpace *, KClass *);
+	kNode*      (*TypeCheckBlock)(KonohaContext *, kNode *, kNameSpace *, KClass *);
 	kNode*      (*TypeCheckNodeByName)(KonohaContext *, kNode*, ksymbol_t, kNameSpace *, KClass *, int);
 	kNode*      (*TypeCheckNodeAt)(KonohaContext *, kNode *, size_t, kNameSpace *, KClass *, int);
 	kNode *     (*TypeCheckMethodParam)(KonohaContext *, kMethod *mtd, kNode *, kNameSpace *, KClass *);
-	int         (*kNameSpace_AddLocalVariable)(KonohaContext *, kNameSpace *, ktypeattr_t, ksymbol_t);
-	kbool_t     (*kNode_DeclType)(KonohaContext *, kNode *, kNameSpace *, ktypeattr_t, kNode *, kObject *, KTypeDeclFunc);
-	kNode*      (*TypeCheckNodeVariableNULL)(KonohaContext *, kNode *, kNodeVar *, kNameSpace *, KClass *);
+	int         (*AddLocalVariable)(KonohaContext *, kNameSpace *, ktypeattr_t, ksymbol_t);
+	void        (*kNode_DeclType)(KonohaContext *, kNode *, kNameSpace *, ktypeattr_t, kNode *, kObject *, KTypeDeclFunc);
+	kNode*      (*TypeVariableNULL)(KonohaContext *, kNode *, kNameSpace *, KClass *);
 
 	void       (*kToken_ToError)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
 	kNode *    (*MessageNode)(KonohaContext *, kNode *, kToken *, kNameSpace *, kinfotag_t, const char *fmt, ...);
 
-	kbool_t (*VisitNode)(KonohaContext *, struct KBuilder *, kNode *node, void *thunk);
+	kbool_t    (*VisitNode)(KonohaContext *, struct KBuilder *, kNode *node, void *thunk);
 
 	void (*dumpToken)(KonohaContext *kctx, kToken *tk, int n);
 	void (*dumpTokenArray)(KonohaContext *kctx, int nest, kArray *a, int s, int e);
@@ -685,7 +685,7 @@ typedef enum {
 	TypeCheckPolicy_Creation       = (1 << 6)   /* TypeCheckNodeByName */
 } TypeCheckPolicy;
 
-#define KPushMethodCall(gma)   SUGAR kNameSpace_AddLocalVariable(kctx, ns, KType_var, 0)
+#define KPushMethodCall(gma)   SUGAR AddLocalVariable(kctx, ns, KType_var, 0)
 
 #define new_ConstNode(CTX, NS, T, O)               SUGAR kNode_SetConst(CTX, KNewNode(NS), T, O)
 #define new_UnboxConstNode(CTX, NS, T, D)         SUGAR kNode_SetUnboxConst(CTX, KNewNode(NS), T, D)

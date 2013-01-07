@@ -57,7 +57,7 @@ static KMETHOD NameSpace_DefineMacro2(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = KAsciiSymbol(kString_text(sfp[1].asString), kString_size(sfp[1].asString), _NEWID);
 	kString *source = sfp[2].asString;
-	KReturnUnboxValue(SUGAR kNameSpace_SetMacroData(kctx, sfp[0].asNameSpace, keyword, 0, kString_text(source), true));
+	KReturnUnboxValue(SUGAR SetMacroData(kctx, sfp[0].asNameSpace, keyword, 0, kString_text(source), true));
 }
 
 //## boolean NameSpace.DefineMacro(String symbol, int param, String source);
@@ -66,7 +66,7 @@ static KMETHOD NameSpace_DefineMacro(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t keyword = KAsciiSymbol(kString_text(sfp[1].asString), kString_size(sfp[1].asString), _NEWID);
 	int paramsize = (int)sfp[2].intValue;
 	kString *source = sfp[3].asString;
-	KReturnUnboxValue(SUGAR kNameSpace_SetMacroData(kctx, sfp[0].asNameSpace, keyword, paramsize, kString_text(source), true));
+	KReturnUnboxValue(SUGAR SetMacroData(kctx, sfp[0].asNameSpace, keyword, paramsize, kString_text(source), true));
 }
 
 static void namespace_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
