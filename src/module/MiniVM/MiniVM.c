@@ -636,7 +636,7 @@ static kbool_t KBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, k
 	for (i = 0; i < kNode_GetNodeListSize(kctx, block); i++) {
 		kNode *stmt = block->NodeList->NodeItems[i];
 		builder->common.uline = kNode_uline(stmt);
-		if(!SUGAR VisitNode(kctx, builder, stmt, &espidx)) break;
+		if(!SUGAR VisitNode(kctx, builder, stmt, &stmt->stackbase)) break;
 	}
 	AssignLocal(kctx, builder, block, thunk);
 	return true;
