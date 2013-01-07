@@ -108,19 +108,19 @@ typedef enum {
 
 /* ------------------------------------------------------------------------ */
 
-#define BasicBlock_isVisited(o)      (KFlag_Is(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1))
-#define BasicBlock_setVisited(o,B)   KFlag_Set(uintptr_t,((kObjectVar *)o)->h.magicflag,kObjectFlag_Local1,B)
+#define BasicNode_isVisited(o)      (KFlag_Is(uintptr_t,(o)->h.magicflag,kObjectFlag_Local1))
+#define BasicNode_SetVisited(o,B)   KFlag_Set(uintptr_t,((kObjectVar *)o)->h.magicflag,kObjectFlag_Local1,B)
 
-typedef struct kBasicBlockVar         kBasicBlock;
+typedef struct kBasicNodeVar         kBasicNode;
 typedef const struct kByteCodeVar     kByteCode;
 typedef struct kByteCodeVar           kByteCodeVar;
 
-struct kBasicBlockVar {
+struct kBasicNodeVar {
 	kObjectHeader h;
 	kushort_t id;     kushort_t incoming;
 	KGrowingArray codeTable;
-	kBasicBlock        *nextBlock;
-	kBasicBlock        *branchBlock;
+	kBasicNode        *nextNode;
+	kBasicNode        *branchNode;
 	KVirtualCode *code;
 	KVirtualCode *opjmp;
 };
@@ -135,11 +135,11 @@ struct kByteCodeVar {
 
 #define ctxcode          ((ctxcode_t *)kctx->modlocal[MOD_code])
 #define kmodcode         ((KModuleByteCode *)kctx->modshare[MOD_code])
-#define KClass_BasicBlock    kmodcode->cBasicBlock
-#define KType_BasicBlock    kmodcode->cBasicBlock->typeId
+#define KClass_BasicNode    kmodcode->cBasicNode
+#define KType_BasicNode    kmodcode->cBasicNode->typeId
 #define KClass_ByteCode      kmodcode->cByteCode
 
-#define IS_BasicBlock(O)  (kObject_class(O) == KClass_BasicBlock)
+#define IS_BasicNode(O)  (kObject_class(O) == KClass_BasicNode)
 #define IS_ByteCode(O)    (kObject_class(O) == KClass_ByteCode)
 
 #define CODE_ENTER        kmodcode->PRECOMPILED_ENTER
@@ -147,7 +147,7 @@ struct kByteCodeVar {
 
 typedef struct {
 	KRuntimeModule     header;
-	KClass     *cBasicBlock;
+	KClass     *cBasicNode;
 	KClass     *cByteCode;
 	kByteCode       *codeNull;
 	struct KVirtualCode  *PRECOMPILED_ENTER;
@@ -158,10 +158,10 @@ typedef struct {
 	KContextModule      h;
 	kfileline_t      uline;
 	kArray          *codeList;
-	kBasicBlock     *lbINIT; // ON GCSTACK
-	kBasicBlock     *lbEND;  // ON GCSTACK
+	kBasicNode     *lbINIT; // ON GCSTACK
+	kBasicNode     *lbEND;  // ON GCSTACK
 	kArray          *constPools;
-	kBasicBlock     *currentWorkingBlock;
+	kBasicNode     *currentWorkingNode;
 } ctxcode_t;
 
 /* ------------------------------------------------------------------------- */

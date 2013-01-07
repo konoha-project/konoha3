@@ -1,6 +1,6 @@
 // written by chenji
 
-import("js4.array");
+import("JavaScript.Array");
 
 void test() {
 	int[] ia0 = [0, 1, 2];

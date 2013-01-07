@@ -1,6 +1,6 @@
 // written by kimio
 
-import("cstyle"); // konoha.null is obsolate; use cstyle
+import("Syntax.Null")
 
 void test () {
 	assert(NULL == null);

@@ -1,7 +1,6 @@
 /* written by shinpei */
-import("konoha.new");
-// //import("konoha.assign"); Don't use any more
-import("js4.array");
+//import("konoha.new"); Don't use this
+import("JavaScript.Array");
 
 void f() {
 	Array[int] ia = new int[8];

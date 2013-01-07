@@ -1,5 +1,5 @@
 /* this test is written by masahiro ide */
-import("konoha.float");
+import("Type.Float");
 
 System.p("0.0km == "+ 0.0km);
 System.p("12345.0kg == "+ 12345.0kg);

@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("java2.string");
+import("JavaScript.String");
 
 void test() {
 	assert(String.fromCharCode(65) == "A");

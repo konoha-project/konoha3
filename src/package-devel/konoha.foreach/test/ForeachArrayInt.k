@@ -2,7 +2,7 @@
 // modified by chenji
 
 import("konoha.foreach");
-import("js4.array");
+import("JavaScript.Array");
 
 void test() {
 	int[] ilist = [1, 2, 3, 4];

@@ -306,7 +306,7 @@ static void konoha_startup(KonohaContext *kctx, const char *startup_script)
 	}
 }
 
-static void CommandLine_setARGV(KonohaContext *kctx, int argc, char** argv)
+static void CommandLine_SetARGV(KonohaContext *kctx, int argc, char** argv)
 {
 	INIT_GCSTACK();
 	KClass *KClass_StringArray0 = KClass_p0(kctx, KClass_Array, KType_String);
@@ -938,13 +938,13 @@ static int konoha_Parseopt(KonohaContext* konoha, KonohaFactory *plat, int argc,
 
 		case 'c': {
 			compileonly_flag = 1;
-			KonohaContext_setCompileOnly(konoha);
+			KonohaContext_SetCompileOnly(konoha);
 		}
 		break;
 
 		case 'i': {
 			interactive_flag = 1;
-			KonohaContext_setInteractive(konoha);
+			KonohaContext_SetInteractive(konoha);
 		}
 		break;
 
@@ -997,7 +997,7 @@ static int konoha_Parseopt(KonohaContext* konoha, KonohaFactory *plat, int argc,
 		}
 	}
 	scriptidx = optind;
-	CommandLine_setARGV(konoha, argc - scriptidx, argv + scriptidx);
+	CommandLine_SetARGV(konoha, argc - scriptidx, argv + scriptidx);
 
 	pid_t thispid = getpid();
 	Page_size = getpagesize(); // for mem usage
@@ -1033,7 +1033,7 @@ static int konoha_Parseopt(KonohaContext* konoha, KonohaFactory *plat, int argc,
 	}
 	else {
 		interactive_flag = 1;
-		KonohaContext_setInteractive(konoha);
+		KonohaContext_SetInteractive(konoha);
 	}
 	if(ret && interactive_flag) {
 		CommandLine_import(konoha, "konoha.i");

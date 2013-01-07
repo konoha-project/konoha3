@@ -1,12 +1,12 @@
 // written by kimio kuramitsu
 
-import("konoha.var");
-import("cstyle");
-import("konoha.object");
+import("Type.StaticVar");
+import("Syntax.Null");
+import("JavaStyle.Object");
 
 void test() {
 	var o = null;
-	assert(o <: Object);
+	assert(o instanceof Object);
 }
 
 test();

@@ -1,4 +1,4 @@
 // written by kimio
 
-import("konoha.object");
+import("JavaStyle.Object");
 

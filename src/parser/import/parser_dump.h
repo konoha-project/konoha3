@@ -31,22 +31,25 @@ static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 {
 	if(verbose_sugar) {
 		if(n < 0) n = (short)tk->uline;
-		if(tk->resolvedSyntaxInfo == NULL) {
-			if(kToken_IsIndent(tk)) {
-				DUMP_P("Token[%d] '%s' TokenType=%s%s indent=%d\n", n, KToken_t(tk), KSymbol_Fmt2(tk->unresolvedTokenType), tk->indent);
-			}
-			else {
-				DUMP_P("Token[%d] '%s' TokenType=``%s%s''\n", n, KToken_t(tk), KSymbol_Fmt2(tk->unresolvedTokenType));
+		DUMP_P("Token[%d] '%s' TokenType=%s%s", n, KToken_t(tk), KSymbol_Fmt2(tk->tokenType));
+		if(kToken_IsIndent(tk)) {
+			DUMP_P(" indent=+%d", tk->indent);
+		}
+		if(tk->symbol > 0) {
+			DUMP_P(" Symbol=%s%s", KSymbol_Fmt2(tk->symbol));
+		}
+		if(tk->resolvedSyntaxInfo != NULL && tk->resolvedSyntaxInfo->keyword == KSymbol_TypePattern) {
+			DUMP_P(" resolvedType=%s", KType_text(tk->resolvedTypeId));
+		}else {
+			if(tk->ruleNameSymbol > 0) {
+				DUMP_P(" ruleNameSymbol=%s%s", KSymbol_Fmt2(tk->ruleNameSymbol));
 			}
 		}
-//		else if(Token_isRule(tk)) {
-//			DUMP_P("RuleToken(%d) '%s' resolvedSymbol=%s%s classNameSymbol=%s%s\n", n, KToken_t(tk), KSymbol_Fmt2(tk->resolvedSymbol), KSymbol_Fmt2(tk->indent));
-//		}
-		else if(tk->resolvedSyntaxInfo->keyword == KSymbol_TypePattern) {
-			DUMP_P("Token(%d) '%s' type=%s\n", n, KToken_t(tk), KType_text(tk->resolvedTypeId));
+		if(tk->resolvedSyntaxInfo == NULL) {
+			DUMP_P(" Syntax=NULL\n");
 		}
 		else {
-			DUMP_P("Token(%d) '%s' syntax=%s%s, symbol=``%s%s''\n", n, KToken_t(tk), KSymbol_Fmt2(tk->resolvedSyntaxInfo->keyword), KSymbol_Fmt2(tk->resolvedSymbol));
+			DUMP_P(" Syntax=%s%s\n", KSymbol_Fmt2(tk->resolvedSyntaxInfo->keyword));
 		}
 	}
 }
@@ -59,91 +62,24 @@ static void dumpIndent(KonohaContext *kctx, int nest)
 	}
 }
 
-static int dumpBeginTokenList(int closure)
-{
-	switch(closure) {
-	case KSymbol_ParenthesisGroup: return '(';
-	case KSymbol_BraceGroup: return '{';
-	case KSymbol_BracketGroup: return '[';
-	}
-	return '<';
-}
-
-static int dumpEndTokenList(int closure)
-{
-	switch(closure) {
-	case KSymbol_ParenthesisGroup: return ')';
-	case KSymbol_BraceGroup: return '}';
-	case KSymbol_BracketGroup: return ']';
-	}
-	return '>';
-}
-
 static void dumpTokenArray(KonohaContext *kctx, int nest, kArray *a, int s, int e)
 {
 	if(verbose_sugar) {
+		if(nest == 0) DUMP_P(">>>\n");
 		while(s < e) {
 			kToken *tk = a->TokenItems[s];
 			dumpIndent(kctx, nest);
-			if(IS_Array(tk->subTokenList)) {
-				ksymbol_t closure = (tk->resolvedSyntaxInfo == NULL) ? tk->resolvedSymbol : tk->resolvedSyntaxInfo->keyword;
-				DUMP_P("%c\n", dumpBeginTokenList(closure));
-				dumpTokenArray(kctx, nest+1, tk->subTokenList, 0, kArray_size(tk->subTokenList));
+			dumpToken(kctx, tk, s);
+			if(IS_Array(tk->GroupTokenList)) {
 				dumpIndent(kctx, nest);
-				DUMP_P("%c\n", dumpEndTokenList(closure));
-			}
-			else {
-				dumpToken(kctx, tk, s);
+				DUMP_P("%s\n", kString_text(tk->GroupTokenList->TokenItems[0]->text));
+				dumpTokenArray(kctx, nest+1, RangeGroup(tk->GroupTokenList));
+				dumpIndent(kctx, nest);
+				DUMP_P("%s\n", kString_text(tk->GroupTokenList->TokenItems[kArray_size(tk->GroupTokenList)-1]->text));
 			}
 			s++;
 		}
-		if(nest == 0) DUMP_P("====\n");
-	}
-}
-
-static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
-{
-	DBG_ASSERT(IS_Expr(expr));
-	if(verbose_sugar) {
-		dumpIndent(kctx, nest);
-		if(expr == K_NULLEXPR) {
-			DUMP_P("[%d] NullObject", n);
-		}
-		else if(kExpr_IsTerm(expr)) {
-			DUMP_P("[%d] TermToken: ", n);
-			dumpToken(kctx, expr->TermToken, -1);
-		}
-		else {
-			if(expr->syn == NULL) {
-				DUMP_P("[%d] Expr: kw=NULL, size=%ld", n, kArray_size(expr->NodeList));
-				DBG_ASSERT(IS_Array(expr->NodeList));
-			}
-			else {
-				DUMP_P("[%d] Expr: kw='%s%s', syn=%p, size=%ld", n, KSymbol_Fmt2(expr->syn->keyword), expr->syn, kArray_size(expr->NodeList));
-				DUMP_P("\n");
-				size_t i;
-				for(i=0; i < kArray_size(expr->NodeList); i++) {
-					kObject *o = expr->NodeList->ObjectItems[i];
-					if(IS_Expr(o)) {
-						dumpExpr(kctx, i, nest+1, (kExpr *)o);
-					}
-					else {
-						dumpIndent(kctx, nest+1);
-						if(kObject_class(o) == KClass_Token) {
-							kToken *tk = (kToken *)o;
-							DUMP_P("[%d] O: %s ", i, KClass_text(o->h.ct));
-							dumpToken(kctx, tk, -1);
-						}
-						else if(o == K_NULL) {
-							DUMP_P("[%d] O: null\n", i);
-						}
-						else {
-							DUMP_P("[%d] O: %s\n", i, KClass_text(o->h.ct));
-						}
-					}
-				}
-			}
-		}
+		if(nest == 0) DUMP_P("<<<\n");
 	}
 }
 

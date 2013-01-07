@@ -1,5 +1,5 @@
 // written by Masahiro Ide
-import("konoha.import");
+import("Syntax.JavaImport");
 
 import konoha.math;
 import konoha.float;

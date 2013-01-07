@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.object");
+import("JavaStyle.Object");
 
 void test() {
 	Object o = 1;

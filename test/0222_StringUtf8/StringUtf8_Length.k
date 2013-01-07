@@ -1,7 +1,7 @@
 //written by Joseph
 
-import("konoha.class");
-import("java2.string");
+import("Syntax.JavaStyleClass");
+import("JavaScript.String");
 
 void test() {
 	assert("こんにちは、世界!".length == 9);

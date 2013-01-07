@@ -1,4 +1,4 @@
-import("js4.array");
+import("JavaScript.Array");
 
 int func(int num) {
 	return num*2;

@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
-import("konoha.new");
-import("js4.array");
+//import("konoha.new"); Don't use this
+import("JavaScript.Array");
 
 void test() {
 	String[] a = new String[10];

@@ -1,6 +1,6 @@
 // written by kimio
 
-import("konoha.eval");
+import("MiniKonoha.Eval");
 
 eval("int succ(int n) { return n + 1; }");
 

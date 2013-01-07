@@ -24,14 +24,14 @@
 
 import("cstyle");
 
-import("konoha.object");
-import("konoha.class");
-import("konoha.var");
-import("konoha.global");
-import("konoha.ns");
-import("java2.string");
-import("js4.regexp");
-import("js4.array");
+import("JavaStyle.Object");
+import("Syntax.JavaStyleClass");
+import("Type.StaticVar");
+import("Syntax.GlobalVariable");
+import("MiniKonoha.NameSpace");
+import("JavaScript.String");
+import("JavaScript.Regexp");
+import("JavaScript.Array");
 import("konoha.map");
 import("konoha.iterator");
 

@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.untyped");
+import("Syntax.UntypedVariable");
 
 void test() {
 	n = 124;

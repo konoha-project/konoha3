@@ -1,4 +1,4 @@
 // written by kimio
 
-import("konoha.float");
+import("Type.Float");
 

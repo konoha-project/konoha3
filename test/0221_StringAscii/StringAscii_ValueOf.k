@@ -1,6 +1,6 @@
 //written by Joseph
 
-import("js4.string");
+import("JavaScript.String");
 
 void test() {
 	assert("Hello world!".valueOf() == "Hello world!");

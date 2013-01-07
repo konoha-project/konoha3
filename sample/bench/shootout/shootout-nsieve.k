@@ -5,11 +5,11 @@
  */
 
 import("cstyle");
-import("konoha.new");
-import("js4.array");
-import("konoha.class");
-import("konoha.ns");
-import("konoha.string");
+//import("konoha.new"); Don't use this
+import("JavaScript.Array");
+import("Syntax.JavaStyleClass");
+import("MiniKonoha.NameSpace");
+import("Java.String");
 
 const N=8;
 

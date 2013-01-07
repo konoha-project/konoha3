@@ -1,7 +1,5 @@
 // written by kimio kuramitsu
 
-// //import("konoha.assign"); Don't use any more
-
 void f(int n) {
 	System.p("n="+n);
 	assert(n == 3);

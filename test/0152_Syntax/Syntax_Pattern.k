@@ -1,5 +1,5 @@
 // written by kimio kuramitsu
 
-import("konoha.desugar");
+import("MiniKonoha.Syntax");
 
 syntax $CDecl $Type ClassName: $Type "." $Symbol [$Text] $Param $CDeclBody;
