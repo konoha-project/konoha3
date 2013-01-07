@@ -8,7 +8,7 @@ BASEDIR=
 
 .PHONY : depend
 depend:
-	wget http://llvm.org/releases/${VERSION}/llvm-${VERSION}.src.tar.gz
+	curl -O http://llvm.org/releases/${VERSION}/llvm-${VERSION}.src.tar.gz
 	tar zxf ${LLVM}.src.tar.gz
 	mkdir -p ${BUILD}
 	make -f `pwd`/src/module-devel/FuelVM/Makefile -C ${BUILD} build BASEDIR=`pwd`
