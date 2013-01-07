@@ -318,7 +318,7 @@ static inline size_t initFieldSizeOfVirtualClass(KClass *superClass)
 	return size64(sizeof(kObjectHeader) + (superClass->fieldsize + 4) * sizeof(kObject *)) / sizeof(kObject *);
 }
 
-KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
 	kToken *tokenClassName = SUGAR kNode_GetToken(kctx, stmt, KSymbol_("$ClassName"), NULL);
