@@ -199,7 +199,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kNode_SetVariable          = kNode_SetVariable;
 	mod->TypeCheckNodeAt        = TypeCheckNodeAt;
 	mod->TypeCheckNodeByName        = TypeCheckNodeByName;
-//	mod->TypeCheckBlock               = TypeCheckBlock;
+	mod->TypeCheckBlock               = TypeCheckBlock;
 	mod->TypeCheckMethodParam         = TypeCheckMethodParam;
 	mod->new_MethodNode               = new_MethodNode;
 	mod->AddLocalVariable  = AddLocalVariable;
@@ -214,7 +214,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kNode_InsertAfter            = kNode_InsertAfter;
 	mod->kNode_Op                     = kNode_Op;
 //	mod->kNode_Termnize               = kNode_Termnize;
-//	mod->new_UntypedOperatorNode      = new_UntypedOperatorNode;
+	mod->new_UntypedOperatorNode      = new_UntypedOperatorNode;
 	mod->ParseSyntaxNode              = ParseSyntaxNode;
 	mod->ParseNode                    = ParseNode;
 	mod->ParseNewNode                 = ParseNewNode;
