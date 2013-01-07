@@ -75,7 +75,7 @@ static kbool_t Libevent_event_PackupNameSpace(KonohaContext *kctx, kNameSpace *n
 	int KType_Libevent_event = Libevent_eventClass->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Libevent_event_new), KType_Libevent_event, KType_Libevent_event, KKMethodName_("new"), 0,
+		_Public, _F(Libevent_event_new), KType_Libevent_event, KType_Libevent_event, KMethodName_("new"), 0,
 		DEND, /* <= sentinel */
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -89,7 +89,7 @@ static kbool_t Libevent_event_PackupNameSpace(KonohaContext *kctx, kNameSpace *n
 		{KDefineConstInt(EV_ET)},
 		{} /* <= sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), trace);
 	return true;
 }
 
