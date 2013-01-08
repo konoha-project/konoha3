@@ -1022,6 +1022,8 @@ static kNode* kNode_LookupIfNodeNULL(KonohaContext *kctx, kNode *stmt)
 				}
 				return NULL;
 			}
+			/* skiping the typed 'else if' */
+			if(node->node == KNode_Done) continue;
 			prevIfNode = node;
 		}
 	}
