@@ -671,9 +671,9 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		_Public|_Const, _F(Array_getSize), KType_int, KType_Array, KMethodName_("getlength"), 0,
 		_Public,        _F(Array_clear), KType_void, KType_Array, KMethodName_("clear"), 0,
 		_Public,        _F(Array_Add1), KType_void, KType_Array, KMethodName_("add"), 1, KType_0, KFieldName_("value"),
-		_Public|_Im,    _F(Array_new), KType_void, KType_Array, KMethodName_("new"), 1, KType_int, KFieldName_("size"),
-		_Public,        _F(Array_newArray), KType_Array, KType_Array, KMethodName_("newArray"), 1, KType_int, KFieldName_("size"),
-		_Public|kMethod_Hidden, _F(Array_newList), KType_Array, KType_Array, KMethodName_("[]"), 0,
+		_Public|_Im,    _F(Array_new), KType_ArrayT0, KType_Array, KMethodName_("new"), 1, KType_int, KFieldName_("size"),
+		_Public,        _F(Array_newArray), KType_ArrayT0, KType_Array, KMethodName_("newArray"), 1, KType_int, KFieldName_("size"),
+		_Public|kMethod_Hidden, _F(Array_newList), KType_ArrayT0, KType_Array, KMethodName_("[]"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
