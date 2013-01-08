@@ -26,7 +26,7 @@ import("konoha.new");
 import("konoha.class");
 import("konoha.object");
 import("konoha.map");
-import("cstyle");
+import("cstyle", "null");
 import("js4.date");
 
 class MyLibevent {
@@ -36,11 +36,11 @@ class MyLibevent {
 		event_Map =  = new Map();
 	}
 
-	int event_add(String key, Date tv) {
+	@Public int event_add(String key, Date tv) {
 		if (key.isNotNull()) {
-			this.event_Map.set(key, new event());
+			this.event_Map.set(key, new Libevent_event());
 		}
-		Libevent_event ev = event_Map.get(key);
+		Libevent_event ev = event_Map.get(key) as Libevent_event;
 		return System.event_add(ev, tv);
 	}
 }
