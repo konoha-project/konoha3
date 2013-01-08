@@ -82,6 +82,8 @@ void main() {
     after.add( "Syntax.CStyleFor");
     before.add("cstyle\", \"$forStmt");
     after.add( "Syntax.CStyleFor");
+    before.add("cstyle\", \"$Number");
+    after.add( "Syntax.Number");
 
     String[] args = SCRIPT_ARGV;
     int i = 1;

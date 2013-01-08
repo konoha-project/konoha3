@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
-import("Syntax.CStyleBitwiseOperator"); // konoha.int was obsolete
-import("cstyle", "$Number");
+import("Syntax.CStyleBitwiseOperator");
+import("Syntax.Number");
 
 void test() {
 	assert(0b10 == 2);
