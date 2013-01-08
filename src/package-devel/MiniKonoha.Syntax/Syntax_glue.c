@@ -286,12 +286,6 @@ static KMETHOD Node_newNode(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(SUGAR ParseNewNode(kctx, kNode_ns(stmt), tokenList, &beginIdx, endIdx, ParseBlockOption|ParseMetaPatternOption, NULL));
 }
 
-//## boolean Node.TypeCheckAll();
-static KMETHOD Node_TypeCheckAll(KonohaContext *kctx, KonohaStack *sfp)
-{
-	KReturnUnboxValue(kNode_IsError(SUGAR TypeCheckBlock(kctx, sfp[0].asNode, kNode_ns(sfp[0].asNode), KClass_void)));
-}
-
 //## Array[Node] Node.GetNodeList();
 static KMETHOD Node_GetNodeList(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -640,7 +634,6 @@ static void Syntax_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceI
 	KDEFINE_METHOD MethodData[] = {
 		/* Block */
 //		_Public|_Const, _F(Node_new), KType_Node, KType_Node, KMethodName_("new"), 1, KType_NameSpace, KFieldName_("namespace"),
-		_Public, _F(Node_TypeCheckAll), KType_boolean, KType_Node, KMethodName_("TypeCheckAll"), 0,
 		_Public, _F(Node_newNode), KType_Node, KType_Node, KMethodName_("newNode"), 3, TP_tokens, TP_begin, TP_end,
 		_Public, _F(Node_GetNodeList), KType_NodeArray, KType_Node, KMethodName_("GetNodeList"), 0,
 		_Public, _F(Node_GetParentNode), KType_Node, KType_Node, KMethodName_("GetParentNode"), 0,
@@ -1218,6 +1211,32 @@ static KMETHOD Syntax_SetMacro(KonohaContext *kctx, KonohaStack *sfp)
 	//KReturnVoid();
 }
 
+//## void Syntax.SetMetaPattern(boolean flag);
+static KMETHOD Syntax_SetMetaPattern(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSyntaxVar *syn = (kSyntaxVar *)sfp[0].asObject;
+	kbool_t flag = sfp[1].boolValue;
+	kSyntax_Set(MetaPattern, syn, flag);
+	KReturnVoid();
+}
+
+//## boolean Syntax.IsMetaPattern();
+static KMETHOD Syntax_IsMetaPattern(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSyntaxVar *syn = (kSyntaxVar *)sfp[0].asObject;
+	KReturnUnboxValue(kSyntax_Is(MetaPattern, syn));
+}
+
+//## void Syntax.SetPattern(String pattern);
+static KMETHOD Syntax_SetPattern(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KMakeTrace(trace, sfp);
+	kSyntaxVar *syn = (kSyntaxVar *)sfp[0].asObject;
+	const char *pattern = kString_text(sfp[1].asString);
+	SUGAR kNameSpace_AddSyntaxPattern(kctx, syn, pattern, 0, trace);
+	KReturnVoid();
+}
+
 static void Syntax_defineSyntaxMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	/* Func[Int, Token, String] */
@@ -1235,6 +1254,9 @@ static void Syntax_defineSyntaxMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 		_Public,     _F(Syntax_SetParseFunc), KType_void, KType_Syntax, KMethodName_("SetParseFunc"), 3, KType_FuncParse, KFieldName_("func"), KType_int, KFieldName_("op1"), KType_int, KFieldName_("op2"),
 		_Public,     _F(Syntax_SetTypeFunc), KType_void, KType_Syntax, KMethodName_("SetTypeFunc"), 1, KType_FuncType, KFieldName_("func"),
 		_Public,     _F(Syntax_SetMacro), KType_void, KType_Syntax, KMethodName_("SetMacro"), 2, KType_int, KFieldName_("number"), KType_Symbol, KFieldName_("macro"),
+		_Public,     _F(Syntax_SetMetaPattern), KType_void, KType_Syntax, KMethodName_("SetMetaPattern"), 1, KType_boolean, KFieldName_("flag"),
+		_Public|_Im, _F(Syntax_IsMetaPattern), KType_boolean, KType_Syntax, KMethodName_("IsMetaPattern"), 0,
+		_Public,     _F(Syntax_SetPattern), KType_void, KType_Syntax, KMethodName_("SetPattern"), 1, KType_String, KFieldName_("pattern"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -1249,13 +1271,25 @@ static KMETHOD NameSpace_GetSyntax(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(kSyntax_(sfp[0].asNameSpace, (ksymbol_t)sfp[1].intValue));
 }
 
-//## boolean NameSpace.DefineSyntax(Syntax syntax);
+//## void NameSpace.DefineSyntax(Syntax syntax);
 static KMETHOD NameSpace_DefineSyntax(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KMakeTrace(trace, sfp);
 	kNameSpace *ns = sfp[0].asNameSpace;
-	kSyntax *syn = (kSyntax *)sfp[1].asObject;
-	SUGAR kNameSpace_AddSyntax(kctx, ns, syn, trace);
+	kSyntaxVar *syn = (kSyntaxVar *)sfp[1].asObject;
+	KFieldSet(syn, syn->packageNameSpace, ns);
+	SUGAR kNameSpace_AddSyntax(kctx, ns, (kSyntax *)syn, trace);
+	KReturnVoid();
+}
+
+//## void NameSpace.AddSyntaxPattern(Symbol symbol, String pattern);
+static KMETHOD NameSpace_AddSyntaxPattern(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KMakeTrace(trace, sfp);
+	kNameSpace *ns = sfp[0].asNameSpace;
+	ksymbol_t symbol = (ksymbol_t)sfp[1].intValue;
+	const char *pattern = kString_text(sfp[2].asString);
+	SUGAR kNameSpace_AddSyntaxPattern(kctx, kSyntax_(ns, symbol), pattern, 0, trace);
 	KReturnVoid();
 }
 
@@ -1263,7 +1297,8 @@ static void Syntax_defineNameSpaceMethod(KonohaContext *kctx, kNameSpace *ns, KT
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const, _F(NameSpace_GetSyntax), KType_Syntax, KType_NameSpace, KMethodName_("GetSyntax"), 1, TP_kw,
-		_Public       , _F(NameSpace_DefineSyntax), KType_boolean, KType_NameSpace, KMethodName_("DefineSyntax"), 1, TP_syntax,
+		_Public       , _F(NameSpace_DefineSyntax), KType_void, KType_NameSpace, KMethodName_("DefineSyntax"), 1, TP_syntax,
+		_Public       , _F(NameSpace_AddSyntaxPattern), KType_void, KType_NameSpace, KMethodName_("AddSyntaxPattern"), 2, TP_kw, KType_String, KFieldName_("pattern"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -1409,27 +1444,7 @@ static kbool_t Syntax_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 		DEFINE_KEYWORD(NoticeTag),
 		DEFINE_KEYWORD(InfoTag),
 		DEFINE_KEYWORD(DebugTag),
-//		DEFINE_KEYWORD(KNode_Error),
-//		DEFINE_KEYWORD(KNode_EXPR),
-//		DEFINE_KEYWORD(KNode_BLOCK),
-//		DEFINE_KEYWORD(KNode_RETURN),
-//		DEFINE_KEYWORD(KNode_IF),
-//		DEFINE_KEYWORD(KNode_LOOP),
-//		DEFINE_KEYWORD(KNode_JUMP),
-//		DEFINE_KEYWORD(KNode_Const),
-//		DEFINE_KEYWORD(KNode_New),
-//		DEFINE_KEYWORD(KNode_Null),
-//		DEFINE_KEYWORD(KNode_UnboxConst),
-//		DEFINE_KEYWORD(KNode_Local),
-//		DEFINE_KEYWORD(KNode_BLOCK),
-//		DEFINE_KEYWORD(KNode_Field),
-////		DEFINE_KEYWORD(KNode_BOX),
-////		DEFINE_KEYWORD(KNode_UNBOX),
-//		DEFINE_KEYWORD(KNode_MethodCall),
-//		DEFINE_KEYWORD(KNode_AND),
-//		DEFINE_KEYWORD(KNode_OR),
-//		DEFINE_KEYWORD(KNode_Assign),
-//		DEFINE_KEYWORD(KNode_STACKTOP),
+
 		DEFINE_KEYWORD(TypeCheckPolicy_NoCheck),
 		DEFINE_KEYWORD(TypeCheckPolicy_AllowVoid),
 		DEFINE_KEYWORD(TypeCheckPolicy_Coercion),
@@ -1454,6 +1469,29 @@ static kbool_t Syntax_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 		DEFINE_KEYWORD(Precedence_CStyleCOMMA),
 		DEFINE_KEYWORD(Precedence_Statement),
 		DEFINE_KEYWORD(Precedence_CStyleStatementEnd),
+
+		DEFINE_KEYWORD(KNode_Done),
+		DEFINE_KEYWORD(KNode_Const),
+		DEFINE_KEYWORD(KNode_New),
+		DEFINE_KEYWORD(KNode_Null),
+		DEFINE_KEYWORD(KNode_UnboxConst),
+		DEFINE_KEYWORD(KNode_Local),
+		DEFINE_KEYWORD(KNode_Field),
+		DEFINE_KEYWORD(KNode_Box),
+		DEFINE_KEYWORD(KNode_MethodCall),
+		DEFINE_KEYWORD(KNode_And),
+		DEFINE_KEYWORD(KNode_Or),
+		DEFINE_KEYWORD(KNode_Assign),
+		DEFINE_KEYWORD(KNode_Block),
+		DEFINE_KEYWORD(KNode_If),
+		DEFINE_KEYWORD(KNode_While),
+		DEFINE_KEYWORD(KNode_DoWhile),
+		DEFINE_KEYWORD(KNode_Return),
+		DEFINE_KEYWORD(KNode_Break),
+		DEFINE_KEYWORD(KNode_Continue),
+		DEFINE_KEYWORD(KNode_Try),
+		DEFINE_KEYWORD(KNode_Throw),
+		DEFINE_KEYWORD(KNode_Error),
 
 #undef DEFINE_KEYWORD
 		{NULL},
