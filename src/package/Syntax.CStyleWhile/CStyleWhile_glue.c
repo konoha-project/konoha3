@@ -42,26 +42,24 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 	if(kNode_IsError(exprNode)) {
 		KReturn(exprNode);
 	}
-	kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
+	kNode_Set(CatchContinue, stmt, true);  // set before TypeCheck Block
 	kNode_Set(CatchBreak, stmt, true);
-	kNode *block = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
+	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
 	KReturn(kNode_Type(kctx, stmt, KNode_While, KType_void));
 }
 
 static KMETHOD Statement_do(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
-	DBG_P("do statement .. ");
-	kNode *ret = K_NULLNODE;
-	if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0)) {
-		kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
-		kNode_Set(CatchBreak, stmt, true);
-		kNode *block = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
-		if(!kNode_IsError(block)) {
-			ret = kNode_Type(kctx, stmt, KNode_DoWhile, KType_void);
-		}
+	//DBG_P("do statement .. ");
+	kNode *exprNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
+	if(kNode_IsError(exprNode)) {
+		KReturn(exprNode);
 	}
-	KReturn(ret);
+	kNode_Set(CatchContinue, stmt, true);  // set before TypeCheck Block
+	kNode_Set(CatchBreak, stmt, true);
+	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
+	KReturn(kNode_Type(kctx, stmt, KNode_DoWhile, KType_void));
 }
 
 static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
