@@ -5,7 +5,7 @@ int g(int a, int b) {
 }
 
 int f(int x) {
-	return g(${int a = x; a+1;}, 3);
+	return g({int a = x; a+1;}, 3);
 }
 
 assert(f(1)==5);
