@@ -48,23 +48,21 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(kNode_Type(kctx, stmt, KNode_While, KType_void));
 }
 
-//static KMETHOD Statement_do(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	VAR_TypeCheck(stmt, ns, reqc);
-//	DBG_P("do statement .. ");
-//	int ret = false;
-//	if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0)) {
-//		kNode *bk = SUGAR kNode_GetNode(kctx, stmt, NULL/*DefaultNameSpace*/, KSymbol_BlockPattern, K_NULLBLOCK);
-//		kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
-//		kNode_Set(CatchBreak, stmt, true);
-//		ret = SUGAR TypeCheckBlock(kctx, bk, gma);
-//		if(ret) {
-//			kNode_Set(RedoLoop, stmt, true);
-//			kNode_Type(kctx, stmt, LOOP);  // FIXME
-//		}
-//	}
-//	KReturnUnboxValue(ret);
-//}
+static KMETHOD Statement_do(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_TypeCheck(stmt, ns, reqc);
+	DBG_P("do statement .. ");
+	kNode *ret = K_NULLNODE;
+	if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0)) {
+		kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
+		kNode_Set(CatchBreak, stmt, true);
+		kNode *block = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
+		if(!kNode_IsError(block)) {
+			ret = kNode_Type(kctx, stmt, KNode_DoWhile, KType_void);
+		}
+	}
+	KReturn(ret);
+}
 
 static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -100,16 +98,12 @@ static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		{ KSymbol_("break"), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {SUGAR patternParseFunc}, {SUGARFUNC Statement_break}},
 		{ KSymbol_("continue"), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {SUGAR patternParseFunc}, {SUGARFUNC Statement_continue}},
 		{ KSymbol_("while"), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {SUGAR patternParseFunc}, {SUGARFUNC Statement_while} },
-//		{ KSymbol_("do"), 0, "\"do\"  $Node \"while\" \"(\" $Node \")\"", 0, 0, NULL, NULL, NULL, Statement_do, NULL, },
-//		{ KSymbol_("$ForNode"), 0, NULL, 0, 0, PatternMatch_ForNode, NULL, NULL, NULL, NULL, },
-//		{ KSymbol_("for"), 0, "\"for\" \"(\" init: $ForNode \";\" $Node \";\" Iterator: $ForNode \")\" $Node", 0, 0, NULL, NULL, NULL, Statement_CStyleFor, NULL, },
-//		{ KSymbol_("$Inc"), 0, "$Inc $IncNode", 0, 0, PatternMatch_Inc, NULL, NULL, NULL, NULL, },
-//		{ KSymbol_("$IncNode"), 0, NULL, 0, 0, PatternMatch_IncNode, NULL, NULL, NULL, NULL, },
+		{ KSymbol_("do"),    SYNFLAG_CTypeFunc, 0, Precedence_Statement, {SUGAR patternParseFunc}, {SUGARFUNC Statement_do} },
 		{ KSymbol_END, }, /* sentinental */
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("while"), "\"while\" \"(\" $Expr \")\" $Block", 0, trace);
-//	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("do"), "\"do\" $Block \"while\" \"(\" $Expr \")\"", 0, trace);
+	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("do"), "\"do\" $Block \"while\" \"(\" $Expr \")\"", 0, trace);
 	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("break"), "\"break\"", 0, trace);
 	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("continue"), "\"continue\"", 0, trace);
 	return true;
