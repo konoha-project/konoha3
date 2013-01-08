@@ -121,6 +121,8 @@ static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		{ KSymbol_END, }, /* sentinental */
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	kSyntax *newSyntax = kSyntax_(ns, KSymbol_TypeDeclPattern);
+	KFieldInit(newSyntax, ((kSyntaxVar *)newSyntax)->syntaxPatternListNULL, assignSyntax->syntaxPatternListNULL);
 	return true;
 }
 
@@ -128,6 +130,7 @@ static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 static	kbool_t global_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
+	KImportPackage(ns, "MiniKonoha.ObjectModel", trace);
 	global_defineMethod(kctx, ns, trace);
 	global_defineSyntax(kctx, ns, trace);
 	return true;
