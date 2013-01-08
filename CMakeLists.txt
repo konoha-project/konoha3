@@ -258,6 +258,7 @@ add_clib_test(test_map     ./test/Clib/test_map.c)
 add_clib_test(test_string  ./test/Clib/test_string.c)
 add_clib_test(test_cpp     ./test/Clib/test_cpp.cpp)
 add_clib_test(test_proto   ./test/Clib/test_proto.c)
+add_clib_test(MultiContext   ./test/Clib/MultiContext.c)
 
 macro(set_package_path test_name)
 set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
