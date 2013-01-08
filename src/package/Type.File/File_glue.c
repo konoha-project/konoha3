@@ -183,6 +183,7 @@ static KMETHOD File_new(KonohaContext *kctx, KonohaStack *sfp)
 	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	const char *mode = kString_text(sfp[2].asString);
 	FILE *fp = fopen(systemPath, mode);
+	kFile *file = (kFile *) sfp[0].asObject;
 	if(fp == NULL) {
 		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "fopen",
@@ -192,20 +193,17 @@ static KMETHOD File_new(KonohaContext *kctx, KonohaStack *sfp)
 	if(mode[0] == 'w' || mode[0] == 'a' || mode[1] == '+') {
 		KTraceChangeSystemPoint(trace, "fopen", LogFileName(kString_text(path)), LogText("mode", mode));
 	}
-	{
-		INIT_GCSTACK();
-		struct kFileVar *file = (struct kFileVar *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), (uintptr_t)fp);
-		KFieldInit(file, file->PathInfoNULL, path);
-		if(!PLATAPI isSystemCharsetUTF8(kctx)) {
-			if(mode[0] == 'w' || mode[0] == 'a' || mode[1] == '+') {
-				file->writerIconv = PLATAPI iconvUTF8ToSystemCharset(kctx, trace);
-			}
-			else {
-				file->readerIconv = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
-			}
+	file->fp = fp;
+	KFieldInit(file, file->PathInfoNULL, path);
+	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
+		if(mode[0] == 'w' || mode[0] == 'a' || mode[1] == '+') {
+			file->writerIconv = PLATAPI iconvUTF8ToSystemCharset(kctx, trace);
 		}
-		KReturnWith(file, RESET_GCSTACK());
+		else {
+			file->readerIconv = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
+		}
 	}
+	KReturn(file);
 }
 
 //## @Native void File.close();
