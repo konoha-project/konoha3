@@ -6,6 +6,7 @@ import("Syntax.JavaStyleClass");
 class C {
 	int x;
 	int y;
+	C() {}
 	void f() {
 		x = 1;
 		y = 2;

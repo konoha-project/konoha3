@@ -4,6 +4,7 @@
 import("Syntax.JavaStyleClass");
 
 class C {
+	C() {}
 	String name = "naruto";
 }
 

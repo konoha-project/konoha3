@@ -9,6 +9,7 @@ class C {
 }
 
 class D extends C {
+	D() {}
 	int z;
 	void f() {
 		x = 1;
