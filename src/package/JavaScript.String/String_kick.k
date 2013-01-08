@@ -32,11 +32,19 @@ import("JavaScript.Regexp");
 }
 
 /* 15.5.4.7 String.prototype.indexOf (searchString, position) */
+@Public @Override int String.indexOf(String searchString) {
+    return this.indexOf(searchString, 0);
+}
+
 @Public @Override int String.indexOf(String searchString, int position) {
     return StringUtil.indexOf(this, searchString, position);
 }
 
 /* 15.5.4.8 String.prototype.lastIndexOf (searchString, position) */
+@Public @Override int String.lastIndexOf(String searchString) {
+    return this.lastIndexOf(searchString, this.getlength());
+}
+
 @Public @Override int String.lastIndexOf(String searchString, int position) {
     return StringUtil.lastIndexOf(this, searchString, position);
 }
