@@ -108,8 +108,8 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 			kToken *tk  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
 			kNode  *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
 			SUGAR kNode_DeclType(kctx, stmt, ns, tk->resolvedTypeId, expr, ns->globalObjectNULL, TypeDeclAndMakeSetter);
+			KReturn(stmt);
 		}
-		KReturn(kNode_Type(kctx, stmt, KNode_Done, KType_void));
 	}
 }
 
