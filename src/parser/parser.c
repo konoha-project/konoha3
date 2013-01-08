@@ -212,6 +212,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 //	mod->kNameSpace_AddSugarFunc      = kNameSpace_AddSugarFunc;
 //	mod->new_BlockNode                = new_BlockNode2;
 	mod->kNode_InsertAfter            = kNode_InsertAfter;
+	mod->kNode_AddNode                = kNode_AddNode;
 	mod->kNode_Op                     = kNode_Op;
 //	mod->kNode_Termnize               = kNode_Termnize;
 	mod->new_UntypedOperatorNode      = new_UntypedOperatorNode;

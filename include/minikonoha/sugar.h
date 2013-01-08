@@ -626,6 +626,7 @@ typedef struct {
 	uintptr_t    (*kNode_ParseFlag)(KonohaContext *kctx, kNode *stmt, KFlagSymbolData *flagData, uintptr_t flag);
 	kToken*      (*kNode_GetToken)(KonohaContext *, kNode *, ksymbol_t kw, kToken *def);
 	kNode*       (*kNode_GetNode)(KonohaContext *, kNode *, ksymbol_t kw, kNode *def);
+	void         (*kNode_AddNode)(KonohaContext *, kNode *, kNode *);
 	void         (*kNode_InsertAfter)(KonohaContext *, kNode *, kNode *target, kNode *);
 
 //	kNode*       (*kNode_Termnize)(KonohaContext *, kNode *, kToken *);
