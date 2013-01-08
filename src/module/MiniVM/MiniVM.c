@@ -586,7 +586,7 @@ static kbool_t KBuilder_VisitUnboxConstNode(KonohaContext *kctx, KBuilder *build
 static kbool_t KBuilder_VisitNewNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
 	intptr_t a = ((intptr_t*)thunk)[0];
-	ASM(NEW, OC_(a), expr->index, KClass_(expr->attrTypeId));
+	ASM(NEW, OC_(a), /*FIXME expr->index, */0, KClass_(expr->attrTypeId));
 	return true;
 }
 
