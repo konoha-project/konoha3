@@ -265,10 +265,9 @@ static void PreprocessSyntaxPattern2(KonohaContext *kctx, kTokenVar *tk, kTokenV
 	}
 }
 
-static void kNameSpace_AddSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, const char *ruleSource, kfileline_t uline, KTraceInfo *trace)
+static void kNameSpace_AddSyntaxPattern(KonohaContext *kctx, kSyntaxVar *syntax, const char *ruleSource, kfileline_t uline, KTraceInfo *trace)
 {
-	kSyntaxVar *syntax = (kSyntaxVar*)kNameSpace_GetSyntax(kctx, ns, keyword);
-	DBG_ASSERT(IS_NOTNULL(syntax));
+	kNameSpace *ns = syntax->packageNameSpace;
 	if(syntax->syntaxPatternListNULL == NULL) {
 		syntax->syntaxPatternListNULL = new_(TokenArray, 0, ns->NameSpaceConstList);
 	}
