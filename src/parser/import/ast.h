@@ -49,6 +49,7 @@ static int ParseSyntaxNode(KonohaContext *kctx, kSyntax *syn, kNode *node, ksymb
 		node->syn = syn;/*node->TermToken->resolvedSyntaxInfo*/;
 	}
 	if(syn->sugarFuncTable[KSugarParseFunc] != NULL) {
+		DBG_P(">>> package=%s", KPackage_text(syn->packageNameSpace->packageId));
 		int nextIdx = CallParseFunc(kctx, syn->sugarFuncTable[KSugarParseFunc], node, symbol, tokenList, beginIdx, opIdx, endIdx);
 		if(nextIdx != PatternNoMatch) return nextIdx;
 		callCount++;
@@ -58,8 +59,12 @@ static int ParseSyntaxNode(KonohaContext *kctx, kSyntax *syn, kNode *node, ksymb
 	for(i = 1; i < kArray_size(syntaxList); i++) { /* ObjectItems[0] == syn */
 		kSyntax *syn2 = syntaxList->SyntaxItems[i];
 		if(syn2->sugarFuncTable[KSugarParseFunc] != NULL) {
+			DBG_P(">>> package=%s", KPackage_text(syn2->packageNameSpace->packageId));
 			int nextIdx = CallParseFunc(kctx, syn2->sugarFuncTable[KSugarParseFunc], node, symbol, tokenList, beginIdx, opIdx, endIdx);
-			if(nextIdx != PatternNoMatch) return nextIdx;
+			if(nextIdx != PatternNoMatch && opIdx != -1) {
+				node->syn = syn2;
+				return nextIdx;
+			}
 			callCount++;
 		}
 	}

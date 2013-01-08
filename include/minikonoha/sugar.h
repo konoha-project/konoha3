@@ -143,7 +143,7 @@ struct Tokenizer {
 	kString            *preparedString;
 };
 
-#define VAR_TRACE
+//#define VAR_TRACE
 #ifndef VAR_TRACE
 #define VAR_TRACE DBG_P("tracing..")
 #endif
