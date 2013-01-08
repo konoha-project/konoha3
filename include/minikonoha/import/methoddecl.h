@@ -34,6 +34,7 @@
 #define _Coercion  kMethod_Coercion
 #define _Hidden    kMethod_Hidden
 #define _Virtual   kMethod_Virtual
+#define _Ignored   kMethod_IgnoredOverride
 #define _Compilation kMethod_Compilation
 #define _F(F)      (intptr_t)(F)
 

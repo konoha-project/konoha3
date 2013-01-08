@@ -22,9 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -39,15 +39,48 @@ static KMETHOD NameSpace_AllowImplicitField(KonohaContext *kctx, KonohaStack *sf
 	kNameSpace_Set(ImplicitField, ns, sfp[1].boolValue);
 }
 
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Ignored  kMethod_IgnoredOverride
-#define _F(F)   (intptr_t)(F)
+/* copied from src/parser/import/token.h */
+static void CallSugarMethod(KonohaContext *kctx, KonohaStack *sfp, kFunc *fo, int argc, kObject *obj)
+{
+	KStackSetFuncAll(sfp, obj, 0, fo, argc);
+	KLIB KRuntime_tryCallMethod(kctx, sfp);
+}
+
+/* copied from src/parser/import/typecheck.h */
+static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kNameSpace *ns, kObject *reqType)
+{
+	INIT_GCSTACK();
+	BEGIN_UnusedStack(lsfp);
+	KUnsafeFieldSet(lsfp[1].asNode, expr);
+	KUnsafeFieldSet(lsfp[2].asNameSpace, ns);
+	KUnsafeFieldSet(lsfp[3].asObject, reqType);
+	CallSugarMethod(kctx, lsfp, fo, 4, UPCAST(K_NULLNODE));
+	END_UnusedStack();
+	RESET_GCSTACK();
+	if(kNode_IsError(expr)) return expr;
+	if(lsfp[K_RTNIDX].asNode == K_NULLNODE) {
+		DBG_ASSERT(expr->attrTypeId == KType_var); // untyped
+	}
+	DBG_ASSERT(IS_Node(lsfp[K_RTNIDX].asObject));
+	return (kNode *)lsfp[K_RTNIDX].asObject;
+}
+
+//## @Public void NameSpace.AddMethodDecl(Node methodNode);
+static KMETHOD NameSpace_AddMethodDecl(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNameSpace *ns = sfp[0].asNameSpace;
+	kSyntax *syn = SUGAR kNameSpace_GetSyntax(kctx, ns, KSymbol_("$MethodDecl"));
+	kFunc *fo = syn->sugarFuncTable[KSugarTypeFunc];
+	kNode *methodNode = (kNode *) sfp[1].asObject;
+	CallTypeFunc(kctx, fo, methodNode, ns, K_NULL);
+	KReturnVoid();
+}
 
 static void class_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Ignored, _F(NameSpace_AllowImplicitField), KType_void, KType_NameSpace, KMethodName_("AllowImplicitField"), 1, KType_boolean, KFieldName_("allow"),
+		_Public|_Const, _F(NameSpace_AddMethodDecl), KType_void, KType_NameSpace, KMethodName_("AddMethodDecl"), 1, KType_Node, KFieldName_("node"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -280,35 +313,36 @@ static kbool_t kNode_declClassField(KonohaContext *kctx, kNode *bk, kNameSpace *
 
 static void kNode_AddMethodDeclNode(KonohaContext *kctx, kNode *bk, kToken *tokenClassName, kNode *classNode)
 {
-	if(bk != NULL) {
-		size_t i;
-		for(i = 0; i < kNode_GetNodeListSize(kctx, bk); i++) {
-			kNode *stmt = bk->NodeList->NodeItems[i];
-			if(stmt->syn->keyword == KSymbol_TypeDeclPattern) continue;
-			if(stmt->syn->keyword == KSymbol_MethodDeclPattern) {
-				KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_("ClassName"), KType_Token, tokenClassName);
-				kNodeVar *classParentBlock;
-				/*if(!IS_Array(kNode_GetParentNode(lastNode)->NodeList)) {
-					// make parent node array.
-					SUGAR kNode_AddNode(kctx, lastNode->Parent, lastNode);
-					KDump(lastNode->Parent);
-				}
-				SUGAR kNode_InsertAfter(kctx, lastNode->Parent, lastNode, stmt);
-				*/
+	if(bk == NULL) {
+		return;
+	}
+	size_t i;
 
-				classParentBlock = kNode_GetParentNULL(classNode);
-				if(classParentBlock == NULL) {
-					classParentBlock = KNewNode(kNode_ns(classNode));
-					kNode_Type(kctx, classParentBlock, KNode_Block, KType_void);
-					SUGAR kNode_AddNode(kctx, classParentBlock, classNode);
-				}
+	kNameSpace *ns = kNode_ns(classNode);
+	kMethod *AddMethod = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_NameSpace, KMethodName_("AddMethodDecl"), 1, KMethodMatch_NoOption);
 
-				SUGAR kNode_AddNode(kctx, classParentBlock, stmt);
-				KDump(classParentBlock);
+	for(i = 0; i < kNode_GetNodeListSize(kctx, bk); i++) {
+		kNode *stmt = bk->NodeList->NodeItems[i];
+		if(stmt->syn->keyword == KSymbol_TypeDeclPattern)
+			continue;
+		if(stmt->syn->keyword == KSymbol_MethodDeclPattern) {
+			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_("ClassName"), KType_Token, tokenClassName);
+			kNodeVar *classParentBlock = kNode_GetParentNULL(classNode);
+			if(classParentBlock == NULL) {
+				classParentBlock = KNewNode(ns);
+				SUGAR kNode_AddNode(kctx, classParentBlock, classNode);
+				kNode_Type(kctx, classParentBlock, KNode_Block, KType_void);
 			}
-			else {
-				SUGAR MessageNode(kctx, stmt, NULL, NULL, WarnTag, "%s is not available within the class clause", KSymbol_Fmt2(stmt->syn->keyword));
-			}
+
+			/* Create 'NameSpace.AddMethodDecl(stmt)' */
+			kNode *arg0 = new_ConstNode(kctx, ns, NULL, UPCAST(ns));
+			kNode *arg1 = new_ConstNode(kctx, ns, NULL, UPCAST(stmt));
+
+			kNode *callNode = SUGAR new_MethodNode(kctx, ns, KClass_NameSpace, AddMethod, 2, arg0, arg1);
+			SUGAR kNode_AddNode(kctx, classParentBlock, callNode);
+		}
+		else {
+			SUGAR MessageNode(kctx, stmt, NULL, NULL, WarnTag, "%s is not available within the class clause", KSymbol_Fmt2(stmt->syn->keyword));
 		}
 	}
 }
