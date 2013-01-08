@@ -144,6 +144,7 @@ static kbool_t KClass_AddField(KonohaContext *kctx, KClass *ct, ktypeattr_t type
 	kushort_t pos = ct->fieldsize;
 	if(unlikely(ct->classMethodList == K_EMPTYARRAY)) {
 		((KClassVar *)ct)->classMethodList = new_(MethodArray, 8, OnGlobalConstList);
+		/*FIXME WriteBarrier */
 	}
 	INIT_GCSTACK();
 	if(pos < ct->fieldAllocSize) {

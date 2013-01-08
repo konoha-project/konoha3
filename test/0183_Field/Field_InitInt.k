@@ -5,6 +5,7 @@ import("Syntax.JavaStyleClass");
 
 class C {
 	int age = 10;
+	C() {}
 }
 
 void test() {

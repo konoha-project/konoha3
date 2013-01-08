@@ -1,5 +1,5 @@
 /* written by shinpei */
-//import("konoha.new"); Don't use this
+import("Syntax.JavaNewArray");
 import("JavaScript.Array");
 
 void f() {

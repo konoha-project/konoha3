@@ -58,7 +58,7 @@ void main() {
         "java2.string", "konoha.eval"];
     String[] after  = ["JavaScript.Array","JavaScript.String","Type.Float","JavaScript.Math", "JavaScript.Regexp", "JavaScript.Date", "Type.Bytes", "Type.File",
         "Type.Complex", "Lib.Curl", "Lib.Libvirt", "Lib.Gmp", "Lib.Openssl", "Lib.Mecab", "Lib.Llvm", "Lib.Apache", "Type.Json", "Java.String",
-        "Java.Object", "JavaScript.Prototype", "MiniKonoha.Console", "MiniKonoha.Syntax", "MiniKonoha.Field", "MiniKonoha.Man",
+        "Java.Object", "JavaScript.Prototype", "MiniKonoha.Console", "MiniKonoha.Syntax", "MiniKonoha.ObjectModel", "MiniKonoha.Man",
         "MiniKonoha.NameSpace", "Syntax.GlobalVariable", "Syntax.JavaStyleClass", "Type.Dynamic", "Syntax.UntypedVariable", "Type.StaticVar", "Lib.Libxml2.Xmlreader",
         "Lib.Mecab", "Lib.Mpi", "Lib.Openssl", "Lib.Python", "MiniKonoha.Sql", "MiniKonoha.NameSpace", "Syntax.JavaImport", "Java.String", "MiniKonoha.Eval"];
 
@@ -82,6 +82,8 @@ void main() {
     after.add( "Syntax.CStyleFor");
     before.add("cstyle\", \"$forStmt");
     after.add( "Syntax.CStyleFor");
+    before.add("cstyle\", \"$Number");
+    after.add( "Syntax.Number");
 
     String[] args = SCRIPT_ARGV;
     int i = 1;

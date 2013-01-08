@@ -10,11 +10,9 @@ void test() {
 		do {
 			j = j + 1;
 			c = c + 1;
-		}
-		while(j < 10);
+		} while(j < 10);
 		i = i + 1;
-	}
-	while(i < 10);
+	} while(i < 10);
 	assert(c == 100);
 }
 test();

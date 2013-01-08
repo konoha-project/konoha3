@@ -1,7 +1,6 @@
 // written by kimio kuramitsu
-import("konoha.new")
+import("Syntax.JavaNewArray");
 import("JavaScript.Array");
-import("Syntax.JavaStyleClass");
 
 void test() {
 	int[] a = new int[10];

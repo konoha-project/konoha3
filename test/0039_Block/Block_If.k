@@ -6,7 +6,7 @@ void f(int n) {
 
 void test() {
 	int n = 0;
-	f(${
+	f({
 		if(n == 0) {
 			n = 3;
 		}

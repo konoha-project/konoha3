@@ -1,5 +1,4 @@
 // written by kimio kuramitsu
-import("konoha.new")
 import("Syntax.JavaStyleClass")
 import("JavaScript.Array");
 

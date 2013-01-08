@@ -1,8 +1,8 @@
 // written by shinpei
 
 import("JavaScript.Array");
-import("Syntax.JavaStyleClass");
-//import("konoha.new"); Don't use this
+import("Syntax.JavaNewArray");
+
 void f () {
 	int[] ia = new int[0];
 	ia.add(4);

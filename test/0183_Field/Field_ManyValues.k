@@ -14,6 +14,7 @@ class C {
 	int w = 10000;
 	int yes = 1;
 	String school="ynu";
+	C() {}
 }
 
 void test() {

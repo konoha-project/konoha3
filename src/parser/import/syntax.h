@@ -539,7 +539,7 @@ static kNode* MakeNodeSetter(KonohaContext *kctx, kNode *expr, kNameSpace *ns, k
 	if(foundMethod != NULL) {
 		KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], foundMethod);
 		KLIB kArray_Add(kctx, expr->NodeList, rightHandNode);
-		return SUGAR TypeCheckMethodParam(kctx, mtd, expr, ns, reqc);
+		return SUGAR TypeCheckMethodParam(kctx, foundMethod, expr, ns, reqc);
 	}
 	return SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "undefined setter");
 }
@@ -1250,7 +1250,7 @@ static KMETHOD Statement_ParamDecl(KonohaContext *kctx, KonohaStack *sfp)
 			p[i].name = 0;
 			kNode *node = params->NodeList->NodeItems[i];
 			if(node->syn->keyword != KSymbol_TypeDeclPattern || !SetParamType(kctx, node, i, p)) {
-				break;
+				KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "Argument(%d) No Type declaration", i));
 			}
 		}
 		pa = new_kParam(kctx, returnType, psize, p);

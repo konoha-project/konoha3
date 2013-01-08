@@ -2,7 +2,7 @@
 
 import("JavaScript.Array");
 import("Syntax.JavaStyleClass");
-//import("konoha.new"); Don't use this
+import("Syntax.JavaNewArray");
 
 class Person {
 	int age;

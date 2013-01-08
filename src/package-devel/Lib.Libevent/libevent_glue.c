@@ -66,8 +66,7 @@ static KMETHOD Libevent_dispatch(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ======================================================================== */
 //## int System.event_add(Libevent_event event, Date tv);
-//TODO: this declaration may be in Libevent_event_glue.c
-KMETHOD System_event_add(KonohaContext *kctx, KonohaStack* sfp)
+KMETHOD Libevent_event_add(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kLibevent_event *ev = (kLibevent_event *)sfp[1].asObject;
 	kDate *date = (kDate *)sfp[2].asObject;
@@ -76,8 +75,7 @@ KMETHOD System_event_add(KonohaContext *kctx, KonohaStack* sfp)
 }
 
 //## int System.event_del(Libevent_event event);
-//TODO: this declaration may be in Libevent_event_glue.c
-KMETHOD System_event_del(KonohaContext *kctx, KonohaStack* sfp)
+KMETHOD Libevent_event_del(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kLibevent_event *ev = (kLibevent_event *)sfp[1].asObject;
 	int ret = event_del(ev->event);
@@ -87,22 +85,20 @@ KMETHOD System_event_del(KonohaContext *kctx, KonohaStack* sfp)
 static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	/* Class Definition */
-	/* If you want to create Generic class like Array<T>, see konoha.map package */
 	KDEFINE_CLASS defLibevent = {0};
 	SETSTRUCTNAME(defLibevent, Libevent);
-	//defLibevent.cflag     = KClassFlag_Final;
+	defLibevent.cflag     = KClassFlag_Final;
 	defLibevent.init      = Libevent_Init;
 	defLibevent.free      = Libevent_Free;
 	KClass *LibeventClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defLibevent, trace);
 
-	/* You can define methods with the following procedures. */
 	int KType_Libevent = LibeventClass->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Libevent_new), KType_Libevent, KType_Libevent, KMethodName_("new"), 0,
 		_Public, _F(Libevent_dispatch), KType_Libevent, KType_Libevent, KMethodName_("dispatch"), 0,
-		_Public|_Static|_Const|_Im, _F(System_event_add), KType_int, KType_System, KMethodName_("event_add"), 2, KType_Object, KFieldName_("Libevent_event"), KType_Object, KFieldName_("timeval"),	//TODO: param type should be "KType_Libevent_event" "KType_Date"
-		_Public|_Static|_Const|_Im, _F(System_event_del), KType_int, KType_System, KMethodName_("event_del"), 1, KType_Object, KFieldName_("Libevent_event"),	//TODO: param type should be "KType_Libevent_event"
+		_Public, _F(Libevent_event_add), KType_int, KType_Libevent, KMethodName_("event_add"), 2, KType_Object, KFieldName_("timeval"),
+		_Public, _F(Libevent_event_del), KType_int, KType_Libevent, KMethodName_("event_del"), 1,
 
 
 

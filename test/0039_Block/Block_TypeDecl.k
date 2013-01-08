@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
 int f(int n) {
-	int m = ${
+	int m = {
 		int a = n;
 		a+1;
 	}

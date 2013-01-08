@@ -22,20 +22,23 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef METHODDECL_H_
-#define METHODDECL_H_
+#include "minikonoha/minikonoha.h"
+#include "minikonoha/platform.h"
 
-#define _Public    kMethod_Public
-#define _Final     kMethod_Final
-#define _Const     kMethod_Const
-#define _Static    kMethod_Static
-#define _Im        kMethod_Immutable
-#define _Imm       kMethod_Immutable
-#define _Coercion  kMethod_Coercion
-#define _Hidden    kMethod_Hidden
-#define _Virtual   kMethod_Virtual
-#define _Ignored   kMethod_IgnoredOverride
-#define _Compilation kMethod_Compilation
-#define _F(F)      (intptr_t)(F)
+extern void KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *name, ModuleType option);
+extern void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv);
+extern KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);
+extern int Konoha_Destroy(KonohaContext *kctx);
 
-#endif /* METHODDECL_H_ */
+
+int main(int argc, const char *argv[])
+{
+	struct KonohaFactory factory = {};
+	KonohaFactory_SetDefaultFactory(&factory, PosixFactory, 0, NULL);
+	KonohaContext *kctx;
+	kctx = KonohaFactory_CreateKonoha(&factory);
+	Konoha_Destroy(kctx);
+	kctx = KonohaFactory_CreateKonoha(&factory);
+	Konoha_Destroy(kctx);
+	return 0;
+}
