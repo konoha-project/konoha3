@@ -539,7 +539,7 @@ static kNode* MakeNodeSetter(KonohaContext *kctx, kNode *expr, kNameSpace *ns, k
 	if(foundMethod != NULL) {
 		KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], foundMethod);
 		KLIB kArray_Add(kctx, expr->NodeList, rightHandNode);
-		return SUGAR TypeCheckMethodParam(kctx, mtd, expr, ns, reqc);
+		return SUGAR TypeCheckMethodParam(kctx, foundMethod, expr, ns, reqc);
 	}
 	return SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "undefined setter");
 }
