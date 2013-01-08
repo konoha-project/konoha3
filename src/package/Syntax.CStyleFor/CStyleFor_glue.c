@@ -37,19 +37,42 @@ extern "C" {
 static KMETHOD PatternMatch_ForStmt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
-	int i;
+	kNameSpace *ns = kNode_ns(stmt);
+	SUGAR dumpTokenArray(kctx, 0, tokenList, beginIdx, endIdx);
+	int i, start = beginIdx;
 	for(i = beginIdx; i < endIdx; i++) {
 		kTokenVar *tk = tokenList->TokenVarItems[i];
 		if(tk->symbol == KSymbol_SEMICOLON) {
-//			kToken_Set(StatementSeparator, tk, false);
+			if(start < i) {
+				kNode *node = SUGAR ParseNewNode(kctx, ns, tokenList, &start, i, ParseMetaPatternOption, NULL);
+				SUGAR kNode_AddParsedObject(kctx, stmt, KSymbol_("init"), UPCAST(node));
+			}
+			start = i + 1;
 			break;
 		}
 	}
-	if(beginIdx < i) {
-		kNode *node = SUGAR ParseNewNode(kctx, kNode_ns(stmt), tokenList, &beginIdx, i, ParseMetaPatternOption, NULL);
-		SUGAR kNode_AddParsedObject(kctx, stmt, name, UPCAST(node));
+	if(start == beginIdx) {
+		KReturnUnboxValue(-1);
 	}
-	KReturnUnboxValue(i);
+	for(; i < endIdx; i++) {
+		kTokenVar *tk = tokenList->TokenVarItems[i];
+		if(tk->symbol == KSymbol_SEMICOLON) {
+			if(start < i) {
+				kNode *node = SUGAR ParseNewNode(kctx, ns, tokenList, &start, i, ParseExpressionOption, NULL);
+				SUGAR kNode_AddParsedObject(kctx, stmt, KSymbol_ExprPattern, UPCAST(node));
+			}
+			start = i + 1;
+			break;
+		}
+	}
+	if(i == endIdx) {
+		KReturnUnboxValue(-1);
+	}
+	if(start < endIdx) {
+		kNode *node = SUGAR ParseNewNode(kctx, ns, tokenList, &start, i, ParseMetaPatternOption, NULL);
+		SUGAR kNode_AddParsedObject(kctx, stmt, KSymbol_("Iterator"), UPCAST(node));
+	}
+	KReturnUnboxValue(endIdx);
 }
 
 static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
@@ -86,12 +109,13 @@ static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("$ForNode"), SYNFLAG_CParseFunc, 0, 0, {SUGARFUNC PatternMatch_ForStmt}, },
+		{ KSymbol_("$ForStmt"), SYNFLAG_CParseFunc, 0, 0, {SUGARFUNC PatternMatch_ForStmt}, },
 		{ KSymbol_("for"), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {SUGAR patternParseFunc}, {SUGARFUNC Statement_CStyleFor} },
 		{ KSymbol_END, }, /* sentinental */
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("for"), "\"for\" \"(\" init: $ForStmt \";\" $Expr \";\" Iterator: $ForStmt \")\" $Block", 0, trace);
+	//SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("for"), "\"for\" \"(\" init: $ForStmt \";\" $Expr \";\" Iterator: $ForStmt \")\" $Block", 0, trace);
+	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("for"), "\"for\" \"(\" $ForStmt \")\" $Block", 0, trace);
 	return true;
 }
 
