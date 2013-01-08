@@ -253,13 +253,7 @@ static size_t kNode_countFieldSize(KonohaContext *kctx, kNode *bk)
 
 static kbool_t kNode_AddClassField(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, KClassVar *definedClass, ktypeattr_t ty, kNode *expr)
 {
-	if(kNode_IsTerm(expr)) {  // String name
-		kString *name = expr->TermToken->text;
-		ksymbol_t symbol = KAsciiSymbol(kString_text(name), kString_size(name), KSymbol_NewId);
-		KLIB KClass_AddField(kctx, definedClass, ty, symbol);
-		return true;
-	}
-	else if(expr->syn->keyword == KSymbol_LET) {  // String name = "naruto";
+	if(expr->syn->keyword == KSymbol_LET) {  // String name = "naruto";
 		kNode *lexpr = kNode_At(expr, 1);
 		if(kNode_IsTerm(lexpr)) {
 			kString *name = lexpr->TermToken->text;
@@ -288,6 +282,12 @@ static kbool_t kNode_AddClassField(KonohaContext *kctx, kNode *stmt, kNameSpace 
 		for(i = 1; i < kNode_GetNodeListSize(kctx, expr); i++) {
 			if(!kNode_AddClassField(kctx, stmt, ns, definedClass, ty, kNode_At(expr, i))) return false;
 		}
+		return true;
+	}
+	else if(kNode_IsTerm(expr)) {  // String name
+		kString *name = expr->TermToken->text;
+		ksymbol_t symbol = KAsciiSymbol(kString_text(name), kString_size(name), KSymbol_NewId);
+		KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 		return true;
 	}
 	SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "field name is expected");
