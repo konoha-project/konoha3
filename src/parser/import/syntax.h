@@ -1250,7 +1250,7 @@ static KMETHOD Statement_ParamDecl(KonohaContext *kctx, KonohaStack *sfp)
 			p[i].name = 0;
 			kNode *node = params->NodeList->NodeItems[i];
 			if(node->syn->keyword != KSymbol_TypeDeclPattern || !SetParamType(kctx, node, i, p)) {
-				break;
+				KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "Argument(%d) No Type declaration", i));
 			}
 		}
 		pa = new_kParam(kctx, returnType, psize, p);
