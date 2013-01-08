@@ -419,7 +419,7 @@ typedef kshort_t       knode_t;
 
 #define DEFINE_KNode(NAME) KNode_##NAME,
 
-typedef enum {
+typedef enum KNode_Type {
 	KNodeList(DEFINE_KNode)
 	KNode_MAX
 } KNode_;
