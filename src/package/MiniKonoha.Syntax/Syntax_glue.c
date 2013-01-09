@@ -838,6 +838,30 @@ static KMETHOD Syntax_SetPattern(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
+//## Func NameSpace.GetTermParseFunc();
+static KMETHOD NameSpace_GetTermParseFunc(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturn(SUGAR termParseFunc);
+}
+
+//## Func NameSpace.GetOpParseFunc();
+static KMETHOD NameSpace_GetOpParseFunc(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturn(SUGAR opParseFunc);
+}
+
+//## Func NameSpace.GetPatternParseFunc();
+static KMETHOD NameSpace_GetPatternParseFunc(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturn(SUGAR patternParseFunc);
+}
+
+//## Func NameSpace.GetMethodTypeFunc();
+static KMETHOD NameSpace_GetMethodTypeFunc(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturn(SUGAR methodTypeFunc);
+}
+
 static void Syntax_defineSyntaxMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	/* Func[Int, Token, String] */
@@ -858,6 +882,10 @@ static void Syntax_defineSyntaxMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 		_Public,     _F(Syntax_SetMetaPattern), KType_void, KType_Syntax, KMethodName_("SetMetaPattern"), 1, KType_boolean, KFieldName_("flag"),
 		_Public|_Im, _F(Syntax_IsMetaPattern), KType_boolean, KType_Syntax, KMethodName_("IsMetaPattern"), 0,
 		_Public,     _F(Syntax_SetPattern), KType_void, KType_Syntax, KMethodName_("SetPattern"), 1, KType_String, KFieldName_("pattern"),
+		_Public|_Const, _F(NameSpace_GetTermParseFunc), KType_FuncParse, KType_NameSpace, KMethodName_("GetTermParseFunc"), 0,
+		_Public|_Const, _F(NameSpace_GetOpParseFunc), KType_FuncParse, KType_NameSpace, KMethodName_("GetOpParseFunc"), 0,
+		_Public|_Const, _F(NameSpace_GetPatternParseFunc), KType_FuncParse, KType_NameSpace, KMethodName_("GetPatternParseFunc"), 0,
+		_Public|_Const, _F(NameSpace_GetMethodTypeFunc), KType_FuncType, KType_NameSpace, KMethodName_("GetMethodTypeFunc"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -902,7 +930,6 @@ static KMETHOD NameSpace_AddSyntaxPattern(KonohaContext *kctx, KonohaStack *sfp)
 	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, symbol, pattern, 0, trace);
 	KReturnVoid();
 }
-
 static void Syntax_defineNameSpaceMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
