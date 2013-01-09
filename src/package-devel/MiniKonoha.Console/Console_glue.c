@@ -23,8 +23,8 @@
  ***************************************************************************/
 
 #include <minikonoha/minikonoha.h>
-//#include <minikonoha/sugar.h>
 #include <minikonoha/konoha_common.h>
+#include <minikonoha/import/methoddecl.h>
 
 typedef struct kConsoleVar kConsole;
 struct kConsoleVar {
@@ -87,11 +87,6 @@ static KMETHOD Console_inputUserPassword0(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 /* ------------------------------------------------------------------------ */
-
-#define _Public   kMethod_Public
-#define _Static   kMethod_Static
-#define _F(F)   (intptr_t)(F)
-#define KType_Date     cDate->typeId
 
 static kbool_t console_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {

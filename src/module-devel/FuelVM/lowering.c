@@ -661,10 +661,10 @@ ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option, bo
 	bool UseLLVM = Mtd->Method->mn != 0;
 
 	KonohaContext *kctx = Mtd->Context;
-	DBG_P("Compiling: %p %s.%s%s", Mtd->Method, KType_text(Mtd->Method->typeId), KMethodName_Fmt2(Mtd->Method->mn));
+	debug("Compiling: %p %s.%s%s\n", Mtd->Method, KType_text(Mtd->Method->typeId), KMethodName_Fmt2(Mtd->Method->mn));
 #ifndef FUELVM_USE_LLVM
 	UseLLVM = false;
-	fprintf(stderr, "%s:%d LLVM has not been linked in.\n", __func__, __LINE__);
+	debug("%s:%d LLVM has not been linked in.\n", __func__, __LINE__);
 #endif
 	IRBuilder_Optimize(builder, Mtd->EntryBlock, UseLLVM);
 	IRBuilder_DumpFunction(builder);

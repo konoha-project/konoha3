@@ -344,10 +344,10 @@ typedef enum {
 #define kToken_Set(P,o,B)    KFlag_Set(uintptr_t,(o)->h.magicflag, kTokenFlag_##P, B)
 
 typedef struct KMacroSet {
-	int/*ksymbol_t*/          symbol;
-	kArray                   *tokenList;
-	int                       beginIdx;
-	int                       endIdx;
+	ksymbol_t  symbol;
+	kArray    *tokenList;
+	int        beginIdx;
+	int        endIdx;
 } KMacroSet;
 
 struct KTokenSeqSource {

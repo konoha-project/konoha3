@@ -144,7 +144,7 @@ static struct option long_options2[] = {
 	{NULL, 0, 0, 0},  /* sentinel */
 };
 
-static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv)
+static kbool_t Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv)
 {
 	kbool_t ret = true;
 	int scriptidx = 0;
@@ -202,7 +202,7 @@ static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv
 
 		default:
 			((KonohaFactory *)kctx->platApi)->exitStatus = EXIT_FAILURE;
-			return;
+			return false;
 		}
 	}
 	scriptidx = optind;
@@ -218,6 +218,7 @@ static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv
 		CommandLine_Import(kctx, "MiniKonoha.Man", trace);
 		ret = konoha_shell(kctx);
 	}
+	return ret;
 }
 
 // -------------------------------------------------------------------------
