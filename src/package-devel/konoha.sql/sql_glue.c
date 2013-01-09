@@ -412,6 +412,21 @@ static KMETHOD ResultSet_getInt(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(res);
 }
 
+//## boolean ResultSet.getBoolean(String n);
+static KMETHOD ResultSet_getBoolean(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kResultSet *rs = (kResultSet *)sfp[0].asObject;
+	int idx = ResultSet_FindColumn(kctx, rs, sfp[1].asString);
+	kbool_t res = 0;
+	if(idx >= 0) {
+		ktypeattr_t type = rs->column[idx].type;
+		if(type == KType_boolean) {
+			res = rs->column[idx].val.boolValue;
+		}
+	}
+	KReturnUnboxValue(res);
+}
+
 //## float ResultSet.getFloat(String name);
 static KMETHOD ResultSet_getFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -511,6 +526,7 @@ static kbool_t sql_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 
 		/* ResultSet method */
 		_Public, _F(ResultSet_getInt), KType_int, KType_ResultSet, KKMethodName_("getInt"), 1, KType_String, KFieldName_("query"),
+		_Public, _F(ResultSet_getBoolean), KType_boolean, KType_ResultSet, KKMethodName_("getBoolean"), 1, KType_String, KFieldName_("query"),
 		_Public, _F(ResultSet_getFloat), KType_float, KType_ResultSet, KKMethodName_("getFloat"), 1, KType_String, KFieldName_("query"),
 		_Public, _F(ResultSet_getString), KType_String, KType_ResultSet, KKMethodName_("getString"), 1, KType_String, KFieldName_("query"),
 		_Public|kMethod_SmartReturn, _F(ResultSet_get), KType_Object, KType_ResultSet, KKMethodName_("get"), 1, KType_String, KFieldName_("query"),
