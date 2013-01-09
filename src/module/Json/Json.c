@@ -112,7 +112,7 @@ static size_t DoJsonEach(KonohaContext *kctx, struct JsonBuf *jsonbuf, void *thu
 	JSONObject_iterator Itr;
 	JSON obj = AsJSON(jsonbuf);
 	JSON_OBJECT_EACH(obj, Itr, Key, Val) {
-		const char *key = Key.str->str;
+		const char *key = JSONString_get(Key);
 		eachbuf.json_i = Val.bits;
 		doEach(kctx, key, &eachbuf, thunk);
 		count++;
