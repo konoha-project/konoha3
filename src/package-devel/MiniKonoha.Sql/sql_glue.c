@@ -528,7 +528,7 @@ static kbool_t sql_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpa
 	return true;
 }
 
-KDEFINE_PACKAGE* Sql_Init(void)
+KDEFINE_PACKAGE *Sql_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("Simple Sql", "1.0"),

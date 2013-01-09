@@ -175,7 +175,7 @@ static kbool_t StringInterpolationExportNameSpace(KonohaContext *kctx, kNameSpac
 	return true;
 }
 
-KDEFINE_PACKAGE* StringInterpolation_Init(void)
+KDEFINE_PACKAGE *StringInterpolation_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "JavaScript", "1.0");

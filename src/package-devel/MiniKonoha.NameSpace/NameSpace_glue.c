@@ -31,7 +31,7 @@
 extern "C" {
 #endif
 
-#include<minikonoha/import/methoddecl.h>
+#include <minikonoha/import/methoddecl.h>
 #define TP_name         KType_String,     KFieldName_("name")
 #define TP_paramsize    KType_int,        KFieldName_("paramsize")
 #define TP_source       KType_String,     KFieldName_("source")
@@ -207,8 +207,8 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("namespace"), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {NULL}, {SUGARFUNC Statement_namespace}},
-		{ KSymbol_("const"), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {NULL}, {SUGARFUNC Statement_ConstDecl}},
+		{ KSymbol_("namespace"), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {SUGAR patternParseFunc}, {SUGARFUNC Statement_namespace}},
+		{ KSymbol_("const"), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {SUGAR patternParseFunc}, {SUGARFUNC Statement_ConstDecl}},
 		{ KSymbol_("defined"), SYNFLAG_CFunc,0, Precedence_CStylePrefixOperator, {SUGARFUNC Expression_Defined}, {SUGARFUNC TypeCheck_Defined},},
 		{ KSymbol_END, },
 	};
@@ -233,7 +233,7 @@ static kbool_t namespace_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kN
 	return true;
 }
 
-KDEFINE_PACKAGE* NameSpace_Init(void)
+KDEFINE_PACKAGE *NameSpace_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);

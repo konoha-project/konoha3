@@ -143,7 +143,7 @@ static kbool_t apache_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* Apache_Init(void)
+KDEFINE_PACKAGE *Apache_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("apache", "1.0"),

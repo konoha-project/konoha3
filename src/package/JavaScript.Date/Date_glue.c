@@ -660,7 +660,7 @@ static kbool_t date_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE* Date_Init(void)
+KDEFINE_PACKAGE *Date_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "JavaScript", "1.4");

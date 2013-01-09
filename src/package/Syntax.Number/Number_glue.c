@@ -201,11 +201,7 @@ static KMETHOD TypeCheck_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sf
 static kbool_t Number_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_NumberPattern, SYNFLAG_CTokenFunc|SYNFLAG_CTypeFunc, 0, 0,
-		{SUGAR termParseFunc},
-		{SUGARFUNC TypeCheck_ExtendedIntLiteral},
-		KonohaChar_Digit,
-		{SUGARFUNC TokenFunc_ExtendedIntLiteral}},
+		{ KSymbol_NumberPattern, SYNFLAG_CTokenFunc|SYNFLAG_CTypeFunc, 0, 0, {SUGAR termParseFunc}, {SUGARFUNC TypeCheck_ExtendedIntLiteral}, KonohaChar_Digit, {SUGARFUNC TokenFunc_ExtendedIntLiteral}},
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

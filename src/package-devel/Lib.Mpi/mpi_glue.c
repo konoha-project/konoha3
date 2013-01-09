@@ -648,7 +648,7 @@ static kbool_t mpi_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpa
 	return true;
 }
 
-KDEFINE_PACKAGE* Mpi_Init(void)
+KDEFINE_PACKAGE *Mpi_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("mpi", "1.0"),

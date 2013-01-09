@@ -752,7 +752,7 @@ static kbool_t regexp_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* Regexp_Init(void)
+KDEFINE_PACKAGE *Regexp_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "JavaScript", "1.4");

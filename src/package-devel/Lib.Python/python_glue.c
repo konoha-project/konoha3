@@ -563,7 +563,7 @@ static kbool_t python_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* Python_Init(void)
+KDEFINE_PACKAGE *Python_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("python", "1.0"),

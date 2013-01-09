@@ -1880,7 +1880,7 @@ static kbool_t subproc_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* subproc_Init(void)
+KDEFINE_PACKAGE *subproc_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("subproc", "1.0"),

@@ -133,7 +133,7 @@ static kbool_t CStyleBitwiseOperator_ExportNameSpace(KonohaContext *kctx, kNameS
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* CStyleBitwiseOperator_Init(void)
+KDEFINE_PACKAGE *CStyleBitwiseOperator_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "CStyle", K_VERSION);

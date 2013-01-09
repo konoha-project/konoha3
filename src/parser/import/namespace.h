@@ -144,7 +144,7 @@ static kSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbo
 	KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, keyword, false/*isLocalOnly*/);
 	if(kvs != NULL && KTypeAttr_Unmask(kvs->attrTypeId) == KType_Syntax) {
 		//DBG_P(">>>>>>> ns=%p kvs=%p keyword=%s%s has defined syntax", ns, kvs, KSymbol_Fmt2(keyword));
-		return (kSyntax*)kvs->ObjectValue;
+		return (kSyntax *)kvs->ObjectValue;
 	}
 	//DBG_P(">>>>>>> ns=%p kvs=%p keyword=%s%s has no defined syntax", ns, kvs, KSymbol_Fmt2(keyword));
 	return KNULL(Syntax);
@@ -175,7 +175,7 @@ static kArray* kNameSpace_GetSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksy
 	KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
 	kArray *syntaxList = NULL;
 	if(foundKeyValue != NULL) {
-		syntaxList = (kArray*)foundKeyValue->ObjectValue;
+		syntaxList = (kArray *)foundKeyValue->ObjectValue;
 		DBG_ASSERT(IS_Array(syntaxList));
 		if(kArray_size(syntaxList) != 0) {
 			return syntaxList;
@@ -196,7 +196,7 @@ static kbool_t kNameSpace_ResetSyntaxList(KonohaContext *kctx, kNameSpace *ns, k
 	ksymbol_t queryKey = keyword | KSymbolAttr_SyntaxList;
 	KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
 	if(foundKeyValue != NULL) {
-		kArray *syntaxList = (kArray*)foundKeyValue->ObjectValue;
+		kArray *syntaxList = (kArray *)foundKeyValue->ObjectValue;
 		DBG_ASSERT(IS_Array(syntaxList));
 		KLIB kArray_Clear(kctx, syntaxList, 0);
 		return true;
@@ -247,7 +247,7 @@ static void kNameSpace_ImportSyntax2(KonohaContext *kctx, kNameSpace *ns, kSynta
 static void kNameSpace_ImportSyntaxAsKeyValue(KonohaContext *kctx, void */*kNameSpace*/ns, KKeyValue *kvs)
 {
 	if(KTypeAttr_Unmask(kvs->attrTypeId) == KType_Syntax) {
-		kNameSpace_ImportSyntax2(kctx, (kNameSpace*)ns, (kSyntax*)kvs->ObjectValue);
+		kNameSpace_ImportSyntax2(kctx, (kNameSpace *)ns, (kSyntax *)kvs->ObjectValue);
 	}
 }
 

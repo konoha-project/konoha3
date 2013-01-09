@@ -35,7 +35,7 @@ static int CallParseFunc(KonohaContext *kctx, kFunc *fo, kNode *node, ksymbol_t 
 	lsfp[4].intValue = beginIdx;
 	lsfp[5].intValue = operatorIdx;
 	lsfp[6].intValue = endIdx;
-	CallSugarMethod(kctx, lsfp, fo, 6, (kObject*)KNULL(Int));
+	CallSugarMethod(kctx, lsfp, fo, 6, (kObject *)KNULL(Int));
 	END_UnusedStack();
 	if(kNode_IsError(node)) return endIdx;
 	return (int)lsfp[K_RTNIDX].intValue;

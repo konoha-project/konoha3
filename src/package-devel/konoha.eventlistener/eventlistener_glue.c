@@ -631,7 +631,7 @@ static kbool_t eventlistener_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns
 	return true;
 }
 
-KDEFINE_PACKAGE* eventlistener_Init(void)
+KDEFINE_PACKAGE *eventlistener_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("event", "1.0"),

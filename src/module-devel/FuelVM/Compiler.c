@@ -828,7 +828,7 @@ static struct KVirtualCode *FuelVM_GenerateKVirtualCode(KonohaContext *kctx, kMe
 		mtd->virtualCodeApi_plus1[-1]->FreeVirtualCode(kctx, mtd->vcode_start);
 	}
 	KLIB kMethod_SetFunc(kctx, mtd, 0);
-	if (JITCompiled) {
+	if(JITCompiled) {
 		KLIB kMethod_SetFunc(kctx, mtd, (KMethodFunc) code);
 	}
 	KFieldSet(mtd, ((kMethodVar *)mtd)->CompiledNode, block);

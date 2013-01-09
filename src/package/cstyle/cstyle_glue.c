@@ -508,7 +508,7 @@
 //
 //// --------------------------------------------------------------------------
 //
-//KDEFINE_PACKAGE* cstyle_Init(void)
+//KDEFINE_PACKAGE *cstyle_Init(void)
 //{
 //	static KDEFINE_PACKAGE d = {0};
 //	KSetPackageName(d, "cstyle", "1.0");

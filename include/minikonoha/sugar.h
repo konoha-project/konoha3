@@ -346,10 +346,10 @@ typedef enum {
 #define kToken_Set(P,o,B)    KFlag_Set(uintptr_t,(o)->h.magicflag, kTokenFlag_##P, B)
 
 typedef struct KMacroSet {
-	int/*ksymbol_t*/          symbol;
-	kArray                   *tokenList;
-	int                       beginIdx;
-	int                       endIdx;
+	ksymbol_t  symbol;
+	kArray    *tokenList;
+	int        beginIdx;
+	int        endIdx;
 } KMacroSet;
 
 struct KTokenSeqSource {
@@ -642,7 +642,7 @@ typedef struct {
 
 	kNode*       (*new_MethodNode)(KonohaContext *, kNameSpace *, KClass *, kMethod *mtd, int n, ...);
 
-	kNode*      (*TypeCheckBlock)(KonohaContext *, kNode *, kNameSpace *, KClass *);
+//	kNode*      (*TypeCheckBlock)(KonohaContext *, kNode *, kNameSpace *, KClass *);
 	kNode*      (*TypeCheckNodeByName)(KonohaContext *, kNode*, ksymbol_t, kNameSpace *, KClass *, int);
 	kNode*      (*TypeCheckNodeAt)(KonohaContext *, kNode *, size_t, kNameSpace *, KClass *, int);
 	kNode *     (*TypeCheckMethodParam)(KonohaContext *, kMethod *mtd, kNode *, kNameSpace *, KClass *);

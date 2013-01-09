@@ -402,10 +402,30 @@ static const unsigned SegmentBitMapCount[] = {
 	OP(11, BITMAP_L0_SIZE(11), BITMAP_L1_SIZE(11), BITMAP_L2_SIZE(11))\
 	OP(12, BITMAP_L0_SIZE(12), BITMAP_L1_SIZE(12), BITMAP_L2_SIZE(12))
 
+#if SIZEOF_VOIDP*8 == 64
+struct BM5  { bitmap_t m0[64]; bitmap_t m1[1]; bitmap_t m2[1]; };
+struct BM6  { bitmap_t m0[32]; bitmap_t m1[1]; bitmap_t m2[1]; };
+struct BM7  { bitmap_t m0[16]; bitmap_t m1[1]; bitmap_t m2[1]; };
+struct BM8  { bitmap_t m0[ 8]; bitmap_t m1[1]; bitmap_t m2[1]; };
+struct BM9  { bitmap_t m0[ 4]; bitmap_t m1[1]; bitmap_t m2[1]; };
+struct BM10 { bitmap_t m0[ 2]; bitmap_t m1[1]; bitmap_t m2[1]; };
+struct BM11 { bitmap_t m0[ 1]; bitmap_t m1[1]; bitmap_t m2[1]; };
+struct BM12 { bitmap_t m0[ 1]; bitmap_t m1[1]; bitmap_t m2[1]; };
+#elif SIZEOF_VOIDP*8 == 32
+struct BM5  { bitmap_t m0[128]; bitmap_t m1[4]; bitmap_t m2[1]; };
+struct BM6  { bitmap_t m0[ 64]; bitmap_t m1[2]; bitmap_t m2[1]; };
+struct BM7  { bitmap_t m0[ 32]; bitmap_t m1[1]; bitmap_t m2[1]; };
+struct BM8  { bitmap_t m0[ 16]; bitmap_t m1[1]; bitmap_t m2[1]; };
+struct BM9  { bitmap_t m0[  8]; bitmap_t m1[1]; bitmap_t m2[1]; };
+struct BM10 { bitmap_t m0[  4]; bitmap_t m1[1]; bitmap_t m2[1]; };
+struct BM11 { bitmap_t m0[  2]; bitmap_t m1[1]; bitmap_t m2[1]; };
+struct BM12 { bitmap_t m0[  1]; bitmap_t m1[1]; bitmap_t m2[1]; };
+#else /* SIZEOF_VOIDP*8 != 32 */
 #define BITMAP_LAYOUT(KLASS, N0, N1, N2)\
 	struct BM##KLASS { bitmap_t m0[N0]; bitmap_t m1[N1]; bitmap_t m2[N2];};
 BITMAP_INFO_LIST(BITMAP_LAYOUT);
 #undef BITMAP_LAYOUT
+#endif /* SIZEOF_VOIDP*8 != 64 */
 
 #define _BLOCK_(size)  struct block##size{uint8_t m[size];} \
 	b##size [SEGMENT_SIZE/(sizeof(struct block##size))]

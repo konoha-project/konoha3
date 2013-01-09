@@ -257,7 +257,7 @@
 //	return true;
 //}
 //
-//KDEFINE_PACKAGE* map_Init(void)
+//KDEFINE_PACKAGE *map_Init(void)
 //{
 //	static KDEFINE_PACKAGE d = {0};
 //	KSetPackageName(d, "map", "1.0");

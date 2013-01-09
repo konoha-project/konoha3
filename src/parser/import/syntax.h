@@ -455,7 +455,7 @@ static kNode* MakeNodeSetter(KonohaContext *kctx, kNode *expr, kNameSpace *ns, k
 	kParam *pa = kMethod_GetParam(mtd);
 	int i, psize = pa->psize + 1;
 	kparamtype_t p[psize];
-	for(i = 0; i < pa->psize; i++) {
+	for(i = 0; i < (int) pa->psize; i++) {
 		p[i].attrTypeId = pa->paramtypeItems[i].attrTypeId;
 	}
 	p[pa->psize].attrTypeId = expr->attrTypeId;
@@ -1265,7 +1265,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	kFunc *OperatorFunc = KSugarFunc(ns, Expression_Operator);
 	kFunc *MethodCallFunc = KSugarFunc(ns, TypeCheck_MethodCall);
 	kFunc *patternParseFunc = KSugarFunc(ns, Parse_Pattern);
-	kSyntaxVar *nullSyntax = (kSyntaxVar*)KNULL(Syntax);
+	kSyntaxVar *nullSyntax = (kSyntaxVar *)KNULL(Syntax);
 	nullSyntax->precedence_op2 = Precedence_CStyleStatementEnd;
 	nullSyntax->precedence_op1 = Precedence_CStyleStatementEnd;
 	nullSyntax->ParseFuncNULL = KSugarFunc(ns, Parse_Block);

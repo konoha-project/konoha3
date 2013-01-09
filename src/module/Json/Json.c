@@ -232,7 +232,15 @@ static kbool_t AppendJsonArray(KonohaContext *kctx, struct JsonBuf *jsonbuf, str
 }
 
 // -------------------------------------------------------------------------
-static void UnloadJsonModule(KonohaContext *kctx)
+static void InitJsonContext(KonohaContext *kctx)
+{
+	JSONMemoryPool *mp = (JSONMemoryPool *) malloc(sizeof(JSONMemoryPool));
+	JSONMemoryPool_Init(mp);
+	KonohaFactory *factory = (KonohaFactory *) kctx->platApi;
+	factory->JsonHandler = (void *) mp;
+}
+
+static void DeleteJsonContext(KonohaContext *kctx)
 {
 	JSONMemoryPool *mp = (JSONMemoryPool *)(PLATAPI JsonHandler);
 	JSONMemoryPool_Delete(mp);
@@ -246,7 +254,8 @@ kbool_t LoadJsonModule(KonohaFactory *factory, ModuleType type)
 	};
 	factory->JsonDataInfo         = &ModuleInfo;
 	factory->IsJsonType           = IsJsonType;
-	factory->UnloadJsonModule     = UnloadJsonModule;
+	factory->InitJsonContext      = InitJsonContext;
+	factory->DeleteJsonContext    = DeleteJsonContext;
 	factory->CreateJson           = CreateJson;
 	factory->ParseJson            = ParseJson;
 	factory->FreeJson             = FreeJson;
@@ -263,8 +272,7 @@ kbool_t LoadJsonModule(KonohaFactory *factory, ModuleType type)
 	factory->RetrieveJsonArrayAt  = RetrieveJsonArrayAt;
 	factory->SetJsonArrayAt       = SetJsonArrayAt;
 	factory->AppendJsonArray      = AppendJsonArray;
-	factory->JsonHandler          = (JSONMemoryPool *) malloc(sizeof(JSONMemoryPool));
-	JSONMemoryPool_Init((JSONMemoryPool *)factory->JsonHandler);
+	factory->JsonHandler          = NULL;
 	return true;
 }
 

@@ -717,7 +717,7 @@ static kbool_t socket_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* socket_Init(void)
+KDEFINE_PACKAGE *socket_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("posix", "1.0"),

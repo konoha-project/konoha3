@@ -98,7 +98,7 @@
 //	return true;
 //}
 //
-//KDEFINE_PACKAGE* CommonLogicalOperator_Init(void)
+//KDEFINE_PACKAGE *CommonLogicalOperator_Init(void)
 //{
 //	static KDEFINE_PACKAGE d = {0};
 //	KSetPackageName(d, "CommonLogicalOperator", "0.0");

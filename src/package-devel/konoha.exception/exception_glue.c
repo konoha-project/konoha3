@@ -340,7 +340,7 @@
 //	return true;
 //}
 //
-//KDEFINE_PACKAGE* exception_Init(void)
+//KDEFINE_PACKAGE *exception_Init(void)
 //{
 //	static KDEFINE_PACKAGE d = {
 //		KPACKNAME("konoha", "1.0"),
