@@ -390,13 +390,13 @@ static KMETHOD Node_getToken(KonohaContext *kctx, KonohaStack *sfp)
 // --------------------------------------------------------------------------
 /* Node(Stmt) */
 
-//## boolean Node.TypeCheckNode(Symbol key, Object type, int policy);
+//## Node Node.TypeCheckNode(Symbol key, Object type, int policy);
 static KMETHOD Node_TypeCheckNode(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t key = (ksymbol_t)sfp[1].intValue;
 	KClass *type = kObject_class(sfp[2].asObject);
 	int policy = sfp[3].intValue;
-	KReturnUnboxValue(kNode_IsError(SUGAR TypeCheckNodeByName(kctx, sfp[0].asNode, key, kNode_ns(sfp[0].asNode), type, policy)));
+	KReturn(SUGAR TypeCheckNodeByName(kctx, sfp[0].asNode, key, kNode_ns(sfp[0].asNode), type, policy));
 }
 
 ////## Node Node.newNode(Token[] tokenList, int s, int e);
@@ -548,7 +548,7 @@ static void Syntax_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceI
 		_Public, _F(Node_GetParentNode), KType_Node, KType_Node, KMethodName_("GetParentNode"), 0,
 
 		_Public, _F(Node_opEQ), KType_boolean, KType_Node, KMethodName_("=="), 1, KType_Node, KFieldName_("other"),
-		_Public, _F(Node_TypeCheckNode), KType_boolean, KType_Node, KMethodName_("TypeCheckNode"), 4, TP_kw, TP_ns, TP_type, TP_pol,
+		_Public, _F(Node_TypeCheckNode), KType_Node, KType_Node, KMethodName_("TypeCheckNode"), 3, TP_kw, TP_type, TP_pol,
 //		_Public, _F(Node_newNode), KType_Node, KType_Node, KMethodName_("newNode"), 3, TP_tokens, TP_begin, TP_end,
 		_Public, _F(Node_SetType), KType_void, KType_Node, KMethodName_("SetType"), 1, TP_type,
 		_Public|_Im, _F(Node_GetType), KType_int, KType_Node, KMethodName_("GetType"), 0,
