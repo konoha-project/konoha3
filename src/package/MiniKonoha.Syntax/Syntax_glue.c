@@ -289,7 +289,7 @@ static KMETHOD Node_newNode(KonohaContext *kctx, KonohaStack *sfp)
 //## Array[Node] Node.GetNodeList();
 static KMETHOD Node_GetNodeList(KonohaContext *kctx, KonohaStack *sfp)
 {
-	if(IS_Array(sfp[0].asNode->NodeList)) {
+	if(sfp[0].asNode->NodeList != NULL && IS_Array(sfp[0].asNode->NodeList)) {
 		KReturn(sfp[0].asNode->NodeList);
 	}
 	else {
@@ -918,6 +918,30 @@ static KMETHOD NameSpace_AddSyntaxPattern(KonohaContext *kctx, KonohaStack *sfp)
 	SUGAR kNameSpace_AddSyntaxPattern(kctx, kSyntax_(ns, symbol), pattern, 0, trace);
 	KReturnVoid();
 }
+
+//## void NameSpace.CompileAllDefinedMethod()
+static KMETHOD NameSpace_CompileAllDefinedMethod(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNameSpace *ns = sfp[0].asNameSpace;
+
+	KRuntime *share = kctx->share;
+	size_t i;
+	for(i = 0; i < kArray_size(share->GlobalConstList); i++) {
+		kObject *o = share->GlobalConstList->ObjectItems[i];
+		if(kObject_class(o) == KClass_NameSpace) {
+			kNameSpace *ns = (kNameSpace  *) o;
+			size_t j;
+			for(j = 0; j < kArray_size(ns->methodList_OnList); j++) {
+				kMethod *mtd = ns->methodList_OnList->MethodItems[j];
+				if(IS_NameSpace(mtd->LazyCompileNameSpace)) {
+					KLIB kMethod_DoLazyCompilation(kctx, mtd, NULL, HatedLazyCompile|CrossCompile);
+				}
+			}
+		}
+	}
+	KReturnVoid();
+}
+
 static void Syntax_defineNameSpaceMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
@@ -925,6 +949,7 @@ static void Syntax_defineNameSpaceMethod(KonohaContext *kctx, kNameSpace *ns, KT
 		_Public|_Const, _F(NameSpace_GetSyntax), KType_Syntax, KType_NameSpace, KMethodName_("GetSyntax"), 1, TP_kw,
 		_Public|_Compilation, _F(NameSpace_DefineSyntax), KType_void, KType_NameSpace, KMethodName_("DefineSyntax"), 1, TP_syntax,
 		_Public|_Compilation, _F(NameSpace_AddSyntaxPattern), KType_void, KType_NameSpace, KMethodName_("AddSyntaxPattern"), 2, TP_kw, KType_String, KFieldName_("pattern"),
+		_Public, _F(NameSpace_CompileAllDefinedMethod), KType_void, KType_NameSpace, KMethodName_("CompileAllDefinedMethod"), 0, 
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
