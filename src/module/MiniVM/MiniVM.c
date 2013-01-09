@@ -503,7 +503,7 @@ static bblock_t KBuilder_AsmJMPF(KonohaContext *kctx, KBuilder *builder, int flo
 
 static bblock_t KBuilder_asmJMPIF(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk, int isTRUE, bblock_t labelId)
 {
-	intptr_t a = ((intptr_t*)thunk)[0];
+	intptr_t a = ((intptr_t *)thunk)[0];
 	SUGAR VisitNode(kctx, builder, expr, thunk);
 	return KBuilder_AsmJMPF(kctx, builder, a, labelId);
 }
@@ -568,7 +568,7 @@ static kbool_t KBuilder_VisitConstNode(KonohaContext *kctx, KBuilder *builder, k
 	DBG_ASSERT(!KType_Is(UnboxType, expr->attrTypeId));
 //	DBG_ASSERT(KNode_Is(ObjectConst, (expr)));
 	kObject *v = KBuilder_AddConstPool(kctx, builder, expr->ObjectConstValue);
-	intptr_t a = ((intptr_t*)thunk)[0];
+	intptr_t a = ((intptr_t *)thunk)[0];
 	ASM(NSET, OC_(a), (uintptr_t)v, KClass_(expr->attrTypeId));
 	return true;
 }
@@ -578,21 +578,21 @@ static kbool_t KBuilder_VisitUnboxConstNode(KonohaContext *kctx, KBuilder *build
 	/*FIXME(ide) Need to skip VoidType Node */
 	if(expr->attrTypeId == KType_void)
 		return true;
-	intptr_t a = ((intptr_t*)thunk)[0];
+	intptr_t a = ((intptr_t *)thunk)[0];
 	ASM(NSET, NC_(a), expr->unboxConstValue, KClass_(expr->attrTypeId));
 	return true;
 }
 
 static kbool_t KBuilder_VisitNewNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	intptr_t a = ((intptr_t*)thunk)[0];
+	intptr_t a = ((intptr_t *)thunk)[0];
 	ASM(NEW, OC_(a), /*FIXME expr->index, */0, KClass_(expr->attrTypeId));
 	return true;
 }
 
 static kbool_t KBuilder_VisitNullNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	intptr_t a = ((intptr_t*)thunk)[0];
+	intptr_t a = ((intptr_t *)thunk)[0];
 	if(KType_Is(UnboxType, expr->attrTypeId)) {
 		ASM(NSET, NC_(a), 0, KClass_(expr->attrTypeId));
 	}
@@ -604,14 +604,14 @@ static kbool_t KBuilder_VisitNullNode(KonohaContext *kctx, KBuilder *builder, kN
 
 static kbool_t KBuilder_VisitLocalNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	intptr_t a = ((intptr_t*)thunk)[0];
+	intptr_t a = ((intptr_t *)thunk)[0];
 	KBuilder_AsmNMOV(kctx, builder, a, KClass_(expr->attrTypeId), expr->index);
 	return true;
 }
 
 static kbool_t KBuilder_VisitFieldNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	intptr_t a = ((intptr_t*)thunk)[0];
+	intptr_t a = ((intptr_t *)thunk)[0];
 	kshort_t index = (kshort_t)expr->index;
 	kshort_t xindex = (kshort_t)(expr->index >> (sizeof(kshort_t)*8));
 	KClass *ty = KClass_(expr->attrTypeId);
@@ -627,15 +627,14 @@ static kbool_t KBuilder_VisitErrorNode(KonohaContext *kctx, KBuilder *builder, k
 
 static void inline AssignLocal(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
-	if(node->attrTypeId != KType_void && ((intptr_t*)thunk)[0] != node->stackbase) {
-		KBuilder_AsmNMOV(kctx, builder, ((intptr_t*)thunk)[0], KClass_(node->attrTypeId), node->stackbase);
+	if(node->attrTypeId != KType_void && ((intptr_t *)thunk)[0] != node->stackbase) {
+		KBuilder_AsmNMOV(kctx, builder, ((intptr_t *)thunk)[0], KClass_(node->attrTypeId), node->stackbase);
 	}
 }
 
 static kbool_t KBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, kNode *block, void *thunk)
 {
 	size_t i;
-	intptr_t espidx = block->stackbase;
 	for (i = 0; i < kNode_GetNodeListSize(kctx, block); i++) {
 		kNode *stmt = block->NodeList->NodeItems[i];
 		builder->common.uline = kNode_uline(stmt);
@@ -840,7 +839,7 @@ static kbool_t KBuilder_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, 
 	kNode *rightHandNode = kNode_At(expr, 2);
 	//DBG_P("LET (%s) a=%d, shift=%d, espidx=%d", KType_text(expr->attrTypeId), a, shift, espidx);
 	if(leftHandNode->node == KNode_Local) {
-		intptr_t a = ((intptr_t*)thunk)[0];
+		intptr_t a = ((intptr_t *)thunk)[0];
 		SUGAR VisitNode(kctx, builder, rightHandNode, &(leftHandNode->index));
 		if(expr->attrTypeId != KType_void && a != leftHandNode->index) {
 			KBuilder_AsmNMOV(kctx, builder, a, KClass_(leftHandNode->attrTypeId), leftHandNode->index);
@@ -855,7 +854,7 @@ static kbool_t KBuilder_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, 
 		KClass *lhsClass = KClass_(leftHandNode->attrTypeId), *rhClass = KClass_(rightHandNode->attrTypeId);
 		ASM(XNMOV, OC_(index), xindex, TC_(espidx, rhClass), lhsClass);
 		if(expr->attrTypeId != KType_void) {
-			intptr_t a = ((intptr_t*)thunk)[0];
+			intptr_t a = ((intptr_t *)thunk)[0];
 			ASM(NMOVx, TC_(a, rhClass), OC_(index), xindex, lhsClass);
 		}
 	}
@@ -870,7 +869,7 @@ static kbool_t KBuilder_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, 
 
 static kbool_t KBuilder_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	intptr_t a = ((intptr_t*)thunk)[0];
+	intptr_t a = ((intptr_t *)thunk)[0];
 	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);
 	ASM(BOX, OC_(a), NC_(a), KClass_(expr->attrTypeId));
 	return true;

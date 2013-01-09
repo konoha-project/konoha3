@@ -296,7 +296,7 @@ static void Preprocess(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, i
 				if(kvs != NULL) {
 					ktypeattr_t ty = KTypeAttr_Unmask(kvs->attrTypeId);
 					if(ty == KType_Syntax) {
-						kSyntax *syntax = (kSyntax*)kvs->ObjectValue;
+						kSyntax *syntax = (kSyntax *)kvs->ObjectValue;
 //						if(kSyntax_Is(Macro, syntax)) {
 //							if(syn->macroParamSize == 0) {
 //								ApplyMacroData(kctx, tokens, syntax->macroDataNULL, 0, kArray_size(syntax->macroDataNULL), 0, NULL);

@@ -42,7 +42,7 @@ static void Libevent_event_Free(KonohaContext *kctx, kObject *o)
 {
 	struct Libevent_event *ev = (struct Libevent_event *) o;
 
-	if (ev->event != NULL) {
+	if(ev->event != NULL) {
 		event_free(ev->event);
 		ev->event = NULL;
 	}

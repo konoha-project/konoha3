@@ -660,7 +660,7 @@ static kbool_t xml_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpa
 	return true;
 }
 
-KDEFINE_PACKAGE* Xmlreader_Init(void)
+KDEFINE_PACKAGE *Xmlreader_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);

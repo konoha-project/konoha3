@@ -4,7 +4,6 @@ import("JavaScript.String");
 import("Type.File");
 import("Type.Bytes");
 import("Syntax.CStyleWhile");
-import("konoha.new");
 import("MiniKonoha.NameSpace");
 
 String readFile(String path) {
@@ -93,7 +92,7 @@ void main() {
         System.p("Fix " + args[i]);
         data = replace(args[i], data, "[a-zA-Z]+\\*\\)", "*)", " *)");
         data = replace(args[i], data, "if \\(", "if (", "if(");
-        data = replace(args[i], data, "KDEFINE_PACKAGE \\*", "KDEFINE_PACKAGE *", "KDEFINE_PACKAGE* ");
+        data = replace(args[i], data, "KDEFINE_PACKAGE\\* ", "KDEFINE_PACKAGE* ", "KDEFINE_PACKAGE *");
         data = replace(args[i], data, "KKMethodName", "KKMethodName", "KMethodName");
         int j = 0;
         while (j < before.getSize()) {

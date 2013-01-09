@@ -94,7 +94,7 @@ static kbool_t CStyleSelfAssignment_ExportNameSpace(KonohaContext *kctx, kNameSp
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* CStyleSelfAssignment_Init(void)
+KDEFINE_PACKAGE *CStyleSelfAssignment_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "CStyle", K_VERSION);

@@ -126,7 +126,7 @@
 //	return true;
 //}
 //
-//KDEFINE_PACKAGE* import_Init(void)
+//KDEFINE_PACKAGE *import_Init(void)
 //{
 //	static KDEFINE_PACKAGE d = {0};
 //	KSetPackageName(d, "import", "1.0");

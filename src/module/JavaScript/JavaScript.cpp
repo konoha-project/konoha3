@@ -564,12 +564,6 @@ static kbool_t JSBuilder_VisitAssignNode(KonohaContext *kctx, KBuilder *builder,
 	return true;
 }
 
-static kbool_t JSBuilder_VisitStackTopNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
-{
-	JSBuilder_EmitString(kctx, builder, "/*FIXME*/ /* STACKTOP */", "", "");
-	return true;
-}
-
 static kbool_t JSBuilder_VisitDoneNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
 	JSBuilder_EmitString(kctx, builder, "/*FIXME*/ /* this may be bug. */", "", "");

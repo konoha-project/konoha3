@@ -320,7 +320,7 @@ static kbool_t thread_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* thread_Init(void)
+KDEFINE_PACKAGE *thread_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("thread", "1.0"),

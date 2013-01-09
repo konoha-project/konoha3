@@ -33,7 +33,7 @@
 extern "C"{
 #endif
 
-#include<minikonoha/import/methoddecl.h>
+#include <minikonoha/import/methoddecl.h>
 
 #define TP_kw           KType_Symbol,     KFieldName_("keyword")
 #define TP_source       KType_String,     KFieldName_("source")
@@ -1058,7 +1058,7 @@ static kbool_t Syntax_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* Syntax_Init(void)
+KDEFINE_PACKAGE *Syntax_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "MiniKonoha", K_VERSION);

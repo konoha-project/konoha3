@@ -295,7 +295,7 @@ static void kNode_AddParsedObject(KonohaContext *kctx, kNode *stmt, ksymbol_t ke
 		KLIB kArray_Add(kctx, valueList, o);
 	}
 	if(IS_Node(o)) {
-		kNode *node = (kNode*)o;
+		kNode *node = (kNode *)o;
 		KFieldSet(node, node->Parent, stmt);
 	}
 }

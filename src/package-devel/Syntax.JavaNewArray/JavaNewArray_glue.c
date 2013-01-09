@@ -83,7 +83,7 @@ static kbool_t new_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpa
 	return true;
 }
 
-KDEFINE_PACKAGE* JavaNewArray_Init(void) 
+KDEFINE_PACKAGE *JavaNewArray_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "new", "1.0");

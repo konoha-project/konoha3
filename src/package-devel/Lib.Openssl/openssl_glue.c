@@ -120,7 +120,7 @@ static kbool_t openssl_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 	return true;
 }
 
-KDEFINE_PACKAGE* Openssl_Init(void)
+KDEFINE_PACKAGE *Openssl_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("openssl", "1.0"),

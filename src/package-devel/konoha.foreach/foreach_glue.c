@@ -170,7 +170,7 @@
 //}
 //
 //
-//KDEFINE_PACKAGE* foreach_Init(void)
+//KDEFINE_PACKAGE *foreach_Init(void)
 //{
 //	static KDEFINE_PACKAGE d = {0};
 //	KSetPackageName(d, "konoha", "1.0");
