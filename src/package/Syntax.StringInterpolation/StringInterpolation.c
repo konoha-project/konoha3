@@ -127,7 +127,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 		KTokenSeq range = {ns, KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, range);
 		const char *buf = KLIB KBuffer_text(kctx, &wb, EnsureZero);
-		SUGAR Tokenize(kctx, ns, buf, tk->uline, range.tokenList);
+		SUGAR Tokenize(kctx, ns, buf, tk->uline, 0, range.tokenList);
 		KTokenSeq_End(kctx, range);
 
 		{

@@ -322,14 +322,16 @@ static struct KGammaLocalData *kNameSpace_PopGamma(KonohaContext *kctx, kNameSpa
 static kNode* kMethod_ParseBodyNode(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *source, kfileline_t uline)
 {
 	const char *script = kString_text(source);
+	int baseIndent = 0;
 	if(IS_NULL(source) || script[0] == 0) {
 		DBG_ASSERT(IS_Token(mtd->SourceToken));
 		script = kString_text(mtd->SourceToken->text);
 		uline = mtd->SourceToken->uline;
+		baseIndent = mtd->SourceToken->indent;
 	}
 	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList, 0};
 	KTokenSeq_Push(kctx, tokens);
-	Tokenize(kctx, ns, script, uline, tokens.tokenList);
+	Tokenize(kctx, ns, script, uline, baseIndent, tokens.tokenList);
 	KTokenSeq_End(kctx, tokens);
 	kNode *node = ParsePreprocessNode(kctx, ns, tokens.tokenList, tokens.beginIdx, tokens.endIdx);
 	KTokenSeq_Pop(kctx, tokens);

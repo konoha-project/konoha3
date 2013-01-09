@@ -146,7 +146,7 @@ static KMETHOD NameSpace_Tokenize(KonohaContext *kctx, KonohaStack *sfp)
 	INIT_GCSTACK();
 	kArray *a = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	KTokenSeq source = {sfp[0].asNameSpace, a};
-	SUGAR Tokenize(kctx, source.ns, kString_text(sfp[1].asString), 0, source.tokenList);
+	SUGAR Tokenize(kctx, source.ns, kString_text(sfp[1].asString), 0, 0, source.tokenList);
 	KReturnWith(a, RESET_GCSTACK());
 }
 
@@ -157,7 +157,7 @@ static KMETHOD NameSpace_Preprocess(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *a = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	KTokenSeq source = {sfp[0].asNameSpace, KGetParserContext(kctx)->preparedTokenList};
 	KTokenSeq_Push(kctx, source);
-	SUGAR Tokenize(kctx, source.ns, kString_text(sfp[1].asString), 0, source.tokenList);
+	SUGAR Tokenize(kctx, source.ns, kString_text(sfp[1].asString), 0, 0, source.tokenList);
 	KTokenSeq tokens = {source.ns, a, 0};
 	tokens.TargetPolicy.ExpandingBraceGroup = true;
 	SUGAR Preprocess(kctx, source.ns, source.tokenList, source.beginIdx, tokens.endIdx, NULL, tokens.tokenList);
@@ -737,7 +737,6 @@ static void Syntax_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceI
 //}
 
 // --------------------------------------------------------------------------
-
 
 //new Syntax(F, F);
 //

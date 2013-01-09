@@ -547,7 +547,7 @@ static kFunc **kNameSpace_tokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns)
 	return funcMatrix + KCHAR_MAX;
 }
 
-static void Tokenize(KonohaContext *kctx, kNameSpace *ns, const char *source, kfileline_t uline, kArray *bufferList)
+static void Tokenize(KonohaContext *kctx, kNameSpace *ns, const char *source, kfileline_t uline, int baseIndent, kArray *bufferList)
 {
 	INIT_GCSTACK();
 	Tokenizer tenv = {};

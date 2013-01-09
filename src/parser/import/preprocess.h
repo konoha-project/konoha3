@@ -343,7 +343,7 @@ static kTokenVar* kToken_ToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameS
 		KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, source);
 		//KdumpToken(kctx, tk);
-		Tokenize(kctx, ns, kString_text(tk->text), tk->uline, source.tokenList);
+		Tokenize(kctx, ns, kString_text(tk->text), tk->uline, tk->indent, source.tokenList);
 		KTokenSeq_End(kctx, source);
 		KFieldSet(tk, tk->GroupTokenList, new_(TokenArray, 0, OnField));
 		tk->resolvedSyntaxInfo = kSyntax_(ns, KSymbol_BraceGroup);
@@ -381,7 +381,7 @@ static kbool_t SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keywo
 	if(IS_NOTNULL(syn) && syn->macroDataNULL == NULL) {
 		KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, source);
-		Tokenize(kctx, ns, data, 0, source.tokenList);
+		Tokenize(kctx, ns, data, 0, 0, source.tokenList);
 		KTokenSeq_End(kctx, source);
 		KTokenSeq tokens = {source.ns, source.tokenList, kArray_size(source.tokenList)};
 		tokens.TargetPolicy.ExpandingBraceGroup = true;

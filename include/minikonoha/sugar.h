@@ -135,6 +135,8 @@ struct Tokenizer {
 	kfileline_t         currentLine;
 	kArray             *tokenList;
 	int                 tabsize;
+	int                 baseIndent;
+	int                 currentIndent;
 	const TokenizeFunc *cFuncItems;
 	union {
 		kFunc         **FuncItems;
@@ -605,7 +607,7 @@ typedef struct {
 	void          (*kNameSpace_AddSyntax)(KonohaContext *, kNameSpace *, kSyntax *, KTraceInfo *);
 	kbool_t       (*SetMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *, int optionMacro);
 
-	void         (*Tokenize)(KonohaContext *, kNameSpace *, const char *, kfileline_t, kArray *bufferList);
+	void         (*Tokenize)(KonohaContext *, kNameSpace *, const char *, kfileline_t, int baseIndent, kArray *bufferList);
 	void         (*ApplyMacroData)(KonohaContext *, kNameSpace *, kArray *, int, int, size_t, KMacroSet *, kArray *bufferList);
 	void         (*Preprocess)(KonohaContext *, kNameSpace *, kArray *, int, int, KMacroSet *, kArray *bufferList);
 	kstatus_t    (*EvalTokenList)(KonohaContext *, KTokenSeq *, KTraceInfo *);
