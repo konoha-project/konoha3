@@ -41,36 +41,59 @@ static void ERROR_UnclosedToken(KonohaContext *kctx, kTokenVar *tk, const char *
 	}
 }
 
-static int TokenizeFirstIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int pos)
+static int CountIndent(KonohaContext *kctx, Tokenizer *tokenizer, int pos, int *indentRef)
 {
 	int ch, indent = 0;
-	while((ch = tokenizer->source[pos++]) != 0) {
+	for(; (ch = tokenizer->source[pos]) != 0; pos++) {
 		if(ch == '\t') { indent += tokenizer->tabsize; }
 		else if(ch == ' ') { indent += 1; }
 		break;
 	}
+	indentRef[0] = indent;
+	return pos;
+}
+
+static int TokenizeFirstIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int pos)
+{
+	int indent = 0;
+	pos = CountIndent(kctx, tokenizer, pos, &indent);
 	if(IS_NOTNULL(tk) && (indent > 0 || tokenizer->currentLine != 0)) {
 		tk->tokenType = TokenType_Indent;
 		tk->indent = indent;
 		tk->uline = tokenizer->currentLine;
+		//tokenizer->baseIndent = indent;
 	}
-	return pos-1;
+	return pos;
+}
+
+static int SkipBlockIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+{
+	int ch, indent, pos = tok_start;
+	for(; (ch = tokenizer->source[pos]) != 0; pos++) {
+		if(ch == '\n') {
+			pos = CountIndent(kctx, tokenizer, pos+1, &indent);
+			if(!(indent > tokenizer->baseIndent)) break;
+		}
+	}
+	if(IS_NOTNULL(tk)) {
+		KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, tokenizer->source + tok_start, pos - tok_start, 0));
+	}
+	return pos;
 }
 
 static int TokenizeIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int pos)
 {
-	int ch, indent = 0;
-	while((ch = tokenizer->source[pos++]) != 0) {
-		if(ch == '\t') { indent += tokenizer->tabsize; }
-		else if(ch == ' ') { indent += 1; }
-		break;
-	}
+	int indent = 0;
+	pos = CountIndent(kctx, tokenizer, pos, &indent);
 	if(IS_NOTNULL(tk)) {
 		tk->tokenType = TokenType_Indent;
 		tk->indent = indent;
 		tk->uline = tokenizer->currentLine;
 	}
-	return pos-1;
+//	if(indent > tokenizer->baseIndent) {
+//		pos = SkipBlockIndent(kctx, tk, tokenizer, pos);
+//	}
+	return pos;
 }
 
 static int TokenizeLineFeed(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int pos)
@@ -506,6 +529,7 @@ static int TokenizeLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *toke
 				if(IS_NOTNULL(tk)) {
 					KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, tokenizer->source + tok_start + 1, ((pos-2)-(tok_start)+1), 0));
 					tk->tokenType = TokenType_LazyBlock;
+					tk->indent = tokenizer->baseIndent;
 				}
 				return pos + 1;
 			}
@@ -556,6 +580,8 @@ static void Tokenize(KonohaContext *kctx, kNameSpace *ns, const char *source, kf
 	tenv.currentLine  = uline;
 	tenv.tokenList    = bufferList;
 	tenv.tabsize = 4;
+	tenv.baseIndent = baseIndent;
+//	tenv.cFuncItems = baseIndent;
 	tenv.ns = ns;
 	tenv.cFuncItems = kNameSpace_tokenMatrix(kctx, ns);
 	tenv.FuncItems  = kNameSpace_tokenFuncMatrix(kctx, ns);

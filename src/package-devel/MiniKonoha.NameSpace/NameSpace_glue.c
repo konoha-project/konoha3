@@ -100,7 +100,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 		kNameSpace *ns = new_(NameSpace, kNode_ns(stmt), _GcStack);
 		KTokenSeq range = {ns, KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, range);
-		SUGAR Tokenize(kctx, ns, kString_text(tk->text), tk->uline, range.tokenList);
+		SUGAR Tokenize(kctx, ns, kString_text(tk->text), tk->uline, tk->indent, range.tokenList);
 		KTokenSeq_End(kctx, range);
 		result = SUGAR EvalTokenList(kctx, &range, NULL/*trace*/);
 		KTokenSeq_Pop(kctx, range);
