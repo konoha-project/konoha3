@@ -32,100 +32,6 @@
 extern "C" {
 #endif
 
-/* Statement */
-
-static void cstyle_DefineStatement(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
-{
-}
-
-
-//// --------------------------------------------------------------------------
-///* null */
-//
-////## Boolean Object.isNull();
-//static KMETHOD Object_isNull(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kObject *o = sfp[0].asObject;
-//	KReturnUnboxValue(IS_NULL(o));
-//}
-//
-////## Boolean Object.isNotNull();
-//static KMETHOD Object_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kObject *o = sfp[0].asObject;
-//	KReturnUnboxValue(!IS_NULL(o));
-//}
-//
-//static kbool_t null_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
-//{
-//	KDEFINE_METHOD MethodData[] = {
-//		_Public|_Im|_Final|_Const, _F(Object_isNull),   KType_boolean, KType_Object, KMethodName_("isNull"), 0,
-//		_Public|_Im|_Final|_Const, _F(Object_isNotNull), KType_boolean, KType_Object, KMethodName_("isNotNull"), 0,
-//		DEND,
-//	};
-//	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
-//	return true;
-//}
-//
-///* null */
-//
-//static KMETHOD TypeCheck_null(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	VAR_TypeCheck2(stmt, expr, ns, reqc);
-//	if(reqty == KType_var) reqty = KType_Object;
-//	KReturn(SUGAR kNode_SetVariable(kctx, expr, KNode_Null, reqty, 0));
-//}
-//
-//static KMETHOD Expression_isNull(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
-//	if(operatorIdx + 2 == endIdx) {
-//		DBG_P("checking .. x == null");
-//		kTokenVar *tk = tokenList->TokenVarItems[operatorIdx+1];
-//		if(tk->symbol == KSymbol_("null")) {
-//			kNode *leftHandNode = SUGAR ParseNewNode(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
-//			tk->symbol = KSymbol_("isNull");
-//			KReturn(SUGAR new_UntypedOperatorNode(kctx, kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/), 2, tk, leftHandNode));
-//		}
-//	}
-//	DBG_P("checking parent .. == ..");
-//}
-//
-//static KMETHOD Expression_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
-//	if(operatorIdx + 2 == endIdx) {
-//		DBG_P("checking .. x != null");
-//		kTokenVar *tk = tokenList->TokenVarItems[operatorIdx+1];
-//		if(tk->symbol == KSymbol_("null")) {
-//			kNode *leftHandNode = SUGAR ParseNewNode(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
-//			tk->symbol = KSymbol_("isNotNull");
-//			KReturn(SUGAR new_UntypedOperatorNode(kctx, kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/), 2, tk, leftHandNode));
-//		}
-//	}
-//	DBG_P("checking parent .. != ..");
-//}
-//
-//static kbool_t null_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
-//{
-//	KDEFINE_SYNTAX SYNTAX[] = {
-//		{ KSymbol_("null"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_null, },
-//		{ KSymbol_("NULL"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_null, },
-//		{ KSymbol_END, },
-//	};
-//	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-//	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_("=="), KSugarParseFunc, KSugarFunc(ns, Expression_isNull));
-//	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_("!="), KSugarParseFunc, KSugarFunc(ns, Expression_isNotNull));
-//	return true;
-//}
-//
-//static kbool_t null_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
-//{
-//	null_defineMethod(kctx, ns, trace);
-//	null_defineSyntax(kctx, ns, trace);
-//	return true;
-//}
-
 static KMETHOD PatternMatch_Inc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
@@ -136,9 +42,6 @@ static KMETHOD PatternMatch_Inc(KonohaContext *kctx, KonohaStack *sfp)
 		if(tk->symbol == KSymbol_Inc || tk->symbol == KSymbol_Dec) {
 			KReturnUnboxValue(beginIdx);
 		}
-//		if(kToken_IsStatementSeparator(tk) || kToken_IsIndent(tk)) {
-//			break;
-//		}
 	}
 	KReturnUnboxValue(-1);
 }
@@ -218,7 +121,7 @@ static kbool_t cstyle_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 KDEFINE_PACKAGE* Increment_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "CStyle", "1.0");
+	KSetPackageName(d, "GoStyle", "1.0");
 	d.PackupNameSpace   = cstyle_PackupNameSpace;
 	d.ExportNameSpace   = cstyle_ExportNameSpace;
 	return &d;

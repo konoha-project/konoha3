@@ -239,7 +239,7 @@ static void kNameSpace_ImportSyntax2(KonohaContext *kctx, kNameSpace *ns, kSynta
 		KLIB kArray_Add(kctx, ns->metaPatternList, syn);
 	}
 	if(syn->tokenKonohaChar > 0) {
-		kNameSpace_SetTokenFuncMatrix(kctx, ns, syn->tokenKonohaChar, syn->sugarFuncTable[KSugarTokenFunc]);
+		kNameSpace_SetTokenFuncMatrix(kctx, ns, syn->tokenKonohaChar, syn->TokenFuncNULL);
 	}
 	kNameSpace_ResetSyntaxList(kctx, ns, syn->keyword);
 }
@@ -293,19 +293,19 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 		if(syndef->parseFunc != NULL) {
 			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CParseFunc)) ? KSugarFunc(ns, syndef->parseMethodFunc) : syndef->parseFunc;
 			DBG_ASSERT(IS_Func(fo));
-			KFieldInit(ns, syn->sugarFuncTable[KSugarParseFunc], fo);
+			KFieldInit(ns, syn->ParseFuncNULL, fo);
 		}
 		if(syndef->typeFunc != NULL) {
 			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CTypeFunc)) ? KSugarFunc(ns, syndef->typeMethodFunc) : syndef->typeFunc;
 			DBG_ASSERT(IS_Func(fo));
-			KFieldInit(ns, syn->sugarFuncTable[KSugarTypeFunc], fo);
+			KFieldInit(ns, syn->TypeFuncNULL, fo);
 		}
 		if(syndef->tokenChar != 0) {
 			syn->tokenKonohaChar = syndef->tokenChar;
 			DBG_ASSERT(syndef->tokenFunc != NULL);
 			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CTokenFunc)) ? KSugarFunc(ns, syndef->tokenMethodFunc) : syndef->tokenFunc;
 			DBG_ASSERT(IS_Func(fo));
-			KFieldInit(ns, syn->sugarFuncTable[KSugarTokenFunc], fo);
+			KFieldInit(ns, syn->TokenFuncNULL, fo);
 		}
 		KLIB ReportScriptMessage(kctx, trace, DebugTag, "@%s new syntax %s%s", KPackage_text(ns->packageId), KSymbol_Fmt2(syn->keyword));
 		kNameSpace_AddSyntax(kctx, ns, syn, trace);

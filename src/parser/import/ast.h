@@ -48,9 +48,9 @@ static int ParseSyntaxNode(KonohaContext *kctx, kSyntax *syn, kNode *node, ksymb
 		KFieldSet(node, node->TermToken, tokenList->TokenItems[opIdx]);
 		node->syn = syn;/*node->TermToken->resolvedSyntaxInfo*/;
 	}
-	if(syn->sugarFuncTable[KSugarParseFunc] != NULL) {
+	if(syn->ParseFuncNULL != NULL) {
 		//DBG_P(">>> package=%s", KPackage_text(syn->packageNameSpace->packageId));
-		int nextIdx = CallParseFunc(kctx, syn->sugarFuncTable[KSugarParseFunc], node, symbol, tokenList, beginIdx, opIdx, endIdx);
+		int nextIdx = CallParseFunc(kctx, syn->ParseFuncNULL, node, symbol, tokenList, beginIdx, opIdx, endIdx);
 		if(nextIdx != PatternNoMatch) return nextIdx;
 		callCount++;
 	}
@@ -58,9 +58,9 @@ static int ParseSyntaxNode(KonohaContext *kctx, kSyntax *syn, kNode *node, ksymb
 	kArray *syntaxList = kNameSpace_GetSyntaxList(kctx, kNode_ns(node), syn->keyword);
 	for(i = 1; i < kArray_size(syntaxList); i++) { /* ObjectItems[0] == syn */
 		kSyntax *syn2 = syntaxList->SyntaxItems[i];
-		if(syn2->sugarFuncTable[KSugarParseFunc] != NULL) {
+		if(syn2->ParseFuncNULL != NULL) {
 			//DBG_P(">>> package=%s", KPackage_text(syn2->packageNameSpace->packageId));
-			int nextIdx = CallParseFunc(kctx, syn2->sugarFuncTable[KSugarParseFunc], node, symbol, tokenList, beginIdx, opIdx, endIdx);
+			int nextIdx = CallParseFunc(kctx, syn2->ParseFuncNULL, node, symbol, tokenList, beginIdx, opIdx, endIdx);
 			if(nextIdx != PatternNoMatch && opIdx != -1) {
 				node->syn = syn2;
 				return nextIdx;

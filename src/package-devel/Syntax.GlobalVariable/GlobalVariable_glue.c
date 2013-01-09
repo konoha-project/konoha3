@@ -117,7 +117,7 @@ static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 {
 	kSyntax *assignSyntax = kSyntax_(KNULL(NameSpace), KSymbol_TypeDeclPattern);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_TypeDeclPattern, SYNFLAG_MetaPattern, 0, 0, {assignSyntax->sugarFuncTable[KSugarParseFunc]}, {KSugarFunc(ns, Statement_GlobalTypeDecl)}},
+		{ KSymbol_TypeDeclPattern, SYNFLAG_MetaPattern, 0, 0, {assignSyntax->ParseFuncNULL}, {KSugarFunc(ns, Statement_GlobalTypeDecl)}},
 		{ KSymbol_END, }, /* sentinental */
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

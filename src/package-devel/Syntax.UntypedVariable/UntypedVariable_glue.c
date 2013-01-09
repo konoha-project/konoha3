@@ -74,7 +74,7 @@ static kbool_t untyped_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	kSyntax *assignSyntax = kSyntax_(KNULL(NameSpace), KSymbol_LET);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ KSymbol_("="),   SYNFLAG_NodeLeftJoinOp2, assignSyntax->precedence_op2, assignSyntax->precedence_op1,
-			{assignSyntax->sugarFuncTable[KSugarParseFunc]}, {KSugarFunc(ns, TypeCheck_UntypedAssign)}},
+			{assignSyntax->ParseFuncNULL}, {KSugarFunc(ns, TypeCheck_UntypedAssign)}},
 		{ KSymbol_END, }, /* sentinental */
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

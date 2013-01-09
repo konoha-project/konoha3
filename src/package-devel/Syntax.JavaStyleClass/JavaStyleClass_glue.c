@@ -70,7 +70,7 @@ static KMETHOD NameSpace_AddMethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNameSpace *ns = sfp[0].asNameSpace;
 	kSyntax *syn = SUGAR kNameSpace_GetSyntax(kctx, ns, KSymbol_("$MethodDecl"));
-	kFunc *fo = syn->sugarFuncTable[KSugarTypeFunc];
+	kFunc *fo = syn->TypeFuncNULL;
 	kNode *methodNode = (kNode *) sfp[1].asObject;
 	CallTypeFunc(kctx, fo, methodNode, ns, K_NULL);
 	KReturnVoid();

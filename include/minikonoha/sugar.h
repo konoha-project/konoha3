@@ -231,12 +231,13 @@ typedef enum {
 
 struct kSyntaxVar {
 	kObjectHeader h;
-//	const struct kSyntaxVar          *parentSyntaxNULL;
 	kNameSpace                       *packageNameSpace;
 	ksymbol_t  keyword;               kshortflag_t  flag;
 	kArray                           *syntaxPatternListNULL;
 	kArray                           *macroDataNULL;
-	kFunc                            *sugarFuncTable[SugarFunc_SIZE];
+	kFunc                            *TokenFuncNULL;
+	kFunc                            *ParseFuncNULL;
+	kFunc                            *TypeFuncNULL;
 	kshort_t tokenKonohaChar;         kshort_t macroParamSize;
 	kshort_t precedence_op2;          kshort_t precedence_op1;
 };
@@ -542,26 +543,20 @@ struct KGammaLocalData {
 	struct KGammaStack    localScope;
 } ;
 
-//struct kNameSpaceVar {
-//	kObjectHeader h;
-//	struct KGammaLocalData *genv;
-//};
-
-
 /* ------------------------------------------------------------------------ */
 
 #define KGetParserContext(kctx)    ((KParserContext *)kctx->modlocal[MOD_sugar])
-#define KPARSERM       ((KParserModule *)kctx->modshare[MOD_sugar])
+#define KPARSERM            ((KParserModule *)kctx->modshare[MOD_sugar])
 #define KClass_Symbol       KPARSERM->cSymbol
-#define KClass_SymbolVar       KPARSERM->cSymbol
+#define KClass_SymbolVar    KPARSERM->cSymbol
 #define KClass_Syntax       KPARSERM->cSyntax
-#define KClass_SyntaxVar       KPARSERM->cSyntax
+#define KClass_SyntaxVar    KPARSERM->cSyntax
 #define KClass_Token        KPARSERM->cToken
-#define KClass_TokenVar        KPARSERM->cToken
+#define KClass_TokenVar     KPARSERM->cToken
 #define KClass_Node         KPARSERM->cNode
 #define KClass_NodeVar      KPARSERM->cNode
 #define KClass_Gamma        KPARSERM->cGamma
-#define KClass_GammaVar        KPARSERM->cGamma
+#define KClass_GammaVar     KPARSERM->cGamma
 
 
 #define KClass_TokenArray           KPARSERM->cTokenArray
@@ -608,8 +603,6 @@ typedef struct {
 	void          (*kNameSpace_DefineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *, KTraceInfo *);
 	void          (*kNameSpace_AddSyntaxPattern)(KonohaContext *, kNameSpace *, ksymbol_t, const char *rule, kfileline_t uline, KTraceInfo *);
 	void          (*kNameSpace_AddSyntax)(KonohaContext *, kNameSpace *, kSyntax *, KTraceInfo *);
-//	kSyntaxVar*   (*kNameSpace_SetTokenFunc)(KonohaContext *, kNameSpace *, ksymbol_t, int ch, kFunc *);
-//	kSyntaxVar*   (*kNameSpace_AddSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 	kbool_t       (*SetMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *, int optionMacro);
 
 	void         (*Tokenize)(KonohaContext *, kNameSpace *, const char *, kfileline_t, kArray *bufferList);
@@ -626,12 +619,12 @@ typedef struct {
 	uintptr_t    (*kNode_ParseFlag)(KonohaContext *kctx, kNode *stmt, KFlagSymbolData *flagData, uintptr_t flag);
 	kToken*      (*kNode_GetToken)(KonohaContext *, kNode *, ksymbol_t kw, kToken *def);
 	kNode*       (*kNode_GetNode)(KonohaContext *, kNode *, ksymbol_t kw, kNode *def);
-	void         (*kNode_AddNode)(KonohaContext *, kNode *, kNode *);
+	kNode*       (*kNode_AddNode)(KonohaContext *, kNode *, kNode *);
 	void         (*kNode_InsertAfter)(KonohaContext *, kNode *, kNode *target, kNode *);
 
 //	kNode*       (*kNode_Termnize)(KonohaContext *, kNode *, kToken *);
 	kNode*       (*kNode_Op)(KonohaContext *kctx, kNode *, kToken *keyToken, int n, ...);
-	kNodeVar*    (*new_UntypedOperatorNode)(KonohaContext *, kSyntax *syn, int n, ...);
+//	kNodeVar*    (*new_UntypedOperatorNode)(KonohaContext *, kSyntax *syn, int n, ...);
 	int          (*ParseSyntaxNode)(KonohaContext *, kSyntax *, kNode *, ksymbol_t, kArray *, int beginIdx, int opIdx, int endIdx);
 
 	kNode*       (*kNode_ParseOperatorNode)(KonohaContext *, kNode *, kSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
@@ -683,6 +676,7 @@ typedef enum {
 	TypeCheckPolicy_NoCheck               = 1,
 	TypeCheckPolicy_AllowVoid      = (1 << 1),
 	TypeCheckPolicy_Coercion       = (1 << 2),
+	TypeCheckPolicy_AllowEmpty          = (1 << 3),
 	TypeCheckPolicy_CONST          = (1 << 4),  /* Reserved */
 	TypeCheckPolicy_Creation       = (1 << 6)   /* TypeCheckNodeByName */
 } TypeCheckPolicy;

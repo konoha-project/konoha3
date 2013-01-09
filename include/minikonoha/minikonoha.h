@@ -988,9 +988,9 @@ struct KContextModule {
 	kMethod     *asMethod;\
 	kFunc       *asFunc; \
 	kNameSpace  *asNameSpace;\
+	struct kSyntaxVar     *asSyntax;\
 	kToken      *asToken;\
 	kNode       *asNode;\
-	kNameSpace      *asGamma;\
 	const struct kExceptionVar  *asException;\
 	const struct kFloatVar      *asFloat; \
 	struct kDateVar             *asDate;\

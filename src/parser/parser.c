@@ -215,7 +215,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kNode_AddNode                = kNode_AddNode;
 	mod->kNode_Op                     = kNode_Op;
 //	mod->kNode_Termnize               = kNode_Termnize;
-	mod->new_UntypedOperatorNode      = new_UntypedOperatorNode;
+//	mod->new_UntypedOperatorNode      = new_UntypedOperatorNode;
 	mod->ParseSyntaxNode              = ParseSyntaxNode;
 	mod->ParseNode                    = ParseNode;
 	mod->ParseNewNode                 = ParseNewNode;

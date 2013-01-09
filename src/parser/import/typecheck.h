@@ -78,8 +78,8 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn, kNode *expr, kNameSpac
 //		KPushMethodCall(gma);
 //		KPushMethodCall(gma);
 //	}
-	if(syn->sugarFuncTable[KSugarTypeFunc] != NULL) {
-		kNode *texpr = CallTypeFunc(kctx, syn->sugarFuncTable[KSugarTypeFunc], expr, ns, reqType);
+	if(syn->TypeFuncNULL != NULL) {
+		kNode *texpr = CallTypeFunc(kctx, syn->TypeFuncNULL, expr, ns, reqType);
 		if(kNode_IsError(texpr) || texpr->attrTypeId != KType_var) {
 			if(!kNode_Is(OpenBlock, expr)) {
 				ns->genv->localScope.varsize = varsize;
@@ -91,8 +91,8 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn, kNode *expr, kNameSpac
 	kArray *syntaxList = kNameSpace_GetSyntaxList(kctx, ns, syn->keyword);
 	for(i = 1; i < kArray_size(syntaxList); i++) { /* ObjectItems[0] == syn */
 		kSyntax *syn2 = syntaxList->SyntaxItems[i];
-		if(syn2->sugarFuncTable[KSugarTypeFunc] != NULL) {
-			kNode *texpr = CallTypeFunc(kctx, syn2->sugarFuncTable[KSugarTypeFunc], expr, ns, reqType);
+		if(syn2->TypeFuncNULL != NULL) {
+			kNode *texpr = CallTypeFunc(kctx, syn2->TypeFuncNULL, expr, ns, reqType);
 			if(kNode_IsError(texpr) || texpr->attrTypeId != KType_var) {
 				if(!kNode_Is(OpenBlock, expr)) {
 					ns->genv->localScope.varsize = varsize;
@@ -216,7 +216,7 @@ static kNode* TypeCheckNodeAt(KonohaContext *kctx, kNode *node, size_t pos, kNam
 	return texpr;
 }
 
-static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t symbol, kNameSpace *ns, KClass *reqClass, int pol)
+static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t symbol, kNameSpace *ns, KClass *reqc, int pol)
 {
 	kNode *expr = (kNode *)kNode_GetObjectNULL(kctx, stmt, symbol);
 	if(expr != NULL) {
@@ -234,9 +234,11 @@ static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t sy
 		}
 		if(IS_Node(expr)) {
 			kNode_SetParent(kctx, expr, stmt);
-			kNode *texpr = TypeCheckNode(kctx, expr, ns, reqClass, pol);
+			kNode *texpr = TypeCheckNode(kctx, expr, ns, reqc, pol);
 			if(kNode_IsError(texpr)) {
-				kNode_ToError(kctx, stmt, texpr->ErrorMessage);
+				if(!kNode_IsError(stmt)) {
+					kNode_ToError(kctx, stmt, texpr->ErrorMessage);
+				}
 				return texpr;
 			}
 			if(texpr != expr) {
@@ -245,6 +247,9 @@ static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t sy
 			}
 			return texpr;
 		}
+	}
+	if(!KFlag_Is(int, pol, TypeCheckPolicy_AllowEmpty)) {
+		return SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "%s%s clause is empty", KSymbol_Fmt2(symbol));
 	}
 	return NULL; //error
 }

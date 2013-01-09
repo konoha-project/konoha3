@@ -360,22 +360,6 @@ static kNode* kNode_AddSeveral(KonohaContext *kctx, kNodeVar *self, int n, va_li
 	return self;
 }
 
-static kNodeVar* kNode_AddSeveral0(KonohaContext *kctx, kNodeVar *expr, int n, va_list ap)
- {
-        int i;
-       if(!IS_Array(expr->NodeList)) {
-               KFieldSet(expr, expr->NodeList, new_(Array, 0, OnField));
-        }
-        for(i = 0; i < n; i++) {
-               kObject *v =  (kObject *)va_arg(ap, kObject *);
-               if(v == NULL || v == (kObject *)K_NULLNODE) {
-                       return (kNodeVar *)K_NULLNODE;
-                }
-               KLIB kArray_Add(kctx, expr->NodeList, v);
-        }
-       return expr;
-}
-
 //#define kNode_Termnize(kctx, node, tk) kNode_Op(kctx, node, tk, 0)
 
 static kNode* kNode_Termnize(KonohaContext *kctx, kNode *node, kToken *termToken)
@@ -400,16 +384,16 @@ static kNode* kNode_Op(KonohaContext *kctx, kNode *node, kToken *keyToken, int n
 	return node;
 }
 
-static kNodeVar* new_UntypedOperatorNode(KonohaContext *kctx, kSyntax *syn, int n, ...)
-{
-	va_list ap;
-	va_start(ap, n);
-	DBG_ASSERT(syn != NULL);
-	kNodeVar *expr = new_(NodeVar, syn, OnGcStack);
-	expr = kNode_AddSeveral(kctx, expr, n, ap);
-	va_end(ap);
-	return expr;
-}
+//static kNodeVar* new_UntypedOperatorNode(KonohaContext *kctx, kSyntax *syn, int n, ...)
+//{
+//	va_list ap;
+//	va_start(ap, n);
+//	DBG_ASSERT(syn != NULL);
+//	kNodeVar *expr = new_(NodeVar, syn, OnGcStack);
+//	expr = kNode_AddSeveral(kctx, expr, n, ap);
+//	va_end(ap);
+//	return expr;
+//}
 
 static kNode* new_TypedNode(KonohaContext *kctx, kNameSpace *ns, int build, KClass *ty, int n, ...)
 {

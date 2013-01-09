@@ -38,7 +38,6 @@ static KMETHOD PatternMatch_ForStmt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
 	kNameSpace *ns = kNode_ns(stmt);
-	SUGAR dumpTokenArray(kctx, 0, tokenList, beginIdx, endIdx);
 	int i, start = beginIdx;
 	for(i = beginIdx; i < endIdx; i++) {
 		kTokenVar *tk = tokenList->TokenVarItems[i];
@@ -79,28 +78,17 @@ static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
 	int KSymbol_InitNode = KSymbol_("init"), KSymbol_IteratorNode = KSymbol_("Iterator");
-	kNode *initNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_InitNode, NULL);
+	KDump(stmt);
+	kNode *initNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_InitNode, ns, KClass_void, TypeCheckPolicy_AllowEmpty);
 	if(initNode != NULL) {
-		initNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_InitNode, ns, KClass_void, 0);
-		if(kNode_IsError(initNode)) {
-			KReturn(initNode);
-		}
+		kNode_Set(OpenBlock, initNode, true);
 	}
-	kNode *iterNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_IteratorNode, NULL);
-	if(iterNode != NULL) {
-		iterNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_IteratorNode, ns, KClass_Boolean, 0);
-		if(kNode_IsError(iterNode)) {
-			KReturn(iterNode);
-		}
-	}
-	kNode *exprNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
-	if(kNode_IsError(exprNode)) {
-		KReturn(exprNode);
-	}
-	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
+	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_IteratorNode, ns, KClass_void, TypeCheckPolicy_AllowEmpty);
+	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
 	kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 	kNode_Set(CatchBreak, stmt, true);
 	//kNode_Set(RedoLoop, stmt, true);
+	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
 	KReturn(kNode_Type(kctx, stmt, KNode_While, KType_void));
 }
 
