@@ -640,7 +640,7 @@ typedef struct {
 
 	kNode*       (*new_MethodNode)(KonohaContext *, kNameSpace *, KClass *, kMethod *mtd, int n, ...);
 
-	kNode*      (*TypeCheckBlock)(KonohaContext *, kNode *, kNameSpace *, KClass *);
+//	kNode*      (*TypeCheckBlock)(KonohaContext *, kNode *, kNameSpace *, KClass *);
 	kNode*      (*TypeCheckNodeByName)(KonohaContext *, kNode*, ksymbol_t, kNameSpace *, KClass *, int);
 	kNode*      (*TypeCheckNodeAt)(KonohaContext *, kNode *, size_t, kNameSpace *, KClass *, int);
 	kNode *     (*TypeCheckMethodParam)(KonohaContext *, kMethod *mtd, kNode *, kNameSpace *, KClass *);
