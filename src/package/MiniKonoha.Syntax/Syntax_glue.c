@@ -823,7 +823,7 @@ static KMETHOD Syntax_SetPattern(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	kSyntaxVar *syn = (kSyntaxVar *)sfp[0].asObject;
 	const char *pattern = kString_text(sfp[1].asString);
-	SUGAR kNameSpace_AddSyntaxPattern(kctx, syn->packageNameSpace, syn->keyword, pattern, 0, trace);
+	SUGAR kNameSpace_AddSyntaxPattern(kctx, syn, pattern, 0, trace);
 	KReturnVoid();
 }
 
@@ -916,7 +916,7 @@ static KMETHOD NameSpace_AddSyntaxPattern(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = sfp[0].asNameSpace;
 	ksymbol_t symbol = (ksymbol_t)sfp[1].intValue;
 	const char *pattern = kString_text(sfp[2].asString);
-	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, symbol, pattern, 0, trace);
+	SUGAR kNameSpace_AddSyntaxPattern(kctx, kSyntax_(ns, symbol), pattern, 0, trace);
 	KReturnVoid();
 }
 static void Syntax_defineNameSpaceMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
