@@ -692,7 +692,8 @@ struct KonohaFactory {
 	/* JSON_API */
 	KModuleInfo *JsonDataInfo;
 	void        *JsonHandler;  // define this in each module if necessary
-	void        (*UnloadJsonModule)(KonohaContext *);
+	void        (*InitJsonContext)(KonohaContext *kctx);
+	void        (*DeleteJsonContext)(KonohaContext *kctx);
 	kbool_t     (*IsJsonType)(struct JsonBuf *, KJSONTYPE);
 	struct JsonBuf* (*CreateJson)(KonohaContext *, struct JsonBuf *jsonbuf, KJSONTYPE type, ...);
 	kbool_t     (*ParseJson)(KonohaContext *, struct JsonBuf *, const char *, size_t, KTraceInfo *);
