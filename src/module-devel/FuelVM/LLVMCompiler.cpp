@@ -20,10 +20,6 @@
 #include <string>
 #include <iostream>
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/konoha_common.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/klib.h>
 #include <stdio.h>
 #include "codegen.h"
 #include "visitor.h"
