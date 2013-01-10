@@ -72,10 +72,10 @@ static KMETHOD NameSpace_DefineMacro(KonohaContext *kctx, KonohaStack *sfp)
 static void namespace_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(NameSpace_GetNameSpace), KType_NameSpace, KType_NameSpace, KKMethodName_("GetNameSpace"), 0,
-		_Public|_Const|_Im, _F(NameSpace_GetParentNameSpace), KType_NameSpace, KType_NameSpace, KKMethodName_("GetParentNameSpace"), 0,
-		_Public, _F(NameSpace_DefineMacro2), KType_boolean, KType_NameSpace, KKMethodName_("DefineMacro"), 2, TP_name, TP_source,
-		_Public, _F(NameSpace_DefineMacro), KType_boolean, KType_NameSpace, KKMethodName_("DefineMacro"), 3, TP_name, TP_paramsize, TP_source,
+		_Public|_Const|_Im, _F(NameSpace_GetNameSpace), KType_NameSpace, KType_NameSpace, KMethodName_("GetNameSpace"), 0,
+		_Public|_Const|_Im, _F(NameSpace_GetParentNameSpace), KType_NameSpace, KType_NameSpace, KMethodName_("GetParentNameSpace"), 0,
+		_Public, _F(NameSpace_DefineMacro2), KType_boolean, KType_NameSpace, KMethodName_("DefineMacro"), 2, TP_name, TP_source,
+		_Public, _F(NameSpace_DefineMacro), KType_boolean, KType_NameSpace, KMethodName_("DefineMacro"), 3, TP_name, TP_paramsize, TP_source,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

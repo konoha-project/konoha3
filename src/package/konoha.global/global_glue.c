@@ -45,7 +45,7 @@ struct _kGlobalObject {
 static kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_AllowImplicitGlobalVariable_), KType_void, KType_NameSpace, KKMethodName_("AllowImplicitGlobalVariable"), 1, KType_boolean, KFieldName_("enabled"),
+		_Public, _F(NameSpace_AllowImplicitGlobalVariable_), KType_void, KType_NameSpace, KMethodName_("AllowImplicitGlobalVariable"), 1, KType_boolean, KFieldName_("enabled"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

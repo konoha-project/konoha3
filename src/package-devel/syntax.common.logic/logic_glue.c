@@ -84,7 +84,7 @@ static kbool_t Logic_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("and"), 2, "X Y (X) && (Y)", false);
 	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("or"), 2, "X Y (X) || (Y)", false);
 	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("not"), 1, "X !(X)", false);
-	
+
 	return true;
 }
 

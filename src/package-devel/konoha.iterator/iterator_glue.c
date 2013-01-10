@@ -176,8 +176,8 @@ static kbool_t iterator_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	}
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Iterator_hasNext), KType_boolean, KType_Iterator, KKMethodName_("hasNext"), 0,
-		_Public, _F(Iterator_next), KType_0, KType_Iterator, KKMethodName_("next"), 0,
+		_Public, _F(Iterator_hasNext), KType_boolean, KType_Iterator, KMethodName_("hasNext"), 0,
+		_Public, _F(Iterator_next), KType_0, KType_Iterator, KMethodName_("next"), 0,
 		_Public, _F(Array_toIterator),  KType_GenericIterator, KType_Array, KMethodName_To(KType_Iterator), 0,
 		_Public, _F(String_toIterator), KType_StringIterator, KType_String, KMethodName_To(KType_Iterator), 0,
 		DEND,

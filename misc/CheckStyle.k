@@ -62,6 +62,7 @@ void main() {
         data = replace(args[i], data, "[a-zA-Z]+\\*\\)", "*)", " *)");
         data = replace(args[i], data, "if \\(", "if (", "if(");
         data = replace(args[i], data, "KDEFINE_PACKAGE\\* ", "KDEFINE_PACKAGE* ", "KDEFINE_PACKAGE *");
+        data = replace(args[i], data, "KKMethodName", "KKMethodName", "KMethodName");
         data = replace(args[i], data, "^static\tkbool_t", "static\tkbool_t", "static kbool_t");
         data = replace(args[i], data, "#include<", "#include<", "#include <");
         data = replace(args[i], data, "#include\"", "#include\"", "#include \"");

@@ -131,15 +131,15 @@ static kbool_t string_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	int FN_n = KFieldName_("n");
 
 	KDEFINE_METHOD MethodData[] = {
-		_JS|_Public|_Const|_Im, _F(String_opLT),  KType_boolean, KType_String, KKMethodName_("<"),  1, KType_String, FN_s,
-		_JS|_Public|_Const|_Im, _F(String_opLTE),  KType_boolean, KType_String, KKMethodName_("<="),  1, KType_String, FN_s,
-		_JS|_Public|_Const|_Im, _F(String_opGT),  KType_boolean, KType_String, KKMethodName_(">"),  1, KType_String, FN_s,
-		_JS|_Public|_Const|_Im, _F(String_opGTE),  KType_boolean, KType_String, KKMethodName_(">="),  1, KType_String, FN_s,
-		_JS|_Public|_Const|_Im, _F(KString_length), KType_int, KType_String, KKMethodName_("getlength"), 0,
-		_JS|_Public|_Const|_Im, _F(String_get), KType_String, KType_String, KKMethodName_("charAt"), 1, KType_int, FN_n,
-		_JS|_Public|_Static|_Const|_Im, _F(String_fromCharCode), KType_String, KType_String, KKMethodName_("fromCharCode"), 1, KType_int, FN_n,
-		_JS|_Public|_Const|_Im|kMethod_Override, _F(String_get),        KType_String, KType_String, KKMethodName_("get"), 1, KType_int, FN_n,  /* [c] */
-		_JS|_Public|_Const|_Im, _F(KString_charAt), KType_int, KType_String, KKMethodName_("charCodeAt"), 1, KType_int, FN_n,
+		_JS|_Public|_Const|_Im, _F(String_opLT),  KType_boolean, KType_String, KMethodName_("<"),  1, KType_String, FN_s,
+		_JS|_Public|_Const|_Im, _F(String_opLTE),  KType_boolean, KType_String, KMethodName_("<="),  1, KType_String, FN_s,
+		_JS|_Public|_Const|_Im, _F(String_opGT),  KType_boolean, KType_String, KMethodName_(">"),  1, KType_String, FN_s,
+		_JS|_Public|_Const|_Im, _F(String_opGTE),  KType_boolean, KType_String, KMethodName_(">="),  1, KType_String, FN_s,
+		_JS|_Public|_Const|_Im, _F(KString_length), KType_int, KType_String, KMethodName_("getlength"), 0,
+		_JS|_Public|_Const|_Im, _F(String_get), KType_String, KType_String, KMethodName_("charAt"), 1, KType_int, FN_n,
+		_JS|_Public|_Static|_Const|_Im, _F(String_fromCharCode), KType_String, KType_String, KMethodName_("fromCharCode"), 1, KType_int, FN_n,
+		_JS|_Public|_Const|_Im|kMethod_Override, _F(String_get),        KType_String, KType_String, KMethodName_("get"), 1, KType_int, FN_n,  /* [c] */
+		_JS|_Public|_Const|_Im, _F(KString_charAt), KType_int, KType_String, KMethodName_("charCodeAt"), 1, KType_int, FN_n,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
