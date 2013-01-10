@@ -213,8 +213,8 @@ static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTrac
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("namespace"), "\"namespace\" $Expr", 0, trace);
-	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("const"), "\"const\" $Symbol \"=\" $Expr", 0, trace);
+	SUGAR kNameSpace_AddSyntaxPattern(kctx, kSyntax_(ns, KSymbol_("namespace")), "\"namespace\" $Expr", 0, trace);
+	SUGAR kNameSpace_AddSyntaxPattern(kctx, kSyntax_(ns, KSymbol_("const")), "\"const\" $Symbol \"=\" $Expr", 0, trace);
 	return true;
 }
 

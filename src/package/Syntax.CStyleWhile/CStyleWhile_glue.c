@@ -100,10 +100,10 @@ static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		{ KSymbol_END, }, /* sentinental */
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("while"), "\"while\" \"(\" $Expr \")\" $Block", 0, trace);
-	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("do"), "\"do\" $Block \"while\" \"(\" $Expr \")\"", 0, trace);
-	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("break"), "\"break\"", 0, trace);
-	SUGAR kNameSpace_AddSyntaxPattern(kctx, ns, KSymbol_("continue"), "\"continue\"", 0, trace);
+	SUGAR kNameSpace_AddSyntaxPattern(kctx, kSyntax_(ns, KSymbol_("while")), "\"while\" \"(\" $Expr \")\" $Block", 0, trace);
+	SUGAR kNameSpace_AddSyntaxPattern(kctx, kSyntax_(ns, KSymbol_("do")), "\"do\" $Block \"while\" \"(\" $Expr \")\"", 0, trace);
+	SUGAR kNameSpace_AddSyntaxPattern(kctx, kSyntax_(ns, KSymbol_("break")), "\"break\"", 0, trace);
+	SUGAR kNameSpace_AddSyntaxPattern(kctx, kSyntax_(ns, KSymbol_("continue")), "\"continue\"", 0, trace);
 	return true;
 }
 
