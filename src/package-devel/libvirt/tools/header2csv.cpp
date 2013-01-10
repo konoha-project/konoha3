@@ -12,7 +12,7 @@
 struct extractor : public clang::ASTConsumer {
     bool HandleTopLevelDecl(clang::DeclGroupRef decls) {
         for (auto& decl : decls) {
-            if (auto const* fd = llvm::dyn_cast<clang::FunctionDecl>(decl)) {
+            if(auto const* fd = llvm::dyn_cast<clang::FunctionDecl>(decl)) {
                 handle_functiondecl(fd);
             }
         }
@@ -22,7 +22,7 @@ struct extractor : public clang::ASTConsumer {
 private:
     void handle_functiondecl(clang::FunctionDecl const* fd) const {
         std::string name = fd->getName();
-        if (strncmp(name.c_str(), "vir", 3) == 0) {
+        if(strncmp(name.c_str(), "vir", 3) == 0) {
             handle_mpi_functiondecl(fd);
         }
     }
@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
     //compiler.createSema(false, nullptr);
 
     auto& inputs = compiler.getFrontendOpts().Inputs;
-    if (inputs.size() > 0) {
+    if(inputs.size() > 0) {
         compiler.InitializeSourceManager(inputs[0].File);
         clang::ParseAST(
             compiler.getPreprocessor(),

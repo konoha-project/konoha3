@@ -206,26 +206,26 @@ static bool EmitKonohaAPI(LLVMIRBuilder *writer, ICall *Inst, kMethod *mtd, std:
 	Node.FieldIndex = mtd->delta;
 
 	/* Getter/Setter */
-	if(mtd->typeId == KType_Array && mtd->mn == KKMethodName_("get")) {
+	if(mtd->typeId == KType_Array && mtd->mn == KMethodName_("get")) {
 		Value *Ref = GetArrayRef(writer, Inst, List);
 		Value *Val = builder->CreateLoad(Ref);
 		SetValue(writer, ToINode(Inst), Val, false);
 		return true;
 	}
-	if(mtd->typeId == KType_Array && mtd->mn == KKMethodName_("set")) {
+	if(mtd->typeId == KType_Array && mtd->mn == KMethodName_("set")) {
 		Value *Ref = GetArrayRef(writer, Inst, List);
 		Value *Val = List[2];
 		EmitWriteBarrier(writer, List[0], Ref, Val);
 		builder->CreateStore(Val, Ref);
 		return true;
 	}
-	if(IsCharSequence(mtd) && mtd->mn == KKMethodName_("getSize")) {
+	if(IsCharSequence(mtd) && mtd->mn == KMethodName_("getSize")) {
 		Value *Val = GetValue(writer, Node.Node);
 		Val = builder->CreateBitCast(Val, ToType(ID_kCharSequence));
 		Val = builder->CreateStructGEP(Val, kCharSequence_bytesize);
 		Val = builder->CreateLoad(Val);
 		if(mtd->typeId == KType_Array) {
-			Val = builder->CreateSDiv(Val, builder->getInt64(sizeof(void*)));
+			Val = builder->CreateSDiv(Val, builder->getInt64(sizeof(void *)));
 		}
 		SetValue(writer, ToINode(Inst), Val, false);
 		return true;
@@ -304,7 +304,7 @@ static Value *EmitConstant(IRBuilder<> *builder, double fval)
 static Value *EmitConstant(IRBuilder<> *builder, void *ptr)
 {
 	PointerType *Ty = builder->getInt8PtrTy();
-	Constant *C = (sizeof(void*) == 4) ?
+	Constant *C = (sizeof(void *) == 4) ?
 		builder->getInt32((uint32_t) (uintptr_t) ptr):
 		builder->getInt64((uint64_t) (uintptr_t) ptr);
 	return ConstantExpr::getIntToPtr(C, Ty);

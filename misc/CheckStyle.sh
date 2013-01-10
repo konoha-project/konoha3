@@ -3,7 +3,9 @@
 SOURCE=
 for DIR in src include
 do
-	SOURCE="${SOURCE} `find ${DIR}/ -iname "*.c"` `find ${DIR}/ -iname "*.h"`"
+	for i in c h cpp; do
+		SOURCE="${SOURCE} `find ${DIR}/ -iname "*.${i}"`"
+	done
 done
 
 for F in ${SOURCE}
