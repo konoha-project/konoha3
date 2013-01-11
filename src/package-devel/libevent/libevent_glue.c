@@ -137,16 +137,16 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	int KType_Libevent_event = Libevent_eventClass->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Libevent_new), KType_Libevent, KType_Libevent, KKMethodName_("new"), 0,
-		_Public, _F(Libevent_dispatch), KType_Libevent, KType_Libevent, KKMethodName_("dispatch"), 0,
-		_Public|_Static|_Const|_Im, _F(System_event_add), KType_int, KType_System, KKMethodName_("event_add"), 2, KType_Object, KFieldName_("Libevent_event"), KType_Object, KFieldName_("timeval"),	//TODO: param type should be "KType_Libevent_event" "KType_Date"
-		_Public|_Static|_Const|_Im, _F(System_event_del), KType_int, KType_System, KKMethodName_("event_del"), 1, KType_Object, KFieldName_("Libevent_event"),	//TODO: param type should be "KType_Libevent_event"
+		_Public, _F(Libevent_new), KType_Libevent, KType_Libevent, KMethodName_("new"), 0,
+		_Public, _F(Libevent_dispatch), KType_Libevent, KType_Libevent, KMethodName_("dispatch"), 0,
+		_Public|_Static|_Const|_Im, _F(System_event_add), KType_int, KType_System, KMethodName_("event_add"), 2, KType_Object, KFieldName_("Libevent_event"), KType_Object, KFieldName_("timeval"),	//TODO: param type should be "KType_Libevent_event" "KType_Date"
+		_Public|_Static|_Const|_Im, _F(System_event_del), KType_int, KType_System, KMethodName_("event_del"), 1, KType_Object, KFieldName_("Libevent_event"),	//TODO: param type should be "KType_Libevent_event"
 
-		_Public, _F(Libevent_event_new), KType_Libevent_event, KType_Libevent_event, KKMethodName_("new"), 0,
+		_Public, _F(Libevent_event_new), KType_Libevent_event, KType_Libevent_event, KMethodName_("new"), 0,
 
 
 #ifdef	CUTCUT
-		_Public, _F(Person_say), KType_String, KType_Person, KKMethodName_("say"), 0,
+		_Public, _F(Person_say), KType_String, KType_Person, KMethodName_("say"), 0,
 #endif
 		DEND, /* <= sentinel */
 	};
