@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
 FIND_PACKAGE_EXTRA_LIBRARY(event)
-#set(PACKAGE_SOURCE_CODE libevent_glue.c libevent_event_glue.c)
 set(PACKAGE_SOURCE_CODE libevent_glue.c)
 set(PACKAGE_SCRIPT_CODE libevent_glue.k)
 add_konoha_package(libevent)
