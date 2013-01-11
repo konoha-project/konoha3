@@ -38,9 +38,9 @@ class MyLibevent {
 
 	@Public int event_add(String key, Date tv) {
 		if (key.isNotNull()) {
-			this.event_Map.set(key, new Libevent_event());
+			this.event_Map.set(key, new Event());
 		}
-		Libevent_event ev = event_Map.get(key) as Libevent_event;
+		Event ev = event_Map.get(key) as Event;
 		return System.event_add(ev, tv);
 	}
 }
