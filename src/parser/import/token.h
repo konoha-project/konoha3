@@ -118,23 +118,28 @@ static int TokenizeBackSlash(KonohaContext *kctx, kTokenVar *tk, Tokenizer *toke
 	return pos+1;
 }
 
+static void kToken_SetParsedText(KonohaContext *kctx, kTokenVar *tk, ksymbol_t tokenType, const char *t, size_t len)
+{
+	if(IS_NOTNULL(tk)) {
+		KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, t, len, StringPolicy_ASCII));
+		tk->tokenType = tokenType;
+	}
+}
+
 static int TokenizeNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	int ch, pos = tok_start, tokenType = TokenType_Number;
 	const char *ts = tokenizer->source;
 	for(; (ch = ts[pos]) != 0; pos++) {
 		if(ch == '.') {
-			if(isalnum(ts[pos])) {
+			if(isalnum(ts[pos+1])) {
 				tokenType = KSymbol_("$Float");
 				continue;
 			}
 		}
 		if(!isalnum(ch)) break;
 	}
-	if(IS_NOTNULL(tk)) {
-		KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, ts + tok_start, (pos)-tok_start, StringPolicy_ASCII));
-		tk->tokenType = tokenType;
-	}
+	kToken_SetParsedText(kctx, tk, tokenType, ts + tok_start, (pos)-tok_start);
 	return pos;  // next
 }
 
