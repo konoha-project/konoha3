@@ -250,6 +250,21 @@ static kArray* kArray_AppendList(KonohaContext *kctx, kArray *a, kArray *tokenLi
 	return a;
 }
 
+static int ReplaceToken(KonohaContext *kctx, kFunc *fo, kNameSpace *ns, kArray *tokenList, int beginIdx, int opIdx, int endIdx, kArray *bufferList)
+{
+	DBG_ASSERT(IS_Func(fo));
+	BEGIN_UnusedStack(lsfp);
+	KUnsafeFieldSet(lsfp[1].asNameSpace, ns);
+	KUnsafeFieldSet(lsfp[2].asArray, tokenList);
+	lsfp[3].unboxValue = (uintptr_t)beginIdx;
+	lsfp[4].unboxValue = (uintptr_t)beginIdx;
+	lsfp[5].unboxValue = (uintptr_t)beginIdx;
+	KUnsafeFieldSet(lsfp[6].asArray, bufferList);
+	CallSugarMethod(kctx, lsfp, fo, 6, KLIB Knull(kctx, KClass_Int));
+	END_UnusedStack();
+	return((int)lsfp[K_RTNIDX].intValue);
+}
+
 static kbool_t ExpandMacroParam(KonohaContext *kctx, kNameSpace *ns, ksymbol_t symbol, KMacroSet *macroParam, kArray *bufferList);
 //static void ApplyMacro(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, size_t paramsize, KMacroSet *macroParam, kArray *bufferList);
 static kTokenVar* kToken_Expand(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, KMacroSet *macroSet, kArray *bufferList);
@@ -304,14 +319,6 @@ static void Preprocess(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, i
 					ktypeattr_t ty = KTypeAttr_Unmask(kvs->attrTypeId);
 					if(ty == KType_Syntax) {
 						kSyntax *syntax = (kSyntax *)kvs->ObjectValue;
-//						if(kSyntax_Is(Macro, syntax)) {
-//							if(syn->macroParamSize == 0) {
-//								ApplyMacroData(kctx, tokens, syntax->macroDataNULL, 0, kArray_size(syntax->macroDataNULL), 0, NULL);
-//							}
-//							else {
-//								currentIdx = ApplyMacroDataSyntax(kctx, tokens, syn, macroParam, source, currentIdx);
-//							}
-//						}
 						tk->resolvedSyntaxInfo = syntax;
 					}
 					if(ty == VirtualType_KClass) {
@@ -334,9 +341,24 @@ static void Preprocess(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, i
 			}
 		}
 		DBG_ASSERT(tk->resolvedSyntaxInfo != NULL);
+		if(tk->resolvedSyntaxInfo->ReplaceFuncNULL != NULL) {
+			int replacedIdx = ReplaceToken(kctx, tk->resolvedSyntaxInfo->ReplaceFuncNULL, ns, tokenList, beginIdx, currentIdx, endIdx, bufferList);
+			if(replacedIdx != -1) {
+				currentIdx = replacedIdx;
+				continue;
+			}
+		}
 		KLIB kArray_Add(kctx, bufferList, tk);
 	}
 }
+//						if(kSyntax_Is(Macro, syntax)) {
+//							if(syn->macroParamSize == 0) {
+//								ApplyMacroData(kctx, tokens, syntax->macroDataNULL, 0, kArray_size(syntax->macroDataNULL), 0, NULL);
+//							}
+//							else {
+//								currentIdx = ApplyMacroDataSyntax(kctx, tokens, syn, macroParam, source, currentIdx);
+//							}
+//						}
 
 static void ResetPreprocess(KonohaContext *kctx, kTokenVar *tk, void *thunk)
 {

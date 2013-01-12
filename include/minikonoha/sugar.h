@@ -158,6 +158,17 @@ struct Tokenizer {
 		int tok_start = (ksymbol_t)sfp[2].intValue;\
 		VAR_TRACE; (void)TK; (void)S; (void)tok_start; (void)tokenizer;
 
+// int ReplaceFunc(kNameSpace *ns, Token[] tokenList, int s, int op, int e,Token[] bufferList)
+#define VAR_ReplaceFunc(NS, TLS, S, OP, E, BUF)\
+		kNameSpace *NS = sfp[1].asNameSpace;\
+		kArray *TLS = (kArray *)sfp[2].asObject;\
+		int S = (int)sfp[3].intValue;\
+		int OP = (int)sfp[4].intValue;\
+		int E = (int)sfp[5].intValue;\
+		kArray *BUF = (kArray *)sfp[6]].asObject;\
+		VAR_TRACE; (void)NS; (void)TLS; (void)S; (void)OP; (void)E; (void)BUF;
+
+
 // int Parse(Node stmt, Symbol name, Token[] toks, int s, int op, int e)
 #define VAR_Parse(STMT, NAME, TLS, S, OP, E)\
 		kNode *STMT = (kNode *)sfp[1].asObject;\
@@ -240,6 +251,7 @@ struct kSyntaxVar {
 	kFunc                            *TokenFuncNULL;
 	kFunc                            *ParseFuncNULL;
 	kFunc                            *TypeFuncNULL;
+	kFunc                            *ReplaceFuncNULL;
 	kshort_t tokenKonohaChar;         kshort_t macroParamSize;
 	kshort_t precedence_op2;          kshort_t precedence_op1;
 };
