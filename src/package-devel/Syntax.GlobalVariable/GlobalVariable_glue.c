@@ -101,7 +101,7 @@ static kbool_t kNameSpace_InitGlobalObject(KonohaContext *kctx, kNameSpace *ns, 
 static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
-	if(Gamma_isTopLevel(ns)) {
+	if(kNameSpace_IsTopLevel(ns)) {
 		KMakeTrace(trace, sfp);
 		trace->pline = kNode_uline(stmt);
 		if(kNameSpace_InitGlobalObject(kctx, ns, trace)) {

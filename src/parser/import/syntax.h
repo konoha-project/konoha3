@@ -565,7 +565,7 @@ static kNode* TypeVariableNULL(KonohaContext *kctx, kNode *expr, kNameSpace *ns,
 			}
 		}
 	}
-	if((Gamma_isTopLevel(ns) || kNameSpace_Is(ImplicitGlobalVariable, ns)) && ns->globalObjectNULL != NULL) {
+	if((kNameSpace_IsTopLevel(ns) || kNameSpace_Is(ImplicitGlobalVariable, ns)) && ns->globalObjectNULL != NULL) {
 		KClass *globalClass = kObject_class(ns->globalObjectNULL);
 		kMethod *mtd = kNameSpace_GetGetterMethodNULL(kctx, ns, globalClass, symbol);
 		if(mtd != NULL) {
@@ -844,7 +844,7 @@ static kMethod* TypeFirstNodeAndLookupMethod(KonohaContext *kctx, kNodeVar *expr
 			return mtd;
 		}
 	}
-	if((Gamma_isTopLevel(ns) || kNameSpace_Is(ImplicitGlobalVariable,ns)) && ns->globalObjectNULL != NULL) {
+	if((kNameSpace_IsTopLevel(ns) || kNameSpace_Is(ImplicitGlobalVariable,ns)) && ns->globalObjectNULL != NULL) {
 		KClass *globalClass = kObject_class(ns->globalObjectNULL);
 		kMethod *mtd = kNameSpace_GetGetterMethodNULL(kctx, ns, globalClass, funcName);
 		if(mtd != NULL && kMethod_IsReturnFunc(mtd)) {
@@ -1334,7 +1334,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	KPARSERM->termParseFunc     = TermFunc;
 	KPARSERM->opParseFunc       = OperatorFunc;
 	KPARSERM->patternParseFunc  = patternParseFunc;
-	KPARSERM->methodTypeFunc = MethodCallFunc;
+	KPARSERM->methodTypeFunc    = MethodCallFunc;
 	// Syntax Rule
 	kSyntax_AddPattern(kctx, kSyntax_(ns, PATTERN(TypeDecl)), "$Type $Expr", 0, NULL);
 	kSyntax_AddPattern(kctx, kSyntax_(ns, PATTERN(MethodDecl)), "$Type [ClassName: $Type] [$Symbol] $Param [$Block]", 0, NULL);

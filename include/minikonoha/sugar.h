@@ -536,11 +536,8 @@ typedef struct {
 	ktypeattr_t    attrTypeId;    ksymbol_t  name;
 } KGammaStackDecl;
 
-#define kNameSpace_TopLevel        (kshortflag_t)(1)
-#define Gamma_isTopLevel(GMA)       KFlag_Is(kshortflag_t, GMA->genv->flag, kNameSpace_TopLevel)
-//#define kNameSpace_ERROR           (kshortflag_t)(1<<1)
-//#define Gamma_hasERROR(GMA)    KFlag_Is(kshortflag_t, GMA->genv->flag, kNameSpace_ERROR)
-//#define Gamma_SetERROR(GMA,B) KFlag_Set(kshortflag_t, GMA->genv->flag, kNameSpace_ERROR, B)
+#define kNameSpace_TopLevel              (kshortflag_t)(1)
+#define kNameSpace_IsTopLevel(GMA)       KFlag_Is(kshortflag_t, GMA->genv->flag, kNameSpace_TopLevel)
 
 struct KGammaStack {
 	KGammaStackDecl *varItems;

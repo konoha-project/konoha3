@@ -1545,6 +1545,7 @@ struct kNameSpaceVar {
 #define kNameSpace_ImplicitGlobalVariable            ((kshortflag_t)(1<<6))
 #define kNameSpace_ImplicitCoercion                  ((kshortflag_t)(1<<7))
 
+#define kNameSpace_StaticError                       ((kshortflag_t)(1<<14))
 #define KPushNameSpaceOption(ns)  kshortflag_t _syntaxOption = ns->syntaxOption
 #define KPopNameSpaceOption(ns)   ns->syntaxOption = _syntaxOption
 
@@ -1746,7 +1747,7 @@ struct KonohaLibVar {
 	kMethodVar*         (*new_kMethod)(KonohaContext*, kArray *gcstack, uintptr_t, ktypeattr_t, kmethodn_t, KMethodFunc);
 	kParam*             (*kMethod_SetParam)(KonohaContext*, kMethod *, ktypeattr_t, kushort_t, const kparamtype_t *);
 	void                (*kMethod_SetFunc)(KonohaContext*, kMethod*, KMethodFunc);
-	void                (*kMethod_GenCode)(KonohaContext*, kMethod*, kNode *, int options);
+	kbool_t             (*kMethod_GenCode)(KonohaContext*, kMethod*, kNode *, int options);
 	intptr_t            (*kMethod_indexOfField)(kMethod *);
 
 	kbool_t             (*KRuntime_SetModule)(KonohaContext*, int, struct KRuntimeModule *, KTraceInfo *);

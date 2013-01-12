@@ -34,38 +34,14 @@ static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *node, vo
 	return ret;
 }
 
-//static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *block)
-//{
-//	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
-//	int a = cbuilder->a;
-//	int espidx = cbuilder->espidx;
-//	int shift = cbuilder->shift;
-//	cbuilder->espidx = (block->esp->node == KNode_STACKTOP) ? shift + block->esp->index : block->esp->index;
-//	kbool_t ret = true;
-//	size_t i;
-//	for (i = 0; i < kArray_size(block->NodeList); i++) {
-//		kNode *stmt = block->NodeList->NodeItems[i];
-//		if(stmt->syn == NULL) continue;
-//		cbuilder->uline = kNode_uline(stmt);
-//		if(!VisitNode(kctx, builder, stmt)) {
-//			ret = false;
-//			break;
-//		}
-//	}
-//	cbuilder->a = a;
-//	cbuilder->espidx = espidx;
-//	cbuilder->shift = shift;
-//	return ret;
-//}
-
-static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kNode *block, int option)
+static kbool_t kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kNode *block, int option)
 {
 	DBG_P("START CODE GENERATION..");
 	kNameSpace *ns = kNode_ns(block);
 	struct KVirtualCode *vcode = ns->builderApi->GenerateKVirtualCode(kctx, mtd, block, option);
 	KMethodFunc func = ns->builderApi->GenerateKMethodFunc(kctx, vcode);
 	ns->builderApi->SetMethodCode(kctx, (kMethodVar *) mtd, vcode, func);
-
+	return true;
 }
 
 static KMETHOD KMethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp)

@@ -36,7 +36,7 @@ static void DeclVariable(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ktype
 {
 	DBG_ASSERT(kNode_isSymbolTerm(termNode));
 	kToken *termToken = termNode->TermToken;
-	if(Gamma_isTopLevel(ns)) {
+	if(kNameSpace_IsTopLevel(ns)) {
 		if(ns->globalObjectNULL == NULL) {
 			kNodeToken_Message(kctx, stmt, termToken, ErrTag, "unavailable global variable");
 			return;
