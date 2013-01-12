@@ -1,6 +1,6 @@
 // written by chenji
 
-import("dshell");
+import("Syntax.ShellStyle");
 
 ls
 

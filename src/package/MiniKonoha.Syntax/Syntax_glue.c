@@ -47,6 +47,7 @@ extern "C"{
 #define TP_syntax       KType_Syntax,     KFieldName_("syntax")
 #define TP_name         KType_String,     KFieldName_("name")
 
+#include "import/namespace_method.h"
 #include "import/syntax_method.h"
 #include "import/token_method.h"
 #include "import/node_method.h"
@@ -99,16 +100,15 @@ static KMETHOD Node_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(new_(Node, sfp[1].asNameSpace, OnStack));
 }
 
-//## Node Node.newNode(Token[] tokenList, int beginIdx, endIdx);
-static KMETHOD Node_newNode(KonohaContext *kctx, KonohaStack *sfp)
+//## Node Node.ParseNewNode(Token[] tokenList, int beginIdx, int endIdx, boolean isMetaPattern);
+static KMETHOD Node_ParseNewNode(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNode    *stmt = sfp[0].asNode;
 	kArray   *tokenList = sfp[1].asArray;
 	int beginIdx = (int)sfp[2].intValue;
 	int endIdx   = (int)sfp[3].intValue;
-//	SUGAR Tokenize(kctx, &source, kString_text(macro), 0);
-	//KReturn(SUGAR new_BlockNode(kctx, stmt, NULL/*nameSpace*/, &source));
-	KReturn(SUGAR ParseNewNode(kctx, kNode_ns(stmt), tokenList, &beginIdx, endIdx, ParseBlockOption|ParseMetaPatternOption, NULL));
+	ParseOption opt = (sfp[4].boolValue == true) ? ParseMetaPatternOption : 0;
+	KReturn(SUGAR ParseNewNode(kctx, kNode_ns(stmt), tokenList, &beginIdx, endIdx, opt, NULL));
 }
 
 //## Array[Node] Node.GetNodeList();
@@ -169,14 +169,14 @@ int patternMatchShell(Node stmt, int nameid, Token[] tokenList, int beginIdx, in
 //	KReturnWith(ret != -1, RESET_GCSTACK());
 //}
 
-////## void Node.AddParsedObject(keyword nameid, Object obj);
-//static KMETHOD Node_AddParsedObject(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kNode   *stmt  = sfp[0].asNode;
-//	ksymbol_t symbol = (ksymbol_t)sfp[1].intValue;
-//	SUGAR kNode_AddParsedObject(kctx, stmt, symbol, sfp[2].asObject);
-//	KReturnVoid();
-//}
+//## void Node.AddParsedObject(keyword nameid, Object obj);
+static KMETHOD Node_AddParsedObject(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNode   *stmt  = sfp[0].asNode;
+	ksymbol_t symbol = (ksymbol_t)sfp[1].intValue;
+	SUGAR kNode_AddParsedObject(kctx, stmt, symbol, sfp[2].asObject);
+	KReturnVoid();
+}
 
 ////## SmartReturn Object Node.GetParsedObject(keyword nameid);
 //static KMETHOD Node_GetParsedObject(KonohaContext *kctx, KonohaStack *sfp)
@@ -223,20 +223,21 @@ static KMETHOD Node_getToken(KonohaContext *kctx, KonohaStack *sfp)
 //## Node Node.TypeCheckNode(Symbol key, Object type, int policy);
 static KMETHOD Node_TypeCheckNode(KonohaContext *kctx, KonohaStack *sfp)
 {
+	kNode *node = sfp[0].asNode;
 	ksymbol_t key = (ksymbol_t)sfp[1].intValue;
 	KClass *type = kObject_class(sfp[2].asObject);
 	int policy = sfp[3].intValue;
-	KReturn(SUGAR TypeCheckNodeByName(kctx, sfp[0].asNode, key, kNode_ns(sfp[0].asNode), type, policy));
+	KReturn(SUGAR TypeCheckNodeByName(kctx, node, key, kNode_ns(node), type, policy));
 }
 
-////## Node Node.newNode(Token[] tokenList, int s, int e);
-//static KMETHOD Node_newNode(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kNode *stmt  = sfp[0].asNode;
-//	kArray *tokenList  = sfp[1].asArray;
-//	int s = sfp[2].intValue, e = sfp[3].intValue;
-//	KReturn(SUGAR ParseNewNode(kctx, stmt, tokenList, s, e, NULL));
-//}
+//## Node Node.TypeCheckNode(Symbol key, int policy);
+static KMETHOD Node_TypeCheckNodeVoid(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNode *node = sfp[0].asNode;
+	ksymbol_t key = (ksymbol_t)sfp[1].intValue;
+	int policy = sfp[2].intValue;
+	KReturn(SUGAR TypeCheckNodeByName(kctx, node, key, kNode_ns(node), KClass_void, policy));
+}
 
 //## void Node.SetType(int type);
 static KMETHOD Node_SetType(KonohaContext *kctx, KonohaStack *sfp)
@@ -267,16 +268,6 @@ static KMETHOD Node_getTokenList(KonohaContext *kctx, KonohaStack *sfp)
 		ret = tokenList;
 	}
 	KReturn(ret);
-}
-
-//## void Node.setNode(Symbol key, Node node);
-static KMETHOD Node_SetObject(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kNode *stmt   = sfp[0].asNode;
-	ksymbol_t key = (ksymbol_t)sfp[1].intValue;
-	kObject *obj  = sfp[2].asObject;
-	kNode_SetObject(kctx, stmt, key, obj);
-	KReturnVoid();
 }
 
 //## Node Node.getNode(Symbol key);
@@ -372,6 +363,44 @@ static KMETHOD Node_InsertAfter(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(node);
 }
 
+//## Node Node.Op(Token tk);
+static KMETHOD Node_Op1(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNode *self  = sfp[0].asNode;
+	kToken *tk   = sfp[1].asToken;
+	KReturn(SUGAR kNode_Op(kctx, self, tk, 0));
+}
+
+//## Node Node.Op(Token tk, Node expr1);
+static KMETHOD Node_Op2(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNode *self  = sfp[0].asNode;
+	kToken *tk   = sfp[1].asToken;
+	kNode *expr1 = sfp[2].asNode;
+	KReturn(SUGAR kNode_Op(kctx, self, tk, 1, expr1));
+}
+
+//## Node Node.Op(Token tk, Node expr1, Node expr2);
+static KMETHOD Node_Op3(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNode *self  = sfp[0].asNode;
+	kToken *tk   = sfp[1].asToken;
+	kNode *expr1 = sfp[2].asNode;
+	kNode *expr2 = sfp[3].asNode;
+	KReturn(SUGAR kNode_Op(kctx, self, tk, 2, expr1, expr2));
+}
+
+//## Node Node.AddParamNode(Token[] tokenList, int beginIdx, int endIdx, String hintBeforeText);
+static KMETHOD Node_AddParamNode(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNode *node = sfp[0].asNode;
+	kArray *tokenList = sfp[1].asArray;
+	int beginIdx = sfp[2].intValue;
+	int endIdx = sfp[3].intValue;
+	const char *hintBeforeText = IS_NULL(sfp[4].asString) ? NULL : kString_text(sfp[4].asString);
+	KReturn(SUGAR AddParamNode(kctx, kNode_ns(node), node, tokenList, beginIdx, endIdx, hintBeforeText));
+}
+
 #define TP_type KType_Object, KFieldName_("type")
 #define TP_pol  KType_int, KFieldName_("policy")
 #define TP_ArgNode(n) KType_Node, KFieldName_("expr" #n)
@@ -382,26 +411,25 @@ static void Syntax_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceI
 	KDEFINE_METHOD MethodData[] = {
 		/* Block */
 		_Public|_Const, _F(Node_new), KType_Node, KType_Node, KMethodName_("new"), 1, KType_NameSpace, KFieldName_("namespace"),
-		_Public, _F(Node_newNode), KType_Node, KType_Node, KMethodName_("newNode"), 3, TP_tokens, TP_begin, TP_end,
+		_Public, _F(Node_ParseNewNode), KType_Node, KType_Node, KMethodName_("ParseNewNode"), 4, TP_tokens, TP_begin, TP_end, KType_boolean, KFieldName_("isMetaPattern"),
 		_Public, _F(Node_GetNodeList), KType_NodeArray, KType_Node, KMethodName_("GetNodeList"), 0,
 		_Public, _F(Node_GetParentNode), KType_Node, KType_Node, KMethodName_("GetParentNode"), 0,
 
 		_Public, _F(Node_opEQ), KType_boolean, KType_Node, KMethodName_("=="), 1, KType_Node, KFieldName_("other"),
 		_Public, _F(Node_TypeCheckNode), KType_Node, KType_Node, KMethodName_("TypeCheckNode"), 3, TP_kw, TP_type, TP_pol,
-//		_Public, _F(Node_newNode), KType_Node, KType_Node, KMethodName_("newNode"), 3, TP_tokens, TP_begin, TP_end,
+		_Public, _F(Node_TypeCheckNodeVoid), KType_Node, KType_Node, KMethodName_("TypeCheckNode"), 2, TP_kw, TP_pol,
 		_Public, _F(Node_SetType), KType_void, KType_Node, KMethodName_("SetType"), 1, TP_type,
 		_Public|_Im, _F(Node_GetType), KType_int, KType_Node, KMethodName_("GetType"), 0,
 		_Public, _F(Node_LookupNode), KType_Node, KType_Node, KMethodName_("lookupNode"), 1, TP_kw,
 //////		_Public, _F(MessageNodearsedNode), KType_Node, KType_Node, KMethodName_("parseNode"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
-//		_Public, _F(Node_newUntypedCallStyleNode1), KType_Node, KType_Node, KMethodName_("newUntypedCallStyleNode"), 1, TP_token,
-//		_Public, _F(Node_newUntypedCallStyleNode2), KType_Node, KType_Node, KMethodName_("newUntypedCallStyleNode"), 2, TP_token, TP_ArgNode(1),
-//		_Public, _F(Node_newUntypedCallStyleNode3), KType_Node, KType_Node, KMethodName_("newUntypedCallStyleNode"), 3, TP_token, TP_ArgNode(1), TP_ArgNode(2),
-//		_Public, _F(Node_newUntypedCallStyleNode4), KType_Node, KType_Node, KMethodName_("newUntypedCallStyleNode"), 4, TP_token, TP_ArgNode(1), TP_ArgNode(2), TP_ArgNode(3),
-//		_Public, _F(Node_newUntypedCallStyleNode5), KType_Node, KType_Node, KMethodName_("newUntypedCallStyleNode"), 5, TP_token, TP_ArgNode(1), TP_ArgNode(2), TP_ArgNode(3), TP_ArgNode(4),
-//		_Public, _F(Node_newUntypedCallStyleNode6), KType_Node, KType_Node, KMethodName_("newUntypedCallStyleNode"), 6, TP_token, TP_ArgNode(1), TP_ArgNode(2), TP_ArgNode(3), TP_ArgNode(4), TP_ArgNode(5),
-//		_Public, _F(Node_newUntypedCallStyleNode7), KType_Node, KType_Node, KMethodName_("newUntypedCallStyleNode"), 7, TP_token, TP_ArgNode(1), TP_ArgNode(2), TP_ArgNode(3), TP_ArgNode(4), TP_ArgNode(5), TP_ArgNode(6),
+		_Public, _F(Node_Op1), KType_Node, KType_Node, KMethodName_("Op"), 1, TP_token,
+		_Public, _F(Node_Op2), KType_Node, KType_Node, KMethodName_("Op"), 2, TP_token, TP_ArgNode(1),
+		_Public, _F(Node_Op3), KType_Node, KType_Node, KMethodName_("Op"), 3, TP_token, TP_ArgNode(1), TP_ArgNode(2),
+//		_Public, _F(Node_Op4), KType_Node, KType_Node, KMethodName_("Op"), 4, TP_token, TP_ArgNode(1), TP_ArgNode(2), TP_ArgNode(3),
+//		_Public, _F(Node_Op5), KType_Node, KType_Node, KMethodName_("Op"), 5, TP_token, TP_ArgNode(1), TP_ArgNode(2), TP_ArgNode(3), TP_ArgNode(4),
+//		_Public, _F(Node_Op6), KType_Node, KType_Node, KMethodName_("Op"), 6, TP_token, TP_ArgNode(1), TP_ArgNode(2), TP_ArgNode(3), TP_ArgNode(4), TP_ArgNode(5),
+//		_Public, _F(Node_Op7), KType_Node, KType_Node, KMethodName_("Op"), 7, TP_token, TP_ArgNode(1), TP_ArgNode(2), TP_ArgNode(3), TP_ArgNode(4), TP_ArgNode(5), TP_ArgNode(6),
 ////		_Public, _F(Node_rightJoinNode), KType_Node, KType_Node, KMethodName_("rightJoinNode"), 4, KType_Node, FN_expr, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
-		_Public, _F(Node_SetObject), KType_void, KType_Node, KMethodName_("setNode"), 2, KType_Symbol, FN_key, KType_Node, KFieldName_("node"),
 		_Public, _F(Node_getObject), KType_Node, KType_Node, KMethodName_("getNode"), 1, KType_Symbol, FN_key,
 		_Public, _F(Node_getTokenList), KType_TokenArray, KType_Node, KMethodName_("getTokenList"), 2, KType_Symbol, FN_key, KType_TokenArray, FN_defval,
 		_Public, _F(Node_getToken), KType_Token, KType_Node, KMethodName_("getToken"), 2, KType_Symbol, FN_key, KType_Token, FN_defval,
@@ -414,6 +442,9 @@ static void Syntax_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceI
 		/* Expr */
 		_Public, _F(Node_getTermToken), KType_Token, KType_Node, KMethodName_("getTermToken"), 0,
 		_Public, _F(Node_setConstValue), KType_Node, KType_Node, KMethodName_("setConstValue"), 1, KType_Object, KFieldName_("value") | KTypeAttr_Coercion,
+
+		_Public, _F(Node_AddParsedObject), KType_void, KType_Node, KMethodName_("AddParsedObject"), 2, TP_kw, KType_Object, KFieldName_("obj"),
+		_Public, _F(Node_AddParamNode), KType_Node, KType_Node, KMethodName_("AddParamNode"), 4, TP_tokens, TP_begin, TP_end, KType_String, KFieldName_("hintBeforeText"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
