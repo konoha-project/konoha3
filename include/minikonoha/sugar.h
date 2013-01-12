@@ -638,12 +638,11 @@ typedef struct {
 //	kNodeVar*    (*new_UntypedOperatorNode)(KonohaContext *, kSyntax *syn, int n, ...);
 	int          (*ParseSyntaxNode)(KonohaContext *, kSyntax *, kNode *, ksymbol_t, kArray *, int beginIdx, int opIdx, int endIdx);
 
-	kNode*       (*kNode_ParseOperatorNode)(KonohaContext *, kNode *, kSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
+//	kNode*       (*kNode_ParseOperatorNode)(KonohaContext *, kNode *, kSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
 	int          (*ParseNode)(KonohaContext *, kNode *, kArray *, int beginIdx, int endIdx, ParseOption option, const char *hintBeforeText);
 	kNode*       (*ParseNewNode)(KonohaContext *, kNameSpace *, kArray *tokenList, int* s, int e, ParseOption option, const char *hintBeforeText);
 
 	kNode*       (*AddParamNode)(KonohaContext *, kNameSpace *, kNode *, kArray *tokenList, int, int, const char *hintBeforeText);
-//	kNode*       (*kNode_RightJoinNode)(KonohaContext *, kNode *, kNode *, kArray *, int, int);
 
 	kNode*       (*kNode_SetConst)(KonohaContext *, kNode *, KClass *, kObject *);
 	kNode*       (*kNode_SetUnboxConst)(KonohaContext *, kNode *, ktypeattr_t, uintptr_t);
@@ -651,7 +650,6 @@ typedef struct {
 
 	kNode*       (*new_MethodNode)(KonohaContext *, kNameSpace *, KClass *, kMethod *mtd, int n, ...);
 
-//	kNode*      (*TypeCheckBlock)(KonohaContext *, kNode *, kNameSpace *, KClass *);
 	kNode*      (*TypeCheckNodeByName)(KonohaContext *, kNode*, ksymbol_t, kNameSpace *, KClass *, int);
 	kNode*      (*TypeCheckNodeAt)(KonohaContext *, kNode *, size_t, kNameSpace *, KClass *, int);
 	kNode *     (*TypeCheckMethodParam)(KonohaContext *, kMethod *mtd, kNode *, kNameSpace *, KClass *);
