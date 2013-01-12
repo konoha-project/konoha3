@@ -101,10 +101,10 @@ static KMETHOD NameSpace_Preprocess(KonohaContext *kctx, KonohaStack *sfp)
 	KTokenSeq source = {sfp[0].asNameSpace, KGetParserContext(kctx)->preparedTokenList};
 	KTokenSeq_Push(kctx, source);
 	SUGAR Tokenize(kctx, source.ns, kString_text(sfp[1].asString), 0, 0, source.tokenList);
+	KTokenSeq_End(kctx, source);
 	KTokenSeq tokens = {source.ns, a, 0};
 	tokens.TargetPolicy.ExpandingBraceGroup = true;
-	SUGAR Preprocess(kctx, source.ns, source.tokenList, source.beginIdx, tokens.endIdx, NULL, tokens.tokenList);
-	KTokenSeq_Pop(kctx, source);
+	SUGAR Preprocess(kctx, source.ns, RangeTokenSeq(source), NULL, tokens.tokenList);
 	KReturnWith(a, RESET_GCSTACK());
 }
 
@@ -116,6 +116,8 @@ static void Syntax_defineNameSpaceMethod(KonohaContext *kctx, kNameSpace *ns, KT
 		_Public|_Compilation, _F(NameSpace_DefineSyntax), KType_void, KType_NameSpace, KMethodName_("DefineSyntax"), 1, TP_syntax,
 		_Public|_Compilation, _F(NameSpace_AddSyntaxPattern), KType_void, KType_NameSpace, KMethodName_("AddSyntaxPattern"), 2, TP_kw, KType_String, KFieldName_("pattern"),
 		_Public, _F(NameSpace_CompileAllDefinedMethod), KType_void, KType_NameSpace, KMethodName_("CompileAllDefinedMethod"), 0,
+		_Public|_Im, _F(NameSpace_Tokenize), KType_TokenArray, KType_NameSpace, KMethodName_("Tokenize"), 1, TP_source,
+		_Public|_Im, _F(NameSpace_Preprocess), KType_TokenArray, KType_NameSpace, KMethodName_("Preprocess"), 1, TP_source,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
