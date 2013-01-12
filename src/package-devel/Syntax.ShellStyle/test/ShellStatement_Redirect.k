@@ -1,5 +1,5 @@
 // written by chenji
 
-import("dshell");
+import("Syntax.ShellStyle");
 
 echo "hello" > hello.txt
