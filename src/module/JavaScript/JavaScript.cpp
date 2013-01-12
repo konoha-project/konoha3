@@ -748,7 +748,7 @@ static void JSBuilder_Free(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 	KLIB KBuffer_Free(&jsBuilder->jsCodeBuffer);
 }
 
-static struct KVirtualCode* V8_GenerateKVirtualCode(KonohaContext *kctx, kMethod *mtd, kNode *block, int option)
+static struct KVirtualCode* V8_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kNode *block, int option)
 {
 	INIT_GCSTACK();
 	JSBuilder builderbuf = {}, *builder = &builderbuf;
@@ -774,7 +774,7 @@ static void V8_SetMethodCode(KonohaContext *kctx, kMethodVar *mtd, KVirtualCode 
 	mtd->vcode_start = vcode;
 }
 
-static KMethodFunc V8_GenerateKMethodFunc(KonohaContext *kctx, KVirtualCode *vcode)
+static KMethodFunc V8_GenerateMethodFunc(KonohaContext *kctx, KVirtualCode *vcode)
 {
 	return KMethodFunc_RunVirtualMachine;
 }
@@ -790,8 +790,8 @@ static void InitStaticBuilderApi(struct KBuilderAPI *builderApi)
 #define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME##Node = JSBuilder_Visit##NAME##Node;
 	KNodeList(DEFINE_BUILDER_API);
 #undef DEFINE_BUILDER_API
-	builderApi->GenerateKVirtualCode = V8_GenerateKVirtualCode;
-	builderApi->GenerateKMethodFunc  = V8_GenerateKMethodFunc;
+	builderApi->GenerateVirtualCode = V8_GenerateVirtualCode;
+	builderApi->GenerateMethodFunc  = V8_GenerateMethodFunc;
 	builderApi->SetMethodCode        = V8_SetMethodCode;
 	//builderApi->RunVirtualMachine   = KonohaVirtualMachine_Run;
 }

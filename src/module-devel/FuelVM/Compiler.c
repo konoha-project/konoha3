@@ -761,7 +761,7 @@ static KMETHOD FuelVM_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 	FuelVM_Exec(kctx, sfp, code);
 }
 
-static KMethodFunc FuelVM_GenerateKMethodFunc(KonohaContext *kctx, struct KVirtualCode *vcode)
+static KMethodFunc FuelVM_GenerateMethodFunc(KonohaContext *kctx, struct KVirtualCode *vcode)
 {
 	return 0;
 }
@@ -773,7 +773,7 @@ static struct KVirtualCode *GetDefaultBootCode(void)
 
 static KMethodFunc AbstractMethodPtr = 0;
 
-static struct KVirtualCode *FuelVM_GenerateKVirtualCode(KonohaContext *kctx, kMethod *mtd, kNode *block, int option)
+static struct KVirtualCode *FuelVM_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kNode *block, int option)
 {
 	if(unlikely(AbstractMethodPtr == 0)) {
 		AbstractMethodPtr = mtd->invokeKMethodFunc;
@@ -856,8 +856,8 @@ static void InitStaticBuilderApi(struct KBuilderAPI *builderApi)
 #define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME##Node = FuelVM_Visit##NAME##Node;
 	KNodeList(DEFINE_BUILDER_API);
 #undef DEFINE_BUILDER_API
-	builderApi->GenerateKVirtualCode = FuelVM_GenerateKVirtualCode;
-	builderApi->GenerateKMethodFunc  = FuelVM_GenerateKMethodFunc;
+	builderApi->GenerateVirtualCode = FuelVM_GenerateVirtualCode;
+	builderApi->GenerateMethodFunc  = FuelVM_GenerateMethodFunc;
 	builderApi->SetMethodCode        = FuelVM_SetMethodCode;
 	builderApi->RunVirtualMachine    = FuelVM_Run;
 }

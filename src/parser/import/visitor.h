@@ -38,8 +38,8 @@ static kbool_t kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kNode *block, 
 {
 	DBG_P("START CODE GENERATION..");
 	kNameSpace *ns = kNode_ns(block);
-	struct KVirtualCode *vcode = ns->builderApi->GenerateKVirtualCode(kctx, mtd, block, option);
-	KMethodFunc func = ns->builderApi->GenerateKMethodFunc(kctx, vcode);
+	struct KVirtualCode *vcode = ns->builderApi->GenerateVirtualCode(kctx, mtd, block, option);
+	KMethodFunc func = ns->builderApi->GenerateMethodFunc(kctx, vcode);
 	ns->builderApi->SetMethodCode(kctx, (kMethodVar *) mtd, vcode, func);
 	return true;
 }

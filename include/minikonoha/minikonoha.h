@@ -681,7 +681,7 @@ struct KonohaFactory {
 
 	// CodeGenerator
 	KModuleInfo  *CodeGeneratorInfo;
-	void*       (*GetCodeGenerateKMethodFunc)(void);
+	void*       (*GetCodeGenerateMethodFunc)(void);
 	void*       (*GenerateCode)(KonohaContext *kctx, kMethod *mtd, kNode *bk, int options);
 
 	// VirtualMachine

@@ -741,8 +741,8 @@ struct KBuilderCommon {
 
 struct KBuilderAPI {
 	const char *target;
-	struct KVirtualCode *(*GenerateKVirtualCode)(KonohaContext *, kMethod *mtd, kNode *block, int option);
-	KMethodFunc          (*GenerateKMethodFunc)(KonohaContext *, struct KVirtualCode *);
+	struct KVirtualCode *(*GenerateVirtualCode)(KonohaContext *, kMethod *mtd, kNode *block, int option);
+	KMethodFunc          (*GenerateMethodFunc)(KonohaContext *, struct KVirtualCode *);
 	void                 (*SetMethodCode)(KonohaContext *, kMethodVar *mtd, struct KVirtualCode *, KMethodFunc func);
 	struct KVirtualCode *(*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
 

@@ -928,7 +928,7 @@ static void _THCODE(KonohaContext *kctx, KVirtualCode *pc, void **codeaddr, size
 #endif
 }
 
-static struct KVirtualCode* MiniVM_GenerateKVirtualCode(KonohaContext *kctx, kMethod *mtd, kNode *block, int option)
+static struct KVirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kNode *block, int option)
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
@@ -991,7 +991,7 @@ static KMETHOD KMethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *s
 	KonohaVirtualMachine_Run(kctx, sfp, BOOTCODE_ENTER);
 }
 
-static KMethodFunc MiniVM_GenerateKMethodFunc(KonohaContext *kctx, KVirtualCode *vcode)
+static KMethodFunc MiniVM_GenerateMethodFunc(KonohaContext *kctx, KVirtualCode *vcode)
 {
 	return KMethodFunc_RunVirtualMachine;
 }
@@ -1013,8 +1013,8 @@ static void InitStaticBuilderApi(struct KBuilderAPI *builderApi)
 #define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME##Node = KBuilder_Visit##NAME##Node;
 	KNodeList(DEFINE_BUILDER_API);
 #undef DEFINE_BUILDER_API
-	builderApi->GenerateKVirtualCode = MiniVM_GenerateKVirtualCode;
-	builderApi->GenerateKMethodFunc = MiniVM_GenerateKMethodFunc;
+	builderApi->GenerateVirtualCode = MiniVM_GenerateVirtualCode;
+	builderApi->GenerateMethodFunc = MiniVM_GenerateMethodFunc;
 	builderApi->SetMethodCode = MiniVM_SetMethodCode;
 	builderApi->RunVirtualMachine   = KonohaVirtualMachine_Run;
 }
