@@ -56,7 +56,7 @@ static KMETHOD NameSpace_AddSyntaxPattern(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = sfp[0].asNameSpace;
 	ksymbol_t symbol = (ksymbol_t)sfp[1].intValue;
 	const char *pattern = kString_text(sfp[2].asString);
-	SUGAR kNameSpace_AddSyntaxPattern(kctx, kSyntax_(ns, symbol), pattern, 0, trace);
+	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, symbol), pattern, 0, trace);
 	KReturnVoid();
 }
 

@@ -165,12 +165,6 @@ static int ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 		foundClass = KClass_(typeToken->resolvedTypeId);
 		nextIdx = beginIdx + 1;
 	}
-//	else if(tk->resolvedSyntaxInfo->keyword == KSymbol_SymbolPattern) { // check
-//		foundClass = KLIB kNameSpace_GetClassByFullName(kctx, ns, kString_text(tk->text), kString_size(tk->text), NULL);
-//		if(foundClass != NULL) {
-//			nextIdx = beginIdx + 1;
-//		}
-//	}
 	if(foundClass != NULL) {
 		int isAllowedGenerics = true;
 		for(; nextIdx < endIdx; nextIdx++) {
@@ -198,7 +192,7 @@ static int ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 	if(foundClass != NULL) {
 		if(typeToken->resolvedTypeId != foundClass->typeId) {
 			typeToken->resolvedTypeId = foundClass->typeId;
-			DBG_P("Retype foundClass=%s", KClass_text(foundClass));
+			//DBG_P("Retype foundClass=%s", KClass_text(foundClass));
 		}
 	}
 	if(classRef != NULL) {
@@ -265,24 +259,25 @@ static void PreprocessSyntaxPattern2(KonohaContext *kctx, kTokenVar *tk, kTokenV
 	}
 }
 
-static void kNameSpace_AddSyntaxPattern(KonohaContext *kctx, kSyntax *syn, const char *ruleSource, kfileline_t uline, KTraceInfo *trace)
+static void kSyntax_AddPattern(KonohaContext *kctx, kSyntax *syntax0, const char *ruleSource, kfileline_t uline, KTraceInfo *trace)
 {
-	DBG_ASSERT(IS_NOTNULL(syn));
-	kSyntaxVar *syntax = (kSyntaxVar *)syn;
-	kNameSpace *ns = syntax->packageNameSpace;
-	if(syntax->syntaxPatternListNULL == NULL) {
-		syntax->syntaxPatternListNULL = new_(TokenArray, 0, ns->NameSpaceConstList);
+	if(IS_NOTNULL(syntax0)) {
+		kSyntaxVar *syntax = (kSyntaxVar *)syntax0;
+		kNameSpace *ns = syntax->packageNameSpace;
+		if(syntax->syntaxPatternListNULL == NULL) {
+			syntax->syntaxPatternListNULL = new_(TokenArray, 0, ns->NameSpaceConstList);
+		}
+		KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
+		KTokenSeq_Push(kctx, source);
+		Tokenize(kctx, ns, ruleSource, uline, 0, source.tokenList);
+		KTokenSeq_End(kctx, source);
+		KTokenSeq step1 = {ns, source.tokenList, kArray_size(source.tokenList)};
+		Preprocess(kctx, ns, RangeTokenSeq(source), NULL, step1.tokenList);
+		KTokenSeq_End(kctx, step1);
+		TraverseTokenList(kctx, RangeTokenSeq(step1), PreprocessSyntaxPattern, NULL);
+		TraverseTokenList2(kctx, RangeTokenSeq(step1), PreprocessSyntaxPattern2, NULL);
+		Preprocess(kctx, ns, RangeTokenSeq(step1), NULL, syntax->syntaxPatternListNULL);
+		KTokenSeq_Pop(kctx, source);
+		SUGAR dumpTokenArray(kctx, 0, RangeArray(syntax->syntaxPatternListNULL));
 	}
-	KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
-	KTokenSeq_Push(kctx, source);
-	Tokenize(kctx, ns, ruleSource, uline, 0, source.tokenList);
-	KTokenSeq_End(kctx, source);
-	KTokenSeq step1 = {ns, source.tokenList, kArray_size(source.tokenList)};
-	Preprocess(kctx, ns, RangeTokenSeq(source), NULL, step1.tokenList);
-	KTokenSeq_End(kctx, step1);
-	TraverseTokenList(kctx, RangeTokenSeq(step1), PreprocessSyntaxPattern, NULL);
-	TraverseTokenList2(kctx, RangeTokenSeq(step1), PreprocessSyntaxPattern2, NULL);
-	Preprocess(kctx, ns, RangeTokenSeq(step1), NULL, syntax->syntaxPatternListNULL);
-	KTokenSeq_Pop(kctx, source);
-	SUGAR dumpTokenArray(kctx, 0, RangeArray(syntax->syntaxPatternListNULL));
 }

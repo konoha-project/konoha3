@@ -91,7 +91,7 @@ static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		{ KSymbol_END, }, /* sentinental */
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR kNameSpace_AddSyntaxPattern(kctx, kSyntax_(ns, KSymbol_("$Inc")), "$IncStmt", 0, trace);
+	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("$Inc")), "$IncStmt", 0, trace);
 	SUGAR SetMacroData(kctx, ns, KSymbol_("++"), 1,  "X X = (X) + 1", false);
 	SUGAR SetMacroData(kctx, ns, KSymbol_("--"), 1,  "X X = (X) - 1", false);
 

@@ -420,7 +420,7 @@ static kbool_t class_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR kNameSpace_AddSyntaxPattern(kctx, kSyntax_(ns, KSymbol_("class")), "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", 0, trace);
+	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("class")), "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", 0, trace);
 	return true;
 }
 
