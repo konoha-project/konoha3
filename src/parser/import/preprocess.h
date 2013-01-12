@@ -348,7 +348,6 @@ static kTokenVar* kToken_Expand(KonohaContext *kctx, kTokenVar *tk, kNameSpace *
 	DBG_ASSERT(IS_String(tk->text));
 	KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
 	KTokenSeq_Push(kctx, source);
-	//KdumpToken(kctx, tk);
 	Tokenize(kctx, ns, kString_text(tk->text), tk->uline, tk->indent, source.tokenList);
 	KTokenSeq_End(kctx, source);
 	Preprocess(kctx, ns, RangeTokenSeq(source), macroSet, bufferList);
@@ -374,10 +373,6 @@ static kTokenVar* kToken_ToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameS
 	}
 	return tk;
 }
-
-
-
-
 
 static kbool_t ExpandMacroParam(KonohaContext *kctx, kNameSpace *ns, ksymbol_t symbol, KMacroSet *macroParam, kArray *bufferList)
 {

@@ -1063,8 +1063,9 @@ static KMETHOD KMethodFunc_LazyCompilation(KonohaContext *kctx, KonohaStack *sfp
 	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 	kString *text = mtd->SourceToken->text;
 	kfileline_t uline = mtd->SourceToken->uline;
-	DBG_P("<<lazy compilation>>: %s.%s%s", KType_text(mtd->typeId), KMethodName_Fmt2(mtd->mn));
-	kMethod_Compile(kctx, mtd, NULL, mtd->LazyCompileNameSpace, text, uline, DefaultCompileOption/*HatedLazyCompile*/);
+	int baseIndent = mtd->SourceToken->indent;
+	DBG_P("<<lazy compilation>>: %s.%s%s baseIndent=%d", KType_text(mtd->typeId), KMethodName_Fmt2(mtd->mn), baseIndent);
+	kMethod_Compile(kctx, mtd, NULL, mtd->LazyCompileNameSpace, text, uline, baseIndent, DefaultCompileOption/*HatedLazyCompile*/);
 	((KonohaContextVar *)kctx)->esp = esp;
 	mtd->invokeKMethodFunc(kctx, sfp); // call again;
 }
@@ -1087,8 +1088,9 @@ static kMethod* kMethod_DoLazyCompilation(KonohaContext *kctx, kMethod *mtd, kpa
 	if(mtd->invokeKMethodFunc == KMethodFunc_LazyCompilation) {
 		kString *text = mtd->SourceToken->text;
 		kfileline_t uline = mtd->SourceToken->uline;
+		int baseIndent = mtd->SourceToken->indent;
 		((kMethodVar *)mtd)->invokeKMethodFunc = NULL; // TO avoid recursive compile
-		mtd = kMethod_Compile(kctx, mtd, callparamNULL, mtd->LazyCompileNameSpace, text, uline, options|HatedLazyCompile);
+		mtd = kMethod_Compile(kctx, mtd, callparamNULL, mtd->LazyCompileNameSpace, text, uline, baseIndent, options|HatedLazyCompile);
 		DBG_ASSERT(mtd->invokeKMethodFunc != KMethodFunc_LazyCompilation);
 	}
 	return mtd;

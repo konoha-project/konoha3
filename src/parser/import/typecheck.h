@@ -319,10 +319,9 @@ static struct KGammaLocalData *kNameSpace_PopGamma(KonohaContext *kctx, kNameSpa
 
 // --------------------------------------------------------------------------
 
-static kNode* kMethod_ParseBodyNode(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *source, kfileline_t uline)
+static kNode* kMethod_ParseBodyNode(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *source, kfileline_t uline, int baseIndent)
 {
 	const char *script = kString_text(source);
-	int baseIndent = 0;
 	if(IS_NULL(source) || script[0] == 0) {
 		DBG_ASSERT(IS_Token(mtd->SourceToken));
 		script = kString_text(mtd->SourceToken->text);
@@ -352,14 +351,14 @@ static void kNameSpace_InitParam(KonohaContext *kctx, struct KGammaLocalData *ge
 	genv->localScope.varsize = psize+1;
 }
 
-static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t *callparamNULL, kNameSpace *ns, kString *text, kfileline_t uline, int options)
+static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t *callparamNULL, kNameSpace *ns, kString *text, kfileline_t uline, int baseIndent, int options)
 {
 	INIT_GCSTACK();
 	kParam *param = kMethod_GetParam(mtd);
 	if(callparamNULL != NULL) {
 		//DynamicComplie();
 	}
-	kNode *node = kMethod_ParseBodyNode(kctx, mtd, ns, text, uline);
+	kNode *node = kMethod_ParseBodyNode(kctx, mtd, ns, text, uline, baseIndent);
 	struct KGammaLocalData newgma = {0};
 	KGammaStackDecl lvarItems[32 + param->psize];
 	bzero(lvarItems, sizeof(KGammaStackDecl) * (32 + param->psize));
