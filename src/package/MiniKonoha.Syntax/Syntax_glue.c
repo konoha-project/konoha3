@@ -128,6 +128,35 @@ static KMETHOD Node_GetParentNode(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(kNode_GetParent(kctx, sfp[0].asNode));
 }
 
+//## Node Node.newMethodNode(Object type, Symbol keyword, Node expr1);
+static KMETHOD Node_newMethodNode1(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNameSpace *ns = kNode_ns(sfp[0].asNode);
+	KClass *type = kObject_class(sfp[1].asObject);
+	ksymbol_t keyword = (ksymbol_t)sfp[2].intValue;
+	kNode *expr1 = sfp[3].asNode;
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, type, keyword, 0, KMethodMatch_NoOption);
+	if(mtd == NULL) {
+		KReturn(KNULL(Node));
+	}
+	KReturn(SUGAR new_MethodNode(kctx, ns, type, mtd, 1, expr1));
+}
+
+//## Node Node.newMethodNode(Object type, Symbol keyword, Node expr1, Node expr2);
+static KMETHOD Node_newMethodNode2(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNameSpace *ns = kNode_ns(sfp[0].asNode);
+	KClass *type = kObject_class(sfp[1].asObject);
+	ksymbol_t keyword = (ksymbol_t)sfp[2].intValue;
+	kNode *expr1 = sfp[3].asNode;
+	kNode *expr2 = sfp[4].asNode;
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, type, keyword, 1, KMethodMatch_NoOption);
+	if(mtd == NULL) {
+		KReturn(KNULL(Node));
+	}
+	KReturn(SUGAR new_MethodNode(kctx, ns, type, mtd, 2, expr1, expr2));
+}
+
 #define TP_ns       KType_NameSpace, KFieldName_("ns")
 #define KType_NodeArray (KClass_p0(kctx, KClass_Array, KType_Node)->typeId)
 
@@ -230,13 +259,14 @@ static KMETHOD Node_TypeCheckNode(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(SUGAR TypeCheckNodeByName(kctx, node, key, kNode_ns(node), type, policy));
 }
 
-//## Node Node.TypeCheckNode(Symbol key, int policy);
-static KMETHOD Node_TypeCheckNodeVoid(KonohaContext *kctx, KonohaStack *sfp)
+//## Node Node.TypeCheckNodeAt(int pos, Object type, int policy);
+static KMETHOD Node_TypeCheckNodeAt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNode *node = sfp[0].asNode;
-	ksymbol_t key = (ksymbol_t)sfp[1].intValue;
-	int policy = sfp[2].intValue;
-	KReturn(SUGAR TypeCheckNodeByName(kctx, node, key, kNode_ns(node), KClass_void, policy));
+	size_t pos = sfp[1].intValue;
+	KClass *type = kObject_class(sfp[2].asObject);
+	int policy = sfp[3].intValue;
+	KReturn(SUGAR TypeCheckNodeAt(kctx, node, pos, kNode_ns(node), type, policy));
 }
 
 //## void Node.SetType(int type);
@@ -417,7 +447,7 @@ static void Syntax_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceI
 
 		_Public, _F(Node_opEQ), KType_boolean, KType_Node, KMethodName_("=="), 1, KType_Node, KFieldName_("other"),
 		_Public, _F(Node_TypeCheckNode), KType_Node, KType_Node, KMethodName_("TypeCheckNode"), 3, TP_kw, TP_type, TP_pol,
-		_Public, _F(Node_TypeCheckNodeVoid), KType_Node, KType_Node, KMethodName_("TypeCheckNode"), 2, TP_kw, TP_pol,
+		_Public, _F(Node_TypeCheckNodeAt), KType_Node, KType_Node, KMethodName_("TypeCheckNodeAt"), 3, TP_pos, TP_type, TP_pol,
 		_Public, _F(Node_SetType), KType_void, KType_Node, KMethodName_("SetType"), 1, TP_type,
 		_Public|_Im, _F(Node_GetType), KType_int, KType_Node, KMethodName_("GetType"), 0,
 		_Public, _F(Node_LookupNode), KType_Node, KType_Node, KMethodName_("lookupNode"), 1, TP_kw,
@@ -445,6 +475,8 @@ static void Syntax_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceI
 
 		_Public, _F(Node_AddParsedObject), KType_void, KType_Node, KMethodName_("AddParsedObject"), 2, TP_kw, KType_Object, KFieldName_("obj"),
 		_Public, _F(Node_AddParamNode), KType_Node, KType_Node, KMethodName_("AddParamNode"), 4, TP_tokens, TP_begin, TP_end, KType_String, KFieldName_("hintBeforeText"),
+		_Public, _F(Node_newMethodNode1), KType_Node, KType_Node, KMethodName_("newMethodNode"), 3, TP_type, TP_kw, TP_ArgNode(1),
+		_Public, _F(Node_newMethodNode2), KType_Node, KType_Node, KMethodName_("newMethodNode"), 4, TP_type, TP_kw, TP_ArgNode(1), TP_ArgNode(2),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
