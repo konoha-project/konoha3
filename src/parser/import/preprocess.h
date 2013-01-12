@@ -252,6 +252,7 @@ static kArray* kArray_AppendList(KonohaContext *kctx, kArray *a, kArray *tokenLi
 
 static kbool_t ExpandMacroParam(KonohaContext *kctx, kNameSpace *ns, ksymbol_t symbol, KMacroSet *macroParam, kArray *bufferList);
 //static void ApplyMacro(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, size_t paramsize, KMacroSet *macroParam, kArray *bufferList);
+static kTokenVar* kToken_Expand(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, KMacroSet *macroSet, kArray *bufferList);
 
 static void Preprocess(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KMacroSet *macroParam, kArray *bufferList)
 {
@@ -261,6 +262,12 @@ static void Preprocess(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, i
 	for(currentIdx = beginIdx; currentIdx < endIdx; currentIdx++) {
 		kTokenVar *tk = tokenList->TokenVarItems[currentIdx];
 		if(tk->tokenType == TokenType_Skip) continue;
+//		if(tk->tokenType == TokenType_Indent) {
+//			if(kString_size(tk->text) > 0) {
+//				kToken_Expand(kctx, tk, ns, macroParam, bufferList);
+//			}
+//			continue;
+//		}
 		if(kToken_Is(OpenGroup, tk)) {
 			kTokenVar *groupToken = new_(TokenVar, tk->tokenType, OnGcStack);
 			KFieldSet(groupToken, groupToken->GroupTokenList, new_(TokenArray, 0, OnField));
@@ -336,6 +343,19 @@ static void ResetPreprocess(KonohaContext *kctx, kTokenVar *tk, void *thunk)
 	tk->resolvedSyntaxInfo = NULL;
 }
 
+static kTokenVar* kToken_Expand(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, KMacroSet *macroSet, kArray *bufferList)
+{
+	DBG_ASSERT(IS_String(tk->text));
+	KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
+	KTokenSeq_Push(kctx, source);
+	//KdumpToken(kctx, tk);
+	Tokenize(kctx, ns, kString_text(tk->text), tk->uline, tk->indent, source.tokenList);
+	KTokenSeq_End(kctx, source);
+	Preprocess(kctx, ns, RangeTokenSeq(source), macroSet, bufferList);
+	KTokenSeq_Pop(kctx, source);
+	return tk;
+}
+
 static kTokenVar* kToken_ToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, KMacroSet *macroSet)
 {
 	if(!IS_Array(tk->GroupTokenList)) {
@@ -354,6 +374,10 @@ static kTokenVar* kToken_ToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameS
 	}
 	return tk;
 }
+
+
+
+
 
 static kbool_t ExpandMacroParam(KonohaContext *kctx, kNameSpace *ns, ksymbol_t symbol, KMacroSet *macroParam, kArray *bufferList)
 {

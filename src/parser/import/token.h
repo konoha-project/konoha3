@@ -61,7 +61,8 @@ static int TokenizeFirstIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *to
 		tk->tokenType = TokenType_Indent;
 		tk->indent = indent;
 		tk->uline = tokenizer->currentLine;
-		//tokenizer->baseIndent = indent;
+		DBG_P(">>>>>>>> baseindent=%d, indent=%d", tokenizer->baseIndent, indent);
+		tokenizer->baseIndent = indent;
 	}
 	return pos;
 }
@@ -72,11 +73,12 @@ static int SkipBlockIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeni
 	for(; (ch = tokenizer->source[pos]) != 0; pos++) {
 		if(ch == '\n') {
 			pos = CountIndent(kctx, tokenizer, pos+1, &indent);
-			if(!(indent > tokenizer->baseIndent)) break;
+			if(indent <= tokenizer->baseIndent) break;
 		}
 	}
 	if(IS_NOTNULL(tk)) {
 		KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, tokenizer->source + tok_start, pos - tok_start, 0));
+		DBG_P("baseindent=%d, indent=%d, tk->text='''%s'''", tokenizer->baseIndent, indent, kString_text(tk->text));
 	}
 	return pos;
 }
@@ -90,9 +92,10 @@ static int TokenizeIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 		tk->indent = indent;
 		tk->uline = tokenizer->currentLine;
 	}
-//	if(indent > tokenizer->baseIndent) {
-//		pos = SkipBlockIndent(kctx, tk, tokenizer, pos);
-//	}
+	if(indent > tokenizer->baseIndent) {
+		DBG_P(">>>>>>>> baseindent=%d, indent=%d", tokenizer->baseIndent, indent);
+		pos = SkipBlockIndent(kctx, tk, tokenizer, pos);
+	}
 	return pos;
 }
 
