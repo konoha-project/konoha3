@@ -135,7 +135,7 @@ static int TokenizeNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 	return pos;  // next
 }
 
-static void kToken_SetSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *t, size_t len)
+static void kToken_SetSymbolText(KonohaContext *kctx, kTokenVar *tk, ksymbol_t tokenType, const char *t, size_t len)
 {
 	if(IS_NOTNULL(tk)) {
 		ksymbol_t symbol = KAsciiSymbol(t, len, _NEWID);
@@ -145,7 +145,7 @@ static void kToken_SetSymbolText(KonohaContext *kctx, kTokenVar *tk, const char 
 		else {
 			KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, t, len, StringPolicy_ASCII));
 		}
-		tk->tokenType = TokenType_Symbol;
+		tk->tokenType = tokenType;
 		tk->symbol = symbol;
 	}
 }
@@ -154,31 +154,30 @@ static int TokenizeSymbol(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 {
 	int ch, pos = tok_start;
 	const char *ts = tokenizer->source;
-	while((ch = ts[pos++]) != 0) {
+	for(; (ch = tokenizer->source[pos]) != 0; pos++) {
 		if(ch == '_' || isalnum(ch)) continue; // nothing
 		break;
 	}
-	kToken_SetSymbolText(kctx, tk, ts + tok_start, (pos-1)-tok_start);
-	return pos - 1;  // next
+	kToken_SetSymbolText(kctx, tk, TokenType_Symbol, ts + tok_start, (pos)-tok_start);
+	return pos;  // next
 }
 
 static int TokenizeSingleOperator(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
-	kToken_SetSymbolText(kctx, tk,  tokenizer->source + tok_start, 1);
+	kToken_SetSymbolText(kctx, tk,  TokenType_Symbol, tokenizer->source + tok_start, 1);
 	return tok_start+1;
 }
 
 static int TokenizeSemiColon(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
-	kToken_SetSymbolText(kctx, tk,  tokenizer->source + tok_start, 1);
+	kToken_SetSymbolText(kctx, tk,  TokenType_Symbol, tokenizer->source + tok_start, 1);
 	return tok_start+1;
 }
 
 static int TokenizeOpenParenthesis(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	if(IS_NOTNULL(tk)) {  // pre-resolved
-		kToken_SetSymbolText(kctx, tk, tokenizer->source + tok_start, 1);
-		tk->tokenType = KSymbol_ParenthesisGroup;
+		kToken_SetSymbolText(kctx, tk, KSymbol_ParenthesisGroup, tokenizer->source + tok_start, 1);
 		kToken_Set(OpenGroup, tk, true);
 	}
 	return tok_start+1;
@@ -187,8 +186,7 @@ static int TokenizeOpenParenthesis(KonohaContext *kctx, kTokenVar *tk, Tokenizer
 static int TokenizeCloseParenthesis(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	if(IS_NOTNULL(tk)) {  // pre-resolved
-		kToken_SetSymbolText(kctx, tk, tokenizer->source + tok_start, 1);
-		tk->tokenType = KSymbol_ParenthesisGroup;
+		kToken_SetSymbolText(kctx, tk, KSymbol_ParenthesisGroup, tokenizer->source + tok_start, 1);
 		kToken_Set(CloseGroup, tk, true);
 	}
 	return tok_start+1;
@@ -197,8 +195,7 @@ static int TokenizeCloseParenthesis(KonohaContext *kctx, kTokenVar *tk, Tokenize
 static int TokenizeOpenBracket(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	if(IS_NOTNULL(tk)) {  // pre-resolved
-		kToken_SetSymbolText(kctx, tk, tokenizer->source + tok_start, 1);
-		tk->tokenType = KSymbol_BracketGroup;
+		kToken_SetSymbolText(kctx, tk, KSymbol_BracketGroup, tokenizer->source + tok_start, 1);
 		kToken_Set(OpenGroup, tk, true);
 	}
 	return tok_start+1;
@@ -207,8 +204,7 @@ static int TokenizeOpenBracket(KonohaContext *kctx, kTokenVar *tk, Tokenizer *to
 static int TokenizeCloseBracket(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	if(IS_NOTNULL(tk)) {  // pre-resolved
-		kToken_SetSymbolText(kctx, tk, tokenizer->source + tok_start, 1);
-		tk->tokenType = KSymbol_BracketGroup;
+		kToken_SetSymbolText(kctx, tk, KSymbol_BracketGroup, tokenizer->source + tok_start, 1);
 		kToken_Set(CloseGroup, tk, true);
 	}
 	return tok_start+1;
@@ -221,7 +217,7 @@ static int TokenizeAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tok
 	if(isalnum(tokenizer->source[tok_start+1])) {
 		int pos = TokenizeSymbol(kctx, tk, tokenizer, tok_start+1);
 		if(IS_NOTNULL(tk)) {  // pre-resolved
-			tk->tokenType = KSymbol_SymbolPattern;
+			//tk->tokenType = KSymbol_SymbolPattern;
 			tk->symbol = KAsciiSymbol(kString_text(tk->text), kString_size(tk->text), KSymbol_NewId) | KSymbolAttr_Annotation;
 		}
 		return pos;
@@ -246,7 +242,7 @@ static int TokenizeAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tok
 static int TokenizeOperator(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	int ch, pos = tok_start;
-	while((ch = tokenizer->source[pos++]) != 0) {
+	for(; (ch = tokenizer->source[pos]) != 0; pos++) {
 		if(isalnum(ch)) break;
 		switch(ch) {
 			case '<': case '>': case '@': case '$': case '#':
@@ -257,41 +253,41 @@ static int TokenizeOperator(KonohaContext *kctx, kTokenVar *tk, Tokenizer *token
 		}
 		break;
 	}
-	kToken_SetSymbolText(kctx, tk, tokenizer->source + tok_start, (pos-1)-tok_start);
-	return pos-1;
+	kToken_SetSymbolText(kctx, tk, KSymbol_SymbolPattern, tokenizer->source + tok_start, (pos)-tok_start);
+	return pos;
 }
 
 static int TokenizeLineComment(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	int ch, pos = tok_start;
-	while((ch = tokenizer->source[pos++]) != 0) {
+	for(; (ch = tokenizer->source[pos]) != 0; pos++) {
 		if(ch == '\n') break;
 	}
-	return pos-1;/*EOF*/
+	return pos;/*EOF*/
 }
 
 static int TokenizeCStyleBlockComment(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	int ch, prev = 0, level = 1, pos = tok_start + 2;
-	/*@#nnnn is line number */
+	/* @#nnnn is a notation to reset its line number */
 	if(tokenizer->source[pos] == '@' && tokenizer->source[pos+1] == '#' && isdigit(tokenizer->source[pos+2])) {
 		tokenizer->currentLine >>= (sizeof(kshort_t)*8);
 		tokenizer->currentLine = (tokenizer->currentLine<<(sizeof(kshort_t)*8))  | (kshort_t)strtoll(tokenizer->source + pos + 2, NULL, 10);
 	}
-	while((ch = tokenizer->source[pos++]) != 0) {
+	for(; (ch = tokenizer->source[pos]) != 0; pos++) {
 		if(ch == '\n') {
 			tokenizer->currentLine += 1;
 		}
 		if(prev == '*' && ch == '/') {
 			level--;
-			if(level == 0) return pos;
+			if(level == 0) return pos+1;
 		} else if(prev == '/' && ch == '*') {
 			level++;
 		}
 		prev = ch;
 	}
 	ERROR_UnclosedToken(kctx, tk, "*/");
-	return pos-1;/*EOF*/
+	return pos;/*EOF*/
 }
 
 static int TokenizeSlash(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
