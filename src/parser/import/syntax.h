@@ -1253,11 +1253,11 @@ static KMETHOD Statement_script(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
 	INIT_GCSTACK();
-	kMethodVar *mtd = (kMethodVar *)KLIB new_kMethod(kctx, _GcStack, kMethod_Static, 0, KSymbol_script, NULL);
+	kMethodVar *mtd = (kMethodVar *)KLIB new_kMethod(kctx, _GcStack, kMethod_Static, KType_Object, KSymbol_script, NULL);
 	KLIB kMethod_SetParam(kctx, mtd, KType_void, 0, NULL);
 	kMethod_SetLazyCompilation(kctx, mtd, stmt, ns);
 	kNode_AddNode(kctx, stmt, K_NULLNODE);
-	kNode_AddNode(kctx, stmt, K_NULLNODE);
+	kNode_AddNode(kctx, stmt, new_ConstNode(kctx, ns, NULL, K_NULL));
 	stmt = TypeCheckMethodParam(kctx, mtd, stmt, ns, KClass_void);
 	KReturnWith(TypeCheckMethodParam(kctx, mtd, stmt, ns, KClass_void), RESET_GCSTACK());
 }
