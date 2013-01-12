@@ -252,19 +252,16 @@ Node typeShell(Node node, NameSpace ns, Object o) {
 }
 
 int parseShell(Node node, Symbol sym, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
-	if(endIdx - beginIdx < 2) {
-		return -1;
-	}
-	Token firstToken = tokenList[beginIdx + 1];
+	Token firstToken = tokenList[beginIdx];
 	if(firstToken.Is("$Symbol") && SubProc.isCommand(firstToken.getParsedText())) {
-		int i = beginIdx + 2;
+		int i = beginIdx + 1;
 		while(i < endIdx) {
-			//if(tokenList[i].Is("()")) {
-			//	return -1;
-			//}
+			if(tokenList[i].Is("()")) {
+				return -1;
+			}
 			i = i + 1;
 		}
-		String[] args = concatTokenList(tokenList.slice(beginIdx + 1, i));
+		String[] args = concatTokenList(tokenList.slice(beginIdx, i));
 		if(!SubProc.isCommand(args[0])) {
 			return -1;
 		}
@@ -372,8 +369,11 @@ int parseShell(Node node, Symbol sym, Token[] tokenList, int beginIdx, int opera
 //}
 
 void defineShellSyntax() {
-	Syntax shellSyntax = new Syntax("sh");
+	CompileAllDefinedMethod();
+	Syntax shellSyntax = new Syntax("$Shell");
 	shellSyntax.SetParseFunc(Precedence_Statement, 0, parseShell);
+	shellSyntax.SetMetaPattern(true);
+	shellSyntax.SetPattern("$Token*");
 	shellSyntax.SetTypeFunc(typeShell);
 	DefineSyntax(shellSyntax);
 
