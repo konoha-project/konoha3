@@ -1249,6 +1249,19 @@ static KMETHOD Statement_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(kNode_Type(kctx, stmt, KNode_Done, KType_void));
 }
 
+static KMETHOD Statement_script(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_TypeCheck(stmt, ns, reqc);
+	INIT_GCSTACK();
+	kMethodVar *mtd = (kMethodVar *)KLIB new_kMethod(kctx, _GcStack, kMethod_Static, 0, KSymbol_script, NULL);
+	KLIB kMethod_SetParam(kctx, mtd, KType_void, 0, NULL);
+	kMethod_SetLazyCompilation(kctx, mtd, stmt, ns);
+	kNode_AddNode(kctx, stmt, K_NULLNODE);
+	kNode_AddNode(kctx, stmt, K_NULLNODE);
+	stmt = TypeCheckMethodParam(kctx, mtd, stmt, ns, KClass_void);
+	KReturnWith(TypeCheckMethodParam(kctx, mtd, stmt, ns, KClass_void), RESET_GCSTACK());
+}
+
 /* ------------------------------------------------------------------------ */
 
 #define PATTERN(T)  KSymbol_##T##Pattern
@@ -1313,6 +1326,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(else),         SYNFLAG_CTypeFunc, 0, Precedence_Statement, {patternParseFunc}, {SUGARFUNC Statement_else}},
 		{ TOKEN(return), SYNFLAG_CTypeFunc|SYNFLAG_NodeBreakExec, 0, Precedence_Statement, {patternParseFunc}, {SUGARFUNC Statement_return} },
 		{ TOKEN(new), SYNFLAG_CFunc, 0, Precedence_CStyleSuffixCall, {SUGARFUNC Expression_new}, },
+		{ TOKEN(script), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {patternParseFunc}, {SUGARFUNC Statement_script},},
 		{ KSymbol_END, },
 	};
 	kNameSpace_DefineSyntax(kctx, ns, SYNTAX, NULL);

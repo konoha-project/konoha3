@@ -615,8 +615,8 @@ typedef struct {
 	//
 	kSyntax*      (*kNameSpace_GetSyntax)(KonohaContext *, kNameSpace *, ksymbol_t);
 	void          (*kNameSpace_DefineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *, KTraceInfo *);
-	void          (*kSyntax_AddPattern)(KonohaContext *, kSyntax *, const char *rule, kfileline_t uline, KTraceInfo *);
 	void          (*kNameSpace_AddSyntax)(KonohaContext *, kNameSpace *, kSyntax *, KTraceInfo *);
+	void          (*kSyntax_AddPattern)(KonohaContext *, kSyntax *, const char *rule, kfileline_t uline, KTraceInfo *);
 	kbool_t       (*SetMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *, int optionMacro);
 
 	void         (*Tokenize)(KonohaContext *, kNameSpace *, const char *, kfileline_t, int baseIndent, kArray *bufferList);

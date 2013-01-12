@@ -111,8 +111,8 @@ static kbool_t PreprocessSingleStatement(KonohaContext *kctx, kNameSpace *ns, KT
 			break;
 		}
 	}
-	DBG_P("beginIdx=%d, endIdx=%d", beginIdx, endIdx);
-	SUGAR dumpTokenArray(kctx, 0, source->tokenList, beginIdx, endIdx);
+//	DBG_P("beginIdx=%d, endIdx=%d", beginIdx, endIdx);
+//	SUGAR dumpTokenArray(kctx, 0, source->tokenList, beginIdx, endIdx);
 	if(beginIdx < endIdx) {
 		Preprocess(kctx, ns, source->tokenList, beginIdx, endIdx, NULL, tokens->tokenList);
 		source->beginIdx = endIdx;

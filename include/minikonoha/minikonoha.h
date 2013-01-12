@@ -258,7 +258,7 @@ static const char *KEYWORD_LIST[] = {
 	".", "/", "%", "*", "+", "-", "<", "<=", ">", ">=", "==", "!=",
 	"&&", "||", "!", "=", ",", "$", ":", ";", /*"@",*/
 	"true", "false", "if", "else", "return", // syn
-	"new", "void"
+	"new", "void", "script"
 };
 #endif
 
@@ -316,6 +316,7 @@ static const char *KEYWORD_LIST[] = {
 #define KSymbol_return    (4+KSymbol_true)
 #define KSymbol_new       (5+KSymbol_true)
 #define KSymbol_void      (6+KSymbol_true)
+#define KSymbol_script    (7+KSymbol_true)
 
 /* MethodName
  * 110   to$(TypeId)
