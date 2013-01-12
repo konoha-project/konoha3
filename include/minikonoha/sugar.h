@@ -638,7 +638,6 @@ typedef struct {
 //	kNodeVar*    (*new_UntypedOperatorNode)(KonohaContext *, kSyntax *syn, int n, ...);
 	int          (*ParseSyntaxNode)(KonohaContext *, kSyntax *, kNode *, ksymbol_t, kArray *, int beginIdx, int opIdx, int endIdx);
 
-//	kNode*       (*kNode_ParseOperatorNode)(KonohaContext *, kNode *, kSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
 	int          (*ParseNode)(KonohaContext *, kNode *, kArray *, int beginIdx, int endIdx, ParseOption option, const char *hintBeforeText);
 	kNode*       (*ParseNewNode)(KonohaContext *, kNameSpace *, kArray *tokenList, int* s, int e, ParseOption option, const char *hintBeforeText);
 

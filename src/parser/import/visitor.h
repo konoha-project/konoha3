@@ -40,7 +40,7 @@ static kbool_t kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kNode *block, 
 	kNameSpace *ns = kNode_ns(block);
 	struct KVirtualCode *vcode = ns->builderApi->GenerateVirtualCode(kctx, mtd, block, option);
 	KMethodFunc func = ns->builderApi->GenerateMethodFunc(kctx, vcode);
-	ns->builderApi->SetMethodCode(kctx, (kMethodVar *) mtd, vcode, func);
+	ns->builderApi->SetMethodCode(kctx, (kMethodVar *)mtd, vcode, func);
 	return true;
 }
 
