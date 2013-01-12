@@ -167,8 +167,6 @@ static void Syntax_defineTokenFunc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		_Public|_Const, _F(Token_GetGroupTokenList), KType_TokenArray, KType_Token, KMethodName_("GetGroupTokenList"), 0,
 		_Public, _F(Token_isBeforeWhiteSpace), KType_boolean, KType_Token, KMethodName_("IsBeforeWhiteSpace"), 0,
 		_Public, _F(Token_new), KType_Token, KType_Token, KMethodName_("new"), 1, TP_kw,
-		_Public|_Im, _F(NameSpace_Tokenize), KType_TokenArray, KType_NameSpace, KMethodName_("Tokenize"), 1, TP_source,
-		_Public|_Im, _F(NameSpace_Preprocess), KType_TokenArray, KType_NameSpace, KMethodName_("Preprocess"), 1, TP_source,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
