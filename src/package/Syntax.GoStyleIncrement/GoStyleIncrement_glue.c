@@ -40,6 +40,7 @@ static KMETHOD PatternMatch_Inc(KonohaContext *kctx, KonohaStack *sfp)
 	for(i = beginIdx; i < endIdx; i++) {
 		kTokenVar *tk = tokenList->TokenVarItems[i];
 		if(tk->symbol == KSymbol_Inc || tk->symbol == KSymbol_Dec) {
+			int start, end;
 			if(beginIdx == i) {
 				start = beginIdx + 1;
 				end = endIdx;
