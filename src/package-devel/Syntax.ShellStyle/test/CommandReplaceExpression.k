@@ -1,6 +1,6 @@
 // written by chenji
 
-import("dshell");
+import("Syntax.ShellStyle");
 
 void test() {
 	String s1 = $(echo hi);
