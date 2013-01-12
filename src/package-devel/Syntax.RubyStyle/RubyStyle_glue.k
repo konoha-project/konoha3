@@ -38,7 +38,7 @@ Node createBlockNode(NameSpace ns){
 
 Node Node.createBlockNodeAt(Symbol symbol){
 	Node blockNode = createBlockNode(this.getNameSpace());
-	this.setNode(symbol, blockNode);
+	this.AddParsedObject(symbol, blockNode);
 	return blockNode;
 }
 

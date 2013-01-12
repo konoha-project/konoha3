@@ -28,6 +28,7 @@ import("MiniKonoha.Eval");
 import("JavaScript.Math");
 import("JavaScript.String");
 import("MiniKonoha.Syntax");
+import("dscript.subproc");
 
 @Override @Public boolean String.startsWith(String str) {
 	return StringUtil.startsWith(this, str, 0);
