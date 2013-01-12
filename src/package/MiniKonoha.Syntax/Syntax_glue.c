@@ -922,8 +922,8 @@ static KMETHOD NameSpace_AddSyntaxPattern(KonohaContext *kctx, KonohaStack *sfp)
 //## void NameSpace.CompileAllDefinedMethod()
 static KMETHOD NameSpace_CompileAllDefinedMethod(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kNameSpace *ns = sfp[0].asNameSpace;
-
+//	kNameSpace *ns = sfp[0].asNameSpace;
+//
 	KRuntime *share = kctx->share;
 	size_t i;
 	for(i = 0; i < kArray_size(share->GlobalConstList); i++) {

@@ -119,7 +119,7 @@ static int TokenizeNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 {
 	int ch, pos = tok_start, tokenType = TokenType_Number;
 	const char *ts = tokenizer->source;
-	while((ch = ts[pos++]) != 0) {
+	for(; (ch = ts[pos]) != 0; pos++) {
 		if(ch == '.') {
 			if(isalnum(ts[pos])) {
 				tokenType = KSymbol_("$Float");
@@ -129,10 +129,10 @@ static int TokenizeNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 		if(!isalnum(ch)) break;
 	}
 	if(IS_NOTNULL(tk)) {
-		KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, ts + tok_start, (pos-1)-tok_start, StringPolicy_ASCII));
+		KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, ts + tok_start, (pos)-tok_start, StringPolicy_ASCII));
 		tk->tokenType = tokenType;
 	}
-	return pos - 1;  // next
+	return pos;  // next
 }
 
 static void kToken_SetSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *t, size_t len)
