@@ -40,46 +40,32 @@ static KMETHOD PatternMatch_Inc(KonohaContext *kctx, KonohaStack *sfp)
 	for(i = beginIdx; i < endIdx; i++) {
 		kTokenVar *tk = tokenList->TokenVarItems[i];
 		if(tk->symbol == KSymbol_Inc || tk->symbol == KSymbol_Dec) {
-			KReturnUnboxValue(beginIdx);
-		}
-	}
-	KReturnUnboxValue(-1);
-}
-
-static KMETHOD PatternMatch_IncStmt(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
-	int i, start, end;
-	ksymbol_t KSymbol_Inc = KSymbol_("++"), KSymbol_Dec = KSymbol_("--");
-	for(i = beginIdx; i < endIdx; i++) {
-		kToken *tk = tokenList->TokenItems[i];
-		if(tk->symbol == KSymbol_Inc || tk->symbol == KSymbol_Dec) {
+			if(beginIdx == i) {
+				start = beginIdx + 1;
+				end = endIdx;
+			}
+			else {
+				start = beginIdx;
+				end   = i;
+			}
+			if(start < end) {
+				kToken *opToken = tokenList->TokenItems[i];
+				kSyntax *opSyntax = opToken->resolvedSyntaxInfo;
+				KTokenSeq macro = {kNode_ns(stmt), tokenList};
+				KTokenSeq_Push(kctx, macro);
+				KMacroSet macroParam[] = {
+					{KSymbol_("X"), tokenList, start, end},
+					{0, NULL, 0, 0},   /* sentinel */
+				};
+				macro.TargetPolicy.RemovingIndent = true;
+				SUGAR ApplyMacroData(kctx, macro.ns, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam, macro.tokenList);
+				KTokenSeq_End(kctx, macro);
+				SUGAR ParseNode(kctx, stmt, RangeTokenSeq(macro), ParseExpressionOption, NULL);
+				KTokenSeq_Pop(kctx, macro);
+				KReturnUnboxValue(endIdx);
+			}
 			break;
 		}
-	}
-	if(beginIdx == i) {
-		start = beginIdx + 1;
-		end = endIdx;
-	}
-	else {
-		start = beginIdx;
-		end   = i;
-	}
-	if(start < end) {
-		kToken *opToken = tokenList->TokenItems[i];
-		kSyntax *opSyntax = opToken->resolvedSyntaxInfo;
-		KTokenSeq macro = {kNode_ns(stmt), tokenList};
-		KTokenSeq_Push(kctx, macro);
-		KMacroSet macroParam[] = {
-			{KSymbol_("X"), tokenList, start, end},
-			{0, NULL, 0, 0},   /* sentinel */
-		};
-		macro.TargetPolicy.RemovingIndent = true;
-		SUGAR ApplyMacroData(kctx, macro.ns, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam, macro.tokenList);
-		KTokenSeq_End(kctx, macro);
-		SUGAR ParseNode(kctx, stmt, RangeTokenSeq(macro), ParseExpressionOption, NULL);
-		KTokenSeq_Pop(kctx, macro);
-		KReturnUnboxValue(endIdx);
 	}
 	KReturnUnboxValue(-1);
 }
@@ -97,7 +83,7 @@ static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ KSymbol_("$Inc"), SYNFLAG_MetaPattern|SYNFLAG_CFunc, 0, Precedence_Statement, {SUGARFUNC PatternMatch_Inc}, },
-		{ KSymbol_("$IncStmt"), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_IncStmt}, },
+//		{ KSymbol_("$IncStmt"), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_IncStmt}, },
 		{ KSymbol_("++"), SYNFLAG_NodeLeftJoinOp2|SYNFLAG_CFunc, Precedence_CStyleSuffixCall, Precedence_CStylePrefixOperator, {SUGARFUNC Expression_Increment},},
 		{ KSymbol_("--"), SYNFLAG_NodeLeftJoinOp2|SYNFLAG_CFunc, Precedence_CStyleSuffixCall, Precedence_CStylePrefixOperator, {SUGARFUNC Expression_Increment},},
 
@@ -118,7 +104,7 @@ static kbool_t cstyle_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE *Increment_Init(void)
+KDEFINE_PACKAGE *GoStyleIncrement_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "GoStyle", "1.0");

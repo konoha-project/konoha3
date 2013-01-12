@@ -4,5 +4,5 @@ Import("Syntax.CStyleBitwiseOperator");
 Import("Syntax.CStyleSelfAssignment");
 Import("Syntax.CStyleFor");
 Import("Syntax.Null");
-Import("Syntax.Increment");
+Import("Syntax.GoStyleIncrement");
 
