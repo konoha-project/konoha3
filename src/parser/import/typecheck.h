@@ -272,8 +272,8 @@ static kNode* TypeCheckNodeList(KonohaContext *kctx, kNode *block, size_t n, kNa
 
 static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, KClass *reqc)
 {
-	DBG_P(">>>>>>>>");
-	KDump(block);
+//	DBG_P(">>>>>>>>");
+//	KDump(block);
 	int i, size = kNode_GetNodeListSize(kctx, block) - 1;
 	for(i = 0; i < size; i++) {
 		kNode *stmt = TypeCheckNodeList(kctx, block, i, ns, KClass_void);
