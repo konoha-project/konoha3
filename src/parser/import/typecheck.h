@@ -319,23 +319,17 @@ static struct KGammaLocalData *kNameSpace_PopGamma(KonohaContext *kctx, kNameSpa
 
 // --------------------------------------------------------------------------
 
-static kNode* kMethod_ParseBodyNode(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *source, kfileline_t uline, int baseIndent)
-{
-	const char *script = kString_text(source);
-	if(IS_NULL(source) || script[0] == 0) {
-		DBG_ASSERT(IS_Token(mtd->SourceToken));
-		script = kString_text(mtd->SourceToken->text);
-		uline = mtd->SourceToken->uline;
-		baseIndent = mtd->SourceToken->indent;
-	}
-	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList, 0};
-	KTokenSeq_Push(kctx, tokens);
-	Tokenize(kctx, ns, script, uline, baseIndent, tokens.tokenList);
-	KTokenSeq_End(kctx, tokens);
-	kNode *node = ParsePreprocessNode(kctx, ns, tokens.tokenList, tokens.beginIdx, tokens.endIdx);
-	KTokenSeq_Pop(kctx, tokens);
-	return node;
-}
+//static kNode* kMethod_ParseBodyNode(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *source, kfileline_t uline, int baseIndent)
+//{
+//	const char *script = kString_text(source);
+//	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList, 0};
+//	KTokenSeq_Push(kctx, tokens);
+//	Tokenize(kctx, ns, script, uline, baseIndent, tokens.tokenList);
+//	KTokenSeq_End(kctx, tokens);
+//	kNode *node = ParsePreprocessNode(kctx, ns, tokens.tokenList, tokens.beginIdx, tokens.endIdx);
+//	KTokenSeq_Pop(kctx, tokens);
+//	return node;
+//}
 
 static void kNameSpace_InitParam(KonohaContext *kctx, struct KGammaLocalData *genv, kParam *pa, kparamtype_t *callparam)
 {
@@ -354,11 +348,12 @@ static void kNameSpace_InitParam(KonohaContext *kctx, struct KGammaLocalData *ge
 static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t *callparamNULL, kNameSpace *ns, kString *text, kfileline_t uline, int baseIndent, int options)
 {
 	INIT_GCSTACK();
+	size_t errorCount = KGetParserContext(kctx)->errorMessageCount;
 	kParam *param = kMethod_GetParam(mtd);
 	if(callparamNULL != NULL) {
 		//DynamicComplie();
 	}
-	kNode *node = kMethod_ParseBodyNode(kctx, mtd, ns, text, uline, baseIndent);
+	kNode *node = ParseSource(kctx, ns, kString_text(text), uline, baseIndent);
 	struct KGammaLocalData newgma = {0};
 	KGammaStackDecl lvarItems[32 + param->psize];
 	bzero(lvarItems, sizeof(KGammaStackDecl) * (32 + param->psize));
@@ -374,6 +369,7 @@ static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t 
 	node = TypeCheckNode(kctx, node, ns, KClass_void, 0);
 	KLIB kMethod_GenCode(kctx, mtd, node, options);
 	KPopGammaStack(ns, &newgma);
+	kMethod_Set(StaticError, ((kMethodVar *)mtd), (KGetParserContext(kctx)->errorMessageCount > errorCount));
 	RESET_GCSTACK();
 	return mtd;
 }

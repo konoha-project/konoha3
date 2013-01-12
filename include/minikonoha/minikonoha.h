@@ -1414,8 +1414,9 @@ static const char* MethodFlagData[] = {
 #define kMethod_Override             ((uintptr_t)(1<<20))
 #define kMethod_IgnoredOverride      ((uintptr_t)(1<<21))
 #define kMethod_DynamicCall          ((uintptr_t)(1<<22))
+#define kMethod_StaticError          ((uintptr_t)(1<<23))
+#define kMethod_Warning              ((uintptr_t)(1<<24))
 
-#define kMethod_Warning              ((uintptr_t)(1<<23))
 #define kMethod_WeakCoercion         kMethod_Coercion|kMethod_Warning
 
 #define kMethod_Is(P, MTD)            (KFlag_Is(uintptr_t, (MTD)->flag, kMethod_##P))

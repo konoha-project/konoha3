@@ -58,7 +58,7 @@ static kString* new_StringMessage(KonohaContext *kctx, kArray *gcstack, KBuffer 
 	return KLIB KBuffer_Stringfy(kctx, wb, gcstack, StringPolicy_ASCII|StringPolicy_FreeKBuffer);
 }
 
-static kString* KParserContext_vprintMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
+static kString* KParserContext_PrintMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
 {
 	KParserContext *sugarContext = KGetParserContext(kctx);
 	if(IsPrintableMessage(kctx, sugarContext, taglevel)) {
@@ -78,7 +78,7 @@ static void kToken_ToError(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglev
 {
 	va_list ap;
 	va_start(ap, fmt);
-	kString *errmsg = KParserContext_vprintMessage(kctx, taglevel, tk->uline, fmt, ap);
+	kString *errmsg = KParserContext_PrintMessage(kctx, taglevel, tk->uline, fmt, ap);
 	va_end(ap);
 	if(errmsg != NULL) {
 		KFieldSet(tk, tk->text, errmsg);
@@ -107,7 +107,7 @@ static kNode* MessageNode(KonohaContext *kctx, kNode *node, kTokenNULL *tk, kNam
 		assert(IS_Token(tk));
 		uline = tk->uline;
 	}
-	kString *errmsg = KParserContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
+	kString *errmsg = KParserContext_PrintMessage(kctx, taglevel, uline, fmt, ap);
 	if(taglevel <= ErrTag && !kNode_IsError(node)) {
 		kNode_ToError(kctx, node, errmsg);
 	}
@@ -125,7 +125,7 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 	if(trace != NULL && IS_Node(trace->baseStack[1].asNode)) {  // Static Compiler Message
 		kNode *stmt = trace->baseStack[1].asNode;
 		kfileline_t uline = kNode_uline(stmt);
-		kString *emsg = KParserContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
+		kString *emsg = KParserContext_PrintMessage(kctx, taglevel, uline, fmt, ap);
 		va_end(ap);
 		if(taglevel <= ErrTag && !kNode_IsError(stmt)) {
 			kNode_ToError(kctx, stmt, emsg);

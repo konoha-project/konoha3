@@ -276,14 +276,30 @@ static kNode *AddParamNode(KonohaContext *kctx, kNameSpace *ns, kNode *node, kAr
 	return node;
 }
 
-static kNode *ParsePreprocessNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
+//static kNode *ParsePreprocessNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
+//{
+//	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList, 0};
+//	KTokenSeq_Push(kctx, tokens);
+//	Preprocess(kctx, ns, tokenList, beginIdx, endIdx, NULL, tokens.tokenList);
+//	KTokenSeq_End(kctx, tokens);
+//	kNode *node = ParseNewNode(kctx, ns, tokens.tokenList, &tokens.beginIdx, tokens.endIdx, ParseMetaPatternOption, NULL);
+//	KTokenSeq_Pop(kctx, tokens);
+//	return node;
+//}
+
+static kNode* ParseSource(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline, int baseIndent)
 {
+	kNode *node;
 	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList, 0};
 	KTokenSeq_Push(kctx, tokens);
-	Preprocess(kctx, ns, tokenList, beginIdx, endIdx, NULL, tokens.tokenList);
+	Tokenize(kctx, ns, script, uline, baseIndent, tokens.tokenList);
 	KTokenSeq_End(kctx, tokens);
-	kNode *node = ParseNewNode(kctx, ns, tokens.tokenList, &tokens.beginIdx, tokens.endIdx, ParseMetaPatternOption, NULL);
+	{
+		KTokenSeq step2 = {ns, tokens.tokenList, kArray_size(tokens.tokenList)};
+		Preprocess(kctx, ns, RangeTokenSeq(tokens), NULL, step2.tokenList);
+		KTokenSeq_End(kctx, step2);
+		node = ParseNewNode(kctx, ns, step2.tokenList, &step2.beginIdx, step2.endIdx, ParseMetaPatternOption, NULL);
+	}
 	KTokenSeq_Pop(kctx, tokens);
 	return node;
 }
-

@@ -69,14 +69,13 @@ static kstatus_t kNode_Eval(KonohaContext *kctx, kNode *stmt, kMethod *mtd, KTra
 	newgma.localScope.varsize   = 0;
 	newgma.localScope.allocsize = 0;
 
+	size_t errorCount = KGetParserContext(kctx)->errorMessageCount;
 	KPushGammaStack(ns, &newgma);
-//	kNameSpace_InitIt(kctx, &newns, kMethod_GetParam(mtd));
 	stmt = TypeCheckNode(kctx, stmt, ns, KClass_var, TypeCheckPolicy_AllowVoid);
 	KPopGammaStack(ns, &newgma);
-	if(kNode_IsError(stmt)) {
+	if(errorCount < KGetParserContext(kctx)->errorMessageCount) {
 		return K_BREAK;  // to avoid duplicated error message
 	}
-	KDump(stmt);
 	kbool_t isTryEval = true;
 	if(KonohaContext_Is(CompileOnly, kctx)) {
 		isTryEval = false;
