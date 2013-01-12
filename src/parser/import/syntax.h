@@ -1336,11 +1336,11 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	KPARSERM->patternParseFunc  = patternParseFunc;
 	KPARSERM->methodTypeFunc = MethodCallFunc;
 	// Syntax Rule
-	kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("script")), "script $Block", 0, NULL);
 	kSyntax_AddPattern(kctx, kSyntax_(ns, PATTERN(TypeDecl)), "$Type $Expr", 0, NULL);
 	kSyntax_AddPattern(kctx, kSyntax_(ns, PATTERN(MethodDecl)), "$Type [ClassName: $Type] [$Symbol] $Param [$Block]", 0, NULL);
 	kSyntax_AddPattern(kctx, kSyntax_(ns, TOKEN(if)), "\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Block]", 0, NULL);
 	kSyntax_AddPattern(kctx, kSyntax_(ns, TOKEN(else)), "\"else\" $Block", 0, NULL);
 	kSyntax_AddPattern(kctx, kSyntax_(ns, TOKEN(return)), "\"return\" [$Expr]", 0, NULL);
+	kSyntax_AddPattern(kctx, kSyntax_(ns, TOKEN(script)), "script $Block", 0, NULL);
 }
 
