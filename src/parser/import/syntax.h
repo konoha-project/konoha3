@@ -78,31 +78,36 @@ static KMETHOD PatternMatch_CStyleBlock(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(beginIdx);
 }
 
+static kbool_t IsStatementEnd(KonohaContext *kctx, kToken *tk)
+{
+	return kToken_IsStatementSeparator(tk);
+}
+
 static KMETHOD Parse_Block(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Parse(block, name, tokenList, beginIdx, opIdx, endIdx);
-	kNameSpace *ns = kNode_ns(block);
 	if(opIdx != -1) {
-		int i;
-		for(i = opIdx; i < endIdx; i++) {
-			kToken *tk = tokenList->TokenVarItems[i];
-			if(tk->resolvedSyntaxInfo->precedence_op2 == Precedence_CStyleStatementEnd) {
-				if(IS_NULL(tk->resolvedSyntaxInfo)) {
-					SUGAR MessageNode(kctx, block, tk, NULL, ErrTag, "undefined token: %s", KToken_t(tk));
-					KReturnUnboxValue(endIdx);
-				}
-				if(beginIdx < i) {
-					kNode *stmt = ParseNewNode(kctx, ns, tokenList, &beginIdx, i, ParseMetaPatternOption, NULL);
-					kNode_AddNode(kctx, block, stmt);
-				}
-				beginIdx = i + 1;
-			}
-		}
-		if(beginIdx < endIdx) {
-			kNode *stmt = ParseNewNode(kctx, ns, tokenList, &beginIdx, endIdx, ParseMetaPatternOption, NULL);
-			kNode_AddNode(kctx, block, stmt);
-		}
-		//DBG_P("create block size=%d", kArray_size(block->NodeList));
+		AppendParsedNode(kctx, block, tokenList, beginIdx, endIdx, IsStatementEnd, ParseMetaPatternOption, NULL);
+//		int i;
+//		for(i = opIdx; i < endIdx; i++) {
+//			kToken *tk = tokenList->TokenVarItems[i];
+//			if(tk->resolvedSyntaxInfo->precedence_op2 == Precedence_CStyleStatementEnd) {
+//				if(IS_NULL(tk->resolvedSyntaxInfo)) {
+//					SUGAR MessageNode(kctx, block, tk, NULL, ErrTag, "undefined token: %s", KToken_t(tk));
+//					KReturnUnboxValue(endIdx);
+//				}
+//				if(beginIdx < i) {
+//					kNode *stmt = ParseNewNode(kctx, ns, tokenList, &beginIdx, i, ParseMetaPatternOption, NULL);
+//					kNode_AddNode(kctx, block, stmt);
+//				}
+//				beginIdx = i + 1;
+//			}
+//		}
+//		if(beginIdx < endIdx) {
+//			kNode *stmt = ParseNewNode(kctx, ns, tokenList, &beginIdx, endIdx, ParseMetaPatternOption, NULL);
+//			kNode_AddNode(kctx, block, stmt);
+//		}
+//		//DBG_P("create block size=%d", kArray_size(block->NodeList));
 		KReturnUnboxValue(endIdx);
 	}
 }
@@ -113,8 +118,8 @@ static KMETHOD Expression_Block(KonohaContext *kctx, KonohaStack *sfp)
 	if(beginIdx == opIdx) {
 		kNameSpace *ns = kNode_ns(node);
 		kToken *groupToken = kToken_ToBraceGroup(kctx, tokenList->TokenVarItems[beginIdx], ns, NULL);
-
-		kNode_Termnize(kctx, node, kToken_ToBraceGroup(kctx, tokenList->TokenVarItems[beginIdx], ns, NULL));
+		AppendParsedNode(kctx, node, RangeGroup(groupToken->GroupTokenList), IsStatementEnd, ParseMetaPatternOption, NULL);
+//		kNode_Termnize(kctx, node, kToken_ToBraceGroup(kctx, tokenList->TokenVarItems[beginIdx], ns, NULL));
 		KReturnUnboxValue(beginIdx+1);
 	}
 	KReturnUnboxValue(-1);

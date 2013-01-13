@@ -56,9 +56,6 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(-1);
 }
 
-// ----------------------------------------------------------------------------
-/* define class */
-
 static kbool_t new_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
