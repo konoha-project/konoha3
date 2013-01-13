@@ -88,26 +88,6 @@ static KMETHOD Parse_Block(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Parse(block, name, tokenList, beginIdx, opIdx, endIdx);
 	if(opIdx != -1) {
 		AppendParsedNode(kctx, block, tokenList, beginIdx, endIdx, IsStatementEnd, ParseMetaPatternOption, NULL);
-//		int i;
-//		for(i = opIdx; i < endIdx; i++) {
-//			kToken *tk = tokenList->TokenVarItems[i];
-//			if(tk->resolvedSyntaxInfo->precedence_op2 == Precedence_CStyleStatementEnd) {
-//				if(IS_NULL(tk->resolvedSyntaxInfo)) {
-//					SUGAR MessageNode(kctx, block, tk, NULL, ErrTag, "undefined token: %s", KToken_t(tk));
-//					KReturnUnboxValue(endIdx);
-//				}
-//				if(beginIdx < i) {
-//					kNode *stmt = ParseNewNode(kctx, ns, tokenList, &beginIdx, i, ParseMetaPatternOption, NULL);
-//					kNode_AddNode(kctx, block, stmt);
-//				}
-//				beginIdx = i + 1;
-//			}
-//		}
-//		if(beginIdx < endIdx) {
-//			kNode *stmt = ParseNewNode(kctx, ns, tokenList, &beginIdx, endIdx, ParseMetaPatternOption, NULL);
-//			kNode_AddNode(kctx, block, stmt);
-//		}
-//		//DBG_P("create block size=%d", kArray_size(block->NodeList));
 		KReturnUnboxValue(endIdx);
 	}
 }
@@ -119,7 +99,6 @@ static KMETHOD Expression_Block(KonohaContext *kctx, KonohaStack *sfp)
 		kNameSpace *ns = kNode_ns(node);
 		kToken *groupToken = kToken_ToBraceGroup(kctx, tokenList->TokenVarItems[beginIdx], ns, NULL);
 		AppendParsedNode(kctx, node, RangeGroup(groupToken->GroupTokenList), IsStatementEnd, ParseMetaPatternOption, NULL);
-//		kNode_Termnize(kctx, node, kToken_ToBraceGroup(kctx, tokenList->TokenVarItems[beginIdx], ns, NULL));
 		KReturnUnboxValue(beginIdx+1);
 	}
 	KReturnUnboxValue(-1);
@@ -921,15 +900,15 @@ static KMETHOD TypeCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp)
 // ---------------------------------------------------------------------------
 // Statement Node
 
-#define DefaultNameSpace NULL
-
 static KMETHOD Statement_if(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
 	TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
-	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, TypeCheckPolicy_AllowEmpty);
-	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_else, ns, KClass_void, TypeCheckPolicy_AllowEmpty);
-	KReturn(kNode_Type(kctx, stmt, KNode_If, KType_void));
+	kNode *thenNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, reqc, TypeCheckPolicy_AllowEmpty);
+	if(thenNode != NULL && !kNode_IsError(thenNode)) {
+		SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_else, ns, KClass_(thenNode->attrTypeId), TypeCheckPolicy_AllowEmpty);
+		KReturn(kNode_Type(kctx, stmt, KNode_If, thenNode->attrTypeId));
+	}
 }
 
 static kNode* LookupNoElseIfNode(KonohaContext *kctx, kNode *ifNode)
@@ -1265,24 +1244,24 @@ static KMETHOD Statement_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(kNode_Type(kctx, stmt, KNode_Done, KType_void));
 }
 
-static KMETHOD Statement_script(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_TypeCheck(stmt, ns, reqc);
-	INIT_GCSTACK();
-	kMethodVar *mtd = (kMethodVar *)KLIB new_kMethod(kctx, _GcStack, kMethod_Static, KType_Object, KSymbol_script, NULL);
-	KLIB kMethod_SetParam(kctx, mtd, KType_void, 0, NULL);
-	kMethod_SetLazyCompilation(kctx, mtd, stmt, ns);
-	kMethod_DoLazyCompilation(kctx, mtd, NULL, 0);
-	if(kMethod_Is(StaticError, mtd)) {
-		stmt = kNode_Type(kctx, stmt, KNode_Done, KType_void);
-	}
-	else {
-		kNode_AddNode(kctx, stmt, K_NULLNODE);
-		kNode_AddNode(kctx, stmt, new_ConstNode(kctx, ns, NULL, K_NULL));
-		stmt = TypeCheckMethodParam(kctx, mtd, stmt, ns, KClass_void);
-	}
-	KReturnWith(stmt, RESET_GCSTACK());
-}
+//static KMETHOD Statement_script(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	VAR_TypeCheck(stmt, ns, reqc);
+//	INIT_GCSTACK();
+//	kMethodVar *mtd = (kMethodVar *)KLIB new_kMethod(kctx, _GcStack, kMethod_Static, KType_Object, KSymbol_script, NULL);
+//	KLIB kMethod_SetParam(kctx, mtd, KType_void, 0, NULL);
+//	kMethod_SetLazyCompilation(kctx, mtd, stmt, ns);
+//	kMethod_DoLazyCompilation(kctx, mtd, NULL, 0);
+//	if(kMethod_Is(StaticError, mtd)) {
+//		stmt = kNode_Type(kctx, stmt, KNode_Done, KType_void);
+//	}
+//	else {
+//		kNode_AddNode(kctx, stmt, K_NULLNODE);
+//		kNode_AddNode(kctx, stmt, new_ConstNode(kctx, ns, NULL, K_NULL));
+//		stmt = TypeCheckMethodParam(kctx, mtd, stmt, ns, KClass_void);
+//	}
+//	KReturnWith(stmt, RESET_GCSTACK());
+//}
 
 /* ------------------------------------------------------------------------ */
 
@@ -1348,7 +1327,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(else),         SYNFLAG_CTypeFunc, 0, Precedence_Statement, {patternParseFunc}, {SUGARFUNC Statement_else}},
 		{ TOKEN(return), SYNFLAG_CTypeFunc|SYNFLAG_NodeBreakExec, 0, Precedence_Statement, {patternParseFunc}, {SUGARFUNC Statement_return} },
 		{ TOKEN(new), SYNFLAG_CFunc, 0, Precedence_CStyleSuffixCall, {SUGARFUNC Expression_new}, },
-		{ TOKEN(script), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {patternParseFunc}, {SUGARFUNC Statement_script},},
+//		{ TOKEN(script), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {patternParseFunc}, {SUGARFUNC Statement_script},},
 		{ KSymbol_END, },
 	};
 	kNameSpace_DefineSyntax(kctx, ns, SYNTAX, NULL);
@@ -1363,6 +1342,6 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	kSyntax_AddPattern(kctx, kSyntax_(ns, TOKEN(if)), "\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Block]", 0, NULL);
 	kSyntax_AddPattern(kctx, kSyntax_(ns, TOKEN(else)), "\"else\" $Block", 0, NULL);
 	kSyntax_AddPattern(kctx, kSyntax_(ns, TOKEN(return)), "\"return\" [$Expr]", 0, NULL);
-	kSyntax_AddPattern(kctx, kSyntax_(ns, TOKEN(script)), "script $Block", 0, NULL);
+//	kSyntax_AddPattern(kctx, kSyntax_(ns, TOKEN(script)), "script $Block", 0, NULL);
 }
 
