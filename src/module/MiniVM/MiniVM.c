@@ -861,11 +861,11 @@ static kbool_t KBuilder_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, 
 	return true;
 }
 
-//static kbool_t KBuilder_VisitPushNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
-//{
-//	SUGAR VisitNode(kctx, builder, expr->NodeToPush, &(expr->stackbase));
-//	return true;
-//}
+static kbool_t KBuilder_VisitPushNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
+{
+	SUGAR VisitNode(kctx, builder, expr->NodeToPush, &(expr->stackbase));
+	return true;
+}
 
 static kbool_t KBuilder_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {

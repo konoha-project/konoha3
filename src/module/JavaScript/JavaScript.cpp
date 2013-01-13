@@ -224,9 +224,15 @@ static int KMethodName_isUnaryOperator(KonohaContext *kctx, kmethodn_t mn)
 	return 0;
 }
 
+static kbool_t JSBuilder_VisitPushNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
+{
+	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);  // ADDED by kimio to pass compilation
+	return true;
+}
+
 static kbool_t JSBuilder_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);  // ADDED by kimio
+	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);  // ADDED by kimio to pass compilation
 	return true;
 }
 

@@ -270,27 +270,42 @@ static kNode* TypeCheckNodeList(KonohaContext *kctx, kNode *block, size_t n, kNa
 	return stmt;
 }
 
+static kNode *PushNode(KonohaContext *kctx, kNameSpace *ns, size_t stackbase, kNode *expr)
+{
+	kNode *node = KNewNode(ns);
+	KFieldSet(node, node->NodeToPush, expr);
+	node->stackbase = stackbase;
+	return kNode_Type(kctx, node, KNode_Push, expr->attrTypeId);
+}
+
 static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, KClass *reqc)
 {
-//	DBG_P(">>>>>>>>");
+	int i, size = kNode_GetNodeListSize(kctx, block) - 1, hasValue = (reqc->typeId != KType_void);
+	DBG_P(">>>>>>>> stackbase=%d varsize=%d, reqc=%s", block->stackbase, ns->genv->localScope.varsize, KClass_text(reqc));
 //	KDump(block);
-	int i, size = kNode_GetNodeListSize(kctx, block) - 1;
+	if(hasValue) {
+
+	}
 	for(i = 0; i < size; i++) {
 		kNode *stmt = TypeCheckNodeList(kctx, block, i, ns, KClass_void);
 		if(kNode_IsError(stmt)) {
-			return reqc->typeId == KType_void ? kNode_Type(kctx, block, KNode_Block, KType_void) : stmt;  // untyped
+			return hasValue ? stmt : kNode_Type(kctx, block, KNode_Block, KType_void);  // untyped
 		}
 	}
 	if(size >= 0) {
 		kNode *stmt = TypeCheckNodeList(kctx, block, size, ns, reqc);
 		if(kNode_IsError(stmt)) {
-			return stmt;
+			return hasValue ? stmt : kNode_Type(kctx, block, KNode_Block, KType_void);  // untyped
 		}
-		kNode_Type(kctx, block, KNode_Block, stmt->attrTypeId == KType_var ? KType_void : stmt->attrTypeId);
+//		if(hasValue) {
+//			KFieldSet(stmt->NodeList, stmt->NodeList->NodeItems[size], PushNode(kctx, ns, block->stackbase, stmt));
+//		}
+		kNode_Type(kctx, block, KNode_Block, stmt->attrTypeId);
 	}
 	else {
 		kNode_Type(kctx, block, KNode_Block, KType_void);
 	}
+	DBG_P(">>>>>>>> stackbase=%d, typed=%s", block->stackbase, KType_text(block->attrTypeId));
 	return block;
 }
 

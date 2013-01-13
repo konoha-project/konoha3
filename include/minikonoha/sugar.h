@@ -417,6 +417,7 @@ typedef kshort_t       knode_t;
 	OP(Local)\
 	OP(Field)\
 	OP(Box)\
+	OP(Push)\
 	OP(MethodCall)\
 	OP(And)\
 	OP(Or)\

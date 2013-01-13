@@ -351,6 +351,7 @@ static void Preprocess(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, i
 		KLIB kArray_Add(kctx, bufferList, tk);
 	}
 }
+
 //						if(kSyntax_Is(Macro, syntax)) {
 //							if(syn->macroParamSize == 0) {
 //								ApplyMacroData(kctx, tokens, syntax->macroDataNULL, 0, kArray_size(syntax->macroDataNULL), 0, NULL);
