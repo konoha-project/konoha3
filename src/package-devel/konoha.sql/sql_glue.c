@@ -422,6 +422,8 @@ static KMETHOD ResultSet_getBoolean(KonohaContext *kctx, KonohaStack *sfp)
 		ktypeattr_t type = rs->column[idx].type;
 		if(type == KType_boolean) {
 			res = rs->column[idx].val.boolValue;
+		} else if(type == KType_int) {
+			res = rs->column[idx].val.intValue;
 		}
 	}
 	KReturnUnboxValue(res);
