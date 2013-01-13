@@ -219,7 +219,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->ParseSyntaxNode              = ParseSyntaxNode;
 	mod->ParseNode                    = ParseNode;
 	mod->ParseNewNode                 = ParseNewNode;
-	mod->AddParamNode                 = AddParamNode;
+	mod->AppendParsedNode                 = AppendParsedNode;
 //	mod->kNode_RightJoinNode          = kNode_RightJoinNode;
 	mod->kToken_ToError               = kToken_ToError;
 	mod->MessageNode                  = MessageNode;

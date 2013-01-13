@@ -112,6 +112,8 @@ static KMETHOD Expression_Block(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Expression(node, tokenList, beginIdx, opIdx, endIdx);
 	if(beginIdx == opIdx) {
 		kNameSpace *ns = kNode_ns(node);
+		kToken *groupToken = kToken_ToBraceGroup(kctx, tokenList->TokenVarItems[beginIdx], ns, NULL);
+
 		kNode_Termnize(kctx, node, kToken_ToBraceGroup(kctx, tokenList->TokenVarItems[beginIdx], ns, NULL));
 		KReturnUnboxValue(beginIdx+1);
 	}
@@ -273,7 +275,7 @@ static KMETHOD Expression_Parenthesis(KonohaContext *kctx, KonohaStack *sfp)
 		kNode_AddNode(kctx, node, lnode);
 		kNode_AddNode(kctx, node, K_NULLNODE);
 		if(kArray_size(parenthesisToken->GroupTokenList) > 2) {
-			AddParamNode(kctx, ns, node, RangeGroup(parenthesisToken->GroupTokenList), "(");
+			AppendParsedNode(kctx, node, RangeGroup(parenthesisToken->GroupTokenList), NULL, ParseExpressionOption, "(");
 		}
 	}
 	KReturnUnboxValue(opIdx+1);
@@ -288,7 +290,7 @@ static KMETHOD Expression_Indexer(KonohaContext *kctx, KonohaStack *sfp)
 		groupToken->symbol = KMethodName_ToGetter(0);
 //		getToken->resolvedSyntaxInfo = groupToken->kSyntax_(ns, KSymbol_MemberPattern/*MethodCall*/);
 		kNode_Op(kctx, stmt, groupToken, 1, SUGAR ParseNewNode(kctx, ns, tokenList, &beginIdx, opIdx, ParseExpressionOption, NULL));
-		SUGAR AddParamNode(kctx, ns, stmt, RangeGroup(groupToken->GroupTokenList), "[");
+		AppendParsedNode(kctx, stmt, RangeGroup(groupToken->GroupTokenList), NULL, ParseExpressionOption, "[");
 		KReturnUnboxValue(opIdx + 1);
 	}
 	KReturnUnboxValue(-1);
@@ -322,9 +324,8 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Expression_COMMA(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(node, tokenList, beginIdx, opIdx, endIdx);
-	kNameSpace *ns = kNode_ns(node);
 	kNode_Op(kctx, node, tokenList->TokenItems[opIdx], 0);
-	AddParamNode(kctx, ns, node, tokenList, beginIdx, endIdx, NULL);
+	AppendParsedNode(kctx, node, tokenList, beginIdx, endIdx, NULL, ParseExpressionOption, NULL);
 	KReturnUnboxValue(endIdx);
 }
 

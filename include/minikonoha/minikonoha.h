@@ -2008,7 +2008,7 @@ typedef struct {
 #endif /* _MSC_VER */
 #define SAFECHECK(T)        (T)
 #define DBG_P(fmt, ...)     PLATAPI ReportDebugMessage(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__)
-#define DBG_ABORT(fmt, ...) PLATAPI ReportDebugMessage(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__); KExit(EXIT_FAILURE)
+#define DBG_ABORT(fmt, ...) PLATAPI ReportDebugMessage(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__); DBG_ASSERT(kctx == NULL)
 #define DUMP_P(fmt, ...)    PLATAPI printf_i(fmt, ## __VA_ARGS__)
 #else
 #define SAFECHECK(T)        (1)

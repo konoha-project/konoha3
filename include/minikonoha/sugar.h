@@ -598,6 +598,8 @@ typedef enum {
 
 struct KBuilder;
 
+typedef kbool_t (*IsSeparatorFunc)(KonohaContext *kctx, kToken *tk);
+
 typedef struct {
 	KRuntimeModule  h;
 	KClass *cSymbol;
@@ -639,10 +641,9 @@ typedef struct {
 //	kNodeVar*    (*new_UntypedOperatorNode)(KonohaContext *, kSyntax *syn, int n, ...);
 	int          (*ParseSyntaxNode)(KonohaContext *, kSyntax *, kNode *, ksymbol_t, kArray *, int beginIdx, int opIdx, int endIdx);
 
-	int          (*ParseNode)(KonohaContext *, kNode *, kArray *, int beginIdx, int endIdx, ParseOption option, const char *hintBeforeText);
-	kNode*       (*ParseNewNode)(KonohaContext *, kNameSpace *, kArray *tokenList, int* s, int e, ParseOption option, const char *hintBeforeText);
-
-	kNode*       (*AddParamNode)(KonohaContext *, kNameSpace *, kNode *, kArray *tokenList, int, int, const char *hintBeforeText);
+	int          (*ParseNode)(KonohaContext *, kNode *, kArray *, int beginIdx, int endIdx, ParseOption, const char *requiredTokenText);
+	kNode*       (*ParseNewNode)(KonohaContext *, kNameSpace *, kArray *tokenList, int* s, int e, ParseOption, const char *requiredTokenText);
+	kNode*       (*AppendParsedNode)(KonohaContext *, kNode *, kArray *tokenList, int, int, IsSeparatorFunc, ParseOption, const char *requiredTokenText);
 
 	kNode*       (*kNode_SetConst)(KonohaContext *, kNode *, KClass *, kObject *);
 	kNode*       (*kNode_SetUnboxConst)(KonohaContext *, kNode *, ktypeattr_t, uintptr_t);

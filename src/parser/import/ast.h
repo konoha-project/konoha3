@@ -147,7 +147,7 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 	//SUGAR dumpTokenArray(kctx, 0, tokenList, beginIdx, endIdx);
 	for(i = beginIdx; i < endIdx; i++) {
 		kToken *tk = tokenList->TokenItems[i];
-		if(tk->resolvedSyntaxInfo->precedence_op2 == Precedence_CStyleStatementEnd) {
+		if(kToken_IsStatementSeparator(tk)) {
 			return ParseSyntaxNode(kctx, tk->resolvedSyntaxInfo, node, 0, tokenList, beginIdx, i, endIdx);
 		}
 	}
@@ -167,7 +167,6 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 				kSyntax *patternSyntax = metaPatternList->SyntaxItems[i];
 				DBG_ASSERT(IS_Syntax(patternSyntax));
 				node->syn = patternSyntax;
-				//DBG_P(">>>>>>>>>> searching meta i=%d, pattern = %s%s index=%d,%d", i, KSymbol_Fmt2(patternSyntax->keyword), beginIdx, endIdx);
 				int nextIdx = ParseSyntaxNode(kctx, patternSyntax, node, 0, tokenList, currentIdx, PatternNoMatch, endIdx);
 				//DBG_P(">>>>>>>>>> searching meta pattern = %s%s index=%d,%d,%d", KSymbol_Fmt2(patternToken->symbol), beginIdx, nextIdx, endIdx);
 				if(nextIdx != PatternNoMatch) {
@@ -224,68 +223,70 @@ static int FindOperator(KonohaContext *kctx, kNode *node, kArray *tokenList, int
 	return opIdx;
 }
 
-static int ParseNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int beginIdx, int endIdx, ParseOption option, const char *hintBeforeText)
+static int ParseNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int beginIdx, int endIdx, ParseOption option, const char *requiredTokenText)
 {
 	if(beginIdx < endIdx) {
-		int opIdx = FindOperator(kctx, node, tokenList, beginIdx, endIdx);
-		kToken *keyOperator = tokenList->TokenItems[opIdx];
-		//DBG_P("KeyOperator >>>>>>>> %d<%d<%d, %s", beginIdx, opIdx, endIdx, KToken_t(keyOperator));
-		return ParseSyntaxNode(kctx, keyOperator->resolvedSyntaxInfo, node, 0, tokenList, beginIdx, opIdx, endIdx);
+		kNameSpace *ns =kNode_ns(node);
+		int nextIdx = PatternNoMatch;
+		if(KFlag_Is(int, option, ParseMetaPatternOption)) {
+			nextIdx = ParseMetaPattern(kctx, ns, node, tokenList, beginIdx, endIdx);
+		}
+		if(nextIdx == PatternNoMatch) {
+			int opIdx = FindOperator(kctx, node, tokenList, beginIdx, endIdx);
+			kToken *keyOperator = tokenList->TokenItems[opIdx];
+			//DBG_P("KeyOperator >>>>>>>> %d<%d<%d, %s", beginIdx, opIdx, endIdx, KToken_t(keyOperator));
+			nextIdx = ParseSyntaxNode(kctx, keyOperator->resolvedSyntaxInfo, node, 0, tokenList, beginIdx, opIdx, endIdx);
+		}
+		return nextIdx;
 	}
 	else {
-		if(hintBeforeText == NULL) hintBeforeText = "";
-		kNode_Message(kctx, node, ErrTag, "expected expression after %s", hintBeforeText);
-		DBG_ASSERT(kctx==NULL);
+		if(requiredTokenText != NULL) {
+			kNode_Message(kctx, node, ErrTag, "expected expression after %s", requiredTokenText);
+		}
+		else {
+			//DBG_ABORT("set null in future");
+		}
 	}
 	return endIdx;
 }
 
-static kNode* ParseNewNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int *beginIdx, int endIdx, ParseOption option, const char *hintBeforeText)
+static kNode* ParseNewNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int *beginIdx, int endIdx, ParseOption option, const char *requiredTokenText)
 {
 	kNode *node = new_UntypedNode(kctx, OnGcStack, ns);
-	//DBG_P("begin,end=(%d,%d)", beginIdx[0], endIdx);
-	int nextIdx = PatternNoMatch;
-	if(KFlag_Is(int, option, ParseMetaPatternOption)) {
-		nextIdx = ParseMetaPattern(kctx, ns, node, tokenList, beginIdx[0], endIdx);
-	}
-	if(nextIdx == PatternNoMatch) {
-		nextIdx = ParseNode(kctx, node, tokenList, beginIdx[0], endIdx, option, hintBeforeText);
-	}
+	int nextIdx = ParseNode(kctx, node, tokenList, beginIdx[0], endIdx, option, requiredTokenText);
 	beginIdx[0] = nextIdx;
-	KDump(node);
 	return node;
 }
 
-static kNode *AddParamNode(KonohaContext *kctx, kNameSpace *ns, kNode *node, kArray *tokenList, int beginIdx, int endIdx, const char *hintBeforeText/* if NULL empty isAllowed */)
+
+static kbool_t IsCommaSeparator(KonohaContext *kctx, kToken *tk)
+{
+	return (tk->symbol == KSymbol_COMMA);
+}
+
+static kNode *AppendParsedNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int beginIdx, int endIdx, IsSeparatorFunc isSeparator, ParseOption option, const char *requiredTokenText)
 {
 	int i, start = beginIdx;
+	kNameSpace *ns = kNode_ns(node);
+	if(isSeparator == NULL) {
+		isSeparator = IsCommaSeparator;
+	}
 	//DBG_P("beginIdx=%d, endIdx=%d", beginIdx, endIdx);
 	for(i = beginIdx; i < endIdx; i++) {
 		kToken *tk = tokenList->TokenItems[i];
-		if(tk->symbol == KSymbol_COMMA) {
-			if(start < i || hintBeforeText != NULL) {
-				kNode_AddNode(kctx, node, ParseNewNode(kctx, ns, tokenList, &start, i, ParseExpressionOption, hintBeforeText));
-				if(hintBeforeText != NULL) hintBeforeText = ",";
+		if(isSeparator(kctx, tk)) {
+			if(start < i || requiredTokenText != NULL) {
+				kNode_AddNode(kctx, node, ParseNewNode(kctx, ns, tokenList, &start, i, option, requiredTokenText));
+				if(requiredTokenText != NULL) requiredTokenText = ",";
 			}
 			start = i + 1;
 		}
 	}
-	if(start < i || hintBeforeText != NULL) {
-		kNode_AddNode(kctx, node, ParseNewNode(kctx, ns, tokenList, &start, i, ParseExpressionOption, hintBeforeText));
+	if(start < i || requiredTokenText != NULL) {
+		kNode_AddNode(kctx, node, ParseNewNode(kctx, ns, tokenList, &start, i, option, requiredTokenText));
 	}
 	return node;
 }
-
-//static kNode *ParsePreprocessNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
-//{
-//	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList, 0};
-//	KTokenSeq_Push(kctx, tokens);
-//	Preprocess(kctx, ns, tokenList, beginIdx, endIdx, NULL, tokens.tokenList);
-//	KTokenSeq_End(kctx, tokens);
-//	kNode *node = ParseNewNode(kctx, ns, tokens.tokenList, &tokens.beginIdx, tokens.endIdx, ParseMetaPatternOption, NULL);
-//	KTokenSeq_Pop(kctx, tokens);
-//	return node;
-//}
 
 static kNode* ParseSource(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline, int baseIndent)
 {

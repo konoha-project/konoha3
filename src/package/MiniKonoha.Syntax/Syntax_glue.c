@@ -420,15 +420,15 @@ static KMETHOD Node_Op3(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(SUGAR kNode_Op(kctx, self, tk, 2, expr1, expr2));
 }
 
-//## Node Node.AddParamNode(Token[] tokenList, int beginIdx, int endIdx, String hintBeforeText);
-static KMETHOD Node_AddParamNode(KonohaContext *kctx, KonohaStack *sfp)
+//## Node Node.AppendParsedNode(Token[] tokenList, int beginIdx, int endIdx, String requiredTokenText);
+static KMETHOD Node_AppendParsedNode(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNode *node = sfp[0].asNode;
 	kArray *tokenList = sfp[1].asArray;
 	int beginIdx = sfp[2].intValue;
 	int endIdx = sfp[3].intValue;
-	const char *hintBeforeText = IS_NULL(sfp[4].asString) ? NULL : kString_text(sfp[4].asString);
-	KReturn(SUGAR AddParamNode(kctx, kNode_ns(node), node, tokenList, beginIdx, endIdx, hintBeforeText));
+	const char *requiredTokenText = IS_NULL(sfp[4].asString) ? NULL : kString_text(sfp[4].asString);
+	KReturn(SUGAR AppendParsedNode(kctx, node, tokenList, beginIdx, endIdx, NULL, ParseExpressionOption, requiredTokenText));
 }
 
 #define TP_type KType_Object, KFieldName_("type")
@@ -474,7 +474,7 @@ static void Syntax_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceI
 		_Public, _F(Node_setConstValue), KType_Node, KType_Node, KMethodName_("setConstValue"), 1, KType_Object, KFieldName_("value") | KTypeAttr_Coercion,
 
 		_Public, _F(Node_AddParsedObject), KType_void, KType_Node, KMethodName_("AddParsedObject"), 2, TP_kw, KType_Object, KFieldName_("obj"),
-		_Public, _F(Node_AddParamNode), KType_Node, KType_Node, KMethodName_("AddParamNode"), 4, TP_tokens, TP_begin, TP_end, KType_String, KFieldName_("hintBeforeText"),
+		_Public, _F(Node_AppendParsedNode), KType_Node, KType_Node, KMethodName_("AppendParsedNode"), 4, TP_tokens, TP_begin, TP_end, KType_String, KFieldName_("requiredTokenText"),
 		_Public, _F(Node_newMethodNode1), KType_Node, KType_Node, KMethodName_("newMethodNode"), 3, TP_type, TP_kw, TP_ArgNode(1),
 		_Public, _F(Node_newMethodNode2), KType_Node, KType_Node, KMethodName_("newMethodNode"), 4, TP_type, TP_kw, TP_ArgNode(1), TP_ArgNode(2),
 		DEND,
@@ -608,7 +608,7 @@ static void Syntax_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceI
 //	}
 //	if(IS_NOTNULL(expr)) {
 //		assert(IS_Array(tk->GroupTokenList));
-//		expr = SUGAR AddParamNode(kctx, ns, expr, RangeGroup(tk->GroupTokenList), 1/*allowEmpty*/);
+//		expr = SUGAR AppendParsedNode(kctx, ns, expr, RangeGroup(tk->GroupTokenList), 1/*allowEmpty*/);
 //	}
 //	KReturn(expr);
 //}

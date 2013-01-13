@@ -180,7 +180,7 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 		if(IS_Array(pToken->GroupTokenList)) {
 			SUGAR kNode_Op(kctx, expr, definedToken, 1, K_NULLNODE);
 			FilterDefinedParam(kctx, ns, RangeGroup(pToken->GroupTokenList));
-			KReturn(SUGAR AddParamNode(kctx, ns, expr, RangeGroup(pToken->GroupTokenList), "("));
+			KReturn(SUGAR AppendParsedNode(kctx, expr, RangeGroup(pToken->GroupTokenList), NULL, ParseExpressionOption, "("));
 		}
 	}
 }

@@ -46,10 +46,9 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 				/* new Type1[] => Array<Type1>.newList */
 				KClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
 				newToken->symbol = KSymbol_("newArray");
-
 				kNode *arg0 = new_ConstNode(kctx, ns, NULL, KLIB Knull(kctx, arrayClass));
 				SUGAR kNode_Op(kctx, stmt, newToken, 1, arg0);
-				SUGAR AddParamNode(kctx, ns, stmt, RangeGroup(GroupTokenList), "[");
+				SUGAR AppendParsedNode(kctx, stmt, RangeGroup(GroupTokenList), NULL, ParseExpressionOption, NULL);
 				KReturnUnboxValue(nextIdx+1);
 			}
 		}

@@ -712,14 +712,12 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Expression_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, opIdx, endIdx);
-	kNameSpace *ns = kNode_ns(stmt);
 	kToken *groupToken = tokenList->TokenItems[opIdx];
 	if(beginIdx == opIdx) {
 		/* transform '[ Value1, Value2, ... ]' to '(Call Untyped new (Value1, Value2, ...))' */
 		DBG_ASSERT(groupToken->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup);
 		SUGAR kNode_Op(kctx, stmt, groupToken, 1, K_NULLNODE);
-		SUGAR AddParamNode(kctx, ns, stmt, RangeGroup(groupToken->GroupTokenList), NULL);
-		DBG_P(">>> package=%s", KPackage_text(stmt->syn->packageNameSpace->packageId));
+		SUGAR AppendParsedNode(kctx, stmt, RangeGroup(groupToken->GroupTokenList), NULL, ParseExpressionOption, NULL);
 		KReturnUnboxValue(opIdx+1);
 	}
 	KReturnUnboxValue(-1);
