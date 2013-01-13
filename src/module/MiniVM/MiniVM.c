@@ -642,10 +642,6 @@ static kbool_t KBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *build
 	DBG_ASSERT(a <= espidx);
 	kMethod *mtd = CallNode_getMethod(expr);
 	DBG_ASSERT(IS_Method(mtd));
-	/*
-	 * [CallNode] := this.method(arg1, arg2, ...)
-	 * expr->NodeList = [method, this, arg1, arg2, ...]
-	 **/
 	int i, s = kMethod_Is(Static, mtd) ? 2 : 1;
 	int argc = CallNode_getArgCount(expr);
 	for (i = s; i < argc + 2; i++) {
@@ -686,8 +682,7 @@ static kbool_t KBuilder_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, 
 			AsmMOV(kctx, builder, a, KClass_(leftHandNode->attrTypeId), leftHandNode->index);
 		}
 	}
-	else{
-		assert(leftHandNode->node == KNode_Field);
+	else if(leftHandNode->node == KNode_Field) {
 		intptr_t espidx = expr->stackbase;
 		SUGAR VisitNode(kctx, builder, rightHandNode, &espidx);
 		kshort_t index  = (kshort_t)leftHandNode->index;

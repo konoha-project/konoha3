@@ -38,7 +38,6 @@ static KMETHOD PatternMatch_Type(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
 	KClass *foundClass = NULL;
 	int returnIdx = ParseTypePattern(kctx, kNode_ns(stmt), tokenList, beginIdx, endIdx, &foundClass);
-	//DBG_P("tk=%s, returnIdx=%d", tokenList->TokenItems[beginIdx], returnIdx);
 	if(foundClass != NULL) {
 		kTokenVar *tk = new_(TokenVar, 0, OnVirtualField);
 		kNode_AddParsedObject(kctx, stmt, name, UPCAST(tk));
@@ -106,6 +105,23 @@ static KMETHOD Parse_Block(KonohaContext *kctx, KonohaStack *sfp)
 		//DBG_P("create block size=%d", kArray_size(block->NodeList));
 		KReturnUnboxValue(endIdx);
 	}
+}
+
+static KMETHOD Expression_Block(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_Expression(node, tokenList, beginIdx, opIdx, endIdx);
+	if(beginIdx == opIdx) {
+		kNameSpace *ns = kNode_ns(node);
+		kNode_Termnize(kctx, node, kToken_ToBraceGroup(kctx, tokenList->TokenVarItems[beginIdx], ns, NULL));
+		KReturnUnboxValue(beginIdx+1);
+	}
+	KReturnUnboxValue(-1);
+}
+
+static KMETHOD TypeCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_TypeCheck2(stmt, expr, ns, reqc);
+	KReturn(TypeCheckBlock(kctx, expr, ns, reqc));
 }
 
 static KMETHOD PatternMatch_Token(KonohaContext *kctx, KonohaStack *sfp)
@@ -524,12 +540,6 @@ static int AddLocalVariable(KonohaContext *kctx, kNameSpace *ns, ktypeattr_t att
 	s->varItems[index].name = name;
 	s->varsize += 1;
 	return index;
-}
-
-static KMETHOD TypeCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_TypeCheck2(stmt, expr, ns, reqc);
-	KReturn(TypeCheckBlock(kctx, expr, ns, reqc));
 }
 
 static kNode* new_GetterNode(KonohaContext *kctx, kToken *tkU, kMethod *mtd, kNode *expr)
@@ -1299,7 +1309,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ PATTERN(Member),  SYNFLAG_CFunc|SYNFLAG_Suffix, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Member}, {SUGARFUNC TypeCheck_Getter}},
 		{ GROUP(Parenthesis), SYNFLAG_CFunc|SYNFLAG_Suffix, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Parenthesis}, {SUGARFUNC TypeCheck_FuncStyleCall}}, //KSymbol_ParenthesisGroup
 		{ GROUP(Bracket),  SYNFLAG_CParseFunc|SYNFLAG_Suffix|SYNFLAG_TypeSuffix, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_Indexer}, {MethodCallFunc}}, //KSymbol_BracketGroup
-		{ GROUP(Brace),  },   // KSymbol_BraceGroup
+		{ GROUP(Brace),  SYNFLAG_CFunc, 0, 0, {SUGARFUNC Expression_Block}, {SUGARFUNC TypeCheck_Block}},   // KSymbol_BraceGroup
 		{ PATTERN(Block), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_CStyleBlock}, {SUGARFUNC TypeCheck_Block}, },
 		{ PATTERN(Param), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_CStyleParam}, {SUGARFUNC Statement_ParamDecl},},
 		{ PATTERN(Token), SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_Token}, {NULL}},
@@ -1321,7 +1331,7 @@ static void DefineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(NOT), 0, 0, Precedence_CStylePrefixOperator, {OperatorFunc}, {MethodCallFunc}},
 		{ TOKEN(COLON), 0, Precedence_CStyleTRINARY, },  // colon
 		{ TOKEN(COMMA), SYNFLAG_CFunc, Precedence_CStyleCOMMA, 0, {SUGARFUNC Expression_COMMA}, {NULL}},
-		{ TOKEN(DOLLAR),  /* 0, 0, 0, NULL, Expression_DOLLAR, */ },
+//		{ TOKEN(DOLLAR),  /* 0, 0, 0, NULL, Expression_DOLLAR, */ },
 		{ TOKEN(true),    SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_true}, },
 		{ TOKEN(false),   SYNFLAG_CTypeFunc, 0, 0, {TermFunc}, {SUGARFUNC TypeCheck_false}, },
 		{ PATTERN(Expr),  SYNFLAG_CFunc, 0, 0, {SUGARFUNC PatternMatch_Expression}, {NULL}, },

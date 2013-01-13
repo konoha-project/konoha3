@@ -281,8 +281,8 @@ static kNode *PushNode(KonohaContext *kctx, kNameSpace *ns, size_t stackbase, kN
 static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, KClass *reqc)
 {
 	int i, size = kNode_GetNodeListSize(kctx, block) - 1, hasValue = (reqc->typeId != KType_void);
-	DBG_P(">>>>>>>> stackbase=%d varsize=%d, reqc=%s", block->stackbase, ns->genv->localScope.varsize, KClass_text(reqc));
-//	KDump(block);
+	KDump(block);
+	DBG_P(">>>>>>>> stackbase=%d size=%d, varsize=%d, reqc=%s", block->stackbase, size, ns->genv->localScope.varsize, KClass_text(reqc));
 	if(hasValue) {
 
 	}
@@ -297,15 +297,12 @@ static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, 
 		if(kNode_IsError(stmt)) {
 			return hasValue ? stmt : kNode_Type(kctx, block, KNode_Block, KType_void);  // untyped
 		}
-//		if(hasValue) {
-//			KFieldSet(stmt->NodeList, stmt->NodeList->NodeItems[size], PushNode(kctx, ns, block->stackbase, stmt));
-//		}
 		kNode_Type(kctx, block, KNode_Block, stmt->attrTypeId);
 	}
 	else {
 		kNode_Type(kctx, block, KNode_Block, KType_void);
 	}
-	DBG_P(">>>>>>>> stackbase=%d, typed=%s", block->stackbase, KType_text(block->attrTypeId));
+	DBG_P(">>>>>>>> stackbase=%d, size=%d, typed=%s", block->stackbase, size, KType_text(block->attrTypeId));
 	return block;
 }
 
