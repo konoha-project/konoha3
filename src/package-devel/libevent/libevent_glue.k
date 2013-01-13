@@ -29,18 +29,18 @@ import("konoha.map");
 import("cstyle", "null");
 import("js4.date");
 
-class MyLibevent {
+class Event_base extends CEvent_base {
 	Map event_Map;
 
-	MyLibevent() {
+	Event_base() {
 		event_Map =  = new Map();
 	}
 
 	@Public int event_add(String key, Date tv) {
 		if (key.isNotNull()) {
-			this.event_Map.set(key, new Event());
+			this.event_Map.set(key, new CEvent());
 		}
-		Event ev = event_Map.get(key) as Event;
+		CEvent ev = event_Map.get(key) as CEvent;
 		return System.event_add(ev, tv);
 	}
 }

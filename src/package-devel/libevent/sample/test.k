@@ -5,7 +5,7 @@ import("libevent");
 import("js4.date");
 
 void main() {
-    MyLibevent e = new MyLibevent();
+    Event_base e = new Event_base();
     e.event_add("listener", new Date());
 }
 

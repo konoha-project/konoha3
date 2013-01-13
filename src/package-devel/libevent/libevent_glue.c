@@ -33,20 +33,20 @@ extern "C" {
 
 /* ======================================================================== */
 // Event_base class
-typedef struct Event_base {
+typedef struct CEvent_base {
 	kObjectHeader h;
 	struct event_base *event_base;
-} kEvent_base;
+} kCEvent_base;
 
-static void Event_base_Init(KonohaContext *kctx, kObject *o, void *conf)
+static void CEvent_base_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct Event_base *ev = (struct Event_base *) o;
+	struct CEvent_base *ev = (struct CEvent_base *) o;
 	ev->event_base = NULL;
 }
 
-static void Event_base_Free(KonohaContext *kctx, kObject *o)
+static void CEvent_base_Free(KonohaContext *kctx, kObject *o)
 {
-	struct Event_base *ev = (struct Event_base *) o;
+	struct CEvent_base *ev = (struct CEvent_base *) o;
 
 	if (ev->event_base != NULL) {
 		event_base_free(ev->event_base);
@@ -54,39 +54,39 @@ static void Event_base_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-//## Event_base Event_base.new();
-static KMETHOD Event_base_new(KonohaContext *kctx, KonohaStack *sfp)
+//## CEvent_base CEvent_base.new();
+static KMETHOD CEvent_base_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kEvent_base *ev = (kEvent_base *)sfp[0].asObject;
+	kCEvent_base *ev = (kCEvent_base *)sfp[0].asObject;
 	ev->event_base = event_base_new();
 	KReturn(ev);
 }
 
-//## Event_base Event_base.dispatch();
-static KMETHOD Event_base_dispatch(KonohaContext *kctx, KonohaStack *sfp)
+//## CEvent_base CEvent_base.dispatch();
+static KMETHOD CEvent_base_dispatch(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kEvent_base *ev = (kEvent_base *)sfp[0].asObject;
+	kCEvent_base *ev = (kCEvent_base *)sfp[0].asObject;
 	int ret = event_base_dispatch(ev->event_base);
 	KReturnUnboxValue(ret);
 }
 
 
 /* ======================================================================== */
-// Event class
-typedef struct Event {
+// CEvent class
+typedef struct CEvent {
 	kObjectHeader h;
 	struct event *event;
-} kEvent;
+} kCEvent;
 
-static void Event_Init(KonohaContext *kctx, kObject *o, void *conf)
+static void CEvent_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct Event *ev = (struct Event *) o;
+	struct CEvent *ev = (struct CEvent *) o;
 	ev->event = NULL;
 }
 
-static void Event_Free(KonohaContext *kctx, kObject *o)
+static void CEvent_Free(KonohaContext *kctx, kObject *o)
 {
-	struct Event *ev = (struct Event *) o;
+	struct CEvent *ev = (struct CEvent *) o;
 
 	if (ev->event != NULL) {
 		event_free(ev->event);
@@ -94,14 +94,14 @@ static void Event_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-//## Event Event.new();
-static KMETHOD Event_new(KonohaContext *kctx, KonohaStack *sfp)
+//## CEvent CEvent.new(CEvent_base event_base, int fd, int what, );
+static KMETHOD CEvent_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct Event *ev = (struct Event *) sfp[0].asObject;
-	struct Event_base *libevent = (struct Event_base *)sfp[1].asObject;
+	struct CEvent *ev = (struct CEvent *) sfp[0].asObject;
+	struct CEvent_base *libevent = (struct CEvent_base *)sfp[1].asObject;
 	evutil_socket_t fd = (evutil_socket_t)sfp[2].intValue;
 	kint_t what = sfp[3].intValue;
-	event_callback_fn cb = (event_callback_fn)sfp[4].asFunc;
+	event_callback_fn cb = (event_callback_fn)sfp[4].asFunc;	//TODO from eventListener package
 	void *arg = (void *)sfp[5].asObject;
 	ev->event = event_new(libevent->event_base, fd, (short)what, cb, arg);
 	KReturn(ev);
@@ -110,7 +110,7 @@ static KMETHOD Event_new(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ======================================================================== */
 // System class
-//## int System.event_add(Event_base_event event, Date tv);
+//## int System.event_add(CEvent_base event, Date tv);
 KMETHOD System_event_add(KonohaContext *kctx, KonohaStack* sfp)
 {
 #define Declare_kDate
@@ -122,16 +122,16 @@ KMETHOD System_event_add(KonohaContext *kctx, KonohaStack* sfp)
 #endif	//Declare_kDate
 #undef Declare_kDate
 
-	kEvent *ev = (kEvent *)sfp[1].asObject;
+	kCEvent *ev = (kCEvent *)sfp[1].asObject;
 	kDate *date = (kDate *)sfp[2].asObject;
 	int ret = event_add(ev->event, &date->tv);
 	KReturnUnboxValue(ret);
 }
 
-//## int System.event_del(Event event);
+//## int System.event_del(CEvent event);
 KMETHOD System_event_del(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kEvent *ev = (kEvent *)sfp[1].asObject;
+	kCEvent *ev = (kCEvent *)sfp[1].asObject;
 	int ret = event_del(ev->event);
 	KReturnUnboxValue(ret);
 }
@@ -139,36 +139,36 @@ KMETHOD System_event_del(KonohaContext *kctx, KonohaStack* sfp)
 
 /* ======================================================================== */
 
-static kbool_t Event_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
+static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	/* Class Definition */
 	/* If you want to create Generic class like Array<T>, see konoha.map package */
-	KDEFINE_CLASS defEvent_base = {0};
-	SETSTRUCTNAME(defEvent_base, Event_base);
-	//defEvent_base.cflag     = KClassFlag_Final;
-	defEvent_base.init      = Event_base_Init;
-	defEvent_base.free      = Event_base_Free;
-	KClass *Event_baseClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defEvent_base, trace);
+	KDEFINE_CLASS defCEvent_base = {0};
+	SETSTRUCTNAME(defCEvent_base, CEvent_base);
+	//defCEvent_base.cflag     = KClassFlag_Final;
+	defCEvent_base.init      = CEvent_base_Init;
+	defCEvent_base.free      = CEvent_base_Free;
+	KClass *CEvent_baseClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCEvent_base, trace);
 
-	KDEFINE_CLASS defEvent = {0};
-	SETSTRUCTNAME(defEvent, Event);
-	defEvent.cflag     = KClassFlag_Final;
-	defEvent.init      = Event_Init;
-	defEvent.free      = Event_Free;
-	KClass *EventClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defEvent, trace);
+	KDEFINE_CLASS defCEvent = {0};
+	SETSTRUCTNAME(defCEvent, CEvent);
+	defCEvent.cflag     = KClassFlag_Final;
+	defCEvent.init      = CEvent_Init;
+	defCEvent.free      = CEvent_Free;
+	KClass *CEventClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCEvent, trace);
 
 
 	/* You can define methods with the following procedures. */
-	int KType_Event_base = Event_baseClass->typeId;
-	int KType_Event = EventClass->typeId;
+	int KType_CEvent_base = CEvent_baseClass->typeId;
+	int KType_CEvent = CEventClass->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Event_base_new), KType_Event_base, KType_Event_base, KMethodName_("new"), 0,
-		_Public, _F(Event_base_dispatch), KType_Event_base, KType_Event_base, KMethodName_("dispatch"), 0,
-		_Public|_Static|_Const|_Im, _F(System_event_add), KType_int, KType_System, KMethodName_("event_add"), 2, KType_Object, KFieldName_("Event"), KType_Object, KFieldName_("timeval"),	//TODO: param type should be "KType_Event" "KType_Date"
-		_Public|_Static|_Const|_Im, _F(System_event_del), KType_int, KType_System, KMethodName_("event_del"), 1, KType_Object, KFieldName_("Event"),	//TODO: param type should be "KType_Event"
+		_Public, _F(CEvent_base_new), KType_CEvent_base, KType_CEvent_base, KMethodName_("new"), 0,
+		_Public, _F(CEvent_base_dispatch), KType_CEvent_base, KType_CEvent_base, KMethodName_("dispatch"), 0,
+		_Public|_Static|_Const|_Im, _F(System_event_add), KType_int, KType_System, KMethodName_("event_add"), 2, KType_Object, KFieldName_("CEvent"), KType_Object, KFieldName_("timeval"),	//TODO: param type should be "KType_CEvent" "KType_Date"
+		_Public|_Static|_Const|_Im, _F(System_event_del), KType_int, KType_System, KMethodName_("event_del"), 1, KType_Object, KFieldName_("CEvent"),	//TODO: param type should be "KType_CEvent"
 
-		_Public, _F(Event_new), KType_Event, KType_Event, KMethodName_("new"), 0,
+		_Public, _F(CEvent_new), KType_CEvent, KType_CEvent, KMethodName_("new"), 0,
 
 
 #ifdef	CUTCUT
@@ -181,7 +181,7 @@ static kbool_t Event_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, i
 	return true;
 }
 
-static kbool_t Event_base_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
+static kbool_t CEvent_base_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -190,8 +190,8 @@ KDEFINE_PACKAGE *libevent_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "libevent2", "0.1");
-	d.PackupNameSpace    = Event_base_PackupNameSpace;
-	d.ExportNameSpace   = Event_base_ExportNameSpace;
+	d.PackupNameSpace    = CEvent_base_PackupNameSpace;
+	d.ExportNameSpace   = CEvent_base_ExportNameSpace;
 	return &d;
 }
 
