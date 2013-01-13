@@ -464,7 +464,7 @@ struct kNodeVar {
 		uintptr_t      unboxConstValue;
 		intptr_t       index;
 		kObject*       ObjectConstValue;
-		size_t         stackbase;
+		intptr_t       stackbase;
 	};
 	knode_t node; 	   ktypeattr_t attrTypeId;
 };
