@@ -259,9 +259,9 @@ struct KBuilder {   /* MiniVM Builder */
 
 /* ------------------------------------------------------------------------ */
 
-typedef struct BasicNode BasicNode;
+typedef struct BasicBlock BasicBlock;
 
-struct BasicNode {
+struct BasicBlock {
 	long     incoming;
 	bblock_t newid;
 	bblock_t nextid;
@@ -272,42 +272,42 @@ struct BasicNode {
 	size_t   max;
 };
 
-static BasicNode *BasicNode_FindById(KonohaContext *kctx, bblock_t id)
+static BasicBlock *BasicBlock_FindById(KonohaContext *kctx, bblock_t id)
 {
-	BasicNode *bb = NULL;
+	BasicBlock *bb = NULL;
 	while(id != -1) {
-		bb = (BasicNode *)(kctx->stack->cwb.bytebuf + id);
+		bb = (BasicBlock *)(kctx->stack->cwb.bytebuf + id);
 		id = bb->newid;
 	}
 	return bb;
 }
 
-static bblock_t BasicNode_id(KonohaContext *kctx, BasicNode *bb)
+static bblock_t BasicBlock_id(KonohaContext *kctx, BasicBlock *bb)
 {
 	while(bb->newid != -1) {
-		bb = BasicNode_FindById(kctx, bb->newid);
+		bb = BasicBlock_FindById(kctx, bb->newid);
 	}
 	return ((char *)bb) - kctx->stack->cwb.bytebuf;
 }
 
-static BasicNode* new_BasicNode(KonohaContext *kctx, size_t max, bblock_t oldId)
+static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, bblock_t oldId)
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	BasicNode *bb = (BasicNode *)KLIB KBuffer_Alloca(kctx, &wb, max);
+	BasicBlock *bb = (BasicBlock *)KLIB KBuffer_Alloca(kctx, &wb, max);
 	if(oldId != -1) {
-		BasicNode *oldbb = BasicNode_FindById(kctx, oldId);
+		BasicBlock *oldbb = BasicBlock_FindById(kctx, oldId);
 		if(((char *)oldbb) + oldbb->max == (char *)bb) {
-			oldbb->max += (max - sizeof(BasicNode));
-			wb.m->bytesize -= sizeof(BasicNode);
+			oldbb->max += (max - sizeof(BasicBlock));
+			wb.m->bytesize -= sizeof(BasicBlock);
 			return oldbb;
 		}
 		memcpy(bb, oldbb, oldbb->size);
-		oldbb->newid = BasicNode_id(kctx, bb);
+		oldbb->newid = BasicBlock_id(kctx, bb);
 		oldbb->size = 0;
 	}
 	else {
-		bb->size = sizeof(BasicNode);
+		bb->size = sizeof(BasicBlock);
 		bb->newid    = -1;
 		bb->nextid   = -1;
 		bb->branchid = -1;
@@ -320,22 +320,22 @@ static BasicNode* new_BasicNode(KonohaContext *kctx, size_t max, bblock_t oldId)
 
 static inline size_t newsize2(size_t max)
 {
-	return ((max - sizeof(BasicNode)) * 2) + sizeof(BasicNode);
+	return ((max - sizeof(BasicBlock)) * 2) + sizeof(BasicBlock);
 }
 
-static bblock_t BasicNode_Add(KonohaContext *kctx, bblock_t blockId, kfileline_t uline, KVirtualCode *op, size_t size, size_t padding_size)
+static bblock_t BasicBlock_Add(KonohaContext *kctx, bblock_t blockId, kfileline_t uline, KVirtualCode *op, size_t size, size_t padding_size)
 {
-	BasicNode *bb = BasicNode_FindById(kctx, blockId);
+	BasicBlock *bb = BasicBlock_FindById(kctx, blockId);
 	DBG_ASSERT(bb->newid == -1);
 	DBG_ASSERT(size <= padding_size);
 	DBG_ASSERT(bb->nextid == -1 && bb->branchid == -1);
 	if(!(bb->size + size < bb->max)) {
 		size_t newsize = newsize2(bb->max);
-		bb = new_BasicNode(kctx, newsize, blockId);
+		bb = new_BasicBlock(kctx, newsize, blockId);
 	}
 	memcpy(((char *)bb) + bb->size, op, size);
 	bb->size += padding_size;
-	return BasicNode_id(kctx, bb);
+	return BasicBlock_id(kctx, bb);
 }
 
 static int CodeOffset(KBuffer *wb)
@@ -343,88 +343,88 @@ static int CodeOffset(KBuffer *wb)
 	return KBuffer_bytesize(wb);
 }
 
-static void BasicNode_WriteBuffer(KonohaContext *kctx, bblock_t blockId, KBuffer *wb)
+static void BasicBlock_WriteBuffer(KonohaContext *kctx, bblock_t blockId, KBuffer *wb)
 {
-	BasicNode *bb = BasicNode_FindById(kctx, blockId);
+	BasicBlock *bb = BasicBlock_FindById(kctx, blockId);
 	while(bb != NULL && bb->codeoffset == -1) {
-		size_t len = bb->size - sizeof(BasicNode);
+		size_t len = bb->size - sizeof(BasicBlock);
 		bb->codeoffset = CodeOffset(wb);
 		if(bb->nextid == bb->branchid  && bb->nextid != -1) {
 			bb->branchid = -1;
 			len -= sizeof(KVirtualCode); // remove unnecesarry jump ..
 		}
 		if(len > 0) {
-			bblock_t id = BasicNode_id(kctx, bb);
+			bblock_t id = BasicBlock_id(kctx, bb);
 			char buf[len];  // bb is growing together with wb.
-			memcpy(buf, ((char *)bb) + sizeof(BasicNode), len);
+			memcpy(buf, ((char *)bb) + sizeof(BasicBlock), len);
 			KLIB KBuffer_Write(kctx, wb, buf, len);
-			bb = BasicNode_FindById(kctx, id);  // recheck
+			bb = BasicBlock_FindById(kctx, id);  // recheck
 			bb->lastoffset = CodeOffset(wb) - sizeof(KVirtualCode);
 			DBG_ASSERT(bb->codeoffset + ((len / sizeof(KVirtualCode)) - 1) * sizeof(KVirtualCode) == bb->lastoffset);
 		}
 		else {
 			DBG_ASSERT(bb->branchid == -1);
 		}
-		bb = BasicNode_FindById(kctx, bb->nextid);
+		bb = BasicBlock_FindById(kctx, bb->nextid);
 	}
-	bb = BasicNode_FindById(kctx, blockId);
+	bb = BasicBlock_FindById(kctx, blockId);
 	while(bb != NULL) {
 		if(bb->branchid != -1 /*&& bb->branchid != builder->bbReturnId*/) {
-			BasicNode *bbJ = BasicNode_FindById(kctx, bb->branchid);
+			BasicBlock *bbJ = BasicBlock_FindById(kctx, bb->branchid);
 			if(bbJ->codeoffset == -1) {
-				BasicNode_WriteBuffer(kctx, bb->branchid, wb);
+				BasicBlock_WriteBuffer(kctx, bb->branchid, wb);
 			}
 		}
-		bb = BasicNode_FindById(kctx, bb->nextid);
+		bb = BasicBlock_FindById(kctx, bb->nextid);
 	}
 }
 
-static int BasicNode_size(BasicNode *bb)
+static int BasicBlock_size(BasicBlock *bb)
 {
-	return (bb->size - sizeof(BasicNode)) / sizeof(KVirtualCode);
+	return (bb->size - sizeof(BasicBlock)) / sizeof(KVirtualCode);
 }
 
-static BasicNode *BasicNode_leapJump(KonohaContext *kctx, BasicNode *bb)
+static BasicBlock *BasicBlock_leapJump(KonohaContext *kctx, BasicBlock *bb)
 {
 	while(bb->nextid != -1) {
-		if(BasicNode_size(bb) != 0) return bb;
-		bb = BasicNode_FindById(kctx, bb->nextid);
+		if(BasicBlock_size(bb) != 0) return bb;
+		bb = BasicBlock_FindById(kctx, bb->nextid);
 	}
-	if(bb->nextid == -1 && bb->branchid != -1 && BasicNode_size(bb) == 1) {
-		return BasicNode_leapJump(kctx, BasicNode_FindById(kctx, bb->branchid));
+	if(bb->nextid == -1 && bb->branchid != -1 && BasicBlock_size(bb) == 1) {
+		return BasicBlock_leapJump(kctx, BasicBlock_FindById(kctx, bb->branchid));
 	}
 	return bb;
 }
 
-#define BasicNode_isVisited(bb)     (bb->incoming == -1)
-#define BasicNode_SetVisited(bb)    bb->incoming = -1
+#define BasicBlock_isVisited(bb)     (bb->incoming == -1)
+#define BasicBlock_SetVisited(bb)    bb->incoming = -1
 
-static void BasicNode_SetJumpAddr(KonohaContext *kctx, BasicNode *bb, char *vcode)
+static void BasicBlock_SetJumpAddr(KonohaContext *kctx, BasicBlock *bb, char *vcode)
 {
 	while(bb != NULL) {
-		BasicNode_SetVisited(bb);
+		BasicBlock_SetVisited(bb);
 		if(bb->branchid != -1) {
-			BasicNode *bbJ = BasicNode_leapJump(kctx, BasicNode_FindById(kctx, bb->branchid));
+			BasicBlock *bbJ = BasicBlock_leapJump(kctx, BasicBlock_FindById(kctx, bb->branchid));
 			OPJMP *j = (OPJMP *)(vcode + bb->lastoffset);
 			DBG_ASSERT(j->opcode == OPCODE_JMP || j->opcode == OPCODE_JMPF);
 			j->jumppc = (KVirtualCode *)(vcode + bbJ->codeoffset);
-			bbJ = BasicNode_FindById(kctx, bb->branchid);
-			if(!BasicNode_isVisited(bbJ)) {
-				BasicNode_SetVisited(bbJ);
-				BasicNode_SetJumpAddr(kctx, bbJ, vcode);
+			bbJ = BasicBlock_FindById(kctx, bb->branchid);
+			if(!BasicBlock_isVisited(bbJ)) {
+				BasicBlock_SetVisited(bbJ);
+				BasicBlock_SetJumpAddr(kctx, bbJ, vcode);
 			}
 		}
-		bb = BasicNode_FindById(kctx, bb->nextid);
+		bb = BasicBlock_FindById(kctx, bb->nextid);
 	}
 }
 
 
 /* ------------------------------------------------------------------------ */
 
-static bblock_t new_BasicNodeLABEL(KonohaContext *kctx)
+static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
 {
-	BasicNode *bb = new_BasicNode(kctx, sizeof(KVirtualCode) * 2 + sizeof(BasicNode), -1);
-	return BasicNode_id(kctx, bb);
+	BasicBlock *bb = new_BasicBlock(kctx, sizeof(KVirtualCode) * 2 + sizeof(BasicBlock), -1);
+	return BasicBlock_id(kctx, bb);
 }
 
 #define ASM(T, ...) do {\
@@ -441,7 +441,7 @@ static bblock_t new_BasicNodeLABEL(KonohaContext *kctx)
 
 static void KBuilder_Asm(KonohaContext *kctx, KBuilder *builder, KVirtualCode *op, size_t opsize)
 {
-	builder->bbMainId = BasicNode_Add(kctx, builder->bbMainId, builder->common.uline, op, opsize, sizeof(KVirtualCode));
+	builder->bbMainId = BasicBlock_Add(kctx, builder->bbMainId, builder->common.uline, op, opsize, sizeof(KVirtualCode));
 }
 
 static void kNode_SetLabelNode(KonohaContext *kctx, kNode *stmt, ksymbol_t label, bblock_t labelId)
@@ -460,40 +460,40 @@ static bblock_t kNode_GetLabelNode(KonohaContext *kctx, kNode *stmt, ksymbol_t l
 
 static void ASM_LABEL(KonohaContext *kctx, KBuilder *builder, bblock_t labelId)
 {
-	BasicNode *bb = BasicNode_FindById(kctx, builder->bbMainId);
+	BasicBlock *bb = BasicBlock_FindById(kctx, builder->bbMainId);
 	DBG_ASSERT(bb != NULL);
 	DBG_ASSERT(bb->nextid == -1);
-	BasicNode *labelNode = BasicNode_FindById(kctx, labelId);
+	BasicBlock *labelNode = BasicBlock_FindById(kctx, labelId);
 	labelNode->incoming += 1;
-	builder->bbMainId = BasicNode_id(kctx, labelNode);
+	builder->bbMainId = BasicBlock_id(kctx, labelNode);
 	bb->nextid = builder->bbMainId;
 }
 
 static void ASM_JMP(KonohaContext *kctx, KBuilder *builder, bblock_t labelId)
 {
-	BasicNode *bb = BasicNode_FindById(kctx, builder->bbMainId);
+	BasicBlock *bb = BasicBlock_FindById(kctx, builder->bbMainId);
 	DBG_ASSERT(bb != NULL);
 	DBG_ASSERT(bb->nextid == -1);
 	if(bb->branchid == -1) {
 		ASM(JMP, NULL);
-		BasicNode *labelNode = BasicNode_FindById(kctx, labelId);
-		bb = BasicNode_FindById(kctx, builder->bbMainId);
-		bb->branchid = BasicNode_id(kctx, labelNode);
+		BasicBlock *labelNode = BasicBlock_FindById(kctx, labelId);
+		bb = BasicBlock_FindById(kctx, builder->bbMainId);
+		bb->branchid = BasicBlock_id(kctx, labelNode);
 		labelNode->incoming += 1;
 	}
 }
 
 static bblock_t KBuilder_AsmJMPF(KonohaContext *kctx, KBuilder *builder, int flocal, bblock_t jumpId)
 {
-	BasicNode *bb = BasicNode_FindById(kctx, builder->bbMainId);
+	BasicBlock *bb = BasicBlock_FindById(kctx, builder->bbMainId);
 	DBG_ASSERT(bb != NULL);
 	DBG_ASSERT(bb->nextid == -1 && bb->branchid == -1);
-	bblock_t nextId = new_BasicNodeLABEL(kctx);
+	bblock_t nextId = new_BasicBlockLABEL(kctx);
 	ASM(JMPF, NULL, NC_(flocal));
-	bb = BasicNode_FindById(kctx, builder->bbMainId);
-	BasicNode *lbJUMP = BasicNode_FindById(kctx, jumpId);
-	BasicNode *lbNEXT = BasicNode_FindById(kctx, nextId);
-	bb->branchid = BasicNode_id(kctx, lbJUMP);
+	bb = BasicBlock_FindById(kctx, builder->bbMainId);
+	BasicBlock *lbJUMP = BasicBlock_FindById(kctx, jumpId);
+	BasicBlock *lbNEXT = BasicBlock_FindById(kctx, nextId);
+	bb->branchid = BasicBlock_id(kctx, lbJUMP);
 	bb->nextid = nextId;
 	lbNEXT->incoming += 1;
 	lbJUMP->incoming += 1;
@@ -658,8 +658,8 @@ static kbool_t KBuilder_VisitReturnNode(KonohaContext *kctx, KBuilder *builder, 
 static kbool_t KBuilder_VisitIfNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
 	intptr_t espidx = stmt->stackbase;
-	bblock_t lbELSE = new_BasicNodeLABEL(kctx);
-	bblock_t lbEND  = new_BasicNodeLABEL(kctx);
+	bblock_t lbELSE = new_BasicBlockLABEL(kctx);
+	bblock_t lbEND  = new_BasicBlockLABEL(kctx);
 	/* if */
 	KBuilder_asmJMPIF(kctx, builder, Node_getFirstExpr(kctx, stmt), &espidx, 0/*FALSE*/, lbELSE);
 	/* then */
@@ -678,8 +678,8 @@ static kbool_t KBuilder_VisitIfNode(KonohaContext *kctx, KBuilder *builder, kNod
 static kbool_t KBuilder_VisitWhileNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
 	intptr_t espidx = stmt->stackbase;
-	bblock_t lbCONTINUE = new_BasicNodeLABEL(kctx);
-	bblock_t lbBREAK    = new_BasicNodeLABEL(kctx);
+	bblock_t lbCONTINUE = new_BasicBlockLABEL(kctx);
+	bblock_t lbBREAK    = new_BasicBlockLABEL(kctx);
 	kNode_SetLabelNode(kctx, stmt, KSymbol_("continue"), lbCONTINUE);
 	kNode_SetLabelNode(kctx, stmt, KSymbol_("break"),    lbBREAK);
 	ASM_LABEL(kctx, builder, lbCONTINUE);
@@ -695,9 +695,9 @@ static kbool_t KBuilder_VisitWhileNode(KonohaContext *kctx, KBuilder *builder, k
 static kbool_t KBuilder_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
 	intptr_t espidx = stmt->stackbase;
-	bblock_t lbCONTINUE = new_BasicNodeLABEL(kctx);
-	bblock_t lbENTRY    = new_BasicNodeLABEL(kctx);
-	bblock_t lbBREAK    = new_BasicNodeLABEL(kctx);
+	bblock_t lbCONTINUE = new_BasicBlockLABEL(kctx);
+	bblock_t lbENTRY    = new_BasicBlockLABEL(kctx);
+	bblock_t lbBREAK    = new_BasicBlockLABEL(kctx);
 	kNode_SetLabelNode(kctx, stmt, KSymbol_("continue"), lbCONTINUE);
 	kNode_SetLabelNode(kctx, stmt, KSymbol_("break"),    lbBREAK);
 	ASM_JMP(kctx, builder, lbENTRY);
@@ -715,9 +715,9 @@ static kbool_t KBuilder_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder,
 //static kbool_t KBuilder_VisitForNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 //{
 //	intptr_t espidx = stmt->stackbase;
-//	bblock_t lbCONTINUE = new_BasicNodeLABEL(kctx);
-//	bblock_t lbENTRY    = new_BasicNodeLABEL(kctx);
-//	bblock_t lbBREAK    = new_BasicNodeLABEL(kctx);
+//	bblock_t lbCONTINUE = new_BasicBlockLABEL(kctx);
+//	bblock_t lbENTRY    = new_BasicBlockLABEL(kctx);
+//	bblock_t lbBREAK    = new_BasicBlockLABEL(kctx);
 //	kNode_SetLabelNode(kctx, stmt, KSymbol_("continue"), lbCONTINUE);
 //	kNode_SetLabelNode(kctx, stmt, KSymbol_("break"),    lbBREAK);
 //	ASM_JMP(kctx, builder, lbENTRY);
@@ -814,7 +814,7 @@ static kbool_t KBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *build
 
 static kbool_t KBuilder_VisitAndNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	bblock_t lbFINAL  = new_BasicNodeLABEL(kctx);
+	bblock_t lbFINAL  = new_BasicBlockLABEL(kctx);
 	KBuilder_asmJMPIF(kctx, builder, kNode_At(expr, 1), thunk, 0/*FALSE*/, lbFINAL);
 	SUGAR VisitNode(kctx, builder, kNode_At(expr, 2), thunk);
 	ASM_LABEL(kctx, builder, lbFINAL);
@@ -823,8 +823,8 @@ static kbool_t KBuilder_VisitAndNode(KonohaContext *kctx, KBuilder *builder, kNo
 
 static kbool_t KBuilder_VisitOrNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	bblock_t lbFALSE = new_BasicNodeLABEL(kctx);
-	bblock_t lbFINAL  = new_BasicNodeLABEL(kctx);
+	bblock_t lbFALSE = new_BasicBlockLABEL(kctx);
+	bblock_t lbFINAL  = new_BasicBlockLABEL(kctx);
 	KBuilder_asmJMPIF(kctx, builder, kNode_At(expr, 1), thunk, 0/*FALSE*/, lbFALSE);
 	ASM_JMP(kctx, builder, lbFINAL);
 	ASM_LABEL(kctx, builder, lbFALSE); // false
@@ -902,15 +902,14 @@ static struct KVirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *bu
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	BasicNode_WriteBuffer(kctx, beginId, &wb);
-	BasicNode_WriteBuffer(kctx, returnId, &wb);
-
+	BasicBlock_WriteBuffer(kctx, beginId, &wb);
+	BasicBlock_WriteBuffer(kctx, returnId, &wb);
 	size_t codesize = KBuffer_bytesize(&wb);
 	DBG_P(">>>>>> codesize=%d", codesize);
 	DBG_ASSERT(codesize != 0);
 	KVirtualCode *vcode = (KVirtualCode *)KCalloc_UNTRACE(codesize, 1);
 	memcpy((void *)vcode, KLIB KBuffer_text(kctx, &wb, NonZero), codesize);
-	BasicNode_SetJumpAddr(kctx, BasicNode_FindById(kctx, beginId), (char *)vcode);
+	BasicBlock_SetJumpAddr(kctx, BasicBlock_FindById(kctx, beginId), (char *)vcode);
 	KLIB KBuffer_Free(&wb);
 	vcode = MakeThreadedCode(kctx, builder, vcode, codesize);
 	DumpVirtualCode(kctx, vcode);
@@ -938,8 +937,8 @@ static struct KVirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMet
 	kNameSpace *ns = kNode_ns(block);
 	builder->common.api = ns->builderApi;
 	builder->constPools = ns->NameSpaceConstList;
-	builder->bbBeginId = new_BasicNodeLABEL(kctx);
-	builder->bbReturnId = new_BasicNodeLABEL(kctx);
+	builder->bbBeginId = new_BasicBlockLABEL(kctx);
+	builder->bbReturnId = new_BasicBlockLABEL(kctx);
 	builder->bbMainId = builder->bbBeginId;
 	ASM(THCODE, 0, _THCODE);
 	ASM(CHKSTACK, 0);
