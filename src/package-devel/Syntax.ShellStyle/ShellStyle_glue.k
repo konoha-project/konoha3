@@ -29,6 +29,7 @@ import("JavaScript.Math");
 import("JavaScript.String");
 import("MiniKonoha.Syntax");
 import("dscript.subproc");
+import("Syntax.Null");
 
 @Override @Public boolean String.startsWith(String str) {
 	return StringUtil.startsWith(this, str, 0);
@@ -246,7 +247,7 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 }
 
 Node typeShell(Node node, NameSpace ns, Object o) {
-	Node block = node.TypeCheckNode("$Block", 8/*allowEmpty*/);
+	Node block = node.TypeCheckNode("$Block", o, 8/*allowEmpty*/);
 	block.SetType(KNode_Block);
 	return block;
 }
@@ -273,115 +274,127 @@ int parseShell(Node node, Symbol sym, Token[] tokenList, int beginIdx, int opera
 	return -1;
 }
 
-//int getLastIndex(String source) {
-//	System.p(source);
-//	int i = 0;
-//	String endSymbol = " )}\n";
-//	while(i < source.getlength()) {
-//		if(endSymbol.indexOf(source[i]) >= 0) {
-//			System.p(i);
-//			System.p(source[i]);
-//			return i;
-//		}
-//		i = i + 1;
-//	}
-//	return -1;
-//}
+int getLastIndex(String source) {
+	int i = 0;
+	String endSymbol = " )}\n";
+	while(i < source.getlength()) {
+		if(endSymbol.indexOf(source[i]) >= 0) {
+			return i;
+		}
+		i = i + 1;
+	}
+	return -1;
+}
 
-//int tokenizeDollarVariable(Token tk, String source) {
-//	int pos = 1;
-//	if(source.indexOf("{") == 1) {
-//		pos = source.indexOf("}");
-//		if(pos > 2) {
-//			tk.setParsedText("$DollarVariable", source, 0, pos + 1);
-//		}
-//		return pos + 1;
-//	}
-//	else if(source.indexOf("(") == 1) {
-//		pos = source.indexOf(")");
-//		if(pos > 2) {
-//			tk.setParsedText("$DollarVariable", source, 0, pos + 1);
-//		}
-//		return pos + 1;
-//	}
-//	pos = getLastIndex(source);
-//	if(pos < 0) {
-//		pos = source.getlength();
-//	}
-//	tk.setParsedText("$DollarVariable", source, 0, pos);
-//	return pos;
-//}
+int tokenizeDollarVariable(Token tk, String source) {
+	int pos = 1;
+	if(source.indexOf("{") == 1) {
+		pos = source.indexOf("}");
+		if(pos > 2) {
+			tk.setParsedText("$DollarVariable", source, 0, pos + 1);
+		}
+		return pos + 1;
+	}
+	else if(source.indexOf("(") == 1) {
+		pos = source.indexOf(")");
+		if(pos > 2) {
+			tk.setParsedText("$DollarVariable", source, 0, pos + 1);
+		}
+		return pos + 1;
+	}
+	pos = getLastIndex(source);
+	if(pos < 0) {
+		pos = source.getlength();
+	}
+	tk.setParsedText("$DollarVariable", source, 0, pos);
+	return pos;
+}
 
-//int parseDollarVariable(Node node, Symbol sym, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
-//	//if(defined(DEBUG)) {
-//		int i = beginIdx;
-//		while(i < endIdx) {
-//			System.p(tokenList[i].getParsedText());
-//			System.p(tokenList[i].getParsedText().getlength());
-//			System.p(tokenList[i].is("$Symbol"));
-//			System.p(tokenList[i].is("()"));
-//			i = i + 1;
-//		}
-//	//}
-//	String text = tokenList[operatorIdx].getParsedText();
-//	if(text.startsWith("$(") && text.endsWith(")")) {
-//		String[] args = text.substring(2, text.getlength() - 1).split(" ");
-//		String funcName = getFuncName();
-//		String evaltext = "@Public String " + funcName + "() { ";
-//		evaltext = evaltext + generateSubProcSequence(args, false).replace("\n", " ");
-//		//if(defined(DEBUG)) {
-//			System.p(evaltext);
-//		//}
-//		eval(evaltext);
-//		Token[] tokens = node.getNameSpace().Preprocess(funcName);
-//		System.p(tokens);
-//		Token methodToken = tokens[0];
-//		System.p(node);
-//		Node classNode = new Node(NameSpace);
-//		System.p(node);
-//		Node expr = node.Op(methodToken, classNode);
-//		System.p(node);
-//		node.AddNode(expr);
-//		System.p(node);
-//		System.p(node);
-//		//Expr expr = stmt.newUntypedCallStyleExpr(methodToken, classExpr);
-//		//return expr;
-//		return endIdx;
-//	}
-//	else if(text.startsWith("${") && text.endsWith("}")) {
-//		text = text.substring(2, text.getlength() - 1);
-//	}
-//	else if(text == "$?") {
-//		//Token methodToken = new Token("getExitStatus");
-//		//Expr classExpr = new Expr(NameSpace);
-//		//Expr expr = stmt.newUntypedCallStyleExpr(methodToken, classExpr);
-//		//return expr;
-//		return endIdx;
-//	}
-//	else {
-//		text = text.substring(1, text.getlength());
-//	}
-//	//Token methodToken = new Token("getenv");
-//	//Expr classExpr = new Expr(System);
-//	//Expr arg1 = new Expr(text);
-//	//Expr expr = stmt.newUntypedCallStyleExpr(methodToken, classExpr, arg1);
-//	return endIdx;
-//}
+int parseDollarVariable(Node node, Symbol sym, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
+	NameSpace ns = node.getNameSpace();
+	//if(defined(DEBUG)) {
+	//	System.p("parseDollarVariable");
+	//	System.p(node);
+	//	int i = beginIdx;
+	//	while(i < endIdx) {
+	//		System.p(tokenList[i].getParsedText());
+	//		System.p(tokenList[i].getParsedText().getlength());
+	//		System.p(tokenList[i].is("$Symbol"));
+	//		System.p(tokenList[i].is("()"));
+	//		i = i + 1;
+	//	}
+	//}
+	String text = tokenList[operatorIdx].getParsedText();
+	if(text.startsWith("$(") && text.endsWith(")")) {
+		String[] args = text.substring(2, text.getlength() - 1).split(" ");
+		String funcName = getFuncName();
+		String evaltext = "@Public String " + funcName + "() { ";
+		evaltext = evaltext + generateSubProcSequence(args, false).replace("\n", " ");
+		//if(defined(DEBUG)) {
+		//	System.p(evaltext);
+		//}
+		ns.eval(evaltext);
+		Token methodToken = ns.Preprocess(funcName)[0];
+		Node classExpr = new Node(ns);
+		classExpr.SetConstValue(ns);
+		node.AddParsedObject("class", classExpr);
+		node.AddParsedObject("method", methodToken);
+		//node.AddParsedObject("$MethodName", node.ParseNewNode(tokens, 0, tokens.getlength(), false));
+		return endIdx;
+	}
+	else if(text.startsWith("${") && text.endsWith("}")) {
+		text = text.substring(2, text.getlength() - 1);
+	}
+	else if(text == "$?") {
+		/*
+		Token methodToken = ns.Preprocess("getExitStatus")[0];
+		Node classExpr = new Node(ns);
+		classExpr.SetConstValue(ns);
+		node.AddParsedObject("class", classExpr);
+		node.AddParsedObject("method", methodToken);
+		*/
+		return endIdx;
+	}
+	else {
+		text = text.substring(1, text.getlength());
+	}
+	Token methodToken = ns.Preprocess("getenv")[0];
+	Node classExpr = new Node(ns);
+	classExpr.SetConstValue(System);
+	node.AddParsedObject("class", classExpr);
+	node.AddParsedObject("method", methodToken);
+	Node arg1 = new Node(ns);
+	arg1.SetConstValue(text);
+	node.AddParsedObject("arg1", arg1);
+	return endIdx;
+}
+
+Node typeDollarVariable(Node node, NameSpace ns, Object o) {
+	//System.p(node);
+	//System.p(node.getNode("class"));
+	Symbol methodName = node.getToken("method", null).getParsedText();
+	Node classNode = node.getNode("class");
+	Node arg1 = node.getNode("arg1");
+	if(arg1 != null) {
+		//System.p(arg1);
+		return node.newMethodNode(System, methodName, classNode, arg1);
+	}
+	return node.newMethodNode(NameSpace, methodName, classNode);
+}
 
 void defineShellSyntax() {
 	CompileAllDefinedMethod();
 	Syntax shellSyntax = new Syntax("$Shell");
 	shellSyntax.SetParseFunc(Precedence_Statement, 0, parseShell);
 	shellSyntax.SetMetaPattern(true);
-	shellSyntax.SetPattern("$Token*");
 	shellSyntax.SetTypeFunc(typeShell);
 	DefineSyntax(shellSyntax);
 
-	//Syntax dollarSyntax = new Syntax("$DollarVariable");
-	//dollarSyntax.SetTokenFunc(36/*$*/, tokenizeDollarVariable);
-	//dollarSyntax.SetParseFunc(0, 0, parseDollarVariable);
-	//dollarSyntax.SetTypeFunc(GetMethodTypeFunc());
-	//DefineSyntax(dollarSyntax);
+	Syntax dollarSyntax = new Syntax("$DollarVariable");
+	dollarSyntax.SetTokenFunc(36/*$*/, tokenizeDollarVariable);
+	dollarSyntax.SetParseFunc(0, 0, parseDollarVariable);
+	dollarSyntax.SetTypeFunc(typeDollarVariable);
+	DefineSyntax(dollarSyntax);
 }
 
 defineShellSyntax();
