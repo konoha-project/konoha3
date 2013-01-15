@@ -260,6 +260,12 @@ static kbool_t FuelVM_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode
 	return true;
 }
 
+static kbool_t FuelVM_VisitPushNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
+{
+	assert(0);
+	return true;
+}
+
 static kbool_t FuelVM_VisitErrorNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
 	kString *Err  = kNode_getErrorMessage(kctx, stmt);
