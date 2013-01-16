@@ -919,6 +919,7 @@ static void loadInitStructData(KonohaContext *kctx)
 	defObject.init = kObject_Init;
 	defObject.reftrace = kObject_Reftrace;
 
+#define KType_boolean KType_Boolean
 	KDEFINE_CLASS defBoolean = {0};
 	SetUnboxTypeName(defBoolean, boolean);
 	defBoolean.cstruct_size = sizeof(kBoolean);
@@ -927,6 +928,7 @@ static void loadInitStructData(KonohaContext *kctx)
 	defBoolean.p     = kBoolean_p;
 	defBoolean.fnull = kBoolean_fnull;
 
+#define KType_int KType_Int
 	KDEFINE_CLASS defInt = {0};
 	SetUnboxTypeName(defInt, int);
 	defInt.cstruct_size = sizeof(kInt);
