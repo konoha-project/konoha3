@@ -574,8 +574,31 @@ static void Func_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visit
 }
 
 // ---------------
-// System
+// Exception
 
+static void kException_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kExceptionVar *e = (kExceptionVar *)o;
+	kString *msg = conf == NULL ? TS_EMPTY : (kString*)conf;
+	KFieldInit(e, e->Message, msg);
+	e->uline  = 0;
+	e->symbol = 0;
+	e->fault  = 0;
+	KFieldInit(e, e->StackTraceList, K_EMPTYARRAY);
+}
+
+static void kException_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+{
+	kException *e = (kException *)o;
+	KRefTrace(e->Message);
+	KRefTrace(e->StackTraceList);
+}
+
+static void kException_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+{
+//	kException *mtd = v[pos].asException;
+//	KBuffer_printf(kctx, wb, "%s.%s%s", kException_Fmt3(mtd));
+}
 
 // ---------------
 
@@ -906,7 +929,7 @@ static KClass *KClass_define(KonohaContext *kctx, kpackageId_t packageId, kStrin
 		VAR.cstruct_size = sizeof(k##C);\
 	}while(0)\
 
-static void loadInitStructData(KonohaContext *kctx)
+static void LoadInitStructData(KonohaContext *kctx)
 {
 	KDEFINE_CLASS defTvoid = {0};
 	SetUnboxTypeName(defTvoid, void);
@@ -966,6 +989,12 @@ static void loadInitStructData(KonohaContext *kctx)
 	defFunc.init = Func_Init;
 	defFunc.reftrace = Func_Reftrace;
 
+	KDEFINE_CLASS defException = {0};
+	SETTYNAME(defException, Exception);
+	defException.init = kException_Init;
+	defException.reftrace = kException_Reftrace;
+	defException.p = kException_p;
+
 	KDEFINE_CLASS defNameSpace = {0};
 	SETTYNAME(defNameSpace, NameSpace);
 	defNameSpace.init = kNameSpace_Init;
@@ -993,6 +1022,7 @@ static void loadInitStructData(KonohaContext *kctx)
 		&defParam,
 		&defMethod,
 		&defFunc,
+		&defException,
 		&defNameSpace,
 		&defSystem,
 		&defT0,
@@ -1065,7 +1095,7 @@ static void KRuntime_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 
 	initKonohaLib((KonohaLibVar *)kctx->klib);
 	KLIB KArray_Init(kctx, &share->classTable, K_CLASSTABLE_INITSIZE * sizeof(KClass));
-	loadInitStructData(kctx);
+	LoadInitStructData(kctx);
 
 	KUnsafeFieldInit(share->GlobalConstList, new_(Array, 8, OnField));
 

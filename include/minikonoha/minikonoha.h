@@ -1194,6 +1194,7 @@ struct KClassField {
 #define KClassFlag_Param             KClassFlag_Nullable|KClassFlag_Final
 #define KClassFlag_Method            KClassFlag_Nullable|KClassFlag_Final
 #define KClassFlag_Func              KClassFlag_Nullable|KClassFlag_Final
+#define KClassFlag_Exception         KClassFlag_Nullable|KClassFlag_Final
 #define KClassFlag_NameSpace         KClassFlag_Nullable|KClassFlag_Final
 #define KClassFlag_System            KClassFlag_Nullable|KClassFlag_Singleton|KClassFlag_Final
 #define KClassFlag_0                 KClassFlag_TypeVar|KClassFlag_UnboxType|KClassFlag_Singleton|KClassFlag_Final
@@ -1536,15 +1537,13 @@ struct kFuncVar {
 /* ------------------------------------------------------------------------ */
 /* Exception */
 
-typedef kushort_t kfault_t;
-
 #define IS_Exception(o)              (kObject_baseTypeId(o) == KType_Exception)
 
 struct kExceptionVar {
 	kObjectHeader h;
-	kshortflag_t flag;   kfault_t faultId;
+	ksymbol_t symbol;  kushort_t fault;
 	kfileline_t  uline;
-	kString     *message;
+	kString     *Message;
 	kArray      *StackTraceList;
 };
 
