@@ -38,8 +38,9 @@ static void kBytes_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct kBytesVar *ba = (struct kBytesVar *)o;
 	DBG_ASSERT((size_t)conf >= 0);
-	ba->bytesize = (size_t)conf;
-	ba->byteptr = (ba->bytesize > 0) ? (const char *)KCalloc((size_t)conf, 1, NULL) : NULL;
+	ba->bytesize = 0;
+	//ba->bytesize = (size_t)conf;
+	//ba->byteptr = (ba->bytesize > 0) ? (const char *)KCalloc((size_t)conf, 1, NULL) : NULL;
 }
 
 static void kBytes_Free(KonohaContext *kctx, kObject *o)
@@ -86,8 +87,12 @@ static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 //## Bytes Bytes.new(int size);
 static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp)
 {
+	kBytes *ba = sfp[0].asBytes;
 	size_t size = (size_t)sfp[1].intValue;
-	KReturn(KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), size));
+	assert(ba->byteptr == NULL);
+	((struct kBytesVar *)ba)->byteptr  = (const char *)KCalloc(size, 1, NULL);
+	((struct kBytesVar *)ba)->bytesize = size;
+	KReturn(ba);
 }
 
 //## int Bytes.getSize();
@@ -138,6 +143,8 @@ static kBytes* new_kBytes(KonohaContext *kctx, kArray *gcstack, KClass *c, const
 {
 	kBytes* ba = (kBytes *) KLIB new_kObject(kctx, gcstack, c, bufsiz);
 	if(bufsiz > 0) {
+		((struct kBytesVar *)ba)->byteptr  = (const char *)KCalloc(bufsiz, 1, NULL);
+		((struct kBytesVar *)ba)->bytesize = bufsiz;
 		memcpy(ba->buf, buf, bufsiz);
 	}
 	return ba;
