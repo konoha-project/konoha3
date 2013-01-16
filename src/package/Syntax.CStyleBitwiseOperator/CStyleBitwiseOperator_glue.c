@@ -76,19 +76,19 @@ static kbool_t int_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 {
 	int FN_x = KFieldName_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(Int_opPlus), KType_int, KType_int, KMethodName_("+"), 0,
-		_Public|_Const|_Im, _F(Int_opCompl), KType_int, KType_int, KMethodName_("~"), 0,
-		_Public|_Const|_Im, _F(Int_opLSHIFT), KType_int, KType_int, KMethodName_("<<"), 1, KType_int, FN_x,
-		_Public|_Const|_Im, _F(Int_opRSHIFT), KType_int, KType_int, KMethodName_(">>"), 1, KType_int, FN_x,
-		_Public|_Const|_Im, _F(Int_opAND), KType_int, KType_int, KMethodName_("&"), 1, KType_int, FN_x,
-		_Public|_Const|_Im, _F(Int_opOR ), KType_int, KType_int, KMethodName_("|"), 1, KType_int, FN_x,
-		_Public|_Const|_Im, _F(Int_opXOR), KType_int, KType_int, KMethodName_("^"), 1, KType_int, FN_x,
+		_Public|_Const|_Im, _F(Int_opPlus), KType_Int, KType_Int, KMethodName_("+"), 0,
+		_Public|_Const|_Im, _F(Int_opCompl), KType_Int, KType_Int, KMethodName_("~"), 0,
+		_Public|_Const|_Im, _F(Int_opLSHIFT), KType_Int, KType_Int, KMethodName_("<<"), 1, KType_Int, FN_x,
+		_Public|_Const|_Im, _F(Int_opRSHIFT), KType_Int, KType_Int, KMethodName_(">>"), 1, KType_Int, FN_x,
+		_Public|_Const|_Im, _F(Int_opAND), KType_Int, KType_Int, KMethodName_("&"), 1, KType_Int, FN_x,
+		_Public|_Const|_Im, _F(Int_opOR ), KType_Int, KType_Int, KMethodName_("|"), 1, KType_Int, FN_x,
+		_Public|_Const|_Im, _F(Int_opXOR), KType_Int, KType_Int, KMethodName_("^"), 1, KType_Int, FN_x,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	KDEFINE_INT_CONST IntData[] = {
-		{"INT_MAX", KType_int, KINT_MAX},
-		{"INT_MIN", KType_int, KINT_MIN},
+		{"INT_MAX", KType_Int, KINT_MAX},
+		{"INT_MIN", KType_Int, KINT_MIN},
 		{NULL},
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), trace);

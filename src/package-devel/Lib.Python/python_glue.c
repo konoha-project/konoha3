@@ -495,10 +495,10 @@ static kbool_t python_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	KClass *cPython = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PythonDef, trace);
 	int KType_PyObject = cPython->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im|_Coercion, _F(PyObject_toBoolean), KType_boolean, KType_PyObject, KMethodName_To(KType_boolean), 0,
-		_Public|_Const|_Im|_Coercion, _F(Boolean_toPyObject), KType_PyObject, KType_boolean, KMethodName_To(KType_PyObject), 0,
-		_Public|_Const|_Im|_Coercion, _F(PyObject_toInt), KType_int, KType_PyObject, KMethodName_To(KType_int), 0,
-		_Public|_Const|_Im|_Coercion, _F(Int_toPyObject), KType_PyObject, KType_int, KMethodName_To(KType_PyObject), 0,
+		_Public|_Const|_Im|_Coercion, _F(PyObject_toBoolean), KType_Boolean, KType_PyObject, KMethodName_To(KType_Boolean), 0,
+		_Public|_Const|_Im|_Coercion, _F(Boolean_toPyObject), KType_PyObject, KType_Boolean, KMethodName_To(KType_PyObject), 0,
+		_Public|_Const|_Im|_Coercion, _F(PyObject_toInt), KType_Int, KType_PyObject, KMethodName_To(KType_Int), 0,
+		_Public|_Const|_Im|_Coercion, _F(Int_toPyObject), KType_PyObject, KType_Int, KMethodName_To(KType_PyObject), 0,
 		_Public|_Const|_Im|_Coercion, _F(PyObject_toString), KType_String, KType_PyObject, KMethodName_To(KType_String), 0,
 		_Public|_Const|_Im|_Coercion, _F(String_toPyObject), KType_PyObject, KType_String, KMethodName_To(KType_PyObject), 0,
 		//_Public,                      _F(Array_Add), KType_void, KType_Array, KMethodName_("add"), 1, KType_0, KFieldName_("value"),
@@ -541,7 +541,7 @@ static kbool_t python_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		//_Public|_Const|_Im|_Coercion, _F(PyObject_toSet), KType_Set, KType_PyObject, KMethodName_To(KType_Set), 0,
 		//_Public|_Const|_Im|_Coercion, _F(Code_toPyObject), KType_PyObject, KType_Code, KMethodName_To(KType_PyObject), 0,
 		//_Public|_Const|_Im|_Coercion, _F(PyObject_toCode), KType_Code, KType_PyObject, KMethodName_To(KType_Code), 0,
-		_Public|_Im, _F(Python_Eval), KType_boolean, KType_System, KFieldName_("pyEval"), 1, KType_String, KFieldName_("script"),
+		_Public|_Im, _F(Python_Eval), KType_Boolean, KType_System, KFieldName_("pyEval"), 1, KType_String, KFieldName_("script"),
 		_Public|_Im, _F(PyObject_import), KType_PyObject, KType_PyObject, KFieldName_("import"), 1, KType_String, KFieldName_("name"),
 		_Public|_Im, _F(PyObject_), KType_PyObject, KType_PyObject, 0, 1, KType_PyObject, 0,
 		DEND,

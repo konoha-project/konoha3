@@ -158,14 +158,14 @@ static void Syntax_defineTokenFunc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im|_Const|_Static, _F(NameSpace_Ascii), KType_String, KType_NameSpace, KMethodName_("Ascii"), 1, TP_source,
-		_Public, _F(String_AsciiAt), KType_int, KType_String, KMethodName_("AsciiAt"), 1, TP_pos,
-		_Public, _F(Token_SetParsedText), KType_int, KType_Token, KMethodName_("SetParsedText"), 4, TP_kw, TP_source, TP_begin, TP_end,
-		_Public, _F(Token_SetError), KType_int, KType_Token, KMethodName_("SetError"), 4, TP_message, TP_source, TP_begin, TP_end,
+		_Public, _F(String_AsciiAt), KType_Int, KType_String, KMethodName_("AsciiAt"), 1, TP_pos,
+		_Public, _F(Token_SetParsedText), KType_Int, KType_Token, KMethodName_("SetParsedText"), 4, TP_kw, TP_source, TP_begin, TP_end,
+		_Public, _F(Token_SetError), KType_Int, KType_Token, KMethodName_("SetError"), 4, TP_message, TP_source, TP_begin, TP_end,
 		_Public|_Coercion|_Im|_Const, _F(Token_toString), KType_String, KType_Token, KMethodName_To(KType_String), 0,
-		_Public|_Const, _F(Token_Is), KType_boolean, KType_Token, KMethodName_("Is"), 1, TP_kw,
+		_Public|_Const, _F(Token_Is), KType_Boolean, KType_Token, KMethodName_("Is"), 1, TP_kw,
 		_Public|_Const, _F(Token_GetParsedText), KType_String, KType_Token, KMethodName_("GetParsedText"), 0,
 		_Public|_Const, _F(Token_GetGroupTokenList), KType_TokenArray, KType_Token, KMethodName_("GetGroupTokenList"), 0,
-		_Public, _F(Token_isBeforeWhiteSpace), KType_boolean, KType_Token, KMethodName_("IsBeforeWhiteSpace"), 0,
+		_Public, _F(Token_isBeforeWhiteSpace), KType_Boolean, KType_Token, KMethodName_("IsBeforeWhiteSpace"), 0,
 		_Public, _F(Token_new), KType_Token, KType_Token, KMethodName_("new"), 1, TP_kw,
 		DEND,
 	};

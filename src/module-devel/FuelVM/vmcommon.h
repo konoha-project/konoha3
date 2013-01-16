@@ -10,8 +10,8 @@
 enum TypeId {
 	TYPE_void = KType_void,
 	TYPE_Object = KType_Object,
-	TYPE_boolean = KType_boolean,
-	TYPE_int = KType_int,
+	TYPE_boolean = KType_Boolean,
+	TYPE_int = KType_Int,
 	TYPE_String = KType_String,
 	TYPE_Function = KType_Func,
 	TYPE_Array = KType_Array,

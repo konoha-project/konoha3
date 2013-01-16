@@ -62,8 +62,8 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 static void object_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im|_Const|_Final, _F(Object_getTypeId), KType_int, KType_Object, KMethodName_("getTypeId"), 0,
-		_Public|_Hidden|_Im|_Const|_Final, _F(Object_instanceOf), KType_boolean, KType_Object, KMethodName_("instanceof"), 1, KType_Object, KFieldName_("type"),
+		_Public|_Im|_Const|_Final, _F(Object_getTypeId), KType_Int, KType_Object, KMethodName_("getTypeId"), 0,
+		_Public|_Hidden|_Im|_Const|_Final, _F(Object_instanceOf), KType_Boolean, KType_Object, KMethodName_("instanceof"), 1, KType_Object, KFieldName_("type"),
 		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn|_Final, _F(Object_as), KType_Object, KType_Object, KMethodName_("as"), 0,
 		DEND,
 	};
@@ -81,7 +81,7 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 		KClass *selfClass = KClass_(selfNode->attrTypeId), *targetClass = KClass_(targetNode->attrTypeId);
 		if(KClass_Is(Final, selfClass)) {
 			kbool_t staticSubType = (selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
-			KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_boolean, staticSubType));
+			KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_Boolean, staticSubType));
 		}
 		kNameSpace *ns = kNode_ns(stmt);
 		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, KMethodName_("instanceof"), 1, KMethodMatch_NoOption);

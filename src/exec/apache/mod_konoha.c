@@ -249,7 +249,7 @@ KonohaContext* konoha_create(KClass **cRequest)
 		_Public, _F(Request_getHandler), KType_String, KType_Req, KMethodName_("getHandler"), 0,
 		_Public, _F(Request_SetContentType), KType_void, KType_Req, KMethodName_("setContentType"), 1, KType_String, KFieldName_("type"),
 		_Public, _F(Request_SetContentEncoding), KType_void, KType_Req, KMethodName_("setContentEncoding"), 1, KType_String, KFieldName_("enc"),
-		_Public, _F(Request_logError), KType_void, KType_Req, KMethodName_("logError"), 3, KType_int, KFieldName_("level"), KType_int, KFieldName_("status"), KType_String, KFieldName_("msg"),
+		_Public, _F(Request_logError), KType_void, KType_Req, KMethodName_("logError"), 3, KType_Int, KFieldName_("level"), KType_Int, KFieldName_("status"), KType_String, KFieldName_("msg"),
 		_Public, _F(Request_getHeadersIn), KType_Tbl, KType_Req, KMethodName_("getHeadersIn"), 0,
 		_Public, _F(Request_getHeadersOut), KType_Tbl, KType_Req, KMethodName_("getHeadersOut"), 0,
 		_Public, _F(AprTable_Add), KType_void, KType_Tbl, KMethodName_("add"), 2, KType_String, KFieldName_("key"), KType_String, KFieldName_("val"),

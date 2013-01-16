@@ -140,15 +140,15 @@ static kbool_t string_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 
 	LoadRopeMethod(kctx, ns, trace, KType_StringUtil);
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(StringUtil_opLT),        KType_boolean,  KType_String, KMethodName_("<"),  1, KType_String, FN_s,
-		_Public|_Const|_Im, _F(StringUtil_opLTE),       KType_boolean,  KType_String, KMethodName_("<="),  1, KType_String, FN_s,
-		_Public|_Const|_Im, _F(StringUtil_opGT),        KType_boolean,  KType_String, KMethodName_(">"),  1, KType_String, FN_s,
-		_Public|_Const|_Im, _F(StringUtil_opGTE),       KType_boolean,  KType_String, KMethodName_(">="),  1, KType_String, FN_s,
-		_Static|_Public|_Const|_Im, _F(StringUtil_length),      KType_int,      KType_StringUtil, KMethodName_("getlength"),   1, KType_String, FN_t, 
-		_Static|_Public|_Const|_Im, _F(StringUtil_get),         KType_String,   KType_StringUtil, KMethodName_("charAt"),      2, KType_String, FN_t, KType_int, FN_n,
-		_Static|_Public|_Const|_Im, _F(StringUtil_fromCharCode),KType_String,   KType_StringUtil, KMethodName_("fromCharCode"),1, KType_int, FN_n,
-		_Static|_Public|_Const|_Im, _F(StringUtil_get),         KType_String,   KType_StringUtil, KMethodName_("getString"),         2, KType_String, FN_t, KType_int, FN_n,  /* [c] */
-		_Static|_Public|_Const|_Im, _F(StringUtil_charAt),      KType_int,      KType_StringUtil, KMethodName_("charCodeAt"),  2, KType_String, FN_t, KType_int, FN_n,
+		_Public|_Const|_Im, _F(StringUtil_opLT),        KType_Boolean,  KType_String, KMethodName_("<"),  1, KType_String, FN_s,
+		_Public|_Const|_Im, _F(StringUtil_opLTE),       KType_Boolean,  KType_String, KMethodName_("<="),  1, KType_String, FN_s,
+		_Public|_Const|_Im, _F(StringUtil_opGT),        KType_Boolean,  KType_String, KMethodName_(">"),  1, KType_String, FN_s,
+		_Public|_Const|_Im, _F(StringUtil_opGTE),       KType_Boolean,  KType_String, KMethodName_(">="),  1, KType_String, FN_s,
+		_Static|_Public|_Const|_Im, _F(StringUtil_length),      KType_Int,      KType_StringUtil, KMethodName_("getlength"),   1, KType_String, FN_t, 
+		_Static|_Public|_Const|_Im, _F(StringUtil_get),         KType_String,   KType_StringUtil, KMethodName_("charAt"),      2, KType_String, FN_t, KType_Int, FN_n,
+		_Static|_Public|_Const|_Im, _F(StringUtil_fromCharCode),KType_String,   KType_StringUtil, KMethodName_("fromCharCode"),1, KType_Int, FN_n,
+		_Static|_Public|_Const|_Im, _F(StringUtil_get),         KType_String,   KType_StringUtil, KMethodName_("getString"),         2, KType_String, FN_t, KType_Int, FN_n,  /* [c] */
+		_Static|_Public|_Const|_Im, _F(StringUtil_charAt),      KType_Int,      KType_StringUtil, KMethodName_("charCodeAt"),  2, KType_String, FN_t, KType_Int, FN_n,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

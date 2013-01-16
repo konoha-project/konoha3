@@ -213,7 +213,7 @@
 //	kToken *tk = expr->TermToken;
 //	if(kString_size(tk->text) == 1) {
 //		int ch = kString_text(tk->text)[0];
-//		KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_int, ch));
+//		KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_Int, ch));
 //	}
 //	else if(kString_size(tk->text) == 2) {
 //		int ch = kString_text(tk->text)[0];
@@ -230,7 +230,7 @@
 //			default:
 //				KReturn(K_NULLEXPR);
 //			}
-//			KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_int, ch));
+//			KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_Int, ch));
 //		}
 //	}
 //	KReturn(K_NULLEXPR);
@@ -291,8 +291,8 @@
 //static kbool_t int_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 //{
 //	KDEFINE_INT_CONST IntData[] = {
-//		{"INT_MAX", KType_int, KINT_MAX},
-//		{"INT_MIN", KType_int, KINT_MIN},
+//		{"INT_MAX", KType_Int, KINT_MAX},
+//		{"INT_MIN", KType_Int, KINT_MIN},
 //		{NULL},
 //	};
 //	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
@@ -460,7 +460,7 @@
 //	VAR_TypeCheck(stmt, expr, gma, reqty);
 //	kToken *tk = expr->TermToken;
 //	long long n = kstrtoll(kString_text(tk->text));
-//	KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_int, (uintptr_t)n));
+//	KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_Int, (uintptr_t)n));
 //}
 //
 //static kbool_t int_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)

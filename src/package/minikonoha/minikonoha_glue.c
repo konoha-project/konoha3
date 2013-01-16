@@ -153,9 +153,9 @@ static kbool_t minikonoha_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTra
 
 	KDEFINE_METHOD MethodData[] = {
 		kMethod_Public, _F(KonohaFactory_new), KType_KonohaFactory, KType_KonohaFactory, KMethodName_("new"), 0,
-		kMethod_Public, _F(KonohaFactory_loadModule), KType_boolean, KType_KonohaFactory, KMethodName_("loadModule"), 1, KType_String, KFieldName_("name"),
+		kMethod_Public, _F(KonohaFactory_loadModule), KType_Boolean, KType_KonohaFactory, KMethodName_("loadModule"), 1, KType_String, KFieldName_("name"),
 		kMethod_Public, _F(KonohaFactory_create), KType_Konoha, KType_KonohaFactory, KMethodName_("create"), 0,
-		kMethod_Public, _F(Konoha_loadScript), KType_boolean, KType_Konoha, KMethodName_("loadScript"), 1, KType_String, KFieldName_("filename"),
+		kMethod_Public, _F(Konoha_loadScript), KType_Boolean, KType_Konoha, KMethodName_("loadScript"), 1, KType_String, KFieldName_("filename"),
 		kMethod_Public, _F(Konoha_eval), KType_Konoha, KType_Konoha, KMethodName_("eval"), 1, KType_String, KFieldName_("script"),
 		DEND,
 	};

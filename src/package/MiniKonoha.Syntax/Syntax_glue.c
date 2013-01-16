@@ -37,12 +37,12 @@ extern "C"{
 
 #define TP_kw           KType_Symbol,     KFieldName_("keyword")
 #define TP_source       KType_String,     KFieldName_("source")
-#define TP_pos          KType_int,        KFieldName_("pos")
+#define TP_pos          KType_Int,        KFieldName_("pos")
 #define TP_tokens       KType_TokenArray, KFieldName_("tokens")
-#define TP_begin        KType_int,        KFieldName_("begin")
-#define TP_end          KType_int,        KFieldName_("end")
+#define TP_begin        KType_Int,        KFieldName_("begin")
+#define TP_end          KType_Int,        KFieldName_("end")
 #define TP_message      KType_String,     KFieldName_("message")
-#define TP_level        KType_int,        KFieldName_("level")
+#define TP_level        KType_Int,        KFieldName_("level")
 #define TP_token        KType_Token,      KFieldName_("token")
 #define TP_syntax       KType_Syntax,     KFieldName_("syntax")
 #define TP_name         KType_String,     KFieldName_("name")
@@ -432,7 +432,7 @@ static KMETHOD Node_AppendParsedNode(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 #define TP_type KType_Object, KFieldName_("type")
-#define TP_pol  KType_int, KFieldName_("policy")
+#define TP_pol  KType_Int, KFieldName_("policy")
 #define TP_ArgNode(n) KType_Node, KFieldName_("expr" #n)
 
 static void Syntax_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
@@ -441,17 +441,17 @@ static void Syntax_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceI
 	KDEFINE_METHOD MethodData[] = {
 		/* Block */
 		_Public|_Const, _F(Node_new), KType_Node, KType_Node, KMethodName_("new"), 1, KType_NameSpace, KFieldName_("namespace"),
-		_Public, _F(Node_ParseNewNode), KType_Node, KType_Node, KMethodName_("ParseNewNode"), 4, TP_tokens, TP_begin, TP_end, KType_boolean, KFieldName_("isMetaPattern"),
+		_Public, _F(Node_ParseNewNode), KType_Node, KType_Node, KMethodName_("ParseNewNode"), 4, TP_tokens, TP_begin, TP_end, KType_Boolean, KFieldName_("isMetaPattern"),
 		_Public, _F(Node_GetNodeList), KType_NodeArray, KType_Node, KMethodName_("GetNodeList"), 0,
 		_Public, _F(Node_GetParentNode), KType_Node, KType_Node, KMethodName_("GetParentNode"), 0,
 
-		_Public, _F(Node_opEQ), KType_boolean, KType_Node, KMethodName_("=="), 1, KType_Node, KFieldName_("other"),
+		_Public, _F(Node_opEQ), KType_Boolean, KType_Node, KMethodName_("=="), 1, KType_Node, KFieldName_("other"),
 		_Public, _F(Node_TypeCheckNode), KType_Node, KType_Node, KMethodName_("TypeCheckNode"), 3, TP_kw, TP_type, TP_pol,
 		_Public, _F(Node_TypeCheckNodeAt), KType_Node, KType_Node, KMethodName_("TypeCheckNodeAt"), 3, TP_pos, TP_type, TP_pol,
 		_Public, _F(Node_SetType), KType_void, KType_Node, KMethodName_("SetType"), 1, TP_type,
-		_Public|_Im, _F(Node_GetType), KType_int, KType_Node, KMethodName_("GetType"), 0,
+		_Public|_Im, _F(Node_GetType), KType_Int, KType_Node, KMethodName_("GetType"), 0,
 		_Public, _F(Node_LookupNode), KType_Node, KType_Node, KMethodName_("lookupNode"), 1, TP_kw,
-//////		_Public, _F(MessageNodearsedNode), KType_Node, KType_Node, KMethodName_("parseNode"), 3, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
+//////		_Public, _F(MessageNodearsedNode), KType_Node, KType_Node, KMethodName_("parseNode"), 3, KType_TokenArray, FN_tokenList, KType_Int, FN_s, KType_Int, FN_e,
 		_Public, _F(Node_Op1), KType_Node, KType_Node, KMethodName_("Op"), 1, TP_token,
 		_Public, _F(Node_Op2), KType_Node, KType_Node, KMethodName_("Op"), 2, TP_token, TP_ArgNode(1),
 		_Public, _F(Node_Op3), KType_Node, KType_Node, KMethodName_("Op"), 3, TP_token, TP_ArgNode(1), TP_ArgNode(2),
@@ -459,12 +459,12 @@ static void Syntax_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceI
 //		_Public, _F(Node_Op5), KType_Node, KType_Node, KMethodName_("Op"), 5, TP_token, TP_ArgNode(1), TP_ArgNode(2), TP_ArgNode(3), TP_ArgNode(4),
 //		_Public, _F(Node_Op6), KType_Node, KType_Node, KMethodName_("Op"), 6, TP_token, TP_ArgNode(1), TP_ArgNode(2), TP_ArgNode(3), TP_ArgNode(4), TP_ArgNode(5),
 //		_Public, _F(Node_Op7), KType_Node, KType_Node, KMethodName_("Op"), 7, TP_token, TP_ArgNode(1), TP_ArgNode(2), TP_ArgNode(3), TP_ArgNode(4), TP_ArgNode(5), TP_ArgNode(6),
-////		_Public, _F(Node_rightJoinNode), KType_Node, KType_Node, KMethodName_("rightJoinNode"), 4, KType_Node, FN_expr, KType_TokenArray, FN_tokenList, KType_int, FN_s, KType_int, FN_e,
+////		_Public, _F(Node_rightJoinNode), KType_Node, KType_Node, KMethodName_("rightJoinNode"), 4, KType_Node, FN_expr, KType_TokenArray, FN_tokenList, KType_Int, FN_s, KType_Int, FN_e,
 		_Public, _F(Node_getObject), KType_Node, KType_Node, KMethodName_("getNode"), 1, KType_Symbol, FN_key,
 		_Public, _F(Node_getTokenList), KType_TokenArray, KType_Node, KMethodName_("getTokenList"), 2, KType_Symbol, FN_key, KType_TokenArray, FN_defval,
 		_Public, _F(Node_getToken), KType_Token, KType_Node, KMethodName_("getToken"), 2, KType_Symbol, FN_key, KType_Token, FN_defval,
 		_Public, _F(Node_done), KType_void, KType_Node, KMethodName_("done"), 0,
-		_Public, _F(Node_keywordIs), KType_boolean, KType_Node, KMethodName_("keywordIs"), 1, KType_Symbol, FN_key,
+		_Public, _F(Node_keywordIs), KType_Boolean, KType_Node, KMethodName_("keywordIs"), 1, KType_Symbol, FN_key,
 		_Public, _F(Node_getNameSpace), KType_NameSpace, KType_Node, KMethodName_("getNameSpace"), 0,
 		_Public, _F(Node_AddNode), KType_Node, KType_Node, KMethodName_("addNode"), 1, KType_Node, KFieldName_("node"),
 		_Public, _F(Node_InsertAfter), KType_Node, KType_Node, KMethodName_("insertAfter"), 2, KType_Node, KFieldName_("target"), KType_Node, KFieldName_("node"),
@@ -759,7 +759,7 @@ static kbool_t Syntax_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 static kbool_t Syntax_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	KDEFINE_INT_CONST IntData[] = {
-#define DEFINE_KEYWORD(KW) {#KW, KType_int, KW}
+#define DEFINE_KEYWORD(KW) {#KW, KType_Int, KW}
 		DEFINE_KEYWORD(ErrTag),
 		DEFINE_KEYWORD(WarnTag),
 		DEFINE_KEYWORD(NoticeTag),

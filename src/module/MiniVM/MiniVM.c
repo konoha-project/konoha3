@@ -446,7 +446,7 @@ static void KBuilder_Asm(KonohaContext *kctx, KBuilder *builder, KVirtualCode *o
 
 static void kNode_SetLabelNode(KonohaContext *kctx, kNode *stmt, ksymbol_t label, bblock_t labelId)
 {
-	KLIB kObjectProto_SetUnboxValue(kctx, stmt, label, KType_int, labelId);
+	KLIB kObjectProto_SetUnboxValue(kctx, stmt, label, KType_Int, labelId);
 }
 
 static bblock_t kNode_GetLabelNode(KonohaContext *kctx, kNode *stmt, ksymbol_t label)

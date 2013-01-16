@@ -123,7 +123,7 @@ static kbool_t HelloWorld_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, i
 	int FN_x = KFieldName_("x");
 	int FN_y = KFieldName_("y");
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Person_new), KType_Person, KType_Person, KMethodName_("new"), 2, KType_String, FN_x, KType_int, FN_y,
+		_Public, _F(Person_new), KType_Person, KType_Person, KMethodName_("new"), 2, KType_String, FN_x, KType_Int, FN_y,
 		_Public, _F(Person_say), KType_String, KType_Person, KMethodName_("say"), 0,
 		DEND, /* <= sentinel */
 	};
@@ -131,7 +131,7 @@ static kbool_t HelloWorld_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, i
 
 	/* You can define constant variable with the following procedures. */
 	KDEFINE_INT_CONST IntData[] = {
-		{"NARUTO_AGE", KType_int, 18},
+		{"NARUTO_AGE", KType_Int, 18},
 		{} /* <= sentinel */
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), trace);

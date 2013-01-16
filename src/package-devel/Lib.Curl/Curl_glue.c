@@ -744,7 +744,7 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 
 #define KType_Curl     cCurl->typeId
 
-#define KDefineConstInt(T)  #T, KType_int, T
+#define KDefineConstInt(T)  #T, KType_Int, T
 
 static kbool_t curl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
@@ -762,14 +762,14 @@ static kbool_t curl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Curl_new), KType_Curl, KType_Curl, KMethodName_("new"), 0,
-		_Public, _F(Curl_SetOptBoolean), KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_boolean, KFieldName_("data"),
-		_Public, _F(Curl_SetOptInt),     KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_int,     KFieldName_("data"),
-		_Public, _F(Curl_SetOptString),  KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_String,  KFieldName_("data"),
-		_Public, _F(Curl_SetOptFile),    KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_int, KFieldName_("option"), KType_File,    KFieldName_("data"),
+		_Public, _F(Curl_SetOptBoolean), KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_Int, KFieldName_("option"), KType_Boolean, KFieldName_("data"),
+		_Public, _F(Curl_SetOptInt),     KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_Int, KFieldName_("option"), KType_Int,     KFieldName_("data"),
+		_Public, _F(Curl_SetOptString),  KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_Int, KFieldName_("option"), KType_String,  KFieldName_("data"),
+		_Public, _F(Curl_SetOptFile),    KType_void, KType_Curl, KMethodName_("setOpt"), 2, KType_Int, KFieldName_("option"), KType_File,    KFieldName_("data"),
 		_Public, _F(Curl_appendHeader), KType_void, KType_Curl, KMethodName_("appendHeader"), 1, KType_String, KFieldName_("header"),
-		_Public, _F(Curl_perform), KType_boolean, KType_Curl, KMethodName_("perform"), 0,
+		_Public, _F(Curl_perform), KType_Boolean, KType_Curl, KMethodName_("perform"), 0,
 		_Public, _F(Curl_receiveString), KType_String, KType_Curl, KMethodName_("receiveString"), 0,
-		_Public|_Im, _F(Curl_getInfo), KType_Object/*FIXME KType_Dynamic*/, KType_Curl, KMethodName_("getInfo"), 1, KType_int, KFieldName_("type"),
+		_Public|_Im, _F(Curl_getInfo), KType_Object/*FIXME KType_Dynamic*/, KType_Curl, KMethodName_("getInfo"), 1, KType_Int, KFieldName_("type"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

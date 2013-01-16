@@ -394,13 +394,13 @@ static KMETHOD TypeCheck_Type(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD TypeCheck_true(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
-	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_boolean, (uintptr_t)1));
+	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_Boolean, (uintptr_t)1));
 }
 
 static KMETHOD TypeCheck_false(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
-	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_boolean, (uintptr_t)0));
+	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_Boolean, (uintptr_t)0));
 }
 
 static KMETHOD TypeCheck_IntLiteral(KonohaContext *kctx, KonohaStack *sfp)
@@ -408,7 +408,7 @@ static KMETHOD TypeCheck_IntLiteral(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	kToken *tk = expr->TermToken;
 	long long n = strtoll(kString_text(tk->text), NULL, 0);
-	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_int, (uintptr_t)n));
+	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_Int, (uintptr_t)n));
 }
 
 static KMETHOD TypeCheck_AndOperator(KonohaContext *kctx, KonohaStack *sfp)
@@ -418,7 +418,7 @@ static KMETHOD TypeCheck_AndOperator(KonohaContext *kctx, KonohaStack *sfp)
 	if(!kNode_IsError(returnNode)) {
 		returnNode = TypeCheckNodeAt(kctx, expr, 2, ns, KClass_Boolean, 0);
 		if(!kNode_IsError(returnNode)) {
-			returnNode = kNode_Type(kctx, expr, KNode_And, KType_boolean);
+			returnNode = kNode_Type(kctx, expr, KNode_And, KType_Boolean);
 		}
 	}
 	KReturn(returnNode);
@@ -431,7 +431,7 @@ static KMETHOD TypeCheck_OrOperator(KonohaContext *kctx, KonohaStack *sfp)
 	if(!kNode_IsError(returnNode)) {
 		returnNode = TypeCheckNodeAt(kctx, expr, 2, ns, KClass_Boolean, 0);
 		if(!kNode_IsError(returnNode)) {
-			returnNode = kNode_Type(kctx, expr, KNode_Or, KType_boolean);
+			returnNode = kNode_Type(kctx, expr, KNode_Or, KType_Boolean);
 		}
 	}
 	KReturn(returnNode);

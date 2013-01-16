@@ -295,34 +295,34 @@ static void stat_defineClassAndMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static, _F(System_stat),  KType_Stat, KType_System, KMethodName_("stat"), 1, KType_String, KFieldName_("path"),
 		_Public|_Static, _F(System_lstat), KType_Stat, KType_System, KMethodName_("lstat"), 1, KType_String, KFieldName_("path"),
-		_Public|_Static, _F(System_fstat), KType_Stat, KType_System, KMethodName_("fstat"), 1, KType_int, KFieldName_("fd"),
-		_Public|_Const|_Im, _F(Stat_getdev), KType_int, KType_Stat, KMethodName_("getdev"), 0,
-		_Public|_Const|_Im, _F(Stat_getino), KType_int, KType_Stat, KMethodName_("getino"), 0,
-		_Public|_Const|_Im, _F(Stat_getmode), KType_int, KType_Stat, KMethodName_("getmode"), 0,
-		_Public|_Const|_Im, _F(Stat_getnlink), KType_int, KType_Stat, KMethodName_("getnlink"), 0,
-		_Public|_Const|_Im, _F(Stat_getuid), KType_int, KType_Stat, KMethodName_("getuid"), 0,
-		_Public|_Const|_Im, _F(Stat_getgid), KType_int, KType_Stat, KMethodName_("getgid"), 0,
-		_Public|_Const|_Im, _F(Stat_getsize), KType_int, KType_Stat, KMethodName_("getsize"), 0,
-		_Public|_Const|_Im, _F(Stat_getatime), KType_int, KType_Stat, KMethodName_("getatime"), 0,
-		_Public|_Const|_Im, _F(Stat_getmtime), KType_int, KType_Stat, KMethodName_("getmtime"), 0,
-		_Public|_Const|_Im, _F(Stat_getctime), KType_int, KType_Stat, KMethodName_("getctime"), 0,
+		_Public|_Static, _F(System_fstat), KType_Stat, KType_System, KMethodName_("fstat"), 1, KType_Int, KFieldName_("fd"),
+		_Public|_Const|_Im, _F(Stat_getdev), KType_Int, KType_Stat, KMethodName_("getdev"), 0,
+		_Public|_Const|_Im, _F(Stat_getino), KType_Int, KType_Stat, KMethodName_("getino"), 0,
+		_Public|_Const|_Im, _F(Stat_getmode), KType_Int, KType_Stat, KMethodName_("getmode"), 0,
+		_Public|_Const|_Im, _F(Stat_getnlink), KType_Int, KType_Stat, KMethodName_("getnlink"), 0,
+		_Public|_Const|_Im, _F(Stat_getuid), KType_Int, KType_Stat, KMethodName_("getuid"), 0,
+		_Public|_Const|_Im, _F(Stat_getgid), KType_Int, KType_Stat, KMethodName_("getgid"), 0,
+		_Public|_Const|_Im, _F(Stat_getsize), KType_Int, KType_Stat, KMethodName_("getsize"), 0,
+		_Public|_Const|_Im, _F(Stat_getatime), KType_Int, KType_Stat, KMethodName_("getatime"), 0,
+		_Public|_Const|_Im, _F(Stat_getmtime), KType_Int, KType_Stat, KMethodName_("getmtime"), 0,
+		_Public|_Const|_Im, _F(Stat_getctime), KType_Int, KType_Stat, KMethodName_("getctime"), 0,
 #ifdef HAVE_STRUKClass_STAT_ST_RDEV
-		_Public|_Const|_Im, _F(Stat_getrdev), KType_int, KType_Stat, KMethodName_("getrdev"), 0,
+		_Public|_Const|_Im, _F(Stat_getrdev), KType_Int, KType_Stat, KMethodName_("getrdev"), 0,
 #endif /* HAVE_STRUKClass_STAT_ST_RDEV */
 #ifdef HAVE_STRUKClass_STAT_ST_BLOCKS
-		_Public|_Const|_Im, _F(Stat_getblocks), KType_int, KType_Stat, KMethodName_("getblocks"), 0,
+		_Public|_Const|_Im, _F(Stat_getblocks), KType_Int, KType_Stat, KMethodName_("getblocks"), 0,
 #endif /* HAVE_STRUKClass_STAT_ST_BLOCKS */
 #ifdef HAVE_STRUKClass_STAT_ST_BLKSIZE
-		_Public|_Const|_Im, _F(Stat_getblksize), KType_int, KType_Stat, KMethodName_("getblksize"), 0,
+		_Public|_Const|_Im, _F(Stat_getblksize), KType_Int, KType_Stat, KMethodName_("getblksize"), 0,
 #endif /* HAVE_STRUKClass_STAT_ST_BLKSIZE */
 #ifdef HAVE_STRUKClass_STAT_ST_FLAGS
-		_Public|_Const|_Im, _F(Stat_getflags), KType_int, KType_Stat, KMethodName_("getflags"), 0,
+		_Public|_Const|_Im, _F(Stat_getflags), KType_Int, KType_Stat, KMethodName_("getflags"), 0,
 #endif /* HAVE_STRUKClass_STAT_ST_FLAGS */
 #ifdef HAVE_STRUKClass_STAT_ST_GEN
-		_Public|_Const|_Im, _F(Stat_getgen), KType_int, KType_Stat, KMethodName_("getgen"), 0,
+		_Public|_Const|_Im, _F(Stat_getgen), KType_Int, KType_Stat, KMethodName_("getgen"), 0,
 #endif /* HAVE_STRUKClass_STAT_ST_GEN */
 #ifdef HAVE_STRUKClass_STAT_ST_BIRTHTIME
-		_Public|_Const|_Im, _F(Stat_getbirthtime), KType_int, KType_Stat, KMethodName_("getbirthtime"), 0,
+		_Public|_Const|_Im, _F(Stat_getbirthtime), KType_Int, KType_Stat, KMethodName_("getbirthtime"), 0,
 #endif /* HAVE_STRUKClass_STAT_ST_BIRTHTIME */
 
 		DEND,

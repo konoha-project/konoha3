@@ -633,20 +633,20 @@ static kbool_t regexp_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 	ktypeattr_t KType_StringArray0 = KClass_StringArray0->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(RegExp_getglobal), KType_boolean, KType_RegExp, KMethodName_("getglobal"), 0,
-		_Public|_Const|_Im, _F(RegExp_getignoreCase), KType_boolean, KType_RegExp, KMethodName_("getignoreCase"), 0,
-		_Public|_Const|_Im, _F(RegExp_getmultiline), KType_boolean, KType_RegExp, KMethodName_("getmultiline"), 0,
+		_Public|_Const|_Im, _F(RegExp_getglobal), KType_Boolean, KType_RegExp, KMethodName_("getglobal"), 0,
+		_Public|_Const|_Im, _F(RegExp_getignoreCase), KType_Boolean, KType_RegExp, KMethodName_("getignoreCase"), 0,
+		_Public|_Const|_Im, _F(RegExp_getmultiline), KType_Boolean, KType_RegExp, KMethodName_("getmultiline"), 0,
 		_Public|_Const|_Im, _F(RegExp_getsource), KType_String, KType_RegExp, KMethodName_("getsource"), 0,
-		_Public|_Const|_Im, _F(RegExp_getlastIndex), KType_int, KType_RegExp, KMethodName_("getlastIndex"), 0,
+		_Public|_Const|_Im, _F(RegExp_getlastIndex), KType_Int, KType_RegExp, KMethodName_("getlastIndex"), 0,
 		_Public|_Im, _F(String_Match), KType_StringArray0, KType_String, KMethodName_("match"), 1, KType_RegExp, KFieldName_("regexp"),
 		_Public|_Const|_Im, _F(String_replace), KType_String, KType_String, KMethodName_("replace"), 2, KType_RegExp, KFieldName_("searchvalue"), KType_String, KFieldName_("newvalue"),
-		_Public|_Const|_Im, _F(String_search), KType_int, KType_String, KMethodName_("search"), 1, KType_RegExp, KFieldName_("searchvalue"),
+		_Public|_Const|_Im, _F(String_search), KType_Int, KType_String, KMethodName_("search"), 1, KType_RegExp, KFieldName_("searchvalue"),
 		_Public|_Im, _F(String_split), KType_StringArray0, KType_String, KMethodName_("split"), 1, KType_RegExp, KFieldName_("separator"),
-		_Public|_Im, _F(String_splitWithLimit), KType_StringArray0, KType_String, KMethodName_("split"), 2, KType_RegExp, KFieldName_("separator"), KType_int, KFieldName_("limit"),
+		_Public|_Im, _F(String_splitWithLimit), KType_StringArray0, KType_String, KMethodName_("split"), 2, KType_RegExp, KFieldName_("separator"), KType_Int, KFieldName_("limit"),
 		_Public|_Const, _F(RegExp_new),     KType_RegExp,  KType_RegExp,  KMethodName_("new"), 1, KType_String, KFieldName_("pattern"),
 		_Public|_Const, _F(RegExp_new2),     KType_RegExp,  KType_RegExp,  KMethodName_("new"), 2, KType_String, KFieldName_("pattern"), KType_String, KFieldName_("option"),
 		_Public|_Const, _F(RegExp_exec),    KType_StringArray0, KType_RegExp,  KMethodName_("exec"), 1, KType_String, KFieldName_("str"),
-		_Public|_Const|_Im, _F(RegExp_test),    KType_boolean, KType_RegExp,  KMethodName_("test"), 1, KType_String, KFieldName_("str"),
+		_Public|_Const|_Im, _F(RegExp_test),    KType_Boolean, KType_RegExp,  KMethodName_("test"), 1, KType_String, KFieldName_("str"),
 		_Static|_Public|_Const, _F(RegExp_create), KType_RegExp, KType_RegExp, KMethodName_("create"), 2, KType_String, KFieldName_("pattern"), KType_String, KFieldName_("option"),
 		DEND,
 	};

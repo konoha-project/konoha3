@@ -71,7 +71,7 @@ static void CommandLine_Define(KonohaContext *kctx, char *keyvalue, KTraceInfo *
 		uintptr_t unboxValue;
 		ktypeattr_t ty;
 		if(isdigit(p[1])) {
-			ty = KType_int;
+			ty = KType_Int;
 			unboxValue = (uintptr_t)strtol(p+1, NULL, 0);
 		}
 		else {

@@ -79,7 +79,7 @@ static KMETHOD NameSpace_AddMethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 static void class_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Ignored, _F(NameSpace_AllowImplicitField), KType_void, KType_NameSpace, KMethodName_("AllowImplicitField"), 1, KType_boolean, KFieldName_("allow"),
+		_Public|_Const|_Ignored, _F(NameSpace_AllowImplicitField), KType_void, KType_NameSpace, KMethodName_("AllowImplicitField"), 1, KType_Boolean, KFieldName_("allow"),
 		_Public|_Const, _F(NameSpace_AddMethodDecl), KType_void, KType_NameSpace, KMethodName_("AddMethodDecl"), 1, KType_Node, KFieldName_("node"),
 		DEND,
 	};

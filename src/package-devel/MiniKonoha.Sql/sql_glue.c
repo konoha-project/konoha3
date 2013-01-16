@@ -235,7 +235,7 @@ static void ResultSet_SetText(KonohaContext *kctx, kResultSet *rs, unsigned Idx,
 
 static void ResultSet_SetInt(KonohaContext *kctx, kResultSet *rs, unsigned Idx, kint_t val)
 {
-	rs->column[Idx].type = KType_int;
+	rs->column[Idx].type = KType_Int;
 	rs->column[Idx].val.intValue = val;
 }
 
@@ -403,7 +403,7 @@ static KMETHOD ResultSet_getInt(KonohaContext *kctx, KonohaStack *sfp)
 	kint_t res = 0;
 	if(idx >= 0) {
 		ktypeattr_t type = rs->column[idx].type;
-		if(type == KType_int) {
+		if(type == KType_Int) {
 			res = rs->column[idx].val.intValue;
 		} else if(KDefinedKonohaCommonModule() && type == KType_float) {
 			res = (kint_t) rs->column[idx].val.floatValue;
@@ -420,7 +420,7 @@ static KMETHOD ResultSet_getFloat(KonohaContext *kctx, KonohaStack *sfp)
 	kfloat_t res = 0.0;
 	if(idx >= 0) {
 		ktypeattr_t type = rs->column[idx].type;
-		if(type == KType_int) {
+		if(type == KType_Int) {
 			res = (kfloat_t) rs->column[idx].val.intValue;
 		} else if(KDefinedKonohaCommonModule() && type == KType_float) {
 			res = rs->column[idx].val.floatValue;
@@ -440,7 +440,7 @@ static KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 		krbp_t *val = &rs->column[idx].val;
 		if(type == KType_String) {
 			res = val[0].asString;
-		} else if(type == KType_int) {
+		} else if(type == KType_Int) {
 			KBuffer wb;
 			KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 			KLIB KBuffer_printf(kctx, &wb, KFLOAT_FMT, val[0].floatValue);
@@ -464,7 +464,7 @@ static KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ResultSet_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KClass *retClass = KGetReturnType(sfp);
-	if(retClass->typeId == KType_int) {
+	if(retClass->typeId == KType_Int) {
 		ResultSet_getInt(kctx, sfp);
 	} else if(retClass->typeId == KType_String) {
 		ResultSet_getString(kctx, sfp);
@@ -506,17 +506,17 @@ static kbool_t sql_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 		_Public, _F(Connection_close), KType_void, KType_Connection, KMethodName_("close"), 0,
 		_Public, _F(Connection_query), KType_ResultSet, KType_Connection, KMethodName_("query"), 1, KType_String, KFieldName_("query"),
 #ifdef HAVE_MYSQL
-		_Public, _F(Connection_getInsertId), KType_int, KType_Connection, KMethodName_("getInsertId"), 0,
+		_Public, _F(Connection_getInsertId), KType_Int, KType_Connection, KMethodName_("getInsertId"), 0,
 #endif
 
 		/* ResultSet method */
-		_Public, _F(ResultSet_getInt), KType_int, KType_ResultSet, KMethodName_("getInt"), 1, KType_String, KFieldName_("query"),
+		_Public, _F(ResultSet_getInt), KType_Int, KType_ResultSet, KMethodName_("getInt"), 1, KType_String, KFieldName_("query"),
 		_Public, _F(ResultSet_getFloat), KType_float, KType_ResultSet, KMethodName_("getFloat"), 1, KType_String, KFieldName_("query"),
 		_Public, _F(ResultSet_getString), KType_String, KType_ResultSet, KMethodName_("getString"), 1, KType_String, KFieldName_("query"),
 		_Public|kMethod_SmartReturn, _F(ResultSet_get), KType_Object, KType_ResultSet, KMethodName_("get"), 1, KType_String, KFieldName_("query"),
-		_Public, _F(ResultSet_next), KType_boolean, KType_ResultSet, KMethodName_("next"), 0,
-		_Public, _F(ResultSet_getSize), KType_int, KType_ResultSet, KMethodName_("getSize"), 0,
-		_Public, _F(ResultSet_getName), KType_String, KType_ResultSet, KMethodName_("getName"), 1, KType_int, KFieldName_("idx"),
+		_Public, _F(ResultSet_next), KType_Boolean, KType_ResultSet, KMethodName_("next"), 0,
+		_Public, _F(ResultSet_getSize), KType_Int, KType_ResultSet, KMethodName_("getSize"), 0,
+		_Public, _F(ResultSet_getName), KType_String, KType_ResultSet, KMethodName_("getName"), 1, KType_Int, KFieldName_("idx"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

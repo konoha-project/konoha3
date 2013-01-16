@@ -72,7 +72,7 @@ static kString *kNode_getErrorMessage(KonohaContext *kctx, kNode *stmt)
 
 static void kNode_SetLabelBlock(KonohaContext *kctx, kNode *stmt, ksymbol_t label, Block *block)
 {
-	KLIB kObjectProto_SetUnboxValue(kctx, stmt, label, KType_int, (uintptr_t) block);
+	KLIB kObjectProto_SetUnboxValue(kctx, stmt, label, KType_Int, (uintptr_t) block);
 }
 
 static Block *kNode_GetTargetBlock(KonohaContext *kctx, kNode *stmt, ksymbol_t keyword)
@@ -169,50 +169,50 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 	kParam     *params = kMethod_GetParam(mtd);
 	kNode *stmt = expr->Parent;
 	assert(IS_Node(stmt));
-	if(thisTy == KType_boolean) {
+	if(thisTy == KType_Boolean) {
 		if(params->psize == 0) { /* UnaryOperator */
-			if(retTy == KType_boolean) {
+			if(retTy == KType_Boolean) {
 				/* booleaen booleaen.opNEG() */
 				enum UnaryOp Op = KMethodName_toUnaryOperator(kctx, mn);
-				INode *Param = FetchINode(kctx, builder, expr, 1, KType_boolean, thunk);
+				INode *Param = FetchINode(kctx, builder, expr, 1, KType_Boolean, thunk);
 				return CreateUnaryInst(BLD(builder), Op, Param, kNode_uline(stmt));
 			}
 		}
 		else if(params->psize == 1) { /* BinaryOperator */
 			ktypeattr_t ptype = params->paramtypeItems[0].attrTypeId;
-			if(retTy == KType_boolean && ptype == KType_boolean) {
+			if(retTy == KType_Boolean && ptype == KType_Boolean) {
 				/* boolean boolean.(opEQ|opNE) (boolean x) */
 				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
 				assert(Op == Eq || Op == Nq);
-				INode *LHS = FetchINode(kctx, builder, expr, 1, KType_boolean, thunk);
-				INode *RHS = FetchINode(kctx, builder, expr, 2, KType_boolean, thunk);
+				INode *LHS = FetchINode(kctx, builder, expr, 1, KType_Boolean, thunk);
+				INode *RHS = FetchINode(kctx, builder, expr, 2, KType_Boolean, thunk);
 				return CreateBinaryInst(BLD(builder), Op, LHS, RHS, kNode_uline(stmt));
 			}
 		}
 	}
-	else if(thisTy == KType_int) {
+	else if(thisTy == KType_Int) {
 		if(params->psize == 0) { /* UnaryOperator */
-			if(retTy == KType_int) {
+			if(retTy == KType_Int) {
 				/* int int.opSUB() */
 				enum UnaryOp Op = KMethodName_toUnaryOperator(kctx, mn);
-				INode *Param = FetchINode(kctx, builder, expr, 1, KType_int, thunk);
+				INode *Param = FetchINode(kctx, builder, expr, 1, KType_Int, thunk);
 				return CreateUnaryInst(BLD(builder), Op, Param, kNode_uline(stmt));
 			}
 		}
 		else if(params->psize == 1) { /* BinaryOperator */
 			ktypeattr_t ptype = params->paramtypeItems[0].attrTypeId;
-			if(retTy == KType_boolean && ptype == KType_int) {
+			if(retTy == KType_Boolean && ptype == KType_Int) {
 				/* boolean int.(opEQ|opNE|opGT|opGE|opLT|opLE) (int x) */
 				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
-				INode *LHS = FetchINode(kctx, builder, expr, 1, KType_int, thunk);
-				INode *RHS = FetchINode(kctx, builder, expr, 2, KType_int, thunk);
+				INode *LHS = FetchINode(kctx, builder, expr, 1, KType_Int, thunk);
+				INode *RHS = FetchINode(kctx, builder, expr, 2, KType_Int, thunk);
 				return CreateBinaryInst(BLD(builder), Op, LHS, RHS, kNode_uline(stmt));
 			}
-			else if(retTy == KType_int && ptype == KType_int) {
+			else if(retTy == KType_Int && ptype == KType_Int) {
 				/* int int.(opADD|opSUB|opMUL|opDIV|opMOD|opLSHIFT|opRSHIFT|opAND|opOR|opXOR) (int x) */
 				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
-				INode *LHS = FetchINode(kctx, builder, expr, 1, KType_int, thunk);
-				INode *RHS = FetchINode(kctx, builder, expr, 2, KType_int, thunk);
+				INode *LHS = FetchINode(kctx, builder, expr, 1, KType_Int, thunk);
+				INode *RHS = FetchINode(kctx, builder, expr, 2, KType_Int, thunk);
 				return CreateBinaryInst(BLD(builder), Op, LHS, RHS, kNode_uline(stmt));
 			}
 		}
@@ -228,7 +228,7 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 		}
 		else if(params->psize == 1) { /* BinaryOperator */
 			ktypeattr_t ptype = params->paramtypeItems[0].attrTypeId;
-			if(retTy == KType_boolean && ptype == KType_float) {
+			if(retTy == KType_Boolean && ptype == KType_float) {
 				/* boolean float.(opEQ|opNE|opGT|opGE|opLT|opLE) (float x) */
 				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
 				INode *LHS = FetchINode(kctx, builder, expr, 1, KType_float, thunk);

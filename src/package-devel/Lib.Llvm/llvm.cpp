@@ -4500,43 +4500,43 @@ static KMETHOD Object_toLLVMBasicBlock(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 static KDEFINE_INT_CONST IntIntrinsic[] = {
-	{"Pow"  , KType_int, (int) Intrinsic::pow},
-	{"Sqrt" , KType_int, (int) Intrinsic::sqrt},
-	{"Exp"  , KType_int, (int) Intrinsic::exp},
-	{"Log10", KType_int, (int) Intrinsic::log10},
-	{"Log"  , KType_int, (int) Intrinsic::log},
-	{"Sin"  , KType_int, (int) Intrinsic::sin},
-	{"Cos"  , KType_int, (int) Intrinsic::cos},
+	{"Pow"  , KType_Int, (int) Intrinsic::pow},
+	{"Sqrt" , KType_Int, (int) Intrinsic::sqrt},
+	{"Exp"  , KType_Int, (int) Intrinsic::exp},
+	{"Log10", KType_Int, (int) Intrinsic::log10},
+	{"Log"  , KType_Int, (int) Intrinsic::log},
+	{"Sin"  , KType_Int, (int) Intrinsic::sin},
+	{"Cos"  , KType_Int, (int) Intrinsic::cos},
 	{NULL, 0, 0}
 };
 
 static KDEFINE_INT_CONST IntGlobalVariable[] = {
-	{"ExternalLinkage",                 KType_int, GlobalValue::ExternalLinkage},
-	{"AvailableExternallyLinkage",      KType_int, GlobalValue::AvailableExternallyLinkage},
-	{"LinkOnceAnyLinkage",              KType_int, GlobalValue::LinkOnceODRLinkage},
-	{"WeakAnyLinkage",                  KType_int, GlobalValue::WeakAnyLinkage},
-	{"WeakODRLinkage",                  KType_int, GlobalValue::WeakODRLinkage},
-	{"AppendingLinkage",                KType_int, GlobalValue::AppendingLinkage},
-	{"InternalLinkage",                 KType_int, GlobalValue::InternalLinkage},
-	{"PrivateLinkage",                  KType_int, GlobalValue::PrivateLinkage},
-	{"LinkerPrivateLinkage",            KType_int, GlobalValue::LinkerPrivateLinkage},
-	{"LinkerPrivateWeakLinkage",        KType_int, GlobalValue::LinkerPrivateWeakLinkage},
+	{"ExternalLinkage",                 KType_Int, GlobalValue::ExternalLinkage},
+	{"AvailableExternallyLinkage",      KType_Int, GlobalValue::AvailableExternallyLinkage},
+	{"LinkOnceAnyLinkage",              KType_Int, GlobalValue::LinkOnceODRLinkage},
+	{"WeakAnyLinkage",                  KType_Int, GlobalValue::WeakAnyLinkage},
+	{"WeakODRLinkage",                  KType_Int, GlobalValue::WeakODRLinkage},
+	{"AppendingLinkage",                KType_Int, GlobalValue::AppendingLinkage},
+	{"InternalLinkage",                 KType_Int, GlobalValue::InternalLinkage},
+	{"PrivateLinkage",                  KType_Int, GlobalValue::PrivateLinkage},
+	{"LinkerPrivateLinkage",            KType_Int, GlobalValue::LinkerPrivateLinkage},
+	{"LinkerPrivateWeakLinkage",        KType_Int, GlobalValue::LinkerPrivateWeakLinkage},
 #if LLVM_VERSION < 302
-	{"LinkerPrivateWeakDefAutoLinkage", KType_int, GlobalValue::LinkerPrivateWeakDefAutoLinkage},
+	{"LinkerPrivateWeakDefAutoLinkage", KType_Int, GlobalValue::LinkerPrivateWeakDefAutoLinkage},
 #endif
-	{"DLLImportLinkage",                KType_int, GlobalValue::DLLImportLinkage},
-	{"DLLExportLinkage",                KType_int, GlobalValue::DLLExportLinkage},
-	{"ExternalWeakLinkage",             KType_int, GlobalValue::ExternalWeakLinkage},
-	{"CommonLinkage",                   KType_int, GlobalValue::CommonLinkage},
+	{"DLLImportLinkage",                KType_Int, GlobalValue::DLLImportLinkage},
+	{"DLLExportLinkage",                KType_Int, GlobalValue::DLLExportLinkage},
+	{"ExternalWeakLinkage",             KType_Int, GlobalValue::ExternalWeakLinkage},
+	{"CommonLinkage",                   KType_Int, GlobalValue::CommonLinkage},
 	{NULL, 0, 0}
 };
 
 #if LLVM_VERSION == 301
-#define C_(S) {#S , KType_int, S ## _i}
+#define C_(S) {#S , KType_Int, S ## _i}
 #elif LLVM_VERSION == 302
-#define C_(S) {#S , KType_int, Attributes::S}
+#define C_(S) {#S , KType_Int, Attributes::S}
 #else
-#define C_(S) {#S , KType_int, S}
+#define C_(S) {#S , KType_Int, S}
 #endif
 #if LLVM_VERSION <= 301
 using namespace llvm::Attribute;
@@ -4719,7 +4719,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 #define KType_BasicBlock  (KClass_BasicBlock)->typeId
 #define KType_IRBuilder   (KClass_IRBuilder)->typeId
 #define KType_Type         (KClass_TypeTBL[0])->typeId
-//#define KType_integerType  (KClass_TypeTBL[1])->typeId
+//#define KType_IntegerType  (KClass_TypeTBL[1])->typeId
 #define KType_PointerType  (KClass_TypeTBL[2])->typeId
 #define KType_FunctionType (KClass_TypeTBL[3])->typeId
 #define KType_ArrayType    (KClass_TypeTBL[4])->typeId
@@ -4810,7 +4810,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 #define KType_LLVM                (KClass_InstTBL[17])->typeId
 #define KType_LibCallInfo         (KClass_InstTBL[18])->typeId
 #define KType_DynamicLibrary      (KClass_InstTBL[19])->typeId
-#define KType_intrinsic           (KClass_InstTBL[20])->typeId
+#define KType_Intrinsic           (KClass_InstTBL[20])->typeId
 
 	KClass *KClass_PassTBL[4];
 	{
@@ -4847,7 +4847,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 #define KType_Array_Type     (KType_TypeArray)
 #define KType_Array_Constant (KType_Array)
 #define KType_Array_Int      (KType_Array)
-#define KType_NativeFunction (KType_int)
+#define KType_NativeFunction (KType_Int)
 
 	assert(KClass_Float != NULL && "please import konoha.float PACKAGE first");
 	intptr_t methoddata[] = {
@@ -4921,9 +4921,9 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public, _F(IRBuilder_createNot),    KType_Value, KType_IRBuilder, KMethodName_("createNot"), 1, KType_Value, KFieldName_("v"),
 		_Public, _F(IRBuilder_createAlloca), KType_Value, KType_IRBuilder, KMethodName_("createAlloca"), 2, KType_Type, KFieldName_("ty"),KType_Value, KFieldName_("arraySize"),
 		_Public, _F(AllocaInst_new), KType_AllocaInst, KType_AllocaInst, KMethodName_("new"), 2, KType_Type, KFieldName_("ty"),KType_Value, KFieldName_("arraySize"),
-		_Public, _F(IRBuilder_createLoad), KType_Value, KType_IRBuilder, KMethodName_("createLoad"), 2, KType_Value, KFieldName_("ptr"),KType_boolean, KFieldName_("isVolatile"),
+		_Public, _F(IRBuilder_createLoad), KType_Value, KType_IRBuilder, KMethodName_("createLoad"), 2, KType_Value, KFieldName_("ptr"),KType_Boolean, KFieldName_("isVolatile"),
 		_Public, _F(LoadInst_new), KType_LoadInst, KType_LoadInst, KMethodName_("new"), 1, KType_Value, KFieldName_("ptr"),
-		_Public, _F(IRBuilder_createStore), KType_Value, KType_IRBuilder, KMethodName_("createStore"), 3, KType_Value, KFieldName_("val"),KType_Value, KFieldName_("ptr"),KType_boolean, KFieldName_("isVolatile"),
+		_Public, _F(IRBuilder_createStore), KType_Value, KType_IRBuilder, KMethodName_("createStore"), 3, KType_Value, KFieldName_("val"),KType_Value, KFieldName_("ptr"),KType_Boolean, KFieldName_("isVolatile"),
 		_Public, _F(StoreInst_new), KType_StoreInst, KType_StoreInst, KMethodName_("new"), 2, KType_Value, KFieldName_("val"),KType_Value, KFieldName_("ptr"),
 		_Public|_Static, _F(GetElementPtrInst_create), KType_GetElementPtrInst, KType_GetElementPtrInst, KMethodName_("create"), 2, KType_Value, KFieldName_("ptr"),KType_Array_Value, KFieldName_("idxList"),
 		_Public|_Static, _F(GetElementPtrInst_createInBounds), KType_GetElementPtrInst, KType_GetElementPtrInst, KMethodName_("createInBounds"), 2, KType_Value, KFieldName_("ptr"),KType_Array_Value, KFieldName_("idxList"),
@@ -4931,15 +4931,15 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public, _F(IRBuilder_createInBoundsGEP), KType_Value, KType_IRBuilder, KMethodName_("createInBoundsGEP"), 2, KType_Value, KFieldName_("ptr"),KType_Array_Value, KFieldName_("idxList"),
 		_Public, _F(IRBuilder_createGEP1), KType_Value, KType_IRBuilder, KMethodName_("createGEP1"), 2, KType_Value, KFieldName_("ptr"),KType_Value, KFieldName_("idx"),
 		_Public, _F(IRBuilder_createInBoundsGEP1), KType_Value, KType_IRBuilder, KMethodName_("createInBoundsGEP1"), 2, KType_Value, KFieldName_("ptr"),KType_Value, KFieldName_("idx"),
-		_Public, _F(IRBuilder_createConstGEP132),  KType_Value, KType_IRBuilder, KMethodName_("createConstGEP1_32"), 2, KType_Value, KFieldName_("ptr"),KType_int, KFieldName_("idx0"),
-		_Public, _F(IRBuilder_createConstGEP232),  KType_Value, KType_IRBuilder, KMethodName_("createConstGEP2_32"), 3, KType_Value, KFieldName_("ptr"),KType_int, KFieldName_("idx0"),KType_int, KFieldName_("idx1"),
-		_Public, _F(IRBuilder_createConstGEP164),  KType_Value, KType_IRBuilder, KMethodName_("createConstGEP1_64"), 2, KType_Value, KFieldName_("ptr"),KType_int, KFieldName_("idx0"),
-		_Public, _F(IRBuilder_createConstGEP264),  KType_Value, KType_IRBuilder, KMethodName_("createConstGEP2_64"), 3, KType_Value, KFieldName_("ptr"),KType_int, KFieldName_("idx0"),KType_int, KFieldName_("idx1"),
-		_Public, _F(IRBuilder_createConstInBoundsGEP132), KType_Value, KType_IRBuilder, KMethodName_("createConstInBoundsGEP1_32"), 2, KType_Value, KFieldName_("ptr"),KType_int, KFieldName_("idx0"),
-		_Public, _F(IRBuilder_createConstInBoundsGEP232), KType_Value, KType_IRBuilder, KMethodName_("createConstInBoundsGEP2_32"), 3, KType_Value, KFieldName_("ptr"),KType_int, KFieldName_("idx0"),KType_int, KFieldName_("idx1"),
-		_Public, _F(IRBuilder_createConstInBoundsGEP164), KType_Value, KType_IRBuilder, KMethodName_("createConstInBoundsGEP1_64"), 2, KType_Value, KFieldName_("ptr"),KType_int, KFieldName_("idx0"),
-		_Public, _F(IRBuilder_createConstInBoundsGEP264), KType_Value, KType_IRBuilder, KMethodName_("createConstInBoundsGEP2_64"), 3, KType_Value, KFieldName_("ptr"),KType_int, KFieldName_("idx0"),KType_int, KFieldName_("idx1"),
-		_Public, _F(IRBuilder_createStructGEP), KType_Value, KType_IRBuilder, KMethodName_("createStructGEP"), 2, KType_Value, KFieldName_("ptr"),KType_int, KFieldName_("idx"),
+		_Public, _F(IRBuilder_createConstGEP132),  KType_Value, KType_IRBuilder, KMethodName_("createConstGEP1_32"), 2, KType_Value, KFieldName_("ptr"),KType_Int, KFieldName_("idx0"),
+		_Public, _F(IRBuilder_createConstGEP232),  KType_Value, KType_IRBuilder, KMethodName_("createConstGEP2_32"), 3, KType_Value, KFieldName_("ptr"),KType_Int, KFieldName_("idx0"),KType_Int, KFieldName_("idx1"),
+		_Public, _F(IRBuilder_createConstGEP164),  KType_Value, KType_IRBuilder, KMethodName_("createConstGEP1_64"), 2, KType_Value, KFieldName_("ptr"),KType_Int, KFieldName_("idx0"),
+		_Public, _F(IRBuilder_createConstGEP264),  KType_Value, KType_IRBuilder, KMethodName_("createConstGEP2_64"), 3, KType_Value, KFieldName_("ptr"),KType_Int, KFieldName_("idx0"),KType_Int, KFieldName_("idx1"),
+		_Public, _F(IRBuilder_createConstInBoundsGEP132), KType_Value, KType_IRBuilder, KMethodName_("createConstInBoundsGEP1_32"), 2, KType_Value, KFieldName_("ptr"),KType_Int, KFieldName_("idx0"),
+		_Public, _F(IRBuilder_createConstInBoundsGEP232), KType_Value, KType_IRBuilder, KMethodName_("createConstInBoundsGEP2_32"), 3, KType_Value, KFieldName_("ptr"),KType_Int, KFieldName_("idx0"),KType_Int, KFieldName_("idx1"),
+		_Public, _F(IRBuilder_createConstInBoundsGEP164), KType_Value, KType_IRBuilder, KMethodName_("createConstInBoundsGEP1_64"), 2, KType_Value, KFieldName_("ptr"),KType_Int, KFieldName_("idx0"),
+		_Public, _F(IRBuilder_createConstInBoundsGEP264), KType_Value, KType_IRBuilder, KMethodName_("createConstInBoundsGEP2_64"), 3, KType_Value, KFieldName_("ptr"),KType_Int, KFieldName_("idx0"),KType_Int, KFieldName_("idx1"),
+		_Public, _F(IRBuilder_createStructGEP), KType_Value, KType_IRBuilder, KMethodName_("createStructGEP"), 2, KType_Value, KFieldName_("ptr"),KType_Int, KFieldName_("idx"),
 		_Public, _F(IRBuilder_createGlobalString), KType_Value, KType_IRBuilder, KMethodName_("createGlobalString"), 1, KType_String, KFieldName_("str"),
 		_Public, _F(IRBuilder_createGlobalStringPtr), KType_Value, KType_IRBuilder, KMethodName_("createGlobalStringPtr"), 1, KType_String, KFieldName_("str"),
 		_Public, _F(IRBuilder_createTrunc),    KType_Value, KType_IRBuilder, KMethodName_("createTrunc"), 2, KType_Value, KFieldName_("v"),KType_Type, KFieldName_("destTy"),
@@ -4958,7 +4958,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public, _F(IRBuilder_createSExtOrBitCast),  KType_Value, KType_IRBuilder, KMethodName_("createSExtOrBitCast"), 2, KType_Value, KFieldName_("v"),KType_Type, KFieldName_("destTy"),
 		_Public, _F(IRBuilder_createTruncOrBitCast), KType_Value, KType_IRBuilder, KMethodName_("createTruncOrBitCast"), 2, KType_Value, KFieldName_("v"),KType_Type, KFieldName_("destTy"),
 		_Public, _F(IRBuilder_createPointerCast),    KType_Value, KType_IRBuilder, KMethodName_("createPointerCast"), 2, KType_Value, KFieldName_("v"),KType_Type, KFieldName_("destTy"),
-		_Public, _F(IRBuilder_createIntCast), KType_Value, KType_IRBuilder, KMethodName_("createIntCast"), 3, KType_Value, KFieldName_("v"),KType_Type, KFieldName_("destTy"),KType_boolean, KFieldName_("isSigned"),
+		_Public, _F(IRBuilder_createIntCast), KType_Value, KType_IRBuilder, KMethodName_("createIntCast"), 3, KType_Value, KFieldName_("v"),KType_Type, KFieldName_("destTy"),KType_Boolean, KFieldName_("isSigned"),
 		_Public, _F(IRBuilder_createFPCast),  KType_Value, KType_IRBuilder, KMethodName_("createFPCast"), 2, KType_Value, KFieldName_("v"),KType_Type, KFieldName_("destTy"),
 		_Public, _F(IRBuilder_createICmpEQ),  KType_Value, KType_IRBuilder, KMethodName_("createICmpEQ"), 2, KType_Value, KFieldName_("lhs"),KType_Value, KFieldName_("rhs"),
 		_Public, _F(IRBuilder_createICmpNE),  KType_Value, KType_IRBuilder, KMethodName_("createICmpNE"), 2, KType_Value, KFieldName_("lhs"),KType_Value, KFieldName_("rhs"),
@@ -4984,7 +4984,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public, _F(IRBuilder_createFCmpULT), KType_Value, KType_IRBuilder, KMethodName_("createFCmpULT"), 2, KType_Value, KFieldName_("lhs"),KType_Value, KFieldName_("rhs"),
 		_Public, _F(IRBuilder_createFCmpULE), KType_Value, KType_IRBuilder, KMethodName_("createFCmpULE"), 2, KType_Value, KFieldName_("lhs"),KType_Value, KFieldName_("rhs"),
 		_Public, _F(IRBuilder_createFCmpUNE), KType_Value, KType_IRBuilder, KMethodName_("createFCmpUNE"), 2, KType_Value, KFieldName_("lhs"),KType_Value, KFieldName_("rhs"),
-		_Public, _F(IRBuilder_createPHI),   KType_PHINode, KType_IRBuilder, KMethodName_("createPHI"), 2, KType_Type, KFieldName_("ty"),KType_int, KFieldName_("numReservedValues"),
+		_Public, _F(IRBuilder_createPHI),   KType_PHINode, KType_IRBuilder, KMethodName_("createPHI"), 2, KType_Type, KFieldName_("ty"),KType_Int, KFieldName_("numReservedValues"),
 		_Public, _F(PHINode_addIncoming),   KType_void, KType_PHINode, KMethodName_("addIncoming"), 2, KType_Value, KFieldName_("v"),KType_BasicBlock, KFieldName_("bb"),
 		_Public, _F(IRBuilder_createCall1), KType_Value, KType_IRBuilder, KMethodName_("createCall1"), 2, KType_Value, KFieldName_("callee"),KType_Value, KFieldName_("arg"),
 		_Public, _F(IRBuilder_createCall2), KType_Value, KType_IRBuilder, KMethodName_("createCall2"), 3, KType_Value, KFieldName_("callee"),KType_Value, KFieldName_("arg1"),KType_Value, KFieldName_("arg2"),
@@ -5006,30 +5006,30 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public, _F(BasicBlock_insertBefore), KType_void, KType_BasicBlock, KMethodName_("insertBefore"), 2, KType_Instruction, KFieldName_("before"),KType_Instruction, KFieldName_("inst"),
 		_Public, _F(BasicBlock_getLastInst),  KType_Value/*TODO*/, KType_BasicBlock, KMethodName_("getLastInst"), 0,
 		_Public, _F(BasicBlock_getTerminator), KType_Value/*TODO*/, KType_BasicBlock, KMethodName_("getTerminator"), 0,
-		_Public, _F(Instruction_SetMetadata), KType_void, KType_Instruction, KMethodName_("setMetadata"), 3, KType_Module, KFieldName_("m"),KType_String, KFieldName_("name"),KType_int, KFieldName_("value"),
+		_Public, _F(Instruction_SetMetadata), KType_void, KType_Instruction, KMethodName_("setMetadata"), 3, KType_Module, KFieldName_("m"),KType_String, KFieldName_("name"),KType_Int, KFieldName_("value"),
 		_Public, _F(Function_dump), KType_void, KType_Function, KMethodName_("dump"), 0,
 		_Public, _F(Value_dump), KType_void, KType_Value, KMethodName_("dump"), 0,
 		_Public, _F(Type_dump), KType_void, KType_Type, KMethodName_("dump"), 0,
 		_Public, _F(BasicBlock_dump), KType_void, KType_BasicBlock, KMethodName_("dump"), 0,
-		_Public|_Static, _F(Function_create), KType_Function, KType_Function, KMethodName_("create"), 4, KType_String, KFieldName_("name"),KType_FunctionType, KFieldName_("fnTy"),KType_Module, KFieldName_("m"),KType_int, KFieldName_("linkage"),
-		_Public, _F(Function_addFnAttr), KType_void, KType_Function, KMethodName_("addFnAttr"), 1, KType_int, KFieldName_("attributes"),
-		_Public, _F(BasicBlock_size), KType_int, KType_BasicBlock, KMethodName_("size"), 0,
-		_Public, _F(BasicBlock_empty), KType_boolean, KType_BasicBlock, KMethodName_("empty"), 0,
+		_Public|_Static, _F(Function_create), KType_Function, KType_Function, KMethodName_("create"), 4, KType_String, KFieldName_("name"),KType_FunctionType, KFieldName_("fnTy"),KType_Module, KFieldName_("m"),KType_Int, KFieldName_("linkage"),
+		_Public, _F(Function_addFnAttr), KType_void, KType_Function, KMethodName_("addFnAttr"), 1, KType_Int, KFieldName_("attributes"),
+		_Public, _F(BasicBlock_size), KType_Int, KType_BasicBlock, KMethodName_("size"), 0,
+		_Public, _F(BasicBlock_empty), KType_Boolean, KType_BasicBlock, KMethodName_("empty"), 0,
 		_Public, _F(Module_new), KType_Module, KType_Module, KMethodName_("new"), 1, KType_String, KFieldName_("name"),
 		_Public, _F(Module_getTypeByName), KType_Type, KType_Module, KMethodName_("getTypeByName"), 1, KType_String, KFieldName_("name"),
 		_Public, _F(Module_dump), KType_void, KType_Module, KMethodName_("dump"), 0,
 		_Public, _F(Module_getOrInsertFunction), KType_Function, KType_Module, KMethodName_("getOrInsertFunction"), 2, KType_String, KFieldName_("name"),KType_FunctionType, KFieldName_("fnTy"),
-		_Public, _F(Module_createExecutionEngine), KType_ExecutionEngine, KType_Module, KMethodName_("createExecutionEngine"), 1, KType_int, KFieldName_("optLevel"),
+		_Public, _F(Module_createExecutionEngine), KType_ExecutionEngine, KType_Module, KMethodName_("createExecutionEngine"), 1, KType_Int, KFieldName_("optLevel"),
 		_Public|_Static, _F(BasicBlock_create), KType_BasicBlock, KType_BasicBlock, KMethodName_("create"), 2, KType_Function, KFieldName_("parent"),KType_String, KFieldName_("name"),
-		_Public|_Static, _F(FunctionType_get), KType_FunctionType, KType_FunctionType, KMethodName_("get"), 3, KType_Type, KFieldName_("retTy"),KType_Array_Type, KFieldName_("args"),KType_boolean, KFieldName_("b"),
-		_Public|_Static, _F(ArrayType_get),    KType_Type, KType_ArrayType, KMethodName_("get"), 2, KType_Type, KFieldName_("t"),KType_int, KFieldName_("elemSize"),
-		_Public|_Static, _F(StructType_get),   KType_Type, KType_StructType, KMethodName_("get"), 2, KType_Array_Type, KFieldName_("args"),KType_boolean, KFieldName_("isPacked"),
-		_Public|_Static, _F(StructType_create), KType_Type, KType_StructType, KMethodName_("create"), 3, KType_Array_Type, KFieldName_("args"),KType_String, KFieldName_("name"),KType_boolean, KFieldName_("isPacked"),
-		_Public, _F(StructType_SetBody), KType_void, KType_StructType, KMethodName_("setBody"), 2, KType_Array_Type, KFieldName_("args"),KType_boolean, KFieldName_("isPacked"),
-		_Public, _F(StructType_isOpaque), KType_boolean, KType_StructType, KMethodName_("isOpaque"), 0,
+		_Public|_Static, _F(FunctionType_get), KType_FunctionType, KType_FunctionType, KMethodName_("get"), 3, KType_Type, KFieldName_("retTy"),KType_Array_Type, KFieldName_("args"),KType_Boolean, KFieldName_("b"),
+		_Public|_Static, _F(ArrayType_get),    KType_Type, KType_ArrayType, KMethodName_("get"), 2, KType_Type, KFieldName_("t"),KType_Int, KFieldName_("elemSize"),
+		_Public|_Static, _F(StructType_get),   KType_Type, KType_StructType, KMethodName_("get"), 2, KType_Array_Type, KFieldName_("args"),KType_Boolean, KFieldName_("isPacked"),
+		_Public|_Static, _F(StructType_create), KType_Type, KType_StructType, KMethodName_("create"), 3, KType_Array_Type, KFieldName_("args"),KType_String, KFieldName_("name"),KType_Boolean, KFieldName_("isPacked"),
+		_Public, _F(StructType_SetBody), KType_void, KType_StructType, KMethodName_("setBody"), 2, KType_Array_Type, KFieldName_("args"),KType_Boolean, KFieldName_("isPacked"),
+		_Public, _F(StructType_isOpaque), KType_Boolean, KType_StructType, KMethodName_("isOpaque"), 0,
 		_Public, _F(ExecutionEngine_getPointerToFunction), KType_NativeFunction, KType_ExecutionEngine, KMethodName_("getPointerToFunction"), 1, KType_Function, KFieldName_("func"),
-		_Public, _F(ExecutionEngine_addGlobalMapping), KType_void, KType_ExecutionEngine, KMethodName_("addGlobalMapping"), 2, KType_GlobalVariable, KFieldName_("g"),KType_int, KFieldName_("addr"),
-		_Public, _F(GlobalVariable_new), KType_Value, KType_GlobalVariable, KMethodName_("new"), 5, KType_Module, KFieldName_("m"),KType_Type, KFieldName_("ty"),KType_Constant, KFieldName_("c"),KType_int, KFieldName_("linkage"),KType_String, KFieldName_("name"),
+		_Public, _F(ExecutionEngine_addGlobalMapping), KType_void, KType_ExecutionEngine, KMethodName_("addGlobalMapping"), 2, KType_GlobalVariable, KFieldName_("g"),KType_Int, KFieldName_("addr"),
+		_Public, _F(GlobalVariable_new), KType_Value, KType_GlobalVariable, KMethodName_("new"), 5, KType_Module, KFieldName_("m"),KType_Type, KFieldName_("ty"),KType_Constant, KFieldName_("c"),KType_Int, KFieldName_("linkage"),KType_String, KFieldName_("name"),
 #if LLVM_VERSION >= 300
 		_Public, _F(PassManagerBuilder_new), KType_PassManagerBuilder, KType_PassManagerBuilder, KMethodName_("new"), 0,
 		_Public, _F(PassManagerBuilder_populateModulePassManager), KType_void, KType_PassManagerBuilder, KMethodName_("populateModulePassManager"), 1, KType_PassManager, KFieldName_("manager"),
@@ -5053,16 +5053,16 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public, _F(Value_getType), KType_Type, KType_Value, KMethodName_("getType"), 0,
 		_Public, _F(Function_getArguments), KType_Array_Value, KType_Function, KMethodName_("getArguments"), 0,
 		_Public, _F(Function_getReturnType), KType_Type, KType_Function, KMethodName_("getReturnType"), 0,
-		_Public, _F(LoadInst_SetAlignment),  KType_void, KType_LoadInst, KMethodName_("setAlignment"), 1, KType_int, KFieldName_("align"),
-		_Public, _F(StoreInst_SetAlignment), KType_void, KType_StoreInst, KMethodName_("setAlignment"), 1, KType_int, KFieldName_("align"),
+		_Public, _F(LoadInst_SetAlignment),  KType_void, KType_LoadInst, KMethodName_("setAlignment"), 1, KType_Int, KFieldName_("align"),
+		_Public, _F(StoreInst_SetAlignment), KType_void, KType_StoreInst, KMethodName_("setAlignment"), 1, KType_Int, KFieldName_("align"),
 		_Public, _F(kMethod_SetFunction), KType_void, KType_Method, KMethodName_("setFunction"), 1, KType_NativeFunction, KFieldName_("nf"),
-		_Public|_Static, _F(ConstantInt_get),         KType_Constant, KType_ConstantInt, KMethodName_("getValue"), 2, KType_Type, KFieldName_("type"),KType_int, KFieldName_("v"),
+		_Public|_Static, _F(ConstantInt_get),         KType_Constant, KType_ConstantInt, KMethodName_("getValue"), 2, KType_Type, KFieldName_("type"),KType_Int, KFieldName_("v"),
 		_Public|_Static, _F(ConstantFP_get),          KType_Constant, KType_ConstantFP, KMethodName_("getValue"), 2, KType_Type, KFieldName_("type"),KType_float, KFieldName_("v"),
-		_Public|_Static, _F(ConstantFP_get),          KType_Constant, KType_ConstantFP, KMethodName_("getValueFromBits"), 2, KType_Type, KFieldName_("type"),KType_int, KFieldName_("v"),
+		_Public|_Static, _F(ConstantFP_get),          KType_Constant, KType_ConstantFP, KMethodName_("getValueFromBits"), 2, KType_Type, KFieldName_("type"),KType_Int, KFieldName_("v"),
 		_Public|_Static, _F(ConstantPointerNull_get), KType_Constant, KType_ConstantPointerNull, KMethodName_("getValue"), 1, KType_Type, KFieldName_("type"),
 		_Public|_Static, _F(ConstantStruct_get),      KType_Constant, KType_ConstantStruct, KMethodName_("getValue"), 2, KType_Type, KFieldName_("type"),KType_Array_Constant, KFieldName_("v"),
-		_Public|_Static, _F(DynamicLibrary_loadLibraryPermanently),   KType_boolean, KType_DynamicLibrary, KMethodName_("loadLibraryPermanently"), 1, KType_String, KFieldName_("libname"),
-		_Public|_Static, _F(DynamicLibrary_searchForAddressOfSymbol), KType_int, KType_DynamicLibrary, KMethodName_("searchForAddressOfSymbol"), 1, KType_String, KFieldName_("fname"),
+		_Public|_Static, _F(DynamicLibrary_loadLibraryPermanently),   KType_Boolean, KType_DynamicLibrary, KMethodName_("loadLibraryPermanently"), 1, KType_String, KFieldName_("libname"),
+		_Public|_Static, _F(DynamicLibrary_searchForAddressOfSymbol), KType_Int, KType_DynamicLibrary, KMethodName_("searchForAddressOfSymbol"), 1, KType_String, KFieldName_("fname"),
 		_Public|_Static, _F(LLVM_createDomPrinterPass),     KType_Pass, KType_LLVM, KMethodName_("createDomPrinterPass"), 0,
 		_Public|_Static, _F(LLVM_createDomOnlyPrinterPass), KType_Pass, KType_LLVM, KMethodName_("createDomOnlyPrinterPass"), 0,
 		_Public|_Static, _F(LLVM_createDomViewerPass),      KType_Pass, KType_LLVM, KMethodName_("createDomViewerPass"), 0,
@@ -5095,18 +5095,18 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public|_Static, _F(LLVM_createRegionPrinterPass),          KType_Pass, KType_LLVM, KMethodName_("createRegionPrinterPass"), 0,
 		_Public|_Static, _F(LLVM_createRegionOnlyPrinterPass),      KType_Pass, KType_LLVM, KMethodName_("createRegionOnlyPrinterPass"), 0,
 		_Public|_Static, _F(LLVM_createLintPass),                   KType_Pass, KType_LLVM, KMethodName_("createLintPass"), 0,
-		_Public|_Static, _F(LLVM_createStripSymbolsPass),           KType_Pass, KType_LLVM, KMethodName_("createStripSymbolsPass"), 1, KType_boolean, KFieldName_("onlyDebugInfo"),
+		_Public|_Static, _F(LLVM_createStripSymbolsPass),           KType_Pass, KType_LLVM, KMethodName_("createStripSymbolsPass"), 1, KType_Boolean, KFieldName_("onlyDebugInfo"),
 		_Public|_Static, _F(LLVM_createStripNonDebugSymbolsPass),   KType_Pass, KType_LLVM, KMethodName_("createStripNonDebugSymbolsPass"), 0,
 		_Public|_Static, _F(LLVM_createStripDeadDebugInfoPass),     KType_Pass, KType_LLVM, KMethodName_("createStripDeadDebugInfoPass"), 0,
 		_Public|_Static, _F(LLVM_createConstantMergePass),          KType_Pass, KType_LLVM, KMethodName_("createConstantMergePass"), 0,
 		_Public|_Static, _F(LLVM_createGlobalOptimizerPass),        KType_Pass, KType_LLVM, KMethodName_("createGlobalOptimizerPass"), 0,
 		_Public|_Static, _F(LLVM_createGlobalDCEPass),              KType_Pass, KType_LLVM, KMethodName_("createGlobalDCEPass"), 0,
-		_Public|_Static, _F(LLVM_createFunctionInliningPass),       KType_Pass, KType_LLVM, KMethodName_("createFunctionInliningPass"), 1, KType_int, KFieldName_("threshold"),
+		_Public|_Static, _F(LLVM_createFunctionInliningPass),       KType_Pass, KType_LLVM, KMethodName_("createFunctionInliningPass"), 1, KType_Int, KFieldName_("threshold"),
 		_Public|_Static, _F(LLVM_createAlwaysInlinerPass),          KType_Pass, KType_LLVM, KMethodName_("createAlwaysInlinerPass"), 0,
 		_Public|_Static, _F(LLVM_createPruneEHPass),                KType_Pass, KType_LLVM, KMethodName_("createPruneEHPass"), 0,
-		_Public|_Static, _F(LLVM_createInternalizePass),            KType_Pass, KType_LLVM, KMethodName_("createInternalizePass"), 1, KType_boolean, KFieldName_("allButMain"),
+		_Public|_Static, _F(LLVM_createInternalizePass),            KType_Pass, KType_LLVM, KMethodName_("createInternalizePass"), 1, KType_Boolean, KFieldName_("allButMain"),
 		_Public|_Static, _F(LLVM_createDeadArgEliminationPass),     KType_Pass, KType_LLVM, KMethodName_("createDeadArgEliminationPass"), 0,
-		_Public|_Static, _F(LLVM_createArgumentPromotionPass),      KType_Pass, KType_LLVM, KMethodName_("createArgumentPromotionPass"), 1, KType_int, KFieldName_("maxElements"),
+		_Public|_Static, _F(LLVM_createArgumentPromotionPass),      KType_Pass, KType_LLVM, KMethodName_("createArgumentPromotionPass"), 1, KType_Int, KFieldName_("maxElements"),
 		_Public|_Static, _F(LLVM_createIPConstantPropagationPass),  KType_Pass, KType_LLVM, KMethodName_("createIPConstantPropagationPass"), 0,
 		_Public|_Static, _F(LLVM_createIPSCCPPass),                 KType_Pass, KType_LLVM, KMethodName_("createIPSCCPPass"), 0,
 		_Public|_Static, _F(LLVM_createLoopExtractorPass),          KType_Pass, KType_LLVM, KMethodName_("createLoopExtractorPass"), 0,
@@ -5122,13 +5122,13 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public|_Static, _F(LLVM_createDeadCodeEliminationPass),    KType_Pass, KType_LLVM, KMethodName_("createDeadCodeEliminationPass"), 0,
 		_Public|_Static, _F(LLVM_createDeadStoreEliminationPass),   KType_Pass, KType_LLVM, KMethodName_("createDeadStoreEliminationPass"), 0,
 		_Public|_Static, _F(LLVM_createAggressiveDCEPass),          KType_Pass, KType_LLVM, KMethodName_("createAggressiveDCEPass"), 0,
-		_Public|_Static, _F(LLVM_createScalarReplAggregatesPass),   KType_Pass, KType_LLVM, KMethodName_("createScalarReplAggregatesPass"), 1, KType_int, KFieldName_("threshold"),
+		_Public|_Static, _F(LLVM_createScalarReplAggregatesPass),   KType_Pass, KType_LLVM, KMethodName_("createScalarReplAggregatesPass"), 1, KType_Int, KFieldName_("threshold"),
 		_Public|_Static, _F(LLVM_createIndVarSimplifyPass),         KType_Pass, KType_LLVM, KMethodName_("createIndVarSimplifyPass"), 0,
 		_Public|_Static, _F(LLVM_createInstructionCombiningPass),   KType_Pass, KType_LLVM, KMethodName_("createInstructionCombiningPass"), 0,
 		_Public|_Static, _F(LLVM_createLICMPass),                   KType_Pass, KType_LLVM, KMethodName_("createLICMPass"), 0,
-		_Public|_Static, _F(LLVM_createLoopUnswitchPass),           KType_Pass, KType_LLVM, KMethodName_("createLoopUnswitchPass"), 1, KType_boolean, KFieldName_("optimizeForSize"),
+		_Public|_Static, _F(LLVM_createLoopUnswitchPass),           KType_Pass, KType_LLVM, KMethodName_("createLoopUnswitchPass"), 1, KType_Boolean, KFieldName_("optimizeForSize"),
 		_Public|_Static, _F(LLVM_createLoopInstSimplifyPass),       KType_Pass, KType_LLVM, KMethodName_("createLoopInstSimplifyPass"), 0,
-		_Public|_Static, _F(LLVM_createLoopUnrollPass),             KType_Pass, KType_LLVM, KMethodName_("createLoopUnrollPass"), 3, KType_int, KFieldName_("threshold"),KType_int, KFieldName_("count"),KType_int, KFieldName_("allowPartial"),
+		_Public|_Static, _F(LLVM_createLoopUnrollPass),             KType_Pass, KType_LLVM, KMethodName_("createLoopUnrollPass"), 3, KType_Int, KFieldName_("threshold"),KType_Int, KFieldName_("count"),KType_Int, KFieldName_("allowPartial"),
 		_Public|_Static, _F(LLVM_createLoopRotatePass),             KType_Pass, KType_LLVM, KMethodName_("createLoopRotatePass"), 0,
 		_Public|_Static, _F(LLVM_createLoopIdiomPass),              KType_Pass, KType_LLVM, KMethodName_("createLoopIdiomPass"), 0,
 		_Public|_Static, _F(LLVM_createPromoteMemoryToRegisterPass), KType_Pass, KType_LLVM, KMethodName_("createPromoteMemoryToRegisterPass"), 0,
@@ -5143,7 +5143,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public|_Static, _F(LLVM_createBlockPlacementPass),          KType_Pass, KType_LLVM, KMethodName_("createBlockPlacementPass"), 0,
 		_Public|_Static, _F(LLVM_createLCSSAPass),                   KType_Pass, KType_LLVM, KMethodName_("createLCSSAPass"), 0,
 		_Public|_Static, _F(LLVM_createEarlyCSEPass),                KType_Pass, KType_LLVM, KMethodName_("createEarlyCSEPass"), 0,
-		_Public|_Static, _F(LLVM_createGVNPass),                     KType_Pass, KType_LLVM, KMethodName_("createGVNPass"), 1, KType_boolean, KFieldName_("noLoads"),
+		_Public|_Static, _F(LLVM_createGVNPass),                     KType_Pass, KType_LLVM, KMethodName_("createGVNPass"), 1, KType_Boolean, KFieldName_("noLoads"),
 		_Public|_Static, _F(LLVM_createMemCpyOptPass),               KType_Pass, KType_LLVM, KMethodName_("createMemCpyOptPass"), 0,
 		_Public|_Static, _F(LLVM_createLoopDeletionPass),            KType_Pass, KType_LLVM, KMethodName_("createLoopDeletionPass"), 0,
 		_Public|_Static, _F(LLVM_createSimplifyLibCallsPass),        KType_Pass, KType_LLVM, KMethodName_("createSimplifyLibCallsPass"), 0,
@@ -5165,25 +5165,25 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public|_Static, _F(LLVM_createTypeBasedAliasAnalysisPass), KType_Pass, KType_LLVM, KMethodName_("createTypeBasedAliasAnalysisPass"), 0,
 		_Public|_Static, _F(LLVM_createBasicAliasAnalysisPass),     KType_Pass, KType_LLVM, KMethodName_("createBasicAliasAnalysisPass"), 0,
 		_Public|_Static, _F(LLVM_createVerifierPass),               KType_Pass, KType_LLVM, KMethodName_("createVerifierPass"), 0,
-		_Public|_Static, _F(Intrinsic_getType), KType_Type, KType_intrinsic, KMethodName_("getType"), 2, KType_int, KFieldName_("id"),KType_Array_Type, KFieldName_("args"),
-		_Public|_Static, _F(Intrinsic_getDeclaration), KType_Function, KType_intrinsic, KMethodName_("getDeclaration"), 3, KType_Module, KFieldName_("m"),KType_int, KFieldName_("id"),KType_Array_Type, KFieldName_("args"),
+		_Public|_Static, _F(Intrinsic_getType), KType_Type, KType_Intrinsic, KMethodName_("getType"), 2, KType_Int, KFieldName_("id"),KType_Array_Type, KFieldName_("args"),
+		_Public|_Static, _F(Intrinsic_getDeclaration), KType_Function, KType_Intrinsic, KMethodName_("getDeclaration"), 3, KType_Module, KFieldName_("m"),KType_Int, KFieldName_("id"),KType_Array_Type, KFieldName_("args"),
 		_Public|_Static, _F(LLVM_parseBitcodeFile), KType_Value, KType_LLVM, KMethodName_("parseBitcodeFile"), 1, KType_String, KFieldName_("bcfile"),
 
 		_Public|_Static, _F(ConstantExpr_getAlignOf), KType_Constant, KType_ConstantExpr, KMethodName_("getAlignOf"), 1,KType_Type, KFieldName_("ty"),
 		_Public|_Static, _F(ConstantExpr_getSizeOf), KType_Constant, KType_ConstantExpr, KMethodName_("getSizeOf"), 1,KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantExpr_getOffsetOf), KType_Constant, KType_ConstantExpr, KMethodName_("getOffsetOf"), 2,KType_StructType, KFieldName_("sTy"), KType_int, KFieldName_("fieldNo"),
+		_Public|_Static, _F(ConstantExpr_getOffsetOf), KType_Constant, KType_ConstantExpr, KMethodName_("getOffsetOf"), 2,KType_StructType, KFieldName_("sTy"), KType_Int, KFieldName_("fieldNo"),
 		_Public|_Static, _F(ConstantExpr_getOffsetOf), KType_Constant, KType_ConstantExpr, KMethodName_("getOffsetOf"), 2,KType_Type, KFieldName_("ty"), KType_Constant, KFieldName_("fieldNo"),
-		_Public|_Static, _F(ConstantExpr_getNeg), KType_Constant, KType_ConstantExpr, KMethodName_("getNeg"), 3,KType_Constant, KFieldName_("c"), KType_boolean, KFieldName_("hasNUW"), KType_boolean, KFieldName_("hasNSW"),
+		_Public|_Static, _F(ConstantExpr_getNeg), KType_Constant, KType_ConstantExpr, KMethodName_("getNeg"), 3,KType_Constant, KFieldName_("c"), KType_Boolean, KFieldName_("hasNUW"), KType_Boolean, KFieldName_("hasNSW"),
 		_Public|_Static, _F(ConstantExpr_getFNeg), KType_Constant, KType_ConstantExpr, KMethodName_("getFNeg"), 1,KType_Constant, KFieldName_("c"),
 		_Public|_Static, _F(ConstantExpr_getNot), KType_Constant, KType_ConstantExpr, KMethodName_("getNot"), 1,KType_Constant, KFieldName_("c"),
-		_Public|_Static, _F(ConstantExpr_getAdd), KType_Constant, KType_ConstantExpr, KMethodName_("getAdd"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("hasNUW"), KType_boolean, KFieldName_("hasNSW"),
+		_Public|_Static, _F(ConstantExpr_getAdd), KType_Constant, KType_ConstantExpr, KMethodName_("getAdd"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_Boolean, KFieldName_("hasNUW"), KType_Boolean, KFieldName_("hasNSW"),
 		_Public|_Static, _F(ConstantExpr_getFAdd), KType_Constant, KType_ConstantExpr, KMethodName_("getFAdd"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantExpr_getSub), KType_Constant, KType_ConstantExpr, KMethodName_("getSub"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("hasNUW"), KType_boolean, KFieldName_("hasNSW"),
+		_Public|_Static, _F(ConstantExpr_getSub), KType_Constant, KType_ConstantExpr, KMethodName_("getSub"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_Boolean, KFieldName_("hasNUW"), KType_Boolean, KFieldName_("hasNSW"),
 		_Public|_Static, _F(ConstantExpr_getFSub), KType_Constant, KType_ConstantExpr, KMethodName_("getFSub"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantExpr_getMul), KType_Constant, KType_ConstantExpr, KMethodName_("getMul"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("hasNUW"), KType_boolean, KFieldName_("hasNSW"),
+		_Public|_Static, _F(ConstantExpr_getMul), KType_Constant, KType_ConstantExpr, KMethodName_("getMul"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_Boolean, KFieldName_("hasNUW"), KType_Boolean, KFieldName_("hasNSW"),
 		_Public|_Static, _F(ConstantExpr_getFMul), KType_Constant, KType_ConstantExpr, KMethodName_("getFMul"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantExpr_getUDiv), KType_Constant, KType_ConstantExpr, KMethodName_("getUDiv"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("isExact"),
-		_Public|_Static, _F(ConstantExpr_getSDiv), KType_Constant, KType_ConstantExpr, KMethodName_("getSDiv"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("isExact"),
+		_Public|_Static, _F(ConstantExpr_getUDiv), KType_Constant, KType_ConstantExpr, KMethodName_("getUDiv"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_Boolean, KFieldName_("isExact"),
+		_Public|_Static, _F(ConstantExpr_getSDiv), KType_Constant, KType_ConstantExpr, KMethodName_("getSDiv"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_Boolean, KFieldName_("isExact"),
 		_Public|_Static, _F(ConstantExpr_getFDiv), KType_Constant, KType_ConstantExpr, KMethodName_("getFDiv"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
 		_Public|_Static, _F(ConstantExpr_getURem), KType_Constant, KType_ConstantExpr, KMethodName_("getURem"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
 		_Public|_Static, _F(ConstantExpr_getSRem), KType_Constant, KType_ConstantExpr, KMethodName_("getSRem"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
@@ -5191,9 +5191,9 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public|_Static, _F(ConstantExpr_getAnd), KType_Constant, KType_ConstantExpr, KMethodName_("getAnd"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
 		_Public|_Static, _F(ConstantExpr_getOr), KType_Constant, KType_ConstantExpr, KMethodName_("getOr"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
 		_Public|_Static, _F(ConstantExpr_getXor), KType_Constant, KType_ConstantExpr, KMethodName_("getXor"), 2,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"),
-		_Public|_Static, _F(ConstantExpr_getShl), KType_Constant, KType_ConstantExpr, KMethodName_("getShl"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("hasNUW"), KType_boolean, KFieldName_("hasNSW"),
-		_Public|_Static, _F(ConstantExpr_getLShr), KType_Constant, KType_ConstantExpr, KMethodName_("getLShr"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("isExact"),
-		_Public|_Static, _F(ConstantExpr_getAShr), KType_Constant, KType_ConstantExpr, KMethodName_("getAShr"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_boolean, KFieldName_("isExact"),
+		_Public|_Static, _F(ConstantExpr_getShl), KType_Constant, KType_ConstantExpr, KMethodName_("getShl"), 4,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_Boolean, KFieldName_("hasNUW"), KType_Boolean, KFieldName_("hasNSW"),
+		_Public|_Static, _F(ConstantExpr_getLShr), KType_Constant, KType_ConstantExpr, KMethodName_("getLShr"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_Boolean, KFieldName_("isExact"),
+		_Public|_Static, _F(ConstantExpr_getAShr), KType_Constant, KType_ConstantExpr, KMethodName_("getAShr"), 3,KType_Constant, KFieldName_("c1"), KType_Constant, KFieldName_("c2"), KType_Boolean, KFieldName_("isExact"),
 		_Public|_Static, _F(ConstantExpr_getTrunc), KType_Constant, KType_ConstantExpr, KMethodName_("getTrunc"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
 		_Public|_Static, _F(ConstantExpr_getSExt), KType_Constant, KType_ConstantExpr, KMethodName_("getSExt"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
 		_Public|_Static, _F(ConstantExpr_getZExt), KType_Constant, KType_ConstantExpr, KMethodName_("getZExt"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
@@ -5224,11 +5224,11 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public|_Static, _F(ConstantExpr_getSExtOrBitCast), KType_Constant, KType_ConstantExpr, KMethodName_("getSExtOrBitCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
 		_Public|_Static, _F(ConstantExpr_getTruncOrBitCast), KType_Constant, KType_ConstantExpr, KMethodName_("getTruncOrBitCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
 		_Public|_Static, _F(ConstantExpr_getPointerCast), KType_Constant, KType_ConstantExpr, KMethodName_("getPointerCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
-		_Public|_Static, _F(ConstantExpr_getIntegerCast), KType_Constant, KType_ConstantExpr, KMethodName_("getIntegerCast"), 3,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"), KType_boolean, KFieldName_("isSigned"),
+		_Public|_Static, _F(ConstantExpr_getIntegerCast), KType_Constant, KType_ConstantExpr, KMethodName_("getIntegerCast"), 3,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"), KType_Boolean, KFieldName_("isSigned"),
 		_Public|_Static, _F(ConstantExpr_getFPCast), KType_Constant, KType_ConstantExpr, KMethodName_("getFPCast"), 2,KType_Constant, KFieldName_("c"), KType_Type, KFieldName_("ty"),
 		_Public|_Static, _F(ConstantExpr_getSelect), KType_Constant, KType_ConstantExpr, KMethodName_("getSelect"), 3,KType_Constant, KFieldName_("c"), KType_Constant, KFieldName_("v1"), KType_Constant, KFieldName_("v2"),
-		_Public|_Static, _F(ConstantExpr_getElementPtr0), KType_Constant, KType_ConstantExpr, KMethodName_("getElementPtr"), 3,KType_Constant, KFieldName_("c"), KType_Constant, KFieldName_("idx"), KType_boolean, KFieldName_("InBounds"),
-		_Public|_Static, _F(ConstantExpr_getElementPtr), KType_Constant, KType_ConstantExpr, KMethodName_("getElementPtr"), 3,KType_Constant, KFieldName_("c"), KType_Array_Value, KFieldName_("IdxList"), KType_boolean, KFieldName_("InBounds"),
+		_Public|_Static, _F(ConstantExpr_getElementPtr0), KType_Constant, KType_ConstantExpr, KMethodName_("getElementPtr"), 3,KType_Constant, KFieldName_("c"), KType_Constant, KFieldName_("idx"), KType_Boolean, KFieldName_("InBounds"),
+		_Public|_Static, _F(ConstantExpr_getElementPtr), KType_Constant, KType_ConstantExpr, KMethodName_("getElementPtr"), 3,KType_Constant, KFieldName_("c"), KType_Array_Value, KFieldName_("IdxList"), KType_Boolean, KFieldName_("InBounds"),
 		_Public|_Static, _F(ConstantExpr_getInBoundsGetElementPtr0), KType_Constant, KType_ConstantExpr, KMethodName_("getInBoundsGetElementPtr0"), 2,KType_Constant, KFieldName_("c"), KType_Constant, KFieldName_("idx"),
 		_Public|_Static, _F(ConstantExpr_getInBoundsGetElementPtr), KType_Constant, KType_ConstantExpr, KMethodName_("getInBoundsGetElementPtr"), 2,KType_Constant, KFieldName_("c"), KType_Array_Value, KFieldName_("idxList"),
 		_Public|_Static, _F(ConstantExpr_getExtractElement), KType_Constant, KType_ConstantExpr, KMethodName_("getExtractElement"), 2,KType_Constant, KFieldName_("vec"), KType_Constant, KFieldName_("idx"),
@@ -5236,9 +5236,9 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public|_Static, _F(ConstantExpr_getShuffleVector), KType_Constant, KType_ConstantExpr, KMethodName_("getShuffleVector"), 3,KType_Constant, KFieldName_("v1"), KType_Constant, KFieldName_("v2"), KType_Constant, KFieldName_("mask"),
 		_Public|_Static, _F(ConstantExpr_getExtractValue), KType_Constant, KType_ConstantExpr, KMethodName_("getExtractValue"), 2,KType_Constant, KFieldName_("Agg"), KType_Array_Int, KFieldName_("idxs"),
 		_Public|_Static, _F(ConstantExpr_getInsertValue), KType_Constant, KType_ConstantExpr, KMethodName_("getInsertValue"), 3,KType_Constant, KFieldName_("Agg"), KType_Constant, KFieldName_("val"), KType_Array_Int, KFieldName_("idxs"),
-		_Public, _F(Type_opEQ), KType_boolean, KType_Type, KMethodName_("=="), 1,KType_Type, KFieldName_("t"),
+		_Public, _F(Type_opEQ), KType_Boolean, KType_Type, KMethodName_("=="), 1,KType_Type, KFieldName_("t"),
 		//FIXME
-	//_Public|_Const|_Im|_Coercion, _F(Float_toInt), KType_int, KType_float, KMethodName_To(KType_int), 0,
+	//_Public|_Const|_Im|_Coercion, _F(Float_toInt), KType_Int, KType_float, KMethodName_To(KType_Int), 0,
 		_Public|_Const|_Coercion|_Im, _F(Object_toValue), KType_Value, KType_Object, KMethodName_To(KType_Value), 0,
 		_Public|_Const|_Coercion|_Im, _F(Object_toType),  KType_Type,  KType_Object, KMethodName_To(KType_Type), 0,
 		_Public|_Const|_Coercion|_Im, _F(Object_toModule), KType_Module,  KType_Object, KMethodName_To(KType_Module), 0,

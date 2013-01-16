@@ -33,9 +33,9 @@ typedef unsigned_long_Ptr unsigned_long_long_Ptr;
 typedef kuint_t unsigned_long;
 typedef kuint_t unsigned_long_long;
 typedef kuint_t unsigned_int;
-#define KType_unsigned_long         KType_int
-#define KType_unsigned_long_long    KType_int
-#define KType_unsigned_int          KType_int
+#define KType_unsigned_long         KType_Int
+#define KType_unsigned_long_long    KType_Int
+#define KType_unsigned_int          KType_Int
 
 //#define To_String(sfp)  sfp.asString
 //#define To_int(sfp)     sfp.intValue
@@ -52,7 +52,7 @@ typedef kuint_t unsigned_int;
 //#define RETURNString(RET)  KReturn(RET)
 //#define RETURNArray(RET)   KReturn(RET)
 //#define TYPE_Array(TYPE)      (KClass_p0(kctx, KClass_Array, KType_##TYPE))->typeId
-//#define KType_char            KType_int
+//#define KType_char            KType_Int
 //#define KType_Locale          KType_String
 #define RETURNint(RET)     KReturnInt(RET)
 #define RETURNvirDomainPtr(RET) KReturn(KLIB new_kObject(kctx, OnStack, KClass_(KType_virDomainPtr), (uintptr_t)RET))
@@ -453,7 +453,7 @@ typedef struct kIntPtr {
 	kObjectHeader h;
 	intPtr p;
 }kIntPtr;
-static int KType_intPtr;
+static int KType_IntPtr;
 
 typedef struct kUnsigned_longPtr {
 	kObjectHeader h;

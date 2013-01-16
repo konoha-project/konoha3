@@ -40,7 +40,7 @@ typedef bool boolean;
 #define RETURNString(RET)  KReturn(RET)
 #define RETURNArray(RET)   KReturn(RET)
 #define TYPE_Array(TYPE)      (KClass_p0(kctx, KClass_Array, KType_##TYPE))->typeId
-#define KType_char            KType_int
+#define KType_char            KType_Int
 #define KType_Locale          KType_String
 
 static void Throw_IndexOutOfBoundsException(KonohaContext *kctx, KonohaStack *sfp, intptr_t index)
@@ -371,28 +371,28 @@ static kbool_t LoadJavaAPI(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trac
 	int FN_s = KFieldName_("s");
 #define METHOD_FLAG (_Static|_Public|_Const|_Im)
 	KDEFINE_METHOD MethodData[] = {
-		//METHOD_FLAG, _F(StringUtil_charAt), KType_char,          KType_StringUtil, KMethodName_("charAt"), 2, KType_String, FN_s, KType_int, KFieldName_("index"),
-		METHOD_FLAG, _F(StringUtil_codePointAt), KType_int,      KType_StringUtil, KMethodName_("codePointAt"), 2, KType_String, FN_s, KType_int, KFieldName_("index"),
-		METHOD_FLAG, _F(StringUtil_codePointBefore), KType_int,  KType_StringUtil, KMethodName_("codePointBefore"), 2, KType_String, FN_s, KType_int, KFieldName_("index"),
-		METHOD_FLAG, _F(StringUtil_codePointCount), KType_int,   KType_StringUtil, KMethodName_("codePointCount"), 3, KType_String, FN_s, KType_int, KFieldName_("beginIndex"),KType_int, KFieldName_("endIndex"),
-		METHOD_FLAG, _F(StringUtil_compareTo), KType_int,        KType_StringUtil, KMethodName_("compareTo"), 2, KType_String, FN_s, KType_String, KFieldName_("anotherString"),
-		METHOD_FLAG, _F(StringUtil_compareToIgnoreCase), KType_int, KType_StringUtil, KMethodName_("compareToIgnoreCase"), 2, KType_String, FN_s, KType_String, KFieldName_("str"),
-		METHOD_FLAG, _F(StringUtil_endsWith), KType_boolean,    KType_StringUtil, KMethodName_("endsWith"), 2, KType_String, FN_s, KType_String, KFieldName_("suffix"),
-		METHOD_FLAG, _F(StringUtil_hashCode), KType_int,        KType_StringUtil, KMethodName_("hashCode"), 1, KType_String, FN_s,
-		METHOD_FLAG, _F(StringUtil_indexOf0), KType_int,        KType_StringUtil, KMethodName_("indexOf"), 3, KType_String, FN_s, KType_int, KFieldName_("ch"),KType_int, KFieldName_("fromIndex"),
-		METHOD_FLAG, _F(StringUtil_indexOf1), KType_int,        KType_StringUtil, KMethodName_("indexOf"), 3, KType_String, FN_s, KType_String, KFieldName_("str"),KType_int, KFieldName_("fromIndex"),
-		METHOD_FLAG, _F(StringUtil_lastIndexOf0), KType_int,    KType_StringUtil, KMethodName_("lastIndexOf"), 3, KType_String, FN_s, KType_int, KFieldName_("ch"),KType_int, KFieldName_("fromIndex"),
-		METHOD_FLAG, _F(StringUtil_lastIndexOf1), KType_int,    KType_StringUtil, KMethodName_("lastIndexOf"), 3, KType_String, FN_s, KType_String, KFieldName_("str"),KType_int, KFieldName_("fromIndex"),
-		METHOD_FLAG, _F(StringUtil_length), KType_int,          KType_StringUtil, KMethodName_("length"), 1, KType_String, FN_s,
-		METHOD_FLAG, _F(StringUtil_Matches), KType_boolean,     KType_StringUtil, KMethodName_("matches"), 2, KType_String, FN_s, KType_String, KFieldName_("regex"),
-		METHOD_FLAG, _F(StringUtil_offsetByCodePoints), KType_int,  KType_StringUtil, KMethodName_("offsetByCodePoints"), 3, KType_String, FN_s, KType_int, KFieldName_("index"),KType_int, KFieldName_("codePointOffset"),
-		METHOD_FLAG, _F(StringUtil_regionMatches), KType_boolean,   KType_StringUtil, KMethodName_("regionMaches"), 6, KType_String, FN_s, KType_boolean, KFieldName_("ignoreCase"),KType_int, KFieldName_("toffset"),KType_String, KFieldName_("other"),KType_int, KFieldName_("ooffset"),KType_int, KFieldName_("len"),
+		//METHOD_FLAG, _F(StringUtil_charAt), KType_char,          KType_StringUtil, KMethodName_("charAt"), 2, KType_String, FN_s, KType_Int, KFieldName_("index"),
+		METHOD_FLAG, _F(StringUtil_codePointAt), KType_Int,      KType_StringUtil, KMethodName_("codePointAt"), 2, KType_String, FN_s, KType_Int, KFieldName_("index"),
+		METHOD_FLAG, _F(StringUtil_codePointBefore), KType_Int,  KType_StringUtil, KMethodName_("codePointBefore"), 2, KType_String, FN_s, KType_Int, KFieldName_("index"),
+		METHOD_FLAG, _F(StringUtil_codePointCount), KType_Int,   KType_StringUtil, KMethodName_("codePointCount"), 3, KType_String, FN_s, KType_Int, KFieldName_("beginIndex"),KType_Int, KFieldName_("endIndex"),
+		METHOD_FLAG, _F(StringUtil_compareTo), KType_Int,        KType_StringUtil, KMethodName_("compareTo"), 2, KType_String, FN_s, KType_String, KFieldName_("anotherString"),
+		METHOD_FLAG, _F(StringUtil_compareToIgnoreCase), KType_Int, KType_StringUtil, KMethodName_("compareToIgnoreCase"), 2, KType_String, FN_s, KType_String, KFieldName_("str"),
+		METHOD_FLAG, _F(StringUtil_endsWith), KType_Boolean,    KType_StringUtil, KMethodName_("endsWith"), 2, KType_String, FN_s, KType_String, KFieldName_("suffix"),
+		METHOD_FLAG, _F(StringUtil_hashCode), KType_Int,        KType_StringUtil, KMethodName_("hashCode"), 1, KType_String, FN_s,
+		METHOD_FLAG, _F(StringUtil_indexOf0), KType_Int,        KType_StringUtil, KMethodName_("indexOf"), 3, KType_String, FN_s, KType_Int, KFieldName_("ch"),KType_Int, KFieldName_("fromIndex"),
+		METHOD_FLAG, _F(StringUtil_indexOf1), KType_Int,        KType_StringUtil, KMethodName_("indexOf"), 3, KType_String, FN_s, KType_String, KFieldName_("str"),KType_Int, KFieldName_("fromIndex"),
+		METHOD_FLAG, _F(StringUtil_lastIndexOf0), KType_Int,    KType_StringUtil, KMethodName_("lastIndexOf"), 3, KType_String, FN_s, KType_Int, KFieldName_("ch"),KType_Int, KFieldName_("fromIndex"),
+		METHOD_FLAG, _F(StringUtil_lastIndexOf1), KType_Int,    KType_StringUtil, KMethodName_("lastIndexOf"), 3, KType_String, FN_s, KType_String, KFieldName_("str"),KType_Int, KFieldName_("fromIndex"),
+		METHOD_FLAG, _F(StringUtil_length), KType_Int,          KType_StringUtil, KMethodName_("length"), 1, KType_String, FN_s,
+		METHOD_FLAG, _F(StringUtil_Matches), KType_Boolean,     KType_StringUtil, KMethodName_("matches"), 2, KType_String, FN_s, KType_String, KFieldName_("regex"),
+		METHOD_FLAG, _F(StringUtil_offsetByCodePoints), KType_Int,  KType_StringUtil, KMethodName_("offsetByCodePoints"), 3, KType_String, FN_s, KType_Int, KFieldName_("index"),KType_Int, KFieldName_("codePointOffset"),
+		METHOD_FLAG, _F(StringUtil_regionMatches), KType_Boolean,   KType_StringUtil, KMethodName_("regionMaches"), 6, KType_String, FN_s, KType_Boolean, KFieldName_("ignoreCase"),KType_Int, KFieldName_("toffset"),KType_String, KFieldName_("other"),KType_Int, KFieldName_("ooffset"),KType_Int, KFieldName_("len"),
 		METHOD_FLAG, _F(StringUtil_replace), KType_String,      KType_StringUtil, KMethodName_("replace"), 3, KType_String, FN_s, KType_char, KFieldName_("oldChar"),KType_char, KFieldName_("newChar"),
 		METHOD_FLAG, _F(StringUtil_replaceAll), KType_String,   KType_StringUtil, KMethodName_("replaceAll"), 3, KType_String, FN_s, KType_String, KFieldName_("regex"),KType_String, KFieldName_("replacement"),
 		METHOD_FLAG, _F(StringUtil_replaceFirst), KType_String, KType_StringUtil, KMethodName_("replaceFirst"), 3, KType_String, FN_s, KType_String, KFieldName_("regex"),KType_String, KFieldName_("replacement"),
-		METHOD_FLAG, _F(StringUtil_split), TYPE_Array(String),  KType_StringUtil, KMethodName_("split"), 3, KType_String, FN_s, KType_String, KFieldName_("regex"),KType_int, KFieldName_("limit"),
-		METHOD_FLAG, _F(StringUtil_startsWith), KType_boolean,  KType_StringUtil, KMethodName_("startsWith"), 3, KType_String, FN_s, KType_String, KFieldName_("prefix"),KType_int, KFieldName_("toffset"),
-		METHOD_FLAG, _F(StringUtil_substring), KType_String,    KType_StringUtil, KMethodName_("substring"), 3, KType_String, FN_s, KType_int, KFieldName_("beginIndex"),KType_int, KFieldName_("endIndex"),
+		METHOD_FLAG, _F(StringUtil_split), TYPE_Array(String),  KType_StringUtil, KMethodName_("split"), 3, KType_String, FN_s, KType_String, KFieldName_("regex"),KType_Int, KFieldName_("limit"),
+		METHOD_FLAG, _F(StringUtil_startsWith), KType_Boolean,  KType_StringUtil, KMethodName_("startsWith"), 3, KType_String, FN_s, KType_String, KFieldName_("prefix"),KType_Int, KFieldName_("toffset"),
+		METHOD_FLAG, _F(StringUtil_substring), KType_String,    KType_StringUtil, KMethodName_("substring"), 3, KType_String, FN_s, KType_Int, KFieldName_("beginIndex"),KType_Int, KFieldName_("endIndex"),
 		METHOD_FLAG, _F(StringUtil_toLowerCase), KType_String,  KType_StringUtil, KMethodName_("toLowerCase"), 2, KType_String, FN_s, KType_Locale, KFieldName_("locale"),
 		METHOD_FLAG, _F(StringUtil_toUpperCase), KType_String,  KType_StringUtil, KMethodName_("toUpperCase"), 2, KType_String, FN_s, KType_Locale, KFieldName_("locale"),
 		METHOD_FLAG, _F(StringUtil_trim), KType_String,         KType_StringUtil, KMethodName_("trim"), 1, KType_String, FN_s,

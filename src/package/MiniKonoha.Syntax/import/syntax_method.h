@@ -130,21 +130,21 @@ static void Syntax_defineSyntaxMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 {
 	/* Func[Int, Token, String] */
 	kparamtype_t P_FuncToken[] = {{KType_Token}, {KType_String}};
-	int KType_FuncToken = (KLIB KClass_Generics(kctx, KClass_Func, KType_int, 2, P_FuncToken))->typeId;
+	int KType_FuncToken = (KLIB KClass_Generics(kctx, KClass_Func, KType_Int, 2, P_FuncToken))->typeId;
 	/* Func[Int, Node, Symbol, Token[], Int, Int, Int] */
-	kparamtype_t P_FuncParse[] = {{KType_Node}, {KType_Symbol}, {KType_TokenArray}, {KType_int}, {KType_int}, {KType_int}};
-	int KType_FuncParse = (KLIB KClass_Generics(kctx, KClass_Func, KType_int, 6, P_FuncParse))->typeId;
+	kparamtype_t P_FuncParse[] = {{KType_Node}, {KType_Symbol}, {KType_TokenArray}, {KType_Int}, {KType_Int}, {KType_Int}};
+	int KType_FuncParse = (KLIB KClass_Generics(kctx, KClass_Func, KType_Int, 6, P_FuncParse))->typeId;
 	/* Func[Node, NameSpace, Object] */
 	kparamtype_t P_FuncType[] = {{KType_Node}, {KType_NameSpace}, {KType_Object}};
 	int KType_FuncType = (KLIB KClass_Generics(kctx, KClass_Func, KType_Node, 3, P_FuncType))->typeId;
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im, _F(Syntax_new), KType_Syntax, KType_Syntax, KMethodName_("new"), 1, TP_kw,
-		_Public,     _F(Syntax_SetTokenFunc), KType_void, KType_Syntax, KMethodName_("SetTokenFunc"), 2, KType_int, KFieldName_("kchar"), KType_FuncToken, KFieldName_("func"),
-		_Public,     _F(Syntax_SetParseFunc), KType_void, KType_Syntax, KMethodName_("SetParseFunc"), 3, KType_int, KFieldName_("op1"), KType_int, KFieldName_("op2"), KType_FuncParse, KFieldName_("func"),
+		_Public,     _F(Syntax_SetTokenFunc), KType_void, KType_Syntax, KMethodName_("SetTokenFunc"), 2, KType_Int, KFieldName_("kchar"), KType_FuncToken, KFieldName_("func"),
+		_Public,     _F(Syntax_SetParseFunc), KType_void, KType_Syntax, KMethodName_("SetParseFunc"), 3, KType_Int, KFieldName_("op1"), KType_Int, KFieldName_("op2"), KType_FuncParse, KFieldName_("func"),
 		_Public,     _F(Syntax_SetTypeFunc), KType_void, KType_Syntax, KMethodName_("SetTypeFunc"), 1, KType_FuncType, KFieldName_("func"),
-		_Public,     _F(Syntax_SetMacro), KType_void, KType_Syntax, KMethodName_("SetMacro"), 2, KType_int, KFieldName_("number"), KType_Symbol, KFieldName_("macro"),
-		_Public,     _F(Syntax_SetMetaPattern), KType_void, KType_Syntax, KMethodName_("SetMetaPattern"), 1, KType_boolean, KFieldName_("flag"),
-		_Public|_Im, _F(Syntax_IsMetaPattern), KType_boolean, KType_Syntax, KMethodName_("IsMetaPattern"), 0,
+		_Public,     _F(Syntax_SetMacro), KType_void, KType_Syntax, KMethodName_("SetMacro"), 2, KType_Int, KFieldName_("number"), KType_Symbol, KFieldName_("macro"),
+		_Public,     _F(Syntax_SetMetaPattern), KType_void, KType_Syntax, KMethodName_("SetMetaPattern"), 1, KType_Boolean, KFieldName_("flag"),
+		_Public|_Im, _F(Syntax_IsMetaPattern), KType_Boolean, KType_Syntax, KMethodName_("IsMetaPattern"), 0,
 		_Public,     _F(Syntax_SetPattern), KType_void, KType_Syntax, KMethodName_("SetPattern"), 1, KType_String, KFieldName_("pattern"),
 		_Public|_Const, _F(NameSpace_GetTermParseFunc), KType_FuncParse, KType_NameSpace, KMethodName_("GetTermParseFunc"), 0,
 		_Public|_Const, _F(NameSpace_GetOpParseFunc), KType_FuncParse, KType_NameSpace, KMethodName_("GetOpParseFunc"), 0,

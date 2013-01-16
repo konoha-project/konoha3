@@ -33,7 +33,7 @@ extern "C" {
 
 #include <minikonoha/import/methoddecl.h>
 #define TP_name         KType_String,     KFieldName_("name")
-#define TP_paramsize    KType_int,        KFieldName_("paramsize")
+#define TP_paramsize    KType_Int,        KFieldName_("paramsize")
 #define TP_source       KType_String,     KFieldName_("source")
 
 //## NameSpace NameSpace.GetNameSpace();
@@ -74,14 +74,14 @@ static void namespace_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(NameSpace_GetNameSpace), KType_NameSpace, KType_NameSpace, KMethodName_("GetNameSpace"), 0,
 		_Public|_Const|_Im, _F(NameSpace_GetParentNameSpace), KType_NameSpace, KType_NameSpace, KMethodName_("GetParentNameSpace"), 0,
-		_Public, _F(NameSpace_DefineMacro2), KType_boolean, KType_NameSpace, KMethodName_("DefineMacro"), 2, TP_name, TP_source,
-		_Public, _F(NameSpace_DefineMacro), KType_boolean, KType_NameSpace, KMethodName_("DefineMacro"), 3, TP_name, TP_paramsize, TP_source,
+		_Public, _F(NameSpace_DefineMacro2), KType_Boolean, KType_NameSpace, KMethodName_("DefineMacro"), 2, TP_name, TP_source,
+		_Public, _F(NameSpace_DefineMacro), KType_Boolean, KType_NameSpace, KMethodName_("DefineMacro"), 3, TP_name, TP_paramsize, TP_source,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 //	KDEFINE_INT_CONST IntData[] = {
-//		{"INT_MAX", KType_int, KINT_MAX},
-//		{"INT_MIN", KType_int, KINT_MIN},
+//		{"INT_MAX", KType_Int, KINT_MAX},
+//		{"INT_MIN", KType_Int, KINT_MIN},
 //		{NULL},
 //	};
 //	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), trace);
@@ -201,7 +201,7 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	sugarContext->isNodeedErrorMessage = popIsNodeingErrorMessage;
-	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_boolean, isDefined));
+	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_Boolean, isDefined));
 }
 
 static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)

@@ -65,7 +65,7 @@ static void Tagger_Free(KonohaContext *kctx, kObject *o)
 
 #define KType_Tagger     cTagger->typeId
 #define KType_MecabNode  cMecabNode->typeId
-#define KDefineConstInt(T)  #T, KType_int, T
+#define KDefineConstInt(T)  #T, KType_Int, T
 
 /* ------------------------------------------------------------------------ */
 /* [API methods] */
@@ -346,7 +346,7 @@ static kbool_t mecab_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const, _F(Tagger_new),         KType_Tagger,  KType_Tagger, KMethodName_("new"),   0,
 		_Public|_Const, _F(Tagger_Parse),       KType_String,  KType_Tagger, KMethodName_("parse"), 1, KType_String, KFieldName_("input"),
-		_Public|_Const, _F(Tagger_NBestParse),  KType_String,  KType_Tagger, KMethodName_("NBestParse"), 2, KType_int, KFieldName_("n"), KType_String, KFieldName_("input"),
+		_Public|_Const, _F(Tagger_NBestParse),  KType_String,  KType_Tagger, KMethodName_("NBestParse"), 2, KType_Int, KFieldName_("n"), KType_String, KFieldName_("input"),
 		_Public|_Const, _F(Tagger_NBestInit),   KType_String,  KType_Tagger, KMethodName_("NBestInit"), 1, KType_String, KFieldName_("input"),
 		_Public|_Const, _F(Tagger_NBestNext),   KType_String,  KType_Tagger, KMethodName_("NBestNext"), 0,
 		_Public|_Const, _F(Tagger_ParseToNode), KType_MecabNode,  KType_Tagger, KMethodName_("parseToNode"), 1, KType_String, KFieldName_("input"),
@@ -358,19 +358,19 @@ static kbool_t mecab_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 		_Public|_Const, _F(MecabNode_bnext),       KType_MecabNode,  KType_MecabNode, KMethodName_("bnext"), 0,
 		_Public|_Const, _F(MecabNode_getSurface),  KType_String,  KType_MecabNode, KMethodName_("getSurface"), 0,
 		_Public|_Const, _F(MecabNode_getFeature),  KType_String,  KType_MecabNode, KMethodName_("getFeature"), 0,
-		_Public|_Const, _F(MecabNode_getLength),   KType_int,  KType_MecabNode, KMethodName_("getLength"), 0,
-		_Public|_Const, _F(MecabNode_getRLength),  KType_int,  KType_MecabNode, KMethodName_("getRLength"), 0,
-		_Public|_Const, _F(MecabNode_getRCAttr),   KType_int,  KType_MecabNode, KMethodName_("getRCAttr"), 0,
-		_Public|_Const, _F(MecabNode_getLCAttr),   KType_int,  KType_MecabNode, KMethodName_("getLCAttr"), 0,
-		_Public|_Const, _F(MecabNode_getCharType), KType_int,  KType_MecabNode, KMethodName_("getCharType"), 0,
-		_Public|_Const, _F(MecabNode_getStat),     KType_int,  KType_MecabNode, KMethodName_("getStat"), 0,
-		_Public|_Const, _F(MecabNode_getID),       KType_int,  KType_MecabNode, KMethodName_("getID"), 0,
-		_Public|_Const, _F(MecabNode_isBest),      KType_boolean,  KType_MecabNode, KMethodName_("isBest"), 0,
+		_Public|_Const, _F(MecabNode_getLength),   KType_Int,  KType_MecabNode, KMethodName_("getLength"), 0,
+		_Public|_Const, _F(MecabNode_getRLength),  KType_Int,  KType_MecabNode, KMethodName_("getRLength"), 0,
+		_Public|_Const, _F(MecabNode_getRCAttr),   KType_Int,  KType_MecabNode, KMethodName_("getRCAttr"), 0,
+		_Public|_Const, _F(MecabNode_getLCAttr),   KType_Int,  KType_MecabNode, KMethodName_("getLCAttr"), 0,
+		_Public|_Const, _F(MecabNode_getCharType), KType_Int,  KType_MecabNode, KMethodName_("getCharType"), 0,
+		_Public|_Const, _F(MecabNode_getStat),     KType_Int,  KType_MecabNode, KMethodName_("getStat"), 0,
+		_Public|_Const, _F(MecabNode_getID),       KType_Int,  KType_MecabNode, KMethodName_("getID"), 0,
+		_Public|_Const, _F(MecabNode_isBest),      KType_Boolean,  KType_MecabNode, KMethodName_("isBest"), 0,
 		//_Public|_Const, _F(MecabNode_alpha),       KType_Float,  KType_MecabNode, KMethodName_("alpha"), 0,
 		//_Public|_Const, _F(MecabNode_beta),        KType_Float,  KType_MecabNode, KMethodName_("beta"), 0,
 		//_Public|_Const, _F(MecabNode_prob),        KType_Float,  KType_MecabNode, KMethodName_("prob"), 0,
-		_Public|_Const, _F(MecabNode_wcost),       KType_int,  KType_MecabNode, KMethodName_("wcost"), 0,
-		_Public|_Const, _F(MecabNode_cost),        KType_int,  KType_MecabNode, KMethodName_("cost"), 0,
+		_Public|_Const, _F(MecabNode_wcost),       KType_Int,  KType_MecabNode, KMethodName_("wcost"), 0,
+		_Public|_Const, _F(MecabNode_cost),        KType_Int,  KType_MecabNode, KMethodName_("cost"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

@@ -97,8 +97,8 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Libevent_new), KType_Libevent, KType_Libevent, KMethodName_("new"), 0,
 		_Public, _F(Libevent_dispatch), KType_Libevent, KType_Libevent, KMethodName_("dispatch"), 0,
-		_Public, _F(Libevent_event_add), KType_int, KType_Libevent, KMethodName_("event_add"), 2, KType_Object, KFieldName_("timeval"),
-		_Public, _F(Libevent_event_del), KType_int, KType_Libevent, KMethodName_("event_del"), 1,
+		_Public, _F(Libevent_event_add), KType_Int, KType_Libevent, KMethodName_("event_add"), 2, KType_Object, KFieldName_("timeval"),
+		_Public, _F(Libevent_event_del), KType_Int, KType_Libevent, KMethodName_("event_del"), 1,
 
 
 

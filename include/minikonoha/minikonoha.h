@@ -520,25 +520,55 @@ struct KObjectVisitor *visitor;
 
 /* ------------------------------------------------------------------------ */
 
+#define DefineBasicTypeList(MACRO)\
+	MACRO(void)\
+	MACRO(var)\
+	MACRO(Object)\
+	MACRO(Boolean)\
+	MACRO(Int)\
+	MACRO(String)\
+	MACRO(Array)\
+	MACRO(Param)\
+	MACRO(Method)\
+	MACRO(Func)\
+	MACRO(Exception)\
+	MACRO(NameSpace)\
+	MACRO(System)\
+	MACRO(0)\
+
+#define TypeDefMacro(T)\
+	typedef /*const*/ struct k##T##Var      k##T;\
+	typedef struct k##T##Var      k##T##Var;\
+
+#define TypeEnumMacro(T)         KType_##T,
+
+typedef enum {
+	DefineBasicTypeList(TypeEnumMacro)
+} KType_;
+
+DefineBasicTypeList(TypeDefMacro)
+
 #define kAbstractObject                 const void
-typedef const struct kObjectVar         kObject;
-typedef struct kObjectVar               kObjectVar;
-typedef const struct kBooleanVar        kBoolean;
-typedef struct kBooleanVar              kBooleanVar;
-typedef const struct kIntVar            kInt;
-typedef struct kIntVar                  kIntVar;
-typedef const struct kStringVar         kString;
-typedef struct kStringVar               kStringVar;
-typedef const struct kArrayVar          kArray;
-typedef struct kArrayVar                kArrayVar;
-typedef const struct kParamVar          kParam;
-typedef struct kParamVar                kParamVar;
-typedef const struct kMethodVar         kMethod;
-typedef struct kMethodVar               kMethodVar;
-typedef const struct kFuncVar           kFunc;
-typedef struct kFuncVar                 kFuncVar;
-typedef struct kNameSpaceVar            kNameSpace;
-typedef struct kNameSpaceVar            kNameSpaceVar;
+//typedef const struct kObjectVar         kObject;
+//typedef struct kObjectVar               kObjectVar;
+//typedef const struct kBooleanVar        kBoolean;
+//typedef struct kBooleanVar              kBooleanVar;
+//typedef const struct kIntVar            kInt;
+//typedef struct kIntVar                  kIntVar;
+//typedef const struct kStringVar         kString;
+//typedef struct kStringVar               kStringVar;
+//typedef const struct kArrayVar          kArray;
+//typedef struct kArrayVar                kArrayVar;
+//typedef const struct kParamVar          kParam;
+//typedef struct kParamVar                kParamVar;
+//typedef const struct kMethodVar         kMethod;
+//typedef struct kMethodVar               kMethodVar;
+//typedef const struct kFuncVar           kFunc;
+//typedef struct kFuncVar                 kFuncVar;
+//typedef const struct kExceptionVar           kException;
+//typedef struct kExceptionVar                 kExceptionVar;
+//typedef struct kNameSpaceVar            kNameSpace;
+//typedef struct kNameSpaceVar            kNameSpaceVar;
 
 /* sugar.h */
 
@@ -943,10 +973,6 @@ struct KRuntimeContextVar {
 #define MOD_konoha     6
 
 #define MOD_exception  5
-//#define MOD_float      11
-//#define MOD_iterator   12
-//#define MOD_iconv      13
-//#define MOD_IO         14
 #define MOD_REGEXP     16
 #define MOD_APACHE     17
 #define MOD_EVENT      18
@@ -1111,29 +1137,30 @@ struct KClassField {
 
 /* ----------------------------------------------------------------------- */
 
-#define KType_void              ((ktypeattr_t)0)
-#define KType_var               ((ktypeattr_t)1)
-#define KType_Object            ((ktypeattr_t)2)
-#define KType_boolean           ((ktypeattr_t)3)
-#define KType_int               ((ktypeattr_t)4)
-#define KType_String            ((ktypeattr_t)5)
-#define KType_Array             ((ktypeattr_t)6)
-#define KType_Param             ((ktypeattr_t)7)
-#define KType_Method            ((ktypeattr_t)8)
-#define KType_Func              ((ktypeattr_t)9)
-#define KType_NameSpace         ((ktypeattr_t)10)
-#define KType_System            ((ktypeattr_t)11)
-#define KType_0                 ((ktypeattr_t)12)    /* Parameter Type*/
+//#define KType_void              ((ktypeattr_t)0)
+//#define KType_var               ((ktypeattr_t)1)
+//#define KType_Object            ((ktypeattr_t)2)
+//#define KType_Boolean           ((ktypeattr_t)3)
+//#define KType_Int               ((ktypeattr_t)4)
+//#define KType_String            ((ktypeattr_t)5)
+//#define KType_Array             ((ktypeattr_t)6)
+//#define KType_Param             ((ktypeattr_t)7)
+//#define KType_Method            ((ktypeattr_t)8)
+//#define KType_Func              ((ktypeattr_t)9)
+//#define KType_NameSpace         ((ktypeattr_t)10)
+//#define KType_System            ((ktypeattr_t)11)
+//#define KType_0                 ((ktypeattr_t)12)    /* Parameter Type*/
 
 #define KClass_void                 KClass_(KType_void)
 #define KClass_Object               KClass_(KType_Object)
-#define KClass_Boolean              KClass_(KType_boolean)
-#define KClass_Int                  KClass_(KType_int)
+#define KClass_Boolean              KClass_(KType_Boolean)
+#define KClass_Int                  KClass_(KType_Int)
 #define KClass_String               KClass_(KType_String)
 #define KClass_Array                KClass_(KType_Array)
 #define KClass_Param                KClass_(KType_Param)
 #define KClass_Method               KClass_(KType_Method)
 #define KClass_Func                 KClass_(KType_Func)
+#define KClass_Exception            KClass_(KType_Exception)
 #define KClass_NameSpace            KClass_(KType_NameSpace)
 #define KClass_System               KClass_(KType_System)
 #define KClass_var                  KClass_(KType_var)
@@ -1252,9 +1279,9 @@ struct kBooleanVar /* extends kNumber */ {
 	ABSTRACT_NUMBER;
 };
 
-#define IS_Boolean(o)              (kObject_typeId(o) == KType_boolean)
-#define IS_TRUE(o)                 (kObject_baseTypeId(o) == KType_boolean && kNumber_ToBool(o))
-#define IS_FALSE(o)                (kObject_baseTypeId(o) == KType_boolean && kNumber_ToBool(o) == 0)
+#define IS_Boolean(o)              (kObject_typeId(o) == KType_Boolean)
+#define IS_TRUE(o)                 (kObject_baseTypeId(o) == KType_Boolean && kNumber_ToBool(o))
+#define IS_FALSE(o)                (kObject_baseTypeId(o) == KType_Boolean && kNumber_ToBool(o) == 0)
 #define new_Boolean(kctx, c)       ((c) ? K_TRUE : K_FALSE)
 #define kNumber_ToInt(o)                 (((kBoolean *)o)->intValue)
 #define kNumber_ToFloat(o)               (((kBoolean *)o)->floatValue)
@@ -1268,7 +1295,7 @@ struct kIntVar /* extends kNumber */ {
 	ABSTRACT_NUMBER;
 };
 
-#define IS_Int(o)              (kObject_typeId(o) == KType_int)
+#define IS_Int(o)              (kObject_typeId(o) == KType_Int)
 
 /* ------------------------------------------------------------------------ */
 /* String */
@@ -1505,6 +1532,22 @@ struct kFuncVar {
 	kObject *env;
 };
 
+
+/* ------------------------------------------------------------------------ */
+/* Exception */
+
+typedef kushort_t kfault_t;
+
+#define IS_Exception(o)              (kObject_baseTypeId(o) == KType_Exception)
+
+struct kExceptionVar {
+	kObjectHeader h;
+	kshortflag_t flag;   kfault_t faultId;
+	kfileline_t  uline;
+	kString     *message;
+	kArray      *StackTraceList;
+};
+
 /* ------------------------------------------------------------------------ */
 /* NameSpace */
 
@@ -1556,9 +1599,7 @@ struct kNameSpaceVar {
 
 #define IS_System(o)              (kObject_typeId(o) == KType_System)
 
-typedef const struct _kSystem kSystem;
-
-struct _kSystem {
+struct kSystemVar {
 	kObjectHeader h;
 };
 
@@ -1844,7 +1885,7 @@ typedef intptr_t  KDEFINE_METHOD;
 
 #define KConst_(D)  ((const char **)D)
 
-#define KDefineConstInt(T) #T, KType_int, T
+#define KDefineConstInt(T) #T, KType_Int, T
 
 typedef struct {
 	const char *key;

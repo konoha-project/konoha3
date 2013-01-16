@@ -215,12 +215,12 @@ static kbool_t math_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	int FN_x = KFieldName_("x");
 	int FN_y = KFieldName_("y");
 	KDEFINE_METHOD MethodData[] = {
-			_Public|_Const|_Static, _F(Math_abs), KType_int, KType_Math, KMethodName_("abs"), 1, KType_int, FN_x,
+			_Public|_Const|_Static, _F(Math_abs), KType_Int, KType_Math, KMethodName_("abs"), 1, KType_Int, FN_x,
 			_Public|_Const|_Static, _F(Math_fabs), KType_float, KType_Math, KMethodName_("fabs"), 1, KType_float, FN_x,
 			_Public|_Const|_Static, _F(Math_pow), KType_float, KType_Math, KMethodName_("pow"), 2, KType_float, FN_x, KType_float, FN_y,
-			_Public|_Const|_Static, _F(Math_ldexp), KType_float, KType_Math, KMethodName_("ldexp"), 2, KType_float, FN_x, KType_int, FN_y,
+			_Public|_Const|_Static, _F(Math_ldexp), KType_float, KType_Math, KMethodName_("ldexp"), 2, KType_float, FN_x, KType_Int, FN_y,
 			_Public|_Const|_Static, _F(Math_modf), KType_float, KType_Math, KMethodName_("modf"), 2, KType_float, FN_x, KType_float, FN_y,
-			_Public|_Const|_Static, _F(Math_frexp), KType_float, KType_Math, KMethodName_("frexp"), 2, KType_float, FN_x, KType_int, FN_y,
+			_Public|_Const|_Static, _F(Math_frexp), KType_float, KType_Math, KMethodName_("frexp"), 2, KType_float, FN_x, KType_Int, FN_y,
 			_Public|_Const|_Static, _F(Math_fmod), KType_float, KType_Math, KMethodName_("fmod"), 2, KType_float, FN_x, KType_float, FN_y,
 			_Public|_Const|_Static, _F(Math_ceil), KType_float, KType_Math, KMethodName_("ceil"), 1, KType_float, FN_x,
 #ifdef K_USING_WIN32_
