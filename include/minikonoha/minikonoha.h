@@ -1513,9 +1513,9 @@ struct kFuncVar {
 
 struct kNameSpaceVar {
 	kObjectHeader h;
+	kNameSpace                        *parentNULL;
 	kpackageId_t packageId;  	       kshortflag_t syntaxOption;
 	kArray                            *NameSpaceConstList;
-	kNameSpace                        *parentNULL;
 	kArray                            *importedNameSpaceList;
 	KDict                              constTable;
 	kArray                            *metaPatternList;
@@ -1688,6 +1688,7 @@ struct KonohaLibVar {
 	kString*            (*KBuffer_Stringfy)(KonohaContext *, KBuffer *, kArray *gcstack, int isClear);
 	kbool_t             (*KBuffer_iconv)(KonohaContext *, KBuffer*, uintptr_t iconv, const char *, size_t, KTraceInfo *);
 
+	void                (*KDict_Init)(KonohaContext *, KDict *);
 	KKeyValue*          (*KDict_GetNULL)(KonohaContext *, KDict *, ksymbol_t);
 	void                (*KDict_Add)(KonohaContext *, KDict *, KKeyValue *);
 	void                (*KDict_Remove)(KonohaContext *, KDict *, ksymbol_t);

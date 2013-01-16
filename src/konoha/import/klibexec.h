@@ -188,6 +188,13 @@ KLIBDECL kbool_t KBuffer_iconv(KonohaContext *kctx, KBuffer* wb, uintptr_t ic, c
 // -------------------------------------------------------------------------
 /* KDict */
 
+KLIBDECL void KDict_Init(KonohaContext *kctx, KDict *dict)
+{
+	dict->data.bytemax  = 0;
+	dict->data.bytesize = 0;
+	dict->sortedData = 0;
+}
+
 #define KDict_size(dict)   (dict->data.bytesize / sizeof(KKeyValue))
 #define KDict_max(dict)    (dict->data.bytemax / sizeof(KKeyValue))
 
@@ -946,6 +953,7 @@ static void klib_Init(KonohaLibVar *l)
 	l->KBuffer_Stringfy  = KBuffer_Stringfy;
 	l->KBuffer_iconv     = KBuffer_iconv;
 
+	l->KDict_Init        = KDict_Init;
 	l->KDict_GetNULL     = KDict_GetNULL;
 	l->KDict_Add         = KDict_Add;
 	l->KDict_Remove      = KDict_Remove;
