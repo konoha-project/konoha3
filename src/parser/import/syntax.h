@@ -1042,10 +1042,16 @@ static void kNode_DeclType(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, kty
 static KMETHOD Statement_TypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
-	kToken *tk   = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
-	kNode  *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
-	ktypeattr_t attrTypeId = Token_typeLiteral(tk);
-	kNode_DeclType(kctx, stmt, ns, attrTypeId, expr, NULL, TypeDeclLocalVariable);
+	if(kNameSpace_IsTopLevel(ns)) {
+		SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "unsupported global variable; use Syntax.GlobalVariable");
+		SUGAR MessageNode(kctx, stmt, NULL, ns, InfoTag, "global variable is defined in Syntax.GlobalVariable");
+	}
+	else {
+		kToken *tk   = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
+		kNode  *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
+		ktypeattr_t attrTypeId = Token_typeLiteral(tk);
+		kNode_DeclType(kctx, stmt, ns, attrTypeId, expr, NULL, TypeDeclLocalVariable);
+	}
 	KReturn(stmt);
 }
 
