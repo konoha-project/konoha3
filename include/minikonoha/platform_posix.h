@@ -827,8 +827,11 @@ static void KBuffer_WriteValue(KonohaContext *kctx, KBuffer *wb, KClass *c, Kono
 	}
 }
 
-static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottomStack, KonohaStack *topStack)
+static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaStack *bottomStack, KonohaStack *topStack)
 {
+	const char *exceptionName = KSymbol_text(e->symbol);
+	const char *optionalMessage = kString_text(e->Message);
+	int fault = e->fault;
 	PLATAPI printf_i("%s", BeginTag(kctx, ErrTag));
 	if(optionalMessage != NULL && optionalMessage[0] != 0) {
 		PLATAPI printf_i("%s: SoftwareFault %s", exceptionName, optionalMessage);
