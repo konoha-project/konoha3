@@ -560,6 +560,13 @@ static kNode* TypeVariableNULL(KonohaContext *kctx, kNode *expr, kNameSpace *ns,
 			}
 		}
 	}
+	if(genv->thisClass->baseTypeId == KType_Func) {
+		kMethod *mtd = kNameSpace_GetGetterMethodNULL(kctx, ns, genv->thisClass, symbol);
+		if(mtd != NULL) {
+			return new_GetterNode(kctx, tk, mtd, new_VariableNode(kctx, ns, KNode_Local, genv->thisClass->typeId, 0));
+		}
+	}
+
 	if((kNameSpace_IsTopLevel(ns) || kNameSpace_Is(ImplicitGlobalVariable, ns)) && ns->globalObjectNULL != NULL) {
 		KClass *globalClass = kObject_class(ns->globalObjectNULL);
 		kMethod *mtd = kNameSpace_GetGetterMethodNULL(kctx, ns, globalClass, symbol);
@@ -780,7 +787,7 @@ static kNode *TypeFuncParam(KonohaContext *kctx, kNodeVar *expr, kNameSpace *ns)
 			return texpr;
 		}
 	}
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, kNode_ns(expr), KClass_Func, KMethodName_("invoke"), -1, KMethodMatch_NoOption);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, kNode_ns(expr), KClass_Func, KMethodName_("Invoke"), -1, KMethodMatch_NoOption);
 	DBG_ASSERT(mtd != NULL);
 	return TypeMethodCallNode(kctx, expr, mtd, KClass_(thisClass->p0));
 }

@@ -108,7 +108,7 @@ static KMETHOD Person_say(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t HelloWorld_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	/* Class Definition */
-	/* If you want to create Generic class like Array<T>, see konoha.map package */
+	/* If you want to create Generic class like Array<T>, see JavaScript.Array package */
 	KDEFINE_CLASS defPerson = {0};
 	SETSTRUCTNAME(defPerson, Person);
 	defPerson.cflag     = KClassFlag_Final;

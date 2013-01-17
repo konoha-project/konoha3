@@ -12,13 +12,11 @@ void FuelVM_UpdateObjectField(KonohaContext *kctx, const struct kObjectVar *pare
 	PLATAPI UpdateObjectField(parent, oldPtr, newVal);
 }
 
-//kObject* (*new_kObject)(KonohaContext*, kArray *gcstack, KClass *, uintptr_t);
 kObject *FuelVM_new_kObject(KonohaContext *kctx, uint64_t gcstack, void *ct, uint64_t conf)
 {
 	KClass *kclass = (KClass *) ct;
 	return KLIB new_kObject(kctx, 0, kclass, (uintptr_t) conf);
 }
-
 
 kMethod *FuelVM_LookupMethod(KonohaContext *kctx, kObject *self, kMethod *mtd, kNameSpace *ns)
 {

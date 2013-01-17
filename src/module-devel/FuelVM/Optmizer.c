@@ -110,7 +110,10 @@ static void ReplaceOldValueWith(INode *Node, INode *oldVal, INode *newVal)
 			break;
 		}
 		CASE(IFunction) {
-			ReplaceArrayElementWith(&((IFunction *)Node)->Env, oldVal, newVal);
+			IFunction *Inst = (IFunction *) Node;
+			ReplaceValue(&(Inst->Func), oldVal, newVal);
+			ReplaceValue(&(Inst->Env), oldVal, newVal);
+			ReplaceValue(&(Inst->Method), oldVal, newVal);
 			break;
 		}
 		CASE(IUpdate) {
@@ -750,10 +753,10 @@ static void TraceNode1(INode *Node)
 		}
 		CASE(IFunction) {
 			IFunction *Inst = (IFunction *) Node;
-			INodePtr *x, *e;
-			FOR_EACH_ARRAY(Inst->Env, x, e) {
-				INode_SetMarked(*x, 1);
-			}
+			INode_SetMarked(Node, 1);
+			INode_SetMarked(Inst->Func, 1);
+			INode_SetMarked(Inst->Env, 1);
+			INode_SetMarked(Inst->Method, 1);
 			break;
 		}
 		CASE(IUpdate) {
