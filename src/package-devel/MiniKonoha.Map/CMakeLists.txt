@@ -1,3 +1,2 @@
-cmake_minimum_required(VERSION 2.6)
-set(PACKAGE_SOURCE_CODE map_glue.c)
-add_konoha_package(konoha.map)
+set(PACKAGE_SOURCE_CODE Map_glue.c)
+add_konoha_package(MiniKonoha.Map)
