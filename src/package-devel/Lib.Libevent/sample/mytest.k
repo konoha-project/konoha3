@@ -1,4 +1,4 @@
-import("konoha.map");
+import("MiniKonoha.Map");
 import("konoha.new");
 import("Syntax.JavaStyleClass");
 import("konoha.object");

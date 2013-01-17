@@ -62,12 +62,8 @@ void main() {
         "Lib.Mecab", "Lib.Mpi", "Lib.Openssl", "Lib.Python", "MiniKonoha.Sql", "MiniKonoha.NameSpace", "Syntax.JavaImport", "Java.String", "MiniKonoha.Eval"];
 
 
-    before.add("MiniKonoha.Desugar");
-    after.add( "MiniKonoha.Syntax");
-    before.add("Type.Var");
-    after.add( "Type.StaticVar");
-    before.add("Type.Untyped");
-    after.add( "Syntax.UntypedVariable");
+    before.add("konoha.map");
+    after.add( "MiniKonoha.Map");
 
     before.add("cstyle\", \"null");
     after.add( "Syntax.Null");

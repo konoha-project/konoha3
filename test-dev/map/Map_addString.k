@@ -1,4 +1,4 @@
 // written by kimio
 
-import("konoha.map");
+import("MiniKonoha.Map");
 

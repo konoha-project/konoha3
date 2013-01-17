@@ -1,5 +1,5 @@
 // written by kimio
-import("konoha.map");
+import("MiniKonoha.Map");
 
 void test() {
 	Map m = {name: "Naruto", age:17};

@@ -1,7 +1,7 @@
 //import("konoha.new"); Don't use this
 import("Syntax.JavaStyleClass");
 import("JavaScript.Array");
-import("konoha.map");
+import("MiniKonoha.Map");
 import("Syntax.GlobalVariable");
 import("MiniKonoha.NameSpace");  // konoha.const is obsolete
 import("JavaStyle.Object");

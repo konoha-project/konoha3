@@ -25,7 +25,7 @@
 import("konoha.new");
 import("Syntax.JavaStyleClass");
 import("konoha.object");
-import("konoha.map");
+import("MiniKonoha.Map");
 import("cstyle");
 import("JavaScript.Date");
 
