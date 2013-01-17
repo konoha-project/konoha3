@@ -89,13 +89,14 @@ static void kToken_ToError(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglev
 
 static void kNode_ToError(KonohaContext *kctx, kNode *node, kString *errmsg)
 {
-	if(errmsg != NULL) { // not in case of isNodeedErrorMessage
-		node->node = KNode_Error;
-		node->attrTypeId = KType_void;
-		KFieldSet(node, node->ErrorMessage, errmsg);
-		kNode_Set(ObjectConst, node, false);
-//		node->stackbase = ns == NULL ? 0 : ns->genv->localScope.varsize;
+	if(errmsg == NULL) { // not in case of isNodeedErrorMessage
+		errmsg = TS_EMPTY;
 	}
+	node->node = KNode_Error;
+	node->attrTypeId = KType_void;
+	KFieldSet(node, node->ErrorMessage, errmsg);
+	kNode_Set(ObjectConst, node, false);
+	//node->stackbase = ns == NULL ? 0 : ns->genv->localScope.varsize;
 }
 
 static kNode* MessageNode(KonohaContext *kctx, kNode *node, kTokenNULL *tk, kNameSpaceNULL *ns, kinfotag_t taglevel, const char *fmt, ...)
