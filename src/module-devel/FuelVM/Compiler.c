@@ -429,16 +429,25 @@ static kbool_t FuelVM_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder, k
 	return FuelVM_VisitLoopNode(kctx, builder, stmt, thunk, DoWhileLoop);
 }
 
-#define FuelVM_VisitContinueNode FuelVM_VisitJumpNode
-#define FuelVM_VisitBreakNode FuelVM_VisitJumpNode
-static kbool_t FuelVM_VisitJumpNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
+static kbool_t FuelVM_VisitJumpNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk, ksymbol_t label)
 {
-	kSyntax *syn = stmt->syn;
-	kNode *jump = kNode_GetNode(kctx, stmt, syn->keyword);
+	kNode *jump = kNode_GetNode(kctx, stmt, label);
 	DBG_ASSERT(jump != NULL && IS_Node(jump));
-	Block *target = kNode_GetTargetBlock(kctx, jump, syn->keyword);
+	Block *target = kNode_GetTargetBlock(kctx, jump, label);
 	IRBuilder_JumpTo(BLD(builder), target);
 	return true;
+}
+
+static kbool_t FuelVM_VisitContinueNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
+{
+	ksymbol_t label = KSymbol_("continue");
+	return FuelVM_VisitJumpNode(kctx, builder, stmt, thunk, label);
+}
+
+static kbool_t FuelVM_VisitBreakNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
+{
+	ksymbol_t label = KSymbol_("break");
+	return FuelVM_VisitJumpNode(kctx, builder, stmt, thunk, label);
 }
 
 static kbool_t FuelVM_VisitTryNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)

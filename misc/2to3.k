@@ -3,7 +3,6 @@ Import("JavaScript.String");
 Import("Type.File");
 Import("Type.Bytes");
 Import("Syntax.CStyleWhile");
-Import("konoha.new");
 Import("MiniKonoha.NameSpace");
 
 String readFile(String path) {
