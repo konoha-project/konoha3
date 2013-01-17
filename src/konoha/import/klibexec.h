@@ -626,7 +626,7 @@ static KKeyValue* kObjectProto_GetKeyValue(KonohaContext *kctx, kAbstractObject 
 static kObject* kObjectProto_GetObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, kAbstractObject *defval)
 {
 	KKeyValue *d = kObjectProto_GetKeyValue(kctx, o, key);
-	return (d != NULL) ? d->ObjectValue : defval;
+	return (d != NULL) ? d->ObjectValue : (kObject *) defval;
 }
 
 static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *ao, ksymbol_t key, ktypeattr_t ty, kAbstractObject *val)
@@ -777,7 +777,7 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 			return;
 		}
 	}
-	kObject_class(d->ObjectValue)->p(kctx, w->values, w->pos, w->wb);
+	KClass_(KTypeAttr_Unmask(d->attrTypeId))->p(kctx, w->values, w->pos, w->wb);
 }
 
 static int kObjectProto_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb, int count)
