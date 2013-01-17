@@ -576,6 +576,13 @@ static kbool_t JSBuilder_VisitDoneNode(KonohaContext *kctx, KBuilder *builder, k
 	return true;
 }
 
+static kbool_t JSBuilder_VisitFunctionNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
+{
+	abort();/*FIXME*/
+	return true;
+}
+
+
 static void compileAllDefinedMethods(KonohaContext *kctx)
 {
 	KRuntime *share = kctx->share;

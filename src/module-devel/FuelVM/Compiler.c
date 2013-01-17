@@ -684,42 +684,45 @@ static kbool_t FuelVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 	return true;
 }
 
-//static bool String_equal(KonohaContext *kctx, kString *str0, kString *str1)
-//{
-//	unsigned len0 = kString_size(str0);
-//	unsigned len1 = kString_size(str1);
-//	if(len0 != len1)
-//		return false;
-//	return strncmp(kString_text(str0), kString_text(str1), len0) == 0;
-//}
-//
-//static bool Token_equal(KonohaContext *kctx, kToken *tk1, kToken *tk2)
-//{
-//	if(IS_String(tk1->text) && IS_String(tk2->text)) {
-//		return String_equal(kctx, tk1->text, tk2->text);
-//	}
-//	return false;
-//}
-//
-//static kbool_t FuelVM_VisitStackTopNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
-//{
-//	enum TypeId type = ConvertToTypeId(kctx, expr->attrTypeId);
-//	INodePtr *x, *e;
-//	FOR_EACH_ARRAY(BLD(builder)->Stack, x, e) {
-//		IField *Node = (IField *) *x;
-//		if((*x)->Type != type)
-//			continue;
-//		kNode *e = (kNode *) Node->Hash;
-//		if(IS_Token(e->TermToken) && IS_Token(expr->TermToken)) {
-//			if(Token_equal(kctx, e->TermToken, expr->TermToken)) {
-//				builder->Value = *x;
-//				return true;
-//			}
-//		}
-//	}
-//	assert(0);
-//	return false;
-//}
+static kbool_t FuelVM_VisitFunctionNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
+{
+	/*
+	 * [FunctionExpr] := new Function(method, env1, env2, ...)
+	 * expr->NodeList = [method, defObj, env1, env2, ...]
+	 **/
+	enum TypeId Type;
+	kMethod *mtd = CallNode_getMethod(expr);
+	kObject *obj = expr->NodeList->ObjectItems[1];
+	INode *MtdObj = CreateObject(BLD(builder), KType_Method, (void *) mtd);
+
+	Type = ConvertToTypeId(kctx, kObject_class(obj)->typeId);
+	INode *NewEnv  = CreateNew(BLD(builder), 0, Type);
+
+	size_t i, ParamSize = kArray_size(expr->NodeList)-2;
+	for(i = 0; i < ParamSize; i++) {
+		kNode *envN = kNode_At(expr, i+2);
+		enum TypeId FieldType = ConvertToTypeId(kctx, envN->attrTypeId);
+		INode *Node = CreateField(BLD(builder), FieldScope, FieldType, NewEnv, i);
+		SUGAR VisitNode(kctx, builder, envN, thunk);
+		CreateUpdate(BLD(builder), Node, FuelVM_getExpression(builder));
+	}
+
+	Type = ConvertToTypeId(kctx, expr->attrTypeId);
+	INode *NewFunc = CreateNew(BLD(builder), 0, Type);
+
+	kNameSpace *ns = kNode_ns(expr);
+	mtd =  KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Func, KMethodName_("_Create"), 2, KMethodMatch_NoOption);
+
+	INode *CallMtd = CreateObject(BLD(builder), KType_Method, (void *) mtd);
+	INode *Params[4];
+	Params[0] = CallMtd;
+	Params[1] = NewFunc;
+	Params[2] = NewEnv;
+	Params[3] = MtdObj;
+	builder->Value = CreateICall(BLD(builder), Type, DefaultCall, kNode_uline(expr), Params, 4);
+
+	return true;
+}
 
 /* end of Visitor */
 /*----------------------------------------------------------------------------*/

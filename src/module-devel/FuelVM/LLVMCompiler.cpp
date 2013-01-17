@@ -661,20 +661,15 @@ static void EmitBranch(LLVMIRBuilder *writer, IBranch *Node)
 	builder->CreateCondBr(Val, ThenBB, ElseBB);
 }
 
-static void EmitNewInst(LLVMIRBuilder *writer, INew *Node)
+static GlobalVariable *GetNewKObject()
 {
-	enum TypeId type = Node->base.Type;
-	uintptr_t conf   = Node->Conf;
-	KonohaContext *kctx = writer->kctx;
-	IRBuilder<> *builder = writer->builder;
-
 	GlobalVariable *G;
 	if((G = GlobalModule->getNamedGlobal("FuelVM_new_kObject")) == 0) {
 		std::vector<Type *> Fields;
 		Fields.push_back(ToType(ID_PtrKonohaContextVar));
-		Fields.push_back(builder->getInt64Ty());
-		Fields.push_back(builder->getInt8PtrTy());
-		Fields.push_back(builder->getInt64Ty());
+		Fields.push_back(Type::getInt64Ty(LLVM_CONTEXT()));
+		Fields.push_back(Type::getInt8PtrTy(LLVM_CONTEXT()));
+		Fields.push_back(Type::getInt64Ty(LLVM_CONTEXT()));
 		FunctionType *FnTy = FunctionType::get(ToType(ID_PtrkObjectVar), Fields, false);
 		G = new GlobalVariable(*GlobalModule, FnTy, true,
 				GlobalValue::ExternalLinkage, NULL, "FuelVM_new_kObject");
@@ -682,7 +677,17 @@ static void EmitNewInst(LLVMIRBuilder *writer, INew *Node)
 		GlobalEngine->addGlobalMapping(G, ptr);
 		sys::DynamicLibrary::AddSymbol("FuelVM_new_kObject", ptr);
 	}
+	return G;
+}
 
+static void EmitNewInst(LLVMIRBuilder *writer, INew *Node)
+{
+	enum TypeId type = Node->base.Type;
+	uintptr_t conf   = Node->Conf;
+	KonohaContext *kctx = writer->kctx;
+	IRBuilder<> *builder = writer->builder;
+
+	GlobalVariable *G = GetNewKObject();
 	/* kObject *new_kObject(KonohaContext *, uint64_t, void *, uint64_t); */
 	Value *Vctx = GetContext(writer);
 	Value *Arg1 = EmitConstant(builder, (int64_t)0UL);
@@ -932,7 +937,7 @@ static void EmitNode(LLVMIRBuilder *writer, INode *Node)
 			break;
 		}
 		CASE(IFunction) {
-			assert(0 && "TODO");
+			assert(0 && "unreachable");
 			break;
 		}
 		CASE(IUpdate) {

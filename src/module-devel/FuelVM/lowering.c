@@ -507,7 +507,7 @@ static void CodeWriter_visitValue(Visitor *visitor, INode *Node, const char *Tag
 	RegisterAllocator *Allocator = &writer->RegAllocator;
 	switch(Node->Kind) {
 		CASE(IConstant) {
-			if(Node->Type == KType_Method) {
+			if(Node->Type == TYPE_Method) {
 				/*XXX(ide) Need to Load Method Constant ??? */
 				return;
 			}
@@ -658,7 +658,7 @@ ByteCode *IRBuilder_CompileToLLVMIR(FuelIRBuilder *builder, IMethod *Mtd, int op
 ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option, bool *JITCompiled)
 {
 	ARRAY_init(BlockPtr, &builder->Blocks, 1);
-	bool UseLLVM = Mtd->Method->mn != 0;
+	bool UseLLVM = !(Mtd->Method->typeId == 0 && Mtd->Method->mn == 0);
 
 	KonohaContext *kctx = Mtd->Context;
 	debug("Compiling: %p %s.%s%s\n", Mtd->Method, KType_text(Mtd->Method->typeId), KMethodName_Fmt2(Mtd->Method->mn));

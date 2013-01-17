@@ -128,11 +128,7 @@ static IFunction *newIFunction(FuelIRBuilder *builder)
 	return (Node);
 }
 
-static void disposeIFunction(INode *Node)
-{
-	IFunction *Func = (IFunction *) Node;
-	ARRAY_dispose(INodePtr, &Func->Env);
-}
+#define disposeIFunction disposeINodeImpl
 
 static IUpdate *newIUpdate(FuelIRBuilder *builder, IField *LHS, INode *RHS)
 {

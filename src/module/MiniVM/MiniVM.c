@@ -876,6 +876,13 @@ static kbool_t KBuilder_VisitTryNode(KonohaContext *kctx, KBuilder *builder, kNo
 	return true;
 }
 
+static kbool_t KBuilder_VisitFunctionNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
+{
+	intptr_t a = AssignStack(thunk);
+	abort();/*FIXME*/
+	return true;
+}
+
 static kbool_t KBuilder_VisitThrowNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
 	return false;
