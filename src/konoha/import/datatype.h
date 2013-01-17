@@ -581,6 +581,7 @@ static void kException_Init(KonohaContext *kctx, kObject *o, void *conf)
 	kExceptionVar *e = (kExceptionVar *)o;
 	kString *msg = conf == NULL ? TS_EMPTY : (kString*)conf;
 	KFieldInit(e, e->Message, msg);
+	DBG_ASSERT(IS_String(msg));
 	e->uline  = 0;
 	e->symbol = 0;
 	e->fault  = 0;

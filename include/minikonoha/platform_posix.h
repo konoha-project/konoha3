@@ -829,6 +829,7 @@ static void KBuffer_WriteValue(KonohaContext *kctx, KBuffer *wb, KClass *c, Kono
 
 static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaStack *bottomStack, KonohaStack *topStack)
 {
+	DBG_ASSERT(IS_Exception(e));
 	const char *exceptionName = KSymbol_text(e->symbol);
 	const char *optionalMessage = kString_text(e->Message);
 	int fault = e->fault;
