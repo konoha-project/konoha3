@@ -103,7 +103,7 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn, kNode *expr, kNameSpac
 	}
 	if(!kNode_IsError(expr)) {
 		KDump(expr);
-		expr = SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "undefined typing: %s%s %s", KSymbol_Fmt2(syn->keyword), KToken_t(expr->KeyOperatorToken));
+		expr = SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "undefined typing: %s%s '%s'", KSymbol_Fmt2(syn->keyword), KToken_t(expr->KeyOperatorToken));
 		//DBG_ASSERT(kctx == NULL);
 	}
 	ns->genv->localScope.varsize = varsize;
