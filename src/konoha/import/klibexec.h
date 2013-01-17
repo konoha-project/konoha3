@@ -817,7 +817,7 @@ static kbool_t KRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	memcpy(&lbuf, runtime->evaljmpbuf, sizeof(jmpbuf_i));
 	runtime->bottomStack = sfp;
-	KUnsafeFieldSet(runtime->ThrownException, (kException*)K_NULL);
+	KUnsafeFieldSet(runtime->ThrownException, (kException *)K_NULL);
 	kbool_t result = true;
 	int jumpResult;
 	INIT_GCSTACK();

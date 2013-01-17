@@ -1,8 +1,8 @@
 import("konoha.map");
 import("konoha.new");
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 import("konoha.object");
-//import("konoha.global");
+//import("Syntax.GlobalVariable");
 
 class event {
 	Map a;

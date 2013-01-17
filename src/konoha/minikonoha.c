@@ -61,7 +61,7 @@ static void KRuntimeContext_Init(KonohaContext *kctx, KonohaContextVar *ctx, siz
 		KUnsafeFieldInit(base->stack[i].asObject, K_NULL);
 	}
 	KUnsafeFieldInit(base->ContextConstList, new_(Array, 8, OnField));
-	KUnsafeFieldInit(base->ThrownException, (kException*)K_NULL);
+	KUnsafeFieldInit(base->ThrownException, (kException *)K_NULL);
 	base->gcStack = new_(Array, K_PAGESIZE/sizeof(void *), base->ContextConstList);
 	KLIB KArray_Init(kctx, &base->cwb, K_PAGESIZE * 4);
 	ctx->esp = base->stack;
