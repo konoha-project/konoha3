@@ -974,6 +974,7 @@ struct KRuntimeContextVar {
 #define MOD_konoha     6
 
 #define MOD_exception  5
+#define MOD_APACHE     17
 #define MOD_EVENT      18
 
 struct KRuntimeModule {
