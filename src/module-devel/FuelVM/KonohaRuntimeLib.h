@@ -7,7 +7,7 @@ void FuelVM_KRuntime_raise(KonohaContext *kctx, int symbol, int fault, kString *
 }
 
 
-void FuelVM_UpdateObjectField(KonohaContext *kctx, const struct kObjectVar *parent, const struct kObjectVar *oldPtr, const struct kObjectVar *newVal)
+void FuelVM_UpdateObjectField(KonohaContext *kctx, struct kObjectVar *parent, struct kObjectVar *oldPtr, struct kObjectVar *newVal)
 {
 	PLATAPI UpdateObjectField(parent, oldPtr, newVal);
 }

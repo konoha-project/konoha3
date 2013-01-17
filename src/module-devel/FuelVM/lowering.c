@@ -507,7 +507,7 @@ static void CodeWriter_visitValue(Visitor *visitor, INode *Node, const char *Tag
 	RegisterAllocator *Allocator = &writer->RegAllocator;
 	switch(Node->Kind) {
 		CASE(IConstant) {
-			if(Node->Type == KType_Method) {
+			if(Node->Type == TYPE_Method) {
 				/*XXX(ide) Need to Load Method Constant ??? */
 				return;
 			}
