@@ -529,7 +529,7 @@ static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 	mod->h.name     = "mpi";
 	mod->h.setupModuleContext    = MpiModule_Setup;
 	mod->h.freeModule     = MpiModule_Free;
-	KLIB KRuntime_SetModule(kctx, MOD_mpi, (KRuntimeModule *)mod, trace);
+	KLIB KRuntime_SetModule(kctx, 19/*MOD_mpi*/, (KRuntimeModule *)mod, trace);
 
 	int argc = 0;
 	char *args[1] = {};
