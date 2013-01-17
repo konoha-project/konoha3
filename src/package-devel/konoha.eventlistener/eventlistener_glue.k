@@ -13,8 +13,9 @@ class EventQueue {
 	//Array[KonohaContext] ctxlist;
 
 	EventQueue(void) {
-		this.data = new Event[0];
+		this.data = [];
 		//this.ctxlist = new KonohaContext[0];
+		return this;
 	}
 
 	void enqueue(Event event) {
@@ -58,6 +59,7 @@ class EventMap { // temporally
 	EventMap() {
 		this.keyToIndexMap = new Json();
 		this.values = [];
+		return this; // TODO remove it
 	}
 
 	@Public void set(String key, Func[void, Event] func) {
@@ -81,6 +83,7 @@ class Dispatcher {
 		this.handlers = new EventMap();
 		this.queue = new EventQueue();
 		this.lock = new Mutex();
+		return this; // TODO remove it
 	}
 
 	@Public void setCallBack(String eventType, Func[void, Event] func) {
