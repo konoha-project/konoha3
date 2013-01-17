@@ -1,0 +1,2 @@
+set(PACKAGE_SOURCE_CODE ClosureModel_glue.c)
+add_konoha_package(MiniKonoha.ClosureModel)

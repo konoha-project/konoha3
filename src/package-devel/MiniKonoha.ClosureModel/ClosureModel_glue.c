@@ -33,6 +33,8 @@
 extern "C" {
 #endif
 
+/* ------------------------------------------------------------------------ */
+/* ClosureModel */
 static KMETHOD KMethodFunc_ObjectFunctionGetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].calledMethod->delta;
@@ -254,8 +256,7 @@ static kMethod *CompileClosure(KonohaContext *kctx, kNameSpace *ns, kNode *expr,
 }
 
 /* ------------------------------------------------------------------------ */
-/* Function */
-static KMETHOD TypeCheck_Function(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(expr, ns, reqc);
 	kNode *texpr = K_NULLNODE;
@@ -294,12 +295,13 @@ static KMETHOD TypeCheck_Function(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(texpr);
 }
 
-// --------------------------------------------------------------------------
-static kbool_t Function_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
-{
 
+
+// --------------------------------------------------------------------------
+static kbool_t ClosureModel_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
+{
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_("function"), SYNFLAG_CTypeFunc, 0, Precedence_CStyleAssign, {SUGAR patternParseFunc}, {SUGARFUNC TypeCheck_Function}},
+		{ KSymbol_("function"), SYNFLAG_CTypeFunc, 0, Precedence_CStyleAssign, {SUGAR patternParseFunc}, {SUGARFUNC TypeCheck_Closure}},
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
@@ -310,21 +312,20 @@ static kbool_t Function_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
-
 	return true;
 }
 
-static kbool_t Function_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
+static kbool_t ClosureModel_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
 
-KDEFINE_PACKAGE *Function_Init(void)
+KDEFINE_PACKAGE *ClosureModel_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "Function", "0.0");
-	d.PackupNameSpace = Function_PackupNameSpace;
-	d.ExportNameSpace = Function_ExportNameSpace;
+	KSetPackageName(d, "ClosureModel", "0.0");
+	d.PackupNameSpace = ClosureModel_PackupNameSpace;
+	d.ExportNameSpace = ClosureModel_ExportNameSpace;
 	return &d;
 }
 

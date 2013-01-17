@@ -38,7 +38,7 @@ extern "C" {
 /* ------------------------------------------------------------------------- */
 DEF_ARRAY_OP_NOPOINTER(BlockPtr);
 
-#define debug(FMT, ...) fprintf(stderr, FMT, ## __VA_ARGS__)
+#define debug(FMT, ...) /*fprintf(stderr, FMT, ## __VA_ARGS__)*/
 
 /* ------------------------------------------------------------------------- */
 /* [Dump IR] */

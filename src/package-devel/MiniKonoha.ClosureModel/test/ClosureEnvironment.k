@@ -1,4 +1,4 @@
-import("JavaScript.Function");
+import("MiniKonoha.ClosureModel");
 
 Func[int, int] f() {
 	int y = 0;
