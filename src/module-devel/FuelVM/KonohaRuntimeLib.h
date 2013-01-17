@@ -7,18 +7,16 @@ void FuelVM_KRuntime_raise(KonohaContext *kctx, int symbol, int fault, kString *
 }
 
 
-void FuelVM_UpdateObjectField(KonohaContext *kctx, const struct kObjectVar *parent, const struct kObjectVar *oldPtr, const struct kObjectVar *newVal)
+void FuelVM_UpdateObjectField(KonohaContext *kctx, struct kObjectVar *parent, struct kObjectVar *oldPtr, struct kObjectVar *newVal)
 {
 	PLATAPI UpdateObjectField(parent, oldPtr, newVal);
 }
 
-//kObject* (*new_kObject)(KonohaContext*, kArray *gcstack, KClass *, uintptr_t);
 kObject *FuelVM_new_kObject(KonohaContext *kctx, uint64_t gcstack, void *ct, uint64_t conf)
 {
 	KClass *kclass = (KClass *) ct;
 	return KLIB new_kObject(kctx, 0, kclass, (uintptr_t) conf);
 }
-
 
 kMethod *FuelVM_LookupMethod(KonohaContext *kctx, kObject *self, kMethod *mtd, kNameSpace *ns)
 {

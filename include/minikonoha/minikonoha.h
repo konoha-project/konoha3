@@ -544,6 +544,7 @@ struct KObjectVisitor *visitor;
 
 typedef enum {
 	DefineBasicTypeList(TypeEnumMacro)
+	KType_ERROR = -1 /*  sentinel */
 } KType_;
 
 DefineBasicTypeList(TypeDefMacro)
@@ -683,8 +684,8 @@ struct KonohaFactory {
 	struct kObjectVar *(*AllocObject)(KonohaContext *kctx, size_t size, KTraceInfo *);
 	kbool_t (*IsKonohaObject)(KonohaContext *kctx, void *ptr);
 	void  (*VisitObject)(struct KObjectVisitor *visitor, struct kObjectVar *obj);
-	void  (*WriteBarrier)(KonohaContext *, const struct kObjectVar *);
-	void  (*UpdateObjectField)(const struct kObjectVar *parent, const struct kObjectVar *oldPtr, const struct kObjectVar *newVal);
+	void  (*WriteBarrier)(KonohaContext *, struct kObjectVar *);
+	void  (*UpdateObjectField)(struct kObjectVar *parent, struct kObjectVar *oldPtr, struct kObjectVar *newVal);
 
 	/* Event Handler API */
 	KModuleInfo *EventInfo;
@@ -974,10 +975,8 @@ struct KRuntimeContextVar {
 #define MOD_konoha     6
 
 #define MOD_exception  5
-#define MOD_REGEXP     16
 #define MOD_APACHE     17
 #define MOD_EVENT      18
-#define MOD_mpi        19
 
 struct KRuntimeModule {
 	const char *name;

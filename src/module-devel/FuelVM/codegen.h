@@ -195,7 +195,9 @@ typedef struct ICall {
 /*$ Any  Function { [Symbol] } */
 typedef struct IFunction {
 	INode base;
-	ARRAY(INodePtr) Env;
+	INode *Func;
+	INode *Env;
+	INode *Method;
 	uintptr_t uline;
 } IFunction;
 
@@ -529,6 +531,17 @@ static inline INode *CreateICall(FuelIRBuilder *builder, enum TypeId Type, enum 
 	INode *C = FoldInst(builder, Node);
 	if(C != NULL)
 		Node = C;
+	IRBuilder_add(builder, Node);
+	return Node;
+}
+
+static inline INode *CreateIFunction(FuelIRBuilder *builder, enum TypeId Type, INode *Func, INode *EnvObj, INode *MtdObj)
+{
+	INode *Node = (INode *) builder->API->newFunction(builder);
+	INode_setType(Node, Type);
+	((IFunction *)Node)->Func   = Func;
+	((IFunction *)Node)->Env    = EnvObj;
+	((IFunction *)Node)->Method = MtdObj;
 	IRBuilder_add(builder, Node);
 	return Node;
 }

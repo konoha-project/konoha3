@@ -107,7 +107,11 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 		if(kNameSpace_InitGlobalObject(kctx, ns, trace)) {
 			kToken *tk  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
 			kNode  *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
-			SUGAR kNode_DeclType(kctx, stmt, ns, tk->resolvedTypeId, expr, ns->globalObjectNULL, TypeDeclAndMakeSetter);
+			ktypeattr_t attrTypeId = Token_typeLiteral(tk);
+			if(kNode_isSymbolTerm(expr) && attrTypeId == KType_void) {
+				KReturn(K_NULLNODE);
+			}
+			SUGAR kNode_DeclType(kctx, stmt, ns, attrTypeId, expr, ns->globalObjectNULL, TypeDeclAndMakeSetter);
 			KReturn(stmt);
 		}
 	}
@@ -115,20 +119,26 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	kSyntax *assignSyntax = kSyntax_(KNULL(NameSpace), KSymbol_TypeDeclPattern);
+#define PATTERN(X) KSymbol_##X##Pattern
+	kSyntax *assignSyntax = kSyntax_(KNULL(NameSpace), PATTERN(TypeDecl));
+	kSyntax *methodDeclSyntax = kSyntax_(KNULL(NameSpace), PATTERN(MethodDecl));
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_TypeDeclPattern, SYNFLAG_MetaPattern, 0, 0, {assignSyntax->ParseFuncNULL}, {KSugarFunc(ns, Statement_GlobalTypeDecl)}},
+		{ PATTERN(TypeDecl), SYNFLAG_MetaPattern|SYNFLAG_CTypeFunc, 0, 0, {assignSyntax->ParseFuncNULL}, {SUGARFUNC Statement_GlobalTypeDecl}},
+		{ PATTERN(MethodDecl), SYNFLAG_MetaPattern, 0, 0, {methodDeclSyntax->ParseFuncNULL}, {methodDeclSyntax->TypeFuncNULL}},
 		{ KSymbol_END, }, /* sentinental */
 	};
+
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	kSyntax *newSyntax = kSyntax_(ns, KSymbol_TypeDeclPattern);
-	KFieldInit(newSyntax, ((kSyntaxVar *)newSyntax)->syntaxPatternListNULL, assignSyntax->syntaxPatternListNULL);
+	kSyntaxVar *NewAssignSyntax     = (kSyntaxVar *) kSyntax_(ns, PATTERN(TypeDecl));
+	kSyntaxVar *NewMethodDeclSyntax = (kSyntaxVar *) kSyntax_(ns, PATTERN(MethodDecl));
+	KFieldInit(NewAssignSyntax, NewAssignSyntax->syntaxPatternListNULL, assignSyntax->syntaxPatternListNULL);
+	KFieldInit(NewMethodDeclSyntax, NewMethodDeclSyntax->syntaxPatternListNULL, methodDeclSyntax->syntaxPatternListNULL);
 	return true;
 }
 
 // -------
 
-static	kbool_t global_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
+static kbool_t global_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KImportPackage(ns, "MiniKonoha.ObjectModel", trace);
 	global_defineMethod(kctx, ns, trace);

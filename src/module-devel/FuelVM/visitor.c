@@ -110,7 +110,7 @@ static void visitICall(Visitor *visitor, INode *Node)
 static void visitIFunction(Visitor *visitor, INode *Node)
 {
 	IFunction *Func = (IFunction *) Node;
-	VISIT_N(Node, 0, Func->Env);
+	VISIT_3(Node, 0, Func->Func, Func->Env, Func->Method);
 }
 
 static void visitIUpdate(Visitor *visitor, INode *Node)

@@ -390,9 +390,13 @@ static void RewriteNode(INode *Node, ARRAY(INodePtr) *stack)
 		case IR_TYPE_ICall:
 			ReplaceArrayElementWith(&((ICall *)Node)->Params, stack);
 			break;
-		case IR_TYPE_IFunction:
-			ReplaceArrayElementWith(&((IFunction *)Node)->Env, stack);
+		case IR_TYPE_IFunction: {
+			IFunction *Inst = (IFunction *) Node;
+			ReplaceValue((INode **)&(Inst->Func), stack);
+			ReplaceValue((INode **)&(Inst->Env), stack);
+			ReplaceValue((INode **)&(Inst->Method), stack);
 			break;
+		}
 		CASE(IUpdate) {
 			IUpdate *Inst = (IUpdate *) Node;
 			ReplaceValue((INode **)&(Inst->RHS), stack);

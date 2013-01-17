@@ -431,6 +431,7 @@ typedef kshort_t       knode_t;
 	OP(Continue)\
 	OP(Try)\
 	OP(Throw)\
+	OP(Function)\
 	OP(Error)
 
 #define DEFINE_KNode(NAME) KNode_##NAME,
