@@ -36,12 +36,14 @@ extern "C" {
 typedef struct CEvent_base {
 	kObjectHeader h;
 	struct event_base *event_base;
+	KonohaContext *kctx;
 } kCEvent_base;
 
 static void CEvent_base_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct CEvent_base *ev = (struct CEvent_base *) o;
 	ev->event_base = NULL;
+	ev->kctx = NULL;
 }
 
 static void CEvent_base_Free(KonohaContext *kctx, kObject *o)
@@ -51,6 +53,7 @@ static void CEvent_base_Free(KonohaContext *kctx, kObject *o)
 	if (ev->event_base != NULL) {
 		event_base_free(ev->event_base);
 		ev->event_base = NULL;
+		ev->kctx = NULL;
 	}
 }
 
@@ -58,7 +61,12 @@ static void CEvent_base_Free(KonohaContext *kctx, kObject *o)
 static KMETHOD CEvent_base_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCEvent_base *ev = (kCEvent_base *)sfp[0].asObject;
-	ev->event_base = event_base_new();
+	if (ev->event_base == NULL) {
+		ev->event_base = event_base_new();
+		ev->kctx = kctx;
+	} else {
+		// TODO: throw exception ?
+	}
 	KReturn(ev);
 }
 
@@ -70,18 +78,76 @@ static KMETHOD CEvent_base_dispatch(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
+/*
+ * 1st stage callback from event_base_dispatch(), NEVER BE CALLED FROM OTHERS.
+ */
+static bool callback_1st(evutil_socket_t evd, short event, void *arg) {
+	CEvent *cbArg = arg;
+
+	ev_base.eventMap.get(
+
+
+	//CEvent ev = event_Map.get(key) as CEvent;
+
+
+	BEGIN_UnusedStack(lsfp);
+	KUnsafeFieldSet(lsfp[0].asObject, K_NULL);
+	KUnsafeFieldSet(lsfp[1].asObject, (kObject *)ev);
+	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, KonohaContext_getEventContext(kctx)->enqFuncNULL, 1);
+	KStackCall(lsfp);
+	END_UnusedStack();
+
+
+
+
+
+
+	--- copy from src/parser/import/eval.h ---
+
+	BEGIN_UnusedStack(lsfp);
+	KRuntimeContextVar *runtime = kctx->stack;
+	if(runtime->evalty != KType_void) {
+		KUnsafeFieldSet(lsfp[1].asObject, runtime->stack[runtime->evalidx].asObject);
+		lsfp[1].intValue = runtime->stack[runtime->evalidx].intValue;
+	}
+	KStackSetMethodAll(lsfp, KLIB Knull(kctx, KClass_(rtype)), uline, mtd, 1);
+	kstatus_t result = K_CONTINUE;
+	if(KLIB KRuntime_tryCallMethod(kctx, lsfp)) {
+		runtime->evalidx = ((lsfp + K_RTNIDX) - kctx->stack->stack);
+		runtime->evalty = rtype;
+	}
+	else {
+		runtime->evalty = KType_void;  // no value
+		result = K_BREAK;        // message must be reported;
+	}
+	END_UnusedStack();
+	return result;
+
+	--- end of copy ---
+
+
+
+}
+
 
 /* ======================================================================== */
 // CEvent class
+
 typedef struct CEvent {
 	kObjectHeader h;
 	struct event *event;
+	kEvent_base *evBase;
+	kFunc *kcb;		// konoha call back method	
+	kObject *arg;	// arg to be passed konoha callback-method
 } kCEvent;
 
 static void CEvent_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct CEvent *ev = (struct CEvent *) o;
 	ev->event = NULL;
+	ev->evBase = NULL;
+	ev->kcb = NULL;
+	ev->arg = NULL;
 }
 
 static void CEvent_Free(KonohaContext *kctx, kObject *o)
@@ -91,20 +157,57 @@ static void CEvent_Free(KonohaContext *kctx, kObject *o)
 	if (ev->event != NULL) {
 		event_free(ev->event);
 		ev->event = NULL;
+		ev->evBase = NULL;
+		ev->kcb = NULL;
+		ev->arg = NULL;
 	}
 }
 
-//## CEvent CEvent.new(CEvent_base event_base, int fd, int what, );
+//## CEvent CEvent.new(CEvent_base event_base, String key, int evd, int event, Func[void, Object cb, TimeVal timout);
 static KMETHOD CEvent_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct CEvent *ev = (struct CEvent *) sfp[0].asObject;
-	struct CEvent_base *libevent = (struct CEvent_base *)sfp[1].asObject;
-	evutil_socket_t fd = (evutil_socket_t)sfp[2].intValue;
-	kint_t what = sfp[3].intValue;
-	event_callback_fn cb = (event_callback_fn)sfp[4].asFunc;	//TODO from eventListener package
-	void *arg = (void *)sfp[5].asObject;
-	ev->event = event_new(libevent->event_base, fd, (short)what, cb, arg);
+	struct CEvent_base *cEvent_base = (struct CEvent_base *)sfp[1].asObject;
+	kString *key = (kString *) sfp[2].asString;
+	evutil_socket_t evd = (evutil_socket_t)sfp[3].intValue;
+	short event = (short)sfp[4].intValue;
+	kFunc *konoha_cb = (kFunc *)sfp[5].asFunc;
+	struct TimeVal timout = (struct TimeVal)sft[6].asObject;
+
+	ev->event = event_new(cEvent_base->event_base, evd, event, callback_1st, this);
+	ev->evBase = cEvent_base;
+	ev->key = key;
+	ev->arg = arg;
+	//event_add() will call in EventBase.event_add() after return this method
 	KReturn(ev);
+}
+
+/* ======================================================================== */
+// TimeVal class
+
+#include <sys/time.h>
+
+typedef struct TimeVal {
+	kObjectHeader h;
+	struct timeval timeval;
+} kTimeVal;
+
+static void TimeVal_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	struct TimeVal *tv = (struct TimeVal *) o;
+	tv->timeval.tv_sec = 0;
+	tv->timeval.tv_usec = 0;
+}
+
+//## TimeVal TimeVal.new(int tv_sec, int tv_usec);
+static KMETHOD TimeVal_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct TimeVal *tv = (struct TimeVal *) sfp[0].asObject;
+	time_t sec = (time_t)sfp[1].intValue;
+	suseconds_t usec = (suseconds_t)sfp[2].intValue;
+	tv->timeval.tv_sec = sec;
+	tv->timeval.tv_usec = usec;
+	KReturn(tv);
 }
 
 
@@ -143,6 +246,7 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 {
 	/* Class Definition */
 	/* If you want to create Generic class like Array<T>, see konoha.map package */
+	// CEvent_base
 	KDEFINE_CLASS defCEvent_base = {0};
 	SETSTRUCTNAME(defCEvent_base, CEvent_base);
 	//defCEvent_base.cflag     = KClassFlag_Final;
@@ -150,6 +254,7 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	defCEvent_base.free      = CEvent_base_Free;
 	KClass *CEvent_baseClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCEvent_base, trace);
 
+	// CEvent
 	KDEFINE_CLASS defCEvent = {0};
 	SETSTRUCTNAME(defCEvent, CEvent);
 	defCEvent.cflag     = KClassFlag_Final;
@@ -157,26 +262,52 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	defCEvent.free      = CEvent_Free;
 	KClass *CEventClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCEvent, trace);
 
+	// TimeVal
+	KDEFINE_CLASS defTimeVal = {0};
+	SETSTRUCTNAME(defTimeVal, TimeVal);
+	defTimeVal.cflag     = KClassFlag_Final;
+	defTimeVal.init      = TimeVal_Init;
+	KClass *TimeValClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defTimeVal, trace);
+
 
 	/* You can define methods with the following procedures. */
 	int KType_CEvent_base = CEvent_baseClass->typeId;
 	int KType_CEvent = CEventClass->typeId;
+	int KType_TimeVal = TimeValClass->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(CEvent_base_new), KType_CEvent_base, KType_CEvent_base, KMethodName_("new"), 0,
-		_Public, _F(CEvent_base_dispatch), KType_CEvent_base, KType_CEvent_base, KMethodName_("dispatch"), 0,
+		// System class
 		_Public|_Static|_Const|_Im, _F(System_event_add), KType_int, KType_System, KMethodName_("event_add"), 2, KType_Object, KFieldName_("CEvent"), KType_Object, KFieldName_("timeval"),	//TODO: param type should be "KType_CEvent" "KType_Date"
 		_Public|_Static|_Const|_Im, _F(System_event_del), KType_int, KType_System, KMethodName_("event_del"), 1, KType_Object, KFieldName_("CEvent"),	//TODO: param type should be "KType_CEvent"
 
-		_Public, _F(CEvent_new), KType_CEvent, KType_CEvent, KMethodName_("new"), 0,
+		// CEvent_base
+		_Public, _F(CEvent_base_new), KType_CEvent_base, KType_CEvent_base, KMethodName_("new"), 0,
+		_Public, _F(CEvent_base_dispatch), KType_CEvent_base, KType_CEvent_base, KMethodName_("dispatch"), 0,
 
+		// CEvent
+		_Public, _F(CEvent_new), KType_CEvent, KType_CEvent, KMethodName_("new"), 5, KType_CEvent_base, KFieldName_("Event_base"), KType_int, KFieldName_("fd"), KType_int, KFieldName_("event"), KType_Func, KFieldName_("cb"), KType_int /*TODO: (void *) */, KFieldName_("arg"),
 
-#ifdef	CUTCUT
-		_Public, _F(Person_say), KType_String, KType_Person, KMethodName_("say"), 0,
-#endif
+		// TimeVal
+		_Public, _F(TimeVal_new), KType_TimeVal, KType_TimeVal, KMethodName_("new"), 2, KType_int, KFieldName_("tvSec"), KType_int, KFieldName_("tvUsec"),
+
 		DEND, /* <= sentinel */
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
+
+
+	KDEFINE_INT_CONST IntData[] = {
+		//for event_new()
+		{KDefineConstInt(EV_TIMEOUT)},
+		{KDefineConstInt(EV_READ)},
+		{KDefineConstInt(EV_WRITE)},
+		{KDefineConstInt(EV_SIGNAL)},
+		{KDefineConstInt(EV_PERSIST)},
+		{KDefineConstInt(EV_ET)},
+
+		//TODO add other constants
+	};
+
+	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
 
 	return true;
 }

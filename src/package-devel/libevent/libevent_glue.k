@@ -27,20 +27,25 @@ import("konoha.class");
 import("konoha.object");
 import("konoha.map");
 import("cstyle", "null");
-import("js4.date");
 
 class Event_base extends CEvent_base {
-	Map event_Map;
+	//Map eventMap;
 
 	Event_base() {
-		event_Map =  = new Map();
+		//eventMap =  = new Map();
 	}
 
-	@Public int event_add(String key, Date tv) {
+	@Public int event_add(String key, int evd, int event, Func[void, Object] cb, TimeVal tv) {
 		if (key.isNotNull()) {
-			this.event_Map.set(key, new CEvent());
+			System.event_del()	//TODO delete old event
+			eventMap.remove()
+			System.p("---overwrite old event set---");
 		}
-		CEvent ev = event_Map.get(key) as CEvent;
+		CEvent ev = new CEvent(this, key, evd, event, cb);
+		this.event_Map.set(key, ev);
 		return System.event_add(ev, tv);
 	}
+
+	//@Public int event_add(String key, int evd, int event
+	//TODO 				, int timout_set, int timout_usec)
 }
