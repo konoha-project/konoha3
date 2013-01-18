@@ -29,23 +29,29 @@ import("konoha.map");
 import("cstyle", "null");
 
 class Event_base extends CEvent_base {
-	//Map eventMap;
+	Map eventMap;
 
 	Event_base() {
-		//eventMap =  = new Map();
+		eventMap = new Map();
 	}
 
 	@Public int event_add(String key, int evd, int event, Func[void, Object] cb, TimeVal tv) {
 		if (key.isNotNull()) {
-			System.event_del()	//TODO delete old event
-			eventMap.remove()
-			System.p("---overwrite old event set---");
-		}
-		CEvent ev = new CEvent(this, key, evd, event, cb);
-		this.event_Map.set(key, ev);
-		return System.event_add(ev, tv);
+			CEvent ev = new CEvent(this, key, evd, event, cb);
+			eventMap.set(key, ev);	//keep Object reference
+			return System.event_add(ev, tv);
+		} 
+		return -1;	// event_add() error status of libevent
 	}
 
+	//TODO
 	//@Public int event_add(String key, int evd, int event
-	//TODO 				, int timout_set, int timout_usec)
+	// 				, int timout_set, int timout_usec)
+	//{}
+
+	@Public int event_del(String key) {
+		CEvent ev = event_Map.get(key) as CEvent;
+		eventMap.remove(key);
+		return System.event_del(ev);
+	}
 }

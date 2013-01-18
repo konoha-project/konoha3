@@ -39,6 +39,21 @@ typedef struct CEvent_base {
 	KonohaContext *kctx;
 } kCEvent_base;
 
+typedef struct CEvent {
+	kObjectHeader h;
+	kString *key;
+	struct event *event;
+	kCEvent_base *evBase;
+	kFunc *kcb;		// konoha call back method	
+	kObject *arg;	// arg to be passed konoha callback-method
+} kCEvent;
+
+#include <sys/time.h>
+typedef struct TimeVal {
+	kObjectHeader h;
+	struct timeval timeval;
+} kTimeVal;
+
 static void CEvent_base_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct CEvent_base *ev = (struct CEvent_base *) o;
@@ -49,7 +64,6 @@ static void CEvent_base_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void CEvent_base_Free(KonohaContext *kctx, kObject *o)
 {
 	struct CEvent_base *ev = (struct CEvent_base *) o;
-
 	if (ev->event_base != NULL) {
 		event_base_free(ev->event_base);
 		ev->event_base = NULL;
@@ -81,65 +95,23 @@ static KMETHOD CEvent_base_dispatch(KonohaContext *kctx, KonohaStack *sfp)
 /*
  * 1st stage callback from event_base_dispatch(), NEVER BE CALLED FROM OTHERS.
  */
-static bool callback_1st(evutil_socket_t evd, short event, void *arg) {
-	CEvent *cbArg = arg;
-
-	ev_base.eventMap.get(
-
-
-	//CEvent ev = event_Map.get(key) as CEvent;
-
+static void callback_1st(evutil_socket_t evd, short event, void *arg) {
+	kCEvent *cbArg = arg;
+	KonohaContext *kctx = cbArg->evBase->kctx;
 
 	BEGIN_UnusedStack(lsfp);
+	KClass *returnType = kMethod_GetReturnType(cbArg->kcb->method);
 	KUnsafeFieldSet(lsfp[0].asObject, K_NULL);
-	KUnsafeFieldSet(lsfp[1].asObject, (kObject *)ev);
-	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, KonohaContext_getEventContext(kctx)->enqFuncNULL, 1);
+	KUnsafeFieldSet(lsfp[1].asObject, cbArg->arg);
+
+	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, cbArg->kcb, 1);
 	KStackCall(lsfp);
 	END_UnusedStack();
-
-
-
-
-
-
-	--- copy from src/parser/import/eval.h ---
-
-	BEGIN_UnusedStack(lsfp);
-	KRuntimeContextVar *runtime = kctx->stack;
-	if(runtime->evalty != KType_void) {
-		KUnsafeFieldSet(lsfp[1].asObject, runtime->stack[runtime->evalidx].asObject);
-		lsfp[1].intValue = runtime->stack[runtime->evalidx].intValue;
-	}
-	KStackSetMethodAll(lsfp, KLIB Knull(kctx, KClass_(rtype)), uline, mtd, 1);
-	kstatus_t result = K_CONTINUE;
-	if(KLIB KRuntime_tryCallMethod(kctx, lsfp)) {
-		runtime->evalidx = ((lsfp + K_RTNIDX) - kctx->stack->stack);
-		runtime->evalty = rtype;
-	}
-	else {
-		runtime->evalty = KType_void;  // no value
-		result = K_BREAK;        // message must be reported;
-	}
-	END_UnusedStack();
-	return result;
-
-	--- end of copy ---
-
-
-
 }
 
 
 /* ======================================================================== */
 // CEvent class
-
-typedef struct CEvent {
-	kObjectHeader h;
-	struct event *event;
-	kEvent_base *evBase;
-	kFunc *kcb;		// konoha call back method	
-	kObject *arg;	// arg to be passed konoha callback-method
-} kCEvent;
 
 static void CEvent_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
@@ -163,7 +135,7 @@ static void CEvent_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-//## CEvent CEvent.new(CEvent_base event_base, String key, int evd, int event, Func[void, Object cb, TimeVal timout);
+//## CEvent CEvent.new(CEvent_base event_base, String key, int evd, int event, Func[void, Object cb);
 static KMETHOD CEvent_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct CEvent *ev = (struct CEvent *) sfp[0].asObject;
@@ -172,25 +144,18 @@ static KMETHOD CEvent_new(KonohaContext *kctx, KonohaStack *sfp)
 	evutil_socket_t evd = (evutil_socket_t)sfp[3].intValue;
 	short event = (short)sfp[4].intValue;
 	kFunc *konoha_cb = (kFunc *)sfp[5].asFunc;
-	struct TimeVal timout = (struct TimeVal)sft[6].asObject;
 
-	ev->event = event_new(cEvent_base->event_base, evd, event, callback_1st, this);
+	ev->event = event_new(cEvent_base->event_base, evd, event, callback_1st, ev);
 	ev->evBase = cEvent_base;
 	ev->key = key;
-	ev->arg = arg;
+	ev->kcb = konoha_cb;
+	ev->arg = (kObject *)ev;
 	//event_add() will call in EventBase.event_add() after return this method
 	KReturn(ev);
 }
 
 /* ======================================================================== */
 // TimeVal class
-
-#include <sys/time.h>
-
-typedef struct TimeVal {
-	kObjectHeader h;
-	struct timeval timeval;
-} kTimeVal;
 
 static void TimeVal_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
@@ -216,26 +181,17 @@ static KMETHOD TimeVal_new(KonohaContext *kctx, KonohaStack *sfp)
 //## int System.event_add(CEvent_base event, Date tv);
 KMETHOD System_event_add(KonohaContext *kctx, KonohaStack* sfp)
 {
-#define Declare_kDate
-#ifdef Declare_kDate	//TODO:It should be declared in headerfile in js4.date package.
-	typedef struct kDateVar {
-		kObjectHeader h;
-		struct timeval tv;
-	} kDate;
-#endif	//Declare_kDate
-#undef Declare_kDate
-
-	kCEvent *ev = (kCEvent *)sfp[1].asObject;
-	kDate *date = (kDate *)sfp[2].asObject;
-	int ret = event_add(ev->event, &date->tv);
+	kCEvent *kcev = (kCEvent *)sfp[1].asObject;
+	kTimeVal *tv = (kTimeVal *)sfp[2].asObject;
+	int ret = event_add(kcev->event, &tv->timeval);
 	KReturnUnboxValue(ret);
 }
 
 //## int System.event_del(CEvent event);
 KMETHOD System_event_del(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kCEvent *ev = (kCEvent *)sfp[1].asObject;
-	int ret = event_del(ev->event);
+	kCEvent *kcev = (kCEvent *)sfp[1].asObject;
+	int ret = event_del(kcev->event);
 	KReturnUnboxValue(ret);
 }
 
