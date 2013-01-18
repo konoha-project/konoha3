@@ -84,8 +84,8 @@ static KMETHOD CEvent_base_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(ev);
 }
 
-//## CEvent_base CEvent_base.dispatch();
-static KMETHOD CEvent_base_dispatch(KonohaContext *kctx, KonohaStack *sfp)
+//## CEvent_base CEvent_base.event_dispatch();
+static KMETHOD CEvent_base_event_dispatch(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCEvent_base *ev = (kCEvent_base *)sfp[0].asObject;
 	int ret = event_base_dispatch(ev->event_base);
@@ -142,8 +142,8 @@ static KMETHOD CEvent_new(KonohaContext *kctx, KonohaStack *sfp)
 	struct CEvent_base *cEvent_base = (struct CEvent_base *)sfp[1].asObject;
 	kString *key = (kString *) sfp[2].asString;
 	evutil_socket_t evd = (evutil_socket_t)sfp[3].intValue;
-	short event = (short)sfp[4].intValue;
-	kFunc *konoha_cb = (kFunc *)sfp[5].asFunc;
+	short event = (short)(sfp[4].intValue & 0xffff);
+	kFunc *konoha_cb = sfp[5].asFunc;
 
 	ev->event = event_new(cEvent_base->event_base, evd, event, callback_1st, ev);
 	ev->evBase = cEvent_base;
@@ -238,10 +238,10 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 
 		// CEvent_base
 		_Public, _F(CEvent_base_new), KType_CEvent_base, KType_CEvent_base, KMethodName_("new"), 0,
-		_Public, _F(CEvent_base_dispatch), KType_CEvent_base, KType_CEvent_base, KMethodName_("dispatch"), 0,
+		_Public, _F(CEvent_base_event_dispatch), KType_CEvent_base, KType_CEvent_base, KMethodName_("event_dispatch"), 0,
 
 		// CEvent
-		_Public, _F(CEvent_new), KType_CEvent, KType_CEvent, KMethodName_("new"), 5, KType_CEvent_base, KFieldName_("Event_base"), KType_int, KFieldName_("fd"), KType_int, KFieldName_("event"), KType_Func, KFieldName_("cb"), KType_int /*TODO: (void *) */, KFieldName_("arg"),
+		_Public, _F(CEvent_new), KType_CEvent, KType_CEvent, KMethodName_("new"), 5, KType_CEvent_base, KFieldName_("Event_base"), KType_String, KFieldName_("key"), KType_int, KFieldName_("evd"), KType_int, KFieldName_("event"), KType_Func, KFieldName_("konoha_CB"),
 
 		// TimeVal
 		_Public, _F(TimeVal_new), KType_TimeVal, KType_TimeVal, KMethodName_("new"), 2, KType_int, KFieldName_("tvSec"), KType_int, KFieldName_("tvUsec"),
@@ -251,6 +251,7 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 
+#ifdef TESTCUT
 	KDEFINE_INT_CONST IntData[] = {
 		//for event_new()
 		{KDefineConstInt(EV_TIMEOUT)},
@@ -264,6 +265,7 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	};
 
 	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
+#endif	// TESTCUT
 
 	return true;
 }
