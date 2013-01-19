@@ -209,6 +209,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kNameSpace_GetSyntax         = kNameSpace_GetSyntax;
 	mod->kSyntax_AddPattern  = kSyntax_AddPattern;
 	mod->kNameSpace_AddSyntax         = kNameSpace_AddSyntax;
+	mod->kNameSpace_UseDefaultVirtualMachine = kNameSpace_UseDefaultVirtualMachine;
 //	mod->kNameSpace_AddSugarFunc      = kNameSpace_AddSugarFunc;
 //	mod->new_BlockNode                = new_BlockNode2;
 	mod->kNode_InsertAfter            = kNode_InsertAfter;
