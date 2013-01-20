@@ -26,7 +26,6 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/import/methoddecl.h>
 #include <event2/event.h>
-#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,12 +75,13 @@ static void CEvent_base_Free(KonohaContext *kctx, kObject *o)
 static KMETHOD CEvent_base_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCEvent_base *ev = (kCEvent_base *)sfp[0].asObject;
-	if (ev->event_base == NULL) {
-		ev->event_base = event_base_new();
-		ev->kctx = kctx;
-	} else {
-		// TODO: throw exception ?
-	}
+	/*
+	TODO
+	I don't know why, it is "ev->event_base != null" at here.
+	Is it correct execution?
+	*/
+	ev->event_base = event_base_new();
+	ev->kctx = kctx;
 	KReturn(ev);
 }
 
@@ -146,9 +146,7 @@ static KMETHOD CEvent_new(KonohaContext *kctx, KonohaStack *sfp)
 	short event = (short)(sfp[4].intValue & 0xffff);
 	kFunc *konoha_cb = sfp[5].asFunc;
 
-	printf("cEvent_base->event_base:%p, evd:%d, event:%#x, callback_1st:%p, ev:%p\n", cEvent_base->event_base, evd, event, callback_1st, ev);
 	ev->event = event_new(cEvent_base->event_base, evd, event, callback_1st, ev);
-	printf("ev->event = %p in CEvent_new\n", ev->event);
 	ev->evBase = cEvent_base;
 	ev->key = key;
 	ev->kcb = konoha_cb;
@@ -185,9 +183,7 @@ static KMETHOD System_event_add(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kCEvent *kcev = (kCEvent *)sfp[1].asObject;
 	kTimeVal *tv = (kTimeVal *)sfp[2].asObject;
-	printf("kcev->event = %p in System_event_add\n", kcev->event);
 	int ret = event_add(kcev->event, &tv->timeval);
-	printf("System_event_add 2\n");
 	KReturnUnboxValue(ret);
 }
 

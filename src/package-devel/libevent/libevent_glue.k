@@ -30,17 +30,15 @@ import("cstyle", "null");
 
 class Event_base extends CEvent_base {
 	Map eventMap;
-	CEvent_base cbase;
 
 	Event_base() {
 		eventMap = new Map();
-		cbase = new CEvent_base();
 	}
 
 	@Public int event_add(String key, int evd, int event, Func[void] cb, TimeVal tv) {
 		if (key.isNotNull()) {
-			CEvent ev = new CEvent(cbase, key, evd, event, cb);
-			eventMap.set(key, ev);	//keep Object reference
+			CEvent ev = new CEvent(this, key, evd, event, cb);
+			//eventMap.set(key, ev);	//keep Object reference	----- SEGV
 			int ret =  System.event_add(ev, tv);
 			return ret;
 		} 
