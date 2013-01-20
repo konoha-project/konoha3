@@ -46,7 +46,7 @@ static KMETHOD Expression_LispOperator(KonohaContext *kctx, KonohaStack *sfp)
 		kNode_Type(kctx, expr, KNode_Block, KType_var);
 		int i = beginIdx + 1;
 		SUGAR kNode_Op(kctx, expr, opToken, 0);
-		while (i < endIdx) {
+		while(i < endIdx) {
 			int orig = i;
 			kNode *node = SUGAR ParseNewNode(kctx, ns, tokenList, &i, i+1, ParseExpressionOption, "(");
 			SUGAR kNode_AddNode(kctx, expr, node);

@@ -1,9 +1,9 @@
 //import("konoha.new"); Don't use this
 import("Syntax.JavaStyleClass");
 import("JavaScript.Array");
-//import("konoha.map");
-import("Syntax.GlobalVariable");
+import("MiniKonoha.Map");
 import("MiniKonoha.NameSpace");  // konoha.const is obsolete
+import("Syntax.GlobalVariable");
 import("JavaStyle.Object");
 import("posix.thread");
 import("Type.Json"); // temporally

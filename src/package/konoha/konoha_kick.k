@@ -32,7 +32,7 @@ import("MiniKonoha.NameSpace");
 import("JavaScript.String");
 import("JavaScript.Regexp");
 import("JavaScript.Array");
-import("konoha.map");
+import("MiniKonoha.Map");
 import("konoha.iterator");
 
 //	KImportPackage(ns, "konoha.const", trace);

@@ -1,4 +1,4 @@
-import("JavaScript.Function");
+import("MiniKonoha.ClosureModel");
 
 Func[String, String] f() {
 	String s = "hi";

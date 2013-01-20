@@ -23,11 +23,11 @@
  ***************************************************************************/
 
 import("konoha.new");
-import("konoha.class");
+import("Syntax.JavaStyleClass");
 import("konoha.object");
-import("konoha.map");
+import("MiniKonoha.Map");
 import("cstyle");
-import("js4.date");
+import("JavaScript.Date");
 
 class Libevent {
 	Map event_Map;

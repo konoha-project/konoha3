@@ -626,7 +626,7 @@ static KKeyValue* kObjectProto_GetKeyValue(KonohaContext *kctx, kAbstractObject 
 static kObject* kObjectProto_GetObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, kAbstractObject *defval)
 {
 	KKeyValue *d = kObjectProto_GetKeyValue(kctx, o, key);
-	return (d != NULL) ? d->ObjectValue : defval;
+	return (d != NULL) ? d->ObjectValue : (kObject *) defval;
 }
 
 static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *ao, ksymbol_t key, ktypeattr_t ty, kAbstractObject *val)
@@ -777,7 +777,7 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 			return;
 		}
 	}
-	kObject_class(d->ObjectValue)->p(kctx, w->values, w->pos, w->wb);
+	KClass_(KTypeAttr_Unmask(d->attrTypeId))->p(kctx, w->values, w->pos, w->wb);
 }
 
 static int kObjectProto_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb, int count)
@@ -817,7 +817,7 @@ static kbool_t KRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	memcpy(&lbuf, runtime->evaljmpbuf, sizeof(jmpbuf_i));
 	runtime->bottomStack = sfp;
-	KUnsafeFieldSet(runtime->OptionalErrorInfo, TS_EMPTY);
+	KUnsafeFieldSet(runtime->ThrownException, (kException *)K_NULL);
 	kbool_t result = true;
 	int jumpResult;
 	INIT_GCSTACK();
@@ -825,7 +825,7 @@ static kbool_t KRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp)
 		KStackCall(sfp);
 	}
 	else {
-		PLATAPI ReportCaughtException(kctx, KSymbol_text(jumpResult), runtime->faultInfo, kString_text(runtime->OptionalErrorInfo), runtime->bottomStack, runtime->topStack);
+		PLATAPI ReportCaughtException(kctx, runtime->ThrownException, runtime->bottomStack, runtime->topStack);
 		result = false;
 	}
 	RESET_GCSTACK();
@@ -834,9 +834,23 @@ static kbool_t KRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp)
 	return result;
 }
 
-// System Script
-//uintptr_t (*ApplyUnboxValueFunc)(KonohaContext *kctx, const char *name, ...);
-//kObject*  (*ApplyObjectFunc)(KonohaContext *kctx, const char *name, ...);
+static void KRuntime_raise(KonohaContext *kctx, int symbol, int fault, kString *optionalErrorInfo, KonohaStack *top)
+{
+	KRuntimeContextVar *runtime = kctx->stack;
+	KNH_ASSERT(symbol != 0);
+	if(runtime->evaljmpbuf != NULL) {
+		kException *e = new_(Exception, optionalErrorInfo, NULL);
+		e->symbol = symbol;
+		e->fault  = fault;
+		runtime->topStack = top;
+		//runtime->faultInfo = fault;
+//		if(optionalErrorInfo != NULL) {
+		KUnsafeFieldSet(runtime->ThrownException, e);
+//		}
+		PLATAPI longjmp_i(*runtime->evaljmpbuf, symbol);  // in setjmp 0 means good
+	}
+	KExit(EXIT_FAILURE);
+}
 
 static void PushParam(KonohaContext *kctx, KonohaStack *sfp, const char *fmt, va_list ap)
 {
@@ -878,22 +892,6 @@ static uintptr_t ApplySystemFunc(KonohaContext *kctx, uintptr_t defval, const ch
 	}
 	return defval;
 }
-
-static void KRuntime_raise(KonohaContext *kctx, int symbol, int fault, kString *optionalErrorInfo, KonohaStack *top)
-{
-	KRuntimeContextVar *runtime = kctx->stack;
-	KNH_ASSERT(symbol != 0);
-	if(runtime->evaljmpbuf != NULL) {
-		runtime->topStack = top;
-		runtime->faultInfo = fault;
-		if(optionalErrorInfo != NULL) {
-			KUnsafeFieldSet(runtime->OptionalErrorInfo, optionalErrorInfo);
-		}
-		PLATAPI longjmp_i(*runtime->evaljmpbuf, symbol);  // in setjmp 0 means good
-	}
-	KExit(EXIT_FAILURE);
-}
-
 
 static int DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 {

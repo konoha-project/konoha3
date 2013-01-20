@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.map");
+import("MiniKonoha.Map");
 //import("konoha.new"); Don't use this
 
 void test() {

@@ -1,6 +1,5 @@
 // written by Masahiro Ide
 import("Lib.Openssl");
-import("konoha");
 
 void f() {
     MD5 md5 = new MD5();
