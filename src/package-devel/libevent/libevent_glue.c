@@ -178,51 +178,6 @@ static KMETHOD TimeVal_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(tv);
 }
 
-
-
-#define EVENT_TEST
-#ifdef EVENT_TEST
-void
-do_accept(evutil_socket_t listener, short event, void *arg)
-{
-	printf("do_accept() called\n");
-}
-
-static void test_event_add(void) {
-    evutil_socket_t listener;
-    struct sockaddr_in sin;
-    struct event_base *base;
-    struct event *listener_event;
-
-    base = event_base_new();
-    if (!base)
-        return; /*XXXerr*/
-
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = 0;
-    sin.sin_port = htons(40713);
-
-    listener = socket(AF_INET, SOCK_STREAM, 0);
-    evutil_make_socket_nonblocking(listener);
-
-    if (bind(listener, (struct sockaddr*)&sin, sizeof(sin)) < 0) {
-        perror("bind");
-        return;
-    }
-
-    if (listen(listener, 16)<0) {
-        perror("listen");
-        return;
-    }
-
-    listener_event = event_new(base, listener, EV_READ|EV_PERSIST, do_accept, (void*)base);
-    /*XXX check it */
-    event_add(listener_event, NULL);
-
-    //event_base_dispatch(base);
-
-}
-#endif	//EVENT_TEST
 /* ======================================================================== */
 // System class
 //## int System.event_add(CEvent_base event, Date tv);
@@ -231,11 +186,7 @@ static KMETHOD System_event_add(KonohaContext *kctx, KonohaStack* sfp)
 	kCEvent *kcev = (kCEvent *)sfp[1].asObject;
 	kTimeVal *tv = (kTimeVal *)sfp[2].asObject;
 	printf("kcev->event = %p in System_event_add\n", kcev->event);
-#ifdef EVENT_TEST
-	test_event_add();
-#endif	//EVENT_TEST
-	int ret = event_add(kcev->event, NULL/* &tv->timeval */);	//SEGV kcev->event
-	ret = event_add(NULL, NULL);
+	int ret = event_add(kcev->event, &tv->timeval);
 	printf("System_event_add 2\n");
 	KReturnUnboxValue(ret);
 }
