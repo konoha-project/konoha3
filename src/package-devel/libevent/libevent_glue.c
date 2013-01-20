@@ -26,6 +26,7 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/import/methoddecl.h>
 #include <event2/event.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -145,7 +146,9 @@ static KMETHOD CEvent_new(KonohaContext *kctx, KonohaStack *sfp)
 	short event = (short)(sfp[4].intValue & 0xffff);
 	kFunc *konoha_cb = sfp[5].asFunc;
 
+	printf("cEvent_base->event_base:%p, evd:%d, event:%#x, callback_1st:%p, ev:%p\n", cEvent_base->event_base, evd, event, callback_1st, ev);
 	ev->event = event_new(cEvent_base->event_base, evd, event, callback_1st, ev);
+	printf("ev->event = %p in CEvent_new\n", ev->event);
 	ev->evBase = cEvent_base;
 	ev->key = key;
 	ev->kcb = konoha_cb;
@@ -176,19 +179,69 @@ static KMETHOD TimeVal_new(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 
+
+#define EVENT_TEST
+#ifdef EVENT_TEST
+void
+do_accept(evutil_socket_t listener, short event, void *arg)
+{
+	printf("do_accept() called\n");
+}
+
+static void test_event_add(void) {
+    evutil_socket_t listener;
+    struct sockaddr_in sin;
+    struct event_base *base;
+    struct event *listener_event;
+
+    base = event_base_new();
+    if (!base)
+        return; /*XXXerr*/
+
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = 0;
+    sin.sin_port = htons(40713);
+
+    listener = socket(AF_INET, SOCK_STREAM, 0);
+    evutil_make_socket_nonblocking(listener);
+
+    if (bind(listener, (struct sockaddr*)&sin, sizeof(sin)) < 0) {
+        perror("bind");
+        return;
+    }
+
+    if (listen(listener, 16)<0) {
+        perror("listen");
+        return;
+    }
+
+    listener_event = event_new(base, listener, EV_READ|EV_PERSIST, do_accept, (void*)base);
+    /*XXX check it */
+    event_add(listener_event, NULL);
+
+    //event_base_dispatch(base);
+
+}
+#endif	//EVENT_TEST
 /* ======================================================================== */
 // System class
 //## int System.event_add(CEvent_base event, Date tv);
-KMETHOD System_event_add(KonohaContext *kctx, KonohaStack* sfp)
+static KMETHOD System_event_add(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kCEvent *kcev = (kCEvent *)sfp[1].asObject;
 	kTimeVal *tv = (kTimeVal *)sfp[2].asObject;
-	int ret = event_add(kcev->event, &tv->timeval);
+	printf("kcev->event = %p in System_event_add\n", kcev->event);
+#ifdef EVENT_TEST
+	test_event_add();
+#endif	//EVENT_TEST
+	int ret = event_add(kcev->event, NULL/* &tv->timeval */);	//SEGV kcev->event
+	ret = event_add(NULL, NULL);
+	printf("System_event_add 2\n");
 	KReturnUnboxValue(ret);
 }
 
 //## int System.event_del(CEvent event);
-KMETHOD System_event_del(KonohaContext *kctx, KonohaStack* sfp)
+static KMETHOD System_event_del(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kCEvent *kcev = (kCEvent *)sfp[1].asObject;
 	int ret = event_del(kcev->event);
@@ -251,7 +304,6 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 
-#ifdef TESTCUT
 	KDEFINE_INT_CONST IntData[] = {
 		//for event_new()
 		{KDefineConstInt(EV_TIMEOUT)},
@@ -262,10 +314,11 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 		{KDefineConstInt(EV_ET)},
 
 		//TODO add other constants
+
+		{} /* <= sentinel */
 	};
 
 	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), false/*isOverride*/, trace);
-#endif	// TESTCUT
 
 	return true;
 }
