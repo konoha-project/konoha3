@@ -231,6 +231,11 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	int KType_CEvent = CEventClass->typeId;
 	int KType_TimeVal = TimeValClass->typeId;
 
+	/* define Generics parameter for callback method */
+	kparamtype_t p = {KType_CEvent, 0};
+	KClass *CEventCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_void, 1, &p);
+	int KType_CEventCBfunc = CEventCBfunc->typeId;
+
 	KDEFINE_METHOD MethodData[] = {
 		// System class
 		_Public|_Static|_Const|_Im, _F(System_event_add), KType_int, KType_System, KMethodName_("event_add"), 2, KType_Object, KFieldName_("CEvent"), KType_Object, KFieldName_("timeval"),	//TODO: param type should be "KType_CEvent" "KType_Date"
@@ -241,7 +246,7 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 		_Public, _F(CEvent_base_event_dispatch), KType_CEvent_base, KType_CEvent_base, KMethodName_("event_dispatch"), 0,
 
 		// CEvent
-		_Public, _F(CEvent_new), KType_CEvent, KType_CEvent, KMethodName_("new"), 5, KType_CEvent_base, KFieldName_("Event_base"), KType_String, KFieldName_("key"), KType_int, KFieldName_("evd"), KType_int, KFieldName_("event"), KType_Func, KFieldName_("konoha_CB"),
+		_Public, _F(CEvent_new), KType_CEvent, KType_CEvent, KMethodName_("new"), 5, KType_CEvent_base, KFieldName_("Event_base"), KType_String, KFieldName_("key"), KType_int, KFieldName_("evd"), KType_int, KFieldName_("event"), KType_CEventCBfunc, KFieldName_("konoha_CB"),
 
 		// TimeVal
 		_Public, _F(TimeVal_new), KType_TimeVal, KType_TimeVal, KMethodName_("new"), 2, KType_int, KFieldName_("tvSec"), KType_int, KFieldName_("tvUsec"),

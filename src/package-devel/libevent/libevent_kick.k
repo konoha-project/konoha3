@@ -26,26 +26,26 @@ import("konoha.new");
 import("konoha.class");
 import("konoha.object");
 import("konoha.map");
+import("konoha.ns");
 import("cstyle", "null");
 
 class Event_base /*extends CEvent_base*/ {
-	CEvent_base ev_base;
+	CEvent_base evbase;
 	Map eventMap;
 
 	Event_base() {
-		System.p("called Event_base Constructor");
-		ev_base = new CEvent_base();
+		evbase = new CEvent_base();
 		eventMap = new Map();
 	}
 
 	@Public int event_dispatch() {
-		int ret = ev_base.event_dispatch();
+		int ret = evbase.event_dispatch();
 		return ret;
 	}
 
-	@Public int event_add(String key, int evd, int event, Func[void] cb, TimeVal tv) {
+	@Public int event_add(String key, int evd, int event, Func[void, CEvent] cb, TimeVal tv) {
 		if (key.isNotNull()) {
-			CEvent ev = new CEvent(ev_base, key, evd, event, cb);
+			CEvent ev = new CEvent(evbase, key, evd, event, cb);
 			System.p(eventMap);
 			eventMap.set(key, ev);	//keep referance of 'ev', and deliver it to callback method
 			int ret =  System.event_add(ev, tv);
