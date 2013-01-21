@@ -125,10 +125,10 @@ static void _JSONString_free(JSONString *obj)
     JSON json = toJSON(ValueS(obj));
     JSON_Release(json);
     if(JSON_CanFree(json)) {
-        JSON_dispose(json);
         if(obj->length > JSONSTRING_INLINE_SIZE) {
             free((char *)obj->str);
         }
+        JSON_dispose(json);
         JSONMemoryPool_Free(0, obj);
     }
 }
@@ -149,8 +149,8 @@ static void JSONArray_free(JSON json)
         FOR_EACH_ARRAY(a->array, s, e) {
             _JSON_free(*s);
         }
-        JSON_dispose(json);
         ARRAY_dispose(JSON, &a->array);
+        JSON_dispose(json);
         JSONMemoryPool_Free(0, a);
     }
 }
