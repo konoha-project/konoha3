@@ -22,7 +22,7 @@ void main() {
 	Event_base e = new Event_base();
 	System.p(e);
 	e.event_add("listener", evd, EV_READ | EV_PERSIST, callback_method, new TimeVal(15, 300));
-	e.evbase.event_dispatch();		//e.event_dispatch();
+	e.event_dispatch();
 }
 
 main();
