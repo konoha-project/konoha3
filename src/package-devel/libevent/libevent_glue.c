@@ -205,7 +205,7 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	// CEvent_base
 	KDEFINE_CLASS defCEvent_base = {0};
 	SETSTRUCTNAME(defCEvent_base, CEvent_base);
-	//defCEvent_base.cflag     = KClassFlag_Final;
+	defCEvent_base.cflag     = KClassFlag_Final;	//must be final in C
 	defCEvent_base.init      = CEvent_base_Init;
 	defCEvent_base.free      = CEvent_base_Free;
 	KClass *CEvent_baseClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCEvent_base, trace);

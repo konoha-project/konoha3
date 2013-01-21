@@ -19,10 +19,14 @@ void main() {
 	System.listen(evd, 1);
 
 	Event_base e = new Event_base();
+	System.p(e);
+	System.p("e.eventMap = " + e.eventMap);
+	System.p("e.ev_base = " + e.ev_base);
 	System.p("--- 1 ----");
 	e.event_add("listener", evd, EV_READ | EV_PERSIST, callback_method, new TimeVal(15, 300));
 	System.p("--- 2 ----");
-	e.event_dispatch();		//SEGV
+	e.ev_base.event_dispatch();
+	//e.event_dispatch();
 	System.p("--- 3 ----");
 }
 
