@@ -788,6 +788,12 @@ static kNode *TypeFuncParam(KonohaContext *kctx, kNodeVar *expr, kNameSpace *ns)
 		}
 	}
 	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, kNode_ns(expr), KClass_Func, KMethodName_("Invoke"), -1, KMethodMatch_NoOption);
+	/* [before] [Func, nulltoken, Arg1, Arg2, Arg3 ..]
+	 * [after]  [null, Func, Arg1, Arg2, Arg3 ..]
+	 */
+	kArray *List = expr->NodeList;
+	KFieldSet(List, List->ObjectItems[1], List->ObjectItems[0]);
+
 	DBG_ASSERT(mtd != NULL);
 	return TypeMethodCallNode(kctx, expr, mtd, KClass_(thisClass->p0));
 }
