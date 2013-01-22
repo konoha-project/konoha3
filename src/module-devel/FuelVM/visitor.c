@@ -176,6 +176,7 @@ static void visitIUnary(Visitor *visitor, INode *Node)
 	switch(Inst->Op) {
 		CASE(Not);
 		CASE(Neg);
+		CASE(Box);
 		default: break;
 	}
 	VISIT_1(Node, Tag, Inst->Node);

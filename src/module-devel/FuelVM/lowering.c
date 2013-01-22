@@ -242,6 +242,9 @@ static void EmitUnaryInst(ByteCodeWriter *writer, enum UnaryOp Op, unsigned Dst,
 	switch(Op) {
 #define CASE(X) case X: EMIT_LIR(writer, X, Dst, Src); break
 		CASE(Not); CASE(Neg);
+		case Box: {
+			assert(0 && "FIXME");
+		}
 		default:
 		assert(0 && "unreachable");
 		break;

@@ -168,14 +168,15 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 	ktypeattr_t retTy  = kMethod_GetReturnType(mtd)->typeId;
 	kParam     *params = kMethod_GetParam(mtd);
 	kNode *stmt = expr->Parent;
-	assert(IS_Node(stmt));
+	if(!IS_Node(stmt))
+		return 0;
 	if(thisTy == KType_Boolean) {
 		if(params->psize == 0) { /* UnaryOperator */
 			if(retTy == KType_Boolean) {
 				/* booleaen booleaen.opNEG() */
 				enum UnaryOp Op = KMethodName_toUnaryOperator(kctx, mn);
 				INode *Param = FetchINode(kctx, builder, expr, 1, KType_Boolean, thunk);
-				return CreateUnaryInst(BLD(builder), Op, Param, kNode_uline(stmt));
+				return CreateUnaryInst(BLD(builder), Op, Param, kNode_uline(expr));
 			}
 		}
 		else if(params->psize == 1) { /* BinaryOperator */
@@ -186,7 +187,7 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 				assert(Op == Eq || Op == Nq);
 				INode *LHS = FetchINode(kctx, builder, expr, 1, KType_Boolean, thunk);
 				INode *RHS = FetchINode(kctx, builder, expr, 2, KType_Boolean, thunk);
-				return CreateBinaryInst(BLD(builder), Op, LHS, RHS, kNode_uline(stmt));
+				return CreateBinaryInst(BLD(builder), Op, LHS, RHS, kNode_uline(expr));
 			}
 		}
 	}
@@ -196,7 +197,7 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 				/* int int.opSUB() */
 				enum UnaryOp Op = KMethodName_toUnaryOperator(kctx, mn);
 				INode *Param = FetchINode(kctx, builder, expr, 1, KType_Int, thunk);
-				return CreateUnaryInst(BLD(builder), Op, Param, kNode_uline(stmt));
+				return CreateUnaryInst(BLD(builder), Op, Param, kNode_uline(expr));
 			}
 		}
 		else if(params->psize == 1) { /* BinaryOperator */
@@ -206,14 +207,14 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
 				INode *LHS = FetchINode(kctx, builder, expr, 1, KType_Int, thunk);
 				INode *RHS = FetchINode(kctx, builder, expr, 2, KType_Int, thunk);
-				return CreateBinaryInst(BLD(builder), Op, LHS, RHS, kNode_uline(stmt));
+				return CreateBinaryInst(BLD(builder), Op, LHS, RHS, kNode_uline(expr));
 			}
 			else if(retTy == KType_Int && ptype == KType_Int) {
 				/* int int.(opADD|opSUB|opMUL|opDIV|opMOD|opLSHIFT|opRSHIFT|opAND|opOR|opXOR) (int x) */
 				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
 				INode *LHS = FetchINode(kctx, builder, expr, 1, KType_Int, thunk);
 				INode *RHS = FetchINode(kctx, builder, expr, 2, KType_Int, thunk);
-				return CreateBinaryInst(BLD(builder), Op, LHS, RHS, kNode_uline(stmt));
+				return CreateBinaryInst(BLD(builder), Op, LHS, RHS, kNode_uline(expr));
 			}
 		}
 	}
@@ -223,7 +224,7 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 				/* int int.opSUB() */
 				enum UnaryOp Op = KMethodName_toUnaryOperator(kctx, mn);
 				INode *Param = FetchINode(kctx, builder, expr, 1, KType_float, thunk);
-				return CreateUnaryInst(BLD(builder), Op, Param, kNode_uline(stmt));
+				return CreateUnaryInst(BLD(builder), Op, Param, kNode_uline(expr));
 			}
 		}
 		else if(params->psize == 1) { /* BinaryOperator */
@@ -233,14 +234,14 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
 				INode *LHS = FetchINode(kctx, builder, expr, 1, KType_float, thunk);
 				INode *RHS = FetchINode(kctx, builder, expr, 2, KType_float, thunk);
-				return CreateBinaryInst(BLD(builder), Op, LHS, RHS, kNode_uline(stmt));
+				return CreateBinaryInst(BLD(builder), Op, LHS, RHS, kNode_uline(expr));
 			}
 			else if(retTy == KType_float && ptype == KType_float) {
 				/* float float.(opADD|opSUB|opMUL|opDIV) (float x) */
 				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
 				INode *LHS = FetchINode(kctx, builder, expr, 1, KType_float, thunk);
 				INode *RHS = FetchINode(kctx, builder, expr, 2, KType_float, thunk);
-				return CreateBinaryInst(BLD(builder), Op, LHS, RHS, kNode_uline(stmt));
+				return CreateBinaryInst(BLD(builder), Op, LHS, RHS, kNode_uline(expr));
 			}
 		}
 	}
@@ -254,9 +255,18 @@ static kbool_t FuelVM_VisitDoneNode(KonohaContext *kctx, KBuilder *builder, kNod
 	return true;
 }
 
-static kbool_t FuelVM_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
+static kbool_t FuelVM_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	assert(0);
+	/*
+	 * [box] := box(this)
+	 **/
+	enum TypeId Type = ConvertToTypeId(kctx, expr->attrTypeId);
+	Type = ToBoxType(Type);
+	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);
+	INode *Node = FuelVM_getExpression(builder);
+	INode *Inst = CreateUnaryInst(BLD(builder), Box, Node, kNode_uline(expr));
+	INode_setType(Inst, Type);
+	builder->Value = Inst;
 	return true;
 }
 
@@ -575,9 +585,7 @@ static kbool_t FuelVM_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder
 	INode *MtdObj = CreateObject(BLD(builder), KType_Method, (void *) mtd);
 	enum CallOp Op = (kMethod_Is(Virtual, mtd)) ? VirtualCall : DefaultCall;
 	Params[0] = MtdObj;
-	kNode *stmt = expr->Parent;
-	assert(IS_Node(stmt));
-	Inst = CreateICall(BLD(builder), Type, Op, kNode_uline(stmt), Params, argc + 2);
+	Inst = CreateICall(BLD(builder), Type, Op, kNode_uline(expr), Params, argc + 2);
 	builder->Value = Inst;
 	return true;
 }

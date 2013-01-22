@@ -265,7 +265,7 @@ typedef struct IYield {
 
 /*$ T Unary { Node } */
 enum UnaryOp {
-	Not/*!*/, Neg/*-*/,
+	Not/*!*/, Neg/*-*/, Box,
 	UnaryOp_NotFound = -1
 };
 

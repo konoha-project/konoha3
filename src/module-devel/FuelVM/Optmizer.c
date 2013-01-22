@@ -410,6 +410,12 @@ INode *FoldInst(FuelIRBuilder *builder, INode *Node)
 #define CASE(X) case X: ret = __##X((Val)->Value); break
 					CASE(Not); CASE(Neg);
 #undef CASE
+					case Box: {
+						return NULL;
+						//FIXME
+						//KClass *ct =...
+						//return KLIB new_kObject(kctx, OnStack, ct, Val->Value);
+					}
 					default: assert(0 && "unreachable");
 				}
 				return (INode *) builder->API->newConstant(builder, TYPE_int, ret);
