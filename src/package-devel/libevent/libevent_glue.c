@@ -102,9 +102,11 @@ static void callback_1st(evutil_socket_t evd, short event, void *arg) {
 	BEGIN_UnusedStack(lsfp);
 	KClass *returnType = kMethod_GetReturnType(cbArg->kcb->method);
 	KUnsafeFieldSet(lsfp[0].asObject, K_NULL);
-	KUnsafeFieldSet(lsfp[1].asObject, (kObject *)cbArg);
+	KUnsafeFieldSet(lsfp[1].intValue, evd);
+	KUnsafeFieldSet(lsfp[2].intValue, event);
+	KUnsafeFieldSet(lsfp[3].asObject, (kObject *)cbArg);
 
-	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, cbArg->kcb, 1);
+	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, cbArg->kcb, 3);
 	KStackCall(lsfp);
 	END_UnusedStack();
 }
@@ -228,8 +230,8 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	int KType_TimeVal = TimeValClass->typeId;
 
 	/* define Generics parameter for callback method */
-	kparamtype_t p = {KType_CEvent, 0};
-	KClass *CEventCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_void, 1, &p);
+	kparamtype_t p[] = {{KType_int}, {KType_int}, {KType_CEvent}};
+	KClass *CEventCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_void, 3, p);
 	int KType_CEventCBfunc = CEventCBfunc->typeId;
 
 	KDEFINE_METHOD MethodData[] = {

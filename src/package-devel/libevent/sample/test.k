@@ -6,10 +6,11 @@ import("posix.socket");
 import("libevent");
 
 
-void do_accept(CEvent e) {	//change callback parameters as libevent cb
+void do_accept(int evd, int event, CEvent e) {
 	System.p("Callback executed!!");
 	System.p("CEvent = " + e);
-	//close()
+	System.p("evd = " + evd + ", event = " + event);
+	Syste.close(evd);	// exit program because event is nothing
 }
 
 void main() {

@@ -42,7 +42,7 @@ class Event_base /*extends CEvent_base*/ {
 		return evbase.event_dispatch();
 	}
 
-	@Public int event_add(String key, int evd, int event, Func[void, CEvent] cb, TimeVal tv) {
+	@Public int event_add(String key, int evd, int event, Func[void, int, int, CEvent] cb, TimeVal tv) {
 		if (key.isNotNull()) {
 			CEvent ev = new CEvent(evbase, key, evd, event, cb);
 			System.p(eventMap);
