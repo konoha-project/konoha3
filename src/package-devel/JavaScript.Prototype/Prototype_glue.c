@@ -25,6 +25,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/konoha_common.h>
+#include <minikonoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -165,8 +166,6 @@ static KMETHOD Prototype_(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 }
-
-#include <minikonoha/import/methoddecl.h>
 
 static void prototype_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
