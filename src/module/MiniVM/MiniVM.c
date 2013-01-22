@@ -822,25 +822,39 @@ static kbool_t KBuilder_VisitForNode(KonohaContext *kctx, KBuilder *builder, kNo
 	bblock_t lbCONTINUE = new_BasicBlockLABEL(kctx);
 	bblock_t lbENTRY    = new_BasicBlockLABEL(kctx);
 	bblock_t lbBREAK    = new_BasicBlockLABEL(kctx);
+	bblock_t lbBody     = new_BasicBlockLABEL(kctx);
 	kNode_SetLabelNode(kctx, stmt, KSymbol_("continue"), lbCONTINUE);
 	kNode_SetLabelNode(kctx, stmt, KSymbol_("break"),    lbBREAK);
-	ASM_JMP(kctx, builder, lbENTRY);
-	ASM_LABEL(kctx, builder, lbCONTINUE);
-	KBuilder_AsmSAFEPOINT(kctx, builder, kNode_uline(stmt), espidx);
+
+	kNode *initNode = kNode_GetNode(kctx, stmt, KSymbol_("init"));
+	if(initNode != NULL) {
+		SUGAR VisitNode(kctx, builder, initNode, &espidx);
+	}
+
 	kNode *iterNode = kNode_GetNode(kctx, stmt, KSymbol_("Iterator"));
 	if(iterNode != NULL) {
-		SUGAR VisitNode(kctx, builder, iterNode, &espidx);
-		ASM_LABEL(kctx, builder, lbENTRY);
-		AsmJumpIfFalse(kctx, builder, Node_getFirstExpr(kctx, stmt), &espidx, lbBREAK);
+		ASM_JMP(kctx, builder, lbENTRY);
 	}
-	else {
-		AsmJumpIfFalse(kctx, builder, Node_getFirstExpr(kctx, stmt), &espidx, lbBREAK);
+
+	{/* Head */
 		ASM_LABEL(kctx, builder, lbENTRY);
+		kNode *condNode = Node_getFirstExpr(kctx, stmt);
+		AsmJumpIfFalse(kctx, builder, condNode, &espidx, lbBREAK);
 	}
-	SUGAR VisitNode(kctx, builder, Node_getFirstBlock(kctx, stmt), &espidx);
-	ASM_JMP(kctx, builder, lbCONTINUE);
+	{/* Body */
+		ASM_LABEL(kctx, builder, lbBody);
+		SUGAR VisitNode(kctx, builder, Node_getFirstBlock(kctx, stmt), &espidx);
+		ASM_JMP(kctx, builder, lbCONTINUE);
+	}
+	{/* Itr */
+		ASM_LABEL(kctx, builder, lbCONTINUE);
+		KBuilder_AsmSAFEPOINT(kctx, builder, kNode_uline(stmt), espidx);
+		if(iterNode != NULL) {
+			SUGAR VisitNode(kctx, builder, iterNode, &espidx);
+		}
+		ASM_JMP(kctx, builder, lbENTRY);
+  }
 	ASM_LABEL(kctx, builder, lbBREAK);
-	//AssignLocal(kctx, builder, stmt, thunk);
 	return true;
 }
 

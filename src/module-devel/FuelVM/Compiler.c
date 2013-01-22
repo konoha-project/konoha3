@@ -441,6 +441,10 @@ static kbool_t FuelVM_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder, k
 
 static kbool_t FuelVM_VisitForNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
+	kNode *initNode = kNode_GetNode(kctx, stmt, KSymbol_("init"));
+	if(initNode != NULL) {
+		SUGAR VisitNode(kctx, builder, initNode, thunk);
+	}
 	return FuelVM_VisitLoopNode(kctx, builder, stmt, thunk, ForLoop);
 }
 
