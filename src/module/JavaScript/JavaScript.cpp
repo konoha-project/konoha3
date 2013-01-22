@@ -331,6 +331,16 @@ static kbool_t JSBuilder_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder
 	return true;
 }
 
+static kbool_t JSBuilder_VisitForNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void* thunk)
+{
+	/*FIXME*/abort();
+	//JSBuilder_EmitString(kctx, builder, "for", "", "");
+	//SUGAR VisitNode(kctx, builder, Node_getFirstBlock(kctx, stmt), thunk);
+	//JSBuilder_VisitNode(kctx, builder, Node_getFirstExpr(kctx, stmt), thunk, "while(", ");");
+	return true;
+}
+
+
 static kbool_t JSBuilder_VisitBreakNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void* thunk)
 {
 	JSBuilder_EmitString(kctx, builder, "break;", "", "");

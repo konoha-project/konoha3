@@ -426,6 +426,7 @@ typedef kshort_t       knode_t;
 	OP(If)\
 	OP(While)\
 	OP(DoWhile)\
+	OP(For)\
 	OP(Return)\
 	OP(Break)\
 	OP(Continue)\

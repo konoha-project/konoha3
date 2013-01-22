@@ -429,6 +429,11 @@ static kbool_t FuelVM_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder, k
 	return FuelVM_VisitLoopNode(kctx, builder, stmt, thunk, DoWhileLoop);
 }
 
+static kbool_t FuelVM_VisitForNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
+{
+	return FuelVM_VisitLoopNode(kctx, builder, stmt, thunk, ForLoop);
+}
+
 static kbool_t FuelVM_VisitJumpNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk, ksymbol_t label)
 {
 	kNode *jump = kNode_GetNode(kctx, stmt, label);
