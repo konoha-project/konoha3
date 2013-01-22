@@ -34,6 +34,9 @@ extern "C" {
 //#define KType_Json          cJson->typeId
 //#define KClass_JsonArray     KClass_p0(kctx, KClass_Array, KType_Json)
 //#define KClass_StringArray0   KClass_p0(kctx, KClass_Array, KType_String)
+
+#define TYPE_Array(TYPE)   (KClass_p0(kctx, KClass_Array, KType_##TYPE))->typeId
+
 struct JsonBuf {
 	uint64_t json_i;
 };
@@ -166,6 +169,21 @@ static KMETHOD Json_toBoolean(KonohaContext *kctx, KonohaStack *sfp)
 	kJson *jo = (kJson *)sfp[0].asObject;
 	kbool_t ret = PLATAPI GetJsonBoolean(kctx, &jo->jsonbuf, NULL, 0, false);
 	KReturnUnboxValue(ret);
+}
+
+static void keys_doEach(KonohaContext* kctx, const char* key, struct JsonBuf *jsonbuf, void* thunk)
+{
+	kArray *array = (kArray*)thunk;
+	KLIB kArray_Add(kctx, array, KLIB new_kString(kctx, OnField, key, strlen(key), 0));
+}
+
+//## String[] Json.Keys();
+static KMETHOD Json_keys(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kJson *jo = (kJson *)sfp[0].asObject;
+	kArray *ret = (kArray *) KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	PLATAPI DoJsonEach(kctx, &jo->jsonbuf, (void*)ret, keys_doEach);
+	KReturn(ret);
 }
 
 //## boolean Json.hasKey(String key);
@@ -342,29 +360,30 @@ static kbool_t json_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	int FN_v = KFieldName_("value");
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(Int_toJson),     KType_Json,       KType_Int , KMethodName_To(KType_Json),    0,
-		_Public|_Const|_Im, _F(String_toJson),  KType_Json,     KType_String, KMethodName_To(KType_Json),    0,
-		_Public|_Const|_Im, _F(Json_toInt),     KType_Int,        KType_Json, KMethodName_To(KType_Int),     0,
-		_Public|_Const|_Im, _F(Json_toString),  KType_String,     KType_Json, KMethodName_To(KType_String),  0,
-		_Public|_Const|_Im, _F(Json_toFloat),   KType_String,     KType_Json, KMethodName_To(KType_float),   0,
-		_Public|_Const|_Im, _F(Json_toBoolean), KType_String,     KType_Json, KMethodName_To(KType_Boolean), 0,
-		_Public|_Const|_Im, _F(Json_getSize),   KType_Int,        KType_Json, KMethodName_("getSize"),    0,
-		_Public|_Const|_Im, _F(Json_hasKey),    KType_Boolean,    KType_Json, KMethodName_("hasKey"),     1, KType_String, FN_k,
-		_Public|_Const|_Im, _F(Json_getJson),   KType_Json,       KType_Json, KMethodName_("get"),        1, KType_String, FN_k,
-		_Public|_Const|_Im, _F(Json_getJson_index),KType_Json,    KType_Json, KMethodName_("get"),        1, KType_Int, FN_k,
-		_Public|_Const|_Im, _F(Json_getBoolean),   KType_Boolean, KType_Json, KMethodName_("getBoolean"), 1, KType_String, FN_k,
-		_Public|_Const|_Im, _F(Json_getFloat),  KType_float,      KType_Json, KMethodName_("getFloat"),   1, KType_String, FN_k,
-		_Public|_Const|_Im, _F(Json_getInt),    KType_Int,        KType_Json, KMethodName_("getInt"),     1, KType_String, FN_k,
-		_Public|_Const|_Im, _F(Json_getString), KType_String,     KType_Json, KMethodName_("getString"),  1, KType_String, FN_k,
-		_Public,            _F(Json_new),       KType_Json,       KType_Json, KMethodName_("new"),        0,
-		_Public|_Static|_Im, _F(Json_Parse), KType_Json,   KType_Json, KMethodName_("parse"),      1, KType_String, FN_v,
-		_Public,            _F(Json_SetJson),   KType_void,       KType_Json, KMethodName_("set"),        2, KType_String, FN_k, KType_Json, FN_v,
-		_Public,            _F(Json_SetJson_index),   KType_void,       KType_Json, KMethodName_("set"),        2, KType_Int,    FN_k, KType_Json, FN_v,
-		_Public,            _F(Json_AddJson),   KType_void,       KType_Json, KMethodName_("add"),        1, KType_Json,   FN_v,
-		_Public,            _F(Json_SetBoolean),   KType_void,       KType_Json, KMethodName_("setBoolean"),    2, KType_String, FN_k, KType_Boolean, FN_v,
-		_Public,            _F(Json_SetFloat),  KType_void,       KType_Json, KMethodName_("setFloat"),   2, KType_String, FN_k, KType_float, FN_v,
-		_Public,            _F(Json_SetInt),    KType_void,       KType_Json, KMethodName_("setInt"),     2, KType_String, FN_k, KType_Int, FN_v,
-		_Public,            _F(Json_SetString), KType_void,       KType_Json, KMethodName_("setString"),  2, KType_String, FN_k, KType_String, FN_v,
+		_Public|_Const|_Im,  _F(Int_toJson),     KType_Json,    KType_Int ,   KMethodName_To(KType_Json),    0,
+		_Public|_Const|_Im,  _F(String_toJson),  KType_Json,    KType_String, KMethodName_To(KType_Json),    0,
+		_Public|_Const|_Im,  _F(Json_toInt),     KType_Int,     KType_Json,   KMethodName_To(KType_Int),     0,
+		_Public|_Const|_Im,  _F(Json_toString),  KType_String,  KType_Json,   KMethodName_To(KType_String),  0,
+		_Public|_Const|_Im,  _F(Json_toFloat),   KType_String,  KType_Json,   KMethodName_To(KType_float),   0,
+		_Public|_Const|_Im,  _F(Json_toBoolean), KType_String,  KType_Json,   KMethodName_To(KType_Boolean), 0,
+		_Public|_Const|_Im,  _F(Json_getSize),   KType_Int,     KType_Json,   KMethodName_("getSize"),    0,
+		_Public|_Const|_Im,  _F(Json_keys),      TYPE_Array(String), KType_Json,   KMethodName_("keys"),  0,
+		_Public|_Const|_Im,  _F(Json_hasKey),    KType_Boolean, KType_Json,   KMethodName_("hasKey"),     1, KType_String, FN_k,
+		_Public|_Const|_Im,  _F(Json_getJson),   KType_Json,    KType_Json,   KMethodName_("get"),        1, KType_String, FN_k,
+		_Public|_Const|_Im,  _F(Json_getJson_index),KType_Json, KType_Json,   KMethodName_("get"),        1, KType_Int, FN_k,
+		_Public|_Const|_Im,  _F(Json_getBoolean),KType_Boolean, KType_Json,   KMethodName_("getBoolean"), 1, KType_String, FN_k,
+		_Public|_Const|_Im,  _F(Json_getFloat),  KType_float,   KType_Json,   KMethodName_("getFloat"),   1, KType_String, FN_k,
+		_Public|_Const|_Im,  _F(Json_getInt),    KType_Int,     KType_Json,   KMethodName_("getInt"),     1, KType_String, FN_k,
+		_Public|_Const|_Im,  _F(Json_getString), KType_String,  KType_Json,   KMethodName_("getString"),  1, KType_String, FN_k,
+		_Public,             _F(Json_new),       KType_Json,    KType_Json,   KMethodName_("new"),        0,
+		_Public|_Static|_Im, _F(Json_Parse),     KType_Json,    KType_Json,   KMethodName_("parse"),      1, KType_String, FN_v,
+		_Public,             _F(Json_SetJson),   KType_void,    KType_Json,   KMethodName_("set"),        2, KType_String, FN_k, KType_Json, FN_v,
+		_Public,             _F(Json_SetJson_index),KType_void, KType_Json,   KMethodName_("set"),        2, KType_Int,    FN_k, KType_Json, FN_v,
+		_Public,             _F(Json_AddJson),   KType_void,    KType_Json,   KMethodName_("add"),        1, KType_Json,   FN_v,
+		_Public,             _F(Json_SetBoolean),   KType_void, KType_Json,   KMethodName_("setBoolean"), 2, KType_String, FN_k, KType_Boolean, FN_v,
+		_Public,             _F(Json_SetFloat),  KType_void,    KType_Json,   KMethodName_("setFloat"),   2, KType_String, FN_k, KType_float, FN_v,
+		_Public,             _F(Json_SetInt),    KType_void,    KType_Json,   KMethodName_("setInt"),     2, KType_String, FN_k, KType_Int, FN_v,
+		_Public,             _F(Json_SetString), KType_void,    KType_Json,   KMethodName_("setString"),  2, KType_String, FN_k, KType_String, FN_v,
 
 		DEND,
 	};
