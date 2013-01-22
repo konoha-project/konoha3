@@ -157,7 +157,7 @@ static KMETHOD Node_newMethodNode2(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(SUGAR new_MethodNode(kctx, ns, type, mtd, 2, expr1, expr2));
 }
 
-#define TP_ns       KType_NameSpace, KFieldName_("ns")
+//#define TP_ns       KType_NameSpace, KFieldName_("ns")
 #define KType_NodeArray (KClass_p0(kctx, KClass_Array, KType_Node)->typeId)
 
 // --------------------------------------------------------------------------
@@ -769,7 +769,9 @@ static kbool_t Syntax_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 		DEFINE_KEYWORD(TypeCheckPolicy_NoCheck),
 		DEFINE_KEYWORD(TypeCheckPolicy_AllowVoid),
 		DEFINE_KEYWORD(TypeCheckPolicy_Coercion),
+		DEFINE_KEYWORD(TypeCheckPolicy_AllowEmpty),
 		DEFINE_KEYWORD(TypeCheckPolicy_CONST),
+		DEFINE_KEYWORD(TypeCheckPolicy_Creation),
 
 		DEFINE_KEYWORD(Precedence_CPPStyleScope),
 		DEFINE_KEYWORD(Precedence_CStyleSuffixCall),  /*x(), x[], x.x x->x x++ */
