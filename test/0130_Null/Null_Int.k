@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("Syntax.Null"):
+import("Syntax.Null");
 
 void test () {
 	int n, n1 = 1;   // n is 0
