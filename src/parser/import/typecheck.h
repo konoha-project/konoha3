@@ -265,6 +265,7 @@ static kNode* TypeCheckNodeList(KonohaContext *kctx, kNode *block, size_t n, kNa
 		if(tstmt != stmt) {
 			KFieldSet(nodeList, nodeList->NodeItems[n], tstmt);
 			kNode_SetParent(kctx, tstmt, block);
+			stmt = tstmt;
 		}
 	}
 	return stmt;
