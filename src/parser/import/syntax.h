@@ -212,6 +212,7 @@ static KMETHOD Expression_Term(KonohaContext *kctx, KonohaStack *sfp)
 		kNode_Termnize(kctx, node, tk);
 		KReturnUnboxValue(nextIdx);
 	}
+	KReturnUnboxValue(-1);
 }
 
 static KMETHOD Expression_Operator(KonohaContext *kctx, KonohaStack *sfp)
