@@ -86,7 +86,7 @@ static KMETHOD Object_opEQ(KonohaContext *kctx, KonohaStack *sfp)
 	kObject *self = sfp[0].asObject;
 	kObject *that = sfp[1].asObject;
 	KClass *ct = kObject_class(self);
-	KReturnUnboxValue(ct->compareObject(self, that) == 0);
+	KReturnUnboxValue(ct->compareTo(kctx, self, that) == 0);
 }
 
 //## @Const method boolean Object.opNEQ(Object x);
@@ -95,7 +95,7 @@ static KMETHOD Object_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
 	kObject *self = sfp[0].asObject;
 	kObject *that = sfp[1].asObject;
 	KClass *ct = kObject_class(self);
-	KReturnUnboxValue(ct->compareObject(self, that) != 0);
+	KReturnUnboxValue(ct->compareTo(kctx, self, that) != 0);
 }
 
 //## Boolean Object.isNull();

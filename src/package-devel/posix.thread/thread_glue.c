@@ -84,7 +84,7 @@ static void kThread_Free(KonohaContext *kctx, kObject *o)
 	//TODO
 }
 
-static int kThread_compareTo(kObject *o1, kObject *o2)
+static int kThread_compareTo(KonohaContext *kctx, kObject *o1, kObject *o2)
 {
 	kThread *t1 = (kThread *)o1;
 	kThread *t2 = (kThread *)o2;
@@ -184,7 +184,7 @@ static KMETHOD Thread_self(KonohaContext *kctx, KonohaStack *sfp)
 //## @Native boolean Thread.equal(Thread t);
 static KMETHOD Thread_equal(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturnUnboxValue(kThread_compareTo(sfp[0].asObject, sfp[1].asObject) == 0);
+	KReturnUnboxValue(kThread_compareTo(kctx, sfp[0].asObject, sfp[1].asObject) == 0);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -270,7 +270,7 @@ static kbool_t thread_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		.init     = kThread_Init,
 		.reftrace = kThread_Reftrace,
 		.free     = kThread_Free,
-		.compareObject = kThread_compareTo,
+		.compareTo = kThread_compareTo,
 	};
 	KDEFINE_CLASS defMutex = {
 		STRUCTNAME(Mutex),

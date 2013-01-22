@@ -2143,7 +2143,7 @@ static KMETHOD Module_createExecutionEngine(KonohaContext *kctx, KonohaStack *sf
 	KReturn(p);
 }
 
-static int BasicBlock_compareTo(kObject *p1, kObject *p2)
+static int BasicBlock_compareTo(KonohaContext *kctx, kObject *p1, kObject *p2)
 {
 	BasicBlock *bb1 = konoha::object_cast<BasicBlock*>(p1);
 	BasicBlock *bb2 = konoha::object_cast<BasicBlock*>(p2);
@@ -4642,7 +4642,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		fnull,\
 		p,\
 		unbox,\
-		compareObject,\
+		compareTo,\
 		compareUnboxValue,\
 		hasField,\
 		getFieldObjectValue,\
@@ -4666,7 +4666,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		fnull,\
 		p,\
 		unbox,\
-		compareObject,\
+		compareTo,\
 		compareUnboxValue,\
 		hasField,\
 		getFieldObjectValue,\
@@ -4691,7 +4691,7 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		0/*fnull*/,\
 		0/*p*/,\
 		0/*unbox*/,\
-		FN_COMPARE/*compareObject*/,\
+		FN_COMPARE/*compareTo*/,\
 		0/*compareUnboxValue*/,\
 		0/*hasField*/,\
 		0/*getFieldObjectValue*/,\

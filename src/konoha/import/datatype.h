@@ -183,6 +183,17 @@ static uintptr_t kString_unbox(KonohaContext *kctx, kObject *o)
 	return (uintptr_t) s->text;
 }
 
+static int kString_compareTo(KonohaContext *kctx, kObject *thisString, kObject *thatString)
+{
+	size_t llen = kString_size((kString *) thisString);
+	size_t rlen = kString_size((kString *) thatString);
+	size_t n = (llen > rlen) ? llen : rlen;
+	const char *ltext = kString_text((kString *) thisString);
+	const char *rtext = kString_text((kString *) thatString);
+	int ret = strncmp(ltext, rtext, n);
+	return ret == 0 ? (int)(llen - rlen) : ret;
+}
+
 static void kString_CheckASCII(KonohaContext *kctx, kString *s)
 {
 	unsigned char ch = 0;
@@ -683,11 +694,13 @@ static kObject* DEFAULT_fnullinit(KonohaContext *kctx, KClass *ct)
 	return ct->defaultNullValue;
 }
 
-static int DEFAULT_compareObject(kObject *o1, kObject *o2) {
+static int DEFAULT_compareTo(KonohaContext *kctx, kObject *o1, kObject *o2)
+{
 	return (int)(o1 - o2);
 }
 
-static int DEFAULT_compareUnboxValue(uintptr_t v1, uintptr_t v2) {
+static int DEFAULT_compareUnboxValue(uintptr_t v1, uintptr_t v2)
+{
 	return v1 - v2;
 }
 
@@ -737,7 +750,7 @@ static KClassVar* new_KClass(KonohaContext *kctx, KClass *bct, KDEFINE_CLASS *s,
 		ct->init = (s->init != NULL) ? s->init : DEFAULT_Init;
 		ct->reftrace = (s->reftrace != NULL) ? s->reftrace : DEFAULT_Reftrace;
 		ct->p     = (s->p != NULL) ? s->p : DEFAULT_p;
-		ct->compareObject     = (s->compareObject != NULL) ? s->compareObject : DEFAULT_compareObject;
+		ct->compareTo   = (s->compareTo != NULL) ? s->compareTo : DEFAULT_compareTo;
 		ct->compareUnboxValue = (s->compareUnboxValue != NULL) ? s->compareUnboxValue : DEFAULT_compareUnboxValue;
 		ct->unbox = (s->unbox != NULL) ? s->unbox : DEFAULT_unbox;
 		ct->free = (s->free != NULL) ? s->free : DEFAULT_Free;
@@ -965,6 +978,7 @@ static void LoadInitStructData(KonohaContext *kctx)
 	defString.init = kString_Init;
 	defString.free = kString_Free;
 	defString.p    = kString_p;
+	defString.compareTo = kString_compareTo;
 	defString.unbox = kString_unbox;
 
 	KDEFINE_CLASS defArray = {0};
