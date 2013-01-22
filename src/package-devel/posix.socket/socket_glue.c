@@ -45,7 +45,7 @@
 extern "C" {
 #endif
 
-#define WORD2INT(val) ((sizeof(val)==8) ? (val&0x7FFFFFFF)|((val>>32)&0x80000000) : val)
+#define WORD2INT(val) ((int)val)
 
 typedef const struct _kSockAddr kSockAddr;
 struct _kSockAddr {
