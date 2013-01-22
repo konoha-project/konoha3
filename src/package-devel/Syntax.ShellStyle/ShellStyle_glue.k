@@ -236,18 +236,18 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 		prevname = varname;
 		startindex = index + 1;
 	}
+	if(!enableStdout) {
+		//ret = ret + "global.lastExitStatus = " + varname + ".getStatus();\n";
+		ret = ret + "return " + varname + ".communicate(\"\")[0];\n";
+	}
 	//if(defined(DEBUG)) {
 	//	System.p(ret);
 	//}
-	if(!enableStdout) {
-		//ret = ret + "global.lastExitStatus = " + varname + ".getStatus(); ";
-		ret = ret + "return " + varname + ".communicate(\"\")[0]; }";
-	}
 	return ret;
 }
 
 Node typeShell(Node node, NameSpace ns, Object o) {
-	Node block = node.TypeCheckNode("$Block", o, 8/*allowEmpty*/);
+	Node block = node.TypeCheckNode("$Block", o, TypeCheckPolicy_AllowEmpty);
 	block.SetType(KNode_Block);
 	return block;
 }
@@ -313,23 +313,14 @@ int tokenizeDollarVariable(Token tk, String source) {
 int parseDollarVariable(Node node, Symbol sym, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
 	NameSpace ns = node.getNameSpace();
 	//if(defined(DEBUG)) {
-	//	System.p("parseDollarVariable");
 	//	System.p(node);
-	//	int i = beginIdx;
-	//	while(i < endIdx) {
-	//		System.p(tokenList[i].getParsedText());
-	//		System.p(tokenList[i].getParsedText().getlength());
-	//		System.p(tokenList[i].is("$Symbol"));
-	//		System.p(tokenList[i].is("()"));
-	//		i = i + 1;
-	//	}
 	//}
 	String text = tokenList[operatorIdx].getParsedText();
 	if(text.startsWith("$(") && text.endsWith(")")) {
 		String[] args = text.substring(2, text.getlength() - 1).split(" ");
 		String funcName = getFuncName();
 		String evaltext = "@Public String " + funcName + "() { ";
-		evaltext = evaltext + generateSubProcSequence(args, false).replace("\n", " ");
+		evaltext = evaltext + generateSubProcSequence(args, false).replace("\n", " ") + "}";
 		//if(defined(DEBUG)) {
 		//	System.p(evaltext);
 		//}
@@ -370,8 +361,9 @@ int parseDollarVariable(Node node, Symbol sym, Token[] tokenList, int beginIdx, 
 }
 
 Node typeDollarVariable(Node node, NameSpace ns, Object o) {
-	//System.p(node);
-	//System.p(node.getNode("class"));
+	//if(defined(DEBUG)) {
+	//	System.p(node);
+	//}
 	Symbol methodName = node.getToken("method", null).getParsedText();
 	Node classNode = node.getNode("class");
 	Node arg1 = node.getNode("arg1");
