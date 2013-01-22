@@ -148,11 +148,12 @@ static void TEST_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel,
 	}
 }
 
-static void TEST_reportCaughtException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottom, KonohaStack *sfp)
+static void TEST_reportCaughtException(KonohaContext *kctx, kException *e, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack)
 {
-	int line = (sfp != NULL) ? (kushort_t)sfp[K_RTNIDX].calledFileLine : 0;
+	int line = (topStack != NULL) ? (kushort_t)topStack[K_RTNIDX].calledFileLine : 0;
+	const char *exceptionName = KSymbol_text(e->symbol);
 	PLATAPI printf_i("LINE%d: %s\n", line, exceptionName);
-	fprintf(stdout, "LINE %d: %s %s\n", line, exceptionName, optionalMessage);
+	fprintf(stdout, "LINE %d: %s %s\n", line, exceptionName, kString_text(e->Message));
 }
 
 
