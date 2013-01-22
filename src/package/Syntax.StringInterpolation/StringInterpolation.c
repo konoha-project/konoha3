@@ -163,7 +163,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 static kbool_t StringInterpolationPackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_TextPattern, SYNFLAG_CTypeFunc, 0, 0, {NULL}, {(kFunc *)TypeCheck_ExtendedTextLiteral}, },
+		{ KSymbol_TextPattern, SYNFLAG_CTypeFunc, 0, 0, {SUGAR termParseFunc}, {SUGARFUNC TypeCheck_ExtendedTextLiteral}, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
