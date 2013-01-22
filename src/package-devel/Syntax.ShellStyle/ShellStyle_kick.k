@@ -4,7 +4,6 @@ import("dscript.subproc");
 import("JavaScript.Array");
 import("Type.File");
 
-//AllowImplicitGlobalVariable(true);
 int lastExitStatus = 0;
 
 @Public String FILE.readAll() {

@@ -168,7 +168,7 @@ String getPipeString(String prevname, String varname, String[] args, int startin
 			ret = ret + varname + ".bg();\n";
 		}
 	}
-	//ret = ret + "global.lastExitStatus = " + varname + ".getStatus();\n";
+	ret = ret + "global.lastExitStatus = " + varname + ".getStatus();\n";
 	return ret;
 }
 
@@ -237,7 +237,7 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 		startindex = index + 1;
 	}
 	if(!enableStdout) {
-		//ret = ret + "global.lastExitStatus = " + varname + ".getStatus();\n";
+		ret = ret + "global.lastExitStatus = " + varname + ".getStatus();\n";
 		ret = ret + "return " + varname + ".communicate(\"\")[0];\n";
 	}
 	//if(defined(DEBUG)) {
@@ -337,13 +337,11 @@ int parseDollarVariable(Node node, Symbol sym, Token[] tokenList, int beginIdx, 
 		text = text.substring(2, text.getlength() - 1);
 	}
 	else if(text == "$?") {
-		/*
 		Token methodToken = ns.Preprocess("getExitStatus")[0];
 		Node classExpr = new Node(ns);
 		classExpr.SetConstValue(ns);
 		node.AddParsedObject("class", classExpr);
 		node.AddParsedObject("method", methodToken);
-		*/
 		return endIdx;
 	}
 	else {
