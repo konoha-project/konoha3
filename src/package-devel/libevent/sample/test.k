@@ -6,9 +6,10 @@ import("posix.socket");
 import("libevent");
 
 
-void callback_method(CEvent e) {
+void do_accept(CEvent e) {	//change callback parameters as libevent cb
 	System.p("Callback executed!!");
 	System.p("CEvent = " + e);
+	//close()
 }
 
 void main() {
@@ -21,7 +22,7 @@ void main() {
 
 	Event_base e = new Event_base();
 	System.p(e);
-	e.event_add("listener", evd, EV_READ | EV_PERSIST, callback_method, new TimeVal(15, 300));
+	e.event_add("do_accept", evd, EV_READ | EV_PERSIST, do_accept, new TimeVal(15, 300));
 	e.event_dispatch();
 }
 

@@ -31,7 +31,7 @@ import("cstyle", "null");
 
 class Event_base /*extends CEvent_base*/ {
 	CEvent_base evbase;
-	Map eventMap;
+	Map eventMap;	//no need?
 
 	Event_base() {
 		evbase = new CEvent_base();
@@ -39,8 +39,7 @@ class Event_base /*extends CEvent_base*/ {
 	}
 
 	@Public int event_dispatch() {
-		int ret = evbase.event_dispatch();
-		return ret;
+		return evbase.event_dispatch();
 	}
 
 	@Public int event_add(String key, int evd, int event, Func[void, CEvent] cb, TimeVal tv) {

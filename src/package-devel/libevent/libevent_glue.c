@@ -45,7 +45,6 @@ typedef struct CEvent {
 	struct event *event;
 	kCEvent_base *evBase;
 	kFunc *kcb;		// konoha call back method	
-	kObject *arg;	// arg to be passed konoha callback-method
 } kCEvent;
 
 #include <sys/time.h>
@@ -103,7 +102,7 @@ static void callback_1st(evutil_socket_t evd, short event, void *arg) {
 	BEGIN_UnusedStack(lsfp);
 	KClass *returnType = kMethod_GetReturnType(cbArg->kcb->method);
 	KUnsafeFieldSet(lsfp[0].asObject, K_NULL);
-	KUnsafeFieldSet(lsfp[1].asObject, cbArg->arg);
+	KUnsafeFieldSet(lsfp[1].asObject, (kObject *)cbArg);
 
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, cbArg->kcb, 1);
 	KStackCall(lsfp);
@@ -120,7 +119,6 @@ static void CEvent_Init(KonohaContext *kctx, kObject *o, void *conf)
 	ev->event = NULL;
 	ev->evBase = NULL;
 	ev->kcb = NULL;
-	ev->arg = NULL;
 }
 
 static void CEvent_Free(KonohaContext *kctx, kObject *o)
@@ -132,7 +130,6 @@ static void CEvent_Free(KonohaContext *kctx, kObject *o)
 		ev->event = NULL;
 		ev->evBase = NULL;
 		ev->kcb = NULL;
-		ev->arg = NULL;
 	}
 }
 
@@ -150,7 +147,6 @@ static KMETHOD CEvent_new(KonohaContext *kctx, KonohaStack *sfp)
 	ev->evBase = cEvent_base;
 	ev->key = key;
 	ev->kcb = konoha_cb;
-	ev->arg = (kObject *)ev;
 	//event_add() will call in EventBase.event_add() after return this method
 	KReturn(ev);
 }
