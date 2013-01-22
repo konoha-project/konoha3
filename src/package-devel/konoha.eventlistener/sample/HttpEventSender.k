@@ -1,4 +1,3 @@
-//import("konoha.new"); Don't use this
 import("Type.Json");
 import("Lib.Curl");
 

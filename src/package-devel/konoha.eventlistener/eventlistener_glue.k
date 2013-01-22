@@ -1,4 +1,3 @@
-//import("konoha.new"); Don't use this
 import("Syntax.JavaStyleClass");
 import("JavaScript.Array");
 import("MiniKonoha.Map");
