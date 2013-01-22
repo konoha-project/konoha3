@@ -79,12 +79,6 @@ static void namespace_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
-//	KDEFINE_INT_CONST IntData[] = {
-//		{"INT_MAX", KType_Int, KINT_MAX},
-//		{"INT_MIN", KType_Int, KINT_MIN},
-//		{NULL},
-//	};
-//	KLIB kNameSpace_LoadConstData(kctx, ns, KConst_(IntData), trace);
 }
 
 
@@ -214,10 +208,9 @@ static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTrac
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("namespace")), "\"namespace\" $Expr", 0, trace);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("const")), "\"const\" $Symbol \"=\" $Expr", 0, trace);
+	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("const")), "\"const\" $Symbol = $Expr", 0, trace);
 	return true;
 }
-
 
 // --------------------------------------------------------------------------
 
