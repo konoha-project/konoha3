@@ -121,8 +121,9 @@ struct kRawPtr {
 #define kmodllvm ((kmodllvm_t *)kctx->modshare[MOD_llvm])
 #define KClass_Value (kmodllvm)->cValue
 #define KType_Value (KClass_Value)->typeId
-#if LLVM_VERSION <= 208
+#if LLVM_VERSION <= 209
 #define DEPRICATE_API(MSG) do {\
+    (void)kctx;(void)sfp;\
     fprintf(stderr, "FIXME " MSG "\n");\
     abort();\
 } while(0)
