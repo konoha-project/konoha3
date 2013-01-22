@@ -718,10 +718,12 @@ static kbool_t KBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, k
 	for (i = 0; i < kNode_GetNodeListSize(kctx, block); i++) {
 		kNode *stmt = block->NodeList->NodeItems[i];
 		builder->common.uline = kNode_uline(stmt);
-		if(hasValue && i == size - 1 /* lastNode*/) {
-			SUGAR VisitNode(kctx, builder, stmt, &block->stackbase);
-		}
-		if(!SUGAR VisitNode(kctx, builder, stmt, &stmt->stackbase)) break;
+		intptr_t *stackRef;
+		if(hasValue && i == size - 1 /* lastNode */)
+			stackRef = &block->stackbase;
+		else
+			stackRef = &stmt->stackbase;
+		if(!SUGAR VisitNode(kctx, builder, stmt, stackRef)) break;
 	}
 	ReAssignNonValueNode(kctx, builder, AssignStack(thunk), block);
 	return true;
