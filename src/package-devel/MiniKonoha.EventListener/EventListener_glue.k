@@ -1,19 +1,20 @@
-//import("konoha.new"); Don't use this
 import("Syntax.JavaStyleClass");
 import("JavaScript.Array");
 import("MiniKonoha.Map");
-import("Syntax.GlobalVariable");
 import("MiniKonoha.NameSpace");  // konoha.const is obsolete
+import("Syntax.GlobalVariable");
 import("JavaStyle.Object");
 import("posix.thread");
+import("Type.Json"); // temporally
 
 class EventQueue {
 	Array[Event] data;
 	//Array[KonohaContext] ctxlist;
 
 	EventQueue(void) {
-		this.data = new Event[0];
+		this.data = [];
 		//this.ctxlist = new KonohaContext[0];
+		return this;
 	}
 
 	void enqueue(Event event) {
@@ -48,10 +49,32 @@ class EventQueue {
 	}
 }
 
-const EventMap = Map[Func[void, Event]];
+//const EventMap = Map[Func[void, Event]]; TODO
+
+class EventMap { // temporally
+	Json keyToIndexMap;
+	Array[Func[void, Event]] values;
+
+	EventMap() {
+		this.keyToIndexMap = new Json();
+		this.values = [];
+		return this; // TODO remove it
+	}
+
+	@Public void set(String key, Func[void, Event] func) {
+		int index = this.values.getSize();
+		this.values.add(func);
+		this.keyToIndexMap.setInt(key, index);
+	}
+
+	@Public Func[void, Event] get(String key) {
+		int index = this.keyToIndexMap.getInt(key);
+		return this.values[index];
+	}
+}
 
 class Dispatcher {
-	Map[Func[void, Event]] handlers;
+	EventMap handlers;
 	EventQueue queue;
 	Mutex lock;
 
@@ -59,6 +82,7 @@ class Dispatcher {
 		this.handlers = new EventMap();
 		this.queue = new EventQueue();
 		this.lock = new Mutex();
+		return this; // TODO remove it
 	}
 
 	@Public void setCallBack(String eventType, Func[void, Event] func) {
@@ -73,7 +97,8 @@ class Dispatcher {
 		}
 		Event event = this.queue.dequeue();
 		String key = event.getProperty("event");
-		Func[void, Event] func = this.handlers[key];
+//		Func[void, Event] func = this.handlers[key]; // TODO
+		Func[void, Event] func = this.handlers.get(key);
 		func(event);
 		/* finally */
 		this.lock.unlock();
