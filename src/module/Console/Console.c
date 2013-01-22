@@ -99,8 +99,12 @@ static void KBuffer_WriteValue(KonohaContext *kctx, KBuffer *wb, KClass *c, Kono
 	}
 }
 
-static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottomStack, KonohaStack *topStack)
+static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaStack *bottomStack, KonohaStack *topStack)
 {
+	DBG_ASSERT(IS_Exception(e));
+	const char *exceptionName = KSymbol_text(e->symbol);
+	const char *optionalMessage = kString_text(e->Message);
+	int fault = e->fault;
 	PLATAPI printf_i("%s", BeginTag(kctx, ErrTag));
 	if(optionalMessage != NULL && optionalMessage[0] != 0) {
 		PLATAPI printf_i("%s: SoftwareFault %s", exceptionName, optionalMessage);
@@ -137,7 +141,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 		}
 		if(!kMethod_Is(Static, mtd)) {
 			KBuffer_WriteValue(kctx, &wb, cThis, sfp);
-			PLATAPI printf_i("this=(%s) %s, ", KClass_text(cThis), KLIB KBuffer_text(kctx, &wb, EnsureZero));
+			PLATAPI printf_i("this=(%s) %s, ", KClass_text(cThis), KLIB KBuffer_text(kctx, &wb, 1));
 			KLIB KBuffer_Free(&wb);
 		}
 		unsigned i;
@@ -149,7 +153,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 			KClass *c = KClass_(param->paramtypeItems[i].attrTypeId);
 			c = c->realtype(kctx, c, cThis);
 			KBuffer_WriteValue(kctx, &wb, c, sfp + i + 1);
-			PLATAPI printf_i("%s=(%s) %s", KSymbol_text(KSymbol_Unmask(param->paramtypeItems[i].name)), KClass_text(c), KLIB KBuffer_text(kctx, &wb, EnsureZero));
+			PLATAPI printf_i("%s=(%s) %s", KSymbol_text(KSymbol_Unmask(param->paramtypeItems[i].name)), KClass_text(c), KLIB KBuffer_text(kctx, &wb, 1));
 			KLIB KBuffer_Free(&wb);
 		}
 		PLATAPI printf_i(")\n");

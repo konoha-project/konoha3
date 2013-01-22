@@ -37,8 +37,11 @@ extern "C" {
 
 /* ------------------------------------------------------------------------- */
 DEF_ARRAY_OP_NOPOINTER(BlockPtr);
-
+#ifdef DEBUG
+#define debug(FMT, ...) fprintf(stderr, FMT, ## __VA_ARGS__)
+#else
 #define debug(FMT, ...) /*fprintf(stderr, FMT, ## __VA_ARGS__)*/
+#endif
 
 /* ------------------------------------------------------------------------- */
 /* [Dump IR] */
@@ -660,7 +663,9 @@ ByteCode *IRBuilder_Compile(FuelIRBuilder *builder, IMethod *Mtd, int option, bo
 	ARRAY_init(BlockPtr, &builder->Blocks, 1);
 	bool UseLLVM = !(Mtd->Method->typeId == 0 && Mtd->Method->mn == 0);
 
+#ifdef DEBUG
 	KonohaContext *kctx = Mtd->Context;
+#endif
 	debug("Compiling: %p %s.%s%s\n", Mtd->Method, KType_text(Mtd->Method->typeId), KMethodName_Fmt2(Mtd->Method->mn));
 #ifndef FUELVM_USE_LLVM
 	UseLLVM = false;

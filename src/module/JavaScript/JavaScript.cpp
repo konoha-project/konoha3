@@ -185,6 +185,7 @@ static kbool_t kNode_isStmt(KonohaContext *kctx, kNode *node){
 		case KNode_Throw:
 			return true;
 	}
+	return false;
 }
 
 static kbool_t kNode_isExpr(KonohaContext *kctx, kNode *node){
@@ -215,7 +216,6 @@ static void JSBuilder_EmitNewLineWith(KonohaContext *kctx, KBuilder *builder, co
 
 static void JSBuilder_EmitString(KonohaContext *kctx, KBuilder *builder, const char* prefix, const char* str, const char* suffix)
 {
-	JSBuilder *jsBuilder = (JSBuilder *)builder;
 	JSBuilder_EmitIndent(kctx, builder);
 	//KLIB KBuffer_printf(kctx, &jsBuilder->jsCodeBuffer, "%s%s%s", prefix, str, suffix);
 	printf("%s%s%s", prefix, str, suffix);
@@ -296,7 +296,6 @@ static kbool_t JSBuilder_VisitStmtNode(KonohaContext *kctx, KBuilder *builder, k
 
 static kbool_t JSBuilder_VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk, const char* prefix, const char* suffix)
 {
-	JSBuilder *jsBuilder = (JSBuilder *)builder;
 	JSBuilder_EmitString(kctx, builder, prefix, "", "");
 	kbool_t ret = JSBuilder_VisitExprNode(kctx, builder, expr, thunk);
 	JSBuilder_EmitString(kctx, builder, suffix, "", "");
@@ -716,7 +715,6 @@ static kbool_t JSBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder
 
 static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 {
-	JSBuilder *jsBuilder = (JSBuilder *)builder;
 	KClass *kclass = KClass_(mtd->typeId);
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);

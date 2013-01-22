@@ -121,10 +121,12 @@ struct kRawPtr {
 #define kmodllvm ((kmodllvm_t *)kctx->modshare[MOD_llvm])
 #define KClass_Value (kmodllvm)->cValue
 #define KType_Value (KClass_Value)->typeId
-#define LLVM_TODO(MSG) do {\
+#if LLVM_VERSION <= 208
+#define DEPRICATE_API(MSG) do {\
     fprintf(stderr, "FIXME " MSG "\n");\
     abort();\
 } while(0)
+#endif
 
 typedef struct {
 	KRuntimeModule h;
@@ -292,8 +294,8 @@ static KMETHOD Type_getPPCFP128Ty(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Type_getX86MMXTy(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	const Type *ptr = Type::getX86_MMXTy(getGlobalContext());
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -385,8 +387,8 @@ static KMETHOD Type_getPPCFP128PtrTy(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Type_getX86MMXPtrTy(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	const Type *ptr = Type::getX86_MMXPtrTy(getGlobalContext());
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -474,7 +476,7 @@ static KMETHOD IRBuilder_createRet(KonohaContext *kctx, KonohaStack *sfp)
 ////## ReturnInst IRBuilder.CreateAggregateRet(Value retVals, int N);
 //KMETHOD IRBuilder_createAggregateRet(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	LLVM_TODO("NO SUPPORT");
+//	DEPRICATE_API("NO SUPPORT");
 //	//IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 //	//Value *const retVals = konoha::object_cast<Value *const>(sfp[1].asObject);
 //	//kint_t N = Int_to(kint_t,sfp[2]);
@@ -747,8 +749,8 @@ static KMETHOD IRBuilder_createUDiv(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD IRBuilder_createExactUDiv(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
@@ -2297,8 +2299,8 @@ static KMETHOD ArrayType_get(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD StructType_SetBody(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 209
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	StructType *type  = konoha::object_cast<StructType *>(sfp[0].asObject);
 	kArray *args = sfp[1].asArray;
@@ -2315,7 +2317,7 @@ static KMETHOD StructType_isOpaque(KonohaContext *kctx _UNUSED_, KonohaStack *sf
 {
 	bool ret = false;
 #if LLVM_VERSION <= 209
-	LLVM_TODO("NO SUPPORT");
+	DEPRICATE_API("NO SUPPORT");
 #else
 	StructType *type  = konoha::object_cast<StructType *>(sfp[0].asObject);
 	ret = type->isOpaque();
@@ -2592,8 +2594,8 @@ static KMETHOD DynamicLibrary_loadLibraryPermanently(KonohaContext *kctx, Konoha
 	std::string ErrMsg;
 	kbool_t ret;
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 	ret = LinkDynamicObject(libname, &ErrMsg);
 #else
 	ret = sys::DynamicLibrary::LoadLibraryPermanently(libname, &ErrMsg);
@@ -2612,8 +2614,8 @@ static KMETHOD DynamicLibrary_searchForAddressOfSymbol(KonohaContext *kctx _UNUS
 	kint_t ret = 0;
 	void *symAddr = NULL;
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));(void)fname;
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;(void)fname;
+	DEPRICATE_API("NO SUPPORT");
 	//symAddr = GetAddressOfSymbol(fname);
 #else
 	symAddr = sys::DynamicLibrary::SearchForAddressOfSymbol(fname);
@@ -2765,8 +2767,8 @@ static KMETHOD LLVM_createProfileVerifierPass(KonohaContext *kctx, KonohaStack *
 static KMETHOD LLVM_createPathProfileLoaderPass(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	ModulePass *ptr = createPathProfileLoaderPass();
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -2778,8 +2780,8 @@ static KMETHOD LLVM_createPathProfileLoaderPass(KonohaContext *kctx, KonohaStack
 static KMETHOD LLVM_createPathProfileVerifierPass(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	ModulePass *ptr = createPathProfileVerifierPass();
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -3336,8 +3338,8 @@ static KMETHOD ConstantExpr_getNUWMul(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getNSWShl(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
@@ -3351,8 +3353,8 @@ static KMETHOD ConstantExpr_getNSWShl(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getNUWShl(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
@@ -3376,8 +3378,8 @@ static KMETHOD ConstantExpr_getExactSDiv(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getExactUDiv(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
@@ -3391,8 +3393,8 @@ static KMETHOD ConstantExpr_getExactUDiv(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getExactAShr(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
@@ -3406,8 +3408,8 @@ static KMETHOD ConstantExpr_getExactAShr(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getExactLShr(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
 	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
@@ -3665,8 +3667,8 @@ static KMETHOD LLVM_createModuleDebugInfoPrinterPass(KonohaContext *kctx, Konoha
 static KMETHOD LLVM_createMemDepPrinter(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	FunctionPass *ptr = createMemDepPrinter();
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -3678,8 +3680,8 @@ static KMETHOD LLVM_createMemDepPrinter(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD LLVM_createPostDomTree(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	FunctionPass *ptr = createPostDomTree();
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -4052,8 +4054,8 @@ static KMETHOD LLVM_createLoopUnswitchPass(KonohaContext *kctx, KonohaStack *sfp
 static KMETHOD LLVM_createLoopInstSimplifyPass(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	Pass *ptr = createLoopInstSimplifyPass();
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -4089,8 +4091,8 @@ static KMETHOD LLVM_createLoopRotatePass(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD LLVM_createLoopIdiomPass(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	Pass *ptr = createLoopIdiomPass();
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -4190,8 +4192,8 @@ static KMETHOD LLVM_createLCSSAPass(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD LLVM_createEarlyCSEPass(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	FunctionPass *ptr = createEarlyCSEPass();
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -4294,8 +4296,8 @@ static KMETHOD LLVM_createObjCARCOptPass(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD LLVM_createInstructionSimplifierPass(KonohaContext *kctx, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	FunctionPass *ptr = createInstructionSimplifierPass();
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -4423,8 +4425,8 @@ static KMETHOD LLVM_parseBitcodeFile(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Instruction_SetMetadata(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
 #if LLVM_VERSION <= 208
-	(void)kctx;(void)sfp;(void)(-(K_CALLDELTA));
-	LLVM_TODO("NO SUPPORT");
+	(void)kctx;(void)sfp;
+	DEPRICATE_API("NO SUPPORT");
 #else
 	Instruction *inst = konoha::object_cast<Instruction *>(sfp[0].asObject);
 	Module *m = konoha::object_cast<Module *>(sfp[1].asObject);

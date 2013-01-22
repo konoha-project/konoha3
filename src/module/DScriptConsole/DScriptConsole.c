@@ -99,7 +99,7 @@ static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, k
 //	}
 //}
 
-static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottomStack, KonohaStack *topStack)
+static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaStack *bottomStack, KonohaStack *topStack)
 {
 	// TODO
 }

@@ -49,7 +49,7 @@ static inline const char *Opcode2String(ByteCode *code)
 #define CONV_IArray(OPCODE, F)     "IAry", CONV_DEFAULT(OPCODE,F)
 #define CONV_TestFunc(OPCODE, F)   "TestF", CONV_DEFAULT(OPCODE,F)
 #define CONV_SValue(OPCODE, F)     "SVal", ((unsigned long long) ((OP##OPCODE *)(code))->F.bits)
-#define CONV_uintptr_t(OPCODE, F)  "uline", (((OP##OPCODE *)(code))->F)
+#define CONV_uintptr_t(OPCODE, F)  "uline", ((unsigned long)((OP##OPCODE *)(code))->F)
 
 #define DUMP(OPCODE, T, F) CONCAT(CONV_, T)(OPCODE, F)
 

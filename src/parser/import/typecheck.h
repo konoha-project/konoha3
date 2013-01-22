@@ -270,14 +270,14 @@ static kNode* TypeCheckNodeList(KonohaContext *kctx, kNode *block, size_t n, kNa
 	}
 	return stmt;
 }
-
-static kNode *PushNode(KonohaContext *kctx, kNameSpace *ns, size_t stackbase, kNode *expr)
-{
-	kNode *node = KNewNode(ns);
-	KFieldSet(node, node->NodeToPush, expr);
-	node->stackbase = stackbase;
-	return kNode_Type(kctx, node, KNode_Push, expr->attrTypeId);
-}
+//
+//static kNode *PushNode(KonohaContext *kctx, kNameSpace *ns, size_t stackbase, kNode *expr)
+//{
+//	kNode *node = KNewNode(ns);
+//	KFieldSet(node, node->NodeToPush, expr);
+//	node->stackbase = stackbase;
+//	return kNode_Type(kctx, node, KNode_Push, expr->attrTypeId);
+//}
 
 static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, KClass *reqc)
 {
@@ -361,7 +361,7 @@ static void kNameSpace_InitParam(KonohaContext *kctx, struct KGammaLocalData *ge
 static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t *callparamNULL, kNameSpace *ns, kString *text, kfileline_t uline, int baseIndent, int options)
 {
 	INIT_GCSTACK();
-	size_t errorCount = KGetParserContext(kctx)->errorMessageCount;
+	int errorCount = KGetParserContext(kctx)->errorMessageCount;
 	kParam *param = kMethod_GetParam(mtd);
 	if(callparamNULL != NULL) {
 		//DynamicComplie();

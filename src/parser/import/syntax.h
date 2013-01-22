@@ -680,19 +680,19 @@ static kNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kNode *exp
 	return kNode_Rebase(kctx, expr, ns->genv->localScope.varsize);
 }
 
-static kNode* TypeCheckDynamicCallParams(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kMethod *mtd, kNameSpace *ns, kString *name, kmethodn_t mn, KClass *reqClass)
-{
-	size_t i;
-	kParam *pa = kMethod_GetParam(mtd);
-	KClass* ptype = (pa->psize == 0) ? KClass_Object : KClass_(pa->paramtypeItems[0].attrTypeId);
-	for(i = 2; i < kArray_size(expr->NodeList); i++) {
-		kNode *texpr = SUGAR TypeCheckNodeAt(kctx, expr, i, ns, ptype, 0);
-		if(kNode_IsError(texpr) /* texpr = K_NULLNODE */) return texpr;
-	}
-	kNode_AddNode(kctx, expr, new_ConstNode(kctx, kNode_ns(expr), NULL, UPCAST(name)));
-	return TypeMethodCallNode(kctx, expr, mtd, reqClass);
-}
-
+//static kNode* TypeCheckDynamicCallParams(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kMethod *mtd, kNameSpace *ns, kString *name, kmethodn_t mn, KClass *reqClass)
+//{
+//	size_t i;
+//	kParam *pa = kMethod_GetParam(mtd);
+//	KClass* ptype = (pa->psize == 0) ? KClass_Object : KClass_(pa->paramtypeItems[0].attrTypeId);
+//	for(i = 2; i < kArray_size(expr->NodeList); i++) {
+//		kNode *texpr = SUGAR TypeCheckNodeAt(kctx, expr, i, ns, ptype, 0);
+//		if(kNode_IsError(texpr) /* texpr = K_NULLNODE */) return texpr;
+//	}
+//	kNode_AddNode(kctx, expr, new_ConstNode(kctx, kNode_ns(expr), NULL, UPCAST(name)));
+//	return TypeMethodCallNode(kctx, expr, mtd, reqClass);
+//}
+//
 static kMethod *kNameSpace_GuessCoercionMethodNULL(KonohaContext *kctx, kNameSpace *ns, kToken *tk, KClass *thisClass)
 {
 	const char *name = kString_text(tk->text);

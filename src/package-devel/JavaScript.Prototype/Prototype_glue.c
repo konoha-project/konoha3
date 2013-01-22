@@ -112,7 +112,7 @@ static void ThrowTypeError(KonohaContext *kctx, KonohaStack *sfp, int argc)
 
 static void KStackDynamicTypeCheck(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd, KClass *thisClass)
 {
-	int i;
+	kushort_t i;
 	kParam *pa = kMethod_GetParam(mtd);
 	for(i = 0; i < pa->psize; i++) {
 		KClass *objectType = kObject_class(sfp[i+1].asObject);
