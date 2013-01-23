@@ -173,7 +173,7 @@ static KMETHOD Json_toBoolean(KonohaContext *kctx, KonohaStack *sfp)
 
 static void keys_doEach(KonohaContext* kctx, const char* key, struct JsonBuf *jsonbuf, void* thunk)
 {
-	kArray *array = (kArray*)thunk;
+	kArray *array = (kArray *)thunk;
 	KLIB kArray_Add(kctx, array, KLIB new_kString(kctx, OnField, key, strlen(key), 0));
 }
 
@@ -182,7 +182,7 @@ static KMETHOD Json_keys(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
 	kArray *ret = (kArray *) KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
-	PLATAPI DoJsonEach(kctx, &jo->jsonbuf, (void*)ret, keys_doEach);
+	PLATAPI DoJsonEach(kctx, &jo->jsonbuf, (void *)ret, keys_doEach);
 	KReturn(ret);
 }
 

@@ -659,7 +659,7 @@ static kNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kNode *exp
 	kNode *thisNode = BoxThisNode(kctx, expr, ns, mtd, &thisClass);
 	kbool_t isConst = kNode_IsConstValue(thisNode);
 	kParam *pa = kMethod_GetParam(mtd);
-	DBG_ASSERT(pa->psize +2 <= kArray_size(expr->NodeList));
+	DBG_ASSERT(pa->psize + 2U <= kArray_size(expr->NodeList));
 	size_t i;
 	for(i = 0; i < pa->psize; i++) {
 		size_t n = i + 2;
@@ -778,7 +778,7 @@ static kNode *TypeFuncParam(KonohaContext *kctx, kNodeVar *expr, kNameSpace *ns)
 	KClass *thisClass = KClass_(kNode_At(expr, 0)->attrTypeId);
 	kParam *pa = KClass_cparam(thisClass);
 	size_t i, size = kArray_size(expr->NodeList);
-	if(pa->psize + 2 != size) {
+	if(pa->psize + 2U != size) {
 		return SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "function %s takes %d parameter(s), but given %d parameter(s)", KClass_text(thisClass), (int)pa->psize, (int)size-2);
 	}
 	for(i = 0; i < pa->psize; i++) {

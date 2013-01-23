@@ -11,5 +11,5 @@ done
 
 for F in ${SOURCE}
 do
-	minikonoha ./misc/CheckStyle.k ${F}
+	minikonoha -MFuelVM ./misc/CheckStyle.k ${F}
 done

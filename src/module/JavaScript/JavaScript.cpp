@@ -230,7 +230,7 @@ static kbool_t JSBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, 
 	DBG_ASSERT(block->node == KNode_Block);
 	if(!IS_Array(block->NodeList)) {
 		JSBuilder_EmitString(kctx, builder, "{ /* ERROR: block->NodeList is not Array. */ }", "", "");
-		return true;	
+		return true;
 	}
 	DBG_ASSERT(IS_Array(block->NodeList));
 	if(!kNode_IsRootNode(block)) {
@@ -746,7 +746,7 @@ static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, k
 		KLIB KBuffer_printf(kctx, &wb, "%s", KSymbol_text(params->paramtypeItems[i].name));
 	}
 	KLIB KBuffer_printf(kctx, &wb, ")");
-	
+
 	JSBuilder_EmitString(kctx, builder, KLIB KBuffer_text(kctx, &wb, EnsureZero), "", "");
 	KLIB KBuffer_Free(&wb);
 }
@@ -874,7 +874,7 @@ static struct KVirtualCode* V8_GenerateVirtualCode(KonohaContext *kctx, kMethod 
 	SUGAR VisitNode(kctx, (KBuilder *)builder, block, NULL);
 	JSBuilder_Free(kctx, (KBuilder *)builder, mtd);
 	RESET_GCSTACK();
-	
+
 	//printf("//<=<=<=<=<=<=<=<=\n");
 	return NULL;
 }
