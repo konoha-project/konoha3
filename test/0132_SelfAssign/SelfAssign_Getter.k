@@ -5,8 +5,8 @@ import("cstyle");
 
 class C {
 	int x;
+	C() {}
 }
-
 void test() {
 	C c = new C();
 	assert(c.x == 0);
@@ -15,6 +15,3 @@ void test() {
 }
 
 test();
-
-
-
