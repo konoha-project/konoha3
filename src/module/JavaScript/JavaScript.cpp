@@ -234,6 +234,10 @@ static kbool_t JSBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, 
 	}
 	DBG_ASSERT(IS_Array(block->NodeList));
 	if(!kNode_IsRootNode(block)) {
+		if(kNode_GetParent(kctx, block)->node == 0) {
+			// Closure
+			return true;
+		}
 		JSBuilder_EmitNewLineWith(kctx, builder, isExprBlock ? "(function() {" : "{");
 		jsBuilder->indent++;
 	}
