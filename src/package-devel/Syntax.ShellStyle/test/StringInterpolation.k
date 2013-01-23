@@ -1,6 +1,6 @@
 // written by ide
 // modified by chenji
-
+import("Java.String");
 import("Syntax.StringInterpolation");
 
 int add(int n) {
@@ -20,8 +20,8 @@ void interpolation() {
 interpolation();
 
 void literal() {
-    assert("abcd efgh".getlength() == 9);
-    assert("${".getlength() == 2);
+    assert("abcd efgh".length() == 9);
+    assert("${".length() == 2);
 }
 
 literal();
