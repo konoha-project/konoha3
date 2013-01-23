@@ -165,8 +165,8 @@ static void kNameSpace_LookupMethodWithInlineCache(KonohaContext *kctx, KonohaSt
 	ktypeattr_t typeId = kObject_typeId(sfp[0].asObject);
 	kMethod *mtd = cache[0];
 	if(mtd->typeId != typeId) {
-		//FIXME: Node unknown error
-		//mtd = KLIB kNameSpace_GetMethodBySignatrueNULL(kctx, ns, kObject_class(sfp[0].asObject), mtd->mn, mtd->paramdom, 0, NULL);
+		KClass *ct = kObject_class(sfp[0].asObject);
+		mtd =  KLIB kNameSpace_GetMethodBySignatureNULL(kctx, ns, ct, mtd->mn, mtd->paramdom, 0, NULL);
 		cache[0] = mtd;
 	}
 	sfp[0].unboxValue = kObject_Unbox(sfp[0].asObject);
