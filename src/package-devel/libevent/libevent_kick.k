@@ -29,9 +29,9 @@ import("konoha.map");
 import("konoha.ns");
 import("cstyle", "null");
 
-class Event_base /*extends CEvent_base*/ {
+class Event_base {
 	CEvent_base evbase;
-	Map eventMap;	//no need?
+	@Private Map eventMap;	//no need?
 
 	Event_base() {
 		evbase = new CEvent_base();
@@ -42,9 +42,9 @@ class Event_base /*extends CEvent_base*/ {
 		return evbase.event_dispatch();
 	}
 
-	@Public int event_add(String key, int evd, int event, Func[void, int, int, CEvent] cb, TimeVal tv) {
+	@Public int event_add(String key, int evd, int event, Func[void, int, int, Object] cb, Object cbArg, TimeVal tv) {
 		if (key.isNotNull()) {
-			CEvent ev = new CEvent(evbase, key, evd, event, cb);
+			CEvent ev = new CEvent(evbase, key, evd, event, new CallBackArg(cb, cbArg));
 			System.p(eventMap);
 			eventMap.set(key, ev);	//keep referance of 'ev', and deliver it to callback method
 			int ret =  System.event_add(ev, tv);
