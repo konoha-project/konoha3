@@ -507,6 +507,7 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 	KClass *globalObjectClass = KLIB kNameSpace_GetClassByFullName(kctx, kNode_ns(expr), "GlobalObject", 12, NULL);
 	kbool_t isGlobal = (KClass_(receiver->attrTypeId) == globalObjectClass || receiver->attrTypeId == KType_NameSpace);
 	const char *methodName = KSymbol_text(mtd->mn);
+	const char* className = KSymbol_text(KClass_(receiver->attrTypeId)->classNameSymbol);
 	if(receiver->attrTypeId == KType_NameSpace) {
 		if(mtd->mn == KMethodName_("import")) {
 			kString *packageNameString = (kString *)kNode_At(expr, 2)->ObjectConstValue;
@@ -521,7 +522,6 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 		JSBuilder_EmitString(kctx, builder, LOG_FUNCTION_NAME, "", "");
 	}
 	else if(strcmp(methodName, "new") == 0) {
-		const char* className = KSymbol_text(KClass_(receiver->attrTypeId)->classNameSymbol);
 		if(strcmp(className, "Map") == 0) {
 			JSBuilder_EmitString(kctx, builder, "new Object", "", "");
 		}
@@ -581,10 +581,15 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 			// TODO
 			break;
 		default:
-			if(!isGlobal){
-				JSBuilder_EmitString(kctx, builder, ".", "", "");
+			if(strcmp(className, "Func") == 0) {
+				// Invoke closure
 			}
-			JSBuilder_EmitString(kctx, builder, methodName, "", "");
+			else {
+				if(!isGlobal){
+					JSBuilder_EmitString(kctx, builder, ".", "", "");
+				}
+				JSBuilder_EmitString(kctx, builder, methodName, "", "");
+			}
 			break;
 		}
 	}
@@ -594,10 +599,11 @@ static kbool_t JSBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *buil
 {
 	kMethod *mtd = CallNode_getMethod(node);
 	kbool_t isArray = false;
+	size_t nodeListSize = kArray_size(node->NodeList);
 
-	if(kArray_size(node->NodeList) == 2 && KMethodName_isUnaryOperator(kctx, mtd->mn)) {
+	if(nodeListSize == 2 && KMethodName_isUnaryOperator(kctx, mtd->mn)) {
 		JSBuilder_EmitString(kctx, builder, KMethodName_Fmt2(mtd->mn), "(");
-		SUGAR VisitNode(kctx, builder, kNode_At(node, 1), thunk);
+		JSBuilder_VisitExprNode(kctx, builder, kNode_At(node, 1), thunk);
 		JSBuilder_EmitString(kctx, builder, ")", "", "");
 	}
 	else if(KMethodName_isBinaryOperator(kctx, mtd->mn)) {
@@ -616,12 +622,7 @@ static kbool_t JSBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *buil
 		case kSymbolPrefix_TO:
 			break;
 		case kSymbolPrefix_SET:
-			if(kArray_size(node->NodeList) > 3) {
-				SUGAR VisitNode(kctx, builder, kNode_At(node, 3), thunk);
-			}
-			else {
-				SUGAR VisitNode(kctx, builder, kNode_At(node, 2), thunk);
-			}
+			JSBuilder_VisitExprNode(kctx, builder, kNode_At(node, nodeListSize > 3 ? 3 : 2), thunk);
 			break;
 		default:
 			JSBuilder_VisitNodeParams(kctx, builder, node, thunk, 2, ", ", isArray ? "[" : "(", isArray ? "]" : ")");
@@ -658,6 +659,8 @@ static kbool_t JSBuilder_VisitFunctionNode(KonohaContext *kctx, KBuilder *builde
 {
 	//abort();/*FIXME*/
 	JSBuilder_EmitString(kctx, builder, "(function)", "", "");
+	JSBuilder_VisitStmtNode(kctx, builder, Node_getFirstBlock(kctx, expr), thunk);
+	KDump(expr);
 	return true;
 }
 
@@ -813,12 +816,14 @@ static void JSBuilder_Init(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 				JSBuilder_EmitNewLineWith(kctx, builder, "_super.call(this);");
 			}
 			JSBuilder_VisitClassFields(kctx, builder, kclass);
-		}else {
+		}
+		else {
 			JSBuilder_EmitMethodHeader(kctx, builder, mtd);
 			JSBuilder_EmitNewLineWith(kctx, builder, " {");
 			jsBuilder->indent++;
 		}
-	}else {
+	}
+	else {
 		// TopLevel
 		compileAllDefinedMethods(kctx);
 	}
