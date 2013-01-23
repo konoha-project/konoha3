@@ -76,7 +76,7 @@ import("JavaStyle.Object");
 
 //## @Public boolean String.equals(Object anObject)
 //## Tests if this string ends with the specified suffix.
-@Public boolean String.equals(String anObject) {
+@Public @Override boolean String.equals(String anObject) {
     if(this.hashCode() != anObject.hashCode()) {
         return false;
     }
@@ -135,7 +135,7 @@ import("JavaStyle.Object");
 
 //## @Public int String.indexOf(int ch)
 //## Returns a hash code for this string.
-@Public int String.indexOf(int ch) {
+@Public @Override int String.indexOf(int ch) {
     return this.indexOf(ch, 0);
 }
 
@@ -147,7 +147,7 @@ import("JavaStyle.Object");
 
 //## @Public int String.indexOf(String str)
 //## Returns the index within this string of the first occurrence of the specified character, starting the search at the specified index.
-@Public int String.indexOf(String str) {
+@Public @Override int String.indexOf(String str) {
     return this.indexOf(str, 0);
 }
 
@@ -177,7 +177,7 @@ import("JavaStyle.Object");
 
 //## @Public int String.lastIndexOf(String str)
 //## Returns the index within this string of the last occurrence of the specified character, searching backward starting at the specified index.
-@Public int String.lastIndexOf(String str) {
+@Public @Override int String.lastIndexOf(String str) {
     return this.lastIndexOf(str, this.length());
 }
 

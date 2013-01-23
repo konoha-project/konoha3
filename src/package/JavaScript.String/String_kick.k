@@ -142,15 +142,8 @@ import("JavaScript.Regexp");
 }
 
 /* 15.5.4.20 String.prototype.trim ( ) */
-
-@Public @Override String String.substr(int index, int length) {
-    assert(length >= 0);
-    if (index >= 0) {
-        return this.substring(index, index + length);
-    } else {
-        int beginIndex = this.getlength() + index;
-        return this.substring(beginIndex, beginIndex + length);
-    }
+@Override @Public String String.trim() {
+    return StringUtil.trim(this);
 }
 
 /* 15.5.5.1 length */
@@ -172,6 +165,16 @@ import("JavaScript.Regexp");
         return this.substring(index, this.getlength());
     } else {
         return this.substring(this.getlength() + index, this.getlength());
+    }
+}
+
+@Public @Override String String.substr(int index, int length) {
+    assert(length >= 0);
+    if (index >= 0) {
+        return this.substring(index, index + length);
+    } else {
+        int beginIndex = this.getlength() + index;
+        return this.substring(beginIndex, beginIndex + length);
     }
 }
 
