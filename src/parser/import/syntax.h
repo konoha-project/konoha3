@@ -757,8 +757,8 @@ static KMETHOD TypeCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(expr, ns, reqc);
 	kNode *texpr = K_NULLNODE;
 	KDump(expr);
-	kMethod *mtd = expr->NodeList->MethodItems[0];
 	DBG_ASSERT(IS_Array(expr->NodeList));
+	kMethod *mtd = expr->NodeList->MethodItems[0];
 	DBG_ASSERT(mtd != NULL);
 	if(!IS_Method(mtd)) {
 		texpr = SUGAR TypeCheckNodeAt(kctx, expr, 1, ns, KClass_INFER, 0);
