@@ -2,11 +2,20 @@
 
 import("MiniKonoha.Syntax");
 
-Expr TypeCheckTrue(Stmt stmt, Expr expr, Gamma gma, int typeid) {
-	return stmt.message(WarnTag, "true was redefined");
+Node TypeCheckTest(Node node, NameSpace ns, Object type) {
+	node.message(2, "Warning message");
+	node.done();
+	return node;
 }
 
-addTypeCheck("true", TypeCheckTrue);
-true;
+void main(){
+	Syntax syntax = new Syntax("test");
+	syntax.SetParseFunc(Precedence_Statement, 0, GetPatternParseFunc());
+	syntax.SetPattern("\"test\"");
+	syntax.SetTypeFunc(TypeCheckTest);
+	DefineSyntax(syntax);
+}
+main();
 
+test;
 
