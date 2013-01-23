@@ -1256,7 +1256,7 @@ static KMETHOD Statement_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 		kMethodVar *mtd = (kMethodVar *)KLIB new_kMethod(kctx, _GcStack, flag, typeId, mn, NULL);
 		KLIB kMethod_SetParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t *)pa->paramtypeItems);
 		KMakeTrace(trace, sfp);
-		if(kNameSpace_AddMethod(kctx, ns, mtd, trace)) {
+		if((mtd = kNameSpace_AddMethod(kctx, ns, mtd, trace)) != NULL) {
 			kMethod_SetLazyCompilation(kctx, mtd, stmt, ns);
 		}
 		RESET_GCSTACK();

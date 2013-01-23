@@ -693,7 +693,7 @@ static void kMethod_ReplaceWith(KonohaContext *kctx, kMethodVar *oldMethod, kMet
 	*newMethod = tempMethod;
 }
 
-static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethodVar *mtd, KTraceInfo *trace)
+static kMethod *kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethodVar *mtd, KTraceInfo *trace)
 {
 	KClass *ct = KClass_(mtd->typeId);
 	if(mtd->packageId == 0) {
@@ -709,11 +709,12 @@ static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethod
 			if(kMethod_Is(Override, mtd)) {
 				TRACE_ReportScriptMessage(kctx, trace, DebugTag, "@%s overriding method %s.%s%s on %s", KPackage_text(ns->packageId), kMethod_Fmt3(mtd), KPackage_text(foundMethod->packageId));
 				kMethod_ReplaceWith(kctx, (kMethodVar *)foundMethod, mtd);
+				return foundMethod;
 			}
 			else {
 				TRACE_ReportScriptMessage(kctx, trace, ErrTag, "duplicated method: %s.%s%s on %s", kMethod_Fmt3(foundMethod), KPackage_text(foundMethod->packageId));
 			}
-			return false;
+			return NULL;
 		}
 		else {
 			if(!kMethod_Is(Final, foundMethod)) {
@@ -722,7 +723,7 @@ static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethod
 			}
 			else {
 				TRACE_ReportScriptMessage(kctx, trace, ErrTag, "final method: %s.%s%s", kMethod_Fmt3(foundMethod));
-				return false;
+				return NULL;
 			}
 		}
 	}
@@ -745,7 +746,7 @@ static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethod
 		}
 		KLIB kArray_Add(kctx, ns->methodList_OnList, mtd);
 	}
-	return true;
+	return mtd;
 }
 
 static void kNameSpace_LoadMethodData(KonohaContext *kctx, kNameSpace *ns, intptr_t *data, KTraceInfo *trace)
