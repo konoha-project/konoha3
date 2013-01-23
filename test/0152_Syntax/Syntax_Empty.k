@@ -2,4 +2,9 @@
 
 import("MiniKonoha.Syntax");
 
-syntax;
+void main(){
+	Syntax syntax = new Syntax("$test");
+	DefineSyntax(syntax);
+}
+main();
+
