@@ -226,7 +226,6 @@ static kbool_t Map_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 	KClass *cMap = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defMap, trace);
 	int FN_key = KMethodName_("key");
-	int KType_Array0 = KClass_p0(kctx, KClass_Array, KType_0)->typeId;
 	int KType_ArrayString = KClass_p0(kctx, KClass_Array, KType_String)->typeId;
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Map_new), KType_Map, KType_Map, KMethodName_("new"), 0,
