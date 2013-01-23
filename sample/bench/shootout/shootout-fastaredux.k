@@ -10,7 +10,6 @@ import("Type.Float");
 import("Syntax.GlobalVariable");
 import("Syntax.JavaStyleClass");
 import("JavaScript.Array");
-//import("konoha.new"); Don't use this
 import("Java.String");
 import("Type.Bytes");
 import("Type.File");
@@ -51,26 +50,8 @@ const ALU = ("GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGG" +
 		"AGGCGGAGGTTGCAGTGAGCCGAGATCGCGCCACTGCACTCC" +
 		"AGCCTGGGCGACAGAGCGAGACTCCGTCTCAAAAA");
 Freq[] iub = [
-	new Freq('a', 0.27),
-	new Freq('c', 0.12),
-	new Freq('g', 0.12),
-	new Freq('t', 0.27),
-	new Freq('B', 0.02),
-	new Freq('D', 0.02),
-	new Freq('H', 0.02),
-	new Freq('K', 0.02),
-	new Freq('M', 0.02),
-	new Freq('N', 0.02),
-	new Freq('R', 0.02),
-	new Freq('S', 0.02),
-	new Freq('V', 0.02),
-	new Freq('W', 0.02),
-	new Freq('Y', 0.02)];
-Freq[] homosapiens = [
-	new Freq('a', 0.3029549426680),
-	new Freq('c', 0.1979883004921),
-	new Freq('g', 0.1975473066391),
-	new Freq('t', 0.3015094502008)];
+new Freq('a', 0.27), new Freq('c', 0.12), new Freq('g', 0.12), new Freq('t', 0.27), new Freq('B', 0.02), new Freq('D', 0.02), new Freq('H', 0.02), new Freq('K', 0.02), new Freq('M', 0.02), new Freq('N', 0.02), new Freq('R', 0.02), new Freq('S', 0.02), new Freq('V', 0.02), new Freq('W', 0.02), new Freq('Y', 0.02)];
+Freq[] homosapiens = [ new Freq('a', 0.3029549426680), new Freq('c', 0.1979883004921), new Freq('g', 0.1975473066391), new Freq('t', 0.3015094502008)];
 
 const IM = 139968;
 const IA = 3877;

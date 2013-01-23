@@ -2,17 +2,16 @@
 // written by shinpei nakata
 
 import("Type.Float");
-import("JavaScript.Math");
-import("Type.Bytes");
-import("Java.String");
-import("Syntax.GlobalVariable");
-import("MiniKonoha.NameSpace");
-import("Syntax.JavaStyleClass");
-import("JavaScript.Array");
 import("Type.File");
-import("Syntax.CStyleWhile);
-import("cstyle", "+=");
-//import("konoha.new"); Don't use this
+import("Type.Bytes");
+import("JavaScript.Math");
+import("JavaScript.Array");
+import("Java.String");
+import("MiniKonoha.NameSpace");
+import("Syntax.CStyleWhile");
+import("Syntax.GlobalVariable");
+import("Syntax.JavaStyleClass");
+import("Syntax.JavaNewArray");
 
 AllowImplicitGlobalVariable(true);
 

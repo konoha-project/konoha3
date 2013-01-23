@@ -4,7 +4,6 @@
 */
 
 import("cstyle");
-//import("konoha.new"); Don't use this
 import("Syntax.JavaStyleClass");
 import("Syntax.GlobalVariable");
 import("MiniKonoha.NameSpace");
@@ -15,13 +14,13 @@ const N=14;
 class TreeNode {
 	TreeNode left, right;
 	int item;
-	
+
 	TreeNode(TreeNode left, TreeNode right, int item) {
 		this.left = left;
 		this.right = right;
 		this.item = item;
 	}
-	
+
 	int itemCheck(){
 		// if necessary deallocate here
 		if(this.left == null) return this.item;

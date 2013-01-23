@@ -8,8 +8,8 @@ import("cstyle");
 import("MiniKonoha.NameSpace");
 import("Syntax.GlobalVariable");
 import("Syntax.JavaStyleClass");
-import("Type.Float");
 import("JavaScript.Array");
+import("Type.Float");
 import("Type.Bytes");
 import("Type.File");
 
@@ -35,27 +35,8 @@ class Frequency {
 	}
 }
 
-Frequency[] iub = [
-	new Frequency('a', 0.27),
-	new Frequency('c', 0.12),
-	new Frequency('g', 0.12),
-	new Frequency('t', 0.27),
-	new Frequency('B', 0.02),
-	new Frequency('D', 0.02),
-	new Frequency('H', 0.02),
-	new Frequency('K', 0.02),
-	new Frequency('M', 0.02),
-	new Frequency('N', 0.02),
-	new Frequency('R', 0.02),
-	new Frequency('S', 0.02),
-	new Frequency('V', 0.02),
-	new Frequency('W', 0.02),
-	new Frequency('Y', 0.02)];
-Frequency[] homosapiens = [
-	new Frequency('a', 0.3029549426680),
-	new Frequency('c', 0.1979883004921),
-	new Frequency('g', 0.1975473066391),
-	new Frequency('t', 0.3015094502008)];
+Frequency[] iub = [new Frequency('a', 0.27), new Frequency('c', 0.12), new Frequency('g', 0.12), new Frequency('t', 0.27), new Frequency('B', 0.02), new Frequency('D', 0.02), new Frequency('H', 0.02), new Frequency('K', 0.02), new Frequency('M', 0.02), new Frequency('N', 0.02), new Frequency('R', 0.02), new Frequency('S', 0.02), new Frequency('V', 0.02), new Frequency('W', 0.02), new Frequency('Y', 0.02)];
+Frequency[] homosapiens = [ new Frequency('a', 0.3029549426680), new Frequency('c', 0.1979883004921), new Frequency('g', 0.1975473066391), new Frequency('t', 0.3015094502008)];
 
 const IM=139968;
 const IA=3877;

@@ -5,9 +5,9 @@
  */
 
 import("cstyle");
-//import("konoha.new"); Don't use this
 import("JavaScript.Array");
 import("Syntax.JavaStyleClass");
+import("Syntax.JavaNewArray");
 import("MiniKonoha.NameSpace");
 import("Java.String");
 
@@ -36,7 +36,7 @@ int nsieve(int m, boolean[] isPrime) {
 
 String padNumber(int number, int fieldLen) {
 	String s = "" + number;
-	int numSpaces = fieldLen - s.length;
+	int numSpaces = fieldLen - s.length();
 
 	int i = 0; while( i < numSpaces) {
 		s = " " + s;

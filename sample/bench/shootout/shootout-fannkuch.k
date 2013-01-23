@@ -4,11 +4,12 @@
  *
  */
 
-import("cstyle");
-import("MiniKonoha.NameSpace");
 import("JavaScript.Array");
-//import("konoha.new"); Don't use this
+import("MiniKonoha.NameSpace");
 import("Syntax.JavaStyleClass");
+import("Syntax.JavaNewArray");
+import("Syntax.CStyleFor");
+import("Syntax.CStyleWhile");
 
 const N=9;
 int max(int a, int b) {
