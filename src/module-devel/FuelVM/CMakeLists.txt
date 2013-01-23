@@ -12,7 +12,7 @@ FIND_PROGRAM(LLVM_CONFIG
          llvm-config-2.9
          llvm-config-2.8
    PATHS ${LLVM_INSTALL_DIR}/bin/
-         ${PROJECT_SOURCE_DIR}/llvm/bin/
+         ${PROJECT_SOURCE_DIR}/llvm-3.2/bin/
          /usr/local/bin/
          /usr/bin/
    DOC "llvm-config")
