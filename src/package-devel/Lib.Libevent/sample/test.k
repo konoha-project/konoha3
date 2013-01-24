@@ -1,9 +1,13 @@
-//import("konoha.new");
+/*
+ * simple echo server
+ * connect from telnet client, and echo back it.
+ * > telnet localhost 10000
+ */
 import("Java.Class");
 import("JavaStyle.Object");
 import("cstyle");
 import("posix.socket");
-//import("konoha.bytes");
+import("Type.Bytes");
 import("Lib.Libevent");
 
 
@@ -11,13 +15,9 @@ void do_read(int evd, int event, Object arg) {
 	System.p("do_read() executed!!");
 	System.p("evd = " + evd + ", event = " + event);
 	System.p("arg = " + arg);
-	/*
 	Bytes buf = new Bytes(32);
-	int ret = System.read(evd, buf, 0);
-	for (int i = 0; i < ret; i++) {
-		System.p(buf[i]);
-	}
-	*/
+	int ret = System.recv(evd, buf, 0);
+	System.send(evd, buf, 0);
 }
 
 void do_accept(int evd, int event, Object arg) {
@@ -25,7 +25,6 @@ void do_accept(int evd, int event, Object arg) {
 	System.p("do_accept() executed!!");
 	System.p("evBase = " + evBase);
 	System.p("evd = " + evd + ", event = " + event);
-	System.p("evBase.evbase = " + evBase.evbase);
 
 	SockAddr dstInfo = new SockAddr();
 	int fd = System.accept(evd, dstInfo);
@@ -61,8 +60,6 @@ void main() {
 		return;
 	}
 
-	System.p("evBase in main() = " + evBase);
-	System.p("evBase.evbase in main() = " + evBase.evbase);
 	evBase.event_add("do_accept", listener, EV_READ | EV_PERSIST, do_accept, evBase, new TimeVal(15, 300));
 	evBase.event_dispatch();
 }
