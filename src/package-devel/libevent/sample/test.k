@@ -1,3 +1,8 @@
+/*
+ * simple echo server
+ * connect from telnet client, and echo back it.
+ * > telnet localhost 10000
+ */
 import("konoha.new");
 import("konoha.class");
 import("konoha.object");
