@@ -3,7 +3,7 @@ import("konoha.class");
 import("konoha.object");
 import("cstyle");
 import("posix.socket");
-//import("konoha.bytes");
+import("konoha.bytes");
 import("libevent");
 
 
@@ -11,13 +11,9 @@ void do_read(int evd, int event, Object arg) {
 	System.p("do_read() executed!!");
 	System.p("evd = " + evd + ", event = " + event);
 	System.p("arg = " + arg);
-	/*
 	Bytes buf = new Bytes(32);
-	int ret = System.read(evd, buf, 0);
-	for (int i = 0; i < ret; i++) {
-		System.p(buf[i]);
-	}
-	*/
+	int ret = System.recv(evd, buf, 0);
+	System.p(buf);
 }
 
 void do_accept(int evd, int event, Object arg) {
