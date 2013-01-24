@@ -552,16 +552,17 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 			}
 			else {
 				// Instance methods
-				SUGAR VisitNode(kctx, builder, receiver, thunk);
+				JSBuilder_VisitExprNode(kctx, builder, receiver, thunk);
 			}
 		}
+		kbool_t isReceiverClosure = strcmp(className, "Func") == 0;
 		switch(KSymbol_prefixText_ID(mtd->mn)) {
 		case kSymbolPrefix_GET:
 			if(kArray_size(expr->NodeList) > 2) {
 				JSBuilder_VisitNode(kctx, builder, kNode_At(expr, 2), thunk, "[", "]");
 			}
 			else {
-				if(!isGlobal) {
+				if(!isGlobal && !isReceiverClosure) {
 					JSBuilder_EmitString(kctx, builder, ".", "", "");
 				}
 				JSBuilder_EmitString(kctx, builder, methodName, "", "");
@@ -575,7 +576,7 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 				if(isGlobal) {
 					JSBuilder_EmitString(kctx, builder, "var ", "", "");
 				}
-				else {
+				else if(!isReceiverClosure) {
 					JSBuilder_EmitString(kctx, builder, ".", "", "");
 				}
 			}
@@ -659,12 +660,14 @@ static kbool_t JSBuilder_VisitDoneNode(KonohaContext *kctx, KBuilder *builder, k
 	return true;
 }
 
+static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, kMethod *mtd);
+
 static kbool_t JSBuilder_VisitFunctionNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	//abort();/*FIXME*/
-	JSBuilder_EmitString(kctx, builder, "(function)", "", "");
+	kMethod *mtd = CallNode_getMethod(expr); 
+	JSBuilder_EmitMethodHeader(kctx, builder, mtd);
 	JSBuilder_VisitStmtNode(kctx, builder, Node_getFirstBlock(kctx, expr), thunk);
-	KDump(expr);
+	JSBuilder_EmitString(kctx, builder, ")", "", "");
 	return true;
 }
 
@@ -726,8 +729,13 @@ static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, k
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kParam *params = kMethod_GetParam(mtd);
+	const char *shortMethodName = KSymbol_text(mtd->mn);
 	unsigned int i;
-	if(mtd->typeId == KType_NameSpace) {
+	if(strcmp(shortMethodName, "") == 0) {
+		// Closure
+		KLIB KBuffer_printf(kctx, &wb, "(function(");
+	}
+	else if(mtd->typeId == KType_NameSpace) {
 		// Top level functions
 		KLIB KBuffer_printf(kctx, &wb, "var %s%s = function(", KMethodName_Fmt2(mtd->mn));
 	}
