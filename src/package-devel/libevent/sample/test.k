@@ -13,7 +13,7 @@ void do_read(int evd, int event, Object arg) {
 	System.p("arg = " + arg);
 	Bytes buf = new Bytes(32);
 	int ret = System.recv(evd, buf, 0);
-	System.p(buf);
+	System.send(evd, buf, 0);
 }
 
 void do_accept(int evd, int event, Object arg) {
@@ -21,7 +21,6 @@ void do_accept(int evd, int event, Object arg) {
 	System.p("do_accept() executed!!");
 	System.p("evBase = " + evBase);
 	System.p("evd = " + evd + ", event = " + event);
-	System.p("evBase.evbase = " + evBase.evbase);
 
 	SockAddr dstInfo = new SockAddr();
 	int fd = System.accept(evd, dstInfo);
@@ -56,8 +55,6 @@ void main() {
 		return;
 	}
 
-	System.p("evBase in main() = " + evBase);
-	System.p("evBase.evbase in main() = " + evBase.evbase);
 	evBase.event_add("do_accept", listener, EV_READ | EV_PERSIST, do_accept, evBase, new TimeVal(15, 300));
 	evBase.event_dispatch();
 }
