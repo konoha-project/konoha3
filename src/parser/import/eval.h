@@ -79,7 +79,7 @@ static kstatus_t kNode_Eval(KonohaContext *kctx, kNode *stmt, kMethod *mtd, KTra
 	kbool_t isTryEval = true;
 	if(KonohaContext_Is(CompileOnly, kctx)) {
 		isTryEval = false;
-		if(stmt->node == KNode_MethodCall) {
+		if(kNode_node(stmt) == KNode_MethodCall) {
 			kMethod *callMethod = stmt->NodeList->MethodItems[0];
 			DBG_ASSERT(IS_Method(callMethod));
 			if(kMethod_Is(Compilation, callMethod)) {

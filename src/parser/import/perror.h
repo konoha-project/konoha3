@@ -92,7 +92,7 @@ static void kNode_ToError(KonohaContext *kctx, kNode *node, kString *errmsg)
 	if(errmsg == NULL) { // not in case of isNodeedErrorMessage
 		errmsg = TS_EMPTY;
 	}
-	node->node = KNode_Error;
+	kNode_setnode(node, KNode_Error);
 	node->attrTypeId = KType_void;
 	KFieldSet(node, node->ErrorMessage, errmsg);
 	kNode_Set(ObjectConst, node, false);

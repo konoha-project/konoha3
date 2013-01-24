@@ -260,15 +260,15 @@ static kbool_t kNode_AddClassField(KonohaContext *kctx, kNode *stmt, kNameSpace 
 			ksymbol_t symbol = KAsciiSymbol(kString_text(name), kString_size(name), KSymbol_NewId);
 			kNode *vexpr =  SUGAR TypeCheckNodeAt(kctx, expr, 2, ns, KClass_(ty), 0);
 			if(vexpr == K_NULLNODE) return false;
-			if(vexpr->node == KNode_Const) {
+			if(kNode_node(vexpr) == KNode_Const) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 				KClass_SetClassFieldObjectValue(kctx, definedClass, symbol, vexpr->ObjectConstValue);
 			}
-			else if(vexpr->node == KNode_UnboxConst) {
+			else if(kNode_node(vexpr) == KNode_UnboxConst) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 				KClass_SetClassFieldUnboxValue(kctx, definedClass, symbol, vexpr->unboxConstValue);
 			}
-			else if(vexpr->node == KNode_Null) {
+			else if(kNode_node(vexpr) == KNode_Null) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 			}
 			else {

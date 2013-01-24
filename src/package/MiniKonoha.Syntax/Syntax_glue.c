@@ -279,7 +279,7 @@ static KMETHOD Node_SetType(KonohaContext *kctx, KonohaStack *sfp)
 //## int Node.GetType();
 static KMETHOD Node_GetType(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturnUnboxValue(sfp[0].asNode->node);
+	KReturnUnboxValue(kNode_node(sfp[0].asNode));
 }
 
 //## Token[] Node.getTokenList(Symbol keyword, Token[] def);

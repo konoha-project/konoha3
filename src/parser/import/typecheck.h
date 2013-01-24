@@ -26,7 +26,7 @@ static kNode *kNode_Rebase(KonohaContext *kctx, kNode *node, size_t stackbase)
 {
 	if(!kNode_IsValue(node)/* && node->stackbase != stackbase*/) {
 		size_t i, size = kNode_GetNodeListSize(kctx, node);
-		if(node->node == KNode_Block) {
+		if(kNode_node(node) == KNode_Block) {
 			for(i = 0; i < size; i++) {
 				kNode *sub = node->NodeList->NodeItems[i];
 				if(kNode_IsValue(sub)) continue;
@@ -106,21 +106,21 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn, kNode *expr, kNameSpac
 
 static void PutConstNode(KonohaContext *kctx, kNode *expr, KonohaStack *sfp)
 {
-	if(expr->node == KNode_Const) {
+	if(kNode_node(expr) == KNode_Const) {
 		KUnsafeFieldSet(sfp[0].asObject, expr->ObjectConstValue);
 		sfp[0].unboxValue = kObject_Unbox(expr->ObjectConstValue);
-	} else if(expr->node == KNode_UnboxConst) {
+	} else if(kNode_node(expr) == KNode_UnboxConst) {
 		sfp[0].unboxValue = expr->unboxConstValue;
-	} else if(expr->node == KNode_New) {
+	} else if(kNode_node(expr) == KNode_New) {
 		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->attrTypeId), 0));
-//	} else if(expr->node == KNode_MethodCall) {   /* case Object Object.boxing(UnboxType Val) */
+//	} else if(kNode_node(expr) == KNode_MethodCall) {   /* case Object Object.boxing(UnboxType Val) */
 //		kMethod *mtd = expr->NodeList->MethodItems[0];
 //		kNode *texpr = expr->NodeList->NodeItems[1];
 //		assert(mtd->mn == MN_box && kArray_size(expr->NodeList) == 2);
 //		assert(KType_Is(UnboxType, expr->attrTypeId) == true);
 //		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->attrTypeId), texpr->unboxConstValue));
 	} else {
-		assert(expr->node == KNode_Null);
+		assert(kNode_node(expr) == KNode_Null);
 		KUnsafeFieldSet(sfp[0].asObject, KLIB Knull(kctx, KClass_(expr->attrTypeId)));
 		sfp[0].unboxValue = 0;
 	}

@@ -117,16 +117,16 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
 		kbool_t result = false;
-		if(constNode->node == KNode_Null) {   // const C = String
+		if(kNode_node(constNode) == KNode_Null) {   // const C = String
 			type = VirtualType_KClass;
 			unboxValue = (uintptr_t)constClass;
 			result = true;
 		}
-		else if(constNode->node == KNode_Const) {   // const C = "1"
+		else if(kNode_node(constNode) == KNode_Const) {   // const C = "1"
 			unboxValue = (uintptr_t)constNode->ObjectConstValue;
 			result = true;
 		}
-		else if(constNode->node == KNode_UnboxConst) {  // const c = 1
+		else if(kNode_node(constNode) == KNode_UnboxConst) {  // const c = 1
 			unboxValue = constNode->unboxConstValue;
 			result = true;
 		}
