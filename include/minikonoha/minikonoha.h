@@ -56,8 +56,10 @@ extern "C" {
 //#define K_CODENAME "Miyajima"
 /*2012/06/14 -  */
 //#define K_CODENAME "The Summer Palace, Beijing"
-/*2012/09/22 -  */
-#define K_CODENAME "Old Riga"
+/*2012/09/22 - 2013/01/23 */
+//#define K_CODENAME "Old Riga"
+/*2012/01/24 - */
+#define K_CODENAME "Rome"  // eternal city
 #else
 #define K_CODENAME "based on MiniKonoha-" K_VERSION
 #endif
