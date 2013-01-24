@@ -370,22 +370,22 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 //	KReturn(ret_s);
 //}
 
-////## int System.recv(int socket, byte[] buffer, int flags);
-//static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp)
-//{
-//	kBytes *ba  = sfp[2].asBytes;
-//	int ret = recv(WORD2INT(sfp[1].intValue),
-//					  ba->buf,
-//					  ba->bytesize,
-//					  (int)sfp[3].intValue);
-//	if(ret < 0) {
-//		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-//				LogText("@", "recv"),
-//				LogText("perror", strerror(errno))
-//		);
-//	}
-//	KReturnUnboxValue(ret);
-//}
+//## int System.recv(int socket, byte[] buffer, int flags);
+static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp)
+{
+	kBytes *ba  = sfp[2].asBytes;
+	int ret = recv(WORD2INT(sfp[1].intValue),
+					  ba->buf,
+					  ba->bytesize,
+					  (int)sfp[3].intValue);
+	if(ret < 0) {
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+				LogText("@", "recv"),
+				LogText("perror", strerror(errno))
+		);
+	}
+	KReturnUnboxValue(ret);
+}
 
 //## int System.recvfrom(int socket, byte[] buffer, int flags, Map remoteInfo);
 //static KMETHOD System_recvfrom(KonohaContext *kctx, KonohaStack* sfp)
@@ -447,46 +447,46 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 //	KReturnUnboxValue(ret);
 //}
 //
-////## int System.send(int socket, byte[] message, int flags);
-//static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
-//{
-//	kBytes *ba = sfp[2].asBytes;
-//	// Broken Pipe Signal Mask
-//#if defined(__linux__)
-//	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
-//	__sighandler_t ret_signal = SIG_ERR;
-//#elif defined(__APPLE__) || defined(__NetBSD__)
-//	sig_t oldset = signal(SIGPIPE, SIG_IGN);
-//	sig_t ret_signal = SIG_ERR;
-//#endif
-//	if(oldset == SIG_ERR) {
-//		OLDTRACE_SWITCH_TO_KTrace(_UserFault,
-//				LogText("@", "signal"),
-//				LogText("perror", strerror(errno))
-//		);
-//	}
-//	int ret = send(WORD2INT(sfp[1].intValue),
-//					  ba->buf,
-//					  ba->bytesize,
-//					  (int)sfp[3].intValue);
-//	if(ret < 0) {
-//		OLDTRACE_SWITCH_TO_KTrace(_UserFault,
-//				LogText("@", "send"),
-//				LogText("perror", strerror(errno))
-//		);
-//	}
-//	if(oldset != SIG_ERR) {
-//		ret_signal = signal(SIGPIPE, oldset);
-//		if(ret_signal == SIG_ERR) {
-//			OLDTRACE_SWITCH_TO_KTrace(_UserFault,
-//					LogText("@", "signal"),
-//					LogText("perror", strerror(errno))
-//			);
-//		}
-//	}
-//	KReturnUnboxValue(ret);
-//}
-//
+//## int System.send(int socket, byte[] message, int flags);
+static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
+{
+	kBytes *ba = sfp[2].asBytes;
+	// Broken Pipe Signal Mask
+#if defined(__linux__)
+	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
+	__sighandler_t ret_signal = SIG_ERR;
+#elif defined(__APPLE__) || defined(__NetBSD__)
+	sig_t oldset = signal(SIGPIPE, SIG_IGN);
+	sig_t ret_signal = SIG_ERR;
+#endif
+	if(oldset == SIG_ERR) {
+		OLDTRACE_SWITCH_TO_KTrace(_UserFault,
+				LogText("@", "signal"),
+				LogText("perror", strerror(errno))
+		);
+	}
+	int ret = send(WORD2INT(sfp[1].intValue),
+					  ba->buf,
+					  ba->bytesize,
+					  (int)sfp[3].intValue);
+	if(ret < 0) {
+		OLDTRACE_SWITCH_TO_KTrace(_UserFault,
+				LogText("@", "send"),
+				LogText("perror", strerror(errno))
+		);
+	}
+	if(oldset != SIG_ERR) {
+		ret_signal = signal(SIGPIPE, oldset);
+		if(ret_signal == SIG_ERR) {
+			OLDTRACE_SWITCH_TO_KTrace(_UserFault,
+					LogText("@", "signal"),
+					LogText("perror", strerror(errno))
+			);
+		}
+	}
+	KReturnUnboxValue(ret);
+}
+
 ////## int System.sendto(int socket, Bytes message, int flags, String dstIP, int dstPort, int family);
 //static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack* sfp)
 //{
@@ -645,9 +645,9 @@ static kbool_t socket_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		// the function below uses Bytes
 		// FIXME
 //		_Public|_Static|_Const|_Im, _F(System_sendto), KType_int, KType_System, KMethodName_("sendto"), 6, KType_int, KFieldName_("socket"), KType_Bytes, KFieldName_("msg"), KType_int, KFieldName_("flag"), KType_String, KFieldName_("dstIP"), KType_int, KFieldName_("dstPort"), KType_int, KFieldName_("family"),
-//		_Public|_Static|_Const|_Im, _F(System_recv), KType_int, KType_System, KMethodName_("recv"), 3, KType_int, KFieldName_("fd"), KType_Bytes, KFieldName_("buf"), KType_int, KFieldName_("flags"),
+		_Public|_Static|_Const|_Im, _F(System_recv), KType_int, KType_System, KMethodName_("recv"), 3, KType_int, KFieldName_("fd"), KType_Object/*KType_Bytes*/, KFieldName_("buf"), KType_int, KFieldName_("flags"),
 //		_Public|_Static|_Const|_Im, _F(System_recvfrom), KType_int, KType_System, KMethodName_("recvfrom"), 4, KType_int, FN_x, KType_Bytes, FN_y, KType_int, FN_z, KType_Map, FN_v,
-//		_Public|_Static|_Const|_Im, _F(System_send), KType_int, KType_System, KMethodName_("send"), 3, KType_int, KFieldName_("fd"), KType_Bytes, KFieldName_("msg"), KType_int, KFieldName_("flags"),
+		_Public|_Static|_Const|_Im, _F(System_send), KType_int, KType_System, KMethodName_("send"), 3, KType_int, KFieldName_("fd"), KType_Object/*KType_Bytes*/, KFieldName_("msg"), KType_int, KFieldName_("flags"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
