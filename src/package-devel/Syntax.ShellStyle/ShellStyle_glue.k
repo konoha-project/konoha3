@@ -22,14 +22,17 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-import("Syntax.CStyleWhile");
-import("JavaScript.Array");
-import("MiniKonoha.Eval");
-import("JavaScript.Math");
-import("JavaScript.String");
-import("MiniKonoha.Syntax");
-import("dscript.subproc");
-import("Syntax.Null");
+Import("dscript.subproc");
+Import("JavaScript.Array");
+Import("JavaScript.Math");
+Import("JavaScript.String");
+Import("MiniKonoha.Eval");
+Import("MiniKonoha.NameSpace");
+Import("MiniKonoha.Syntax");
+Import("posix.path");
+Import("Syntax.CStyleWhile");
+Import("Syntax.Null");
+Import("Type.File");
 
 @Override @Public boolean String.startsWith(String str) {
 	return StringUtil.startsWith(this, str, 0);
@@ -40,9 +43,9 @@ import("Syntax.Null");
 }
 
 String[] concatTokenList(Token[] tokenList) {
-	//if(defined(DEBUG)) {
-	//	System.p(tokenList);
-	//}
+	if(defined(DEBUG)) {
+		System.p(tokenList);
+	}
 	int i = 0;
 	String[] ret = [];
 	String buf = "";
@@ -51,6 +54,9 @@ String[] concatTokenList(Token[] tokenList) {
 		if(tk.isBeforeWhiteSpace()) {
 			ret.add(buf + tk.getParsedText());
 			buf = "";
+		}
+		else if(tk.Is("$Member")) {
+			buf = buf + "." + tk.getParsedText();
 		}
 		else {
 			buf = buf + tk.getParsedText();
@@ -72,15 +78,6 @@ String getVarName() {
 	return ret;
 }
 
-String getFuncName() {
-	String rand = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-	String ret = "__f";
-	while(ret.getlength() < 10) {
-		ret = ret + rand[(Math.random() * (rand.getlength() - 1)).toint()];
-	}
-	return ret;
-}
-
 int indexOf(String[] a, String s, int startIdx) {
 	int i = startIdx;
 	while(i < a.getlength()) {
@@ -92,15 +89,22 @@ int indexOf(String[] a, String s, int startIdx) {
 	return -1;
 }
 
+String expandDollar(String arg) {
+	if(arg.startsWith("\"") && arg.endsWith("\"")) {
+		return arg;
+	}
+	return "\"" + arg + "\"";
+}
+
 String expandArgs(String[] args) {
 	String ret = "[";
 	int i = 0;
 	while(i < args.getlength() - 1) {
-		ret = ret + "\"" + args[i] + "\", ";
+		ret = ret + expandDollar(args[i]) + ", ";
 		i = i + 1;
 	}
 	if(args.getlength() >= 1) {
-		ret = ret + "\"" + args[args.getlength() - 1] + "\"";
+		ret = ret + expandDollar(args[args.getlength() - 1]);
 	}
 	ret = ret + "]";
 	return ret;
@@ -135,13 +139,13 @@ String getPipeString(String prevname, String varname, String[] args, int startin
 	if(isCommandUseTty(args[startindex])) {
 		if(prevname != "") {
 			ret = ret + varname + ".bg();\n";
-			//if(defined(USE_PRINT)) {
-			//	ret = ret + "System.p(";
-			//}
+			if(defined(USE_PRINT)) {
+				ret = ret + "System.p(";
+			}
 			ret = ret + varname + ".communicate(" + prevname + ".getOutputStream().readAll())";
-			//if(defined(USE_PRINT)) {
-			//	ret = ret + "[0])";
-			//}
+			if(defined(USE_PRINT)) {
+				ret = ret + "[0])";
+			}
 			ret = ret + ";\n";
 		}
 		else {
@@ -155,14 +159,14 @@ String getPipeString(String prevname, String varname, String[] args, int startin
 	}
 	else {
 		if(enableStdout) {
-			//if(defined(USE_PRINT) && index < 0) {
-			//	/* use System.p instead of pipe to stdout */
-			//	ret = ret + varname + ".bg();\n";
-			//	ret = ret + "System.p(" + varname + ".communicate(\"\")[0]);\n";
-			//}
-			//else {
+			if(defined(USE_PRINT) && index < 0) {
+				/* use System.p instead of pipe to stdout */
+				ret = ret + varname + ".bg();\n";
+				ret = ret + "System.p(" + varname + ".communicate(\"\")[0]);\n";
+			}
+			else {
 				ret = ret + varname + ".fg();\n";
-			//}
+			}
 		}
 		else {
 			ret = ret + varname + ".bg();\n";
@@ -173,9 +177,9 @@ String getPipeString(String prevname, String varname, String[] args, int startin
 }
 
 String generateSubProcSequence(String[] args, boolean enableStdout) {
-	//if(defined(DEBUG)) {
-	//	System.p(args);
-	//}
+	if(defined(DEBUG)) {
+		System.p(args);
+	}
 	String ret = "";
 	int startindex = 0;
 	int index = 0;
@@ -209,9 +213,9 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 		}
 		varname = getVarName();
 		ret = ret + "SubProc " + varname + " = new SubProc(\"" + args[startindex] + "\");\n";
-		//if(defined(SHOW_COMMAND)) {
-		//	stdout.println(args[startindex]);
-		//}
+		if(defined(SHOW_COMMAND)) {
+			stdout.println(args[startindex]);
+		}
 		if(argsize > 0) {
 			ret = ret + varname + ".setArgumentList(" + expandArgs(args.slice(startindex + 1, startindex + 1 + argsize)) + ");\n";
 		}
@@ -226,7 +230,7 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 			}
 			else {
 				/* end of pipe */
-				if(enableStdout/* && !defined(USE_PRINT)*/) {
+				if(enableStdout && !defined(USE_PRINT)) {
 					ret = ret + varname + ".setOutputStream(stdout);\n";
 				}
 			}
@@ -237,22 +241,20 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 		startindex = index + 1;
 	}
 	if(!enableStdout) {
-		ret = ret + "global.lastExitStatus = " + varname + ".getStatus();\n";
-		ret = ret + "return " + varname + ".communicate(\"\")[0];\n";
+		ret = ret + varname + ".communicate(\"\")[0];\n";
 	}
-	//if(defined(DEBUG)) {
-	//	System.p(ret);
-	//}
+	if(defined(DEBUG)) {
+		System.p(ret);
+	}
 	return ret;
 }
 
-Node typeShell(Node node, NameSpace ns, Object o) {
-	Node block = node.TypeCheckNode("$Block", o, TypeCheckPolicy_AllowEmpty);
-	block.SetType(KNode_Block);
-	return block;
+Node TypeShell(Node node, NameSpace ns, Object o) {
+	Node sequence = node.TypeCheckNode("$SubprocSequence", o, TypeCheckPolicy_AllowEmpty);
+	return sequence;
 }
 
-int parseShell(Node node, Symbol sym, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
+int ParseShell(Node node, Symbol sym, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
 	Token firstToken = tokenList[beginIdx];
 	if(firstToken.Is("$Symbol") && SubProc.isCommand(firstToken.getParsedText())) {
 		int i = beginIdx + 1;
@@ -267,8 +269,8 @@ int parseShell(Node node, Symbol sym, Token[] tokenList, int beginIdx, int opera
 			return -1;
 		}
 		Token[] subprocTokens = node.getNameSpace().Preprocess(generateSubProcSequence(args, true));
-		Node block = node.ParseNewNode(subprocTokens, 0, subprocTokens.getlength(), false);
-		node.AddParsedObject("$Block", block);
+		Node sequence = node.ParseNewNode(subprocTokens, 0, subprocTokens.getlength(), false);
+		node.AddParsedObject("$SubprocSequence", sequence);
 		return i;
 	}
 	return -1;
@@ -286,7 +288,7 @@ int getLastIndex(String source) {
 	return -1;
 }
 
-int tokenizeDollarVariable(Token tk, String source) {
+int TokenizeDollarVariable(Token tk, String source) {
 	int pos = 1;
 	if(source.indexOf("{") == 1) {
 		pos = source.indexOf("}");
@@ -310,31 +312,26 @@ int tokenizeDollarVariable(Token tk, String source) {
 	return pos;
 }
 
-int parseDollarVariable(Node node, Symbol sym, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
+int ParseDollarVariable(Node node, Symbol sym, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
 	NameSpace ns = node.getNameSpace();
-	//if(defined(DEBUG)) {
-	//	System.p(node);
-	//}
+	if(defined(DEBUG)) {
+		System.p(node);
+	}
 	String text = tokenList[operatorIdx].getParsedText();
 	if(text.startsWith("$(") && text.endsWith(")")) {
 		String[] args = text.substring(2, text.getlength() - 1).split(" ");
-		String funcName = getFuncName();
-		String evaltext = "@Public String " + funcName + "() { ";
-		evaltext = evaltext + generateSubProcSequence(args, false).replace("\n", " ") + "}";
-		//if(defined(DEBUG)) {
-		//	System.p(evaltext);
-		//}
-		ns.eval(evaltext);
-		Token methodToken = ns.Preprocess(funcName)[0];
-		Node classExpr = new Node(ns);
-		classExpr.SetConstValue(ns);
-		node.AddParsedObject("class", classExpr);
-		node.AddParsedObject("method", methodToken);
-		//node.AddParsedObject("$MethodName", node.ParseNewNode(tokens, 0, tokens.getlength(), false));
+		if(!SubProc.isCommand(args[0])) {
+			return -1;
+		}
+		Token[] tokens = ns.Preprocess(generateSubProcSequence(args, false));
+		Node sequence = node.ParseNewNode(tokens, 0, tokens.getlength(), false);
+		node.AddParsedObject("$SubprocSequence", sequence);
 		return endIdx;
 	}
 	else if(text.startsWith("${") && text.endsWith("}")) {
 		text = text.substring(2, text.getlength() - 1);
+		node.AddParsedObject("text", node.ParseNewNode(ns.Preprocess(text), 0, 1, false));
+		return endIdx;
 	}
 	else if(text == "$?") {
 		Token methodToken = ns.Preprocess("getExitStatus")[0];
@@ -344,46 +341,39 @@ int parseDollarVariable(Node node, Symbol sym, Token[] tokenList, int beginIdx, 
 		node.AddParsedObject("method", methodToken);
 		return endIdx;
 	}
-	else {
-		text = text.substring(1, text.getlength());
-	}
-	Token methodToken = ns.Preprocess("getenv")[0];
-	Node classExpr = new Node(ns);
-	classExpr.SetConstValue(System);
-	node.AddParsedObject("class", classExpr);
-	node.AddParsedObject("method", methodToken);
-	Node arg1 = new Node(ns);
-	arg1.SetConstValue(text);
-	node.AddParsedObject("arg1", arg1);
+	text = text.substring(1, text.getlength());
+	node.AddParsedObject("text", node.ParseNewNode(ns.Preprocess(text), 0, 1, false));
 	return endIdx;
 }
 
-Node typeDollarVariable(Node node, NameSpace ns, Object o) {
-	//if(defined(DEBUG)) {
-	//	System.p(node);
-	//}
-	Symbol methodName = node.getToken("method", null).getParsedText();
-	Node classNode = node.getNode("class");
-	Node arg1 = node.getNode("arg1");
-	if(arg1 != null) {
-		//System.p(arg1);
-		return node.newMethodNode(System, methodName, classNode, arg1);
+Node TypeDollarVariable(Node node, NameSpace ns, Object o) {
+	if(defined(DEBUG)) {
+		System.p(node);
 	}
-	return node.newMethodNode(NameSpace, methodName, classNode);
+	if(node.getNode("text") != null) {
+		return node.TypeCheckNode("text", o, 0);
+	}
+	Node classNode = node.getNode("class");
+	if(classNode != null) {
+		Symbol methodName = node.getToken("method", null).getParsedText();
+		return node.newMethodNode(NameSpace, methodName, classNode);
+	}
+	Node sequence = node.TypeCheckNode("$SubprocSequence", String, TypeCheckPolicy_AllowEmpty);
+	return sequence;
 }
 
 void defineShellSyntax() {
 	CompileAllDefinedMethod();
 	Syntax shellSyntax = new Syntax("$Shell");
-	shellSyntax.SetParseFunc(Precedence_Statement, 0, parseShell);
+	shellSyntax.SetParseFunc(Precedence_Statement, 0, ParseShell);
 	shellSyntax.SetMetaPattern(true);
-	shellSyntax.SetTypeFunc(typeShell);
+	shellSyntax.SetTypeFunc(TypeShell);
 	DefineSyntax(shellSyntax);
 
 	Syntax dollarSyntax = new Syntax("$DollarVariable");
-	dollarSyntax.SetTokenFunc(36/*$*/, tokenizeDollarVariable);
-	dollarSyntax.SetParseFunc(0, 0, parseDollarVariable);
-	dollarSyntax.SetTypeFunc(typeDollarVariable);
+	dollarSyntax.SetTokenFunc(36/*$*/, TokenizeDollarVariable);
+	dollarSyntax.SetParseFunc(0, 0, ParseDollarVariable);
+	dollarSyntax.SetTypeFunc(TypeDollarVariable);
 	DefineSyntax(dollarSyntax);
 }
 
