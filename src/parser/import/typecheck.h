@@ -71,13 +71,6 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn, kNode *expr, kNameSpac
 	kObject *reqType = KLIB Knull(kctx, reqtc);
 	int varsize = ns->genv->localScope.varsize;
 	expr->stackbase = varsize;
-//	DBG_P(">>>>>>>>>> #stackbase = %d", varsize);
-//	if(KFlag_Is(kshortflag_t, syn->flag, SYNFLAG_CallNode)) {
-//		KPushMethodCall(gma);
-//		KPushMethodCall(gma);
-//		KPushMethodCall(gma);
-//		KPushMethodCall(gma);
-//	}
 	if(syn->TypeFuncNULL != NULL) {
 		kNode *texpr = CallTypeFunc(kctx, syn->TypeFuncNULL, expr, ns, reqType);
 		if(kNode_IsError(texpr) || texpr->attrTypeId != KType_var) {
@@ -103,6 +96,7 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn, kNode *expr, kNameSpac
 	}
 	if(!kNode_IsError(expr)) {
 		KDump(expr);
+		DBG_P("syn->TypeFuncNULL=%p", syn->TypeFuncNULL);
 		expr = SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "undefined typing: %s%s '%s'", KSymbol_Fmt2(syn->keyword), KToken_t(expr->KeyOperatorToken));
 		//DBG_ASSERT(kctx == NULL);
 	}
