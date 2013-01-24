@@ -161,6 +161,7 @@ static kbool_t kNode_isStmt(KonohaContext *kctx, kNode *node){
 	case KNode_Throw:
 		return true;
 	}
+	return false;
 }
 
 static kbool_t kNode_isExpr(KonohaContext *kctx, kNode *node){
@@ -729,7 +730,7 @@ static void BashBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder,
 		if(i != 0) {
 			KLIB KBuffer_printf(kctx, &wb, ", ");
 		}
-		const char *argname = KSymbol_text(params->paramtypeItems[i].name);
+		//const char *argname = KSymbol_text(params->paramtypeItems[i].name);
 	}
 	BashBuilder_EmitString(kctx, builder, KLIB KBuffer_text(kctx, &wb, EnsureZero), "", "");
 	KLIB KBuffer_Free(&wb);
