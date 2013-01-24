@@ -276,10 +276,10 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 		 * 3: ditto
 		 * 4: ...
 		 */
-		kNode_Type(kctx, expr, KNode_Function, envCt->typeId);
-		KFieldSet(expr, expr->NodeList, new_(Array, 0, OnField));
-		KLIB kArray_Add(kctx, expr->NodeList, mtd);
-		KLIB kArray_Add(kctx, expr->NodeList, KLIB Knull(kctx, EnvObjectClass));
+		kNode_Type(kctx, texpr, KNode_Function, envCt->typeId);
+		KFieldSet(expr, texpr->NodeList, new_(Array, 0, OnField));
+		KLIB kArray_Add(kctx, texpr->NodeList, mtd);
+		KLIB kArray_Add(kctx, texpr->NodeList, KLIB Knull(kctx, EnvObjectClass));
 		size_t i = 0;
 		struct KGammaLocalData *genv = ns->genv;
 		if(genv->thisClass == KClass_NameSpace) {
@@ -287,13 +287,11 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		for(; i < genv->localScope.varsize; i++) {
 			kNode *node = new_VariableNode(kctx, ns, KNode_Local, genv->localScope.varItems[i].attrTypeId, i);
-			KLIB kArray_Add(kctx, expr->NodeList, node);
+			KLIB kArray_Add(kctx, texpr->NodeList, node);
 		}
-
-		assert(IS_Array(expr->NodeList));
 	}
 	RESET_GCSTACK();
-	KReturn(expr);
+	KReturn(texpr);
 }
 
 

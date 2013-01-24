@@ -255,13 +255,13 @@ static kbool_t BashBuilder_VisitNode(KonohaContext *kctx, KBuilder *builder, kNo
 
 static kbool_t BashBuilder_VisitPushNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);  // ADDED by kimio to pass compilation
+	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);
 	return true;
 }
 
 static kbool_t BashBuilder_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);  // ADDED by kimio to pass compilation
+	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);
 	return true;
 }
 
@@ -317,20 +317,21 @@ static kbool_t BashBuilder_VisitDoWhileNode(KonohaContext *kctx, KBuilder *build
 
 static kbool_t BashBuilder_VisitForNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void* thunk)
 {
-	kNode *initNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("init"), NULL) ;
-	kNode *iterNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("Iterator"), NULL) ;
-	BashBuilder_EmitString(kctx, builder, "for(", "", "");
-	if(initNode != NULL) {
-		BashBuilder_VisitStmtNode(kctx, builder, initNode, thunk);
-	}
-	BashBuilder_EmitString(kctx, builder, ";", "", "");
-	BashBuilder_VisitExprNode(kctx, builder, Node_getFirstExpr(kctx, stmt), thunk);
-	BashBuilder_EmitString(kctx, builder, ";", "", "");
-	if(iterNode != NULL) {
-		BashBuilder_VisitStmtNode(kctx, builder, iterNode, thunk);
-	}
-	BashBuilder_EmitString(kctx, builder, ") ", "", "");
-	BashBuilder_VisitStmtNode(kctx, builder, Node_getFirstBlock(kctx, stmt), thunk);
+	abort();
+	//kNode *initNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("init"), NULL) ;
+	//kNode *iterNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("Iterator"), NULL) ;
+	//BashBuilder_EmitString(kctx, builder, "for(", "", "");
+	//if(initNode != NULL) {
+	//	BashBuilder_VisitStmtNode(kctx, builder, initNode, thunk);
+	//}
+	//BashBuilder_EmitString(kctx, builder, ";", "", "");
+	//BashBuilder_VisitExprNode(kctx, builder, Node_getFirstExpr(kctx, stmt), thunk);
+	//BashBuilder_EmitString(kctx, builder, ";", "", "");
+	//if(iterNode != NULL) {
+	//	BashBuilder_VisitStmtNode(kctx, builder, iterNode, thunk);
+	//}
+	//BashBuilder_EmitString(kctx, builder, ") ", "", "");
+	//BashBuilder_VisitStmtNode(kctx, builder, Node_getFirstBlock(kctx, stmt), thunk);
 	return true;
 }
 
