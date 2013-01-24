@@ -1,11 +1,11 @@
-//import("Syntax.GlobalVariable");
+import("Syntax.GlobalVariable");
 import("posix.process");
 import("dscript.subproc");
 import("JavaScript.Array");
 import("Type.File");
+import("Syntax.StringInterpolation");
 
-//AllowImplicitGlobalVariable(true);
-//int lastExitStatus = 0;
+int lastExitStatus = 0;
 
 @Public String FILE.readAll() {
 	String ret = "";

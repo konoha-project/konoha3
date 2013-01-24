@@ -1060,7 +1060,7 @@ typedef enum {
 		kObject*     (*fnull)(KonohaContext*, KClass *);\
 		uintptr_t    (*unbox)(KonohaContext*, kObject *);\
 		void         (*p)(KonohaContext*, KonohaValue *, int, KBuffer *);\
-		int          (*compareObject)(kObject*, kObject *);\
+		int          (*compareTo)(KonohaContext *, kObject *, kObject *);\
 		int          (*compareUnboxValue)(uintptr_t, uintptr_t);\
 		kbool_t      (*hasField)(KonohaContext*, kObject*, ksymbol_t, ktypeattr_t);\
 		kObject*     (*getFieldObjectValue)(KonohaContext*, kObject*, ksymbol_t, ktypeattr_t);\

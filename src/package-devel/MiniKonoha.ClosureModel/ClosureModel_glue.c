@@ -277,7 +277,8 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 		 * 4: ...
 		 */
 		kNode_Type(kctx, texpr, KNode_Function, envCt->typeId);
-		KFieldSet(texpr->NodeList, texpr->NodeList->MethodItems[0], mtd);
+		KFieldSet(expr, texpr->NodeList, new_(Array, 0, OnField));
+		KLIB kArray_Add(kctx, texpr->NodeList, mtd);
 		KLIB kArray_Add(kctx, texpr->NodeList, KLIB Knull(kctx, EnvObjectClass));
 		size_t i = 0;
 		struct KGammaLocalData *genv = ns->genv;
@@ -288,8 +289,6 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 			kNode *node = new_VariableNode(kctx, ns, KNode_Local, genv->localScope.varItems[i].attrTypeId, i);
 			KLIB kArray_Add(kctx, texpr->NodeList, node);
 		}
-
-		assert(IS_Array(texpr->NodeList));
 	}
 	RESET_GCSTACK();
 	KReturn(texpr);

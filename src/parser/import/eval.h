@@ -69,7 +69,7 @@ static kstatus_t kNode_Eval(KonohaContext *kctx, kNode *stmt, kMethod *mtd, KTra
 	newgma.localScope.varsize   = 0;
 	newgma.localScope.allocsize = 0;
 
-	size_t errorCount = KGetParserContext(kctx)->errorMessageCount;
+	int errorCount = KGetParserContext(kctx)->errorMessageCount;
 	KPushGammaStack(ns, &newgma);
 	stmt = TypeCheckNode(kctx, stmt, ns, KClass_var, TypeCheckPolicy_AllowVoid);
 	KPopGammaStack(ns, &newgma);

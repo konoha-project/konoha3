@@ -79,6 +79,7 @@ static JSContext* globalJSContext = NULL;
 typedef struct JSBuilder {
 	struct KBuilderCommon common;
 	kbool_t isIndentEmitted;
+	kbool_t isExprNode;
 	kMethod *visitingMethod;
 	int indent;
 	KGrowingArray buffer;
@@ -184,6 +185,7 @@ static kbool_t kNode_isStmt(KonohaContext *kctx, kNode *node){
 		case KNode_Throw:
 			return true;
 	}
+	return false;
 }
 
 static kbool_t kNode_isExpr(KonohaContext *kctx, kNode *node){
@@ -214,7 +216,6 @@ static void JSBuilder_EmitNewLineWith(KonohaContext *kctx, KBuilder *builder, co
 
 static void JSBuilder_EmitString(KonohaContext *kctx, KBuilder *builder, const char* prefix, const char* str, const char* suffix)
 {
-	JSBuilder *jsBuilder = (JSBuilder *)builder;
 	JSBuilder_EmitIndent(kctx, builder);
 	//KLIB KBuffer_printf(kctx, &jsBuilder->jsCodeBuffer, "%s%s%s", prefix, str, suffix);
 	printf("%s%s%s", prefix, str, suffix);
@@ -225,21 +226,30 @@ static kbool_t JSBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, 
 	size_t i;
 	kbool_t ret = true;
 	JSBuilder *jsBuilder = (JSBuilder *)builder;
+	kbool_t isExprBlock = jsBuilder->isExprNode;
 	DBG_ASSERT(block->node == KNode_Block);
 	if(!IS_Array(block->NodeList)) {
 		JSBuilder_EmitString(kctx, builder, "{ /* ERROR: block->NodeList is not Array. */ }", "", "");
-		return true;	
+		return true;
 	}
 	DBG_ASSERT(IS_Array(block->NodeList));
 	if(!kNode_IsRootNode(block)) {
-		JSBuilder_EmitNewLineWith(kctx, builder, "{");
+		if(kNode_GetParent(kctx, block)->node == 0) {
+			// Closure
+			return true;
+		}
+		JSBuilder_EmitNewLineWith(kctx, builder, isExprBlock ? "(function() {" : "{");
 		jsBuilder->indent++;
 	}
-	for (i = 0; i < kArray_size(block->NodeList); ++i) {
+	for (i = 0; ret && i < kArray_size(block->NodeList); ++i) {
 		kNode *node = block->NodeList->NodeItems[i];
-		if(node->node == KNode_Block && kArray_size(node->NodeList) == 1) {
-			node = node->NodeList->NodeItems[0];	
+
+		while(node->node == KNode_Block && kArray_size(node->NodeList) == 1) {
+			node = node->NodeList->NodeItems[0];
 		}
+
+		jsBuilder->isExprNode = kNode_isExpr(kctx, node);
+
 		if(node->node == KNode_Assign) {
 			if(kNode_At(node, 1)->node == KNode_Field){
 				JSBuilder_EmitString(kctx, builder, "this.", "", "");
@@ -248,11 +258,13 @@ static kbool_t JSBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, 
 				JSBuilder_EmitString(kctx, builder, "var ", "", "");
 			}
 		}
-		if(!SUGAR VisitNode(kctx, builder, node, thunk)) {
-			ret = false;
-			break;
+
+		ret = SUGAR VisitNode(kctx, builder, node, thunk);
+
+		if(node->node == KNode_Block) {
+			JSBuilder_EmitNewLineWith(kctx, builder, ")();");
 		}
-		if(kNode_isExpr(kctx, node)){
+		else if(kNode_isExpr(kctx, node)){
 			JSBuilder_EmitNewLineWith(kctx, builder, ";");
 		}
 		else {
@@ -261,28 +273,48 @@ static kbool_t JSBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, 
 	}
 	if(!kNode_IsRootNode(block)) {
 		jsBuilder->indent--;
-		JSBuilder_EmitString(kctx, builder, "}", "", "");
+		JSBuilder_EmitString(kctx, builder, isExprBlock ? "})()" : "}", "", "");
 	}
 	return ret;
+}
+
+static kbool_t JSBuilder_VisitExprNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
+{
+	((JSBuilder *)builder)->isExprNode = true;
+	return SUGAR VisitNode(kctx, builder, node, thunk);
+}
+
+static kbool_t JSBuilder_VisitStmtNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
+{
+	((JSBuilder *)builder)->isExprNode = false;
+	if(node->node == KNode_Assign) {
+		if(kNode_At(node, 1)->node == KNode_Field){
+			JSBuilder_EmitString(kctx, builder, "this.", "", "");
+		}
+		else {
+			JSBuilder_EmitString(kctx, builder, "var ", "", "");
+		}
+	}
+	return SUGAR VisitNode(kctx, builder, node, thunk);
 }
 
 static kbool_t JSBuilder_VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk, const char* prefix, const char* suffix)
 {
 	JSBuilder_EmitString(kctx, builder, prefix, "", "");
-	kbool_t ret = SUGAR VisitNode(kctx, builder, expr, thunk);
+	kbool_t ret = JSBuilder_VisitExprNode(kctx, builder, expr, thunk);
 	JSBuilder_EmitString(kctx, builder, suffix, "", "");
 	return ret;
 }
 
 static kbool_t JSBuilder_VisitPushNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);  // ADDED by kimio to pass compilation
+	JSBuilder_VisitExprNode(kctx, builder, expr->NodeToPush, thunk);  // ADDED by kimio to pass compilation
 	return true;
 }
 
 static kbool_t JSBuilder_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);  // ADDED by kimio to pass compilation
+	JSBuilder_VisitExprNode(kctx, builder, expr->NodeToPush, thunk);  // ADDED by kimio to pass compilation
 	return true;
 }
 
@@ -294,11 +326,12 @@ static kbool_t JSBuilder_VisitErrorNode(KonohaContext *kctx, KBuilder *builder, 
 static kbool_t JSBuilder_VisitReturnNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
 	if(((JSBuilder *)builder)->visitingMethod->mn != 0) {
-		JSBuilder_EmitString(kctx, builder, "return ", "", "");
+		JSBuilder_EmitString(kctx, builder, "return", "", "");
 	}
 	kNode* expr = Node_getFirstExpr(kctx, stmt);
 	if(expr != NULL && IS_Node(expr)) {
-		SUGAR VisitNode(kctx, builder, expr, thunk);
+		JSBuilder_EmitString(kctx, builder, " ", "", "");
+		JSBuilder_VisitExprNode(kctx, builder, expr, thunk);
 	}
 	JSBuilder_EmitString(kctx, builder, ";", "", "");
 	return true;
@@ -307,11 +340,11 @@ static kbool_t JSBuilder_VisitReturnNode(KonohaContext *kctx, KBuilder *builder,
 static kbool_t JSBuilder_VisitIfNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void* thunk)
 {
 	JSBuilder_VisitNode(kctx, builder, Node_getFirstExpr(kctx, stmt), thunk, "if(", ") ");
-	SUGAR VisitNode(kctx, builder, Node_getFirstBlock(kctx, stmt), thunk);
+	JSBuilder_VisitStmtNode(kctx, builder, Node_getFirstBlock(kctx, stmt), thunk);
 	kNode *elseNode = Node_getElseBlock(kctx, stmt);
 	if(elseNode != K_NULLBLOCK) {
-		JSBuilder_EmitString(kctx, builder, "else", "", "");
-		SUGAR VisitNode(kctx, builder, elseNode, thunk);
+		JSBuilder_EmitString(kctx, builder, "else ", "", "");
+		JSBuilder_VisitStmtNode(kctx, builder, elseNode, thunk);
 	}
 	return true;
 }
@@ -319,15 +352,34 @@ static kbool_t JSBuilder_VisitIfNode(KonohaContext *kctx, KBuilder *builder, kNo
 static kbool_t JSBuilder_VisitWhileNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void* thunk)
 {
 	JSBuilder_VisitNode(kctx, builder, Node_getFirstExpr(kctx, stmt), thunk, "while(", ") ");
-	SUGAR VisitNode(kctx, builder, Node_getFirstBlock(kctx, stmt), thunk);
+	JSBuilder_VisitStmtNode(kctx, builder, Node_getFirstBlock(kctx, stmt), thunk);
 	return true;
 }
 
 static kbool_t JSBuilder_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void* thunk)
 {
 	JSBuilder_EmitString(kctx, builder, "do", "", "");
-	SUGAR VisitNode(kctx, builder, Node_getFirstBlock(kctx, stmt), thunk);
+	JSBuilder_VisitStmtNode(kctx, builder, Node_getFirstBlock(kctx, stmt), thunk);
 	JSBuilder_VisitNode(kctx, builder, Node_getFirstExpr(kctx, stmt), thunk, "while(", ");");
+	return true;
+}
+
+static kbool_t JSBuilder_VisitForNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void* thunk)
+{
+	kNode *initNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("init"), NULL) ;
+	kNode *iterNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("Iterator"), NULL) ;
+	JSBuilder_EmitString(kctx, builder, "for(", "", "");
+	if(initNode != NULL) {
+		JSBuilder_VisitStmtNode(kctx, builder, initNode, thunk);
+	}
+	JSBuilder_EmitString(kctx, builder, ";", "", "");
+	JSBuilder_VisitExprNode(kctx, builder, Node_getFirstExpr(kctx, stmt), thunk);
+	JSBuilder_EmitString(kctx, builder, ";", "", "");
+	if(iterNode != NULL) {
+		JSBuilder_VisitStmtNode(kctx, builder, iterNode, thunk);
+	}
+	JSBuilder_EmitString(kctx, builder, ") ", "", "");
+	JSBuilder_VisitStmtNode(kctx, builder, Node_getFirstBlock(kctx, stmt), thunk);
 	return true;
 }
 
@@ -357,11 +409,11 @@ static kbool_t JSBuilder_VisitTryNode(KonohaContext *kctx, KBuilder *builder, kN
 	kNode *finallyNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("finally"), K_NULLBLOCK);
 	if(catchNode != K_NULLBLOCK) {
 		JSBuilder_EmitString(kctx, builder, "catch(e) ", "", "");
-		SUGAR VisitNode(kctx, builder, catchNode, thunk);
+		JSBuilder_VisitStmtNode(kctx, builder, catchNode, thunk);
 	}
 	if(finallyNode != K_NULLBLOCK) {
 		JSBuilder_EmitString(kctx, builder, "finally", "", "");
-		SUGAR VisitNode(kctx, builder, finallyNode, thunk);
+		JSBuilder_VisitStmtNode(kctx, builder, finallyNode, thunk);
 	}
 	return true;
 }
@@ -443,7 +495,7 @@ static kbool_t JSBuilder_VisitNodeParams(KonohaContext *kctx, KBuilder *builder,
 		JSBuilder_EmitString(kctx, builder, leftBracket, "", "");
 	}
 	for(i = beginIndex; i < n;) {
-		SUGAR VisitNode(kctx, builder, kNode_At(expr, i), thunk);
+		JSBuilder_VisitExprNode(kctx, builder, kNode_At(expr, i), thunk);
 		if(++i < n) {
 			JSBuilder_EmitString(kctx, builder, delimiter, "", "");
 		}
@@ -459,6 +511,7 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 	KClass *globalObjectClass = KLIB kNameSpace_GetClassByFullName(kctx, kNode_ns(expr), "GlobalObject", 12, NULL);
 	kbool_t isGlobal = (KClass_(receiver->attrTypeId) == globalObjectClass || receiver->attrTypeId == KType_NameSpace);
 	const char *methodName = KSymbol_text(mtd->mn);
+	const char* className = KSymbol_text(KClass_(receiver->attrTypeId)->classNameSymbol);
 	if(receiver->attrTypeId == KType_NameSpace) {
 		if(mtd->mn == KMethodName_("import")) {
 			kString *packageNameString = (kString *)kNode_At(expr, 2)->ObjectConstValue;
@@ -473,13 +526,22 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 		JSBuilder_EmitString(kctx, builder, LOG_FUNCTION_NAME, "", "");
 	}
 	else if(strcmp(methodName, "new") == 0) {
-		JSBuilder_EmitString(kctx, builder, "new ", KClass_text(KClass_(receiver->attrTypeId)), "");
+		if(strcmp(className, "Map") == 0) {
+			JSBuilder_EmitString(kctx, builder, "new Object", "", "");
+		}
+		else {
+			JSBuilder_EmitString(kctx, builder, "new ", className, "");
+		}
 	}
-	else if(strcmp(methodName, "newList") == 0) {
-	}
+	//else if(strcmp(methodName, "newList") == 0) {
+	//}
 	else if(strcmp(methodName, "[]") == 0) {
 		// [1, 2, 3];
-		JSBuilder_EmitString(kctx, builder, "new Array", "", "");
+		//JSBuilder_EmitString(kctx, builder, "new Array", "", "");
+	}
+	else if(strcmp(methodName, "newArray") == 0) {
+		// [1, 2, 3];
+		//JSBuilder_EmitString(kctx, builder, "new Array", "", "");
 	}
 	else {
 		// Normal functions
@@ -490,16 +552,17 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 			}
 			else {
 				// Instance methods
-				SUGAR VisitNode(kctx, builder, receiver, thunk);
+				JSBuilder_VisitExprNode(kctx, builder, receiver, thunk);
 			}
 		}
+		kbool_t isReceiverClosure = strcmp(className, "Func") == 0;
 		switch(KSymbol_prefixText_ID(mtd->mn)) {
 		case kSymbolPrefix_GET:
 			if(kArray_size(expr->NodeList) > 2) {
 				JSBuilder_VisitNode(kctx, builder, kNode_At(expr, 2), thunk, "[", "]");
 			}
 			else {
-				if(!isGlobal) {
+				if(!isGlobal && !isReceiverClosure) {
 					JSBuilder_EmitString(kctx, builder, ".", "", "");
 				}
 				JSBuilder_EmitString(kctx, builder, methodName, "", "");
@@ -513,7 +576,7 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 				if(isGlobal) {
 					JSBuilder_EmitString(kctx, builder, "var ", "", "");
 				}
-				else {
+				else if(!isReceiverClosure) {
 					JSBuilder_EmitString(kctx, builder, ".", "", "");
 				}
 			}
@@ -523,10 +586,15 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 			// TODO
 			break;
 		default:
-			if(!isGlobal){
-				JSBuilder_EmitString(kctx, builder, ".", "", "");
+			if(strcmp(className, "Func") == 0) {
+				// Invoke closure
 			}
-			JSBuilder_EmitString(kctx, builder, methodName, "", "");
+			else {
+				if(!isGlobal){
+					JSBuilder_EmitString(kctx, builder, ".", "", "");
+				}
+				JSBuilder_EmitString(kctx, builder, methodName, "", "");
+			}
 			break;
 		}
 	}
@@ -536,10 +604,11 @@ static kbool_t JSBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *buil
 {
 	kMethod *mtd = CallNode_getMethod(node);
 	kbool_t isArray = false;
+	size_t nodeListSize = kArray_size(node->NodeList);
 
-	if(kArray_size(node->NodeList) == 2 && KMethodName_isUnaryOperator(kctx, mtd->mn)) {
+	if(nodeListSize == 2 && KMethodName_isUnaryOperator(kctx, mtd->mn)) {
 		JSBuilder_EmitString(kctx, builder, KMethodName_Fmt2(mtd->mn), "(");
-		SUGAR VisitNode(kctx, builder, kNode_At(node, 1), thunk);
+		JSBuilder_VisitExprNode(kctx, builder, kNode_At(node, 1), thunk);
 		JSBuilder_EmitString(kctx, builder, ")", "", "");
 	}
 	else if(KMethodName_isBinaryOperator(kctx, mtd->mn)) {
@@ -547,7 +616,7 @@ static kbool_t JSBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *buil
 	}
 	else {
 		kNode *receiver = kNode_At(node, 1);
-		if(strcmp(KSymbol_text(mtd->mn), "newList") == 0) {
+		if(strcmp(KSymbol_text(mtd->mn), "[]") == 0 || strcmp(KSymbol_text(mtd->mn), "newArray") == 0) {
 			isArray = true;
 		}
 		else {
@@ -558,12 +627,7 @@ static kbool_t JSBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *buil
 		case kSymbolPrefix_TO:
 			break;
 		case kSymbolPrefix_SET:
-			if(kArray_size(node->NodeList) > 3) {
-				SUGAR VisitNode(kctx, builder, kNode_At(node, 3), thunk);
-			}
-			else {
-				SUGAR VisitNode(kctx, builder, kNode_At(node, 2), thunk);
-			}
+			JSBuilder_VisitExprNode(kctx, builder, kNode_At(node, nodeListSize > 3 ? 3 : 2), thunk);
 			break;
 		default:
 			JSBuilder_VisitNodeParams(kctx, builder, node, thunk, 2, ", ", isArray ? "[" : "(", isArray ? "]" : ")");
@@ -596,9 +660,14 @@ static kbool_t JSBuilder_VisitDoneNode(KonohaContext *kctx, KBuilder *builder, k
 	return true;
 }
 
+static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, kMethod *mtd);
+
 static kbool_t JSBuilder_VisitFunctionNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	abort();/*FIXME*/
+	kMethod *mtd = CallNode_getMethod(expr); 
+	JSBuilder_EmitMethodHeader(kctx, builder, mtd);
+	JSBuilder_VisitStmtNode(kctx, builder, Node_getFirstBlock(kctx, expr), thunk);
+	JSBuilder_EmitString(kctx, builder, ")", "", "");
 	return true;
 }
 
@@ -656,13 +725,17 @@ static kbool_t JSBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder
 
 static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 {
-	JSBuilder *jsBuilder = (JSBuilder *)builder;
 	KClass *kclass = KClass_(mtd->typeId);
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	kParam *params = kMethod_GetParam(mtd);
+	const char *shortMethodName = KSymbol_text(mtd->mn);
 	unsigned int i;
-	if(mtd->typeId == KType_NameSpace) {
+	if(strcmp(shortMethodName, "") == 0) {
+		// Closure
+		KLIB KBuffer_printf(kctx, &wb, "(function(");
+	}
+	else if(mtd->typeId == KType_NameSpace) {
 		// Top level functions
 		KLIB KBuffer_printf(kctx, &wb, "var %s%s = function(", KMethodName_Fmt2(mtd->mn));
 	}
@@ -688,7 +761,7 @@ static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, k
 		KLIB KBuffer_printf(kctx, &wb, "%s", KSymbol_text(params->paramtypeItems[i].name));
 	}
 	KLIB KBuffer_printf(kctx, &wb, ")");
-	
+
 	JSBuilder_EmitString(kctx, builder, KLIB KBuffer_text(kctx, &wb, EnsureZero), "", "");
 	KLIB KBuffer_Free(&wb);
 }
@@ -733,6 +806,7 @@ static void JSBuilder_Init(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 	jsBuilder->visitingMethod = mtd;
 	jsBuilder->isIndentEmitted = false;
 	jsBuilder->indent = 0;
+	jsBuilder->isExprNode = false;
 	KLIB KBuffer_Init(&jsBuilder->buffer, &jsBuilder->jsCodeBuffer);
 
 	KClass *kclass = KClass_(mtd->typeId);
@@ -754,12 +828,14 @@ static void JSBuilder_Init(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 				JSBuilder_EmitNewLineWith(kctx, builder, "_super.call(this);");
 			}
 			JSBuilder_VisitClassFields(kctx, builder, kclass);
-		}else {
+		}
+		else {
 			JSBuilder_EmitMethodHeader(kctx, builder, mtd);
 			JSBuilder_EmitNewLineWith(kctx, builder, " {");
 			jsBuilder->indent++;
 		}
-	}else {
+	}
+	else {
 		// TopLevel
 		compileAllDefinedMethods(kctx);
 	}
@@ -815,7 +891,7 @@ static struct KVirtualCode* V8_GenerateVirtualCode(KonohaContext *kctx, kMethod 
 	SUGAR VisitNode(kctx, (KBuilder *)builder, block, NULL);
 	JSBuilder_Free(kctx, (KBuilder *)builder, mtd);
 	RESET_GCSTACK();
-	
+
 	//printf("//<=<=<=<=<=<=<=<=\n");
 	return NULL;
 }

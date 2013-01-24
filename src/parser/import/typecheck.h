@@ -259,18 +259,19 @@ static kNode* TypeCheckNodeList(KonohaContext *kctx, kNode *block, size_t n, kNa
 		if(tstmt != stmt) {
 			KFieldSet(nodeList, nodeList->NodeItems[n], tstmt);
 			kNode_SetParent(kctx, tstmt, block);
+			stmt = tstmt;
 		}
 	}
 	return stmt;
 }
-
-static kNode *PushNode(KonohaContext *kctx, kNameSpace *ns, size_t stackbase, kNode *expr)
-{
-	kNode *node = KNewNode(ns);
-	KFieldSet(node, node->NodeToPush, expr);
-	node->stackbase = stackbase;
-	return kNode_Type(kctx, node, KNode_Push, expr->attrTypeId);
-}
+//
+//static kNode *PushNode(KonohaContext *kctx, kNameSpace *ns, size_t stackbase, kNode *expr)
+//{
+//	kNode *node = KNewNode(ns);
+//	KFieldSet(node, node->NodeToPush, expr);
+//	node->stackbase = stackbase;
+//	return kNode_Type(kctx, node, KNode_Push, expr->attrTypeId);
+//}
 
 static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, KClass *reqc)
 {
@@ -339,7 +340,7 @@ static struct KGammaLocalData *kNameSpace_PopGamma(KonohaContext *kctx, kNameSpa
 
 static void kNameSpace_InitParam(KonohaContext *kctx, struct KGammaLocalData *genv, kParam *pa, kparamtype_t *callparam)
 {
-	int i, psize = (pa->psize + 1 < genv->localScope.capacity) ? pa->psize : genv->localScope.capacity - 1;
+	int i, psize = (pa->psize + 1U < genv->localScope.capacity) ? pa->psize : genv->localScope.capacity - 1;
 	for(i = 0; i < psize; i++) {
 		genv->localScope.varItems[i+1].name = pa->paramtypeItems[i].name;
 		genv->localScope.varItems[i+1].attrTypeId = (callparam == NULL) ? pa->paramtypeItems[i].attrTypeId : callparam[i].attrTypeId;
@@ -354,7 +355,7 @@ static void kNameSpace_InitParam(KonohaContext *kctx, struct KGammaLocalData *ge
 static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t *callparamNULL, kNameSpace *ns, kString *text, kfileline_t uline, int baseIndent, int options)
 {
 	INIT_GCSTACK();
-	size_t errorCount = KGetParserContext(kctx)->errorMessageCount;
+	int errorCount = KGetParserContext(kctx)->errorMessageCount;
 	kParam *param = kMethod_GetParam(mtd);
 	if(callparamNULL != NULL) {
 		//DynamicComplie();

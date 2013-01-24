@@ -139,6 +139,7 @@ static void Syntax_defineSyntaxMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 	int KType_FuncType = (KLIB KClass_Generics(kctx, KClass_Func, KType_Node, 3, P_FuncType))->typeId;
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im, _F(Syntax_new), KType_Syntax, KType_Syntax, KMethodName_("new"), 1, TP_kw,
+		_Public|_Im, _F(Syntax_newParent), KType_Syntax, KType_Syntax, KMethodName_("new"), 1, KType_Syntax, KMethodName_("parent"),
 		_Public,     _F(Syntax_SetTokenFunc), KType_void, KType_Syntax, KMethodName_("SetTokenFunc"), 2, KType_Int, KFieldName_("kchar"), KType_FuncToken, KFieldName_("func"),
 		_Public,     _F(Syntax_SetParseFunc), KType_void, KType_Syntax, KMethodName_("SetParseFunc"), 3, KType_Int, KFieldName_("op1"), KType_Int, KFieldName_("op2"), KType_FuncParse, KFieldName_("func"),
 		_Public,     _F(Syntax_SetTypeFunc), KType_void, KType_Syntax, KMethodName_("SetTypeFunc"), 1, KType_FuncType, KFieldName_("func"),

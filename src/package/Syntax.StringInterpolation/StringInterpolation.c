@@ -83,78 +83,110 @@ static kString *remove_escapes(KonohaContext *kctx, kToken *tk)
 	return text;
 }
 
-static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *sfp)
+static kNode *ParseSource(KonohaContext *kctx, kNameSpace *ns, const char *script, size_t len)
 {
-	VAR_TypeCheck2(stmt, expr, ns, reqc);
-	kToken  *tk   = expr->TermToken;
+	KBuffer wb;
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+	KLIB KBuffer_Write(kctx, &wb, "(", 1);
+	KLIB KBuffer_Write(kctx, &wb, script, len);
+	KLIB KBuffer_Write(kctx, &wb, ")", 1);
+
+	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList};
+	KTokenSeq_Push(kctx, tokens);
+	const char *buf = KLIB KBuffer_text(kctx, &wb, EnsureZero);
+	SUGAR Tokenize(kctx, ns, buf, 0, 0, tokens.tokenList);
+	KTokenSeq_End(kctx, tokens);
+
+	KTokenSeq step2 = {ns, tokens.tokenList, kArray_size(tokens.tokenList)};
+	SUGAR Preprocess(kctx, ns, RangeTokenSeq(tokens), NULL, step2.tokenList);
+	KTokenSeq_End(kctx, step2);
+	kNode *newexpr = SUGAR ParseNewNode(kctx, ns, step2.tokenList, &step2.beginIdx, step2.endIdx, 0, NULL);
+	KTokenSeq_Pop(kctx, tokens);
+	KLIB KBuffer_Free(&wb);
+	return newexpr;
+}
+
+static KMETHOD Expression_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_Expression(expr, tokenList, beginIdx, opIdx, endIdx);
+	kNameSpace *ns = kNode_ns(expr);
+	kToken *tk = tokenList->TokenItems[opIdx];
 	INIT_GCSTACK();
 	kString *text = remove_escapes(kctx, tk);
-	if(text == NULL) {
-		kString_Set(Literal, ((kStringVar *)text), true);
-		KReturnWith(K_NULLNODE, RESET_GCSTACK());
+	if(beginIdx != opIdx) {
+		/* FIXME */
+		asm volatile("int3");
+		KReturnUnboxValue(-1);
 	}
 
-	const char *end = NULL;
+	if(text == NULL) {
+		/* text contain unsupported escape sequences */
+		RESET_GCSTACK();
+		KReturnUnboxValue(-1);
+	}
+
 	const char *str = kString_text(text);
+	const char *end = NULL;
 	const char *start = strstr(str, "${");
 	if(start == NULL) {
-		KReturnWith(K_NULLNODE, RESET_GCSTACK());
+		/* text does not contain Interpolation expressions */
+		RESET_GCSTACK();
+		KReturnUnboxValue(beginIdx+1);
 	}
-	expr = (kNodeVar *) SUGAR kNode_SetConst(kctx, expr, NULL, UPCAST(text));
-	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_String, KMethodName_("+"), 1, KMethodMatch_NoOption);
+	kSyntax *addSyntax = kSyntax_(ns, KSymbol_("+"));
+	kTokenVar *opToken = tokenList->TokenVarItems[beginIdx];
+	opToken->symbol = KSymbol_("+");
+	opToken->text   = KLIB new_kString(kctx, OnGcStack, "+", 1, 0);
+	KFieldSet(opToken, opToken->resolvedSyntaxInfo, addSyntax);
+	SUGAR kNode_Op(kctx, expr, opToken, 0);
 
-	expr = (kNodeVar *) new_ConstNode(kctx, ns, NULL, UPCAST(TS_EMPTY));
+	/* [before] "aaa${bbb}ccc"
+	 * [after]  "" + "aaa" + bbb + "ccc"
+	 */
+	SUGAR kNode_AddNode(kctx, expr, new_ConstNode(kctx, ns, NULL, UPCAST(TS_EMPTY)));
 	while(true) {
 		start = strstr(str, "${");
-		if(start == NULL) {
+		if(start == NULL)
 			break;
-		}
 		if(start == strstr(str, "${}")) {
 			str += 3;
 			continue;
 		}
 		end = strchr(start, '}');
-		if(end == NULL) {
+		if(end == NULL)
 			break;
+		kNode *newexpr = ParseSource(kctx, ns, start+2, end-(start+2));
+		if(start - str > 0) {
+			kNode *first = new_ConstNode(kctx, ns, NULL,
+					UPCAST(KLIB new_kString(kctx, OnGcStack, str, (start - str), 0)));
+			SUGAR kNode_AddNode(kctx, expr, first);
 		}
-
-		KBuffer wb;
-		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-		KLIB KBuffer_Write(kctx, &wb, "(", 1);
-		KLIB KBuffer_Write(kctx, &wb, start+2, end-(start+2));
-		KLIB KBuffer_Write(kctx, &wb, ")", 1);
-
-		KTokenSeq range = {ns, KGetParserContext(kctx)->preparedTokenList};
-		KTokenSeq_Push(kctx, range);
-		const char *buf = KLIB KBuffer_text(kctx, &wb, EnsureZero);
-		SUGAR Tokenize(kctx, ns, buf, tk->uline, 0, range.tokenList);
-		KTokenSeq_End(kctx, range);
-
-		{
-			KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList};
-			KTokenSeq_Push(kctx, tokens);
-
-			SUGAR Preprocess(kctx, ns, tokens.tokenList, range.beginIdx, range.endIdx, NULL, range.tokenList);
-			kNode *newexpr = SUGAR ParseNewNode(kctx, ns, tokens.tokenList, &tokens.beginIdx, tokens.endIdx, 0, NULL);
-			KTokenSeq_Pop(kctx, tokens);
-			if(start - str > 0) {
-				kNode *first = new_ConstNode(kctx, ns, NULL,
-						UPCAST(KLIB new_kString(kctx, OnGcStack, str, (start - str), 0)));
-				expr = (kNodeVar *) SUGAR new_MethodNode(kctx, ns, KClass_String, concat, 2, expr, first);
-			}
-			expr = (kNodeVar *) SUGAR new_MethodNode(kctx, ns, KClass_String, concat, 2, expr, newexpr);
-		}
-		KTokenSeq_Pop(kctx, range);
-		KLIB KBuffer_Free(&wb);
+		SUGAR kNode_AddNode(kctx, expr, newexpr);
 		str = end + 1;
 	}
 
 	if((start == NULL) || (start != NULL && end == NULL)) {
 		kNode *rest = new_ConstNode(kctx, ns, KClass_String,
 				UPCAST(KLIB new_kString(kctx, OnGcStack, str, strlen(str), 0)));
-		expr = (kNodeVar *) SUGAR new_MethodNode(kctx, ns, KClass_String, concat, 2, expr, rest);
+		SUGAR kNode_AddNode(kctx, expr, rest);
 	}
-	KReturnWith(expr, RESET_GCSTACK());
+
+	/* (+ 1 2 3 4) => (+ (+ (+ 1 2) 3 ) 4) */
+	int i, size = kNode_GetNodeListSize(kctx, expr);
+	assert(size > 2);
+	kNode *leftNode = kNode_At(expr, 1), *rightNode;
+	for(i = 2; i < size-1; i++) {
+		kNode *node = KNewNode(ns);
+		rightNode = kNode_At(expr, i);
+		SUGAR kNode_Op(kctx, node, opToken, 2, leftNode, rightNode);
+		leftNode = node;
+	}
+	rightNode = kNode_At(expr, i);
+	KLIB kArray_Clear(kctx, expr->NodeList, 1);
+	KLIB kArray_Add(kctx, expr->NodeList, leftNode);
+	KLIB kArray_Add(kctx, expr->NodeList, rightNode);
+	RESET_GCSTACK();
+	KReturnUnboxValue(beginIdx+1);
 }
 
 
@@ -162,8 +194,10 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 
 static kbool_t StringInterpolationPackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
+#define PATTERN(X) KSymbol_##X##Pattern
+	kSyntax *textSyntax = kSyntax_(KNULL(NameSpace), PATTERN(Text));
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KSymbol_TextPattern, SYNFLAG_CTypeFunc, 0, 0, {NULL}, {(kFunc *)TypeCheck_ExtendedTextLiteral}, },
+		{ KSymbol_TextPattern, SYNFLAG_CParseFunc, 0, 0, {SUGARFUNC Expression_ExtendedTextLiteral}, {textSyntax->TypeFuncNULL}, },
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

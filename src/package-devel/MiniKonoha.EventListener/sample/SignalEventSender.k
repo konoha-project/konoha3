@@ -14,7 +14,7 @@ void sendSignalEvent() {
 	String req = sdata.toString();
 	FILE mailbox = new FILE("/usr/local/minikonoha/dse/mailbox", "a");
 	req = req + "\n";
-	int len = req.getSize();
+	int len = req.length();
 	mailbox.write(req.toBytes());
 	mailbox.close();
 	FILE pid = new FILE("/usr/local/minikonoha/dse/pid", "r");

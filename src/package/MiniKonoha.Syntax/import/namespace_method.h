@@ -105,6 +105,7 @@ static KMETHOD NameSpace_Preprocess(KonohaContext *kctx, KonohaStack *sfp)
 	KTokenSeq tokens = {source.ns, a, 0};
 	tokens.TargetPolicy.ExpandingBraceGroup = true;
 	SUGAR Preprocess(kctx, source.ns, RangeTokenSeq(source), NULL, tokens.tokenList);
+	KTokenSeq_Pop(kctx, source);
 	KReturnWith(a, RESET_GCSTACK());
 }
 

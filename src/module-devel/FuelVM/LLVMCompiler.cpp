@@ -697,6 +697,19 @@ static void EmitNewInst(LLVMIRBuilder *writer, INew *Node)
 	SetValue(writer, (INode *)Node, Ret);
 }
 
+static Value *CreateBoxInst(LLVMIRBuilder *writer, IUnary *Node, Value *Val)
+{
+	GlobalVariable *G = GetNewKObject();
+	enum TypeId type = ToUnBoxType(Node->base.Type);
+	IRBuilder<> *builder = writer->builder;
+	KonohaContext *kctx = writer->kctx;
+	Value *Vctx = GetContext(writer);
+	Value *Arg1 = EmitConstant(builder, (int64_t)0UL);
+	Value *Arg2 = EmitConstant(builder, (void *) KClass_(ToKType(kctx, type)));
+	Value *Ret = builder->CreateCall4(G, Vctx, Arg1, Arg2, Val);
+	return Ret;
+}
+
 static void EmitUnaryInst(LLVMIRBuilder *writer, IUnary *Node)
 {
 	Value *Val = GetValue(writer, Node->Node);
@@ -735,6 +748,9 @@ static void EmitUnaryInst(LLVMIRBuilder *writer, IUnary *Node)
 			assert(0 && "unreachable");
 			break;
 		}
+	} else if(IsUnBoxedType(ToUnBoxType(Type))) {
+		SetValue(writer, (INode *) Node, CreateBoxInst(writer, Node, Val));
+		return;
 	}
 #undef CASE
 #undef CASE_

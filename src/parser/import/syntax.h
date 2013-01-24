@@ -212,6 +212,7 @@ static KMETHOD Expression_Term(KonohaContext *kctx, KonohaStack *sfp)
 		kNode_Termnize(kctx, node, tk);
 		KReturnUnboxValue(nextIdx);
 	}
+	KReturnUnboxValue(-1);
 }
 
 static KMETHOD Expression_Operator(KonohaContext *kctx, KonohaStack *sfp)
@@ -658,7 +659,7 @@ static kNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kNode *exp
 	kNode *thisNode = BoxThisNode(kctx, expr, ns, mtd, &thisClass);
 	kbool_t isConst = kNode_IsConstValue(thisNode);
 	kParam *pa = kMethod_GetParam(mtd);
-	DBG_ASSERT(pa->psize +2 <= kArray_size(expr->NodeList));
+	DBG_ASSERT(pa->psize + 2U <= kArray_size(expr->NodeList));
 	size_t i;
 	for(i = 0; i < pa->psize; i++) {
 		size_t n = i + 2;
@@ -679,19 +680,19 @@ static kNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kNode *exp
 	return kNode_Rebase(kctx, expr, ns->genv->localScope.varsize);
 }
 
-static kNode* TypeCheckDynamicCallParams(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kMethod *mtd, kNameSpace *ns, kString *name, kmethodn_t mn, KClass *reqClass)
-{
-	size_t i;
-	kParam *pa = kMethod_GetParam(mtd);
-	KClass* ptype = (pa->psize == 0) ? KClass_Object : KClass_(pa->paramtypeItems[0].attrTypeId);
-	for(i = 2; i < kArray_size(expr->NodeList); i++) {
-		kNode *texpr = SUGAR TypeCheckNodeAt(kctx, expr, i, ns, ptype, 0);
-		if(kNode_IsError(texpr) /* texpr = K_NULLNODE */) return texpr;
-	}
-	kNode_AddNode(kctx, expr, new_ConstNode(kctx, kNode_ns(expr), NULL, UPCAST(name)));
-	return TypeMethodCallNode(kctx, expr, mtd, reqClass);
-}
-
+//static kNode* TypeCheckDynamicCallParams(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kMethod *mtd, kNameSpace *ns, kString *name, kmethodn_t mn, KClass *reqClass)
+//{
+//	size_t i;
+//	kParam *pa = kMethod_GetParam(mtd);
+//	KClass* ptype = (pa->psize == 0) ? KClass_Object : KClass_(pa->paramtypeItems[0].attrTypeId);
+//	for(i = 2; i < kArray_size(expr->NodeList); i++) {
+//		kNode *texpr = SUGAR TypeCheckNodeAt(kctx, expr, i, ns, ptype, 0);
+//		if(kNode_IsError(texpr) /* texpr = K_NULLNODE */) return texpr;
+//	}
+//	kNode_AddNode(kctx, expr, new_ConstNode(kctx, kNode_ns(expr), NULL, UPCAST(name)));
+//	return TypeMethodCallNode(kctx, expr, mtd, reqClass);
+//}
+//
 static kMethod *kNameSpace_GuessCoercionMethodNULL(KonohaContext *kctx, kNameSpace *ns, kToken *tk, KClass *thisClass)
 {
 	const char *name = kString_text(tk->text);
@@ -756,8 +757,8 @@ static KMETHOD TypeCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(expr, ns, reqc);
 	kNode *texpr = K_NULLNODE;
 	KDump(expr);
-	kMethod *mtd = expr->NodeList->MethodItems[0];
 	DBG_ASSERT(IS_Array(expr->NodeList));
+	kMethod *mtd = expr->NodeList->MethodItems[0];
 	DBG_ASSERT(mtd != NULL);
 	if(!IS_Method(mtd)) {
 		texpr = SUGAR TypeCheckNodeAt(kctx, expr, 1, ns, KClass_INFER, 0);
@@ -777,7 +778,7 @@ static kNode *TypeFuncParam(KonohaContext *kctx, kNodeVar *expr, kNameSpace *ns)
 	KClass *thisClass = KClass_(kNode_At(expr, 0)->attrTypeId);
 	kParam *pa = KClass_cparam(thisClass);
 	size_t i, size = kArray_size(expr->NodeList);
-	if(pa->psize + 2 != size) {
+	if(pa->psize + 2U != size) {
 		return SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "function %s takes %d parameter(s), but given %d parameter(s)", KClass_text(thisClass), (int)pa->psize, (int)size-2);
 	}
 	for(i = 0; i < pa->psize; i++) {
@@ -788,6 +789,12 @@ static kNode *TypeFuncParam(KonohaContext *kctx, kNodeVar *expr, kNameSpace *ns)
 		}
 	}
 	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, kNode_ns(expr), KClass_Func, KMethodName_("Invoke"), -1, KMethodMatch_NoOption);
+	/* [before] [Func, nulltoken, Arg1, Arg2, Arg3 ..]
+	 * [after]  [null, Func, Arg1, Arg2, Arg3 ..]
+	 */
+	kArray *List = expr->NodeList;
+	KFieldSet(List, List->ObjectItems[1], List->ObjectItems[0]);
+
 	DBG_ASSERT(mtd != NULL);
 	return TypeMethodCallNode(kctx, expr, mtd, KClass_(thisClass->p0));
 }
@@ -1249,7 +1256,7 @@ static KMETHOD Statement_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 		kMethodVar *mtd = (kMethodVar *)KLIB new_kMethod(kctx, _GcStack, flag, typeId, mn, NULL);
 		KLIB kMethod_SetParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t *)pa->paramtypeItems);
 		KMakeTrace(trace, sfp);
-		if(kNameSpace_AddMethod(kctx, ns, mtd, trace)) {
+		if((mtd = kNameSpace_AddMethod(kctx, ns, mtd, trace)) != NULL) {
 			kMethod_SetLazyCompilation(kctx, mtd, stmt, ns);
 		}
 		RESET_GCSTACK();

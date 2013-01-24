@@ -2,4 +2,11 @@
 
 import("MiniKonoha.Syntax");
 
-syntax "token" $Token*;
+void main(){
+	Syntax syntax = new Syntax("test");
+	syntax.setParseFunc(Precedence_Statement, 0, GetPatternParseFunc());
+	syntax.SetPattern("$Token*");
+	DefineSyntax(syntax);
+}
+main();
+

@@ -4,16 +4,19 @@
  *
  */
 
-import("cstyle");
 import("MiniKonoha.NameSpace");
 import("Syntax.JavaStyleClass");
+import("Syntax.JavaNewArray");
+import("Syntax.CStyleFor");
+import("Syntax.CStyleCompoundAssignment");
 import("JavaScript.Array");
-//import("konoha.new"); Don't use this
 import("Type.Float");
 import("JavaScript.Math");
+
 const N=5500;
 
 class Spectralnorm {
+	Spectralnorm() {}
 	/* return element i,j of infinite matrix A */
 	float a(int i, int j){
 		return 1.0/((i+j)*(i+j+1)/2 +i+1);
@@ -24,7 +27,7 @@ class Spectralnorm {
 		for (int i=0; i < n; i= i + 1) {
 			av[i] = 0;
 			for (int j=0; j < n; j= j + 1) {
-				av[i] += a(i,j)*v[j];
+				av[i] = av[i] + a(i,j)*v[j];
 			}
 		}
 	}
@@ -34,7 +37,7 @@ class Spectralnorm {
 		for (int i=0; i < n; i= i + 1) {
 			atv[i] = 0;
 			for (int j=0; j < n; j= j + 1) {
-				atv[i] += a(j,i)*v[j];
+				atv[i] = atv[i] + a(j,i)*v[j];
 			}
 		}
 	}

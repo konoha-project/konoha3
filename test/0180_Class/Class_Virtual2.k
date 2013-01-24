@@ -14,8 +14,8 @@ class C {
 	int x5;
 	int x6;
 	int x7;
+	C(){}
 }
-
 void test() {
 	C c = new C();
 	assert(c.x0 == 0);

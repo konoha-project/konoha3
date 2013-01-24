@@ -5,10 +5,11 @@
  * modified slightly by Chad Whipkey
  */
 
-import("cstyle");
 import("MiniKonoha.NameSpace");
 import("Type.Float");
 import("Syntax.JavaStyleClass");
+import("Syntax.JavaNewArray");
+import("Syntax.CStyleFor");
 import("JavaScript.Array");
 import("JavaScript.Math");
 
@@ -19,7 +20,7 @@ const N = 50000;
 
 class Body {
 	float x, y, z, vx, vy, vz, mass;
-
+	Body() {}
 	@Static Body jupiter(){
 		Body p = new Body();
 		p.x = 4.84143144246472090e+00;
@@ -90,7 +91,7 @@ class NBodySystem {
 		float py = 0.0;
 		float pz = 0.0;
 		bodies = [Body.sun(), Body.jupiter(), Body.saturn(), Body.uranus(), Body.neptune()];
-		for(int i=0; i < bodies.size; ++i) {
+		for(int i=0; i < bodies.size; i = i + 1) {
 			px = px + bodies[i].vx * bodies[i].mass;
 			py = py + bodies[i].vy * bodies[i].mass;
 			pz = pz + bodies[i].vz * bodies[i].mass;
@@ -99,9 +100,9 @@ class NBodySystem {
 	}
 
 	void advance(float dt) {
-		for(int i=0; i < bodies.size; ++i) {
+		for(int i=0; i < bodies.size; i = i + 1) {
 			Body iBody = bodies[i];
-			for(int j=i+1; j < bodies.size; ++j) {
+			for(int j=i+1; j < bodies.size; j = j + 1) {
 				float dx = iBody.x - bodies[j].x;
 				float dy = iBody.y - bodies[j].y;
 				float dz = iBody.z - bodies[j].z;
@@ -119,7 +120,7 @@ class NBodySystem {
 			}
 		}
 
-		for(int i=0; i < bodies.size; ++i) {
+		for(int i=0; i < bodies.size; i = i + 1) {
 			Body body = bodies[i];
 			body.x = body.x + dt * body.vx;
 			body.y = body.y + dt * body.vy;
@@ -131,11 +132,11 @@ class NBodySystem {
 		float dx, dy, dz, distance;
 		float e = 0.0;
 
-		for (int i=0; i < bodies.size; ++i) {
+		for (int i=0; i < bodies.size; i = i + 1) {
 			Body iBody = bodies[i];
 			e = e + (0.5 * iBody.mass * ( iBody.vx * iBody.vx + iBody.vy * iBody.vy + iBody.vz * iBody.vz ));
 
-			for (int j=i+1; j < bodies.size; ++j) {
+			for (int j=i+1; j < bodies.size; j = j + 1) {
 				Body jBody = bodies[j];
 				dx = iBody.x - jBody.x;
 				dy = iBody.y - jBody.y;
@@ -153,7 +154,7 @@ void run() {
 	int n = N;
 	NBodySystem bodies = new NBodySystem();
 	System.p("energy:"+ bodies.energy());
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < n; i = i + 1) {
 		bodies.advance(0.01);
 	}
 	System.p("energy:"+ bodies.energy());

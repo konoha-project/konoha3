@@ -516,12 +516,14 @@ static KMETHOD Array_slice1(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnWith(returnValue, RESET_GCSTACK());
 }
 
-static int kArray_indexOf(KonohaContext *kctx, kArray *a, uintptr_t e, size_t fromIndex) {
+static int kArray_indexOf(KonohaContext *kctx, kArray *a, uintptr_t e, size_t fromIndex)
+{
 	int res = -1;
 	size_t i, asize = kArray_size(a);
+	KClass *ElementClass =KClass_(kObject_p0(a));
 	if(kArray_Is(UnboxData, a)) {
 		for(i = fromIndex; i < asize; i++) {
-			if(KClass_(kObject_p0(a))->compareUnboxValue(a->unboxItems[i], e) == 0) {
+			if(ElementClass->compareUnboxValue(a->unboxItems[i], e) == 0) {
 				res = i; break;
 			}
 		}
@@ -529,7 +531,7 @@ static int kArray_indexOf(KonohaContext *kctx, kArray *a, uintptr_t e, size_t fr
 	else {
 		kObject *o = (kObject *)e;
 		for(i = fromIndex; i < asize; i++) {
-			if(KClass_(kObject_p0(a))->compareObject(a->ObjectItems[i], o) == 0) {
+			if(ElementClass->compareTo(kctx, a->ObjectItems[i], o) == 0) {
 				res = i; break;
 			}
 		}
@@ -541,7 +543,8 @@ static int kArray_indexOf(KonohaContext *kctx, kArray *a, uintptr_t e, size_t fr
 static KMETHOD Array_indexOf0(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	uintptr_t value = sfp[1].unboxValue;
+	uintptr_t value = kArray_Is(UnboxData, a) ?
+		sfp[1].unboxValue : (uintptr_t) sfp[1].asObject;
 	KReturnUnboxValue(kArray_indexOf(kctx, a, value, 0));
 }
 
@@ -549,7 +552,8 @@ static KMETHOD Array_indexOf0(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_indexOf1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	uintptr_t value = sfp[1].unboxValue;
+	uintptr_t value = kArray_Is(UnboxData, a) ?
+		sfp[1].unboxValue : (uintptr_t) sfp[1].asObject;
 	uintptr_t fromIndex  = sfp[2].unboxValue;
 	KReturnUnboxValue(kArray_indexOf(kctx, a, value, fromIndex));
 }
@@ -567,7 +571,7 @@ static int kArray_lastIndexOf(KonohaContext *kctx, kArray *a, uintptr_t e, size_
 	else {
 		kObject *o = (kObject *)e;
 		for(i = fromIndex; i >= 0; i--) {
-			if(KClass_(kObject_p0(a))->compareObject(a->ObjectItems[i], o) == 0) {
+			if(KClass_(kObject_p0(a))->compareTo(kctx, a->ObjectItems[i], o) == 0) {
 				res = i; break;
 			}
 		}
@@ -579,7 +583,8 @@ static int kArray_lastIndexOf(KonohaContext *kctx, kArray *a, uintptr_t e, size_
 static KMETHOD Array_lastIndexOf0(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	uintptr_t value = sfp[1].unboxValue;
+	uintptr_t value = kArray_Is(UnboxData, a) ?
+		sfp[1].unboxValue : (uintptr_t) sfp[1].asObject;
 	KReturnUnboxValue(kArray_lastIndexOf(kctx, a, value, kArray_size(a)));
 }
 
@@ -587,7 +592,8 @@ static KMETHOD Array_lastIndexOf0(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_lastIndexOf1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	uintptr_t value = sfp[1].unboxValue;
+	uintptr_t value = kArray_Is(UnboxData, a) ?
+		sfp[1].unboxValue : (uintptr_t) sfp[1].asObject;
 	uintptr_t fromIndex  = sfp[2].unboxValue;
 	KReturnUnboxValue(kArray_lastIndexOf(kctx, a, value, fromIndex));
 }

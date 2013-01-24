@@ -241,12 +241,18 @@ add_subdirectory(src/module-devel)
 add_subdirectory(src/package)
 add_subdirectory(src/package-devel)
 
+macro(set_konoha_home test_name)
+	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
+		"KONOHA_HOME=${PARENT_BINARY_DIR}")
+endmacro(set_konoha_home test_name)
+
 macro(add_clib_test test_name)
 	add_executable(${test_name} ${ARGN})
 	SET_CXX_PROPERTY_IF_MSVC(${test_name} ${ARGN})
 	target_link_libraries(${test_name} ${ExtraLibs})
 	add_test(Clib/Release/${test_name} ${test_name})
 	set_tests_properties(Clib/Release/${test_name} PROPERTIES TIMEOUT 5)
+	set_konoha_home(Clib/Release/${test_name})
 endmacro(add_clib_test sources)
 
 add_clib_test(test_sizeof  ./test/Clib/test_sizeof.c)
@@ -260,20 +266,15 @@ add_clib_test(test_cpp     ./test/Clib/test_cpp.cpp)
 add_clib_test(test_proto   ./test/Clib/test_proto.c)
 add_clib_test(MultiContext   ./test/Clib/MultiContext.c)
 
-macro(set_package_path test_name)
-set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
-	"KONOHA_HOME=${PARENT_BINARY_DIR}")
-endmacro(set_package_path test_name)
-
 add_test(Shell/Release/Oneline
 	${CMAKE_CURRENT_SOURCE_DIR}/test/test-oneline.sh ${TEST_BIN}
 	"System.p(\"hi\");")
-set_package_path(Shell/Release/Oneline)
+set_konoha_home(Shell/Release/Oneline)
 
 add_test(Shell/Release/Multiline
 	${CMAKE_CURRENT_SOURCE_DIR}/test/test-multiline.sh ${TEST_BIN}
 	${CMAKE_CURRENT_SOURCE_DIR}/test/Release/Fibonacci.k)
-set_package_path(Shell/Release/Multiline)
+set_konoha_home(Shell/Release/Multiline)
 
 file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/Shell/*.sh)
 foreach(f ${test_files})
@@ -286,8 +287,7 @@ foreach(f ${test_files})
 		add_test(${test_name} sh +x ${f} ${TEST_BIN})
 	endif(EXISTS ${TEST_SCRIPT})
 	set_tests_properties(${test_name} PROPERTIES TIMEOUT 5)
-	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
-		"KONOHA_HOME=${PARENT_BINARY_DIR}")
+	set_konoha_home(${test_name})
 endforeach(f ${test_files})
 
 add_subdirectory(src/exec/apache)

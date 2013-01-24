@@ -808,7 +808,6 @@ enum {
 //#define DEF_TIMEOUT -1
 #define ONEXEC(p)          (p->cpid > 0) ? 1 : 0
 #define PREEXEC(p)         (p->cpid == -1) ? 1 : 0
-#define WORD2INT(val)      (sizeof(val)==8) ? (val&0x7FFFFFFF)|((val>>32)&0x80000000) : val
 
 /* ------------------------------------------------------------------------ */
 
@@ -1488,7 +1487,7 @@ static KMETHOD Subproc_SetBufsize(KonohaContext *kctx, KonohaStack *sfp)
 	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	int ret = PREEXEC(sp);
 	if(ret) {
-		sp->bufferSize = WORD2INT(sfp[1].intValue);
+		sp->bufferSize = (int) (sfp[1].intValue);
 	}
 	KReturnUnboxValue(ret);
 }

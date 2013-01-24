@@ -313,7 +313,7 @@ static int TokenizeSlash(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenize
 static int TokenizeMember(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	const char *ts = tokenizer->source + tok_start;
-	if(isalpha(ts[1]) || ts[1] < 0) {
+	if(isalpha(ts[1]) || ts[1] == '_' || ts[1] < 0) {
 		int pos = TokenizeSymbol(kctx, tk, tokenizer, tok_start+1);
 		tk->tokenType = TokenType_Member;
 		return pos;
