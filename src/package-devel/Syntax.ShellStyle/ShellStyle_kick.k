@@ -3,6 +3,7 @@ import("posix.process");
 import("dscript.subproc");
 import("JavaScript.Array");
 import("Type.File");
+import("Syntax.StringInterpolation");
 
 int lastExitStatus = 0;
 
