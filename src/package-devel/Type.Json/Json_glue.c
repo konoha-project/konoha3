@@ -259,9 +259,12 @@ static KMETHOD Json_getInt(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_getString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	const char *text = PLATAPI GetJsonText(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), 0);
-	if(text != NULL){
-		KReturn(KLIB new_kString(kctx, OnStack, text, strlen(text), 0));
+
+	struct JsonBuf jsonbuf = {};
+	if(PLATAPI RetrieveJsonKeyValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), &jsonbuf)) {
+		const char *text = PLATAPI GetJsonText(kctx, &jsonbuf, NULL, 0, 0);
+		int64_t len = PLATAPI GetJsonSize(kctx, &jsonbuf);
+		KReturn(KLIB new_kString(kctx, OnStack, text, len, 0));
 	}
 	KReturn(KNULL(String));
 }

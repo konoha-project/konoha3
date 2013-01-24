@@ -172,6 +172,10 @@ static int64_t GetJsonInt(KonohaContext *kctx, struct JsonBuf *jsonbuf, const ch
 	if(key == NULL) {
 		if(JSON_TYPE_CHECK(Int32, json)) {
 			return JSONInt_get(json);
+		} else if(JSON_TYPE_CHECK(Int64, json)) {
+			return JSONInt64_get(json);
+		} else {
+			return 0;
 		}
 	}
 	return JSON_getInt(json, key, KeyLen(key, keylen_or_zero));
@@ -181,7 +185,7 @@ static double GetJsonFloat(KonohaContext *kctx, struct JsonBuf *jsonbuf, const c
 {
 	JSON json = AsJSON(jsonbuf);
 	if(key == NULL)
-		JSONDouble_get(json);
+		return JSONDouble_get(json);
 	return JSON_getDouble(json, key, KeyLen(key, keylen_or_zero));
 }
 
@@ -189,7 +193,7 @@ static const char *GetJsonText(KonohaContext *kctx, struct JsonBuf *jsonbuf, con
 {
 	JSON json = AsJSON(jsonbuf);
 	if(key == NULL)
-		JSONString_get(json);
+		return JSONString_get(json);
 	size_t length = KeyLen(key, keylen_or_zero);
 	return JSON_getString(json, key, &length);
 }
