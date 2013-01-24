@@ -244,6 +244,10 @@ static kbool_t JSBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, 
 	for (i = 0; ret && i < kArray_size(block->NodeList); ++i) {
 		kNode *node = block->NodeList->NodeItems[i];
 
+		if(node == K_NULLNODE || node->node == KNode_Done) {
+			continue;
+		}
+
 		while(node->node == KNode_Block && kArray_size(node->NodeList) == 1) {
 			node = node->NodeList->NodeItems[0];
 		}
@@ -480,10 +484,18 @@ static kbool_t JSBuilder_VisitFieldNode(KonohaContext *kctx, KBuilder *builder, 
 	return true;
 }
 
+kbool_t LoadJavaScriptModule(KonohaFactory *factory, ModuleType type);
+
 static bool JSBuilder_importPackage(KonohaContext *kctx, kNameSpace *ns, kString *package, kfileline_t uline)
 {
 	KBaseTrace(trace);
+	SUGAR kNameSpace_UseDefaultVirtualMachine(kctx, ns);
+
 	KImportPackage(ns, kString_text(package), trace);
+	
+	KonohaFactory *factory = (KonohaFactory *)kctx->platApi;
+	LoadJavaScriptModule(factory, ReleaseModule); 
+	ns->builderApi = factory->GetDefaultBuilderAPI();
 	return true;
 }
 
@@ -632,6 +644,9 @@ static kbool_t JSBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *buil
 		default:
 			JSBuilder_VisitNodeParams(kctx, builder, node, thunk, 2, ", ", isArray ? "[" : "(", isArray ? "]" : ")");
 			break;
+		}
+		if(mtd->mn == KMethodName_("import")) {
+			JSBuilder_EmitNewLineWith(kctx, builder, ";");
 		}
 	}
 	return true;
