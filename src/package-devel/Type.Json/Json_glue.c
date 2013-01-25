@@ -172,6 +172,25 @@ static KMETHOD Json_toString(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
+//## String Json.asString();
+static KMETHOD Json_asString(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kJson *jo = (kJson *)sfp[0].asObject;
+	const char *text = PLATAPI JsonToNewText(kctx, &jo->jsonbuf);
+	DBG_ASSERT(text != NULL);
+	kString *ret;
+	if(PLATAPI IsJsonType(&jo->jsonbuf, KJSON_STRING)) {
+		/* Skip DoubleQuote */
+		ret = KLIB new_kString(kctx, OnStack, text+1, strlen(text)-2, 0);
+	}
+	else {
+		ret = KLIB new_kString(kctx, OnStack, text, strlen(text), 0);
+	}
+	free((char *) text);
+	KReturn(ret);
+}
+
+
 //## Json String.toJson();
 static KMETHOD String_toJson(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -392,6 +411,7 @@ static kbool_t json_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		_Public|_Const|_Im,  _F(String_toJson),  KType_Json,    KType_String, KMethodName_To(KType_Json),    0,
 		_Public|_Const|_Im,  _F(Json_toInt),     KType_Int,     KType_Json,   KMethodName_To(KType_Int),     0,
 		_Public|_Const|_Im,  _F(Json_toString),  KType_String,  KType_Json,   KMethodName_To(KType_String),  0,
+		_Public|_Const|_Im,  _F(Json_asString),  KType_String,  KType_Json,   KMethodName_To(KType_String),  0,
 		_Public|_Const|_Im,  _F(Json_toFloat),   KType_float,  KType_Json,   KMethodName_To(KType_float),   0,
 		_Public|_Const|_Im,  _F(Json_toBoolean), KType_Boolean,  KType_Json,   KMethodName_To(KType_Boolean), 0,
 		_Public|_Const|_Im,  _F(Json_getSize),   KType_Int,     KType_Json,   KMethodName_("getSize"),    0,
