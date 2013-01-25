@@ -84,8 +84,33 @@ static void kJson_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 //## Json Json.new();
 static KMETHOD Json_new (KonohaContext *kctx, KonohaStack *sfp)
 {
-	kJson *jo = (kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	kJson *jo = (kJson *) sfp[0].asObject;
 	PLATAPI CreateJson(kctx, &jo->jsonbuf, KJSON_OBJECT);
+	KReturn(jo);
+}
+
+static KJSONTYPE ToKJSONType(KonohaContext *kctx, ktypeattr_t type)
+{
+	switch(type) {
+		case KType_Object:   return KJSON_OBJECT;
+		case KType_Array:    return KJSON_ARRAY;
+		case KType_String:   return KJSON_STRING;
+		case KType_Int:      return KJSON_INT;
+		case KType_Boolean:  return KJSON_BOOLEAN;
+		default:
+			if(type == KType_float) {
+				return KJSON_DOUBLE;
+			}
+	}
+	return KJSON_OBJECT;
+}
+
+//## Json Json.new(Object defaultObject);
+static KMETHOD Json_new2(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kJson *jo = (kJson *) sfp[0].asObject;
+	kObject *def = sfp[1].asObject;
+	PLATAPI CreateJson(kctx, &jo->jsonbuf, ToKJSONType(kctx, kObject_typeId(def)), kObject_Unbox(def));
 	KReturn(jo);
 }
 
@@ -367,8 +392,8 @@ static kbool_t json_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		_Public|_Const|_Im,  _F(String_toJson),  KType_Json,    KType_String, KMethodName_To(KType_Json),    0,
 		_Public|_Const|_Im,  _F(Json_toInt),     KType_Int,     KType_Json,   KMethodName_To(KType_Int),     0,
 		_Public|_Const|_Im,  _F(Json_toString),  KType_String,  KType_Json,   KMethodName_To(KType_String),  0,
-		_Public|_Const|_Im,  _F(Json_toFloat),   KType_String,  KType_Json,   KMethodName_To(KType_float),   0,
-		_Public|_Const|_Im,  _F(Json_toBoolean), KType_String,  KType_Json,   KMethodName_To(KType_Boolean), 0,
+		_Public|_Const|_Im,  _F(Json_toFloat),   KType_float,  KType_Json,   KMethodName_To(KType_float),   0,
+		_Public|_Const|_Im,  _F(Json_toBoolean), KType_Boolean,  KType_Json,   KMethodName_To(KType_Boolean), 0,
 		_Public|_Const|_Im,  _F(Json_getSize),   KType_Int,     KType_Json,   KMethodName_("getSize"),    0,
 		_Public|_Const|_Im,  _F(Json_keys),      TYPE_Array(String), KType_Json,   KMethodName_("keys"),  0,
 		_Public|_Const|_Im,  _F(Json_hasKey),    KType_Boolean, KType_Json,   KMethodName_("hasKey"),     1, KType_String, FN_k,
@@ -379,6 +404,7 @@ static kbool_t json_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		_Public|_Const|_Im,  _F(Json_getInt),    KType_Int,     KType_Json,   KMethodName_("getInt"),     1, KType_String, FN_k,
 		_Public|_Const|_Im,  _F(Json_getString), KType_String,  KType_Json,   KMethodName_("getString"),  1, KType_String, FN_k,
 		_Public,             _F(Json_new),       KType_Json,    KType_Json,   KMethodName_("new"),        0,
+		_Public,             _F(Json_new2),      KType_Json,    KType_Json,   KMethodName_("new"),        1, KType_Object, FN_v,
 		_Public|_Static|_Im, _F(Json_Parse),     KType_Json,    KType_Json,   KMethodName_("parse"),      1, KType_String, FN_v,
 		_Public,             _F(Json_SetJson),   KType_void,    KType_Json,   KMethodName_("set"),        2, KType_String, FN_k, KType_Json, FN_v,
 		_Public,             _F(Json_SetJson_index),KType_void, KType_Json,   KMethodName_("set"),        2, KType_Int,    FN_k, KType_Json, FN_v,
