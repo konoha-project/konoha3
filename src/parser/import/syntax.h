@@ -766,8 +766,9 @@ static KMETHOD TypeCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	if(mtd != NULL) {
 		texpr = TypeCheckMethodParam(kctx, mtd, expr, ns, reqc);
+		KReturn(texpr);
 	}
-	KReturn(texpr);
+	KReturn(expr);
 }
 
 // --------------------------------------------------------------------------
