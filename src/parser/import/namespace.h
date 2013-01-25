@@ -966,6 +966,7 @@ static kbool_t kNameSpace_ImportPackage(KonohaContext *kctx, kNameSpace *ns, con
 	if(ns->packageId != packageId) {
 		KPackage *pack = GetPackageNULL(kctx, packageId, option, trace);
 		if(pack != NULL) {
+			*pack->packageNS->builderApi = *ns->builderApi;
 			kNameSpace_ImportAll(kctx, ns, pack->packageNS, trace);
 			if(pack->packageHandler != NULL && pack->packageHandler->ExportNameSpace != NULL) {
 				pack->packageHandler->ExportNameSpace(kctx, pack->packageNS, ns, option, trace);
@@ -990,6 +991,15 @@ static kbool_t kNameSpace_ImportPackage(KonohaContext *kctx, kNameSpace *ns, con
 //	}
 //	return false;
 //}
+
+// --------------------------------------------------------------------------
+
+static void kNameSpace_UseDefaultVirtualMachine(KonohaContext *kctx, kNameSpace *ns)
+{
+	KonohaFactory *factory = (KonohaFactory *)kctx->platApi;
+	factory->LoadPlatformModule(factory, "MiniVM", ReleaseModule);
+	ns->builderApi = factory->GetDefaultBuilderAPI();
+}
 
 // --------------------------------------------------------------------------
 /* namespace method */
