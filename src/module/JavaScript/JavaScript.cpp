@@ -568,9 +568,17 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 			}
 		}
 		kbool_t isReceiverClosure = strcmp(className, "Func") == 0;
-		switch(KSymbol_prefixText_ID(mtd->mn)) {
+		int prefix = KSymbol_prefixText_ID(mtd->mn);
+		switch(prefix) {
 		case kSymbolPrefix_GET:
 			if(kArray_size(expr->NodeList) > 2) {
+				if(strlen(methodName) != 0) {
+					if(!isGlobal){
+						JSBuilder_EmitString(kctx, builder, ".", "", "");
+					}
+					JSBuilder_EmitString(kctx, builder, "get", methodName, "");
+					break;
+				}
 				JSBuilder_VisitNode(kctx, builder, kNode_At(expr, 2), thunk, "[", "]");
 			}
 			else {
@@ -636,6 +644,12 @@ static kbool_t JSBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *buil
 		}
 		switch(KSymbol_prefixText_ID(mtd->mn)) {
 		case kSymbolPrefix_GET:
+			if(kArray_size(node->NodeList) > 2) {
+				if(strlen(KSymbol_text(mtd->mn)) != 0) {
+					JSBuilder_VisitNodeParams(kctx, builder, node, thunk, 2, ", ", isArray ? "[" : "(", isArray ? "]" : ")");
+				}
+			}
+			break;
 		case kSymbolPrefix_TO:
 			break;
 		case kSymbolPrefix_SET:
