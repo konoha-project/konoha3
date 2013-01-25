@@ -317,7 +317,8 @@ static KMETHOD Json_getString(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_SetString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	if(!PLATAPI SetJsonValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), KJSON_STRING, kString_text(sfp[2].asString))) {
+	kString *key = sfp[1].asString;
+	if(!PLATAPI SetJsonValue(kctx, &jo->jsonbuf, kString_text(key), kString_size(key), KJSON_STRING, kString_text(sfp[2].asString))) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();
@@ -327,8 +328,9 @@ static KMETHOD Json_SetString(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_SetJson(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo  = (kJson *)sfp[0].asObject;
+	kString *key = sfp[1].asString;
 	kJson *val = (kJson *)sfp[2].asObject;
-	if(!PLATAPI SetJsonKeyValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), &val->jsonbuf)) {
+	if(!PLATAPI SetJsonKeyValue(kctx, &jo->jsonbuf, kString_text(key), kString_size(key), &val->jsonbuf)) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();
@@ -411,7 +413,7 @@ static kbool_t json_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		_Public|_Const|_Im,  _F(String_toJson),  KType_Json,    KType_String, KMethodName_To(KType_Json),    0,
 		_Public|_Const|_Im,  _F(Json_toInt),     KType_Int,     KType_Json,   KMethodName_To(KType_Int),     0,
 		_Public|_Const|_Im,  _F(Json_toString),  KType_String,  KType_Json,   KMethodName_To(KType_String),  0,
-		_Public|_Const|_Im,  _F(Json_asString),  KType_String,  KType_Json,   KMethodName_To(KType_String),  0,
+		_Public|_Const|_Im,  _F(Json_asString),  KType_String,  KType_Json,   KMethodName_As(KType_String),  0,
 		_Public|_Const|_Im,  _F(Json_toFloat),   KType_float,  KType_Json,   KMethodName_To(KType_float),   0,
 		_Public|_Const|_Im,  _F(Json_toBoolean), KType_Boolean,  KType_Json,   KMethodName_To(KType_Boolean), 0,
 		_Public|_Const|_Im,  _F(Json_getSize),   KType_Int,     KType_Json,   KMethodName_("getSize"),    0,
