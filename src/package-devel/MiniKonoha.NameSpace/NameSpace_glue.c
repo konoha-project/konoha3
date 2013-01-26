@@ -172,7 +172,7 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *definedToken = tokenList->TokenVarItems[beginIdx];   // defined
 		kTokenVar *pToken = tokenList->TokenVarItems[beginIdx+1];
 		if(IS_Array(pToken->GroupTokenList)) {
-			SUGAR kNode_Op(kctx, expr, definedToken, 1, K_NULLNODE);
+			SUGAR kNode_Op(kctx, expr, definedToken, 0);
 			FilterDefinedParam(kctx, ns, RangeGroup(pToken->GroupTokenList));
 			KReturn(SUGAR AppendParsedNode(kctx, expr, RangeGroup(pToken->GroupTokenList), NULL, ParseExpressionOption, "("));
 		}
@@ -189,7 +189,7 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	sugarContext->isNodeedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->NodeList); i++) {
 		kNode *typedNode = SUGAR TypeCheckNodeAt(kctx, expr, i, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
-		if(typedNode == K_NULLNODE) {
+		if(kNode_IsError(typedNode)) {
 			isDefined = false;
 			break;
 		}
