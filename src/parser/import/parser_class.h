@@ -147,7 +147,7 @@ static void kToken_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer 
 static void kNode_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kNodeVar *node = (kNodeVar *)o;
-	node->node             = KNode_Done;
+	kNode_setnode(node, KNode_Done);
 	node->attrTypeId       = KType_var;
 	kNameSpace *ns = (conf == NULL) ? KNULL(NameSpace) : (kNameSpace *)conf;
 	KFieldInit(node, node->TermToken, K_NULLTOKEN);
@@ -214,31 +214,31 @@ static void kNode_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 		}
 	}
 	else {
-		KLIB KBuffer_printf(kctx, wb, "%s %s :%s ", KNode_text(expr->node), KToken_t(expr->KeyOperatorToken), KType_text(expr->attrTypeId));
+		KLIB KBuffer_printf(kctx, wb, "%s %s :%s ", KNode_text(kNode_node(expr)), KToken_t(expr->KeyOperatorToken), KType_text(expr->attrTypeId));
 	}
 	KLIB kObjectProto_p(kctx, values, pos, wb, 0);
-	if(expr->node == KNode_Error) {
+	if(kNode_node(expr) == KNode_Error) {
 		KLIB KBuffer_printf(kctx, wb, "%s", kString_text(expr->ErrorMessage));
 	}
-	else if(expr->node == KNode_Const) {
+	else if(kNode_node(expr) == KNode_Const) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("const "));
 		kNodeTerm_p(kctx, (kObject *)expr->ObjectConstValue, values, pos+1, wb);
 	}
-	else if(expr->node == KNode_New) {
+	else if(kNode_node(expr) == KNode_New) {
 		KLIB KBuffer_printf(kctx, wb, "new %s", KType_text(expr->attrTypeId));
 	}
-	else if(expr->node == KNode_Null) {
+	else if(kNode_node(expr) == KNode_Null) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("null"));
 	}
-	else if(expr->node == KNode_UnboxConst) {
+	else if(kNode_node(expr) == KNode_UnboxConst) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("const "));
 		values[pos+1].unboxValue = expr->unboxConstValue;
 		KClass_(expr->attrTypeId)->p(kctx, values, pos+1, wb);
 	}
-	else if(expr->node == KNode_Local) {
+	else if(kNode_node(expr) == KNode_Local) {
 		KLIB KBuffer_printf(kctx, wb, "local sfp[%d]", (int)expr->index);
 	}
-	else if(expr->node == KNode_Field) {
+	else if(kNode_node(expr) == KNode_Field) {
 		kshort_t index  = (kshort_t)expr->index;
 		kshort_t xindex = (kshort_t)(expr->index >> (sizeof(kshort_t)*8));
 		KLIB KBuffer_printf(kctx, wb, "field sfp[%d][%d]", (int)index, (int)xindex);
@@ -402,7 +402,7 @@ static kNode* new_TypedNode(KonohaContext *kctx, kNameSpace *ns, int build, KCla
 	va_start(ap, n);
 	node = kNode_AddSeveral(kctx, node, n, ap);
 	va_end(ap);
-	node->node = build;
+	kNode_setnode(node, build);
 	node->attrTypeId = ty->typeId;
 	return (kNode *)node;
 }
@@ -418,7 +418,7 @@ static kNode* new_MethodNode(KonohaContext *kctx, kNameSpace *ns, KClass *reqc, 
 	va_start(ap, n);
 	expr = kNode_AddSeveral(kctx, expr, n, ap);
 	va_end(ap);
-	expr->node = KNode_MethodCall;
+	kNode_setnode(expr, KNode_MethodCall);
 	return TypeCheckMethodParam(kctx, mtd, expr, ns, reqc);
 }
 
@@ -427,11 +427,11 @@ static kNode* kNode_SetConst(KonohaContext *kctx, kNode *expr, KClass *typedClas
 	if(typedClass == NULL) typedClass = kObject_class(o);
 	expr->attrTypeId = typedClass->typeId;
 	if(KClass_Is(UnboxType, typedClass)) {
-		expr->node = KNode_UnboxConst;
+		kNode_setnode(expr, KNode_UnboxConst);
 		expr->unboxConstValue = kNumber_ToInt(o);
 	}
 	else {
-		expr->node = KNode_Const;
+		kNode_setnode(expr, KNode_Const);
 		KFieldInit(expr, expr->ObjectConstValue, o);
 		kNode_Set(ObjectConst, expr, true);
 	}
@@ -440,7 +440,7 @@ static kNode* kNode_SetConst(KonohaContext *kctx, kNode *expr, KClass *typedClas
 
 static kNode* kNode_SetUnboxConst(KonohaContext *kctx, kNode *expr, ktypeattr_t attrTypeId, uintptr_t unboxValue)
 {
-	expr->node = KNode_UnboxConst;
+	kNode_setnode(expr, KNode_UnboxConst);
 	expr->unboxConstValue = unboxValue;
 	expr->attrTypeId = attrTypeId;
 	kNode_Set(ObjectConst, expr, false);
@@ -449,7 +449,7 @@ static kNode* kNode_SetUnboxConst(KonohaContext *kctx, kNode *expr, ktypeattr_t 
 
 static kNode* kNode_SetVariable(KonohaContext *kctx, kNode *expr, knode_t build, ktypeattr_t attrTypeId, intptr_t index)
 {
-	expr->node = build;
+	kNode_setnode(expr, build);
 	expr->attrTypeId = attrTypeId;
 	expr->index = index;
 	kNode_Set(ObjectConst, expr, false);

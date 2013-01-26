@@ -442,8 +442,10 @@ typedef enum KNode_Type {
 	KNode_MAX
 } KNode_;
 
-#define kNode_IsConstValue(o)     (KNode_Const <= (o)->node && (o)->node <= KNode_UnboxConst)
-#define kNode_IsValue(o)          (KNode_Const <= (o)->node && (o)->node <= KNode_Field)
+#define kNode_node(o)             (kObject_HashCode(o))
+#define kNode_setnode(o, node)    kObject_SetHashCode(o, (node))
+#define kNode_IsConstValue(o)     (KNode_Const <= kNode_node(o) && kNode_node(o) <= KNode_UnboxConst)
+#define kNode_IsValue(o)          (KNode_Const <= kNode_node(o) && kNode_node(o) <= KNode_Field)
 
 struct kNodeVar {
 	kObjectHeader h;
@@ -466,9 +468,8 @@ struct kNodeVar {
 		uintptr_t      unboxConstValue;
 		intptr_t       index;
 		kObject*       ObjectConstValue;
-		intptr_t       stackbase;
 	};
-	knode_t node; 	   ktypeattr_t attrTypeId;
+	kshort_t stackbase; ktypeattr_t attrTypeId;
 };
 
 #define kNode_uline(O)   (O)->KeyOperatorToken->uline
@@ -498,8 +499,8 @@ static inline kNameSpace *kNode_GetNameSpace(KonohaContext *kctx, kNode *node)
 
 static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeType, ktypeattr_t attrTypeId)
 {
-	if(node->node != KNode_Error) {
-		node->node = nodeType;
+	if(kNode_node(node) != KNode_Error) {
+		kNode_setnode(node, nodeType);
 		node->attrTypeId = attrTypeId;
 	}
 	return node;
@@ -522,7 +523,7 @@ static inline size_t kNode_GetNodeListSize(KonohaContext *kctx, kNode *node)
 #define kNode_Set(P, O, B)   KFlag_Set(uintptr_t,(O)->h.magicflag, kNodeFlag_##P, B)
 
 #define kNode_At(E, N)            ((E)->NodeList->NodeItems[(N)])
-#define kNode_IsError(STMT)         ((STMT)->node == KNode_Error)
+#define kNode_IsError(STMT)         (kNode_node(STMT) == KNode_Error)
 
 #define kNode_GetObjectNULL(CTX, O, K)            (KLIB kObject_getObject(CTX, UPCAST(O), K, NULL))
 #define kNode_GetObject(CTX, O, K, DEF)           (KLIB kObject_getObject(CTX, UPCAST(O), K, DEF))

@@ -28,7 +28,7 @@ static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *node, vo
 {
 	kbool_t ret = false;
 	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
-	switch(node->node) {
+	switch(kNode_node(node)) {
 		KNodeList(DefineVisitCase)
 	}
 	return ret;

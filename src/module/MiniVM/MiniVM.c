@@ -517,7 +517,7 @@ static void AsmMOV(KonohaContext *kctx, KBuilder *builder, int a, KClass *ty, in
 	ASM(NMOV, TC_(a, ty), TC_(b, ty), ty);
 }
 
-#define AssignStack(T)   (((intptr_t *)T)[0])
+#define AssignStack(T)   (((kshort_t *)T)[0])
 
 static bblock_t AsmJumpIfFalse(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk, bblock_t labelId)
 {
@@ -675,14 +675,14 @@ static kbool_t KBuilder_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, 
 	kNode *leftHandNode  = kNode_At(expr, 1);
 	kNode *rightHandNode = kNode_At(expr, 2);
 	//DBG_P("LET (%s) a=%d, shift=%d, espidx=%d", KType_text(expr->attrTypeId), a, shift, espidx);
-	if(leftHandNode->node == KNode_Local) {
+	if(kNode_node(leftHandNode) == KNode_Local) {
 		intptr_t a = AssignStack(thunk);
 		SUGAR VisitNode(kctx, builder, rightHandNode, &(leftHandNode->index));
 		if(expr->attrTypeId != KType_void && a != leftHandNode->index) {
 			AsmMOV(kctx, builder, a, KClass_(leftHandNode->attrTypeId), leftHandNode->index);
 		}
 	}
-	else if(leftHandNode->node == KNode_Field) {
+	else if(kNode_node(leftHandNode) == KNode_Field) {
 		intptr_t espidx = expr->stackbase;
 		SUGAR VisitNode(kctx, builder, rightHandNode, &espidx);
 		kshort_t index  = (kshort_t)leftHandNode->index;
@@ -718,7 +718,7 @@ static kbool_t KBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, k
 	for (i = 0; i < kNode_GetNodeListSize(kctx, block); i++) {
 		kNode *stmt = block->NodeList->NodeItems[i];
 		builder->common.uline = kNode_uline(stmt);
-		intptr_t *stackRef;
+		kshort_t *stackRef;
 		if(hasValue && i == size - 1 /* lastNode */)
 			stackRef = &block->stackbase;
 		else
