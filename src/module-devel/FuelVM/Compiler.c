@@ -663,7 +663,7 @@ static kbool_t FuelVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 	kNode *right = kNode_At(expr, 2);
 	INode *Node;
 	FuelIRBuilder *flbuilder = BLD(builder);
-	if(left->node == KNode_Local) {
+	if(kNode_node(left) == KNode_Local) {
 		enum TypeId type = ConvertToTypeId(kctx, left->attrTypeId);
 		if((Node = IRBuilder_FindLocalVarByHash(flbuilder, type, left->index)) == 0) {
 			Node = CreateLocal(flbuilder, type);
@@ -691,7 +691,7 @@ static kbool_t FuelVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 	//	CreateUpdate(BLD(builder), Node, RHS);
 	//}
 	else{
-		assert(left->node == KNode_Field);
+		assert(kNode_node(left) == KNode_Field);
 		SUGAR VisitNode(kctx, builder, right, thunk);
 		kshort_t index  = (kshort_t)left->index;
 		kshort_t xindex = (kshort_t)(left->index >> (sizeof(kshort_t)*8));

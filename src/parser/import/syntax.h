@@ -322,7 +322,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 		KClass *foundClass = NULL;
 		int nextIdx = SUGAR ParseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
 		if(foundClass != NULL) {
-			expr->node = KNode_New;
+			kNode_setnode(expr, KNode_New);
 			expr->attrTypeId = foundClass->typeId;
 			KReturnUnboxValue(nextIdx);
 		}
@@ -440,7 +440,7 @@ static KMETHOD TypeCheck_OrOperator(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t kNode_IsGetter(kNode *expr)
 {
-	if(expr->node == KNode_MethodCall) {  // check getter and transform to setter
+	if(kNode_node(expr) == KNode_MethodCall) {  // check getter and transform to setter
 		kMethod *mtd = expr->NodeList->MethodItems[0];
 		DBG_ASSERT(IS_Method(mtd));
 		if(KMethodName_IsGetter(mtd->mn)) return true;
@@ -489,7 +489,7 @@ static KMETHOD TypeCheck_Assign(KonohaContext *kctx, KonohaStack *sfp)
 		KReturn(rightHandNode);
 	}
 	kNode *returnNode = K_NULLNODE;
-	if(leftHandNode->node == KNode_Local || leftHandNode->node == KNode_Field) {
+	if(kNode_node(leftHandNode) == KNode_Local || kNode_node(leftHandNode) == KNode_Field) {
 		if(KTypeAttr_Is(ReadOnly, leftHandNode->attrTypeId)) {
 			returnNode = SUGAR MessageNode(kctx, expr, leftHandNode->TermToken, ns, ErrTag, "read only: %s", KToken_t(leftHandNode->TermToken));
 		}
@@ -628,7 +628,7 @@ static kNodeVar* TypeMethodCallNode(KonohaContext *kctx, kNodeVar *expr, kMethod
 	kNode *thisNode = kNode_At(expr, 1);
 	KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], mtd);
 	KClass *typedClass = ResolveTypeVariable(kctx, kMethod_GetReturnType(mtd), KClass_(thisNode->attrTypeId));
-	if(thisNode->node == KNode_New) {
+	if(kNode_node(thisNode) == KNode_New) {
 		typedClass = KClass_(thisNode->attrTypeId);
 	}
 	else if(kMethod_Is(SmartReturn, mtd) && reqClass->typeId != KType_var) {
@@ -927,15 +927,15 @@ static KMETHOD Statement_if(KonohaContext *kctx, KonohaStack *sfp)
 
 static kNode* LookupNoElseIfNode(KonohaContext *kctx, kNode *ifNode)
 {
-	DBG_ASSERT(ifNode->node == KNode_If);
+	DBG_ASSERT(kNode_node(ifNode) == KNode_If);
 	kNode *elseNode = SUGAR kNode_GetNode(kctx, ifNode, KSymbol_else, NULL);
 	if(elseNode != NULL) {
-		if(elseNode->node == KNode_If) {
+		if(kNode_node(elseNode) == KNode_If) {
 			return LookupNoElseIfNode(kctx, elseNode);
 		}
 		if(kNode_GetNodeListSize(kctx, elseNode) == 1) {
 			ifNode = elseNode->NodeList->NodeItems[0];
-			if(ifNode->node == KNode_If) {
+			if(kNode_node(ifNode) == KNode_If) {
 				return LookupNoElseIfNode(kctx, ifNode);
 			}
 		}
@@ -953,13 +953,13 @@ static kNode* kNode_LookupIfNodeNULL(KonohaContext *kctx, kNode *stmt)
 		for(i = 0; kArray_size(block->NodeList); i++) {
 			kNode *node = block->NodeList->NodeItems[i];
 			if(node == stmt) {
-				if(prevIfNode != NULL && prevIfNode->node == KNode_If) {
+				if(prevIfNode != NULL && kNode_node(prevIfNode) == KNode_If) {
 					return LookupNoElseIfNode(kctx, prevIfNode);
 				}
 				return NULL;
 			}
 			/* skiping the typed 'else if' */
-			if(node->node == KNode_Done) continue;
+			if(kNode_node(node) == KNode_Done) continue;
 			prevIfNode = node;
 		}
 	}

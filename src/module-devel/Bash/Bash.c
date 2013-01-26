@@ -149,7 +149,7 @@ static int KMethodName_isUnaryOperator(KonohaContext *kctx, kmethodn_t mn)
 }
 
 static kbool_t kNode_isStmt(KonohaContext *kctx, kNode *node){
-	switch(node->node){
+	switch(kNode_node(node)){
 	case KNode_Block:
 	case KNode_If:
 	case KNode_While:
@@ -205,7 +205,7 @@ static kbool_t BashBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder
 	size_t i;
 	kbool_t ret = true;
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
-	DBG_ASSERT(block->node == KNode_Block);
+	DBG_ASSERT(kNode_node(block) == KNode_Block);
 	if(!IS_Array(block->NodeList)) {
 		BashBuilder_EmitString(kctx, builder, "{ /* ERROR: block->NodeList is not Array. */ }", "", "");
 		return true;
@@ -217,11 +217,11 @@ static kbool_t BashBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder
 	}
 	for (i = 0; i < kArray_size(block->NodeList); ++i) {
 		kNode *node = block->NodeList->NodeItems[i];
-		if(node->node == KNode_Block && kArray_size(node->NodeList) == 1) {
+		if(kNode_node(node) == KNode_Block && kArray_size(node->NodeList) == 1) {
 			node = node->NodeList->NodeItems[0];
 		}
-		if(node->node == KNode_Assign) {
-			if(kNode_At(node, 1)->node == KNode_Field){
+		if(kNode_node(node) == KNode_Assign) {
+			if(kNode_node(kNode_At(node, 1)) == KNode_Field){
 				BashBuilder_EmitString(kctx, builder, "this.", "", "");
 			}
 			else {
@@ -510,7 +510,7 @@ static void BashBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *
 	else {
 		// Normal functions
 		if(!isGlobal) {
-			if(receiver->node == KNode_Null) {
+			if(kNode_node(receiver) == KNode_Null) {
 				// Static methods
 				BashBuilder_EmitString(kctx, builder, KClass_text(KClass_(receiver->attrTypeId)), "", "");
 			}
@@ -619,7 +619,7 @@ static kbool_t BashBuilder_VisitAssignNode(KonohaContext *kctx, KBuilder *builde
 	BashBuilder_EmitString(kctx, builder, "=", "", "");
 	for(i = 2; i < n;) {
 		kNode *tmpNode = kNode_At(node, i);
-		switch(tmpNode->node) {
+		switch(kNode_node(tmpNode)) {
 		case KNode_UnboxConst :
 			SUGAR VisitNode(kctx, builder, kNode_At(node, i), thunk);
 			break;
