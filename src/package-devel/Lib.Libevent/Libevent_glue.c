@@ -55,7 +55,7 @@ typedef struct CallBackArg {	//callback-method argument wrapper
 #include <sys/time.h>
 typedef struct TimeVal {
 	kObjectHeader h;
-	struct timeval timeval;
+	struct timeval *timeval;
 } kTimeVal;
 
 
@@ -123,7 +123,7 @@ static void CEvent_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct CEvent *ev = (struct CEvent *) o;
 	ev->event = NULL;
-	ev->evBase = NULL;
+	KFieldInit(ev, ev->evBase, NULL);
 }
 
 static void CEvent_Free(KonohaContext *kctx, kObject *o)
@@ -133,8 +133,15 @@ static void CEvent_Free(KonohaContext *kctx, kObject *o)
 	if (ev->event != NULL) {
 		event_free(ev->event);
 		ev->event = NULL;
-		ev->evBase = NULL;
 	}
+	KFieldInit(ev, ev->evBase, NULL);
+}
+
+static void CEvent_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+{
+	struct CEvent *ev = (struct CEvent *) o;
+	KRefTraceNullable(ev->key);
+	KRefTraceNullable(ev->evBase);
 }
 
 //## CEvent CEvent.new(CEvent_base event_base, String key, int evd, int event, Func[int, int, Object arg] cb, CallBackArg cbArg);
@@ -149,8 +156,7 @@ static KMETHOD CEvent_new(KonohaContext *kctx, KonohaStack *sfp)
 
 	ev->event = event_new(cEvent_base->event_base, evd, event, callback_1st, cbArg);
 	ev->evBase = cEvent_base; //does this no need?
-	ev->key = key;
-	//TODO CallBackArg ev->kcb = konoha_cb;
+	KFieldSet(ev, ev->key, key);
 	//event_add() will call in EventBase.event_add() after return this method
 	KReturn(ev);
 }
@@ -162,12 +168,24 @@ static void CallBackArg_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct CallBackArg *cbarg = (struct CallBackArg *) o;
 	cbarg->kctx = NULL;
-	cbarg->kcb = NULL;
-	cbarg->arg = NULL;
+	KFieldInit(cbarg, cbarg->kcb, NULL);
+	KFieldInit(cbarg, cbarg->arg, NULL);
 }
 
 static void CallBackArg_Free(KonohaContext *kctx, kObject *o)
 {
+	struct CallBackArg *cbarg = (struct CallBackArg *) o;
+
+	cbarg->kctx = NULL;
+	KFieldInit(cbarg, cbarg->kcb, NULL);
+	KFieldInit(cbarg, cbarg->arg, NULL);
+}
+
+static void CallBackArg_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+{
+	struct CallBackArg *cba = (struct CallBackArg *) o;
+	KRefTraceNullable(cba->kcb);
+	KRefTraceNullable(cba->arg);
 }
 
 //## CallBackArg CallBackArg.new(Func[int, int, Object arg] cb, Object cbArg);
@@ -178,8 +196,8 @@ static KMETHOD CallBackArg_new(KonohaContext *kctx, KonohaStack *sfp)
 	kObjectVar *cbArg = sfp[2].asObjectVar;	//deliver callback method
 
 	cbarg->kctx = kctx;
-	cbarg->kcb = cb;
-	cbarg->arg = cbArg;
+	KFieldSet(cbarg, cbarg->kcb, cb);
+	KFieldSet(cbarg, cbarg->arg, cbArg);
 	KReturn(cbarg);
 }
 
@@ -189,8 +207,13 @@ static KMETHOD CallBackArg_new(KonohaContext *kctx, KonohaStack *sfp)
 static void TimeVal_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct TimeVal *tv = (struct TimeVal *) o;
-	tv->timeval.tv_sec = 0;
-	tv->timeval.tv_usec = 0;
+	tv->timeval = NULL;
+}
+
+static void TimeVal_Free(KonohaContext *kctx, kObject *o)
+{
+	struct TimeVal *tv = (struct TimeVal *) o;
+	KFree(tv->timeval, sizeof(struct timeval));
 }
 
 //## TimeVal TimeVal.new(int tv_sec, int tv_usec);
@@ -199,8 +222,10 @@ static KMETHOD TimeVal_new(KonohaContext *kctx, KonohaStack *sfp)
 	struct TimeVal *tv = (struct TimeVal *) sfp[0].asObject;
 	time_t sec = (time_t)sfp[1].intValue;
 	suseconds_t usec = (suseconds_t)sfp[2].intValue;
-	tv->timeval.tv_sec = sec;
-	tv->timeval.tv_usec = usec;
+
+	tv->timeval = KMalloc_UNTRACE(sizeof(struct timeval));
+	tv->timeval->tv_sec = sec;
+	tv->timeval->tv_usec = usec;
 	KReturn(tv);
 }
 
@@ -219,7 +244,7 @@ static KMETHOD System_event_add(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kCEvent *kcev = (kCEvent *)sfp[1].asObject;
 	kTimeVal *tv = (kTimeVal *)sfp[2].asObject;
-	int ret = event_add(kcev->event, &tv->timeval);
+	int ret = event_add(kcev->event, tv->timeval);
 	KReturnUnboxValue(ret);
 }
 
@@ -251,6 +276,7 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	SETSTRUCTNAME(defCEvent, CEvent);
 	defCEvent.cflag     = KClassFlag_Final;
 	defCEvent.init      = CEvent_Init;
+	defCEvent.reftrace  = CEvent_Reftrace;
 	defCEvent.free      = CEvent_Free;
 	KClass *CEventClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCEvent, trace);
 
@@ -259,6 +285,7 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	SETSTRUCTNAME(defCallBackArg, CallBackArg);
 	defCallBackArg.cflag     = KClassFlag_Final;
 	defCallBackArg.init      = CallBackArg_Init;
+	defCallBackArg.reftrace  = CallBackArg_Reftrace;
 	defCallBackArg.free      = CallBackArg_Free;
 	KClass *CallBackArgClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCallBackArg, trace);
 
@@ -267,6 +294,7 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	SETSTRUCTNAME(defTimeVal, TimeVal);
 	defTimeVal.cflag     = KClassFlag_Final;
 	defTimeVal.init      = TimeVal_Init;
+	defTimeVal.free      = TimeVal_Free;
 	KClass *TimeValClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defTimeVal, trace);
 
 
