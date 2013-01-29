@@ -1558,7 +1558,7 @@ struct kExceptionVar {
 struct kNameSpaceVar {
 	kObjectHeader h;
 	kNameSpace                        *parentNULL;
-	kpackageId_t packageId;  	       kshortflag_t syntaxOption;
+	kpackageId_t packageId;            kshortflag_t syntaxOption;
 	kArray                            *NameSpaceConstList;
 	kArray                            *importedNameSpaceList;
 	KDict                              constTable;
@@ -1761,10 +1761,10 @@ struct KonohaLibVar {
 	kbool_t             (*Konoha_LoadScript)(KonohaContext*, const char *);
 	kbool_t             (*Konoha_Eval)(KonohaContext*, const char *, kfileline_t);
 
-	KClass*        (*Kclass)(KonohaContext*, ktypeattr_t, KTraceInfo *);
+	KClass*             (*Kclass)(KonohaContext*, ktypeattr_t, KTraceInfo *);
 	kString*            (*KClass_shortName)(KonohaContext*, KClass *ct);
-	KClass*        (*KClass_define)(KonohaContext*, kpackageId_t, kString *, KDEFINE_CLASS *, KTraceInfo *);
-	KClass*        (*KClass_Generics)(KonohaContext*, KClass *, ktypeattr_t rty, kushort_t psize, kparamtype_t *p);
+	KClass*             (*KClass_define)(KonohaContext*, kpackageId_t, kString *, KDEFINE_CLASS *, KTraceInfo *);
+	KClass*             (*KClass_Generics)(KonohaContext*, KClass *, ktypeattr_t rty, kushort_t psize, kparamtype_t *p);
 	kbool_t             (*KClass_isSubtype)(KonohaContext*, KClass *, KClass *);
 	kbool_t             (*KClass_AddField)(KonohaContext*, KClass *, ktypeattr_t, ksymbol_t);
 
@@ -1800,7 +1800,6 @@ struct KonohaLibVar {
 
 	KPackage*           (*kNameSpace_RequirePackage)(KonohaContext*, const char *, KTraceInfo *);
 	kbool_t             (*kNameSpace_ImportPackage)(KonohaContext*, kNameSpace*, const char *, KTraceInfo *);
-//	kbool_t             (*kNameSpace_ImportPackageSymbol)(KonohaContext *, kNameSpace *, const char *, ksymbol_t keyword, KTraceInfo *);
 	kbool_t             (*kNameSpace_LoadScript)(KonohaContext*, kNameSpace*, const char *, KTraceInfo *);
 
 	KClass*        (*kNameSpace_GetClassByFullName)(KonohaContext*, kNameSpace *, const char *, size_t, KClass *);
@@ -1817,7 +1816,6 @@ struct KonohaLibVar {
 	kMethod*            (*kNameSpace_GetMethodByParamSizeNULL)(KonohaContext*, kNameSpace *, KClass *, kmethodn_t mn, int paramsize, KMethodMatchOption option);
 	kMethod*            (*kNameSpace_GetMethodBySignatureNULL)(KonohaContext*, kNameSpace *, KClass *, kmethodn_t mn, int paramdom, int paramsize, kparamtype_t *);
 	kMethod*            (*kMethod_DoLazyCompilation)(KonohaContext *kctx, kMethod *mtd, kparamtype_t *, int options);
-//	void                (*kNameSpace_compileAllDefinedMethods)(KonohaContext *kctx);
 
 	// runtime support
 	void                (*CheckSafePoint)(KonohaContext *kctx, KonohaStack *sfp, kfileline_t uline);
@@ -1881,7 +1879,6 @@ struct KonohaLibVar {
 
 #define KRequirePackage(NAME, TRACE)       KLIB kNameSpace_RequirePackage(kctx, NAME, TRACE)
 #define KImportPackage(NS, NAME, TRACE)    KLIB kNameSpace_ImportPackage(kctx, NS, NAME, TRACE)
-//#define KImportPackageSymbol(NS, NAME, SYMBOL, TRACE) KLIB kNameSpace_ImportPackageSymbol(kctx, NS, NAME, KSymbol_(SYMBOL), TRACE)
 
 typedef intptr_t  KDEFINE_METHOD;
 
@@ -2037,8 +2034,7 @@ typedef struct {
 #define KExit(S)           PLATAPI exit_i(S, __FILE__, __LINE__)
 #endif
 
-#define FIXME_ASSERT(a)    assert(a)
-#define KTODO(A); KExit(EXIT_FAILURE);
+#define KTODO(A)          KExit(EXIT_FAILURE);
 
 #ifndef USE_SMALLBUILD
 #ifdef _MSC_VER

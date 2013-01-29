@@ -89,9 +89,6 @@ static kinline kString* KType_GetString(KonohaContext *kctx, ktypeattr_t ty)
 static kinline kString* KSymbol_GetString(KonohaContext *kctx, ksymbol_t sym)
 {
 	size_t index = (size_t) KSymbol_Unmask(sym);
-//	if(!(index < kArray_size(kctx->share->symbolList))) {
-//		DBG_P("index=%d, size=%d", index, kArray_size(kctx->share->symbolList));
-//	}
 	DBG_ASSERT(index < kArray_size(kctx->share->symbolList));
 	return kctx->share->symbolList->stringItems[index];
 }
