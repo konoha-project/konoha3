@@ -1801,6 +1801,7 @@ struct KonohaLibVar {
 	KPackage*           (*kNameSpace_RequirePackage)(KonohaContext*, const char *, KTraceInfo *);
 	kbool_t             (*kNameSpace_ImportPackage)(KonohaContext*, kNameSpace*, const char *, KTraceInfo *);
 //	kbool_t             (*kNameSpace_ImportPackageSymbol)(KonohaContext *, kNameSpace *, const char *, ksymbol_t keyword, KTraceInfo *);
+	kbool_t             (*kNameSpace_LoadScript)(KonohaContext*, kNameSpace*, const char *, KTraceInfo *);
 
 	KClass*        (*kNameSpace_GetClassByFullName)(KonohaContext*, kNameSpace *, const char *, size_t, KClass *);
 	KClass*        (*kNameSpace_DefineClass)(KonohaContext*, kNameSpace *, kString *, KDEFINE_CLASS *, KTraceInfo *);
