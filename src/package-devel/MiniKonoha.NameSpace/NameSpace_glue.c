@@ -185,8 +185,8 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	size_t i;
 	kbool_t isDefined = true;
 	KParserContext *sugarContext = KGetParserContext(kctx);
-	int popIsNodeingErrorMessage = sugarContext->isNodeedErrorMessage;
-	sugarContext->isNodeedErrorMessage = true;
+	int popIsBlockingErrorMessage = sugarContext->isBlockedErrorMessage;
+	sugarContext->isBlockedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->NodeList); i++) {
 		kNode *typedNode = SUGAR TypeCheckNodeAt(kctx, expr, i, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
 		if(kNode_IsError(typedNode)) {
@@ -194,7 +194,7 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 			break;
 		}
 	}
-	sugarContext->isNodeedErrorMessage = popIsNodeingErrorMessage;
+	sugarContext->isBlockedErrorMessage = popIsBlockingErrorMessage;
 	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_Boolean, isDefined));
 }
 

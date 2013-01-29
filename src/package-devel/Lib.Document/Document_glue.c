@@ -216,7 +216,7 @@ static kbool_t defineDocumentObject(KonohaContext *kctx, kNameSpace *ns, int opt
 	int KType_DocumentType = classes->DocumentTypeClass->typeId;
 	int KType_Flagment = classes->DocumentFragmentClass->typeId;
 	int KType_NodeList = classes->NodeListClass->typeId;
-	
+
 	int FN_x = KFieldName_("x");
 
 	KDEFINE_METHOD MethodData[] = {

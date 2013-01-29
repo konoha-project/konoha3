@@ -679,7 +679,7 @@ typedef struct {
 	KGrowingArray      errorMessageBuffer;
 	kArray            *errorMessageList;
 	int                errorMessageCount;
-	kbool_t            isNodeedErrorMessage;
+	kbool_t            isBlockedErrorMessage;
 	kArray            *definedMethodList;
 } KParserContext;
 

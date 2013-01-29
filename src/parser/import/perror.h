@@ -33,7 +33,7 @@ extern "C" {
 
 static int IsPrintableMessage(KonohaContext *kctx, KParserContext *sugarContext, kinfotag_t taglevel)
 {
-	if(sugarContext->isNodeedErrorMessage) return false;
+	if(sugarContext->isBlockedErrorMessage) return false;
 	if(verbose_sugar) return true;
 	if(taglevel == InfoTag) {
 		if(KonohaContext_Is(Interactive, kctx) || KonohaContext_Is(CompileOnly, kctx) || KonohaContext_Is(Debug, kctx)) {
@@ -89,7 +89,7 @@ static void kToken_ToError(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglev
 
 static void kNode_ToError(KonohaContext *kctx, kNode *node, kString *errmsg)
 {
-	if(errmsg == NULL) { // not in case of isNodeedErrorMessage
+	if(errmsg == NULL) { // not in case of isBlockedErrorMessage
 		errmsg = TS_EMPTY;
 	}
 	kNode_setnode(node, KNode_Error);

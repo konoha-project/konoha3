@@ -94,6 +94,7 @@ void main() {
         data = replace(args[i], data, "if \\(", "if (", "if(");
         data = replace(args[i], data, "KDEFINE_PACKAGE\\* ", "KDEFINE_PACKAGE* ", "KDEFINE_PACKAGE *");
         data = replace(args[i], data, "KKMethodName", "KKMethodName", "KMethodName");
+        data = replace(args[i], data, "NodeingErrorMessage", "NodeingErrorMessage", "BlockingErrorMessage");
         int j = 0;
         while (j < before.getSize()) {
             data = replace(args[i], data,
