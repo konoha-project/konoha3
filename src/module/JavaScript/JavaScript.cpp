@@ -499,6 +499,22 @@ static bool JSBuilder_importPackage(KonohaContext *kctx, kNameSpace *ns, kString
 	return true;
 }
 
+static bool JSBuilder_loadScript(KonohaContext *kctx, kNameSpace *ns, kString *package, kfileline_t uline)
+{
+	KBaseTrace(trace);
+	char pathbuf[512];
+	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), KFileLine_textFileName(trace->pline), kString_text(package));
+	
+	SUGAR kNameSpace_UseDefaultVirtualMachine(kctx, ns);
+		
+	KLIB kNameSpace_LoadScript(kctx, ns, path, trace);
+
+	KonohaFactory *factory = (KonohaFactory *)kctx->platApi;
+	LoadJavaScriptModule(factory, ReleaseModule); 
+	ns->builderApi = factory->GetDefaultBuilderAPI();
+	return true;
+}
+
 static kbool_t JSBuilder_VisitNodeParams(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk, int beginIndex, const char* delimiter, const char* leftBracket, const char* rightBracket)
 {
 	unsigned n = kArray_size(expr->NodeList);
@@ -530,6 +546,13 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 			kNameSpace *ns = (kNameSpace *)receiver->ObjectConstValue;
 			JSBuilder_importPackage(kctx, ns, packageNameString, expr->TermToken->uline);
 			JSBuilder_EmitString(kctx, builder, "//import", "", "");
+			return;
+		}
+		else if(mtd->mn == KMethodName_("load") || mtd->mn == KMethodName_("include")) {
+			kString *packageNameString = (kString *)kNode_At(expr, 2)->ObjectConstValue;
+			kNameSpace *ns = (kNameSpace *)receiver->ObjectConstValue;
+			JSBuilder_loadScript(kctx, ns, packageNameString, expr->TermToken->uline);
+			JSBuilder_EmitString(kctx, builder, "//load", "", "");
 			return;
 		}
 	}
@@ -659,7 +682,7 @@ static kbool_t JSBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *buil
 			JSBuilder_VisitNodeParams(kctx, builder, node, thunk, 2, ", ", isArray ? "[" : "(", isArray ? "]" : ")");
 			break;
 		}
-		if(mtd->mn == KMethodName_("import")) {
+		if(mtd->mn == KMethodName_("import") || mtd->mn == KMethodName_("load") || mtd->mn == KMethodName_("include")) {
 			JSBuilder_EmitNewLineWith(kctx, builder, ";");
 		}
 	}
