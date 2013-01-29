@@ -682,7 +682,7 @@ static kbool_t JSBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *buil
 			JSBuilder_VisitNodeParams(kctx, builder, node, thunk, 2, ", ", isArray ? "[" : "(", isArray ? "]" : ")");
 			break;
 		}
-		if(mtd->mn == KMethodName_("import")) {
+		if(mtd->mn == KMethodName_("import") || mtd->mn == KMethodName_("load") || mtd->mn == KMethodName_("include")) {
 			JSBuilder_EmitNewLineWith(kctx, builder, ";");
 		}
 	}
