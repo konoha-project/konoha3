@@ -1,6 +1,5 @@
 // written by imasahiro
-import("konoha.exception");
-//import("konoha.new"); Don't use this
+Import("Syntax.Exception");
 
 void f() {
     System.p("try-start");
