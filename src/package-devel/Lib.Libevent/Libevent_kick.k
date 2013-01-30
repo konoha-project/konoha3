@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-import("Java.Class");
+import("Syntax.JavaStyleClass");
 import("JavaStyle.Object");
 import("MiniKonoha.Map");
 import("MiniKonoha.NameSpace");
