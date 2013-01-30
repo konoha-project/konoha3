@@ -3,7 +3,7 @@
  * connect from telnet client, and echo back it.
  * > telnet localhost 10000
  */
-import("Java.Class");
+import("Syntax.JavaStyleClass");
 import("JavaStyle.Object");
 import("cstyle");
 import("posix.socket");
@@ -44,7 +44,6 @@ void do_accept(int evd, int event, Object arg) {
 }
 
 void main() {
-	Object p = new Object();	//just testing 'new' operator in this version
 	Event_base evBase = new Event_base();
 
 	int listener = System.socket(AF_INET, SOCK_STREAM, 0);
