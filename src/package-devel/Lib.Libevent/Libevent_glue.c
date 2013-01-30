@@ -123,7 +123,7 @@ static void CEvent_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct CEvent *ev = (struct CEvent *) o;
 	ev->event = NULL;
-	KFieldInit(ev, ev->evBase, NULL);
+	KFieldInit(ev, ev->evBase, K_NULL);
 }
 
 static void CEvent_Free(KonohaContext *kctx, kObject *o)
@@ -134,7 +134,7 @@ static void CEvent_Free(KonohaContext *kctx, kObject *o)
 		event_free(ev->event);
 		ev->event = NULL;
 	}
-	KFieldInit(ev, ev->evBase, NULL);
+	KFieldInit(ev, ev->evBase, K_NULL);
 }
 
 static void CEvent_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
@@ -168,8 +168,8 @@ static void CallBackArg_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct CallBackArg *cbarg = (struct CallBackArg *) o;
 	cbarg->kctx = NULL;
-	KFieldInit(cbarg, cbarg->kcb, NULL);
-	KFieldInit(cbarg, cbarg->arg, NULL);
+	KFieldInit(cbarg, cbarg->kcb, K_NULL);
+	KFieldInit(cbarg, cbarg->arg, K_NULL);
 }
 
 static void CallBackArg_Free(KonohaContext *kctx, kObject *o)
@@ -177,8 +177,8 @@ static void CallBackArg_Free(KonohaContext *kctx, kObject *o)
 	struct CallBackArg *cbarg = (struct CallBackArg *) o;
 
 	cbarg->kctx = NULL;
-	KFieldInit(cbarg, cbarg->kcb, NULL);
-	KFieldInit(cbarg, cbarg->arg, NULL);
+	KFieldInit(cbarg, cbarg->kcb, K_NULL);
+	KFieldInit(cbarg, cbarg->arg, K_NULL);
 }
 
 static void CallBackArg_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
