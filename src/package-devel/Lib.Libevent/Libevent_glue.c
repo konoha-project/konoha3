@@ -55,7 +55,7 @@ typedef struct CallBackArg {	//callback-method argument wrapper
 #include <sys/time.h>
 typedef struct TimeVal {
 	kObjectHeader h;
-	struct timeval *timeval;
+	struct timeval timeval;
 } kTimeVal;
 
 
@@ -207,13 +207,8 @@ static KMETHOD CallBackArg_new(KonohaContext *kctx, KonohaStack *sfp)
 static void TimeVal_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct TimeVal *tv = (struct TimeVal *) o;
-	tv->timeval = NULL;
-}
-
-static void TimeVal_Free(KonohaContext *kctx, kObject *o)
-{
-	struct TimeVal *tv = (struct TimeVal *) o;
-	KFree(tv->timeval, sizeof(struct timeval));
+	tv->timeval.tv_sec = 0;
+	tv->timeval.tv_usec = 0;
 }
 
 //## TimeVal TimeVal.new(int tv_sec, int tv_usec);
@@ -222,10 +217,8 @@ static KMETHOD TimeVal_new(KonohaContext *kctx, KonohaStack *sfp)
 	struct TimeVal *tv = (struct TimeVal *) sfp[0].asObject;
 	time_t sec = (time_t)sfp[1].intValue;
 	suseconds_t usec = (suseconds_t)sfp[2].intValue;
-
-	tv->timeval = KMalloc_UNTRACE(sizeof(struct timeval));
-	tv->timeval->tv_sec = sec;
-	tv->timeval->tv_usec = usec;
+	tv->timeval.tv_sec = sec;
+	tv->timeval.tv_usec = usec;
 	KReturn(tv);
 }
 
@@ -244,7 +237,7 @@ static KMETHOD System_event_add(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kCEvent *kcev = (kCEvent *)sfp[1].asObject;
 	kTimeVal *tv = (kTimeVal *)sfp[2].asObject;
-	int ret = event_add(kcev->event, tv->timeval);
+	int ret = event_add(kcev->event, &tv->timeval);
 	KReturnUnboxValue(ret);
 }
 
@@ -294,7 +287,6 @@ static kbool_t CEvent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	SETSTRUCTNAME(defTimeVal, TimeVal);
 	defTimeVal.cflag     = KClassFlag_Final;
 	defTimeVal.init      = TimeVal_Init;
-	defTimeVal.free      = TimeVal_Free;
 	KClass *TimeValClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defTimeVal, trace);
 
 
