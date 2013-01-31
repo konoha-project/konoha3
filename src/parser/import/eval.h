@@ -77,7 +77,7 @@ static kstatus_t kNode_Eval(KonohaContext *kctx, kNode *stmt, kMethod *mtd, KTra
 		return K_BREAK;  // to avoid duplicated error message
 	}
 	kbool_t isTryEval = true;
-	if(KonohaContext_Is(CompileOnly, kctx)) {
+	if(0/*KonohaContext_Is(CompileOnly, kctx)*/) {
 		isTryEval = false;
 		if(kNode_node(stmt) == KNode_MethodCall) {
 			kMethod *callMethod = stmt->NodeList->MethodItems[0];

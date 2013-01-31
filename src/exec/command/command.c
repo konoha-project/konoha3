@@ -159,6 +159,9 @@ static kbool_t Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **a
 		case 'c': {
 			compileonly_flag = 1;
 			KonohaContext_Set(CompileOnly, kctx);
+			if(!PLATAPI LoadPlatformModule((KonohaFactory *) kctx->platApi, "DummyVM", ReleaseModule)) {
+				exit(EXIT_FAILURE);
+			}
 		}
 		break;
 
