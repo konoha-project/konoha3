@@ -1,6 +1,5 @@
 // written by shinpei
 import("Syntax.CStyleWhile");
-//import("konoha.new"); Don't use this
 import("konoha.iterator");
 import("JavaScript.Array");
 

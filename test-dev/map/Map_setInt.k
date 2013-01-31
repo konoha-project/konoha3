@@ -1,7 +1,6 @@
 // written by masahiro ide
 
 import("MiniKonoha.Map");
-//import("konoha.new"); Don't use this
 import("JavaScript.Array");
 
 void test() {
