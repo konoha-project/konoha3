@@ -551,10 +551,9 @@ struct KGammaStack {
 } ;
 
 struct KGammaLocalData {
-	kshortflag_t  flag;      kshortflag_t  cflag;
+	kshortflag_t  flag;   kshortflag_t cflag;
 	KClass   *thisClass;
-	//ktypeattr_t      static_cid;
-	kMethod       *currentWorkingMethod;
+	kMethod  *currentWorkingMethod;
 	struct KGammaStack    localScope;
 } ;
 
@@ -574,11 +573,11 @@ struct KGammaLocalData {
 #define KClass_GammaVar     KPARSERM->cGamma
 
 
-#define KClass_TokenArray           KPARSERM->cTokenArray
+#define KClass_TokenArray       KPARSERM->cTokenArray
 #define kTokenArray             kArray
-#define KClass_NodeArray            KClass_Array
+#define KClass_NodeArray        KClass_Array
 #define kNodeArray              kArray
-#define KClass_NodeArray            KClass_Array
+#define KClass_NodeArray        KClass_Array
 #define kNodeArray              kArray
 
 #define IS_Syntax(O) (kObject_class(O) == KClass_Syntax)
@@ -603,7 +602,7 @@ struct KBuilder;
 
 typedef kbool_t (*IsSeparatorFunc)(KonohaContext *kctx, kToken *tk);
 
-typedef struct {
+typedef struct KParserModule {
 	KRuntimeModule  h;
 	KClass *cSymbol;
 	KClass *cSyntax;
@@ -686,18 +685,18 @@ typedef struct {
 #define KClass_INFER    KClass_(KType_var)
 
 typedef enum {
-	TypeCheckPolicy_NoPolicy              = 0,
-	TypeCheckPolicy_NoCheck               = 1,
+	TypeCheckPolicy_NoPolicy       = 0,
+	TypeCheckPolicy_NoCheck        = (1 << 0),
 	TypeCheckPolicy_AllowVoid      = (1 << 1),
 	TypeCheckPolicy_Coercion       = (1 << 2),
-	TypeCheckPolicy_AllowEmpty          = (1 << 3),
+	TypeCheckPolicy_AllowEmpty     = (1 << 3),
 	TypeCheckPolicy_CONST          = (1 << 4),  /* Reserved */
 	TypeCheckPolicy_Creation       = (1 << 6)   /* TypeCheckNodeByName */
 } TypeCheckPolicy;
 
 #define KPushMethodCall(gma)   SUGAR AddLocalVariable(kctx, ns, KType_var, 0)
 
-#define new_ConstNode(CTX, NS, T, O)               SUGAR kNode_SetConst(CTX, KNewNode(NS), T, O)
+#define new_ConstNode(CTX, NS, T, O)              SUGAR kNode_SetConst(CTX, KNewNode(NS), T, O)
 #define new_UnboxConstNode(CTX, NS, T, D)         SUGAR kNode_SetUnboxConst(CTX, KNewNode(NS), T, D)
 #define new_VariableNode(CTX, NS, BLD, TY, IDX)   SUGAR kNode_SetVariable(CTX, KNewNode(NS), BLD, TY, IDX)
 

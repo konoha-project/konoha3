@@ -115,7 +115,7 @@ static KMETHOD Expression_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *
 	kString *text = remove_escapes(kctx, tk);
 	if(beginIdx != opIdx) {
 		/* FIXME */
-		asm volatile("int3");
+		assert(0 && "FIXME");
 		KReturnUnboxValue(-1);
 	}
 
@@ -189,10 +189,9 @@ static KMETHOD Expression_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *
 	KReturnUnboxValue(beginIdx+1);
 }
 
-
 // --------------------------------------------------------------------------
 
-static kbool_t StringInterpolationPackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
+static kbool_t StringInterpolation_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 #define PATTERN(X) KSymbol_##X##Pattern
 	kSyntax *textSyntax = kSyntax_(KNULL(NameSpace), PATTERN(Text));
@@ -204,7 +203,7 @@ static kbool_t StringInterpolationPackupNameSpace(KonohaContext *kctx, kNameSpac
 	return true;
 }
 
-static kbool_t StringInterpolationExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
+static kbool_t StringInterpolation_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -212,9 +211,9 @@ static kbool_t StringInterpolationExportNameSpace(KonohaContext *kctx, kNameSpac
 KDEFINE_PACKAGE *StringInterpolation_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "JavaScript", "1.0");
-	d.PackupNameSpace    = StringInterpolationPackupNameSpace;
-	d.ExportNameSpace   = StringInterpolationExportNameSpace;
+	KSetPackageName(d, "Konoha", "1.0");
+	d.PackupNameSpace = StringInterpolation_PackupNameSpace;
+	d.ExportNameSpace = StringInterpolation_ExportNameSpace;
 	return &d;
 }
 
