@@ -29,11 +29,8 @@ SET(CMAKE_CXX_FLAGS_DEBUG      "${CMAKE_CXX_FLAGS} -O0 -g3")
 SET(CMAKE_CXX_FLAGS_COMPRESSED "${CMAKE_CXX_FLAGS} -Os -g0")
 
 ## Source Code settings
-set(RUNTIME
+set(KONOHA_SOURCE
 	src/konoha/minikonoha.c
-)
-
-set(PARSER
 	src/parser/parser.c
 )
 
@@ -42,11 +39,6 @@ set(PACKAGE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 set(PACKAGE_STRING  ${CMAKE_PROJECT_NAME}-${PACKAGE_VERSION})
 set(SO_VERSION      ${VERSION_MAJOR}.${VERSION_MINOR})
 set(PACKAGE_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
-
-set(K_CONFIG_ARCH ${CMAKE_SYSTEM})
-set(K_CONFIG_OS   ${CMAKE_SYSTEM_NAME})
-set(K_CONFIG_CPU  ${CMAKE_SYSTEM_PROCESSOR})
-set(K_PREFIX ${CMAKE_INSTALL_PREFIX})
 
 set(CMAKE_MODULE_PATH
 	${CMAKE_MODULE_PATH}
@@ -148,7 +140,6 @@ if(HAVE_LIBICONV)
 	set(ExtraLibs ${ExtraLibs} ${HAVE_LIBICONV})
 endif(HAVE_LIBICONV)
 
-
 macro(POP _STR _DELIM _RESULT)
 	string(REPLACE ${_DELIM} ";" _tmp ${_STR})
 	list(REVERSE _tmp)
@@ -207,8 +198,8 @@ macro(SET_CXX_PROPERTY_IF_MSVC TARGET)
 	endif(MSVC)
 endmacro(SET_CXX_PROPERTY_IF_MSVC TARGET)
 
-add_library(minikonoha SHARED ${RUNTIME} ${PARSER} ${VM})
-SET_CXX_PROPERTY_IF_MSVC(minikonoha ${RUNTIME} ${PARSER} ${VM})
+add_library(minikonoha SHARED ${KONOHA_SOURCE})
+SET_CXX_PROPERTY_IF_MSVC(minikonoha ${KONOHA_SOURCE})
 target_link_libraries(minikonoha ${ExtraLibs})
 set(ExtraLibs ${ExtraLibs} minikonoha)
 
