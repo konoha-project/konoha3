@@ -36,11 +36,11 @@ extern "C" {
 // -------------------------------------------------------------------------
 /* Console */
 
-static const char* BeginTag(KonohaContext *kctx, kinfotag_t t)
+static const char *BeginTag(KonohaContext *kctx, kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
 	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
-	static const char* tags[] = {
+	static const char *tags[] = {
 		"\x1b[1m\x1b[31m", /*CritTag*/
 		"\x1b[1m\x1b[31m", /*ErrTag*/
 		"\x1b[1m\x1b[31m", /*WarnTag*/
@@ -52,11 +52,11 @@ static const char* BeginTag(KonohaContext *kctx, kinfotag_t t)
 	return tags[(int)t];
 }
 
-static const char* EndTag(KonohaContext *kctx, kinfotag_t t)
+static const char *EndTag(KonohaContext *kctx, kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
 	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
-	static const char* tags[] = {
+	static const char *tags[] = {
 			"\x1b[0m", /*CritTag*/
 			"\x1b[0m", /*ErrTag*/
 			"\x1b[0m", /*WarnTag*/
@@ -174,7 +174,7 @@ static void ReportDebugMessage(const char *file, const char *func, int line, con
 	va_end(ap);
 }
 
-static char* myreadline(const char* prompt)
+static char *myreadline(const char *prompt)
 {
 	static int checkCTL = 0;
 	int ch, pos = 0;
@@ -204,12 +204,12 @@ static char* myreadline(const char* prompt)
 	return p;
 }
 
-static int myadd_history(const char* line)
+static int myadd_history(const char *line)
 {
 	return 0;
 }
 
-static char* InputUserText(KonohaContext *kctx, const char *message, int flag)
+static char *InputUserText(KonohaContext *kctx, const char *message, int flag)
 {
 	return myreadline(message);
 }
@@ -232,7 +232,7 @@ static int InputUserApproval(KonohaContext *kctx, const char *message, const cha
 	}
 }
 
-static char* InputUserPassword(KonohaContext *kctx, const char *message)
+static char *InputUserPassword(KonohaContext *kctx, const char *message)
 {
 	char buff[BUFSIZ] = {0};
 	struct termios tm, tm_save;
@@ -259,7 +259,7 @@ kbool_t LoadConsoleModule(KonohaFactory *factory, ModuleType type)
 {
 //	void *handler = dlopen("libreadline" K_OSDLLEXT, RTLD_LAZY);
 //	if(handler != NULL) {
-//		factory->readline_i = (char* (*)(const char *))dlsym(handler, "readline");
+//		factory->readline_i = (char *(*)(const char *))dlsym(handler, "readline");
 //		factory->add_history_i = (int (*)(const char *))dlsym(handler, "add_history");
 //	}
 	static KModuleInfo ModuleInfo = {
