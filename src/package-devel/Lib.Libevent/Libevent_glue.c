@@ -237,7 +237,7 @@ static KMETHOD System_event_add(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kCEvent *kcev = (kCEvent *)sfp[1].asObject;
 	kTimeVal *tv = (kTimeVal *)sfp[2].asObject;
-	int ret = event_add(kcev->event, &tv->timeval);
+	int ret = event_add(kcev->event, (tv->timeval.tv_sec == 0 && tv->timeval.tv_usec == 0) ? NULL : &tv->timeval);
 	KReturnUnboxValue(ret);
 }
 

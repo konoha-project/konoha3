@@ -38,7 +38,7 @@ void do_accept(int evd, int event, Object arg) {
 		System.evutil_make_socket_nonblocking(fd);
 		//{
 			//alloc_fd_state
-			evBase.event_add("do_read", fd, EV_READ | EV_PERSIST, do_read, NULL, new TimeVal(15, 300));
+			evBase.event_add("do_read", fd, EV_READ | EV_PERSIST, do_read, NULL, NULL/* NULL: no timeout(forever waiting), timeout sets like "new TimeVal(sec, usec)")*/;
 		//}
 	}
 }
@@ -59,7 +59,7 @@ void main() {
 		return;
 	}
 
-	evBase.event_add("do_accept", listener, EV_READ | EV_PERSIST, do_accept, evBase, new TimeVal(15, 300));
+	evBase.event_add("do_accept", listener, EV_READ | EV_PERSIST, do_accept, evBase, NULL);
 	evBase.event_dispatch();
 }
 
