@@ -1020,7 +1020,7 @@ struct KContextModule {
 	struct kSyntaxVar     *asSyntax;\
 	kToken      *asToken;\
 	kNode       *asNode;\
-	const struct kExceptionVar  *asException;\
+	kException  *asException;\
 	const struct kFloatVar      *asFloat; \
 	struct kDateVar             *asDate;\
 	struct kRegExpVar           *asRegExp; \

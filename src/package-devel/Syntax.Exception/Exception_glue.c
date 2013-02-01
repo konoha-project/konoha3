@@ -82,33 +82,30 @@ static kbool_t isCalledMethod(KonohaContext *kctx, KonohaStack *sfp)
 	return false;
 }
 
-static void Kthrow(KonohaContext *kctx, KonohaStack *sfp)
+static void Kthrow(KonohaContext *kctx, KonohaStack *sfp, kException *e)
 {
-	//KonohaExceptionContext *ctx = KonohaContext_getExceptionContext(kctx);
-	//kException *e = ctx->thrownException;
-	//if(IS_Exception(e)) {
-	//	KonohaStack *p = (sfp == NULL) ? kctx->esp : sfp - 1;
-	//	KonohaStack *bottom = kctx->stack->jump_bottom;
-	//	while(bottom < p) {
-	//		if(p[0].calledMethod != NULL && isCalledMethod(kctx, p)) {
-	//			kException_AddStackTrace(kctx, p+1, e);
-	//			p[0].calledMethod = 0;
-	//			//p = p[-1];
-	//		}
-	//		p--;
-	//	}
-	//}
-	//KLIB KRuntime_raise(kctx, 1);
+	if(IS_Exception(e)) {
+		KonohaStack *p = (sfp == NULL) ? kctx->esp : sfp - 1;
+		KonohaStack *bottom = kctx->stack->stack;
+		while(bottom < p) {
+			if(p[0].calledMethod != NULL && isCalledMethod(kctx, p)) {
+				kException_AddStackTrace(kctx, p+1, e);
+				p[0].calledMethod = 0;
+				//p = p[-1];
+			}
+			p--;
+		}
+	}
+	KLIB KRuntime_raise(kctx, e->symbol, SoftwareFault, NULL, sfp);
 }
 
 /* ------------------------------------------------------------------------ */
 
-//## void System.throw(Exception e);
+//## void System.throw(Object e);
 static KMETHOD System_throw(KonohaContext *kctx, KonohaStack *sfp)
 {
-	//KonohaExceptionContext *ctx = KonohaContext_getExceptionContext(kctx);
-	//KUnsafeFieldSet(ctx->thrownException, sfp[1].asException);
-	//Kthrow(kctx, sfp);
+	KUnsafeFieldSet(kctx->stack->ThrownException, sfp[1].asException);
+	Kthrow(kctx, sfp, sfp[1].asException);
 }
 
 //## Exception System.getThrownException();
@@ -145,14 +142,14 @@ static KMETHOD Exception_new(KonohaContext *kctx, KonohaStack *sfp)
 //	}
 //	return NULL;
 //}
-//
+
 static KMETHOD Statement_try(KonohaContext *kctx, KonohaStack *sfp)
 {
-	//VAR_TypeCheck(stmt, ns, reqc);
-	//DBG_P("try statement .. \n");
-	//int ret = false;
+	VAR_TypeCheck(stmt, ns, reqc);
+	DBG_P("try statement .. \n");
+	int ret = false;
 	//kNode *tryNode, *catchNode, *finallyNode;
-	//tryNode     = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
+	//tryNode = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
 	//ret = SUGAR TypeCheckBlock(kctx, tryNode,   gma);
 	//if(ret == false) {
 	//	KReturnUnboxValue(ret);
@@ -171,14 +168,14 @@ static KMETHOD Statement_try(KonohaContext *kctx, KonohaStack *sfp)
 	//if(ret) {
 	//	kNode_Type(kctx, stmt, TRY);
 	//}
-	//KReturnUnboxValue(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD Statement_catch(KonohaContext *kctx, KonohaStack *sfp)
 {
-	//VAR_TypeCheck(stmt, ns, reqc);
-	//DBG_P("catch statement .. \n");
-	//int ret = false;
+	VAR_TypeCheck(stmt, ns, reqc);
+	DBG_P("catch statement .. \n");
+	int ret = false;
 
 	//// check "catch(...)"
 	////ret = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, ns, KClass_Exception, 0);
@@ -196,14 +193,14 @@ static KMETHOD Statement_catch(KonohaContext *kctx, KonohaStack *sfp)
 	//	kNode_Message(kctx, stmt, ErrTag, "upper stmt is not try/catch");
 	//	KReturnUnboxValue(false);
 	//}
-	//KReturnUnboxValue(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD Statement_finally(KonohaContext *kctx, KonohaStack *sfp)
 {
-	//VAR_TypeCheck(stmt, ns, reqc);
-	//DBG_P("finally statement .. \n");
-	//int ret = false;
+	VAR_TypeCheck(stmt, ns, reqc);
+	DBG_P("finally statement .. \n");
+	int ret = false;
 	//kNode *finallyNode = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
 
 	//if(finallyNode != K_NULLBLOCK) {
@@ -215,7 +212,7 @@ static KMETHOD Statement_finally(KonohaContext *kctx, KonohaStack *sfp)
 	//	}
 	//}
 
-	//KReturnUnboxValue(ret);
+	KReturnUnboxValue(ret);
 }
 
 
@@ -232,6 +229,7 @@ static kbool_t Exception_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, in
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ KSymbol_("try"), SYNFLAG_CTypeFunc, 0, 0, {SUGAR patternParseFunc}, {SUGARFUNC Statement_try}},
 		{ KSymbol_("catch"), SYNFLAG_CTypeFunc, 0, 0, {SUGAR patternParseFunc}, {SUGARFUNC Statement_catch}},
+		{ KSymbol_("finally"), SYNFLAG_CTypeFunc, 0, 0, {SUGAR patternParseFunc}, {SUGARFUNC Statement_catch}},
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
