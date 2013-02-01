@@ -330,11 +330,11 @@ void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 	KSetKLibFunc(0, kNameSpace_GetConstNULL,        kNameSpace_GetConstNULL,        NULL);
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Compilation, _F(NameSpace_DefineConst), KType_Boolean, KType_NameSpace, KMethodName_("DefineConst"), 2, KType_Symbol, KFieldName_("symbol"), KType_Object, KFieldName_("value"),
-		_Public, _F(NameSpace_ImportPackage), KType_void, KType_NameSpace, KMethodName_("import"), 1, KType_String, KFieldName_("package"),
+		_Public|_Compilation, _F(NameSpace_ImportPackage), KType_void, KType_NameSpace, KMethodName_("import"), 1, KType_String, KFieldName_("package"),
 //		_Public, _F(NameSpace_ImportPackageSymbol), KType_void, KType_NameSpace, KMethodName_("import"), 2, KType_String, KFieldName_("package"), KType_String, KFieldName_("symbol"),
 		_Public, _F(NameSpace_hate), KType_Boolean, KType_NameSpace, KMethodName_("hate"), 1, KType_String, KFieldName_("symbol"),
-		_Public, _F(NameSpace_loadScript), KType_void, KType_NameSpace, KMethodName_("load"), 1, KType_String, KFieldName_("filename"),
-		_Public, _F(NameSpace_loadScript), KType_void, KType_NameSpace, KMethodName_("include"), 1, KType_String, KFieldName_("filename"),
+		_Public|_Compilation, _F(NameSpace_loadScript), KType_void, KType_NameSpace, KMethodName_("load"), 1, KType_String, KFieldName_("filename"),
+		_Public|_Compilation, _F(NameSpace_loadScript), KType_void, KType_NameSpace, KMethodName_("include"), 1, KType_String, KFieldName_("filename"),
 		_Public, _F(NameSpace_useStaticFunc), KType_void, KType_NameSpace, KMethodName_("UseStaticFunc"), 1, KType_Object, KFieldName_("class"),
 		_Public|_Coercion|_Const|_Imm, _F(String_toSymbol), KType_Symbol, KType_String, KMethodName_To(KType_Symbol), 0,
 		_Public|_Coercion|_Const|_Imm, _F(KSymbol_toString), KType_String, KType_Symbol, KMethodName_To(KType_String), 0,
