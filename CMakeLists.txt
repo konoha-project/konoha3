@@ -73,6 +73,7 @@ endif(APPLE)
 if(MSVC OR MINGW)
 	set(K_OSDLLEXT ".dll")
 endif()
+set(K_PREFIX ${CMAKE_INSTALL_PREFIX})
 
 find_library(HAVE_LIBDL    NAMES dl)
 find_library(HAVE_LIBICONV NAMES iconv)

@@ -19,15 +19,6 @@
 /* Define to 1 if you have the `m' library (-lm). */
 #cmakedefine HAVE_LIBM 1
 
-/* arch type */
-#cmakedefine K_CONFIG_ARCH "${K_CONFIG_ARCH}"
-
-/* cpu type */
-#cmakedefine K_CONFIG_CPU "${K_CONFIG_CPU}"
-
-/* os type */
-#cmakedefine K_CONFIG_OS "${K_CONFIG_OS}"
-
 /* build revision */
 #cmakedefine K_REVISION  "${K_REVISION}"
 
