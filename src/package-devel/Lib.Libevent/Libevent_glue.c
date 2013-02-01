@@ -349,7 +349,7 @@ static kbool_t CEvent_base_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	return true;
 }
 
-KDEFINE_PACKAGE *libevent_Init(void)
+KDEFINE_PACKAGE *Libevent_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "libevent2", "0.1");
