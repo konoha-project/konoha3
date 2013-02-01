@@ -2,15 +2,11 @@
 
 import("Syntax.ShellStyle");
 
-void test1() {
-	String s = "abc";
-	echo ${s}
-}
-
-void test2() {
+void test() {
 	int i = 123;
-	echo ${i}
+	String s = "abc";
+	assert($(echo ${i}) == "123\n");
+	assert($(echo ${s}) == "abc\n");
 }
 
-test1();
-test2();
+test();
