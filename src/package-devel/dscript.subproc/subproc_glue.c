@@ -674,6 +674,9 @@ static KMETHOD SubProc_isCommand(KonohaContext *kctx, KonohaStack *sfp)
 	char buf[bufsize];
 	confstr(_CS_PATH, buf, bufsize);
 	char *pos, *p = buf;
+	if(cmd[0] == '/' && checkExecutablePath(kctx, NULL, cmd)) {
+		KReturnUnboxValue(true);
+	}
 	while(p < buf + bufsize) {
 		if((pos = strchr(p, ':')) == NULL) {
 			if(checkExecutablePath(kctx, p, cmd)) {
