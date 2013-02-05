@@ -156,7 +156,6 @@ class Dse {
 				dtaskId = this.dtaskIds[i];
 				response = global.DTaskStatusMap.get(dtaskId);
 				if(response.toString() != "{}") {
-//					System.p("response : " + response); // for debug
 					responses.add(response);
 					this.dtaskIds.removeAt(i);
 				}
@@ -252,7 +251,6 @@ class DseGroup {
 				dtaskId = this.dtaskIds[i];
 				response = global.DTaskStatusMap.get(dtaskId);
 				if(response.toString() != "{}") {
-//					System.p("response : " + response); // for debug
 					responses.add(response);
 					this.dtaskIds.removeAt(i);
 				}
