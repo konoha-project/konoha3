@@ -1,4 +1,3 @@
-import("Syntax.Null")
 import("Syntax.JavaStyleClass")
 
 class Derived;
