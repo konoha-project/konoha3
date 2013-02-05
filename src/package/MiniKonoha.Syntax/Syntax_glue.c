@@ -207,17 +207,17 @@ static KMETHOD Node_AddParsedObject(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
-////## SmartReturn Object Node.GetParsedObject(keyword nameid);
-//static KMETHOD Node_GetParsedObject(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kNode *stmt  = sfp[0].asNode;
-//	ksymbol_t symbol = (ksymbol_t)sfp[1].intValue;
-//	kObject *o = SUGAR kNode_GetObject(kctx, stmt, symbol, NULL);
-//	if(o != NULL) {
-//
-//	}
-//	KReturnDefaultValue();
-//}
+//## SmartReturn Object Node.GetParsedObject(keyword nameid);
+static KMETHOD Node_GetParsedObject(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNode *stmt  = sfp[0].asNode;
+	ksymbol_t symbol = (ksymbol_t)sfp[1].intValue;
+	kObject *o = kNode_GetObject(kctx, stmt, symbol, NULL);
+	if(o != NULL) {
+		KReturn(o);
+	}
+	KReturnDefaultValue();
+}
 
 //## Token Node.getToken(Symbol key, Token def);
 static KMETHOD Node_getToken(KonohaContext *kctx, KonohaStack *sfp)
@@ -347,7 +347,7 @@ static KMETHOD Node_keywordIs(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(sfp[0].asNode->syn->keyword == keyword);
 }
 
-//## boolean Node.getNameSpace();
+//## NameSpace Node.getNameSpace();
 static KMETHOD Node_getNameSpace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KReturn(kNode_ns(sfp[0].asNode));
@@ -372,6 +372,14 @@ static KMETHOD Node_setConstValue(KonohaContext *kctx, KonohaStack *sfp)
 		KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, ct->typeId, sfp[1].unboxValue));
 	}
 	KReturn(SUGAR kNode_SetConst(kctx, expr, ct, sfp[1].asObject));
+}
+
+//## Object Node.getConstValue();
+static KMETHOD Node_getConstValue(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNode *expr = sfp[0].asNode;
+	assert(kNode_node(expr) == KNode_Const);
+	KReturn(expr->ObjectConstValue);
 }
 
 //## Node Node.addNode(Node node);
@@ -472,8 +480,9 @@ static void Syntax_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceI
 		/* Expr */
 		_Public, _F(Node_getTermToken), KType_Token, KType_Node, KMethodName_("getTermToken"), 0,
 		_Public, _F(Node_setConstValue), KType_Node, KType_Node, KMethodName_("setConstValue"), 1, KType_Object, KFieldName_("value") | KTypeAttr_Coercion,
-
+		_Public, _F(Node_getConstValue), KType_Object, KType_Node, KMethodName_("getConstValue"), 0,
 		_Public, _F(Node_AddParsedObject), KType_void, KType_Node, KMethodName_("AddParsedObject"), 2, TP_kw, KType_Object, KFieldName_("obj"),
+		_Public, _F(Node_GetParsedObject), KType_Object, KType_Node, KMethodName_("GetParsedObject"), 1, TP_kw,
 		_Public, _F(Node_AppendParsedNode), KType_Node, KType_Node, KMethodName_("AppendParsedNode"), 4, TP_tokens, TP_begin, TP_end, KType_String, KFieldName_("requiredTokenText"),
 		_Public, _F(Node_newMethodNode1), KType_Node, KType_Node, KMethodName_("newMethodNode"), 3, TP_type, TP_kw, TP_ArgNode(1),
 		_Public, _F(Node_newMethodNode2), KType_Node, KType_Node, KMethodName_("newMethodNode"), 4, TP_type, TP_kw, TP_ArgNode(1), TP_ArgNode(2),

@@ -139,6 +139,16 @@ static KMETHOD Token_GetParsedText(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
+//## Object Token.getType();
+static KMETHOD Token_GetType(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kToken *tk = sfp[0].asToken;
+	if(tk->resolvedSyntaxInfo->keyword) {
+		KReturnField(KLIB Knull(kctx, KClass_(tk->resolvedTypeId)));
+	}
+}
+
+
 //## void Token.getGroupTokenList();
 static KMETHOD Token_GetGroupTokenList(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -164,6 +174,7 @@ static void Syntax_defineTokenFunc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		_Public|_Coercion|_Im|_Const, _F(Token_toString), KType_String, KType_Token, KMethodName_To(KType_String), 0,
 		_Public|_Const, _F(Token_Is), KType_Boolean, KType_Token, KMethodName_("Is"), 1, TP_kw,
 		_Public|_Const, _F(Token_GetParsedText), KType_String, KType_Token, KMethodName_("GetParsedText"), 0,
+		_Public|_Const, _F(Token_GetType), KType_Object, KType_Token, KMethodName_("GetType"), 0,
 		_Public|_Const, _F(Token_GetGroupTokenList), KType_TokenArray, KType_Token, KMethodName_("GetGroupTokenList"), 0,
 		_Public, _F(Token_isBeforeWhiteSpace), KType_Boolean, KType_Token, KMethodName_("IsBeforeWhiteSpace"), 0,
 		_Public, _F(Token_new), KType_Token, KType_Token, KMethodName_("new"), 1, TP_kw,
