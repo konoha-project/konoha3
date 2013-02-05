@@ -43,7 +43,7 @@ class Event_base {
 
 	@Public int event_add(String key, int evd, int event, Func[void, int, int, Object] cb, Object cbArg, TimeVal tv) {
 		if (key.isNotNull()) {
-			Cevent ev = new Cevent(evbase, key, evd, event, new CallBackArg(cb, cbArg));
+			Cevent ev = new Cevent(evbase, key, evd, event, new EventCallBackArg(cb, cbArg));
 			eventMap.set(key, ev);	//keep referance of 'ev', and deliver it to callback method
 			int ret =  System.event_add(ev, tv);
 			return ret;
