@@ -122,16 +122,17 @@ static const char* JsonToNewText(KonohaContext *kctx, struct JsonBuf *jsonbuf)
 	return (const char *) json_dumps(jsonbuf->jsonobj, 0);  // FIXME: if UTF-8 is supported
 }
 
-static size_t DoJsonEach(KonohaContext *kctx, struct JsonBuf *jsonbuf, void *thunk, void (*doEach)(KonohaContext *, const char *, struct JsonBuf *, void *))
+static size_t DoJsonEach(KonohaContext *kctx, struct JsonBuf *jsonbuf, void *thunk, void (*doEach)(KonohaContext *, const char *, size_t, struct JsonBuf *, void *))
 {
 	size_t count = 0;
 	struct JsonBuf eachbuf = {};
 	void *iter = json_object_iter(jsonbuf->jsonobj);
 	while(iter != NULL) {
 		const char *key = json_object_iter_key(iter);
+		size_t len = strlen(key);
 		json_t *value   = json_object_iter_value(iter);
 		SetJsonBuf(&eachbuf, value);
-		doEach(kctx, key, &eachbuf, thunk);
+		doEach(kctx, key, len, &eachbuf, thunk);
 		count++;
 		iter = json_object_iter_next(jsonbuf->jsonobj, iter);
 	}

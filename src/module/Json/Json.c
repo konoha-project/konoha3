@@ -104,7 +104,7 @@ static const char *JsonToNewText(KonohaContext *kctx, struct JsonBuf *jsonbuf)
 	return text; /* need free */
 }
 
-static size_t DoJsonEach(KonohaContext *kctx, struct JsonBuf *jsonbuf, void *thunk, void (*doEach)(KonohaContext *, const char *, struct JsonBuf *, void *))
+static size_t DoJsonEach(KonohaContext *kctx, struct JsonBuf *jsonbuf, void *thunk, void (*doEach)(KonohaContext *, const char *, size_t, struct JsonBuf *, void *))
 {
 	size_t count = 0;
 	struct JsonBuf eachbuf;
@@ -113,8 +113,9 @@ static size_t DoJsonEach(KonohaContext *kctx, struct JsonBuf *jsonbuf, void *thu
 	JSON obj = AsJSON(jsonbuf);
 	JSON_OBJECT_EACH(obj, Itr, Key, Val) {
 		const char *key = JSONString_get(Key);
-		eachbuf.json_i = Val.bits;
-		doEach(kctx, key, &eachbuf, thunk);
+		size_t len      = JSONString_length(Key);
+		eachbuf.json_i  = Val.bits;
+		doEach(kctx, key, len, &eachbuf, thunk);
 		count++;
 	}
 	return count;

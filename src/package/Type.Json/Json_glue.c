@@ -215,10 +215,10 @@ static KMETHOD Json_toBoolean(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-static void keys_doEach(KonohaContext* kctx, const char* key, struct JsonBuf *jsonbuf, void* thunk)
+static void keys_doEach(KonohaContext* kctx, const char *key, size_t len, struct JsonBuf *jsonbuf, void* thunk)
 {
 	kArray *array = (kArray *)thunk;
-	KLIB kArray_Add(kctx, array, KLIB new_kString(kctx, OnField, key, strlen(key), 0));
+	KLIB kArray_Add(kctx, array, KLIB new_kString(kctx, OnField, key, len, 0));
 }
 
 //## String[] Json.Keys();
