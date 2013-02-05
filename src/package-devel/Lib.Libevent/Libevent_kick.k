@@ -29,11 +29,11 @@ import("MiniKonoha.NameSpace");
 import("Syntax.Null");
 
 class Event_base {
-	CEvent_base evbase;
+	Cevent_base evbase;
 	@Private Map eventMap;	//no need?
 
 	Event_base() {
-		evbase = new CEvent_base();
+		evbase = new Cevent_base();
 		eventMap = new Map();
 	}
 
@@ -43,7 +43,7 @@ class Event_base {
 
 	@Public int event_add(String key, int evd, int event, Func[void, int, int, Object] cb, Object cbArg, TimeVal tv) {
 		if (key.isNotNull()) {
-			CEvent ev = new CEvent(evbase, key, evd, event, new CallBackArg(cb, cbArg));
+			Cevent ev = new Cevent(evbase, key, evd, event, new CallBackArg(cb, cbArg));
 			eventMap.set(key, ev);	//keep referance of 'ev', and deliver it to callback method
 			int ret =  System.event_add(ev, tv);
 			return ret;
@@ -57,7 +57,7 @@ class Event_base {
 	//{}
 
 	@Public int event_del(String key) {
-		CEvent ev = event_Map.get(key) as CEvent;
+		Cevent ev = event_Map.get(key) as Cevent;
 		eventMap.remove(key);
 		return System.event_del(ev);
 	}
