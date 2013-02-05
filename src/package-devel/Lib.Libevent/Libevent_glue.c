@@ -42,7 +42,6 @@ typedef struct CEvent {
 	kObjectHeader h;
 	kString *key;
 	struct event *event;
-	kCEvent_base *evBase;
 } kCEvent;
 
 typedef struct CallBackArg {	//callback-method argument wrapper
@@ -123,7 +122,6 @@ static void CEvent_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct CEvent *ev = (struct CEvent *) o;
 	ev->event = NULL;
-	KFieldInit(ev, ev->evBase, K_NULL);
 }
 
 static void CEvent_Free(KonohaContext *kctx, kObject *o)
@@ -134,14 +132,12 @@ static void CEvent_Free(KonohaContext *kctx, kObject *o)
 		event_free(ev->event);
 		ev->event = NULL;
 	}
-	KFieldInit(ev, ev->evBase, K_NULL);
 }
 
 static void CEvent_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	struct CEvent *ev = (struct CEvent *) o;
 	KRefTraceNullable(ev->key);
-	KRefTraceNullable(ev->evBase);
 }
 
 //## CEvent CEvent.new(CEvent_base event_base, String key, int evd, int event, Func[int, int, Object arg] cb, CallBackArg cbArg);
@@ -155,7 +151,6 @@ static KMETHOD CEvent_new(KonohaContext *kctx, KonohaStack *sfp)
 	kCallBackArg *cbArg = (kCallBackArg *)sfp[5].asObject;	//deliver callback method
 
 	ev->event = event_new(cEvent_base->event_base, evd, event, callback_1st, cbArg);
-	ev->evBase = cEvent_base; //does this no need?
 	KFieldSet(ev, ev->key, key);
 	//event_add() will call in EventBase.event_add() after return this method
 	KReturn(ev);
