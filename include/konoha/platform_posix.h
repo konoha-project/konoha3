@@ -60,7 +60,7 @@ extern "C" {
 
 #define kunused __attribute__((unused))
 
-#include <minikonoha/klib.h>
+#include <konoha/klib.h>
 
 #ifndef K_PREFIX
 #define K_PREFIX  "/usr/local"
@@ -85,12 +85,12 @@ static kbool_t FormatModulePath(KonohaFactory *factory, char *buf, size_t bufsiz
 	const char *local = "/module";
 	if(path == NULL) {
 		path = factory->getenv_i("HOME");
-		local = "/.minikonoha/module";
+		local = "/.konoha/module";
 	}
 	snprintf(buf, bufsiz, "%s%s/%s/%s%s", path, local, moduleName, moduleName, ext);
 #ifdef K_PREFIX
 	if(!HasFile(buf)) {
-		snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/module" "/%s/%s%s", moduleName, moduleName, ext);
+		snprintf(buf, bufsiz, K_PREFIX "/lib/konoha/" K_VERSION "/module" "/%s/%s%s", moduleName, moduleName, ext);
 	}
 #endif
 	return HasFile(buf);
@@ -128,12 +128,12 @@ static const char* FormatPackagePath(KonohaContext *kctx, char *buf, size_t bufs
 	const char *local = "/package";
 	if(path == NULL) {
 		path = PLATAPI getenv_i("HOME");
-		local = "/.minikonoha/package";
+		local = "/.konoha/package";
 	}
 	snprintf(buf, bufsiz, "%s%s/%s/%s%s", path, local, packageName, ShortPackageName(packageName), ext);
 #ifdef K_PREFIX
 	if(!HasFile(buf)) {
-		snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/package" "/%s/%s%s", packageName, ShortPackageName(packageName), ext);
+		snprintf(buf, bufsiz, K_PREFIX "/lib/konoha/" K_VERSION "/package" "/%s/%s%s", packageName, ShortPackageName(packageName), ext);
 	}
 #endif
 	return HasFile(buf) ? (const char *)buf : NULL;

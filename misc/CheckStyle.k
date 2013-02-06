@@ -95,6 +95,9 @@ void main() {
         data = replace(args[i], data, "\n\t\n", "\n\t\n", "\n\n");
         data = replace(args[i], data, ";\t\n", ";\t\n", ";\n");
         data = replace(args[i], data, "; \n", "; \n", ";\n");
+
+        data = data.replace("minikonoha", "konoha");
+
         emit(args[i], data);
         i = i + 1;
     }

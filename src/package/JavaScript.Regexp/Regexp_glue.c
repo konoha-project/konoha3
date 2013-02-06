@@ -24,11 +24,11 @@
 
 #define USE_STRINGLIB 1
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/klib.h>
-#include <minikonoha/konoha_common.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/klib.h>
+#include <konoha/konoha_common.h>
+#include <konoha/import/methoddecl.h>
 #include <pcre.h>
 
 #ifdef __cplusplus

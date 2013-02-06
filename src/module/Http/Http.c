@@ -30,7 +30,7 @@ extern "C" {
 #include <pthread.h>
 #include <event.h>
 #include <evhttp.h>
-#include <minikonoha/minikonoha.h>
+#include <konoha/konoha.h>
 
 // -------------------------------------------------------------------------
 /* EventModule, EventContext */

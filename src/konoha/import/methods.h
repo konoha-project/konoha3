@@ -315,7 +315,7 @@ static KMETHOD System_gc(KonohaContext *kctx, KonohaStack *sfp)
 
 // --------------------------------------------------------------------------
 
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/import/methoddecl.h>
 
 static void LoadDefaultMethod(KonohaContext *kctx, kNameSpace *ns)
 {

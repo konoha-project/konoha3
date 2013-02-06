@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 #include "kjson/kjson.c"
-#include <minikonoha/minikonoha.h>
+#include <konoha/konoha.h>
 
 // -------------------------------------------------------------------------
 /* JSON Parse/ToString API */

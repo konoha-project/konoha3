@@ -22,29 +22,23 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef PLATFORM_H_
-#define PLATFORM_H_
-
+#ifndef MINIOKNOHA_LOCAL_H_
+#define MINIOKNOHA_LOCAL_H_
 #ifndef MINIOKNOHA_H_
-#error Do not include platform.h without minikonoha.h.
+#error Do not include local.h without konoha.h.
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern int verbose_debug;
+#define IS_RootKonohaContext(o)   (kctx == (KonohaContext *)o)
+
+void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx);
+void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns);
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
-#if defined(_MSC_VER)
-#include <minikonoha/platform_msvc.h>
-#elif defined(__MINGW32__)
-#include <minikonoha/platform_mingw.h>
-#else
-#include <minikonoha/platform_posix.h>
-#endif
-
-#endif /* PLATFORM_H_ */
+#endif /* MINIOKNOHA_LOCAL_H_ */

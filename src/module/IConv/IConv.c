@@ -28,7 +28,7 @@ extern "C" {
 
 #include <iconv.h>
 #include <errno.h>
-#include <minikonoha/minikonoha.h>
+#include <konoha/konoha.h>
 
 // -------------------------------------------------------------------------
 /* I18N */

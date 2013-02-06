@@ -22,8 +22,8 @@
 // * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ***************************************************************************/
 //
-//#include <minikonoha/minikonoha.h>
-//#include <minikonoha/sugar.h>
+//#include <konoha/konoha.h>
+//#include <konoha/sugar.h>
 //
 //#ifdef __cplusplus
 //extern "C"{

@@ -40,21 +40,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
-#include <sys/time.h>
-
-#ifdef HAVE_DLFCN_H
-#include <dlfcn.h>
-#endif
-#include <sys/stat.h>
 #include <errno.h>
-
-#ifdef HAVE_ICONV_H
-#include <iconv.h>
-#endif /* HAVE_ICONV_H */
-
-#ifdef K_USE_PTHREAD
-#include <pthread.h>
-#endif
 
 #include <windows.h>
 
@@ -62,33 +48,30 @@
 extern "C" {
 #endif
 
-#define kunused __attribute__((unused))
+#define snprintf sprintf_s
+
 // -------------------------------------------------------------------------
 
 static const char *isSystemCharsetUTF8(void)
 {
-#if defined(K_USING_WINDOWS_)
 	static char codepage[64];
-	knh_snprintf(codepage, sizeof(codepage), "CP%d", (int)GetACP());
+	snprintf(codepage, sizeof(codepage), "CP%d", (int)GetACP());
 	return codepage;
-#else
-	return "UTF-8";
-#endif
 }
 
 typedef uintptr_t (*ficonv_open)(const char *, const char *);
 typedef size_t (*ficonv)(uintptr_t, char **, size_t *, char **, size_t *);
 typedef int    (*ficonv_close)(uintptr_t);
 
-static kunused uintptr_t dummy_iconv_open(const char *t, const char *f)
+static uintptr_t dummy_iconv_open(const char *t, const char *f)
 {
 	return -1;
 }
-static kunused size_t dummy_iconv(uintptr_t i, char **t, size_t *ts, char **f, size_t *fs)
+static size_t dummy_iconv(uintptr_t i, char **t, size_t *ts, char **f, size_t *fs)
 {
 	return 0;
 }
-static kunused int dummy_iconv_close(uintptr_t i)
+static int dummy_iconv_close(uintptr_t i)
 {
 	return 0;
 }
@@ -116,52 +99,60 @@ static void loadIconv(KonohaFactory *plat)
 
 // -------------------------------------------------------------------------
 
+#define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
+
 static unsigned long long getTimeMilliSecond(void)
 {
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+	return (unsigned long long)GetTickCount();
 }
 
 // -------------------------------------------------------------------------
 
-static int kpthread_mutex_destroy(kmutex_t *mutex)
-{
-	return 0;
-}
-
-static int kpthread_mutex_init(kmutex_t *mutex, const kmutexattr_t *attr)
-{
-	return 0;
-}
-
-static int kpthread_mutex_lock(kmutex_t *mutex)
-{
-	return 0;
-}
-
-static int kpthread_mutex_trylock(kmutex_t *mutex)
-{
-	return 0;
-}
-
-static int kpthread_mutex_unlock(kmutex_t *mutex)
-{
-	return 0;
-}
-
-static int kpthread_mutex_init_recursive(kmutex_t *mutex)
-{
 #ifdef K_USE_PTHREAD
+#include <pthread.h>
+
+static int pthread_mutex_init_recursive(kmutex_t *mutex)
+{
 	pthread_mutexattr_t attr;
 	bzero(&attr, sizeof(pthread_mutexattr_t));
 	pthread_mutexattr_init(&attr);
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
 	return pthread_mutex_init((pthread_mutex_t *)mutex, &attr);
-#else
-	return 0;
-#endif
 }
+
+#else
+
+static int pthread_mutex_destroy(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int pthread_mutex_init(kmutex_t *mutex, const kmutexattr_t *attr)
+{
+	return 0;
+}
+
+static int pthread_mutex_lock(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int pthread_mutex_trylock(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int pthread_mutex_unlock(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int pthread_mutex_init_recursive(kmutex_t *mutex)
+{
+	return 0;
+}
+
+#endif
 
 // -------------------------------------------------------------------------
 
@@ -177,12 +168,12 @@ static const char* formatKonohaPath(char *buf, size_t bufsiz, const char *path)
 
 static kbool_t isDir(const char *path)
 {
-	struct stat buf;
 	char pathbuf[K_PATHMAX];
-	if(stat(formatSystemPath(pathbuf, sizeof(pathbuf), path), &buf) == 0) {
-		return S_ISDIR(buf.st_mode);
-	}
-	return false;
+	formatSystemPath(pathbuf, sizeof(pathbuf), path);
+
+	DWORD attr = GetFileAttributesA(pathbuf);
+	if(attr == -1) return false;
+	return ((attr & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY);
 }
 
 // -------------------------------------------------------------------------
@@ -355,7 +346,7 @@ static const char* FormatPackagePath(char *buf, size_t bufsiz, const char *packa
 	}
 	if(path == NULL) {
 		path = getenv("HOME");
-		local = "/.minikonoha/package";
+		local = "/.konoha/package";
 	}
 	snprintf(buf, bufsiz, "%s%s/%s/%s%s", path, local, packageName, packname(packageName), ext);
 #ifdef K_PREFIX
@@ -364,7 +355,7 @@ static const char* FormatPackagePath(char *buf, size_t bufsiz, const char *packa
 		fclose(fp);
 		return (const char *)buf;
 	}
-	snprintf(buf, bufsiz, K_PREFIX "/minikonoha/package" "/%s/%s%s", packageName, packname(packageName), ext);
+	snprintf(buf, bufsiz, K_PREFIX "/konoha/package" "/%s/%s%s", packageName, packname(packageName), ext);
 #endif
 	fp = fopen(buf, "r");
 	if(fp != NULL) {
@@ -517,12 +508,12 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.exit_i          = exit;
 
 	// mutex
-	plat.pthread_mutex_init_i = kpthread_mutex_init;
-	plat.pthread_mutex_init_recursive = kpthread_mutex_init_recursive;
-	plat.pthread_mutex_lock_i    = kpthread_mutex_lock;
-	plat.pthread_mutex_unlock_i  = kpthread_mutex_unlock;
-	plat.pthread_mutex_trylock_i = kpthread_mutex_trylock;
-	plat.pthread_mutex_destroy_i = kpthread_mutex_destroy;
+	plat.pthread_mutex_init_i = pthread_mutex_init;
+	plat.pthread_mutex_init_recursive = pthread_mutex_init_recursive;
+	plat.pthread_mutex_lock_i = pthread_mutex_lock;
+	plat.pthread_mutex_unlock_i = pthread_mutex_unlock;
+	plat.pthread_mutex_trylock_i = pthread_mutex_trylock;
+	plat.pthread_mutex_destroy_i = pthread_mutex_destroy;
 
 	plat.shortFilePath       = shortFilePath;
 	plat.FormatPackagePath   = FormatPackagePath;

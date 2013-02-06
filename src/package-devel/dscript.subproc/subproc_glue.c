@@ -31,10 +31,10 @@
 #include <sys/wait.h>
 
 #define USE_FILE 1
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/konoha_common.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/konoha_common.h>
+#include <konoha/import/methoddecl.h>
 
 #if defined(__linux__)
 #include <linux/version.h>

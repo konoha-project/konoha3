@@ -41,8 +41,8 @@ extern "C" {
 #include <event.h>
 #include <evhttp.h>
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/klib.h>
+#include <konoha/konoha.h>
+#include <konoha/klib.h>
 
 // -------------------------------------------------------------------------
 /* Console */

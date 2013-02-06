@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include "minikonoha/minikonoha.h"
+#include "konoha/konoha.h"
 #include "test_konoha.h"
 
 #ifdef __cplusplus
@@ -42,7 +42,7 @@ static int __Free__  = 0;
 static void Dummy_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	assert((uintptr_t)conf == 0xdeadbeaf);
-	((kDummy*)o)->x = __Init__++;
+	((kDummy *)o)->x = __Init__++;
 }
 
 static void Dummy_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
@@ -172,7 +172,7 @@ static void test_bitops()
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 	for (i = 0; i < ARRAY_SIZE(test_data); i++) {
 		int test   = CLZ(test_data[i]);
-		int answer = (clz_test[i]) - ((sizeof(void*)==8)?0:32);
+		int answer = (clz_test[i]) - ((sizeof(void *)==8)?0:32);
 		assert(test == answer);
 		assert(FFS(test_data[i]) == myffs(test_data[i]));
 	}

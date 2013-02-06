@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "minikonoha/minikonoha.h"
-#include "minikonoha/platform.h"
+#include "konoha/konoha.h"
+#include "konoha/platform.h"
 
 extern void KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *name, ModuleType option);
 extern void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv);

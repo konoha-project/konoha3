@@ -22,9 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/konoha_common.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/konoha_common.h>
+#include <konoha/import/methoddecl.h>
 
 typedef struct kConsoleVar kConsole;
 struct kConsoleVar {

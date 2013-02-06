@@ -22,9 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/import/methoddecl.h>
 
 #include <unistd.h>
 #include <pthread.h>
@@ -280,7 +280,7 @@ static void signalHandler(KonohaContext *kctx, const char *signo)
 //static void signalEventHandler(KonohaContext *kctx)
 //{
 //	FILE *mailbox;
-//	char mailboxPath[] = "/usr/local/minikonoha/dse/mailbox";
+//	char mailboxPath[] = "/usr/local/konoha/dse/mailbox";
 //	char buf[BUFSIZE];
 //	RawEvent rawEvent;
 //
@@ -394,7 +394,7 @@ static KMETHOD SignalEventListener_start(KonohaContext *kctx, KonohaStack *sfp)
 
 	//FILE *pid;
 	pthread_t t;
-	//if(!(pid = fopen("/usr/local/minikonoha/dse/pid", "w"))) {
+	//if(!(pid = fopen("/usr/local/konoha/dse/pid", "w"))) {
 	//	fprintf(stderr, "cannot open pid file\n");
 	//	exit(1);
 	//}

@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "minikonoha/minikonoha.h"
+#include "konoha/konoha.h"
 #include "bmgc.h"
 
 #ifdef __cplusplus

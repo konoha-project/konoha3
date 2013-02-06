@@ -1,9 +1,9 @@
 #ifndef LIBVIRT_GLUE_H
 #define LIBVIRT_GLUE_H
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/import/methoddecl.h>
 #include "libvirt/libvirt.h"
 #include "libvirt/libvirt.h"
 

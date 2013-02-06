@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "minikonoha/minikonoha.h"
+#include "konoha/konoha.h"
 #include "test_konoha.h"
 
 void test_kString(KonohaContext *kctx)
@@ -39,7 +39,7 @@ void test_kString(KonohaContext *kctx)
         s = KLIB new_kString(kctx, GcUnsafe, "abcd", 4, 0);
         assert(strcmp(kString_text(s), "abcd") == 0);
         assert(kString_size(s) == 4);
-        assert(kString_text(s) == (char*)s->inline_text);
+        assert(kString_text(s) == (char *)s->inline_text);
     }
     for (i = 0; i < 100; ++i) {
         static const char *text = "12345678901234567890";

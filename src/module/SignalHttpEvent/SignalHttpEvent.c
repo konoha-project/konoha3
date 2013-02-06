@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 #include <stdio.h>
-#include <minikonoha/minikonoha.h>
+#include <konoha/konoha.h>
 
 // -------------------------------------------------------------------------
 /* EventModule, EventContext */

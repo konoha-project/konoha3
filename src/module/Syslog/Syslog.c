@@ -28,8 +28,8 @@ extern "C" {
 
 #include <syslog.h>
 #include <errno.h>
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/klib.h>
+#include <konoha/konoha.h>
+#include <konoha/klib.h>
 
 // -------------------------------------------------------------------------
 /* Logging */

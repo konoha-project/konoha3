@@ -24,9 +24,9 @@
 
 /* ************************************************************************ */
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/klib.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/klib.h>
 
 #ifdef __cplusplus
 extern "C" {

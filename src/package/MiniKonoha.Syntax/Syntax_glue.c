@@ -22,18 +22,18 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
+#include <konoha/konoha.h>
 #define USE_AsciiToKonohaChar
-#include <minikonoha/sugar.h>
-#include <minikonoha/klib.h>
-#include <minikonoha/konoha_common.h>
+#include <konoha/sugar.h>
+#include <konoha/klib.h>
+#include <konoha/konoha_common.h>
 #include <stdio.h>
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/import/methoddecl.h>
 
 #define TP_kw           KType_Symbol,     KFieldName_("keyword")
 #define TP_source       KType_String,     KFieldName_("source")

@@ -5,7 +5,7 @@ include(CheckLibraryExists)
 
 cmake_minimum_required(VERSION 2.6)
 
-project(minikonoha)
+project(konoha)
 
 set(VERSION_MAJOR "0")
 set(VERSION_MINOR "3")
@@ -30,7 +30,7 @@ SET(CMAKE_CXX_FLAGS_COMPRESSED "${CMAKE_CXX_FLAGS} -Os -g0")
 
 ## Source Code settings
 set(KONOHA_SOURCE
-	src/konoha/minikonoha.c
+	src/konoha/konoha.c
 	src/parser/parser.c
 )
 
@@ -158,7 +158,7 @@ endif(TEST_COVERAGE)
 
 # for .k script test
 enable_testing()
-set(TEST_BIN ${CMAKE_CURRENT_BINARY_DIR}/minikonoha)
+set(TEST_BIN ${CMAKE_CURRENT_BINARY_DIR}/konoha)
 set(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(PARENT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -199,15 +199,15 @@ macro(SET_CXX_PROPERTY_IF_MSVC TARGET)
 	endif(MSVC)
 endmacro(SET_CXX_PROPERTY_IF_MSVC TARGET)
 
-add_library(minikonoha SHARED ${KONOHA_SOURCE})
-SET_CXX_PROPERTY_IF_MSVC(minikonoha ${KONOHA_SOURCE})
-target_link_libraries(minikonoha ${ExtraLibs})
-set(ExtraLibs ${ExtraLibs} minikonoha)
+add_library(konoha SHARED ${KONOHA_SOURCE})
+SET_CXX_PROPERTY_IF_MSVC(konoha ${KONOHA_SOURCE})
+target_link_libraries(konoha ${ExtraLibs})
+set(ExtraLibs ${ExtraLibs} konoha)
 
-add_executable(minikonoha_bin src/exec/command/command.c)
-SET_CXX_PROPERTY_IF_MSVC(minikonoha_bin src/exec/command/command.c)
-target_link_libraries(minikonoha_bin ${ExtraLibs})
-set_target_properties(minikonoha_bin PROPERTIES OUTPUT_NAME minikonoha)
+add_executable(konoha_bin src/exec/command/command.c)
+SET_CXX_PROPERTY_IF_MSVC(konoha_bin src/exec/command/command.c)
+target_link_libraries(konoha_bin ${ExtraLibs})
+set_target_properties(konoha_bin PROPERTIES OUTPUT_NAME konoha)
 
 macro(ENABLE_COVERAGE_INFO_IF_ENABLE VARNAME)
 	if(TEST_COVERAGE)
@@ -285,17 +285,13 @@ endforeach(f ${test_files})
 add_subdirectory(src/exec/apache)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpack.cmake)
 
-# for konoha command
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/exec/command/konoha.sh.cmake
-		${CMAKE_CURRENT_BINARY_DIR}/konoha.sh)
-
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/konoha.sh
 	DESTINATION bin
 	RENAME konoha
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
 	GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
-install(TARGETS minikonoha minikonoha_bin
+install(TARGETS konoha konoha_bin
 		RUNTIME DESTINATION bin
 		LIBRARY DESTINATION lib${LIB_SUFFIX}
 		)

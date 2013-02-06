@@ -22,9 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/klib.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/klib.h>
 
 #ifdef __GNUC__
 #include <getopt.h>
@@ -49,8 +49,8 @@ extern int verbose_debug;
 int verbose_code;
 extern int verbose_sugar;
 
-#include <minikonoha/platform.h>
-#include <minikonoha/libcode/minishell.h>
+#include <konoha/platform.h>
+#include <konoha/libcode/minishell.h>
 
 // -------------------------------------------------------------------------
 // KonohaContext
@@ -104,7 +104,7 @@ static void CommandLine_Import(KonohaContext *kctx, char *packageName, KTraceInf
 //	}
 //	if(path == NULL) {
 //		path = PLATAPI getenv_i("HOME");
-//		local = "/.minikonoha/script";
+//		local = "/.konoha/script";
 //	}
 //	snprintf(buf, sizeof(buf), "%s%s/%s.k", path, local, startup_script);
 //	if(!Konoha_LoadScript((KonohaContext *)kctx, (const char *)buf)) {

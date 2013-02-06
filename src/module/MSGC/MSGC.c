@@ -28,8 +28,8 @@
 
 //#define GCDEBUG 1
 
-#include "minikonoha/minikonoha.h"
-#include "minikonoha/local.h"
+#include "konoha/konoha.h"
+#include "konoha/local.h"
 
 #ifdef __cplusplus
 extern "C" {

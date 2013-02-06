@@ -106,10 +106,10 @@
 #undef PACKAGE_NAME
 #undef PACKAGE_STRING
 #undef PACKAGE_VERSION
-#include "../../../include/minikonoha/minikonoha.h"
-#include "../../../include/minikonoha/sugar.h"
-#include "../../../include/minikonoha/konoha_common.h"
-#include "../../../include/minikonoha/import/methoddecl.h"
+#include "../../../include/konoha/konoha.h"
+#include "../../../include/konoha/sugar.h"
+#include "../../../include/konoha/konoha_common.h"
+#include "../../../include/konoha/import/methoddecl.h"
 #include <stdio.h>
 
 struct kRawPtr {

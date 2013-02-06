@@ -1,4 +1,4 @@
-#include "minikonoha/minikonoha.h"
+#include "konoha/konoha.h"
 #include "test_konoha.h"
 
 #ifdef __cplusplus
@@ -70,7 +70,7 @@ static void test_proto_value(KonohaContext *kctx)
 	reset_timer(&timer);
 	for (i = 0; i < EACH; i++) {
 		uintptr_t val = 0;
-		KLIB kObjectProto_DoEach(kctx, o0, (void*) &val, each);
+		KLIB kObjectProto_DoEach(kctx, o0, (void *) &val, each);
 		assert(val == SUM);
 	}
 	show_timer(&timer, "Map.eachN");
@@ -84,7 +84,7 @@ static void test_proto_value(KonohaContext *kctx)
 	reset_timer(&timer);
 	for (i = 0; i < EACH; i++) {
 		uintptr_t val = 0;
-		KLIB kObjectProto_DoEach(kctx, o0, (void*) &val, each);
+		KLIB kObjectProto_DoEach(kctx, o0, (void *) &val, each);
 		assert(val == 0);
 	}
 	show_timer(&timer, "Map.each:emptyN");
@@ -105,7 +105,7 @@ static void test_proto_value(KonohaContext *kctx)
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
 		uintptr_t val = 0;
-		KLIB kObjectProto_DoEach(kctx, o1, (void*) &val, each);
+		KLIB kObjectProto_DoEach(kctx, o1, (void *) &val, each);
 		assert(val == 6);
 	}
 	show_timer(&timer, "Map[4].eachN");
@@ -132,7 +132,7 @@ static void test_proto_value(KonohaContext *kctx)
 	reset_timer(&timer);
 	for (i = 0; i < COUNT/2; i++) {
 		uintptr_t val = 0;
-		KLIB kObjectProto_DoEach(kctx, o2, (void*) &val, each);
+		KLIB kObjectProto_DoEach(kctx, o2, (void *) &val, each);
 		assert(val == 120);
 	}
 	show_timer(&timer, "Map[16].eachN");
@@ -182,7 +182,7 @@ static void test_proto_object(KonohaContext *kctx)
 	reset_timer(&timer);
 	for (i = 0; i < EACH; i++) {
 		uintptr_t val = 0;
-		KLIB kObjectProto_DoEach(kctx, o0, (void*) &val, each_object);
+		KLIB kObjectProto_DoEach(kctx, o0, (void *) &val, each_object);
 		assert(val == ((uintptr_t)o0) * COUNT);
 	}
 	show_timer(&timer, "Map.eachO");
@@ -196,7 +196,7 @@ static void test_proto_object(KonohaContext *kctx)
 	reset_timer(&timer);
 	for (i = 0; i < EACH; i++) {
 		uintptr_t val = 0;
-		KLIB kObjectProto_DoEach(kctx, o0, (void*) &val, each_object);
+		KLIB kObjectProto_DoEach(kctx, o0, (void *) &val, each_object);
 		assert(val == 0);
 	}
 	show_timer(&timer, "Map.each:emptyO");
@@ -217,7 +217,7 @@ static void test_proto_object(KonohaContext *kctx)
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
 		uintptr_t val = 0;
-		KLIB kObjectProto_DoEach(kctx, o1, (void*) &val, each_object);
+		KLIB kObjectProto_DoEach(kctx, o1, (void *) &val, each_object);
 		assert(val == 4*(uintptr_t)o1);
 	}
 	show_timer(&timer, "Map[4].eachO");
@@ -244,7 +244,7 @@ static void test_proto_object(KonohaContext *kctx)
 	reset_timer(&timer);
 	for (i = 0; i < COUNT/2; i++) {
 		uintptr_t val = 0;
-		KLIB kObjectProto_DoEach(kctx, o2, (void*) &val, each_object);
+		KLIB kObjectProto_DoEach(kctx, o2, (void *) &val, each_object);
 		assert(val == 16*(uintptr_t)o2);
 	}
 	show_timer(&timer, "Map[16].eachO");

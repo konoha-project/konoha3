@@ -25,10 +25,10 @@
 #include <stdio.h>
 #include <iconv.h>
 #include <errno.h>
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/klib.h>
-#include <minikonoha/arch/minivm.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/klib.h>
+#include <konoha/arch/minivm.h>
 #ifdef HAVE_LIBV8
 	#undef HAVE_LIBV8
 	//#include <v8.h>

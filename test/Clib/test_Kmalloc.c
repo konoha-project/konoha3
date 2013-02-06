@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include "minikonoha/minikonoha.h"
+#include "konoha/konoha.h"
 #include "test_konoha.h"
 
 int main(int argc, const char *argv[])
@@ -40,7 +40,7 @@ int main(int argc, const char *argv[])
     for (i = 0; i < 100; ++i) {
         malloced[i] = PLATAPI Kzmalloc(0, i, NULL);
         int j;
-        char *p = (char*)malloced[i];
+        char *p = (char *)malloced[i];
         for (j = 0; j < i; ++j) {
             assert(p[0] == 0);
         }

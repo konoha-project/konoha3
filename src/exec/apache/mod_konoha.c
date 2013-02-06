@@ -30,11 +30,11 @@
 #ifndef K_USE_PTHREAD
 #define K_USE_PTHREAD 1
 #endif
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/klib.h>
-#include <minikonoha/platform.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/klib.h>
+#include <konoha/platform.h>
+#include <konoha/import/methoddecl.h>
 #include "../../package-devel/apache/apache_glue.h"
 
 #ifndef K_PREFIX

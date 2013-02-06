@@ -26,7 +26,7 @@
 #define KLIB_H_
 
 #ifndef MINIOKNOHA_H_
-#error Do not include klib.h without minikonoha.h.
+#error Do not include klib.h without konoha.h.
 #endif
 
 #ifdef __cplusplus

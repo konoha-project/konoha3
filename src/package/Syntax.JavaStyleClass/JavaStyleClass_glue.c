@@ -22,9 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -357,7 +357,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, ns, reqc);
 	kToken *tokenClassName = SUGAR kNode_GetToken(kctx, stmt, KSymbol_("$ClassName"), NULL);
 	KClassVar *definedClass = (KClassVar *)KLIB kNameSpace_GetClassByFullName(kctx, ns, kString_text(tokenClassName->text), kString_size(tokenClassName->text), NULL);
-	const int isNewlyDefinedClass = (definedClass == NULL); 
+	const int isNewlyDefinedClass = (definedClass == NULL);
 	if(isNewlyDefinedClass) {
 		kshortflag_t cflag = kNode_ParseClassFlag(kctx, stmt, KClassFlag_Virtual);
 		KMakeTraceUL(trace, sfp, kNode_uline(stmt));

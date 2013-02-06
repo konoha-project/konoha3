@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* ************************************************************************ */
-#include "minikonoha/minikonoha.h"
+#include "konoha/konoha.h"
 #include "../BitmapGC/bmgc.h"
 
 #ifdef __cplusplus

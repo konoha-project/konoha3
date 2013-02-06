@@ -23,10 +23,10 @@
  ***************************************************************************/
 
 #define USE_KEYWORD_LIST 1
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/klib.h>
-#include <minikonoha/local.h>
-#include <minikonoha/sugar.h>
+#include <konoha/konoha.h>
+#include <konoha/klib.h>
+#include <konoha/local.h>
+#include <konoha/sugar.h>
 
 #ifdef __cplusplus
 extern "C" {

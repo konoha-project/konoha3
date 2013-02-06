@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 #include <jansson.h>
-#include <minikonoha/minikonoha.h>
+#include <konoha/konoha.h>
 
 // -------------------------------------------------------------------------
 

@@ -30,10 +30,10 @@
 #include <sys/time.h>
 #endif
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/konoha_common.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/konoha_common.h>
+#include <konoha/import/methoddecl.h>
 
 #if defined(__MINGW32__) || defined(_MSC_VER)
 

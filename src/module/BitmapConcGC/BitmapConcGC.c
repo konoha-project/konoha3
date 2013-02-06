@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "minikonoha/minikonoha.h"
-#include "minikonoha/local.h"
+#include "konoha/konoha.h"
+#include "konoha/local.h"
 
 #ifdef __cplusplus
 extern "C" {
