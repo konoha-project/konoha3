@@ -170,7 +170,7 @@ KLIBDECL kbool_t KBuffer_iconv(KonohaContext *kctx, KBuffer* wb, uintptr_t ic, c
 	while(inBytesLeft > 0) {
 		int isTooBig;
 		memset(convBuf, '\0', K_PAGESIZE);
-		size_t iconv_ret = PLATAPI iconv_i(kctx, ic, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
+		size_t iconv_ret = PLATAPI I18NModule.iconv_i(kctx, ic, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
 		size_t processedSize = K_PAGESIZE - outBytesLeft;
 		KLIB KBuffer_Write(kctx, wb, convBuf, processedSize);
 		if(isTooBig) {   // input is too big. reset convbuf
@@ -897,7 +897,7 @@ static int DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 {
 	//DBG_P("IN fault=%d %d,%d,%d,%d", fault, KFlag_Is(int, fault, SoftwareFault), KFlag_Is(int, fault, UserFault), KFlag_Is(int, fault, SystemFault), KFlag_Is(int, fault, ExternalFault));
 	if(KFlag_Is(int, fault, SystemError)) {
-		fault = PLATAPI DiagnosisSystemError(kctx, fault);
+		fault = PLATAPI DiagnosisModule.DiagnosisSystemError(kctx, fault);
 	}
 	if(KFlag_Is(int, fault, NotSoftwareFault)) {
 		fault ^= SoftwareFault;
@@ -912,7 +912,7 @@ static int DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 		fault ^= ExternalFault;
 	}
 	if(KFlag_Is(int, fault, SoftwareFault)) {
-		if(PLATAPI DiagnosisCheckSoftwareTestIsPass(kctx, KFileLine_textFileName(trace->pline), (kushort_t)trace->pline)) {
+		if(PLATAPI DiagnosisModule.DiagnosisCheckSoftwareTestIsPass(kctx, KFileLine_textFileName(trace->pline), (kushort_t)trace->pline)) {
 			KFlag_Set(int, fault, SoftwareFault, false);
 		}
 	}

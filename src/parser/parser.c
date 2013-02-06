@@ -353,12 +353,12 @@ void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 static void KonohaContext_EnterCStack(KonohaContext *kctx, void **bottom)
 {
 	kctx->stack->cstack_bottom = bottom;
-	PLATAPI EnterEventContext(kctx, NULL);
+	PLATAPI EventModule.EnterEventContext(kctx, NULL);
 }
 
 static void KonohaContext_ExitCStack(KonohaContext *kctx)
 {
-	PLATAPI ExitEventContext(kctx, NULL);
+	PLATAPI EventModule.ExitEventContext(kctx, NULL);
 	kctx->stack->cstack_bottom = NULL;
 }
 

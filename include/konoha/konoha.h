@@ -592,6 +592,7 @@ struct KonohaFactory {
 	int          verbose;
 	int          exitStatus;
 
+	/* LowLevel API */
 	/* memory allocation / deallocation */
 	void *(*malloc_i)(size_t size);
 	void  (*free_i)  (void *ptr);
@@ -601,16 +602,18 @@ struct KonohaFactory {
 	void    (*longjmp_i)(jmpbuf_i, int);
 
 	// system info
-	const char* (*getenv_i)(const char *);
+	const char *(*getenv_i)(const char *);
 
 	// time
 	unsigned long long (*getTimeMilliSecond)(void);
 
 	/* message */
-	int     (*printf_i)(const char *fmt, ...) __PRINTFMT(2, 3);
-	int     (*vprintf_i)(const char *fmt, va_list args);
-	int     (*snprintf_i)(char *str, size_t size, const char *fmt, ...);
-	int     (*vsnprintf_i)(char *str, size_t size, const char *fmt, va_list args);
+	int    (*printf_i)(const char *fmt, ...) __PRINTFMT(2, 3);
+	int    (*vprintf_i)(const char *fmt, va_list args);
+	int    (*snprintf_i)(char *str, size_t size, const char *fmt, ...);
+	int    (*vsnprintf_i)(char *str, size_t size, const char *fmt, va_list args);
+	char  *(*readline_i)(const char *prompt);
+	int    (*add_history_i)(const char *);
 
 	void    (*qsort_i)(void *base, size_t nel, size_t width, int (*compar)(const void *, const void *));
 	// abort
@@ -643,29 +646,29 @@ struct KonohaFactory {
 	int (*loadScript)(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *));
 	void (*AFTER_LoadScript)(KonohaContext *, const char *filename);
 
-	const char* (*shortFilePath)(const char *path);
-	const char* (*formatTransparentPath)(char *buf, size_t bufsiz, const char *parent, const char *path);
-
-	// message (cui)
-	char*  (*readline_i)(const char *prompt);
-	int    (*add_history_i)(const char *);
+	const char *(*shortFilePath)(const char *path);
+	const char *(*formatTransparentPath)(char *buf, size_t bufsiz, const char *parent, const char *path);
 
 	/* Logging API */
-	KModuleInfo *LoggerInfo;
-	void  (*syslog_i)(int priority, const char *message, ...) __PRINTFMT(2, 3);
-	void  (*vsyslog_i)(int priority, const char *message, va_list args);
-	void  (*TraceDataLog)(KonohaContext *kctx, KTraceInfo *trace, int, logconf_t *, ...);
+	struct LoggerModule {
+		KModuleInfo *LoggerInfo;
+		void  (*syslog_i)(int priority, const char *message, ...) __PRINTFMT(2, 3);
+		void  (*vsyslog_i)(int priority, const char *message, va_list args);
+		void  (*TraceDataLog)(KonohaContext *kctx, KTraceInfo *trace, int, logconf_t *, ...);
+	} LoggerModule;
 
 	/* Diagnosis API */
-	KModuleInfo *DiagnosisInfo;
-	kbool_t (*CheckStaticRisk)(KonohaContext *, const char *keyword, size_t keylen, kfileline_t uline);
-	void    (*CheckDynamicRisk)(KonohaContext *, const char *keyword, size_t keylen, KTraceInfo *);
-	int (*DiagnosisSoftwareProcess)(KonohaContext *, kfileline_t uline, KTraceInfo *);
-	int (*DiagnosisSystemError)(KonohaContext *, int fault);
-	int (*DiagnosisSystemResource)(KonohaContext *, KTraceInfo *);
-	int (*DiagnosisFileSystem)(KonohaContext *, const char *path, size_t pathlen, KTraceInfo *);
-	int (*DiagnosisNetworking)(KonohaContext *, const char *path, size_t pathlen, int port, KTraceInfo *);
-	kbool_t (*DiagnosisCheckSoftwareTestIsPass)(KonohaContext *, const char *filename, int line);
+	struct DiagnosisModule {
+		KModuleInfo *DiagnosisInfo;
+		kbool_t (*CheckStaticRisk)(KonohaContext *, const char *keyword, size_t keylen, kfileline_t uline);
+		void    (*CheckDynamicRisk)(KonohaContext *, const char *keyword, size_t keylen, KTraceInfo *);
+		int (*DiagnosisSoftwareProcess)(KonohaContext *, kfileline_t uline, KTraceInfo *);
+		int (*DiagnosisSystemError)(KonohaContext *, int fault);
+		int (*DiagnosisSystemResource)(KonohaContext *, KTraceInfo *);
+		int (*DiagnosisFileSystem)(KonohaContext *, const char *path, size_t pathlen, KTraceInfo *);
+		int (*DiagnosisNetworking)(KonohaContext *, const char *path, size_t pathlen, int port, KTraceInfo *);
+		kbool_t (*DiagnosisCheckSoftwareTestIsPass)(KonohaContext *, const char *filename, int line);
+	} DiagnosisModule;
 
 	/* Console API */
 	struct ConsoleModule {
@@ -696,29 +699,33 @@ struct KonohaFactory {
 	} GCModule;
 
 	/* Event Handler API */
-	KModuleInfo *EventInfo;
-	struct EventContext *eventContext;
-	void (*StartEventHandler)(KonohaContext *kctx, void *args);
-	void (*StopEventHandler)(KonohaContext *kctx, void *args);
-	void (*EnterEventContext)(KonohaContext *kctx, void *args);
-	void (*ExitEventContext)(KonohaContext *kctx, void *args);
-	kbool_t (*EmitEvent)(KonohaContext *kctx, struct JsonBuf *json, KTraceInfo *);
-	void (*DispatchEvent)(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo *), KTraceInfo *);
-	void (*WaitEvent)(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo *), KTraceInfo *);
+	struct EventModule {
+		KModuleInfo *EventInfo;
+		struct EventContext *eventContext;
+		void (*StartEventHandler)(KonohaContext *kctx, void *args);
+		void (*StopEventHandler)(KonohaContext *kctx, void *args);
+		void (*EnterEventContext)(KonohaContext *kctx, void *args);
+		void (*ExitEventContext)(KonohaContext *kctx, void *args);
+		kbool_t (*EmitEvent)(KonohaContext *kctx, struct JsonBuf *json, KTraceInfo *);
+		void (*DispatchEvent)(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo *), KTraceInfo *);
+		void (*WaitEvent)(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo *), KTraceInfo *);
+	} EventModule;
 
-	// I18N Module
-	KModuleInfo *I18NInfo;
-	uintptr_t   (*iconv_open_i)(KonohaContext *, const char* tocode, const char* fromcode, KTraceInfo *);
-	size_t      (*iconv_i)(KonohaContext *, uintptr_t iconv, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft, int *isTooBigRef, KTraceInfo *trace);
-	int         (*iconv_close_i)(KonohaContext *, uintptr_t iconv);
-	const char* systemCharset;
-	kbool_t     (*isSystemCharsetUTF8)(KonohaContext *);
-	uintptr_t   (*iconvUTF8ToSystemCharset)(KonohaContext *, KTraceInfo *);
-	uintptr_t   (*iconvSystemCharsetToUTF8)(KonohaContext *, KTraceInfo *);
-	const char* (*formatSystemPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
-	const char* (*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
+	/* I18N Module */
+	struct I18NModule {
+		KModuleInfo *I18NInfo;
+		uintptr_t   (*iconv_open_i)(KonohaContext *, const char* tocode, const char* fromcode, KTraceInfo *);
+		size_t      (*iconv_i)(KonohaContext *, uintptr_t iconv, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft, int *isTooBigRef, KTraceInfo *trace);
+		int         (*iconv_close_i)(KonohaContext *, uintptr_t iconv);
+		const char* systemCharset;
+		kbool_t     (*isSystemCharsetUTF8)(KonohaContext *);
+		uintptr_t   (*iconvUTF8ToSystemCharset)(KonohaContext *, KTraceInfo *);
+		uintptr_t   (*iconvSystemCharsetToUTF8)(KonohaContext *, KTraceInfo *);
+		const char* (*formatSystemPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
+		const char* (*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
+	} I18NModule;
 
-	// CodeGenerator & VirtualMachine
+	/* CodeGenerator & VirtualMachine */
 	KModuleInfo  *CodeGeneratorInfo;
 	void*       (*GetCodeGenerateMethodFunc)(void);
 	void*       (*GenerateCode)(KonohaContext *kctx, kMethod *mtd, kNode *bk, int options);
@@ -772,21 +779,21 @@ struct KonohaFactory {
 #define KTraceErrorPoint(TRACE, POLICY, APINAME, ...)    do {\
 		logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
 		if(trace != NULL && KFlag_Is(int, _logconf.policy, isRecord)) { \
-			PLATAPI TraceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
+			PLATAPI LoggerModule.TraceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
 		}\
 	} while(0)
 
 #define KTraceChangeSystemPoint(TRACE, APINAME, ...)    do {\
 		logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|SystemChangePoint)};\
 		if(trace != NULL && KFlag_Is(int, _logconf.policy, isRecord)) { \
-			PLATAPI TraceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
+			PLATAPI LoggerModule.TraceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
 		}\
 	} while(0)
 
 #define KTraceApi(TRACE, POLICY, APINAME, ...)    do {\
 		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
 		if(trace != NULL && KFlag_Is(int, _logconf.policy, isRecord)) {\
-			PLATAPI TraceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
+			PLATAPI LoggerModule.TraceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
 		}\
 	} while(0)
 
@@ -794,10 +801,10 @@ struct KonohaFactory {
 		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
 		if(trace != NULL && KFlag_Is(int, _logconf.policy, isRecord)) {\
 			uint64_t _startTime = PLATAPI getTimeMilliSecond();\
-			PLATAPI TraceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
+			PLATAPI LoggerModule.TraceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
 			STMT;\
 			uint64_t _endTime = PLATAPI getTimeMilliSecond();\
-			PLATAPI TraceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), LogUint("ElapsedTime", (_endTime - _startTime)), ## __VA_ARGS__, LOG_END);\
+			PLATAPI LoggerModule.TraceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), LogUint("ElapsedTime", (_endTime - _startTime)), ## __VA_ARGS__, LOG_END);\
 			/*counter++;*/\
 		}else { \
 			STMT;\

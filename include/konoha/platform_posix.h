@@ -203,15 +203,15 @@ static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t 
 
 static void loadI18N(KonohaFactory *plat, const char *defaultCharSet)
 {
-	plat->systemCharset  = (defaultCharSet == NULL) ? "UTF-8" : defaultCharSet;
-	plat->iconv_open_i   = I18N_iconv_open;
-	plat->iconv_i        = I18N_iconv;
-	plat->iconv_close_i  = I18N_iconv_close;
-	plat->isSystemCharsetUTF8 = I18N_isSystemCharsetUTF8;
-	plat->iconvSystemCharsetToUTF8 = I18N_iconvSystemCharsetToUTF8;
-	plat->iconvUTF8ToSystemCharset = I18N_iconvUTF8ToSystemCharset;
-	plat->formatKonohaPath = I18N_formatKonohaPath;
-	plat->formatSystemPath = I18N_formatSystemPath;
+	plat->I18NModule.systemCharset  = (defaultCharSet == NULL) ? "UTF-8" : defaultCharSet;
+	plat->I18NModule.iconv_open_i   = I18N_iconv_open;
+	plat->I18NModule.iconv_i        = I18N_iconv;
+	plat->I18NModule.iconv_close_i  = I18N_iconv_close;
+	plat->I18NModule.isSystemCharsetUTF8 = I18N_isSystemCharsetUTF8;
+	plat->I18NModule.iconvSystemCharsetToUTF8 = I18N_iconvSystemCharsetToUTF8;
+	plat->I18NModule.iconvUTF8ToSystemCharset = I18N_iconvUTF8ToSystemCharset;
+	plat->I18NModule.formatKonohaPath = I18N_formatKonohaPath;
+	plat->I18NModule.formatSystemPath = I18N_formatSystemPath;
 }
 
 // -------------------------------------------------------------------------

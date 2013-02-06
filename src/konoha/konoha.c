@@ -301,7 +301,7 @@ static kbool_t DiagnosisCheckSoftwareTestIsPass(KonohaContext *kctx, const char 
 kbool_t KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *name, ModuleType option)
 {
 	if(!factory->LoadPlatformModule(factory, name, option)) {
-		factory->syslog_i(ErrTag, "failed to load platform module: %s\n", name);
+		factory->LoggerModule.syslog_i(ErrTag, "failed to load platform module: %s\n", name);
 		factory->printf_i("failed to load platform module: %s\n", name);
 		return true;
 	}
@@ -335,9 +335,9 @@ static void KonohaFactory_syslog_i(int priority, const char *message, ...)
 
 static void KonohaFactory_Check(KonohaFactory *factory)
 {
-	if(factory->LoggerInfo == NULL) {
-		factory->TraceDataLog = DefaultTraceLog;  // for safety
-		factory->syslog_i     = KonohaFactory_syslog_i;
+	if(factory->LoggerModule.LoggerInfo == NULL) {
+		factory->LoggerModule.TraceDataLog = DefaultTraceLog;  // for safety
+		factory->LoggerModule.syslog_i     = KonohaFactory_syslog_i;
 	}
 	if(factory->VirtualMachineInfo == NULL) {
 		const char *mod = factory->getenv_i("KONOHA_VM");
@@ -349,7 +349,7 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 		if(mod == NULL) mod = "BitmapGenGC";  // default
 		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);
 	}
-	if(factory->I18NInfo == NULL) {
+	if(factory->I18NModule.I18NInfo == NULL) {
 		const char *mod = factory->getenv_i("KONOHA_I18N");
 		if(mod == NULL) mod = "IConv";        // default
 		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);
@@ -359,27 +359,27 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 		if(mod == NULL) mod = "Json";
 		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);
 	}
-	if(factory->EventInfo == NULL) {
-		factory->StartEventHandler = DefaultEventHandler;
-		factory->StopEventHandler  = DefaultEventHandler;
-		factory->EnterEventContext = DefaultEventHandler;
-		factory->ExitEventContext  = DefaultEventHandler;
-		factory->EmitEvent         = DefaultEmitEvent;
-		factory->DispatchEvent     = DefaultDispatchEvent;
-		factory->WaitEvent         = NULL;  // check NULL
+	if(factory->EventModule.EventInfo == NULL) {
+		factory->EventModule.StartEventHandler = DefaultEventHandler;
+		factory->EventModule.StopEventHandler  = DefaultEventHandler;
+		factory->EventModule.EnterEventContext = DefaultEventHandler;
+		factory->EventModule.ExitEventContext  = DefaultEventHandler;
+		factory->EventModule.EmitEvent         = DefaultEmitEvent;
+		factory->EventModule.DispatchEvent     = DefaultDispatchEvent;
+		factory->EventModule.WaitEvent         = NULL;  // check NULL
 	}
-	if(factory->DiagnosisInfo == NULL) {
-		factory->CheckStaticRisk          = CheckStaticRisk;
-		factory->CheckDynamicRisk         = CheckDynamicRisk;
-		factory->DiagnosisSystemError     = DiagnosisSystemError;
-		factory->DiagnosisSoftwareProcess = DiagnosisSoftwareProcess;
-		factory->DiagnosisSystemResource  = DiagnosisSystemResource;
-		factory->DiagnosisFileSystem      = DiagnosisFileSystem;
-		factory->DiagnosisNetworking      = DiagnosisNetworking;
-		factory->DiagnosisCheckSoftwareTestIsPass = DiagnosisCheckSoftwareTestIsPass;
+	if(factory->DiagnosisModule.DiagnosisInfo == NULL) {
+		factory->DiagnosisModule.CheckStaticRisk          = CheckStaticRisk;
+		factory->DiagnosisModule.CheckDynamicRisk         = CheckDynamicRisk;
+		factory->DiagnosisModule.DiagnosisSystemError     = DiagnosisSystemError;
+		factory->DiagnosisModule.DiagnosisSoftwareProcess = DiagnosisSoftwareProcess;
+		factory->DiagnosisModule.DiagnosisSystemResource  = DiagnosisSystemResource;
+		factory->DiagnosisModule.DiagnosisFileSystem      = DiagnosisFileSystem;
+		factory->DiagnosisModule.DiagnosisNetworking      = DiagnosisNetworking;
+		factory->DiagnosisModule.DiagnosisCheckSoftwareTestIsPass = DiagnosisCheckSoftwareTestIsPass;
 	}
-	if(factory->syslog_i == KonohaFactory_syslog_i) {
-		factory->syslog_i = NULL;
+	if(factory->LoggerModule.syslog_i == KonohaFactory_syslog_i) {
+		factory->LoggerModule.syslog_i = NULL;
 	}
 }
 

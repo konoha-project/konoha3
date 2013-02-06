@@ -43,6 +43,8 @@ extern "C"{
 #define K_PATHMAX 1024
 #endif
 
+#define I18NAPI PLATAPI I18NModule.
+
 #define LogFileName(S)     LogText("filename", S)
 #define LogFile(F) LogText("filename", kFile_textPath(kctx, F))
 #define LogWrittenByte(size)  LogUint("WrittenByteSize", size)
@@ -86,11 +88,11 @@ static void kFile_close(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
 	}
 	file->fp = NULL;
 	if(file->readerIconv != ICONV_NULL) {
-		PLATAPI iconv_close_i(kctx, file->readerIconv);
+		I18NAPI iconv_close_i(kctx, file->readerIconv);
 		file->readerIconv = ICONV_NULL;
 	}
 	if(file->writerIconv != ICONV_NULL) {
-		PLATAPI iconv_close_i(kctx, file->writerIconv);
+		I18NAPI iconv_close_i(kctx, file->writerIconv);
 		file->writerIconv = ICONV_NULL;
 	}
 }
@@ -180,7 +182,7 @@ static KMETHOD File_new(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = I18NAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	const char *mode = kString_text(sfp[2].asString);
 	FILE *fp = fopen(systemPath, mode);
 	kFile *file = (kFile *) sfp[0].asObject;
@@ -195,12 +197,12 @@ static KMETHOD File_new(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	file->fp = fp;
 	KFieldInit(file, file->PathInfoNULL, path);
-	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
+	if(!I18NAPI isSystemCharsetUTF8(kctx)) {
 		if(mode[0] == 'w' || mode[0] == 'a' || mode[1] == '+') {
-			file->writerIconv = PLATAPI iconvUTF8ToSystemCharset(kctx, trace);
+			file->writerIconv = I18NAPI iconvUTF8ToSystemCharset(kctx, trace);
 		}
 		else {
-			file->readerIconv = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
+			file->readerIconv = I18NAPI iconvSystemCharsetToUTF8(kctx, trace);
 		}
 	}
 	KReturn(file);
@@ -413,7 +415,7 @@ static KMETHOD File_SetReaderCharset(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFile   *file = sfp[0].asFile;
 	KMakeTrace(trace, sfp);
-	file->readerIconv = PLATAPI iconv_open_i(kctx, "UTF-8", kString_text(sfp[1].asString), trace);
+	file->readerIconv = I18NAPI iconv_open_i(kctx, "UTF-8", kString_text(sfp[1].asString), trace);
 }
 
 //## void setWriterCharset(String charset);
@@ -421,7 +423,7 @@ static KMETHOD File_SetWriterCharset(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFile   *file = sfp[0].asFile;
 	KMakeTrace(trace, sfp);
-	file->writerIconv = PLATAPI iconv_open_i(kctx, kString_text(sfp[1].asString), "UTF-8", trace);
+	file->writerIconv = I18NAPI iconv_open_i(kctx, kString_text(sfp[1].asString), "UTF-8", trace);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -481,12 +483,12 @@ static kFile* new_File(KonohaContext *kctx, kArray *gcstack, FILE *fp, const cha
 	file->fp = fp;
 	KFieldInit(file, file->PathInfoNULL, KLIB new_kString(kctx, OnField, pathInfo, len, StringPolicy_ASCII|StringPolicy_TEXT));
 	kFile_Set(ChangeLessStream, file, true);
-	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
+	if(!I18NAPI isSystemCharsetUTF8(kctx)) {
 		if(fp == stdin) {
-			file->readerIconv = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
+			file->readerIconv = I18NAPI iconvSystemCharsetToUTF8(kctx, trace);
 		}
 		else {
-			file->writerIconv = PLATAPI iconvUTF8ToSystemCharset(kctx, trace);
+			file->writerIconv = I18NAPI iconvUTF8ToSystemCharset(kctx, trace);
 		}
 	}
 	return file;
