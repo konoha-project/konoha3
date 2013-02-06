@@ -1,6 +1,6 @@
 // written by imasahiro
 import("Type.Float");
-import("Lib.Llvm");
+import("Lib.LLVM");
 
 void f() {
 	Module m = new Module("hello");
