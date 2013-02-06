@@ -969,9 +969,9 @@ static kunused void PosixFactory(KonohaFactory *factory)
 	PlatformApi_loadReadline(factory);
 
 	// logger
-	//factory->syslog_i              = syslog;
-	//factory->vsyslog_i             = vsyslog;
-	//factory->TraceDataLog          = TraceDataLog;
+	//factory->LoggerModule.syslog_i              = syslog;
+	//factory->LoggerModule.vsyslog_i             = vsyslog;
+	//factory->LoggerModule.TraceDataLog          = TraceDataLog;
 	//factory->DiagnosisErrorCode    = DEOS_DiagnosisErrorCode;
 
 	factory->ConsoleModule.ReportDebugMessage    = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;

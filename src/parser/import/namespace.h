@@ -1004,5 +1004,3 @@ static void kNameSpace_UseDefaultVirtualMachine(KonohaContext *kctx, kNameSpace 
 // --------------------------------------------------------------------------
 /* namespace method */
 
-
-
