@@ -32,6 +32,7 @@ extern "C" {
 #include <evhttp.h>
 #include <konoha/konoha.h>
 
+#define EVENTAPI PLATAPI EventModule.
 // -------------------------------------------------------------------------
 /* EventModule, EventContext */
 
@@ -196,10 +197,10 @@ typedef struct {
 
 static void StartEventHandler(KonohaContext *kctx, void *args)
 {
-	KNH_ASSERT(PLATAPI eventContext == NULL);
+	KNH_ASSERT(EVENTAPI eventContext == NULL);
 	struct EventContext *eventContext = (struct EventContext *)PLATAPI malloc_i(sizeof(struct EventContext));
-	((KonohaFactory *)kctx->platApi)->eventContext = eventContext;
-	bzero(((KonohaFactory *)kctx->platApi)->eventContext, sizeof(struct EventContext));
+	bzero(eventContext, sizeof(struct EventContext));
+	((KonohaFactory *)kctx->platApi)->EventModule.eventContext = eventContext;
 
 	eventContext->safePointRef = (int *)&kctx->safepoint;
 
@@ -227,7 +228,7 @@ static void StartEventHandler(KonohaContext *kctx, void *args)
 static void StopEventHandler(KonohaContext *kctx, void *args)
 {
 	KonohaFactory *factory = (KonohaFactory *)kctx->platApi;
-	struct EventContext *eventContext = factory->eventContext;
+	struct EventContext *eventContext = factory->EventModule.eventContext;
 	if(eventContext != NULL) {
 		eventContext->isWaiting = false;
 		pthread_cond_signal(&eventContext->cond);
@@ -237,7 +238,7 @@ static void StopEventHandler(KonohaContext *kctx, void *args)
 		evhttp_free(eventContext->httpd);
 		event_base_free(eventContext->base);
 		PLATAPI free_i(eventContext);
-		factory->eventContext = NULL;
+		factory->EventModule.eventContext = NULL;
 	}
 }
 
@@ -253,7 +254,7 @@ static void ExitEventContext(KonohaContext *kctx, void *args)
 
 static kbool_t EmitEvent(KonohaContext *kctx, struct JsonBuf *json, KTraceInfo *trace)
 {
-	struct EventContext *eventContext = PLATAPI eventContext;
+	struct EventContext *eventContext = EVENTAPI eventContext;
 	kbool_t ret = false;
 	if(eventContext != NULL) {
 		pthread_mutex_lock(&eventContext->lock);
@@ -268,7 +269,7 @@ static kbool_t EmitEvent(KonohaContext *kctx, struct JsonBuf *json, KTraceInfo *
 
 static void DispatchEvent(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo *), KTraceInfo *trace)
 {
-	struct EventContext *eventContext = PLATAPI eventContext;
+	struct EventContext *eventContext = EVENTAPI eventContext;
 	pthread_mutex_lock(&eventContext->lock);
 	RawEvent *rawEvent = dequeueRawEventFromLocalQueue(eventContext->queue);
 	pthread_mutex_unlock(&eventContext->lock);
@@ -282,15 +283,15 @@ static void DispatchEvent(KonohaContext *kctx, kbool_t (*consume)(KonohaContext 
 
 static void WaitEvent(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo *), KTraceInfo *trace)
 {
-	while(PLATAPI eventContext != NULL) { // check this out
-		int safePoint = *(PLATAPI eventContext->safePointRef);
-		*(PLATAPI eventContext->safePointRef) ^= SafePoint_Event;  // FIXME
+	while(EVENTAPI eventContext != NULL) { // check this out
+		int safePoint = *(EVENTAPI eventContext->safePointRef);
+		*(EVENTAPI eventContext->safePointRef) ^= SafePoint_Event;  // FIXME
 		if((safePoint & SafePoint_Event) == SafePoint_Event) {
 			DispatchEvent(kctx, consume, trace);
 		}
-		PLATAPI eventContext->isWaiting = true;
-		pthread_cond_wait(&(PLATAPI eventContext->cond), &(PLATAPI eventContext->lock));
-		if(PLATAPI eventContext->isWaiting == false) break;
+		EVENTAPI eventContext->isWaiting = true;
+		pthread_cond_wait(&(EVENTAPI eventContext->cond), &(EVENTAPI eventContext->lock));
+		if(EVENTAPI eventContext->isWaiting == false) break;
 	}
 }
 
@@ -301,15 +302,15 @@ kbool_t LoadHttpModule(KonohaFactory *factory, ModuleType type)
 	static KModuleInfo ModuleInfo = {
 		"Http", "0.1", 0, "http",
 	};
-	factory->EventInfo         = &ModuleInfo;
-	factory->eventContext      = NULL;
-	factory->StartEventHandler = StartEventHandler;
-	factory->StopEventHandler  = StopEventHandler;
-	factory->EnterEventContext = EnterEventContext;
-	factory->ExitEventContext  = ExitEventContext;
-	factory->EmitEvent         = EmitEvent;
-	factory->DispatchEvent     = DispatchEvent;
-	factory->WaitEvent         = WaitEvent;
+	factory->EventModule.EventInfo         = &ModuleInfo;
+	factory->EventModule.eventContext      = NULL;
+	factory->EventModule.StartEventHandler = StartEventHandler;
+	factory->EventModule.StopEventHandler  = StopEventHandler;
+	factory->EventModule.EnterEventContext = EnterEventContext;
+	factory->EventModule.ExitEventContext  = ExitEventContext;
+	factory->EventModule.EmitEvent         = EmitEvent;
+	factory->EventModule.DispatchEvent     = DispatchEvent;
+	factory->EventModule.WaitEvent         = WaitEvent;
 	return true;
 }
 

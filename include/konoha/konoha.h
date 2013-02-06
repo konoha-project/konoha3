@@ -584,6 +584,20 @@ typedef struct kNodeVar                 kNodeVar;
 #define kNodeNULL  kNode
 #define kNameSpaceNULL kNameSpace
 
+#define KMETHOD    void  /*CC_FASTCALL_*/
+typedef KMETHOD   (*KMethodFunc)(KonohaContext*, struct KonohaValueVar *);
+
+struct ExecutionEngineModule {
+	const KModuleInfo          *ExecutionEngineInfo;
+	void                      (*DeleteExecutionEngine)(KonohaContext *kctx);
+	const struct KBuilderAPI *(*GetDefaultBuilderAPI)(void);
+	struct KVirtualCode      *(*GetDefaultBootCode)(void);
+	struct KVirtualCode      *(*GenerateVirtualCode)(KonohaContext *, kMethod *mtd, kNode *block, int option);
+	KMethodFunc               (*GenerateMethodFunc)(KonohaContext *, struct KVirtualCode *);
+	void                      (*SetMethodCode)(KonohaContext *, kMethodVar *mtd, struct KVirtualCode *, KMethodFunc func);
+	struct KVirtualCode     *(*RunExecutionEngine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
+};
+
 struct KonohaFactory {
 	// settings
 	const char  *name;
@@ -725,15 +739,8 @@ struct KonohaFactory {
 		const char* (*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
 	} I18NModule;
 
-	/* CodeGenerator & VirtualMachine */
-	KModuleInfo  *CodeGeneratorInfo;
-	void*       (*GetCodeGenerateMethodFunc)(void);
-	void*       (*GenerateCode)(KonohaContext *kctx, kMethod *mtd, kNode *bk, int options);
-
-	KModuleInfo  *VirtualMachineInfo;
-	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
-	struct KVirtualCode*  (*GetDefaultBootCode)(void);
-	struct KBuilderAPI*   (*GetDefaultBuilderAPI)(void);
+	/* ExecutionEngine */
+	struct ExecutionEngineModule ExecutionEngineModule;
 
 	/* JSON_API */
 	struct JsonModule {
@@ -1474,9 +1481,6 @@ static const char* MethodFlagData[] = {
 /* method data */
 #define DEND     (-1)
 
-#define KMETHOD    void  /*CC_FASTCALL_*/
-typedef KMETHOD   (*KMethodFunc)(KonohaContext*, KonohaStack *);
-
 struct KVirtualCodeAPI {
 	void (*FreeVirtualCode)(KonohaContext *kctx, struct KVirtualCode *);
 	void (*WriteVirtualCode)(KonohaContext *kctx, KBuffer *, struct KVirtualCode *);
@@ -1582,7 +1586,7 @@ struct kNameSpaceVar {
 	// the below references are defined in sugar
 	void                              *tokenMatrix;
 //	KHashMap                          *syntaxMapNN;
-	struct KBuilderAPI                *builderApi;
+	const struct KBuilderAPI          *builderApi;
 	KKeyValue                         *typeVariableItems;
 	size_t                             typesize;
 	struct KGammaLocalData            *genv;

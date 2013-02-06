@@ -1,8 +1,8 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include "../../../include/konoha/konoha.h"
-#include "../../../include/konoha/konoha_common.h"
-#include "../../../include/konoha/sugar.h"
+#include "../../../../include/konoha/konoha.h"
+#include "../../../../include/konoha/konoha_common.h"
+#include "../../../../include/konoha/sugar.h"
 
 #ifndef VMCOMMON_H
 #define VMCOMMON_H

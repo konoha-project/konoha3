@@ -263,7 +263,7 @@ static void TraceDataLog(KonohaContext *kctx, KTraceInfo *trace, int logkey, log
 	va_start(ap, logconf);
 	writeDataLogToBuffer(kctx, logconf, ap, buf, buf + (K_PAGESIZE - 4), trace);
 	int level = (logconf->policy & HasFault) ? LOG_ERR : LOG_NOTICE;
-	PLATAPI syslog_i(level, "%s", buf);
+	PLATAPI LoggerModule.syslog_i(level, "%s", buf);
 	if(PLATAPI verbose || KonohaContext_Is(Interactive, kctx)) {
 		PLATAPI printf_i("SYSLOG %s\n", buf);
 	}
@@ -277,10 +277,10 @@ kbool_t LoadSyslogModule(KonohaFactory *factory, ModuleType type)
 	static KModuleInfo ModuleInfo = {
 		"Syslog", "0.1", 0, "syslog",
 	};
-	factory->LoggerInfo            = &ModuleInfo;
-	factory->syslog_i              = syslog;
-	factory->vsyslog_i             = vsyslog;
-	factory->TraceDataLog          = TraceDataLog;
+	factory->LoggerModule.LoggerInfo   = &ModuleInfo;
+	factory->LoggerModule.syslog_i     = syslog;
+	factory->LoggerModule.vsyslog_i    = vsyslog;
+	factory->LoggerModule.TraceDataLog = TraceDataLog;
 	return true;
 }
 

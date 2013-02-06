@@ -179,22 +179,20 @@ kbool_t LoadOutputTestModule(KonohaFactory *factory, ModuleType type)
 	static KModuleInfo ModuleInfo = {
 		"OutputTest", "0.1", 0, "test",
 	};
-	factory->ConsoleInfo     = &ModuleInfo;
-
 	factory->BEFORE_LoadScript = BEFORE_LoadScript;
 	factory->AFTER_LoadScript  = AFTER_LoadScript;
 
 	factory->printf_i               = TEST_printf;
 	factory->vprintf_i              = TEST_vprintf;
 
-	factory->ConsoleModuel.ReportDebugMessage     = NOP_ReportDebugMessage;
-	factory->ConsoleModuel.ReportUserMessage      = TEST_ReportUserMessage;
-	factory->ConsoleModuel.ReportCompilerMessage  = TEST_ReportCompilerMessage;
-	factory->ConsoleModuel.ReportCaughtException  = TEST_reportCaughtException;
-
-	factory->InputUserApproval        = TEST_InputUserApproval;
-	factory->InputUserText            = TEST_InputUserText;
-	factory->InputUserPassword        = TEST_InputUserPassword;
+	factory->ConsoleModule.ConsoleInfo     = &ModuleInfo;
+	factory->ConsoleModule.ReportDebugMessage     = NOP_ReportDebugMessage;
+	factory->ConsoleModule.ReportUserMessage      = TEST_ReportUserMessage;
+	factory->ConsoleModule.ReportCompilerMessage  = TEST_ReportCompilerMessage;
+	factory->ConsoleModule.ReportCaughtException  = TEST_reportCaughtException;
+	factory->ConsoleModule.InputUserApproval        = TEST_InputUserApproval;
+	factory->ConsoleModule.InputUserText            = TEST_InputUserText;
+	factory->ConsoleModule.InputUserPassword        = TEST_InputUserPassword;
 
 	return true;
 }

@@ -152,7 +152,7 @@ static void ShowVersion(KonohaContext *kctx)
 	PLATAPI printf_i("[clang %s]\n", __VERSION__);
 #endif
 	PLATAPI printf_i("modules:");
-	ShowModule(kctx, PLATAPI VirtualMachineInfo);
+	ShowModule(kctx, PLATAPI ExecutionEngineModule.ExecutionEngineInfo);
 	ShowModule(kctx, PLATAPI GCModule.GCInfo);
 	ShowModule(kctx, PLATAPI ConsoleModule.ConsoleInfo);
 	ShowModule(kctx, PLATAPI EventModule.EventInfo);

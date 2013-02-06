@@ -863,10 +863,6 @@ static void InitStaticBuilderApi(struct KBuilderAPI *builderApi)
 #define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME##Node = FuelVM_Visit##NAME##Node;
 	KNodeList(DEFINE_BUILDER_API);
 #undef DEFINE_BUILDER_API
-	builderApi->GenerateVirtualCode = FuelVM_GenerateVirtualCode;
-	builderApi->GenerateMethodFunc  = FuelVM_GenerateMethodFunc;
-	builderApi->SetMethodCode        = FuelVM_SetMethodCode;
-	builderApi->RunVirtualMachine    = FuelVM_Run;
 }
 
 static struct KBuilderAPI *GetDefaultBuilderAPI(void)
@@ -878,7 +874,7 @@ static struct KBuilderAPI *GetDefaultBuilderAPI(void)
 	return &builderApi;
 }
 
-static void FuelVMDeleteVirtualMachine(KonohaContext *kctx)
+static void FuelVM_DeleteVirtualMachine(KonohaContext *kctx)
 {
 #ifdef FUELVM_USE_LLVM
 	extern void ExitLLVM();
@@ -893,10 +889,17 @@ kbool_t LoadFuelVMModule(KonohaFactory *factory, ModuleType type)
 	static KModuleInfo ModuleInfo = {
 		"FuelVM", K_VERSION, 0, "FuelVM",
 	};
-	factory->VirtualMachineInfo   = &ModuleInfo;
-	factory->GetDefaultBootCode   = GetDefaultBootCode;
-	factory->GetDefaultBuilderAPI = GetDefaultBuilderAPI;
-	factory->DeleteVirtualMachine = FuelVMDeleteVirtualMachine;
+	static const struct ExecutionEngineModule Mod = {
+		&ModuleInfo,
+		FuelVM_DeleteVirtualMachine,
+		GetDefaultBuilderAPI,
+		GetDefaultBootCode,
+		FuelVM_GenerateVirtualCode,
+		FuelVM_GenerateMethodFunc,
+		FuelVM_SetMethodCode,
+		FuelVM_Run
+	};
+	memcpy(&factory->ExecutionEngineModule, &Mod, sizeof(Mod));
 	return true;
 }
 

@@ -29,7 +29,7 @@ extern "C" {
 #include <stdio.h>
 #include <signal.h>
 #include <konoha/konoha.h>
-
+#define EVENTAPI PLATAPI EventModule.
 // -------------------------------------------------------------------------
 /* EventModule, EventContext */
 
@@ -146,7 +146,7 @@ static void signal_handler(int signum, siginfo_t *siginfo, void *context)
 {
 	KonohaContext* kctx = signalContext;
 	if(kctx != NULL) {
-		struct EventContext *eventContext = PLATAPI eventContext;
+		struct EventContext *eventContext = EVENTAPI eventContext;
 		eventContext->caughtSignal = 1;
 		if(eventContext->siginfo[signum] != NULL) {
 			// overriding unconsumed signal
@@ -181,7 +181,7 @@ static void ResetSigAction(KonohaContext *kctx, int signo, struct sigaction *act
 
 static void SetSignal(KonohaContext *kctx)
 {
-	struct EventContext *eventContext = PLATAPI eventContext;
+	struct EventContext *eventContext = EVENTAPI eventContext;
 	struct sigaction act = {};
 
 	KSetSignal(SIGHUP, 0);
@@ -220,7 +220,7 @@ static void SetSignal(KonohaContext *kctx)
 
 static void ResetSignal(KonohaContext *kctx)
 {
-	struct EventContext *eventContext = PLATAPI eventContext;
+	struct EventContext *eventContext = EVENTAPI eventContext;
 	struct sigaction act = {};
 
 	KResetSignal(SIGHUP);
@@ -278,10 +278,10 @@ static void AddSignalEvent(KonohaContext *kctx, struct EventContext *eventContex
 
 static void StartEventHandler(KonohaContext *kctx, void *args)
 {
-	KNH_ASSERT(PLATAPI eventContext == NULL);
+	KNH_ASSERT(EVENTAPI eventContext == NULL);
 	struct EventContext *eventContext = (struct EventContext *)PLATAPI malloc_i(sizeof(struct EventContext));
-	((KonohaFactory *)kctx->platApi)->eventContext = eventContext;
-	bzero(((KonohaFactory *)kctx->platApi)->eventContext, sizeof(struct EventContext));
+	bzero(eventContext, sizeof(struct EventContext));
+	((KonohaFactory *)kctx->platApi)->EventModule.eventContext = eventContext;
 	eventContext->queue = (LocalQueue *)PLATAPI malloc_i(sizeof(LocalQueue));
 	LocalQueue_Init(kctx, eventContext->queue);
 	SetSignal(kctx);
@@ -290,7 +290,7 @@ static void StartEventHandler(KonohaContext *kctx, void *args)
 static void StopEventHandler(KonohaContext *kctx, void *args)
 {
 	ResetSignal(kctx);
-	struct EventContext *eventContext = ((KonohaFactory *)kctx->platApi)->eventContext;
+	struct EventContext *eventContext = ((KonohaFactory *)kctx->platApi)->EventModule.eventContext;
 	LocalQueue_Free(kctx, eventContext->queue);
 	PLATAPI free_i(eventContext);
 }
@@ -307,7 +307,7 @@ static void ExitEventContext(KonohaContext *kctx, void *args)
 
 static kbool_t EmitEvent(KonohaContext *kctx, struct JsonBuf *json, KTraceInfo *trace)
 {
-	struct EventContext *eventContext = PLATAPI eventContext;
+	struct EventContext *eventContext = EVENTAPI eventContext;
 	kbool_t ret = false;
 	if(eventContext != NULL) {
 		ret = enqueueRawEventToLocalQueue(eventContext->queue, (RawEvent *)json);
@@ -320,7 +320,7 @@ static kbool_t EmitEvent(KonohaContext *kctx, struct JsonBuf *json, KTraceInfo *
 
 static void DispatchEvent(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo *), KTraceInfo *trace)
 {
-	struct EventContext *eventContext = PLATAPI eventContext;
+	struct EventContext *eventContext = EVENTAPI eventContext;
 	if(eventContext->caughtSignal != 0) {
 		eventContext->caughtSignal = 0;
 		AddSignalEvent(kctx, eventContext, trace);
@@ -341,18 +341,18 @@ static void WaitEvent(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kct
 	sigaddset(&ss, SIGINT);
 //	sigprocmask(SIG_BLOCK, &ss, NULL); // check this out
 
-	while(PLATAPI eventContext != NULL) {
-		int safePoint = *(PLATAPI eventContext->safePointRef);
-		*(PLATAPI eventContext->safePointRef) ^= SafePoint_Event;  // FIXME
+	while(EVENTAPI eventContext != NULL) {
+		int safePoint = *(EVENTAPI eventContext->safePointRef);
+		*(EVENTAPI eventContext->safePointRef) ^= SafePoint_Event;  // FIXME
 		if((safePoint & SafePoint_Event) == SafePoint_Event) {
 			DispatchEvent(kctx, consume, trace);
 		}
-		PLATAPI eventContext->isWaiting = true;
+		EVENTAPI eventContext->isWaiting = true;
 		sigwait(&ss, &signo);
 		if(signo == SIGINT) break;
 	}
-	if(PLATAPI eventContext != NULL) {
-		PLATAPI eventContext->isWaiting = false;
+	if(EVENTAPI eventContext != NULL) {
+		EVENTAPI eventContext->isWaiting = false;
 	}
 }
 
@@ -364,15 +364,15 @@ kbool_t LoadSignalModule(KonohaFactory *factory, ModuleType type)
 	static KModuleInfo ModuleInfo = {
 		"Signal", "0.1", 0, "signal",
 	};
-	factory->EventInfo            = &ModuleInfo;
-	factory->eventContext = NULL;
-	factory->StartEventHandler = StartEventHandler;
-	factory->StopEventHandler  = StopEventHandler;
-	factory->EnterEventContext = EnterEventContext;
-	factory->ExitEventContext  = ExitEventContext;
-	factory->EmitEvent         = EmitEvent;
-	factory->DispatchEvent     = DispatchEvent;
-	factory->WaitEvent         = WaitEvent;
+	factory->EventModule.EventInfo            = &ModuleInfo;
+	factory->EventModule.eventContext = NULL;
+	factory->EventModule.StartEventHandler = StartEventHandler;
+	factory->EventModule.StopEventHandler  = StopEventHandler;
+	factory->EventModule.EnterEventContext = EnterEventContext;
+	factory->EventModule.ExitEventContext  = ExitEventContext;
+	factory->EventModule.EmitEvent         = EmitEvent;
+	factory->EventModule.DispatchEvent     = DispatchEvent;
+	factory->EventModule.WaitEvent         = WaitEvent;
 	return true;
 }
 

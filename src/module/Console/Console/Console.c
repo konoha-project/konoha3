@@ -265,21 +265,21 @@ kbool_t LoadConsoleModule(KonohaFactory *factory, ModuleType type)
 	static KModuleInfo ModuleInfo = {
 		"Console", "0.1", 0, "term",
 	};
-	factory->ConsoleInfo     = &ModuleInfo;
+	factory->ConsoleModule.ConsoleInfo     = &ModuleInfo;
 	if(factory->readline_i == NULL) {
 		factory->readline_i = myreadline;
 	}
 	if(factory->add_history_i == NULL) {
 		factory->add_history_i = myadd_history;
 	}
-	factory->ConsoleModuel.ReportUserMessage        = UI_ReportUserMessage;
-	factory->ConsoleModuel.ReportCompilerMessage    = UI_ReportCompilerMessage;
-	factory->ConsoleModuel.ReportCaughtException    = UI_ReportCaughtException;
-	factory->ConsoleModuel.ReportDebugMessage       = ReportDebugMessage;
+	factory->ConsoleModule.ReportUserMessage        = UI_ReportUserMessage;
+	factory->ConsoleModule.ReportCompilerMessage    = UI_ReportCompilerMessage;
+	factory->ConsoleModule.ReportCaughtException    = UI_ReportCaughtException;
+	factory->ConsoleModule.ReportDebugMessage       = ReportDebugMessage;
 
-	factory->ConsoleModuel.InputUserApproval        = InputUserApproval;
-	factory->ConsoleModuel.InputUserText            = InputUserText;
-	factory->ConsoleModuel.InputUserPassword        = InputUserPassword;
+	factory->ConsoleModule.InputUserApproval        = InputUserApproval;
+	factory->ConsoleModule.InputUserText            = InputUserText;
+	factory->ConsoleModule.InputUserPassword        = InputUserPassword;
 	return true;
 }
 

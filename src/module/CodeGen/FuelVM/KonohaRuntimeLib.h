@@ -10,7 +10,7 @@ void FuelVM_KRuntime_raise(KonohaContext *kctx, int symbol, int fault, kString *
 
 void FuelVM_UpdateObjectField(KonohaContext *kctx, struct kObjectVar *parent, struct kObjectVar *oldPtr, struct kObjectVar *newVal)
 {
-	PLATAPI UpdateObjectField(parent, oldPtr, newVal);
+	PLATAPI GCModule.UpdateObjectField(parent, oldPtr, newVal);
 }
 
 kObject *FuelVM_new_kObject(KonohaContext *kctx, kArray *gcstack, KClass *ct, uintptr_t conf)

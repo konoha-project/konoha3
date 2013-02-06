@@ -28,7 +28,7 @@ extern "C" {
 
 #include "kjson/kjson.c"
 #include <konoha/konoha.h>
-
+#define JSONAPI PLATAPI JsonModule.
 // -------------------------------------------------------------------------
 /* JSON Parse/ToString API */
 
@@ -77,14 +77,14 @@ static struct JsonBuf *CreateJson(KonohaContext *kctx, struct JsonBuf *jsonbuf, 
 {
 	va_list ap;
 	va_start(ap, type);
-	jsonbuf->json_i = NewJsonI((JSONMemoryPool *)(PLATAPI JsonHandler), type, ap);
+	jsonbuf->json_i = NewJsonI((JSONMemoryPool *)(JSONAPI JsonHandler), type, ap);
 	va_end(ap);
 	return jsonbuf;
 }
 
 static kbool_t ParseJson(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *text, size_t length, KTraceInfo *trace)
 {
-	JSON json = parseJSON((JSONMemoryPool *)(PLATAPI JsonHandler), text, text + length);
+	JSON json = parseJSON((JSONMemoryPool *)(JSONAPI JsonHandler), text, text + length);
 	if(IsError(json.val)) {
 		KLIB KRuntime_raise(kctx, KException_("InvalidJsonText"), SoftwareFault, NULL, trace->baseStack);
 	}
@@ -138,7 +138,7 @@ static kbool_t SetJsonKeyValue(KonohaContext *kctx, struct JsonBuf *jsonbuf, con
 		return false;
 	}
 	size_t keylen = KeyLen(key, keylen_or_zero);
-	JSONObject_set((JSONMemoryPool *)(PLATAPI JsonHandler), json, key, keylen, AsJSON(otherbuf));
+	JSONObject_set((JSONMemoryPool *)(JSONAPI JsonHandler), json, key, keylen, AsJSON(otherbuf));
 	return true;
 }
 
@@ -146,11 +146,11 @@ static kbool_t SetJsonValue(KonohaContext *kctx, struct JsonBuf *jsonbuf, const 
 {
 	va_list ap;
 	va_start(ap, type);
-	JSON val = toJSON(NewJsonI((JSONMemoryPool *)(PLATAPI JsonHandler), type, ap));
+	JSON val = toJSON(NewJsonI((JSONMemoryPool *)(JSONAPI JsonHandler), type, ap));
 	kbool_t ret = true;
 	if(key != NULL) {
 		size_t keylen = KeyLen(key, keylen_or_zero);
-		JSONObject_set((JSONMemoryPool *)(PLATAPI JsonHandler), AsJSON(jsonbuf), key, keylen, val);
+		JSONObject_set((JSONMemoryPool *)(JSONAPI JsonHandler), AsJSON(jsonbuf), key, keylen, val);
 	}
 	else {
 		jsonbuf->json_i = val.bits;
@@ -230,7 +230,7 @@ static kbool_t AppendJsonArray(KonohaContext *kctx, struct JsonBuf *jsonbuf, str
 {
 	JSON json = AsJSON(jsonbuf);
 	if(JSON_TYPE_CHECK(Array, json)) {
-		JSONArray_append((JSONMemoryPool *)(PLATAPI JsonHandler), json, toJSON(otherbuf->json_i));
+		JSONArray_append((JSONMemoryPool *)(JSONAPI JsonHandler), json, toJSON(otherbuf->json_i));
 		return true;
 	}
 	return false;
@@ -242,12 +242,12 @@ static void InitJsonContext(KonohaContext *kctx)
 	JSONMemoryPool *mp = (JSONMemoryPool *) malloc(sizeof(JSONMemoryPool));
 	JSONMemoryPool_Init(mp);
 	KonohaFactory *factory = (KonohaFactory *) kctx->platApi;
-	factory->JsonHandler = (void *) mp;
+	factory->JsonModule.JsonHandler = (void *) mp;
 }
 
 static void DeleteJsonContext(KonohaContext *kctx)
 {
-	JSONMemoryPool *mp = (JSONMemoryPool *)(PLATAPI JsonHandler);
+	JSONMemoryPool *mp = (JSONMemoryPool *)(JSONAPI JsonHandler);
 	JSONMemoryPool_Delete(mp);
 	free(mp);
 }
@@ -257,27 +257,27 @@ kbool_t LoadJsonModule(KonohaFactory *factory, ModuleType type)
 	static KModuleInfo ModuleInfo = {
 		"Json", "0.1", 0, "json",
 	};
-	factory->JsonDataInfo         = &ModuleInfo;
-	factory->IsJsonType           = IsJsonType;
-	factory->InitJsonContext      = InitJsonContext;
-	factory->DeleteJsonContext    = DeleteJsonContext;
-	factory->CreateJson           = CreateJson;
-	factory->ParseJson            = ParseJson;
-	factory->FreeJson             = FreeJson;
-	factory->JsonToNewText        = JsonToNewText;
-	factory->DoJsonEach           = DoJsonEach;
-	factory->RetrieveJsonKeyValue = RetrieveJsonKeyValue;
-	factory->SetJsonKeyValue      = SetJsonKeyValue;
-	factory->SetJsonValue         = SetJsonValue;
-	factory->GetJsonBoolean       = GetJsonBoolean;
-	factory->GetJsonInt           = GetJsonInt;
-	factory->GetJsonFloat         = GetJsonFloat;
-	factory->GetJsonText          = GetJsonText;
-	factory->GetJsonSize          = GetJsonSize;
-	factory->RetrieveJsonArrayAt  = RetrieveJsonArrayAt;
-	factory->SetJsonArrayAt       = SetJsonArrayAt;
-	factory->AppendJsonArray      = AppendJsonArray;
-	factory->JsonHandler          = NULL;
+	factory->JsonModule.JsonDataInfo         = &ModuleInfo;
+	factory->JsonModule.IsJsonType           = IsJsonType;
+	factory->JsonModule.InitJsonContext      = InitJsonContext;
+	factory->JsonModule.DeleteJsonContext    = DeleteJsonContext;
+	factory->JsonModule.CreateJson           = CreateJson;
+	factory->JsonModule.ParseJson            = ParseJson;
+	factory->JsonModule.FreeJson             = FreeJson;
+	factory->JsonModule.JsonToNewText        = JsonToNewText;
+	factory->JsonModule.DoJsonEach           = DoJsonEach;
+	factory->JsonModule.RetrieveJsonKeyValue = RetrieveJsonKeyValue;
+	factory->JsonModule.SetJsonKeyValue      = SetJsonKeyValue;
+	factory->JsonModule.SetJsonValue         = SetJsonValue;
+	factory->JsonModule.GetJsonBoolean       = GetJsonBoolean;
+	factory->JsonModule.GetJsonInt           = GetJsonInt;
+	factory->JsonModule.GetJsonFloat         = GetJsonFloat;
+	factory->JsonModule.GetJsonText          = GetJsonText;
+	factory->JsonModule.GetJsonSize          = GetJsonSize;
+	factory->JsonModule.RetrieveJsonArrayAt  = RetrieveJsonArrayAt;
+	factory->JsonModule.SetJsonArrayAt       = SetJsonArrayAt;
+	factory->JsonModule.AppendJsonArray      = AppendJsonArray;
+	factory->JsonModule.JsonHandler          = NULL;
 	return true;
 }
 

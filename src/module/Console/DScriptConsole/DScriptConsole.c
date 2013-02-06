@@ -78,7 +78,7 @@ static void UI_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfilelin
 	const char *file = PLATAPI shortFilePath(getThisFileName(kctx));
 	char cid[64] = {0};
 	file2CId(file, cid);
-	PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptMessage\", \"CId\": \"%s\", \"Body\": \"%s\"}" , cid, msg);
+	PLATAPI LoggerModule.syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptMessage\", \"CId\": \"%s\", \"Body\": \"%s\"}" , cid, msg);
 }
 
 static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t pline, const char *msg)
@@ -86,7 +86,7 @@ static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, k
 	const char *file = PLATAPI shortFilePath(getThisFileName(kctx));
 	char cid[64] = {0};
 	file2CId(file, cid);
-	PLATAPI syslog_i( 5/*LOG_NOTICE*/, "{\"Method\": \"DScriptCompilerMessage\", \"CId\": \"%s\", \"Body\": \"%s\"}", cid, msg);
+	PLATAPI LoggerModule.syslog_i( 5/*LOG_NOTICE*/, "{\"Method\": \"DScriptCompilerMessage\", \"CId\": \"%s\", \"Body\": \"%s\"}", cid, msg);
 }
 
 //static void KBuffer_WriteValue(KonohaContext *kctx, KBuffer *wb, KClass *c, KonohaStack *sfp)
@@ -144,7 +144,7 @@ static char *getUserInput(KonohaContext *kctx, char *buff, const char *cid, cons
 	struct event_base *base = event_base_new();
 	struct evhttp *httpd = evhttp_new(base);
 	if(evhttp_bind_socket(httpd, host, port) < 0) {
-		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptError\", \"CId\": \"%s\", \"Body\": \"couldn't bind socket\"}", cid);
+		PLATAPI LoggerModule.syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptError\", \"CId\": \"%s\", \"Body\": \"couldn't bind socket\"}", cid);
 		exit(1);
 	}
 
@@ -189,7 +189,7 @@ static int InputUserApproval(KonohaContext *kctx, const char *message, const cha
 	const char host[] = "127.0.0.1"; // TODO get localhost IP
 	int port = 8090; // TODO random port scan
 
-	PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptApproval\", \"CId\": \"%s\", \"Body\": \"%s (%s %s, %s %s): \", \"Ip\": \"%s:%d\"}" , cid, message, yes, ykey, no, nkey, host, port);
+	PLATAPI LoggerModule.syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptApproval\", \"CId\": \"%s\", \"Body\": \"%s (%s %s, %s %s): \", \"Ip\": \"%s:%d\"}" , cid, message, yes, ykey, no, nkey, host, port);
 	getUserInput(kctx, buff, cid, host, port);
 	if(defval) {
 		return ((buff[0] == 'N' || buff[0] == 'n') && buff[1] == 0) ? false : true;
@@ -229,7 +229,7 @@ static char* InputUserPassword(KonohaContext *kctx, const char *message)
 	const char host[] = "127.0.0.1"; // TODO get localhost IP
 	int port = 8090; // TODO random port scan
 
-	PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptPassword\", \"CId\": \"%s\", \"Body\": \"%s\", \"Ip\": \"%s:%d\"}" , cid, message, host, port);
+	PLATAPI LoggerModule.syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptPassword\", \"CId\": \"%s\", \"Body\": \"%s\", \"Ip\": \"%s:%d\"}" , cid, message, host, port);
 	getUserInput(kctx, buff, cid, host, port);
 	size_t len = strlen(buff) + 1;
 	char *p = malloc(len);
@@ -474,7 +474,7 @@ static void TraceDataLog(KonohaContext *kctx, KTraceInfo *trace, int logkey, log
 	const char *file = PLATAPI shortFilePath(getThisFileName(kctx));
 	char cid[64] = {0};
 	file2CId(file, cid);
-	PLATAPI syslog_i(level, "{\"Method\": \"DScriptError\", \"CId\": \"%s\", \"Body\": %s}", cid, buf);
+	PLATAPI LoggerModule.syslog_i(level, "{\"Method\": \"DScriptError\", \"CId\": \"%s\", \"Body\": %s}", cid, buf);
 	va_end(ap);
 }
 
@@ -485,16 +485,15 @@ kbool_t LoadDScriptConsoleModule(KonohaFactory *factory, ModuleType type)
 	static KModuleInfo ModuleInfo = {
 		"DScriptConsole", "0.1", 0, "dscript",
 	};
-	factory->ConsoleInfo     = &ModuleInfo;
-
-	factory->ConsoleModuel.ReportUserMessage        = UI_ReportUserMessage;
-	factory->ConsoleModuel.ReportCompilerMessage    = UI_ReportCompilerMessage;
-	factory->ConsoleModuel.ReportCaughtException    = UI_ReportCaughtException;
-	factory->ConsoleModuel.ReportDebugMessage       = ReportDebugMessage;
-	factory->ConsoleModuel.InputUserApproval        = InputUserApproval;
-	factory->ConsoleModuel.InputUserText            = InputUserText;
-	factory->ConsoleModuel.InputUserPassword        = InputUserPassword;
-	factory->TraceDataLog             = TraceDataLog;
+	factory->ConsoleModule.ConsoleInfo     = &ModuleInfo;
+	factory->ConsoleModule.ReportUserMessage        = UI_ReportUserMessage;
+	factory->ConsoleModule.ReportCompilerMessage    = UI_ReportCompilerMessage;
+	factory->ConsoleModule.ReportCaughtException    = UI_ReportCaughtException;
+	factory->ConsoleModule.ReportDebugMessage       = ReportDebugMessage;
+	factory->ConsoleModule.InputUserApproval        = InputUserApproval;
+	factory->ConsoleModule.InputUserText            = InputUserText;
+	factory->ConsoleModule.InputUserPassword        = InputUserPassword;
+	factory->LoggerModule.TraceDataLog              = TraceDataLog;
 	return true;
 }
 

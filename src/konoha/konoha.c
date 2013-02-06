@@ -192,7 +192,7 @@ static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 	}
 	KRuntimeContext_Free(kctx, ctx);
 	if(IS_RootKonohaContext(ctx)){  // share
-		PLATAPI DeleteVirtualMachine(ctx);
+		PLATAPI ExecutionEngineModule.DeleteExecutionEngine(ctx);
 		KonohaLibVar *kklib = (KonohaLibVar *)ctx - 1;
 		for(i = 0; i < KRuntimeModule_MAXSIZE; i++) {
 			KRuntimeModule *p = ctx->modshare[i];
@@ -339,7 +339,7 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 		factory->LoggerModule.TraceDataLog = DefaultTraceLog;  // for safety
 		factory->LoggerModule.syslog_i     = KonohaFactory_syslog_i;
 	}
-	if(factory->VirtualMachineInfo == NULL) {
+	if(factory->ExecutionEngineModule.ExecutionEngineInfo == NULL) {
 		const char *mod = factory->getenv_i("KONOHA_VM");
 		if(mod == NULL) mod = "MiniVM";
 		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);

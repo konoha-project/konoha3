@@ -29,7 +29,7 @@ extern "C" {
 #include <iconv.h>
 #include <errno.h>
 #include <konoha/konoha.h>
-
+#define I18NAPI PLATAPI I18NModule.
 // -------------------------------------------------------------------------
 /* I18N */
 
@@ -66,31 +66,31 @@ static int I18N_iconv_close(KonohaContext *kctx, uintptr_t ic)
 
 static kbool_t I18N_isSystemCharsetUTF8(KonohaContext *kctx)
 {
-	const char *t = PLATAPI systemCharset;
+	const char *t = I18NAPI systemCharset;
 	return (t[0] == 'U' && t[5] == 0 && t[4] == '8' && t[3] == '-' && t[2] == 'F'); // "UTF-8"
 }
 
 static uintptr_t I18N_iconvSystemCharsetToUTF8(KonohaContext *kctx, KTraceInfo *trace)
 {
-	return PLATAPI iconv_open_i(kctx, "UTF-8", PLATAPI systemCharset, trace);
+	return I18NAPI iconv_open_i(kctx, "UTF-8", I18NAPI systemCharset, trace);
 }
 
 static uintptr_t I18N_iconvUTF8ToSystemCharset(KonohaContext *kctx, KTraceInfo *trace)
 {
-	return PLATAPI iconv_open_i(kctx, PLATAPI systemCharset, "UTF-8", trace);
+	return I18NAPI iconv_open_i(kctx, I18NAPI systemCharset, "UTF-8", trace);
 }
 
 static const char *I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
 {
 	size_t newsize;
-	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
-		uintptr_t ic = PLATAPI iconvUTF8ToSystemCharset(kctx, trace);
+	if(!I18NAPI isSystemCharsetUTF8(kctx)) {
+		uintptr_t ic = I18NAPI iconvUTF8ToSystemCharset(kctx, trace);
 		int isTooBig;
 		ICONV_INBUF_CONST char *presentPtrFrom = (ICONV_INBUF_CONST char *)path;	// too dirty?
 		ICONV_INBUF_CONST char **inbuf = &presentPtrFrom;
 		char **outbuf = &buf;
 		size_t inBytesLeft = pathsize, outBytesLeft = bufsiz - 1;
-		PLATAPI iconv_i(kctx, ic, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
+		I18NAPI iconv_i(kctx, ic, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
 		newsize = (bufsiz - 1) - outBytesLeft;
 	}
 	else {
@@ -105,14 +105,14 @@ static const char *I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t 
 static const char *I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
 {
 	size_t newsize;
-	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
-		uintptr_t ic = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
+	if(!I18NAPI isSystemCharsetUTF8(kctx)) {
+		uintptr_t ic = I18NAPI iconvSystemCharsetToUTF8(kctx, trace);
 		int isTooBig;
 		ICONV_INBUF_CONST char *presentPtrFrom = (ICONV_INBUF_CONST char *)path;	// too dirty?
 		ICONV_INBUF_CONST char **inbuf = &presentPtrFrom;
 		char **outbuf = &buf;
 		size_t inBytesLeft = pathsize, outBytesLeft = bufsiz - 1;
-		PLATAPI iconv_i(kctx, ic, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
+		I18NAPI iconv_i(kctx, ic, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
 		newsize = (bufsiz - 1) - outBytesLeft;
 	}
 	else {
@@ -131,16 +131,16 @@ kbool_t LoadIConvModule(KonohaFactory *factory, ModuleType type)
 	static KModuleInfo ModuleInfo = {
 		"IConv", "0.1", 0, "iconv",
 	};
-	factory->I18NInfo            = &ModuleInfo;
-	factory->systemCharset            = "UTF-8";
-	factory->iconv_open_i             = I18N_iconv_open;
-	factory->iconv_i                  = I18N_iconv;
-	factory->iconv_close_i            = I18N_iconv_close;
-	factory->isSystemCharsetUTF8      = I18N_isSystemCharsetUTF8;
-	factory->iconvSystemCharsetToUTF8 = I18N_iconvSystemCharsetToUTF8;
-	factory->iconvUTF8ToSystemCharset = I18N_iconvUTF8ToSystemCharset;
-	factory->formatKonohaPath         = I18N_formatKonohaPath;
-	factory->formatSystemPath         = I18N_formatSystemPath;
+	factory->I18NModule.I18NInfo            = &ModuleInfo;
+	factory->I18NModule.systemCharset            = "UTF-8";
+	factory->I18NModule.iconv_open_i             = I18N_iconv_open;
+	factory->I18NModule.iconv_i                  = I18N_iconv;
+	factory->I18NModule.iconv_close_i            = I18N_iconv_close;
+	factory->I18NModule.isSystemCharsetUTF8      = I18N_isSystemCharsetUTF8;
+	factory->I18NModule.iconvSystemCharsetToUTF8 = I18N_iconvSystemCharsetToUTF8;
+	factory->I18NModule.iconvUTF8ToSystemCharset = I18N_iconvUTF8ToSystemCharset;
+	factory->I18NModule.formatKonohaPath         = I18N_formatKonohaPath;
+	factory->I18NModule.formatSystemPath         = I18N_formatSystemPath;
 	return true;
 }
 

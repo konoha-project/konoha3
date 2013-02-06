@@ -923,7 +923,7 @@ static struct KVirtualCode *MakeThreadedCode(KonohaContext *kctx, KBuilder *buil
 {
 	OPTHCODE *opTHCODE = (OPTHCODE *)vcode;
 	opTHCODE->codesize = codesize;
-	struct KVirtualCodeAPI** p = (struct KVirtualCodeAPI **)builder->common.api->RunVirtualMachine(kctx, kctx->esp + 1, vcode);
+	struct KVirtualCodeAPI** p = (struct KVirtualCodeAPI **)builder->common.api->ExecutionEngineModule->RunExecutionEngine(kctx, kctx->esp + 1, vcode);
 	p[-1] = &vapi;
 	return (KVirtualCode *)p;
 }
@@ -1036,43 +1036,47 @@ static struct KVirtualCode* GetDefaultBootCode(void)
 	return BOOTCODE_NCALL;
 }
 
-static void InitStaticBuilderApi(struct KBuilderAPI *builderApi)
+static void MiniVM_DeleteVirtualMachine(KonohaContext *kctx)
 {
-	builderApi->target = "minivm";
-#define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME##Node = KBuilder_Visit##NAME##Node;
-	KNodeList(DEFINE_BUILDER_API);
+}
+
+static const KModuleInfo ModuleInfo = {
+	"MiniVM", K_VERSION, 0, "minivm",
+};
+
+static const struct KBuilderAPI *GetDefaultBuilderAPI(void);
+
+static const struct ExecutionEngineModule MiniVM_Module = {
+	&ModuleInfo,
+	MiniVM_DeleteVirtualMachine,
+	GetDefaultBuilderAPI,
+	GetDefaultBootCode,
+	MiniVM_GenerateVirtualCode,
+	MiniVM_GenerateMethodFunc,
+	MiniVM_SetMethodCode,
+	KonohaVirtualMachine_Run
+};
+
+static const struct KBuilderAPI MiniVM_BuilderApi = {
+	"minivm",
+	&MiniVM_Module,
+#define DEFINE_BUILDER_API(NAME) KBuilder_Visit##NAME##Node,
+	KNodeList(DEFINE_BUILDER_API)
 #undef DEFINE_BUILDER_API
-	builderApi->GenerateVirtualCode = MiniVM_GenerateVirtualCode;
-	builderApi->GenerateMethodFunc = MiniVM_GenerateMethodFunc;
-	builderApi->SetMethodCode = MiniVM_SetMethodCode;
-	builderApi->RunVirtualMachine   = KonohaVirtualMachine_Run;
-}
+};
 
-static void MiniVMDeleteVirtualMachine(KonohaContext *kctx)
+static const struct KBuilderAPI *GetDefaultBuilderAPI(void)
 {
-}
-
-static struct KBuilderAPI* GetDefaultBuilderAPI(void)
-{
-	static struct KBuilderAPI builderApi = {};
-	if(builderApi.target == NULL) {
-		InitStaticBuilderApi(&builderApi);
-	}
-	return &builderApi;
+	return &MiniVM_BuilderApi;
 }
 
 // -------------------------------------------------------------------------
 
 kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
 {
-	static KModuleInfo ModuleInfo = {
-		"MiniVM", K_VERSION, 0, "minivm",
-	};
 	SetUpBootCode();
-	factory->VirtualMachineInfo   = &ModuleInfo;
-	factory->GetDefaultBootCode   = GetDefaultBootCode;
-	factory->GetDefaultBuilderAPI = GetDefaultBuilderAPI;
-	factory->DeleteVirtualMachine = MiniVMDeleteVirtualMachine;
+	memcpy(&factory->ExecutionEngineModule, &MiniVM_Module, sizeof(MiniVM_Module));
+
 	return true;
 }
 
