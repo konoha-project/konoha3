@@ -22,6 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#include <konoha/import/methoddecl.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -303,19 +305,17 @@ static KMETHOD NameSpace_AllowImplicitCoercion(KonohaContext *kctx, KonohaStack 
 static KMETHOD System_p(KonohaContext *kctx, KonohaStack *sfp)
 {
 	const char *text = (IS_NULL(sfp[1].asString)) ? K_NULLTEXT : kString_text(sfp[1].asString);
-	PLATAPI ReportUserMessage(kctx, DebugTag, sfp[K_RTNIDX].calledFileLine, text, true/*isNewLine*/);
+	PLATAPI ConsoleModule.ReportUserMessage(kctx, DebugTag, sfp[K_RTNIDX].calledFileLine, text, true/*isNewLine*/);
 }
 
 //## method void System.gc();
 static KMETHOD System_gc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KMakeTrace(trace, sfp);
-	PLATAPI ScheduleGC(kctx, trace);
+	PLATAPI GCModule.ScheduleGC(kctx, trace);
 }
 
 // --------------------------------------------------------------------------
-
-#include <konoha/import/methoddecl.h>
 
 static void LoadDefaultMethod(KonohaContext *kctx, kNameSpace *ns)
 {

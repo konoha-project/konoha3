@@ -893,19 +893,19 @@ static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaS
 
 static char* InputUserText(KonohaContext *kctx, const char *message, int flag)
 {
-	PLATAPI ReportUserMessage(kctx, WarnTag, 0, "unsupported; use -M Console option or the like", true);
+	PLATAPI ConsoleModule.ReportUserMessage(kctx, WarnTag, 0, "unsupported; use -M Console option or the like", true);
 	return NULL;
 }
 
 static int InputUserApproval(KonohaContext *kctx, const char *message, const char *yes, const char *no, int defval)
 {
-	PLATAPI ReportUserMessage(kctx, WarnTag, 0, "unsupported; use -M Console option or the like", true);
+	PLATAPI ConsoleModule.ReportUserMessage(kctx, WarnTag, 0, "unsupported; use -M Console option or the like", true);
 	return defval;
 }
 
 static char* InputUserPassword(KonohaContext *kctx, const char *message)
 {
-	PLATAPI ReportUserMessage(kctx, WarnTag, 0, "unsupported; use -M Console option or the like", true);
+	PLATAPI ConsoleModule.ReportUserMessage(kctx, WarnTag, 0, "unsupported; use -M Console option or the like", true);
 	return NULL;
 }
 
@@ -936,19 +936,19 @@ static kunused void PosixFactory(KonohaFactory *factory)
 	factory->exit_i          = exit_i;
 
 	// mutex
-	factory->pthread_create_i        = kpthread_create;
-	factory->pthread_join_i          = kpthread_join;
-	factory->pthread_mutex_init_i    = kpthread_mutex_init;
-	factory->pthread_mutex_init_recursive = kpthread_mutex_init_recursive;
-	factory->pthread_mutex_lock_i    = kpthread_mutex_lock;
-	factory->pthread_mutex_unlock_i  = kpthread_mutex_unlock;
-	factory->pthread_mutex_trylock_i = kpthread_mutex_trylock;
-	factory->pthread_mutex_destroy_i = kpthread_mutex_destroy;
-	factory->pthread_cond_init_i     = kpthread_cond_init;
-	factory->pthread_cond_wait_i     = kpthread_cond_wait;
-	factory->pthread_cond_signal_i   = kpthread_cond_signal;
-	factory->pthread_cond_broadcast_i= kpthread_cond_broadcast;
-	factory->pthread_cond_destroy_i  = kpthread_cond_destroy;
+	factory->ThreadModule.thread_create_i        = kpthread_create;
+	factory->ThreadModule.thread_join_i          = kpthread_join;
+	factory->ThreadModule.thread_mutex_init_i    = kpthread_mutex_init;
+	factory->ThreadModule.thread_mutex_init_recursive = kpthread_mutex_init_recursive;
+	factory->ThreadModule.thread_mutex_lock_i    = kpthread_mutex_lock;
+	factory->ThreadModule.thread_mutex_unlock_i  = kpthread_mutex_unlock;
+	factory->ThreadModule.thread_mutex_trylock_i = kpthread_mutex_trylock;
+	factory->ThreadModule.thread_mutex_destroy_i = kpthread_mutex_destroy;
+	factory->ThreadModule.thread_cond_init_i     = kpthread_cond_init;
+	factory->ThreadModule.thread_cond_wait_i     = kpthread_cond_wait;
+	factory->ThreadModule.thread_cond_signal_i   = kpthread_cond_signal;
+	factory->ThreadModule.thread_cond_broadcast_i= kpthread_cond_broadcast;
+	factory->ThreadModule.thread_cond_destroy_i  = kpthread_cond_destroy;
 
 	factory->LoadPlatformModule   = LoadPlatformModule;
 	factory->FormatPackagePath   = FormatPackagePath;
@@ -959,7 +959,6 @@ static kunused void PosixFactory(KonohaFactory *factory)
 	factory->shortFilePath       = shortFilePath;
 	factory->formatTransparentPath = formatTransparentPath;
 	factory->loadScript            = loadScript;
-	factory->ReportDebugMessage    = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
 
 	// timer
 	factory->getTimeMilliSecond    = getTimeMilliSecond;
@@ -970,18 +969,18 @@ static kunused void PosixFactory(KonohaFactory *factory)
 	PlatformApi_loadReadline(factory);
 
 	// logger
-//	factory->syslog_i              = syslog;
-//	factory->vsyslog_i             = vsyslog;
-//	factory->TraceDataLog          = TraceDataLog;
+	//factory->syslog_i              = syslog;
+	//factory->vsyslog_i             = vsyslog;
+	//factory->TraceDataLog          = TraceDataLog;
+	//factory->DiagnosisErrorCode    = DEOS_DiagnosisErrorCode;
 
-//	factory->DiagnosisErrorCode    = DEOS_DiagnosisErrorCode;
-
-	factory->ReportUserMessage     = UI_ReportUserMessage;
-	factory->ReportCompilerMessage = UI_ReportCompilerMessage;
-	factory->ReportCaughtException = UI_ReportCaughtException;
-	factory->InputUserApproval     = InputUserApproval;
-	factory->InputUserText         = InputUserText;
-	factory->InputUserPassword     = InputUserPassword;
+	factory->ConsoleModule.ReportDebugMessage    = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
+	factory->ConsoleModule.ReportUserMessage     = UI_ReportUserMessage;
+	factory->ConsoleModule.ReportCompilerMessage = UI_ReportCompilerMessage;
+	factory->ConsoleModule.ReportCaughtException = UI_ReportCaughtException;
+	factory->ConsoleModule.InputUserApproval     = InputUserApproval;
+	factory->ConsoleModule.InputUserText         = InputUserText;
+	factory->ConsoleModule.InputUserPassword     = InputUserPassword;
 }
 
 #ifdef __cplusplus

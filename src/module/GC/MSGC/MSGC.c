@@ -884,17 +884,17 @@ kbool_t LoadMSGCModule(KonohaFactory *factory, ModuleType type)
 	static KModuleInfo ModuleInfo = {
 		"MSGC", "0.1", 0, "msgc",
 	};
-	factory->GCInfo            = &ModuleInfo;
-	factory->Kmalloc = Kmalloc;
-	factory->Kzmalloc = Kzmalloc;
-	factory->Kfree = Kfree;
-	factory->InitGcContext = KnewGcContext;
-	factory->DeleteGcContext = KdeleteGcContext;
-	factory->ScheduleGC = KscheduleGC;
-	factory->AllocObject = KallocObject;
-	factory->WriteBarrier = Kwrite_barrier;   // check this
-	factory->UpdateObjectField = KupdateObjectField;  // check this
-	factory->IsKonohaObject = KisObject;
+	factory->GCModule.GCInfo            = &ModuleInfo;
+	factory->GCModule.Kmalloc           = Kmalloc;
+	factory->GCModule.Kzmalloc          = Kzmalloc;
+	factory->GCModule.Kfree             = Kfree;
+	factory->GCModule.InitGcContext     = KnewGcContext;
+	factory->GCModule.DeleteGcContext   = KdeleteGcContext;
+	factory->GCModule.ScheduleGC        = KscheduleGC;
+	factory->GCModule.AllocObject       = KallocObject;
+	factory->GCModule.WriteBarrier      = Kwrite_barrier;   // check this
+	factory->GCModule.UpdateObjectField = KupdateObjectField;  // check this
+	factory->GCModule.IsKonohaObject    = KisObject;
 	return true;
 }
 

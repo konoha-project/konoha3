@@ -23,7 +23,6 @@
  ***************************************************************************/
 
 #include "konoha/konoha.h"
-#include "konoha/platform.h"
 #include "test_konoha.h"
 
 void test_KArray(KonohaContext *kctx)

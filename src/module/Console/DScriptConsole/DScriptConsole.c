@@ -487,15 +487,13 @@ kbool_t LoadDScriptConsoleModule(KonohaFactory *factory, ModuleType type)
 	};
 	factory->ConsoleInfo     = &ModuleInfo;
 
-	factory->ReportUserMessage        = UI_ReportUserMessage;
-	factory->ReportCompilerMessage    = UI_ReportCompilerMessage;
-	factory->ReportCaughtException    = UI_ReportCaughtException;
-	factory->ReportDebugMessage       = ReportDebugMessage;
-	factory->InputUserApproval        = InputUserApproval;
-
-	factory->InputUserText            = InputUserText;
-	factory->InputUserPassword        = InputUserPassword;
-
+	factory->ConsoleModuel.ReportUserMessage        = UI_ReportUserMessage;
+	factory->ConsoleModuel.ReportCompilerMessage    = UI_ReportCompilerMessage;
+	factory->ConsoleModuel.ReportCaughtException    = UI_ReportCaughtException;
+	factory->ConsoleModuel.ReportDebugMessage       = ReportDebugMessage;
+	factory->ConsoleModuel.InputUserApproval        = InputUserApproval;
+	factory->ConsoleModuel.InputUserText            = InputUserText;
+	factory->ConsoleModuel.InputUserPassword        = InputUserPassword;
 	factory->TraceDataLog             = TraceDataLog;
 	return true;
 }

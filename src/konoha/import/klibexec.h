@@ -638,7 +638,7 @@ static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *ao, ksy
 	}
 	KDict *dict = &(KGetProtoMap(o)->dict);
 	KDict_Set(kctx, dict, &kvs);
-	PLATAPI WriteBarrier(kctx, o);
+	PLATAPI GCModule.WriteBarrier(kctx, o);
 }
 
 static void kObjectProto_SetUnboxValue(KonohaContext *kctx, kAbstractObject *ao, ksymbol_t key, ktypeattr_t ty, uintptr_t unboxValue)
@@ -799,7 +799,7 @@ static void DumpObject(KonohaContext *kctx, kObject *o, const char *file, const 
 		PLATAPI printf_i("(%s)%s\n", KClass_text(kObject_class(o)), msg);
 	}
 	else {
-		PLATAPI ReportDebugMessage(file, func, line, "(%s)%s", KClass_text(kObject_class(o)), msg);
+		PLATAPI ConsoleModule.ReportDebugMessage(file, func, line, "(%s)%s", KClass_text(kObject_class(o)), msg);
 	}
 	KLIB KBuffer_Free(&wb);
 }
@@ -825,7 +825,7 @@ static kbool_t KRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp)
 		KStackCall(sfp);
 	}
 	else {
-		PLATAPI ReportCaughtException(kctx, runtime->ThrownException, runtime->bottomStack, runtime->topStack);
+		PLATAPI ConsoleModule.ReportCaughtException(kctx, runtime->ThrownException, runtime->bottomStack, runtime->topStack);
 		result = false;
 	}
 	RESET_GCSTACK();
@@ -922,7 +922,7 @@ static int DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 
 static void CheckSafePoint(KonohaContext *kctx, KonohaStack *sfp, kfileline_t uline)
 {
-	PLATAPI ScheduleGC(kctx, NULL); // FIXME: NULL
+	PLATAPI GCModule.ScheduleGC(kctx, NULL); // FIXME: NULL
 	if(kctx->modshare[MOD_EVENT] != NULL) {
 		KLIB KscheduleEvent(kctx);
 	}

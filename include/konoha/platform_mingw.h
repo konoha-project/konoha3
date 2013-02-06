@@ -517,12 +517,12 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.exit_i          = exit;
 
 	// mutex
-	plat.pthread_mutex_init_i = kpthread_mutex_init;
-	plat.pthread_mutex_init_recursive = kpthread_mutex_init_recursive;
-	plat.pthread_mutex_lock_i    = kpthread_mutex_lock;
-	plat.pthread_mutex_unlock_i  = kpthread_mutex_unlock;
-	plat.pthread_mutex_trylock_i = kpthread_mutex_trylock;
-	plat.pthread_mutex_destroy_i = kpthread_mutex_destroy;
+	plat.ThreadModule.thread_mutex_init_i = kpthread_mutex_init;
+	plat.ThreadModule.thread_mutex_init_recursive = kpthread_mutex_init_recursive;
+	plat.ThreadModule.thread_mutex_lock_i    = kpthread_mutex_lock;
+	plat.ThreadModule.thread_mutex_unlock_i  = kpthread_mutex_unlock;
+	plat.ThreadModule.thread_mutex_trylock_i = kpthread_mutex_trylock;
+	plat.ThreadModule.thread_mutex_destroy_i = kpthread_mutex_destroy;
 
 	plat.shortFilePath       = shortFilePath;
 	plat.FormatPackagePath   = FormatPackagePath;

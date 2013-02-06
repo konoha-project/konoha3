@@ -127,8 +127,8 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		kctx = (KonohaContext *)newctx;
 		newctx->modshare = (KRuntimeModule**)calloc(sizeof(KRuntimeModule *), KRuntimeModule_MAXSIZE);
 		newctx->modlocal = (KContextModule**)calloc(sizeof(KContextModule *), KRuntimeModule_MAXSIZE);
-		DBG_ASSERT(PLATAPI InitGcContext != NULL);
-		PLATAPI InitGcContext(newctx);
+		DBG_ASSERT(PLATAPI GCModule.InitGcContext != NULL);
+		PLATAPI GCModule.InitGcContext(newctx);
 		PLATAPI JsonModule.InitJsonContext(newctx);
 		KRuntime_Init(kctx, newctx);
 	}
@@ -139,7 +139,7 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		newctx->share = kctx->share;
 		newctx->modshare = kctx->modshare;
 		newctx->modlocal = (KContextModule**)KCalloc_UNTRACE(sizeof(KContextModule *), KRuntimeModule_MAXSIZE);
-		PLATAPI InitGcContext(kctx);
+		PLATAPI GCModule.InitGcContext(kctx);
 		PLATAPI JsonModule.InitJsonContext(newctx);
 	}
 	KRuntimeContext_Init(kctx, newctx, platApi->stacksize);
@@ -204,16 +204,15 @@ static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 				p->freeModule(kctx, p);
 			}
 		}
-		PLATAPI DeleteGcContext(ctx);
+		PLATAPI GCModule.DeleteGcContext(ctx);
 		PLATAPI JsonModule.DeleteJsonContext(ctx);
 		KRuntime_Free(kctx, ctx);
-		//MODGC_Check_malloced_size(kctx);
 		free(kctx->modlocal);
 		free(kctx->modshare);
 		free(kklib/*, sizeof(KonohaLib) + sizeof(KonohaContextVar)*/);
 	}
 	else {
-		PLATAPI DeleteGcContext(ctx);
+		PLATAPI GCModule.DeleteGcContext(ctx);
 		PLATAPI JsonModule.DeleteJsonContext(ctx);
 		KFree(ctx->modlocal, sizeof(KContextModule *) * KRuntimeModule_MAXSIZE);
 		KFree(ctx, sizeof(KonohaContextVar));
@@ -345,7 +344,7 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 		if(mod == NULL) mod = "MiniVM";
 		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);
 	}
-	if(factory->GCInfo == NULL) {
+	if(factory->GCModule.GCInfo == NULL) {
 		const char *mod = factory->getenv_i("KONOHA_GC");
 		if(mod == NULL) mod = "BitmapGenGC";  // default
 		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);

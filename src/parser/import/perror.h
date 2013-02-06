@@ -65,7 +65,7 @@ static kString* KParserContext_PrintMessage(KonohaContext *kctx, kinfotag_t tagl
 		KBuffer wb;
 		KLIB KBuffer_Init(&sugarContext->errorMessageBuffer, &wb);
 		kString *emsg = new_StringMessage(kctx, sugarContext->errorMessageList, &wb, taglevel, uline, fmt, ap);
-		PLATAPI ReportCompilerMessage(kctx, taglevel, uline, kString_text(emsg));
+		PLATAPI ConsoleModule.ReportCompilerMessage(kctx, taglevel, uline, kString_text(emsg));
 		if(taglevel <= ErrTag) {
 			sugarContext->errorMessageCount++;
 		}
@@ -138,7 +138,7 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 		KLIB KBuffer_Init(&kctx->stack->cwb, &wb);
 		kString *emsg = new_StringMessage(kctx, _GcStack, &wb, taglevel, Trace_pline(trace), fmt, ap);
 		va_end(ap);
-		PLATAPI ReportCompilerMessage(kctx, taglevel, Trace_pline(trace), kString_text(emsg));
+		PLATAPI ConsoleModule.ReportCompilerMessage(kctx, taglevel, Trace_pline(trace), kString_text(emsg));
 		if(taglevel <= ErrTag) {
 			if(trace == NULL) {
 				KExit(EXIT_FAILURE);

@@ -99,7 +99,7 @@ void test_gc(KonohaContext *kctx)
 		}
 		assert(__Init__ == (i+1) * 100);
 		assert(__trace__ == -1);
-		PLATAPI ScheduleGC(kctx, NULL);
+		PLATAPI GCModule.ScheduleGC(kctx, NULL);
 	}
 
 	int small_object_count = __Init__;
@@ -111,7 +111,7 @@ void test_gc(KonohaContext *kctx)
 		}
 		assert(__Init__ == (i+1) * 1000 + small_object_count);
 		assert(__trace__ == -1);
-		PLATAPI ScheduleGC(kctx, NULL);
+		PLATAPI GCModule.ScheduleGC(kctx, NULL);
 	}
 }
 

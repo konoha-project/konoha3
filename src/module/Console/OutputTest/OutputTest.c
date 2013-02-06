@@ -184,13 +184,13 @@ kbool_t LoadOutputTestModule(KonohaFactory *factory, ModuleType type)
 	factory->BEFORE_LoadScript = BEFORE_LoadScript;
 	factory->AFTER_LoadScript  = AFTER_LoadScript;
 
-	factory->ReportDebugMessage     = NOP_ReportDebugMessage;
 	factory->printf_i               = TEST_printf;
 	factory->vprintf_i              = TEST_vprintf;
 
-	factory->ReportUserMessage           = TEST_ReportUserMessage;
-	factory->ReportCompilerMessage       = TEST_ReportCompilerMessage;
-	factory->ReportCaughtException       = TEST_reportCaughtException;
+	factory->ConsoleModuel.ReportDebugMessage     = NOP_ReportDebugMessage;
+	factory->ConsoleModuel.ReportUserMessage      = TEST_ReportUserMessage;
+	factory->ConsoleModuel.ReportCompilerMessage  = TEST_ReportCompilerMessage;
+	factory->ConsoleModuel.ReportCaughtException  = TEST_reportCaughtException;
 
 	factory->InputUserApproval        = TEST_InputUserApproval;
 	factory->InputUserText            = TEST_InputUserText;

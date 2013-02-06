@@ -617,19 +617,21 @@ struct KonohaFactory {
 	void    (*exit_i)(int p, const char *file, int line);
 
 	// pthread
-	int     (*pthread_create_i)(kthread_t *thread, const kthread_attr_t *attr, void *(*f)(void *), void *arg);
-	int     (*pthread_join_i)(kthread_t thread, void **);
-	int     (*pthread_mutex_init_i)(kmutex_t *mutex, const kmutexattr_t *attr);
-	int     (*pthread_mutex_lock_i)(kmutex_t *mutex);
-	int     (*pthread_mutex_trylock_i)(kmutex_t *mutex);
-	int     (*pthread_mutex_unlock_i)(kmutex_t *mutex);
-	int     (*pthread_mutex_destroy_i)(kmutex_t *mutex);
-	int     (*pthread_mutex_init_recursive)(kmutex_t *mutex);
-	int     (*pthread_cond_init_i)(kmutex_cond_t *cond, const kmutex_condattr_t *attr);
-	int     (*pthread_cond_wait_i)(kmutex_cond_t *cond, kmutex_t *mutex);
-	int     (*pthread_cond_signal_i)(kmutex_cond_t *cond);
-	int     (*pthread_cond_broadcast_i)(kmutex_cond_t *cond);
-	int     (*pthread_cond_destroy_i)(kmutex_cond_t *cond);
+	struct ThreadModule {
+		int     (*thread_create_i)(kthread_t *thread, const kthread_attr_t *attr, void *(*f)(void *), void *arg);
+		int     (*thread_join_i)(kthread_t thread, void **);
+		int     (*thread_mutex_init_i)(kmutex_t *mutex, const kmutexattr_t *attr);
+		int     (*thread_mutex_lock_i)(kmutex_t *mutex);
+		int     (*thread_mutex_trylock_i)(kmutex_t *mutex);
+		int     (*thread_mutex_unlock_i)(kmutex_t *mutex);
+		int     (*thread_mutex_destroy_i)(kmutex_t *mutex);
+		int     (*thread_mutex_init_recursive)(kmutex_t *mutex);
+		int     (*thread_cond_init_i)(kmutex_cond_t *cond, const kmutex_condattr_t *attr);
+		int     (*thread_cond_wait_i)(kmutex_cond_t *cond, kmutex_t *mutex);
+		int     (*thread_cond_signal_i)(kmutex_cond_t *cond);
+		int     (*thread_cond_broadcast_i)(kmutex_cond_t *cond);
+		int     (*thread_cond_destroy_i)(kmutex_cond_t *cond);
+	} ThreadModule;
 
 	/* high-level functions */
 	kbool_t  (*LoadPlatformModule)(struct KonohaFactory*, const char *moduleName, ModuleType);
@@ -666,28 +668,32 @@ struct KonohaFactory {
 	kbool_t (*DiagnosisCheckSoftwareTestIsPass)(KonohaContext *, const char *filename, int line);
 
 	/* Console API */
-	KModuleInfo *ConsoleInfo;
-	void  (*ReportUserMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *, int isNewLine);
-	void  (*ReportCompilerMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *);
-	void  (*ReportCaughtException)(KonohaContext *, kException *e, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
-	void  (*ReportDebugMessage)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
-	int   (*InputUserApproval)(KonohaContext *, const char *message, const char *yes, const char *no, int defval);
-	char* (*InputUserText)(KonohaContext *, const char *message, int flag);
-	char* (*InputUserPassword)(KonohaContext *, const char *message);
+	struct ConsoleModule {
+		KModuleInfo *ConsoleInfo;
+		void  (*ReportUserMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *, int isNewLine);
+		void  (*ReportCompilerMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *);
+		void  (*ReportCaughtException)(KonohaContext *, kException *e, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
+		void  (*ReportDebugMessage)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
+		int   (*InputUserApproval)(KonohaContext *, const char *message, const char *yes, const char *no, int defval);
+		char* (*InputUserText)(KonohaContext *, const char *message, int flag);
+		char* (*InputUserPassword)(KonohaContext *, const char *message);
+	} ConsoleModule;
 
 	/* Garbage Collection API */
-	KModuleInfo *GCInfo;
-	void* (*Kmalloc)(KonohaContext*, size_t, KTraceInfo *);
-	void* (*Kzmalloc)(KonohaContext*, size_t, KTraceInfo *);
-	void  (*Kfree)(KonohaContext*, void *, size_t);
-	void (*InitGcContext)(KonohaContext *kctx);
-	void (*DeleteGcContext)(KonohaContext *kctx);
-	void (*ScheduleGC)(KonohaContext *kctx, KTraceInfo *trace);
-	struct kObjectVar *(*AllocObject)(KonohaContext *kctx, size_t size, KTraceInfo *);
-	kbool_t (*IsKonohaObject)(KonohaContext *kctx, void *ptr);
-	void  (*VisitObject)(struct KObjectVisitor *visitor, struct kObjectVar *obj);
-	void  (*WriteBarrier)(KonohaContext *, struct kObjectVar *);
-	void  (*UpdateObjectField)(struct kObjectVar *parent, struct kObjectVar *oldPtr, struct kObjectVar *newVal);
+	struct GCModule {
+		KModuleInfo *GCInfo;
+		void* (*Kmalloc)(KonohaContext*, size_t, KTraceInfo *);
+		void* (*Kzmalloc)(KonohaContext*, size_t, KTraceInfo *);
+		void  (*Kfree)(KonohaContext*, void *, size_t);
+		void (*InitGcContext)(KonohaContext *kctx);
+		void (*DeleteGcContext)(KonohaContext *kctx);
+		void (*ScheduleGC)(KonohaContext *kctx, KTraceInfo *trace);
+		struct kObjectVar *(*AllocObject)(KonohaContext *kctx, size_t size, KTraceInfo *);
+		kbool_t (*IsKonohaObject)(KonohaContext *kctx, void *ptr);
+		void  (*VisitObject)(struct KObjectVisitor *visitor, struct kObjectVar *obj);
+		void  (*WriteBarrier)(KonohaContext *, struct kObjectVar *);
+		void  (*UpdateObjectField)(struct kObjectVar *parent, struct kObjectVar *oldPtr, struct kObjectVar *newVal);
+	} GCModule;
 
 	/* Event Handler API */
 	KModuleInfo *EventInfo;
@@ -1837,11 +1843,11 @@ struct KonohaLibVar {
 
 #define UPCAST(o)         ((kObject *)o)
 
-#define KMalloc(size, TRACE)           PLATAPI Kmalloc(kctx, size, TRACE)
-#define KCalloc(size, item, TRACE)     PLATAPI Kzmalloc(kctx, ((size) * (item)), TRACE)
-#define KMalloc_UNTRACE(size)          PLATAPI Kmalloc(kctx, size, NULL)
-#define KCalloc_UNTRACE(size, item)    PLATAPI Kzmalloc(kctx, ((size) * (item)), NULL)
-#define KFree(p, size)                 PLATAPI Kfree(kctx, p, size)
+#define KMalloc(size, TRACE)           PLATAPI GCModule.Kmalloc(kctx, size, TRACE)
+#define KCalloc(size, item, TRACE)     PLATAPI GCModule.Kzmalloc(kctx, ((size) * (item)), TRACE)
+#define KMalloc_UNTRACE(size)          PLATAPI GCModule.Kmalloc(kctx, size, NULL)
+#define KCalloc_UNTRACE(size, item)    PLATAPI GCModule.Kzmalloc(kctx, ((size) * (item)), NULL)
+#define KFree(p, size)                 PLATAPI GCModule.Kfree(kctx, p, size)
 
 #define KBuffer_bytesize(W)                 (((W)->m)->bytesize - (W)->pos)
 
@@ -1942,7 +1948,7 @@ typedef struct {
 #define KRefDecObject(T, O)
 
 #define GC_WRITE_BARRIER(kctx, PARENT, VAR, VAL)\
-	(PLATAPI UpdateObjectField((struct kObjectVar *)(PARENT), (struct kObjectVar *)(VAR), ((struct kObjectVar *)(VAL))))
+	(PLATAPI GCModule.UpdateObjectField((struct kObjectVar *)(PARENT), (struct kObjectVar *)(VAR), ((struct kObjectVar *)(VAL))))
 
 #define KUnsafeFieldInit(VAR, VAL) OBJECT_SET(VAR, VAL)
 #define KUnsafeFieldSet( VAR, VAL) (VAR) = (VAL) /* for c-compiler type check */
@@ -2047,8 +2053,8 @@ typedef struct {
 #define TODO_ASSERT(a)      assert(a)
 #endif /* _MSC_VER */
 #define SAFECHECK(T)        (T)
-#define DBG_P(fmt, ...)     PLATAPI ReportDebugMessage(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__)
-#define DBG_ABORT(fmt, ...) PLATAPI ReportDebugMessage(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__); DBG_ASSERT(kctx == NULL)
+#define DBG_P(fmt, ...)     PLATAPI ConsoleModule.ReportDebugMessage(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__)
+#define DBG_ABORT(fmt, ...) PLATAPI ConsoleModule.ReportDebugMessage(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__); DBG_ASSERT(kctx == NULL)
 #define DUMP_P(fmt, ...)    PLATAPI printf_i(fmt, ## __VA_ARGS__)
 #else
 #define SAFECHECK(T)        (1)
