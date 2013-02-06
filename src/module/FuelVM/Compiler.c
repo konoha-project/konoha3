@@ -272,7 +272,7 @@ static kbool_t FuelVM_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode
 
 static kbool_t FuelVM_VisitPushNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
-	assert(0);
+	assert(0 && "Not Implemented");
 	return true;
 }
 
@@ -286,15 +286,9 @@ static kbool_t FuelVM_VisitErrorNode(KonohaContext *kctx, KBuilder *builder, kNo
 
 static kbool_t FuelVM_VisitThrowNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
-	assert(0);
+	assert(0 && "Not Implemented");
 	return true;
 }
-
-//static kbool_t FuelVM_VisitExprNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
-//{
-//	SUGAR VisitNode(kctx, builder, kNode_getFirstNode(kctx, stmt), thunk);
-//	return true;
-//}
 
 static kbool_t FuelVM_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, kNode *block, void *thunk)
 {
@@ -476,17 +470,10 @@ static kbool_t FuelVM_VisitTryNode(KonohaContext *kctx, KBuilder *builder, kNode
 	return true;
 }
 
-//static kbool_t FuelVM_VisitUndefinedNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
-//{
-//	DBG_P("undefined asm syntax kw='%s'", KSymbol_text(stmt->syn->keyword));
-//	return true;
-//}
-
 static kbool_t FuelVM_VisitConstNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
 	kObject *v = expr->ObjectConstValue;
 	DBG_ASSERT(!KType_Is(UnboxType, expr->attrTypeId));
-	//DBG_ASSERT(kNode_HasObjectConstValue(expr));
 	builder->Value = CreateObject(BLD(builder), expr->attrTypeId, (void *)v);
 	return true;
 }
@@ -494,7 +481,6 @@ static kbool_t FuelVM_VisitConstNode(KonohaContext *kctx, KBuilder *builder, kNo
 static kbool_t FuelVM_VisitUnboxConstNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
 	DBG_ASSERT(KType_Is(UnboxType, expr->attrTypeId));
-	//DBG_ASSERT(!kNode_HasObjectConstValue(expr));
 
 	SValue Val = {};
 	Val.bits = expr->unboxConstValue;
@@ -676,20 +662,6 @@ static kbool_t FuelVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 		//}
 		CreateUpdate(flbuilder, Node, RHS);
 	}
-	//else if(left->node == TEXPR_STACKTOP) {
-	//	enum TypeId type = ConvertToTypeId(kctx, left->attrTypeId);
-	//	uintptr_t Hash = (uintptr_t) left;
-	//	if((Node = IRBuilder_FindLocalVarByHash(flbuilder, type, Hash)) == 0) {
-	//		Node = CreateLocal(flbuilder, type);
-	//		IField_setHash((IField *) Node, Hash);
-	//		ARRAY_add(INodePtr, &BLD(builder)->Stack, Node);
-	//	}
-	//	SUGAR VisitNode(kctx, builder, right, thunk);
-	//	INode *RHS = FuelVM_getExpression(builder);
-	//	if(RHS->Type != Node->Type)
-	//		INode_setType(Node, RHS->Type);
-	//	CreateUpdate(BLD(builder), Node, RHS);
-	//}
 	else{
 		assert(kNode_node(left) == KNode_Field);
 		SUGAR VisitNode(kctx, builder, right, thunk);
