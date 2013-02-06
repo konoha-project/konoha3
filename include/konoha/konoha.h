@@ -51,7 +51,7 @@ extern "C" {
 #endif
 
 #ifndef K_PROGNAME
-#define K_PROGNAME  "Mini Konoha"
+#define K_PROGNAME  "Konoha"
 /* - 2012/06/14 */
 //#define K_CODENAME "Miyajima"
 /*2012/06/14 -  */

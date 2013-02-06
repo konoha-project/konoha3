@@ -285,12 +285,6 @@ endforeach(f ${test_files})
 add_subdirectory(src/exec/apache)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpack.cmake)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/konoha.sh
-	DESTINATION bin
-	RENAME konoha
-	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-	GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-
 install(TARGETS konoha konoha_bin
 		RUNTIME DESTINATION bin
 		LIBRARY DESTINATION lib${LIB_SUFFIX}

@@ -7,7 +7,7 @@ macro(GET_MODULE_NAME _STR _RESULT)
 endmacro()
 
 set(KONOHA_MODULE_DIR
-	"lib/minikonoha/${SO_VERSION}/module/${ModuleName}")
+	"lib/konoha/${SO_VERSION}/module/${ModuleName}")
 
 macro(add_konoha_module ModuleName)
 	#MESSAGE(STATUS "Compiling ${ModuleName} Module")
