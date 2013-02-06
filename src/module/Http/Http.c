@@ -163,7 +163,7 @@ static void http_handler(struct evhttp_request *req, void *args)
 			requestLine = evbuffer_pullup(body, -1);
 			requestLine[len] = '\0';
 			struct JsonBuf jsonbuf = {};
-			if(PLATAPI ParseJson(kctx, &jsonbuf, (char *)requestLine, strlen((char *)requestLine), NULL)) {
+			if(PLATAPI JsonModule.ParseJson(kctx, &jsonbuf, (char *)requestLine, strlen((char *)requestLine), NULL)) {
 				pthread_mutex_lock(&eventContext->lock);
 				if(enqueueRawEventToLocalQueue(eventContext->queue, (RawEvent *)&jsonbuf) == true) {
 					pthread_mutex_unlock(&eventContext->lock);

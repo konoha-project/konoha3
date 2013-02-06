@@ -518,7 +518,7 @@ typedef enum {
 	SafePoint_Event  = (1 << 2)
 } SafePoint;
 
-struct KObjectVisitor *visitor;
+struct KObjectVisitor;
 
 /* ------------------------------------------------------------------------ */
 
@@ -586,7 +586,7 @@ typedef struct kNodeVar                 kNodeVar;
 
 struct KonohaFactory {
 	// settings
-	const char *name;
+	const char  *name;
 	size_t       stacksize;
 	volatile int safePointFlag;
 	int          verbose;
@@ -712,41 +712,42 @@ struct KonohaFactory {
 	const char* (*formatSystemPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
 	const char* (*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
 
-	// CodeGenerator
+	// CodeGenerator & VirtualMachine
 	KModuleInfo  *CodeGeneratorInfo;
 	void*       (*GetCodeGenerateMethodFunc)(void);
 	void*       (*GenerateCode)(KonohaContext *kctx, kMethod *mtd, kNode *bk, int options);
 
-	// VirtualMachine
-	KModuleInfo            *VirtualMachineInfo;
+	KModuleInfo  *VirtualMachineInfo;
 	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
 	struct KVirtualCode*  (*GetDefaultBootCode)(void);
 	struct KBuilderAPI*   (*GetDefaultBuilderAPI)(void);
 
 	/* JSON_API */
-	KModuleInfo *JsonDataInfo;
-	void        *JsonHandler;  // define this in each module if necessary
-	void        (*InitJsonContext)(KonohaContext *kctx);
-	void        (*DeleteJsonContext)(KonohaContext *kctx);
-	kbool_t     (*IsJsonType)(struct JsonBuf *, KJSONTYPE);
-	struct JsonBuf* (*CreateJson)(KonohaContext *, struct JsonBuf *jsonbuf, KJSONTYPE type, ...);
-	kbool_t     (*ParseJson)(KonohaContext *, struct JsonBuf *, const char *, size_t, KTraceInfo *);
-	void        (*FreeJson)(KonohaContext *, struct JsonBuf *);
-	const char* (*JsonToNewText)(KonohaContext *, struct JsonBuf *);
-	size_t      (*DoJsonEach)(KonohaContext *, struct JsonBuf *, void *thunk, void (*doEach)(KonohaContext *, const char *key, size_t len, struct JsonBuf *, void *));
+	struct JsonModule {
+		KModuleInfo *JsonDataInfo;
+		void        *JsonHandler;  // define this in each module if necessary
+		void        (*InitJsonContext)(KonohaContext *kctx);
+		void        (*DeleteJsonContext)(KonohaContext *kctx);
+		kbool_t     (*IsJsonType)(struct JsonBuf *, KJSONTYPE);
+		struct JsonBuf* (*CreateJson)(KonohaContext *, struct JsonBuf *jsonbuf, KJSONTYPE type, ...);
+		kbool_t     (*ParseJson)(KonohaContext *, struct JsonBuf *, const char *, size_t, KTraceInfo *);
+		void        (*FreeJson)(KonohaContext *, struct JsonBuf *);
+		const char* (*JsonToNewText)(KonohaContext *, struct JsonBuf *);
+		size_t      (*DoJsonEach)(KonohaContext *, struct JsonBuf *, void *thunk, void (*doEach)(KonohaContext *, const char *key, size_t len, struct JsonBuf *, void *));
 
-	kbool_t     (*RetrieveJsonKeyValue)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, struct JsonBuf *newbuf);
-	kbool_t     (*SetJsonKeyValue)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, struct JsonBuf *otherbuf);
-	kbool_t     (*SetJsonValue)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, KJSONTYPE, ...);
+		kbool_t     (*RetrieveJsonKeyValue)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, struct JsonBuf *newbuf);
+		kbool_t     (*SetJsonKeyValue)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, struct JsonBuf *otherbuf);
+		kbool_t     (*SetJsonValue)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, KJSONTYPE, ...);
 
-	kbool_t     (*GetJsonBoolean)(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, kbool_t defval);
-	int64_t     (*GetJsonInt)(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, int64_t defval);
-	double      (*GetJsonFloat)(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, double defval);
-	const char* (*GetJsonText)(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, const char *defval);
-	size_t      (*GetJsonSize)(KonohaContext *kctx, struct JsonBuf *jsonbuf);
-	kbool_t     (*RetrieveJsonArrayAt)(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf);
-	kbool_t     (*SetJsonArrayAt)(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf);
-	kbool_t     (*AppendJsonArray)(KonohaContext *kctx, struct JsonBuf *jsonbuf, struct JsonBuf *otherbuf);
+		kbool_t     (*GetJsonBoolean)(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, kbool_t defval);
+		int64_t     (*GetJsonInt)(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, int64_t defval);
+		double      (*GetJsonFloat)(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, double defval);
+		const char* (*GetJsonText)(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, const char *defval);
+		size_t      (*GetJsonSize)(KonohaContext *kctx, struct JsonBuf *jsonbuf);
+		kbool_t     (*RetrieveJsonArrayAt)(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf);
+		kbool_t     (*SetJsonArrayAt)(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf);
+		kbool_t     (*AppendJsonArray)(KonohaContext *kctx, struct JsonBuf *jsonbuf, struct JsonBuf *otherbuf);
+	} JsonModule;
 
 };
 

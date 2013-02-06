@@ -129,7 +129,7 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		newctx->modlocal = (KContextModule**)calloc(sizeof(KContextModule *), KRuntimeModule_MAXSIZE);
 		DBG_ASSERT(PLATAPI InitGcContext != NULL);
 		PLATAPI InitGcContext(newctx);
-		PLATAPI InitJsonContext(newctx);
+		PLATAPI JsonModule.InitJsonContext(newctx);
 		KRuntime_Init(kctx, newctx);
 	}
 	else {   // others take ctx as its parent
@@ -140,7 +140,7 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		newctx->modshare = kctx->modshare;
 		newctx->modlocal = (KContextModule**)KCalloc_UNTRACE(sizeof(KContextModule *), KRuntimeModule_MAXSIZE);
 		PLATAPI InitGcContext(kctx);
-		PLATAPI InitJsonContext(newctx);
+		PLATAPI JsonModule.InitJsonContext(newctx);
 	}
 	KRuntimeContext_Init(kctx, newctx, platApi->stacksize);
 	if(IS_RootKonohaContext(newctx)) {
@@ -205,7 +205,7 @@ static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 			}
 		}
 		PLATAPI DeleteGcContext(ctx);
-		PLATAPI DeleteJsonContext(ctx);
+		PLATAPI JsonModule.DeleteJsonContext(ctx);
 		KRuntime_Free(kctx, ctx);
 		//MODGC_Check_malloced_size(kctx);
 		free(kctx->modlocal);
@@ -214,7 +214,7 @@ static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 	}
 	else {
 		PLATAPI DeleteGcContext(ctx);
-		PLATAPI DeleteJsonContext(ctx);
+		PLATAPI JsonModule.DeleteJsonContext(ctx);
 		KFree(ctx->modlocal, sizeof(KContextModule *) * KRuntimeModule_MAXSIZE);
 		KFree(ctx, sizeof(KonohaContextVar));
 	}
@@ -355,7 +355,7 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 		if(mod == NULL) mod = "IConv";        // default
 		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);
 	}
-	if(factory->JsonDataInfo == NULL) {
+	if(factory->JsonModule.JsonDataInfo == NULL) {
 		const char *mod = factory->getenv_i("KONOHA_JSON");
 		if(mod == NULL) mod = "Json";
 		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);

@@ -267,7 +267,7 @@ static void AddSignalEvent(KonohaContext *kctx, struct EventContext *eventContex
 			char buf[BUFSIZ];
 			struct JsonBuf jsonbuf = {};
 			snprintf(buf, sizeof(buf), "{\"event\": \"signal\", \"signal\": %d}", (int)(i+1));
-			if(PLATAPI ParseJson(kctx, &jsonbuf, buf, strlen(buf), trace)) {
+			if(PLATAPI JsonModule.ParseJson(kctx, &jsonbuf, buf, strlen(buf), trace)) {
 				enqueueRawEventToLocalQueue(eventContext->queue, (RawEvent *)&jsonbuf);
 			}
 		}
