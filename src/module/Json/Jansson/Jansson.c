@@ -250,24 +250,24 @@ kbool_t LoadJanssonModule(KonohaFactory *factory, ModuleType type)
 	static KModuleInfo ModuleInfo = {
 		"Janson", "0.1", 0, "json jansson",
 	};
-	factory->JsonDataInfo            = &ModuleInfo;
-	factory->IsJsonType             = IsJsonType;
-	factory->CreateJson             = CreateJson;
-	factory->ParseJson              = ParseJson;
-	factory->FreeJson               = FreeJson;
-	factory->JsonToNewText          = JsonToNewText;
-	factory->DoJsonEach             = DoJsonEach;
-	factory->RetrieveJsonKeyValue   = RetrieveJsonKeyValue;
-	factory->SetJsonKeyValue        = SetJsonKeyValue;
-	factory->SetJsonValue           = SetJsonValue;
-	factory->GetJsonBoolean         = GetJsonBoolean;
-	factory->GetJsonInt             = GetJsonInt;
-	factory->GetJsonFloat           = GetJsonFloat;
-	factory->GetJsonText            = GetJsonText;
-	factory->GetJsonSize            = GetJsonSize;
-	factory->RetrieveJsonArrayAt = RetrieveJsonArrayAt;
-	factory->SetJsonArrayAt      = SetJsonArrayAt;
-	factory->AppendJsonArray        = AppendJsonArray;
+	factory->JsonModule.JsonDataInfo            = &ModuleInfo;
+	factory->JsonModule.IsJsonType             = IsJsonType;
+	factory->JsonModule.CreateJson             = CreateJson;
+	factory->JsonModule.ParseJson              = ParseJson;
+	factory->JsonModule.FreeJson               = FreeJson;
+	factory->JsonModule.JsonToNewText          = JsonToNewText;
+	factory->JsonModule.DoJsonEach             = DoJsonEach;
+	factory->JsonModule.RetrieveJsonKeyValue   = RetrieveJsonKeyValue;
+	factory->JsonModule.SetJsonKeyValue        = SetJsonKeyValue;
+	factory->JsonModule.SetJsonValue           = SetJsonValue;
+	factory->JsonModule.GetJsonBoolean         = GetJsonBoolean;
+	factory->JsonModule.GetJsonInt             = GetJsonInt;
+	factory->JsonModule.GetJsonFloat           = GetJsonFloat;
+	factory->JsonModule.GetJsonText            = GetJsonText;
+	factory->JsonModule.GetJsonSize            = GetJsonSize;
+	factory->JsonModule.RetrieveJsonArrayAt = RetrieveJsonArrayAt;
+	factory->JsonModule.SetJsonArrayAt      = SetJsonArrayAt;
+	factory->JsonModule.AppendJsonArray        = AppendJsonArray;
 	return true;
 }
 
