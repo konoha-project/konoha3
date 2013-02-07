@@ -1,6 +1,6 @@
 // written by imasahiro
 // expects:
-// $ minikonoha -Ipackage_not_found
+// $ konoha -Ipackage_not_found
 
 void test() {
 	assert(true);

@@ -51,7 +51,7 @@ import("JavaScript.Regexp");
 
 /* 15.5.4.9 String.prototype.localeCompare (that) */
 @Public @Override int String.localeCompare(String that) {
-    return StringUtil.compare(this, that);
+    return StringUtil.compareTo(this, that);
 }
 
 /* 15.5.4.10 String.prototype.match (regexp) */
@@ -177,9 +177,3 @@ import("JavaScript.Regexp");
         return this.substring(beginIndex, beginIndex + length);
     }
 }
-
-//@Public @Override int String.localeCompare(String that) {
-//    /*FIXME(ide) to care about locale */
-//    return this.compareTo(that);
-//}
-//
