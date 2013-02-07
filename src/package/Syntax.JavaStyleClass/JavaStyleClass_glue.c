@@ -365,7 +365,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	kNode *block = kNode_ParseClassNodeNULL(kctx, stmt, tokenClassName);
 	size_t declsize = kNode_countFieldSize(kctx, block);
-	if(isNewlyDefinedClass || (KClass_Is(Virtual, definedClass) && block != NULL)) {  
+	if(isNewlyDefinedClass || (KClass_Is(Virtual, definedClass) && block != NULL)) {
 		KClass *superClass = KClass_Object;
 		kToken *tokenSuperClass= SUGAR kNode_GetToken(kctx, stmt, KSymbol_("extends"), NULL);
 		if(tokenSuperClass != NULL) {
