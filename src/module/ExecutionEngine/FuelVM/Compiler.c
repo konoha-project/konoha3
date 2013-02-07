@@ -857,23 +857,6 @@ static void FuelVM_SetMethodCode(KonohaContext *kctx, kMethodVar *mtd, struct KV
 	}
 }
 
-static void InitStaticBuilderApi(struct KBuilderAPI *builderApi)
-{
-	builderApi->target = "FuelVM";
-#define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME##Node = FuelVM_Visit##NAME##Node;
-	KNodeList(DEFINE_BUILDER_API);
-#undef DEFINE_BUILDER_API
-}
-
-static struct KBuilderAPI *GetDefaultBuilderAPI(void)
-{
-	static struct KBuilderAPI builderApi = {};
-	if(builderApi.target == NULL) {
-		InitStaticBuilderApi(&builderApi);
-	}
-	return &builderApi;
-}
-
 static void FuelVM_DeleteVirtualMachine(KonohaContext *kctx)
 {
 #ifdef FUELVM_USE_LLVM
@@ -882,24 +865,41 @@ static void FuelVM_DeleteVirtualMachine(KonohaContext *kctx)
 #endif
 }
 
+static const KModuleInfo ModuleInfo = {
+	"FuelVM", K_VERSION, 0, "FuelVM",
+};
+
+static const struct KBuilderAPI *GetDefaultBuilderAPI(void);
+
+static const struct ExecutionEngineModule FuelVM_Module = {
+	&ModuleInfo,
+	FuelVM_DeleteVirtualMachine,
+	GetDefaultBuilderAPI,
+	GetDefaultBootCode,
+	FuelVM_GenerateVirtualCode,
+	FuelVM_GenerateMethodFunc,
+	FuelVM_SetMethodCode,
+	FuelVM_Run
+};
+
+static const struct KBuilderAPI FuelVM_BuilderAPI = {
+	"FuelVM",
+	&FuelVM_Module,
+#define DEFINE_BUILDER_API(NAME) FuelVM_Visit##NAME##Node,
+	KNodeList(DEFINE_BUILDER_API)
+#undef DEFINE_BUILDER_API
+};
+
+static const struct KBuilderAPI *GetDefaultBuilderAPI(void)
+{
+	return &FuelVM_BuilderAPI;
+}
+
 // -------------------------------------------------------------------------
 
 kbool_t LoadFuelVMModule(KonohaFactory *factory, ModuleType type)
 {
-	static KModuleInfo ModuleInfo = {
-		"FuelVM", K_VERSION, 0, "FuelVM",
-	};
-	static const struct ExecutionEngineModule Mod = {
-		&ModuleInfo,
-		FuelVM_DeleteVirtualMachine,
-		GetDefaultBuilderAPI,
-		GetDefaultBootCode,
-		FuelVM_GenerateVirtualCode,
-		FuelVM_GenerateMethodFunc,
-		FuelVM_SetMethodCode,
-		FuelVM_Run
-	};
-	memcpy(&factory->ExecutionEngineModule, &Mod, sizeof(Mod));
+	memcpy(&factory->ExecutionEngineModule, &FuelVM_Module, sizeof(FuelVM_Module));
 	return true;
 }
 

@@ -34,7 +34,7 @@ macro(ADD_MODULE dir)
 	endif()
 endmacro(ADD_MODULE dir)
 
-set(MODULE_SUBDIRS CodeGen Console Event GC Json)
+set(MODULE_SUBDIRS ExecutionEngine Console Event GC Json I18N)
 foreach(sub ${MODULE_SUBDIRS})
 	file(GLOB dirs ${CMAKE_CURRENT_SOURCE_DIR}/${sub}/*)
 	foreach(dir ${dirs})
