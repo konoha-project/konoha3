@@ -134,7 +134,7 @@ static void RunShell(KonohaContext *kctx)
 	return;
 }
 
-static void ShowModule(KonohaContext *kctx, KModuleInfo *info)
+static void ShowModule(KonohaContext *kctx, const KModuleInfo *info)
 {
 	if(info != NULL && info->desc != NULL) {
 		PLATAPI printf_i(" %s", info->desc);

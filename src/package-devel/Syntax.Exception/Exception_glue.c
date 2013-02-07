@@ -229,7 +229,7 @@ static kbool_t Exception_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, in
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ KSymbol_("try"), SYNFLAG_CTypeFunc, 0, 0, {SUGAR patternParseFunc}, {SUGARFUNC Statement_try}},
 		{ KSymbol_("catch"), SYNFLAG_CTypeFunc, 0, 0, {SUGAR patternParseFunc}, {SUGARFUNC Statement_catch}},
-		{ KSymbol_("finally"), SYNFLAG_CTypeFunc, 0, 0, {SUGAR patternParseFunc}, {SUGARFUNC Statement_catch}},
+		{ KSymbol_("finally"), SYNFLAG_CTypeFunc, 0, 0, {SUGAR patternParseFunc}, {SUGARFUNC Statement_finally}},
 		{ KSymbol_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);

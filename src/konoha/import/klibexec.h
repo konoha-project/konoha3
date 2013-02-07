@@ -699,7 +699,7 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 
 static int kObjectProto_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb, int count)
 {
-	struct wbenv w = {values, pos+1, wb, count};
+	struct wbenv w = {values, wb, pos+1, count};
 	KLIB kObjectProto_DoEach(kctx, values[pos].asObject, &w, dumpProto);
 	return w.count;
 }

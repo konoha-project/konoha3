@@ -665,7 +665,7 @@ struct KonohaFactory {
 
 	/* Logging API */
 	struct LoggerModule {
-		KModuleInfo *LoggerInfo;
+		const KModuleInfo *LoggerInfo;
 		void  (*syslog_i)(int priority, const char *message, ...) __PRINTFMT(2, 3);
 		void  (*vsyslog_i)(int priority, const char *message, va_list args);
 		void  (*TraceDataLog)(KonohaContext *kctx, KTraceInfo *trace, int, logconf_t *, ...);
@@ -673,7 +673,7 @@ struct KonohaFactory {
 
 	/* Diagnosis API */
 	struct DiagnosisModule {
-		KModuleInfo *DiagnosisInfo;
+		const KModuleInfo *DiagnosisInfo;
 		kbool_t (*CheckStaticRisk)(KonohaContext *, const char *keyword, size_t keylen, kfileline_t uline);
 		void    (*CheckDynamicRisk)(KonohaContext *, const char *keyword, size_t keylen, KTraceInfo *);
 		int (*DiagnosisSoftwareProcess)(KonohaContext *, kfileline_t uline, KTraceInfo *);
@@ -686,7 +686,7 @@ struct KonohaFactory {
 
 	/* Console API */
 	struct ConsoleModule {
-		KModuleInfo *ConsoleInfo;
+		const KModuleInfo *ConsoleInfo;
 		void  (*ReportUserMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *, int isNewLine);
 		void  (*ReportCompilerMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *);
 		void  (*ReportCaughtException)(KonohaContext *, kException *e, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
@@ -698,7 +698,7 @@ struct KonohaFactory {
 
 	/* Garbage Collection API */
 	struct GCModule {
-		KModuleInfo *GCInfo;
+		const KModuleInfo *GCInfo;
 		void* (*Kmalloc)(KonohaContext*, size_t, KTraceInfo *);
 		void* (*Kzmalloc)(KonohaContext*, size_t, KTraceInfo *);
 		void  (*Kfree)(KonohaContext*, void *, size_t);
@@ -714,7 +714,7 @@ struct KonohaFactory {
 
 	/* Event Handler API */
 	struct EventModule {
-		KModuleInfo *EventInfo;
+		const KModuleInfo *EventInfo;
 		struct EventContext *eventContext;
 		void (*StartEventHandler)(KonohaContext *kctx, void *args);
 		void (*StopEventHandler)(KonohaContext *kctx, void *args);
@@ -727,7 +727,7 @@ struct KonohaFactory {
 
 	/* I18N Module */
 	struct I18NModule {
-		KModuleInfo *I18NInfo;
+		const KModuleInfo *I18NInfo;
 		uintptr_t   (*iconv_open_i)(KonohaContext *, const char* tocode, const char* fromcode, KTraceInfo *);
 		size_t      (*iconv_i)(KonohaContext *, uintptr_t iconv, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft, int *isTooBigRef, KTraceInfo *trace);
 		int         (*iconv_close_i)(KonohaContext *, uintptr_t iconv);
@@ -744,7 +744,7 @@ struct KonohaFactory {
 
 	/* JSON_API */
 	struct JsonModule {
-		KModuleInfo *JsonDataInfo;
+		const KModuleInfo *JsonDataInfo;
 		void        *JsonHandler;  // define this in each module if necessary
 		void        (*InitJsonContext)(KonohaContext *kctx);
 		void        (*DeleteJsonContext)(KonohaContext *kctx);
