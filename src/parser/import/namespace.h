@@ -883,7 +883,7 @@ static KPackage *LoadPackageNULL(KonohaContext *kctx, kpackageId_t packageId, in
 static KPackage *GetPackageNULL(KonohaContext *kctx, kpackageId_t packageId, int option, KTraceInfo *trace)
 {
 	KLock(kctx->share->filepackMutex);
-	KPackage *pack = (KPackage *)map_getu(kctx, kctx->share->packageMapNO, packageId, uNULL);
+	KPackage *pack = (KPackage *)map_getu(kctx, kctx->share->packageMapNO, packageId, 0);
 	KUnlock(kctx->share->filepackMutex);
 	if(pack == NULL) {
 		pack = LoadPackageNULL(kctx, packageId, option, trace);

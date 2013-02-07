@@ -136,7 +136,6 @@ static kinline KClass *KClass_p0(KonohaContext *kctx, KClass *ct, ktypeattr_t ty
 	return KLIB KClass_Generics(kctx, ct, KType_void, 1, &p);
 }
 
-#define uNULL   ((uintptr_t)NULL)
 static kinline void map_Addu(KonohaContext *kctx, KHashMap *kmp, uintptr_t hcode, uintptr_t unboxValue)
 {
 	KHashMapEntry *e = KLIB KHashMap_newEntry(kctx, kmp, hcode);
@@ -168,10 +167,11 @@ static kinline const char* TAG_t(kinfotag_t t)
 	return tags[(int)t];
 }
 
-#define KCheckIndex(N, MAX) \
+#define KCheckIndex(N, MAX) do {\
 	if(unlikely (!(((size_t)N) < ((size_t)MAX)))) {\
 		KLIB KRuntime_raise(kctx, KException_("OutOfBoundary"), SoftwareFault, NULL, sfp);\
 	}\
+} while(0)
 
 
 #ifdef USE_STRINGLIB

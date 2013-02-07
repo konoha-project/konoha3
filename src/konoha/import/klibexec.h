@@ -22,8 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-//#define USE_IDE_PROTOMAP 1
-
 KLIBDECL void KArray_Init(KonohaContext *kctx, KGrowingArray *m, size_t bytemax)
 {
 	m->bytesize = 0;
@@ -570,8 +568,6 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 
 //---------------------------------------------------------------------------
 
-#ifndef USE_IDE_PROTOMAP
-
 #define KGetProtoMap(o)     ((o)->h.prototypePtr)
 #define KSetProtoMap(o, p)   (o)->h.prototypePtr = p
 
@@ -669,89 +665,10 @@ static void kObjectProto_DoEach(KonohaContext *kctx, kAbstractObject *ao, void *
 	}
 }
 
-#endif
-
-#ifdef USE_IDE_PROTOMAP
-
-#include "protomap.h"
-
-static void kObjectProto_Free(KonohaContext *kctx, kObjectVar *o)
-{
-	KClass *ct = kObject_class(o);
-	protomap_delete((Kprotomap_t *)o->h.prototypePtr);
-	ct->free(kctx, o);
-}
-
-static void kObjectProto_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
-{
-	unsigned map_size;
-	kObject_class(o)->reftrace(kctx, o, visitor);
-	map_size = protomap_size((Kprotomap_t *)o->h.prototypePtr);
-	if(map_size) {
-		protomap_iterator itr = {0};
-		KKeyValue *d;
-		while((d = protomap_next((Kprotomap_t *)o->h.prototypePtr, &itr)) != NULL) {
-			if(KTypeAttr_Is(Boxed, d->attrTypeId)) {
-				KRefTrace(d->ObjectValue);
-			}
-		}
-	}
-}
-
-static KKeyValue* kObjectProto_GetKeyValue(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key)
-{
-	kObject *v = (kObject *)o;
-	return protomap_get((Kprotomap_t *)v->h.prototypePtr, key);
-}
-
-static kObject* kObjectProto_GetObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, kAbstractObject *defval)
-{
-	kObject *v = (kObject *)o;
-	KKeyValue *d = protomap_get((Kprotomap_t *)v->h.prototypePtr, key);
-	return (d != NULL) ? d->ObjectValue : defval;
-}
-
-static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktypeattr_t ty, kAbstractObject *val)
-{
-	kObjectVar *v = (kObjectVar *)o;
-	if(ty == 0) ty = kObject_class(v)->typeId;
-	protomap_Set((Kprotomap_t **)&v->h.prototypePtr, key, ty | KTypeAttr_Boxed, (void *)val);
-	PLATAPI WriteBarrier(kctx, v);
-}
-
-static void kObjectProto_SetUnboxValue(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktypeattr_t ty, uintptr_t unboxValue)
-{
-	kObjectVar *v = (kObjectVar *)o;
-	//PLATAPI WriteBarrier(kctx, v);   // why ? need this? by kimio
-	protomap_Set((Kprotomap_t **)&v->h.prototypePtr, key, ty, (void *)unboxValue);
-}
-
-static void kObjectProto_RemoveKey(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key)
-{
-	kObjectVar *v = (kObjectVar *)o;
-	KKeyValue *d = protomap_get((Kprotomap_t *)v->h.prototypePtr, key);
-	if(d != NULL) {
-		d->key = 0; d->attrTypeId = 0; d->unboxValue = 0;
-	}
-}
-
-typedef void (*feach)(KonohaContext *kctx, void *, KKeyValue *d);
-static void kObjectProto_DoEach(KonohaContext *kctx, kAbstractObject *o, void *thunk, feach f)
-{
-	kObjectVar *v = (kObjectVar *)o;
-	KKeyValue *r;
-	protomap_iterator itr = {0};
-	while((r = protomap_next((Kprotomap_t *)v->h.prototypePtr, &itr)) != NULL) {
-		f(kctx, thunk, r);
-	}
-}
-
-#endif
-
 struct wbenv {
 	KonohaValue *values;
-	int pos;
 	KBuffer *wb;
+	int pos;
 	int count;
 };
 
@@ -937,16 +854,16 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 
 static void klib_Init(KonohaLibVar *l)
 {
-	l->KArray_Init   = KArray_Init;
-	l->KArray_Resize = KArray_Resize;
-	l->KArray_Expand = KArray_Expand;
-	l->KArray_Free   = KArray_Free;
+	l->KArray_Init       = KArray_Init;
+	l->KArray_Resize     = KArray_Resize;
+	l->KArray_Expand     = KArray_Expand;
+	l->KArray_Free       = KArray_Free;
 	l->KBuffer_Init      = KBuffer_Init;
 	l->KBuffer_Alloca    = KBuffer_Alloca;
 	l->KBuffer_Write     = KBuffer_Write;
 	l->KBuffer_vprintf   = KBuffer_vprintf;
 	l->KBuffer_printf    = KBuffer_printf;
-	l->KBuffer_text       = KBuffer_text;
+	l->KBuffer_text      = KBuffer_text;
 	l->KBuffer_Free      = KBuffer_Free;
 	l->KBuffer_Stringfy  = KBuffer_Stringfy;
 	l->KBuffer_iconv     = KBuffer_iconv;
@@ -963,7 +880,7 @@ static void klib_Init(KonohaLibVar *l)
 
 	l->KHashMap_Init     = KHashMap_Init;
 	l->KHashMap_Free     = KHashMap_Free;
-	l->KHashMap_DoEach     = KHashMap_DoEach;
+	l->KHashMap_DoEach   = KHashMap_DoEach;
 	l->KHashMap_newEntry = KHashMap_newEntry;
 	l->KHashMap_get      = KHashMap_getentry;
 	l->KHashMap_Remove   = KHashMap_Remove;
@@ -971,22 +888,22 @@ static void klib_Init(KonohaLibVar *l)
 	l->kObjectProto_Free     = kObjectProto_Free;
 	l->kObjectProto_Reftrace = kObjectProto_Reftrace;
 
-	l->kObject_getObject     = kObjectProto_GetObject;
+	l->kObject_getObject          = kObjectProto_GetObject;
 	l->kObjectProto_SetObject     = kObjectProto_SetObject;
-	l->kObjectProto_GetKeyValue = kObjectProto_GetKeyValue;
+	l->kObjectProto_GetKeyValue   = kObjectProto_GetKeyValue;
 	l->kObjectProto_SetUnboxValue = kObjectProto_SetUnboxValue;
 	l->kObjectProto_RemoveKey     = kObjectProto_RemoveKey;
-	l->kObjectProto_DoEach     = kObjectProto_DoEach;
-	l->kObjectProto_p        = kObjectProto_p;
-	l->DumpObject            = DumpObject;
-	l->KfileId       = KfileId;
-	l->KpackageId    = KpackageId;
-	l->Ksymbol       = Ksymbol;
+	l->kObjectProto_DoEach    = kObjectProto_DoEach;
+	l->kObjectProto_p         = kObjectProto_p;
+	l->DumpObject             = DumpObject;
+	l->KfileId                = KfileId;
+	l->KpackageId             = KpackageId;
+	l->Ksymbol                = Ksymbol;
 	l->KRuntime_tryCallMethod = KRuntime_tryCallMethod;
-	l->ApplySystemFunc             = ApplySystemFunc;
+	l->ApplySystemFunc        = ApplySystemFunc;
 
 	l->KRuntime_raise         = KRuntime_raise;
-	l->ReportScriptMessage         = TRACE_ReportScriptMessage; /* perror.h */
-	l->CheckSafePoint              = CheckSafePoint;
-	l->DiagnosisFaultType          = DiagnosisFaultType;
+	l->ReportScriptMessage    = TRACE_ReportScriptMessage; /* perror.h */
+	l->CheckSafePoint         = CheckSafePoint;
+	l->DiagnosisFaultType     = DiagnosisFaultType;
 }
