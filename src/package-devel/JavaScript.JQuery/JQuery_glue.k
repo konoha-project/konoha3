@@ -5,8 +5,7 @@ import("Syntax.Null");
 import("MiniKonoha.Map");
 import("JavaStyle.Object");
 import("JavaScript.Array");
-import("Lib.Document");
-
+import("JavaScript.Document");
 
 // Typing for the jQuery library, version 1.7.x
 
@@ -350,13 +349,13 @@ JQueryDeferred JQueryPromise.then(Object doneCallbacks, Object failCallbacks, Ob
 
 class JQueryEventObject /*extends Event*/ {
 	@Public Object data;
-	@Public Element delegateTarget;
+	@Public DomElement delegateTarget;
 	@Public boolean isDefaultPrevented(){ return null; }
 	@Public boolean isImmediatePropogationStopped(){ return null; }
 	@Public boolean isPropogationStopped(){ return null; }
 	@Public String namespace;
 	@Public Object preventDefault(){ return null; }
-	@Public Element relatedTarget;
+	@Public DomElement relatedTarget;
 	@Public Object result;
 	@Public void stopImmediatePropagation(){ return; }
 	@Public void stopPropagation(){ return; }
@@ -767,7 +766,7 @@ class JQuery {
 	@Public JQuery undelegate(String namespace){ return null; }
 
 	// INTERNALS
-	@Public Element context;
+	@Public DomElement context;
 	@Public String jquery;
 	@Public JQuery pushStack(Object[] elements){ return null; }
 	@Public JQuery pushStack(Object[] elements, Object name, Object arguments){ return null; }
@@ -880,7 +879,7 @@ class JQuery {
 	@Public JQuery wrapInner(Func[Object, Object] func){ return null; }
 
 	// MISCELLANEOUS
-	@Public Element each(Func[JQuery, Object, Element] func){ return null; }
+	@Public DomElement each(Func[JQuery, Object, DomElement] func){ return null; }
 
 	//Object get(int index){ return null; }
 
@@ -888,9 +887,8 @@ class JQuery {
 
 	// PROPERTIES
 	@Public int length;
-	// TODO: Element is base of HTMLElement. create it rater,.
-	@Public Element get(String index){ return null; }
-	@Public Element get(int index){ return null; }
+	@Public HTMLElement get(String index){ return null; }
+	@Public HTMLElement get(int index){ return null; }
 
 	// TRAVERSING
 	@Public JQuery add(String selector, Object context){ return null; }
@@ -919,10 +917,10 @@ class JQuery {
 	@Public JQuery children(Object selector){ return null; }
 
 	@Public JQuery closest(String selector){ return null; }
-	@Public JQuery closest(String selector, Element context){ return null; }
+	@Public JQuery closest(String selector, DomElement context){ return null; }
 	@Public JQuery closest(JQuery obj){ return null; }
 	@Public JQuery closest(Object element){ return null; }
-	@Public Object closest(Object selectors, Element context)[];
+	@Public Object closest(Object selectors, DomElement context)[];
 
 	@Public JQuery contents(){ return null; }
 
@@ -942,7 +940,7 @@ class JQuery {
 	@Public JQuery first(){ return null; }
 
 	@Public JQuery has(String selector){ return null; }
-	@Public JQuery has(Element contained){ return null; }
+	@Public JQuery has(DomElement contained){ return null; }
 
 	@Public JQuery is(String selector){ return null; }
 	@Public JQuery is(Func[Object, Object] func){ return null; }
@@ -951,14 +949,14 @@ class JQuery {
 
 	@Public JQuery last(){ return null; }
 
-	@Public JQuery map(Func[Object, Object, Element] callback){ return null; }
+	@Public JQuery map(Func[Object, Object, DomElement] callback){ return null; }
 
 	@Public JQuery next(String selector){ return null; }
 
 	@Public JQuery nextAll(String selector){ return null; }
 
 	@Public JQuery nextUntil(String selector, String filter){ return null; }
-	@Public JQuery nextUntil(Element element, String filter){ return null; }
+	@Public JQuery nextUntil(DomElement element, String filter){ return null; }
 
 	@Public JQuery not(String selector){ return null; }
 	@Public JQuery not(Func[Object, Object] func){ return null; }
@@ -972,14 +970,14 @@ class JQuery {
 	@Public JQuery parents(String selector){ return null; }
 
 	@Public JQuery parentsUntil(String selector, String filter){ return null; }
-	@Public JQuery parentsUntil(Element element, String filter){ return null; }
+	@Public JQuery parentsUntil(DomElement element, String filter){ return null; }
 
 	@Public JQuery prev(String selector){ return null; }
 
 	@Public JQuery prevAll(String selector){ return null; }
 
 	@Public JQuery prevUntil(String selector, String filter){ return null; }
-	@Public JQuery prevUntil(Element element, String filter){ return null; }
+	@Public JQuery prevUntil(DomElement element, String filter){ return null; }
 
 	@Public JQuery siblings(String selector){ return null; }
 
@@ -1053,16 +1051,16 @@ class JQueryStatic {
 	@Public Map[Object] cssHooks;
 
 	// DATA
-	@Public Object data(Element element, String key, Object value){ return null; }
+	@Public Object data(DomElement element, String key, Object value){ return null; }
 
-	@Public Object dequeue(Element element, String queueName){ return null; }
+	@Public Object dequeue(DomElement element, String queueName){ return null; }
 
-	@Public boolean hasData(Element element){ return null; }
+	@Public boolean hasData(DomElement element){ return null; }
 
-	@Public Object[] queue(Element element, String queueName);
-	@Public JQuery queue(Element element, String queueName, Object newQueueOrCallback){ return null; }
+	@Public Object[] queue(DomElement element, String queueName);
+	@Public JQuery queue(DomElement element, String queueName, Object newQueueOrCallback){ return null; }
 
-	@Public JQuery removeData(Element element, String name){ return null; }
+	@Public JQuery removeData(DomElement element, String name){ return null; }
 
 	// EFFECTS
 	//Object fxFunc[void] tick, double interval; Func[void] stop; JQuerySpeeds speeds, boolean off, Object step };
@@ -1083,7 +1081,7 @@ class JQueryStatic {
 	@Public JQuerySupport support;
 
 	// UTILITIES
-	@Public boolean contains(Element container, Element contained){ return null; }
+	@Public boolean contains(DomElement container, DomElement contained){ return null; }
 
 	@Public Object each(Object collection, Func[Object, Object, Object] callback){ return null; }
 
@@ -1132,7 +1130,7 @@ class JQueryStatic {
 	@Public boolean isNumeric(Object value){ return null; }
 	@Public boolean isPlainObject(Object obj){ return null; }
 	@Public boolean isWindow(Object obj){ return null; }
-	@Public boolean isXMLDoc(Node node){ return null; }
+	@Public boolean isXMLDoc(DomNode node){ return null; }
 
 	@Public Object makeArray(Object obj)[];
 
@@ -1149,7 +1147,7 @@ class JQueryStatic {
 	//This FIXME should return an XMLDocument
 	@Public Object parseXML(String data){ return null; }
 
-	@Public JQuery queue(Element element, String queueName, Object[] newQueue){ return null; }
+	@Public JQuery queue(DomElement element, String queueName, Object[] newQueue){ return null; }
 
 	@Public String trim(String str){ return null; }
 
