@@ -197,6 +197,9 @@ static void KClass_InitField(KonohaContext *kctx, KClassVar *definedClass, KClas
 	definedClass->cstruct_size = size64((fieldsize * sizeof(kObject *)) + sizeof(kObjectHeader));
 	DBG_P("superClass->fieldsize=%d, definedFieldSize=%d, cstruct_size=%d", superClass->fieldsize, fieldInitSize, definedClass->cstruct_size);
 	if(fieldsize > 0) {
+		if(definedClass->fieldItems != NULL) {
+			KFree(definedClass->fieldItems, definedClass->fieldAllocSize * sizeof(KClassField));
+		}
 		definedClass->fieldItems = (KClassField *)KCalloc_UNTRACE(fieldsize, sizeof(KClassField));
 		definedClass->fieldAllocSize = fieldsize;
 		definedClass->fieldsize = superClass->fieldsize; /* supsize */
