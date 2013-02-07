@@ -8,5 +8,5 @@ done
 
 for F in ${SOURCE}
 do
-	minikonoha -MFuelVM ./misc/2to3.k ${F}
+	konoha -MFuelVM ./misc/2to3.k ${F}
 done
