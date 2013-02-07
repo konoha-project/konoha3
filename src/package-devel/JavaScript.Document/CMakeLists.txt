@@ -1,3 +1,3 @@
 cmake_minimum_required(VERSION 2.6)
-set(PACKAGE_SOURCE_CODE Document_glue.c)
-add_konoha_package(Lib.Document)
+set(PACKAGE_SCRIPT_CODE Document_glue.k Document_kick.k)
+add_konoha_package(JavaScript.Document)
