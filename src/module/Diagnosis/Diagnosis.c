@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 #include <errno.h>
-#include <konoha/konoha.h>
+#include <konoha3/konoha.h>
 
 #if HAVE_DB_H
 #if defined(__linux__)

@@ -60,7 +60,7 @@ extern "C" {
 
 #define kunused __attribute__((unused))
 
-#include <konoha/klib.h>
+#include <konoha3/klib.h>
 
 #ifndef K_PREFIX
 #define K_PREFIX  "/usr/local"

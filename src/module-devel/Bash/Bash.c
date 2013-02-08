@@ -25,10 +25,10 @@
 #include <stdio.h>
 #include <iconv.h>
 #include <errno.h>
-#include <konoha/konoha.h>
-#include <konoha/sugar.h>
-#include <konoha/klib.h>
-#include <konoha/arch/minivm.h>
+#include <konoha3/konoha.h>
+#include <konoha3/sugar.h>
+#include <konoha3/klib.h>
+#include <konoha3/arch/minivm.h>
 
 #define LOG_FUNCTION_NAME "echo"
 #define ARGLENGTH 8

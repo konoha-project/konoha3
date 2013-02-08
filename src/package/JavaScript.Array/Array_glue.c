@@ -22,11 +22,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <konoha/konoha.h>
-#include <konoha/sugar.h>
-#include <konoha/klib.h>
-#include <konoha/konoha_common.h>
-#include <konoha/import/methoddecl.h>
+#include <konoha3/konoha.h>
+#include <konoha3/sugar.h>
+#include <konoha3/klib.h>
+#include <konoha3/konoha_common.h>
+#include <konoha3/import/methoddecl.h>
 #define _JS    kMethod_JSCompatible
 
 #ifdef __cplusplus

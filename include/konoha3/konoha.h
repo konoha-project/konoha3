@@ -43,7 +43,7 @@ extern "C" {
 #define K_MINOR_VERSION 0
 #define K_PATCH_LEVEL   0
 
-#include <konoha/stardate.h>
+#include <konoha3/stardate.h>
 #define K_DATE      ((K_YEAR - 2006) * (12 * 24 * 32) + (K_MONTH * (24 * 32) + ((K_DAY * 24) + K_HOUR)))
 
 #ifndef K_REVISION
@@ -94,7 +94,7 @@ extern "C" {
 #ifdef HAVE_STDBOOL_H
 #include <stdbool.h>
 #else
-#include <konoha/stdbool.h>
+#include <konoha3/stdbool.h>
 #endif
 #include <stdint.h>
 #endif

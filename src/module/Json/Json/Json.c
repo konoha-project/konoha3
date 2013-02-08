@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 #include "kjson/kjson.c"
-#include <konoha/konoha.h>
+#include <konoha3/konoha.h>
 #define JSONAPI PLATAPI JsonModule.
 // -------------------------------------------------------------------------
 /* JSON Parse/ToString API */

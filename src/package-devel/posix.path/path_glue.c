@@ -30,9 +30,9 @@
 #include <sys/file.h>
 #include <dirent.h>
 
-#include <konoha/konoha.h>
-#include <konoha/sugar.h>
-#include <konoha/import/methoddecl.h>
+#include <konoha3/konoha.h>
+#include <konoha3/sugar.h>
+#include <konoha3/import/methoddecl.h>
 #define _Iter  kMethod_Iterative
 #define _C     kMethod_CCompatible
 

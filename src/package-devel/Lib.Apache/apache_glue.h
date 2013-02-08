@@ -1,5 +1,5 @@
-#include <konoha/konoha.h>
-#include <konoha/sugar.h>
+#include <konoha3/konoha.h>
+#include <konoha3/sugar.h>
 
 #ifndef APACHE_GLUE_H
 #define APACHE_GLUE_H

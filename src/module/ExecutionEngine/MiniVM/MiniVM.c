@@ -24,9 +24,9 @@
 
 #define USE_DIRECT_THREADED_CODE
 
-#include <konoha/konoha.h>
-#include <konoha/klib.h>
-#include <konoha/sugar.h>
+#include <konoha3/konoha.h>
+#include <konoha3/klib.h>
+#include <konoha3/sugar.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,7 +57,7 @@ extern "C" {
 	MACRO(SAFEPOINT)\
 	MACRO(CHKSTACK)\
 
-#include <konoha/arch/minivm.h>
+#include <konoha3/arch/minivm.h>
 
 #define OPCODE(T)  OPCODE_##T,
 typedef enum {

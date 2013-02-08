@@ -26,9 +26,9 @@
 
 #define USE_STRINGLIB 1
 
-#include <konoha/konoha.h>
-#include <konoha/klib.h>
-#include <konoha/import/methoddecl.h>
+#include <konoha3/konoha.h>
+#include <konoha3/klib.h>
+#include <konoha3/import/methoddecl.h>
 
 #include "string_api.h"
 #include "rope_string.h"

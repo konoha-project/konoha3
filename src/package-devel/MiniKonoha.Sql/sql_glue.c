@@ -24,10 +24,10 @@
 
 /* ************************************************************************ */
 
-#include <konoha/konoha.h>
-#include <konoha/konoha_common.h>
-#include <konoha/klib.h>
-#include <konoha/import/methoddecl.h>
+#include <konoha3/konoha.h>
+#include <konoha3/konoha_common.h>
+#include <konoha3/klib.h>
+#include <konoha3/import/methoddecl.h>
 #include <stdio.h> /* for strtoll, strtod */
 
 #ifdef HAVE_KONOHA_SQL_CONFIG_H

@@ -30,8 +30,8 @@ extern "C" {
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <sys/ttydefaults.h>
-#include <konoha/konoha.h>
-#include <konoha/klib.h>
+#include <konoha3/konoha.h>
+#include <konoha3/klib.h>
 
 // -------------------------------------------------------------------------
 /* Console */

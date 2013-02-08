@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <konoha/import/methoddecl.h>
+#include <konoha3/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -27,9 +27,9 @@
 //#define USING_SUGAR_AS_BUILTIN 1
 #define USE_AsciiToKonohaChar
 
-#include <konoha/konoha.h>
-#include <konoha/sugar.h>
-#include <konoha/klib.h>
+#include <konoha3/konoha.h>
+#include <konoha3/sugar.h>
+#include <konoha3/klib.h>
 
 /* ************************************************************************ */
 
@@ -318,7 +318,7 @@ static KMETHOD KSymbol_toString(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(s);
 }
 
-#include <konoha/import/methoddecl.h>
+#include <konoha3/import/methoddecl.h>
 
 void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 {

@@ -40,11 +40,11 @@ extern int verbose_debug;
 #endif
 
 #if defined(_MSC_VER)
-#include <konoha/platform_msvc.h>
+#include <konoha3/platform_msvc.h>
 #elif defined(__MINGW32__)
-#include <konoha/platform_mingw.h>
+#include <konoha3/platform_mingw.h>
 #else
-#include <konoha/platform_posix.h>
+#include <konoha3/platform_posix.h>
 #endif
 
 #endif /* PLATFORM_H_ */
