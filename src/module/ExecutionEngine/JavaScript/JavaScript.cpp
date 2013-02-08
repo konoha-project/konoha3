@@ -683,7 +683,12 @@ static kbool_t JSBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *buil
 		JSBuilder_EmitString(kctx, builder, ")", "", "");
 	}
 	else if(KMethodName_isBinaryOperator(kctx, mtd->mn)) {
-		JSBuilder_VisitNodeParams(kctx, builder, node, thunk, 1, KSymbol_text(mtd->mn),"(", ")");
+		if(mtd->mn == MN_opDIV && kNode_At(node, 1)->attrTypeId == KType_Int && kNode_At(node, 2)->attrTypeId == KType_Int) {
+			JSBuilder_VisitNodeParams(kctx, builder, node, thunk, 1, KSymbol_text(mtd->mn),"((", ")|0)");
+		}
+		else {
+			JSBuilder_VisitNodeParams(kctx, builder, node, thunk, 1, KSymbol_text(mtd->mn),"(", ")");
+		}
 	}
 	else {
 		kNode *receiver = kNode_At(node, 1);
