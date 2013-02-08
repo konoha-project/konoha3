@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include "minikonoha/minikonoha.h"
+#include "konoha/konoha.h"
 #include "test_konoha.h"
 
 #ifdef __cplusplus
@@ -42,7 +42,7 @@ static int __Free__  = 0;
 static void Dummy_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	assert((uintptr_t)conf == 0xdeadbeaf);
-	((kDummy*)o)->x = __Init__++;
+	((kDummy *)o)->x = __Init__++;
 }
 
 static void Dummy_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
@@ -99,7 +99,7 @@ void test_gc(KonohaContext *kctx)
 		}
 		assert(__Init__ == (i+1) * 100);
 		assert(__trace__ == -1);
-		PLATAPI ScheduleGC(kctx, NULL);
+		PLATAPI GCModule.ScheduleGC(kctx, NULL);
 	}
 
 	int small_object_count = __Init__;
@@ -111,7 +111,7 @@ void test_gc(KonohaContext *kctx)
 		}
 		assert(__Init__ == (i+1) * 1000 + small_object_count);
 		assert(__trace__ == -1);
-		PLATAPI ScheduleGC(kctx, NULL);
+		PLATAPI GCModule.ScheduleGC(kctx, NULL);
 	}
 }
 
@@ -172,7 +172,7 @@ static void test_bitops()
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 	for (i = 0; i < ARRAY_SIZE(test_data); i++) {
 		int test   = CLZ(test_data[i]);
-		int answer = (clz_test[i]) - ((sizeof(void*)==8)?0:32);
+		int answer = (clz_test[i]) - ((sizeof(void *)==8)?0:32);
 		assert(test == answer);
 		assert(FFS(test_data[i]) == myffs(test_data[i]));
 	}

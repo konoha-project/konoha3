@@ -31,10 +31,10 @@
 #include <sys/wait.h>
 
 #define USE_FILE 1
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/konoha_common.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/konoha_common.h>
+#include <konoha/import/methoddecl.h>
 
 #if defined(__linux__)
 #include <linux/version.h>
@@ -229,12 +229,12 @@ static kFile *new_PipeFile(KonohaContext *kctx, kArray *gcstack, int fd, const c
 	}
 	struct kFileVar *file = (struct kFileVar *)KLIB new_kObject(kctx, gcstack, KClass_File, (uintptr_t)fp);
 	KFieldInit(file, file->PathInfoNULL, command);
-	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
+	if(!PLATAPI I18NModule.isSystemCharsetUTF8(kctx)) {
 		if(mode[0] == 'r') {
-			file->readerIconv = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
+			file->readerIconv = PLATAPI I18NModule.iconvSystemCharsetToUTF8(kctx, trace);
 		}
 		else {
-			file->writerIconv = PLATAPI iconvUTF8ToSystemCharset(kctx, trace);
+			file->writerIconv = PLATAPI I18NModule.iconvUTF8ToSystemCharset(kctx, trace);
 		}
 	}
 	kFile_Set(ChangeLessStream, file, true);

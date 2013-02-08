@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -136,7 +136,7 @@ static KMETHOD Konoha_eval(KonohaContext *kctx, KonohaStack *sfp)
 
 #define _F(F) (intptr_t)(F)
 
-static kbool_t minikonoha_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t konoha_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defKonohaFactory = {0};
 	SETSTRUCTNAME(defKonohaFactory, KonohaFactory);
@@ -165,23 +165,23 @@ static kbool_t minikonoha_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTra
 
 // ----
 
-static kbool_t minikonoha_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
+static kbool_t konoha_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	minikonoha_defineMethod(kctx, ns, trace);
+	konoha_defineMethod(kctx, ns, trace);
 	return true;
 }
 
-static kbool_t minikonoha_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
+static kbool_t konoha_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
 
-KDEFINE_PACKAGE *minikonoha_Init(void)
+KDEFINE_PACKAGE *konoha_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "minikonoha", K_VERSION);
-	d.PackupNameSpace    = minikonoha_PackupNameSpace;
-	d.ExportNameSpace   = minikonoha_ExportNameSpace;
+	KSetPackageName(d, "konoha", K_VERSION);
+	d.PackupNameSpace    = konoha_PackupNameSpace;
+	d.ExportNameSpace   = konoha_ExportNameSpace;
 	return &d;
 }
 

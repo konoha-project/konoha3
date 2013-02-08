@@ -5,7 +5,7 @@ include(CheckLibraryExists)
 
 cmake_minimum_required(VERSION 2.6)
 
-project(minikonoha)
+project(konoha)
 
 set(VERSION_MAJOR "0")
 set(VERSION_MINOR "3")
@@ -24,13 +24,14 @@ else(MSVC)
 	SET(CMAKE_C_FLAGS_DEBUG        "${CMAKE_C_FLAGS} -O0 -g3")
 	SET(CMAKE_C_FLAGS_COMPRESSED   "${CMAKE_C_FLAGS} -Os -g0")
 endif(MSVC)
+
 SET(CMAKE_CXX_FLAGS_RELEASE    "${CMAKE_CXX_FLAGS} -O3 -g")
 SET(CMAKE_CXX_FLAGS_DEBUG      "${CMAKE_CXX_FLAGS} -O0 -g3")
 SET(CMAKE_CXX_FLAGS_COMPRESSED "${CMAKE_CXX_FLAGS} -Os -g0")
 
 ## Source Code settings
 set(KONOHA_SOURCE
-	src/konoha/minikonoha.c
+	src/konoha/konoha.c
 	src/parser/parser.c
 )
 
@@ -158,7 +159,7 @@ endif(TEST_COVERAGE)
 
 # for .k script test
 enable_testing()
-set(TEST_BIN ${CMAKE_CURRENT_BINARY_DIR}/minikonoha)
+set(TEST_BIN ${CMAKE_CURRENT_BINARY_DIR}/konoha)
 set(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(PARENT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -199,15 +200,15 @@ macro(SET_CXX_PROPERTY_IF_MSVC TARGET)
 	endif(MSVC)
 endmacro(SET_CXX_PROPERTY_IF_MSVC TARGET)
 
-add_library(minikonoha SHARED ${KONOHA_SOURCE})
-SET_CXX_PROPERTY_IF_MSVC(minikonoha ${KONOHA_SOURCE})
-target_link_libraries(minikonoha ${ExtraLibs})
-set(ExtraLibs ${ExtraLibs} minikonoha)
+add_library(konoha SHARED ${KONOHA_SOURCE})
+SET_CXX_PROPERTY_IF_MSVC(konoha ${KONOHA_SOURCE})
+target_link_libraries(konoha ${ExtraLibs})
+set(ExtraLibs ${ExtraLibs} konoha)
 
-add_executable(minikonoha_bin src/exec/command/command.c)
-SET_CXX_PROPERTY_IF_MSVC(minikonoha_bin src/exec/command/command.c)
-target_link_libraries(minikonoha_bin ${ExtraLibs})
-set_target_properties(minikonoha_bin PROPERTIES OUTPUT_NAME minikonoha)
+add_executable(konoha_bin src/exec/command/command.c)
+SET_CXX_PROPERTY_IF_MSVC(konoha_bin src/exec/command/command.c)
+target_link_libraries(konoha_bin ${ExtraLibs})
+set_target_properties(konoha_bin PROPERTIES OUTPUT_NAME konoha)
 
 macro(ENABLE_COVERAGE_INFO_IF_ENABLE VARNAME)
 	if(TEST_COVERAGE)
@@ -247,16 +248,13 @@ macro(add_clib_test test_name)
 	set_konoha_home(Clib/Release/${test_name})
 endmacro(add_clib_test sources)
 
-add_clib_test(test_sizeof  ./test/Clib/test_sizeof.c)
-add_clib_test(test_Kmalloc ./test/Clib/test_Kmalloc.c)
-add_clib_test(test_Karray  ./test/Clib/test_Karray.c)
-add_clib_test(test_gc      ./test/Clib/test_gc.c)
-add_clib_test(test_Kwb     ./test/Clib/test_Kwb.c)
-add_clib_test(test_map     ./test/Clib/test_map.c)
-add_clib_test(test_string  ./test/Clib/test_string.c)
-add_clib_test(test_cpp     ./test/Clib/test_cpp.cpp)
-add_clib_test(test_proto   ./test/Clib/test_proto.c)
-add_clib_test(MultiContext   ./test/Clib/MultiContext.c)
+file(GLOB_RECURSE test_files_c   "${CMAKE_CURRENT_SOURCE_DIR}/test/Clib/*.c")
+file(GLOB_RECURSE test_files_cpp "${CMAKE_CURRENT_SOURCE_DIR}/test/Clib/*.cpp")
+foreach(f ${test_files_c} ${test_files_cpp})
+	SET(test_file)
+	POP(${f} "/" test_file)
+	add_clib_test(${test_file} ${f})
+endforeach()
 
 add_test(Shell/Release/Oneline
 	${CMAKE_CURRENT_SOURCE_DIR}/test/test-oneline.sh ${TEST_BIN}
@@ -285,17 +283,7 @@ endforeach(f ${test_files})
 add_subdirectory(src/exec/apache)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpack.cmake)
 
-# for konoha command
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/exec/command/konoha.sh.cmake
-		${CMAKE_CURRENT_BINARY_DIR}/konoha.sh)
-
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/konoha.sh
-	DESTINATION bin
-	RENAME konoha
-	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-	GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-
-install(TARGETS minikonoha minikonoha_bin
+install(TARGETS konoha konoha_bin
 		RUNTIME DESTINATION bin
 		LIBRARY DESTINATION lib${LIB_SUFFIX}
 		)

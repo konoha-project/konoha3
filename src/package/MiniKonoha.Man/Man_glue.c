@@ -24,10 +24,10 @@
 
 #include <stdio.h>
 #define  USE_MethodFlagData
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/klib.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/klib.h>
+#include <konoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C"{

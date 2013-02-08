@@ -22,10 +22,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/klib.h>
-#include <minikonoha/konoha_common.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/klib.h>
+#include <konoha/konoha_common.h>
+#include <konoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,6 +36,7 @@ extern "C" {
 //#define KClass_StringArray0   KClass_p0(kctx, KClass_Array, KType_String)
 
 #define TYPE_Array(TYPE)   (KClass_p0(kctx, KClass_Array, KType_##TYPE))->typeId
+#define JSONAPI PLATAPI JsonModule.
 
 struct JsonBuf {
 	uint64_t json_i;
@@ -52,25 +53,25 @@ typedef struct kJsonVar kJson;
 static void kJson_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kJson *jo = (kJson *)o;
-	PLATAPI CreateJson(kctx, &jo->jsonbuf, KJSON_OBJECT);
+	JSONAPI CreateJson(kctx, &jo->jsonbuf, KJSON_OBJECT);
 }
 
 static void kJson_Free(KonohaContext *kctx, kObject *o)
 {
 	kJson *jo = (kJson *)o;
-	PLATAPI FreeJson(kctx, &jo->jsonbuf);
+	JSONAPI FreeJson(kctx, &jo->jsonbuf);
 }
 
 
 static void kJson_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 //	kJson *jo = (kJson *)v[pos].asObject;
-//	if(PLATAPI IsJsonType(&jo->jsonbuf, KJSON_STRING)) {
-//		const char *text = PLATAPI GetJsonText(kctx, &jo->jsonbuf, NULL, 0, NULL);
+//	if(JSONAPI IsJsonType(&jo->jsonbuf, KJSON_STRING)) {
+//		const char *text = JSONAPI GetJsonText(kctx, &jo->jsonbuf, NULL, 0, NULL);
 //		DBG_ASSERT(text != NULL);
 //		KReturn(KLIB new_kString(kctx, OnStack, text, strlen(text), 0));
 //	}
-//	else if(PLATAPI IsJsonType(&jo->jsonbuf, KJSON_NULL)) {
+//	else if(JSONAPI IsJsonType(&jo->jsonbuf, KJSON_NULL)) {
 //		KReturn(KNULL(String));
 //	}
 //	char* data = json_dumps(json->obj, JSON_ENSURE_ASCII);
@@ -85,7 +86,7 @@ static void kJson_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 static KMETHOD Json_new (KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *) sfp[0].asObject;
-	PLATAPI CreateJson(kctx, &jo->jsonbuf, KJSON_OBJECT);
+	JSONAPI CreateJson(kctx, &jo->jsonbuf, KJSON_OBJECT);
 	KReturn(jo);
 }
 
@@ -110,7 +111,7 @@ static KMETHOD Json_new2(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *) sfp[0].asObject;
 	kObject *def = sfp[1].asObject;
-	PLATAPI CreateJson(kctx, &jo->jsonbuf, ToKJSONType(kctx, kObject_typeId(def)), kObject_Unbox(def));
+	JSONAPI CreateJson(kctx, &jo->jsonbuf, ToKJSONType(kctx, kObject_typeId(def)), kObject_Unbox(def));
 	KReturn(jo);
 }
 
@@ -119,7 +120,7 @@ static KMETHOD Json_Parse(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 	KMakeTrace(trace, sfp);
-	if(PLATAPI ParseJson(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), trace)) {
+	if(JSONAPI ParseJson(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), trace)) {
 		KReturn(jo);
 	}
 }
@@ -128,21 +129,21 @@ static KMETHOD Json_Parse(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_toInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	if(PLATAPI IsJsonType(&jo->jsonbuf, KJSON_INT)) {
-		int64_t n = PLATAPI GetJsonInt(kctx, &jo->jsonbuf, NULL, 0, 0);
+	if(JSONAPI IsJsonType(&jo->jsonbuf, KJSON_INT)) {
+		int64_t n = JSONAPI GetJsonInt(kctx, &jo->jsonbuf, NULL, 0, 0);
 		KReturnUnboxValue(n);
 	}
-	else if(PLATAPI IsJsonType(&jo->jsonbuf, KJSON_DOUBLE)) {
-		double n = PLATAPI GetJsonInt(kctx, &jo->jsonbuf, NULL, 0, 0);
+	else if(JSONAPI IsJsonType(&jo->jsonbuf, KJSON_DOUBLE)) {
+		double n = JSONAPI GetJsonInt(kctx, &jo->jsonbuf, NULL, 0, 0);
 		KReturnUnboxValue((intptr_t)n);
 	}
-	else if(PLATAPI IsJsonType(&jo->jsonbuf, KJSON_STRING)) {
-		const char *text = PLATAPI GetJsonText(kctx, &jo->jsonbuf, NULL, 0, "0");
+	else if(JSONAPI IsJsonType(&jo->jsonbuf, KJSON_STRING)) {
+		const char *text = JSONAPI GetJsonText(kctx, &jo->jsonbuf, NULL, 0, "0");
 		int64_t n = strtoll(text, NULL, 10);
 		KReturnUnboxValue((intptr_t)n);
 	}
-	else if(PLATAPI IsJsonType(&jo->jsonbuf, KJSON_BOOLEAN)) {
-		int n = PLATAPI GetJsonBoolean(kctx, &jo->jsonbuf, NULL, 0, 0);
+	else if(JSONAPI IsJsonType(&jo->jsonbuf, KJSON_BOOLEAN)) {
+		int n = JSONAPI GetJsonBoolean(kctx, &jo->jsonbuf, NULL, 0, 0);
 		KReturnUnboxValue((intptr_t)n);
 	}
 	KReturnUnboxValue(0);
@@ -152,7 +153,7 @@ static KMETHOD Json_toInt(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Int_toJson(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
-	PLATAPI CreateJson(kctx, &jo->jsonbuf, KJSON_INT64, (int64_t)sfp[0].intValue);
+	JSONAPI CreateJson(kctx, &jo->jsonbuf, KJSON_INT64, (int64_t)sfp[0].intValue);
 	KReturn(jo);
 }
 
@@ -160,11 +161,11 @@ static KMETHOD Int_toJson(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	if(PLATAPI IsJsonType(&jo->jsonbuf, KJSON_NULL)) {
+	if(JSONAPI IsJsonType(&jo->jsonbuf, KJSON_NULL)) {
 		KReturn(KNULL(String));
 	}
 	else {
-		const char *text = PLATAPI JsonToNewText(kctx, &jo->jsonbuf);
+		const char *text = JSONAPI JsonToNewText(kctx, &jo->jsonbuf);
 		DBG_ASSERT(text != NULL);
 		kString *ret = KLIB new_kString(kctx, OnStack, text, strlen(text), 0);
 		free((char *) text);
@@ -176,10 +177,10 @@ static KMETHOD Json_toString(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_asString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	const char *text = PLATAPI JsonToNewText(kctx, &jo->jsonbuf);
+	const char *text = JSONAPI JsonToNewText(kctx, &jo->jsonbuf);
 	DBG_ASSERT(text != NULL);
 	kString *ret;
-	if(PLATAPI IsJsonType(&jo->jsonbuf, KJSON_STRING)) {
+	if(JSONAPI IsJsonType(&jo->jsonbuf, KJSON_STRING)) {
 		/* Skip DoubleQuote */
 		ret = KLIB new_kString(kctx, OnStack, text+1, strlen(text)-2, 0);
 	}
@@ -195,7 +196,7 @@ static KMETHOD Json_asString(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD String_toJson(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
-	PLATAPI CreateJson(kctx, &jo->jsonbuf, KJSON_STRING, kString_text(sfp[0].asString));
+	JSONAPI CreateJson(kctx, &jo->jsonbuf, KJSON_STRING, kString_text(sfp[0].asString));
 	KReturn(jo);
 }
 
@@ -203,7 +204,7 @@ static KMETHOD String_toJson(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	double ret = PLATAPI GetJsonFloat(kctx, &jo->jsonbuf, NULL, 0, 0.0);
+	double ret = JSONAPI GetJsonFloat(kctx, &jo->jsonbuf, NULL, 0, 0.0);
 	KReturnFloatValue(ret);
 }
 
@@ -211,7 +212,7 @@ static KMETHOD Json_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_toBoolean(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	kbool_t ret = PLATAPI GetJsonBoolean(kctx, &jo->jsonbuf, NULL, 0, false);
+	kbool_t ret = JSONAPI GetJsonBoolean(kctx, &jo->jsonbuf, NULL, 0, false);
 	KReturnUnboxValue(ret);
 }
 
@@ -226,7 +227,7 @@ static KMETHOD Json_keys(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
 	kArray *ret = (kArray *) KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
-	PLATAPI DoJsonEach(kctx, &jo->jsonbuf, (void *)ret, keys_doEach);
+	JSONAPI DoJsonEach(kctx, &jo->jsonbuf, (void *)ret, keys_doEach);
 	KReturn(ret);
 }
 
@@ -235,10 +236,10 @@ static KMETHOD Json_hasKey(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
 	struct JsonBuf jsonbuf = {};
-	kbool_t ret = PLATAPI RetrieveJsonKeyValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), &jsonbuf);
+	kbool_t ret = JSONAPI RetrieveJsonKeyValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), &jsonbuf);
 	/* TODO(ide)
 	 * In common json library, retrieved Json object is need not to free object. */
-	//PLATAPI FreeJson(kctx, &jsonbuf);
+	//JSONAPI FreeJson(kctx, &jsonbuf);
 	KReturnUnboxValue(ret);
 }
 
@@ -246,7 +247,7 @@ static KMETHOD Json_hasKey(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	int64_t ret = PLATAPI GetJsonSize(kctx, &jo->jsonbuf);
+	int64_t ret = JSONAPI GetJsonSize(kctx, &jo->jsonbuf);
 	KReturnUnboxValue(ret);
 }
 
@@ -256,7 +257,7 @@ static KMETHOD Json_getJson(KonohaContext *kctx, KonohaStack *sfp)
 	kJson *jo = (kJson *)sfp[0].asObject;
 	struct JsonBuf jsonbuf = {};
 	kJson *jnew = (kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
-	if(PLATAPI RetrieveJsonKeyValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), &jsonbuf)) {
+	if(JSONAPI RetrieveJsonKeyValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), &jsonbuf)) {
 		memcpy(&jnew->jsonbuf, &jsonbuf, sizeof(struct JsonBuf));
 	}
 	KReturn(jnew);
@@ -268,7 +269,7 @@ static KMETHOD Json_getJson_index(KonohaContext *kctx, KonohaStack *sfp)
 	kJson *jo = (kJson *)sfp[0].asObject;
 	struct JsonBuf jsonbuf = {};
 	kJson *jnew = (kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
-	if(PLATAPI RetrieveJsonArrayAt(kctx, &jo->jsonbuf, sfp[1].unboxValue, &jsonbuf)) {
+	if(JSONAPI RetrieveJsonArrayAt(kctx, &jo->jsonbuf, sfp[1].unboxValue, &jsonbuf)) {
 		memcpy(&jnew->jsonbuf, &jsonbuf, sizeof(struct JsonBuf));
 	}
 	KReturn(jnew);
@@ -279,7 +280,7 @@ static KMETHOD Json_getJson_index(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_getBoolean(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	kbool_t ret = PLATAPI GetJsonBoolean(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), false);
+	kbool_t ret = JSONAPI GetJsonBoolean(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), false);
 	KReturnUnboxValue(ret);
 }
 
@@ -287,7 +288,7 @@ static KMETHOD Json_getBoolean(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_getFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	double ret = PLATAPI GetJsonFloat(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), 0.0);
+	double ret = JSONAPI GetJsonFloat(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), 0.0);
 	KReturnFloatValue(ret);
 }
 
@@ -295,7 +296,7 @@ static KMETHOD Json_getFloat(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_getInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	int64_t ret = PLATAPI GetJsonInt(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), 0);
+	int64_t ret = JSONAPI GetJsonInt(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), 0);
 	KReturnUnboxValue(ret);
 }
 
@@ -305,9 +306,9 @@ static KMETHOD Json_getString(KonohaContext *kctx, KonohaStack *sfp)
 	kJson *jo = (kJson *)sfp[0].asObject;
 
 	struct JsonBuf jsonbuf = {};
-	if(PLATAPI RetrieveJsonKeyValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), &jsonbuf)) {
-		const char *text = PLATAPI GetJsonText(kctx, &jsonbuf, NULL, 0, 0);
-		int64_t len = PLATAPI GetJsonSize(kctx, &jsonbuf);
+	if(JSONAPI RetrieveJsonKeyValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), &jsonbuf)) {
+		const char *text = JSONAPI GetJsonText(kctx, &jsonbuf, NULL, 0, 0);
+		int64_t len = JSONAPI GetJsonSize(kctx, &jsonbuf);
 		KReturn(KLIB new_kString(kctx, OnStack, text, len, 0));
 	}
 	KReturn(KNULL(String));
@@ -318,7 +319,7 @@ static KMETHOD Json_SetString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
 	kString *key = sfp[1].asString;
-	if(!PLATAPI SetJsonValue(kctx, &jo->jsonbuf, kString_text(key), kString_size(key), KJSON_STRING, kString_text(sfp[2].asString))) {
+	if(!JSONAPI SetJsonValue(kctx, &jo->jsonbuf, kString_text(key), kString_size(key), KJSON_STRING, kString_text(sfp[2].asString))) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();
@@ -330,7 +331,7 @@ static KMETHOD Json_SetJson(KonohaContext *kctx, KonohaStack *sfp)
 	kJson *jo  = (kJson *)sfp[0].asObject;
 	kString *key = sfp[1].asString;
 	kJson *val = (kJson *)sfp[2].asObject;
-	if(!PLATAPI SetJsonKeyValue(kctx, &jo->jsonbuf, kString_text(key), kString_size(key), &val->jsonbuf)) {
+	if(!JSONAPI SetJsonKeyValue(kctx, &jo->jsonbuf, kString_text(key), kString_size(key), &val->jsonbuf)) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();
@@ -341,7 +342,7 @@ static KMETHOD Json_SetJson_index(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo  = (kJson *)sfp[0].asObject;
 	kJson *val = (kJson *)sfp[2].asObject;
-	if(!PLATAPI SetJsonArrayAt(kctx, &jo->jsonbuf, sfp[1].unboxValue, &val->jsonbuf)) {
+	if(!JSONAPI SetJsonArrayAt(kctx, &jo->jsonbuf, sfp[1].unboxValue, &val->jsonbuf)) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();
@@ -352,7 +353,7 @@ static KMETHOD Json_AddJson(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo  = (kJson *)sfp[0].asObject;
 	kJson *val = (kJson *)sfp[1].asObject;
-	if(!PLATAPI AppendJsonArray(kctx, &jo->jsonbuf, &val->jsonbuf)) {
+	if(!JSONAPI AppendJsonArray(kctx, &jo->jsonbuf, &val->jsonbuf)) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();
@@ -362,7 +363,7 @@ static KMETHOD Json_AddJson(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_SetBoolean(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	if(!PLATAPI SetJsonValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), KJSON_BOOLEAN, sfp[2].unboxValue)) {
+	if(!JSONAPI SetJsonValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), KJSON_BOOLEAN, sfp[2].unboxValue)) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();
@@ -372,7 +373,7 @@ static KMETHOD Json_SetBoolean(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_SetFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	if(!PLATAPI SetJsonValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), KJSON_DOUBLE, sfp[2].floatValue)) {
+	if(!JSONAPI SetJsonValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), KJSON_DOUBLE, sfp[2].floatValue)) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();
@@ -382,7 +383,7 @@ static KMETHOD Json_SetFloat(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_SetInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	if(!PLATAPI SetJsonValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), KJSON_INT, sfp[2].unboxValue)) {
+	if(!JSONAPI SetJsonValue(kctx, &jo->jsonbuf, kString_text(sfp[1].asString), kString_size(sfp[1].asString), KJSON_INT, sfp[2].unboxValue)) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();

@@ -50,7 +50,7 @@ static void kObject_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vi
 static kObject *new_kObject(KonohaContext *kctx, kArray *gcstackNULL, KClass *ct, uintptr_t conf)
 {
 	DBG_ASSERT(ct->cstruct_size > 0);
-	kObjectVar *o = PLATAPI AllocObject(kctx, ct->cstruct_size, NULL/*FIXME*/);
+	kObjectVar *o = PLATAPI GCModule.AllocObject(kctx, ct->cstruct_size, NULL/*FIXME*/);
 	o->h.magicflag = ct->magicflag;
 	o->h.ct = ct;
 	o->h.prototypePtr = NULL; /* (KProtoMap *) Kprotomap_new(0); */
@@ -544,7 +544,7 @@ static void kNameSpace_Init(KonohaContext *kctx, kObject *o, void *conf)
 	ns->importedNameSpaceList = K_EMPTYARRAY;
 	ns->methodList_OnList = K_EMPTYARRAY;
 	ns->metaPatternList = K_EMPTYARRAY;
-	ns->builderApi = PLATAPI GetDefaultBuilderAPI();
+	ns->builderApi = PLATAPI ExecutionEngineModule.GetDefaultBuilderAPI();
 	KLIB KDict_Init(kctx, &(ns->constTable));
 }
 

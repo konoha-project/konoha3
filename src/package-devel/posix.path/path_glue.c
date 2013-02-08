@@ -30,9 +30,9 @@
 #include <sys/file.h>
 #include <dirent.h>
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/import/methoddecl.h>
 #define _Iter  kMethod_Iterative
 #define _C     kMethod_CCompatible
 
@@ -60,7 +60,7 @@ static KMETHOD System_getcwd(KonohaContext *kctx, KonohaStack *sfp)
 	char *cwd = getcwd(filepath, K_PATHMAX);
 	if(cwd != NULL) {
 		char buffer[K_PATHMAX] = {0};
-		const char *konohaPath = PLATAPI formatKonohaPath(kctx, buffer, sizeof(buffer), cwd, strlen(cwd), trace);
+		const char *konohaPath = PLATAPI I18NModule.formatKonohaPath(kctx, buffer, sizeof(buffer), cwd, strlen(cwd), trace);
 		KReturn(KLIB new_kString(kctx, OnStack, konohaPath, strlen(konohaPath), 0));
 	}
 	else {
@@ -75,10 +75,10 @@ static KMETHOD System_realpath(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX], filepath[K_PATHMAX] = {0};
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	char *cwd = realpath(systemPath, filepath);
 	if(cwd != NULL) {
-		const char *konohaPath = PLATAPI formatKonohaPath(kctx, buffer, sizeof(buffer), cwd, strlen(cwd), trace);
+		const char *konohaPath = PLATAPI I18NModule.formatKonohaPath(kctx, buffer, sizeof(buffer), cwd, strlen(cwd), trace);
 		KReturn(KLIB new_kString(kctx, OnStack, konohaPath, strlen(konohaPath), 0));
 	}
 	else {
@@ -93,7 +93,7 @@ static KMETHOD System_chdir(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	int ret = chdir(systemPath);
 	if(ret == -1) {
 		KTraceErrorPoint(trace, SystemFault, "chdir", LogFileName(kString_text(path)), LogErrno);
@@ -107,7 +107,7 @@ static KMETHOD System_chroot(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	int ret = chroot(systemPath);
 	if(ret == -1) {
 		KTraceErrorPoint(trace, SystemFault, "chroot", LogFileName(kString_text(path)), LogErrno);
@@ -130,7 +130,7 @@ static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	mode_t mode = (mode_t)sfp[2].intValue;
 	int ret = chmod(systemPath, mode);
 	if(ret == -1) {
@@ -161,7 +161,7 @@ static KMETHOD System_access(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	mode_t mode = (mode_t)sfp[2].intValue;
 	int ret = access(systemPath, mode);
 	if(ret == -1) {
@@ -175,7 +175,7 @@ static KMETHOD System_chown(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	uid_t owner = (uid_t)sfp[2].intValue;
 	gid_t group = (gid_t)sfp[3].intValue;
 	int ret = chown(systemPath, owner, group);
@@ -190,7 +190,7 @@ static KMETHOD System_lchown(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	uid_t owner = (uid_t)sfp[2].intValue;
 	gid_t group = (gid_t)sfp[3].intValue;
 	int ret = lchown(systemPath, owner, group);
@@ -207,8 +207,8 @@ static KMETHOD System_link(KonohaContext *kctx, KonohaStack *sfp)
 	char buffer[K_PATHMAX], buffer2[K_PATHMAX];
 	kString *path = sfp[1].asString, *path2 = sfp[2].asString;
 	KMakeTrace(trace, sfp);
-	const char *oldpath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
-	const char *newpath = PLATAPI formatSystemPath(kctx, buffer2, sizeof(buffer2), kString_text(path2), kString_size(path2), trace);
+	const char *oldpath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *newpath = PLATAPI I18NModule.formatSystemPath(kctx, buffer2, sizeof(buffer2), kString_text(path2), kString_size(path2), trace);
 	int ret = link(oldpath, newpath);
 	if(ret == -1) {
 		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(path)|kString_GuessUserFault(path2)|SystemError, trace);
@@ -225,8 +225,8 @@ static KMETHOD System_symlink(KonohaContext *kctx, KonohaStack *sfp)
 	char buffer[K_PATHMAX], buffer2[K_PATHMAX];
 	kString *path = sfp[1].asString, *path2 = sfp[2].asString;
 	KMakeTrace(trace, sfp);
-	const char *oldpath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
-	const char *newpath = PLATAPI formatSystemPath(kctx, buffer2, sizeof(buffer2), kString_text(path2), kString_size(path2), trace);
+	const char *oldpath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *newpath = PLATAPI I18NModule.formatSystemPath(kctx, buffer2, sizeof(buffer2), kString_text(path2), kString_size(path2), trace);
 	int ret = symlink(oldpath, newpath);
 	if(ret == -1) {
 		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(path)|kString_GuessUserFault(path2)|SystemError, trace);
@@ -243,8 +243,8 @@ static KMETHOD System_rename(KonohaContext *kctx, KonohaStack *sfp)
 	char buffer[K_PATHMAX], buffer2[K_PATHMAX];
 	kString *path = sfp[1].asString, *path2 = sfp[2].asString;
 	KMakeTrace(trace, sfp);
-	const char *oldpath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
-	const char *newpath = PLATAPI formatSystemPath(kctx, buffer2, sizeof(buffer2), kString_text(path2), kString_size(path2), trace);
+	const char *oldpath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *newpath = PLATAPI I18NModule.formatSystemPath(kctx, buffer2, sizeof(buffer2), kString_text(path2), kString_size(path2), trace);
 	int ret = rename(oldpath, newpath);
 	if(ret == -1) {
 		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(path)|kString_GuessUserFault(path2)|SystemError, trace);
@@ -261,7 +261,7 @@ static KMETHOD System_unlink(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	int ret = unlink(systemPath);
 	if(ret == -1) {
 		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(path)|SystemError, trace);
@@ -278,7 +278,7 @@ static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	char pathbuf[K_PATHMAX];
 	ssize_t ret = readlink(systemPath, pathbuf, K_PATHMAX);
 	if(ret == -1) {
@@ -287,7 +287,7 @@ static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp)
 		KReturn(KNULL(String));
 	}
 	else {
-		const char *konohaPath = PLATAPI formatKonohaPath(kctx, buffer, sizeof(buffer), pathbuf, strlen(pathbuf), trace);
+		const char *konohaPath = PLATAPI I18NModule.formatKonohaPath(kctx, buffer, sizeof(buffer), pathbuf, strlen(pathbuf), trace);
 		KReturn(KLIB new_kString(kctx, OnStack, konohaPath, strlen(konohaPath), 0));
 	}
 }
@@ -298,7 +298,7 @@ static KMETHOD System_truncate(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	off_t length = (off_t)sfp[2].intValue;
 	int ret = truncate(systemPath, length);
 	if(ret == -1) {
@@ -320,7 +320,7 @@ static KMETHOD System_isDir(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	struct stat buf;
 	if(stat(systemPath, &buf) == 0) {
 		KReturnUnboxValue(S_ISDIR(buf.st_mode));
@@ -334,7 +334,7 @@ static KMETHOD System_mkdir(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	mode_t mode = (mode_t)sfp[2].intValue;
 	int ret = mkdir(systemPath, mode);
 	if(ret == -1) {
@@ -352,7 +352,7 @@ static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	int ret = rmdir(systemPath);
 	if(ret == -1) {
 		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(path)|SystemError, trace);
@@ -395,7 +395,7 @@ static void kDir_close(KonohaContext *kctx, kDir *dir)
 		dir->dirp = NULL;
 	}
 	if(dir->readerIconv != ICONV_NULL) {
-		PLATAPI iconv_close_i(kctx, dir->readerIconv);
+		PLATAPI I18NModule.iconv_close_i(kctx, dir->readerIconv);
 		dir->readerIconv = ICONV_NULL;
 	}
 }
@@ -417,7 +417,7 @@ static KMETHOD System_opendir(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	DIR *d = opendir(systemPath);
 	if(d == NULL) {
 		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(path)|SystemError, trace);
@@ -426,8 +426,8 @@ static KMETHOD System_opendir(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	kDir *dir = (kDir *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)d);
 	KFieldSet(dir, dir->PathInfoNULL, path);
-	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
-		dir->readerIconv = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
+	if(!PLATAPI I18NModule.isSystemCharsetUTF8(kctx)) {
+		dir->readerIconv = PLATAPI I18NModule.iconvSystemCharsetToUTF8(kctx, trace);
 	}
 	KReturn(dir);
 }

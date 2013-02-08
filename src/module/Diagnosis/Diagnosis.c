@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 #include <errno.h>
-#include <minikonoha/minikonoha.h>
+#include <konoha/konoha.h>
 
 #if HAVE_DB_H
 #if defined(__linux__)
@@ -321,15 +321,15 @@ kbool_t LoadDiagnosisModule(KonohaFactory *factory, ModuleType type)
 	static KModuleInfo ModuleInfo = {
 		"Diagnosis", "0.1", 0, "deos",
 	};
-	factory->DiagnosisInfo                    = &ModuleInfo;
-	factory->CheckStaticRisk                  = CheckStaticRisk;
-	factory->CheckDynamicRisk                 = CheckDynamicRisk;
-	factory->DiagnosisSystemError             = DiagnosisSystemError;
-	factory->DiagnosisSoftwareProcess         = DiagnosisSoftwareProcess;
-	factory->DiagnosisSystemResource          = DiagnosisSystemResource;
-	factory->DiagnosisFileSystem              = DiagnosisFileSystem;
-	factory->DiagnosisNetworking              = DiagnosisNetworking;
-	factory->DiagnosisCheckSoftwareTestIsPass = DiagnosisCheckSoftwareTestIsPass;
+	factory->DiagnosisModule.DiagnosisInfo                    = &ModuleInfo;
+	factory->DiagnosisModule.CheckStaticRisk                  = CheckStaticRisk;
+	factory->DiagnosisModule.CheckDynamicRisk                 = CheckDynamicRisk;
+	factory->DiagnosisModule.DiagnosisSystemError             = DiagnosisSystemError;
+	factory->DiagnosisModule.DiagnosisSoftwareProcess         = DiagnosisSoftwareProcess;
+	factory->DiagnosisModule.DiagnosisSystemResource          = DiagnosisSystemResource;
+	factory->DiagnosisModule.DiagnosisFileSystem              = DiagnosisFileSystem;
+	factory->DiagnosisModule.DiagnosisNetworking              = DiagnosisNetworking;
+	factory->DiagnosisModule.DiagnosisCheckSoftwareTestIsPass = DiagnosisCheckSoftwareTestIsPass;
 	return true;
 }
 

@@ -24,7 +24,7 @@ echo "add_konoha_package(${NAME})" >> ${HOME}/CMakeLists.txt
 
 echo -n -e \
 "/****************************************************************************\n"\
-" * Copyright (c) 2012, the Konoha project authors. All rights reserved.\n"\
+" * Copyright (c) 2013, the Konoha project authors. All rights reserved.\n"\
 " * Redistribution and use in source and binary forms, with or without\n"\
 " * modification, are permitted provided that the following conditions are met:\n"\
 " *\n"\
@@ -49,10 +49,10 @@ echo -n -e \
 "\n"\
 "/* ************************************************************************ */\n"\
 "\n"\
-"#include <minikonoha/minikonoha.h>\n"\
-"#include <minikonoha/sugar.h>\n"\
-"#include <minikonoha/klib.h>\n"\
-"#include <minikonoha/import/methoddecl.h>\n"\
+"#include <konoha/konoha.h>\n"\
+"#include <konoha/sugar.h>\n"\
+"#include <konoha/klib.h>\n"\
+"#include <konoha/import/methoddecl.h>\n"\
 "\n"\
 "#ifdef __cplusplus\n"\
 "extern \"C\" {\n"\

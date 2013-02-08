@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -57,7 +57,7 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(returnValue);
 }
 
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/import/methoddecl.h>
 
 static void object_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {

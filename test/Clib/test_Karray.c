@@ -22,8 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "minikonoha/minikonoha.h"
-#include "minikonoha/platform.h"
+#include "konoha/konoha.h"
 #include "test_konoha.h"
 
 void test_KArray(KonohaContext *kctx)
@@ -35,12 +34,12 @@ void test_KArray(KonohaContext *kctx)
         if(a.bytesize == a.bytemax) {
             kctx->klib->KArray_Expand(kctx, &a, a.bytesize+1 * sizeof(intptr_t));
         }
-        ((int*)a.bytebuf)[i] = i;
+        ((int *)a.bytebuf)[i] = i;
         a.bytesize += 1*sizeof(intptr_t);
     }
     for (i = 0; i < 10; ++i) {
         assert (i*sizeof(intptr_t) < a.bytesize);
-        assert(((int*)a.bytebuf)[i] == i);
+        assert(((int *)a.bytebuf)[i] == i);
     }
     kctx->klib->KArray_Free(kctx, &a);
 }

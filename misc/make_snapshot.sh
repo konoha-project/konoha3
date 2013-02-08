@@ -1,6 +1,6 @@
 #!/bin/sh
 stable="$1"
-version="0.2-alpha"
+version="0.3-alpha"
 
 if [ "x$stable" == "x" ]; then
     echo "usage $0 stable_revision"

@@ -25,10 +25,10 @@
 #include <stdio.h>
 #include <iconv.h>
 #include <errno.h>
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/klib.h>
-#include <minikonoha/arch/minivm.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/klib.h>
+#include <konoha/arch/minivm.h>
 
 #define LOG_FUNCTION_NAME "echo"
 #define ARGLENGTH 8
@@ -850,6 +850,13 @@ static KMETHOD KMethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *s
 {
 }
 
+static struct KVirtualCode *Bash_RunExecutionEngine(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc)
+{
+	/* NotSupportedAPI(); */
+	return NULL;
+}
+
+
 static void Bash_SetMethodCode(KonohaContext *kctx, kMethodVar *mtd, KVirtualCode *vcode, KMethodFunc func)
 {
 	KLIB kMethod_SetFunc(kctx, mtd, func);
@@ -866,42 +873,47 @@ static struct KVirtualCode* GetDefaultBootCode(void)
 	return NULL;
 }
 
-static void InitStaticBuilderApi(struct KBuilderAPI *builderApi)
-{
-	builderApi->target = "Bash";
-#define DEFINE_BUILDER_API(NAME) builderApi->visit##NAME##Node = BashBuilder_Visit##NAME##Node;
-	KNodeList(DEFINE_BUILDER_API);
-#undef DEFINE_BUILDER_API
-	builderApi->GenerateVirtualCode = Bash_GenerateVirtualCode;
-	builderApi->GenerateMethodFunc  = Bash_GenerateMethodFunc;
-	builderApi->SetMethodCode       = Bash_SetMethodCode;
-}
-
-static struct KBuilderAPI* GetDefaultBuilderAPI(void)
-{
-	static struct KBuilderAPI builderApi = {};
-	if(builderApi.target == NULL) {
-		InitStaticBuilderApi(&builderApi);
-	}
-	return &builderApi;
-}
-
 static void Bash_DeleteVirtualMachine(KonohaContext *kctx)
 {
+}
+
+static const KModuleInfo ModuleInfo = {
+	"Bash", K_VERSION, 0, "Bash",
+};
+
+static const struct KBuilderAPI *GetDefaultBuilderAPI(void);
+
+static const struct ExecutionEngineModule Bash_Module = {
+	&ModuleInfo,
+	Bash_DeleteVirtualMachine,
+	GetDefaultBuilderAPI,
+	GetDefaultBootCode,
+	Bash_GenerateVirtualCode,
+	Bash_GenerateMethodFunc,
+	Bash_SetMethodCode,
+	Bash_RunExecutionEngine
+};
+
+static const struct KBuilderAPI Bash_BuilderAPI = {
+	"Bash",
+	&Bash_Module,
+#define DEFINE_BUILDER_API(NAME) BashBuilder_Visit##NAME##Node,
+	KNodeList(DEFINE_BUILDER_API)
+#undef DEFINE_BUILDER_API
+};
+
+static const struct KBuilderAPI *GetDefaultBuilderAPI(void)
+{
+	return &Bash_BuilderAPI;
 }
 
 // -------------------------------------------------------------------------
 
 kbool_t LoadBashModule(KonohaFactory *factory, ModuleType type)
 {
-	static KModuleInfo ModuleInfo = {
-		"Bash", K_VERSION, 0, "Bash",
-	};
+
 	SetUpBashShebang();
-	factory->VirtualMachineInfo            = &ModuleInfo;
-	factory->GetDefaultBootCode            = GetDefaultBootCode;
-	factory->GetDefaultBuilderAPI          = GetDefaultBuilderAPI;
-	factory->DeleteVirtualMachine          = Bash_DeleteVirtualMachine;
+	memcpy(&factory->ExecutionEngineModule, &Bash_Module, sizeof(Bash_Module));
 	return true;
 }
 

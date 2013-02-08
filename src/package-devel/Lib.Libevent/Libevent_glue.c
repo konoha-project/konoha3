@@ -22,9 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/import/methoddecl.h>
 #include <event2/event.h>
 
 #ifdef __cplusplus
@@ -69,7 +69,7 @@ static void CEvent_base_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void CEvent_base_Free(KonohaContext *kctx, kObject *o)
 {
 	struct CEvent_base *ev = (struct CEvent_base *) o;
-	if (ev->event_base != NULL) {
+	if(ev->event_base != NULL) {
 		event_base_free(ev->event_base);
 		ev->event_base = NULL;
 	}
@@ -130,7 +130,7 @@ static void CEvent_Free(KonohaContext *kctx, kObject *o)
 {
 	struct CEvent *ev = (struct CEvent *) o;
 
-	if (ev->event != NULL) {
+	if(ev->event != NULL) {
 		event_free(ev->event);
 		ev->event = NULL;
 	}

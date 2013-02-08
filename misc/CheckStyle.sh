@@ -1,7 +1,7 @@
 #!/bin/sh
 
 SOURCE=
-for DIR in src include
+for DIR in src include test
 do
 	for EXT in c h cpp
 	do
@@ -11,5 +11,5 @@ done
 
 for F in ${SOURCE}
 do
-	minikonoha -MFuelVM ./misc/CheckStyle.k ${F}
+	konoha -MFuelVM ./misc/CheckStyle.k ${F}
 done

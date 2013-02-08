@@ -1,5 +1,5 @@
 #!/bin/sh
-BRANCH=-`git branch --contains=HEAD | grep "*" | cut -c 3-`
+BRANCH=-`git branch --contains=HEAD | grep "*" | cut -c 3- | head -1`
 DEFAULT=Debug
 
 if [ "${BRANCH}" = "-" ]; then

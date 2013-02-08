@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include "minikonoha/minikonoha.h"
+#include "konoha/konoha.h"
 #include "test_konoha.h"
 
 int main(int argc, const char *argv[])
@@ -32,21 +32,21 @@ int main(int argc, const char *argv[])
     int i;
     void *malloced[100];
     for (i = 0; i < 100; ++i) {
-        malloced[i] = PLATAPI Kmalloc(0, i, NULL);
+        malloced[i] = PLATAPI GCModule.Kmalloc(0, i, NULL);
     }
     for (i = 0; i < 100; ++i) {
-        PLATAPI Kfree(0, malloced[i], i);
+        PLATAPI GCModule.Kfree(0, malloced[i], i);
     }
     for (i = 0; i < 100; ++i) {
-        malloced[i] = PLATAPI Kzmalloc(0, i, NULL);
+        malloced[i] = PLATAPI GCModule.Kzmalloc(0, i, NULL);
         int j;
-        char *p = (char*)malloced[i];
+        char *p = (char *)malloced[i];
         for (j = 0; j < i; ++j) {
             assert(p[0] == 0);
         }
     }
     for (i = 0; i < 100; ++i) {
-        PLATAPI Kfree(0, malloced[i], i);
+        PLATAPI GCModule.Kfree(0, malloced[i], i);
     }
     DeleteContext(kctx);
     return 0;

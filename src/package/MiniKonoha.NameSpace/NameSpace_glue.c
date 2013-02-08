@@ -24,14 +24,14 @@
 
 /* ************************************************************************ */
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/import/methoddecl.h>
 #define TP_name         KType_String,     KFieldName_("name")
 #define TP_paramsize    KType_Int,        KFieldName_("paramsize")
 #define TP_source       KType_String,     KFieldName_("source")

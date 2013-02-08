@@ -22,28 +22,30 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/konoha_common.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/konoha_common.h>
+#include <konoha/import/methoddecl.h>
 
 typedef struct kConsoleVar kConsole;
 struct kConsoleVar {
 	kObjectHeader h;
 };
 
+#define CONSOLEAPI PLATAPI ConsoleModule.
+
 /* ------------------------------------------------------------------------ */
 
 //## void Console.notify(String msg)
 static KMETHOD Console_notify(KonohaContext *kctx, KonohaStack *sfp)
 {
-	PLATAPI ReportUserMessage(kctx, NoticeTag, (sfp[K_RTNIDX].calledFileLine), kString_text(sfp[1].asString), true);
+	CONSOLEAPI ReportUserMessage(kctx, NoticeTag, (sfp[K_RTNIDX].calledFileLine), kString_text(sfp[1].asString), true);
 }
 
 //## void Console.readLine(String prompt)
 static KMETHOD Console_readLine(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s;
-	char *p = PLATAPI InputUserText(kctx, kString_text(sfp[1].asString), 0);
+	char *p = CONSOLEAPI InputUserText(kctx, kString_text(sfp[1].asString), 0);
 	if(p != NULL) {
 		s = KLIB new_kString(kctx, OnStack, p, strlen(p), 0);
 		free(p);
@@ -57,13 +59,13 @@ static KMETHOD Console_readLine(KonohaContext *kctx, KonohaStack *sfp)
 //## boolean Console.inputUserApproval(String msg, String yes, String no, kbool_t defval)
 static KMETHOD Console_inputUserApproval(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturnUnboxValue(PLATAPI InputUserApproval(kctx, kString_text(sfp[1].asString), kString_text(sfp[2].asString), kString_text(sfp[3].asString), sfp[4].boolValue));
+	KReturnUnboxValue(CONSOLEAPI InputUserApproval(kctx, kString_text(sfp[1].asString), kString_text(sfp[2].asString), kString_text(sfp[3].asString), sfp[4].boolValue));
 }
 
 static kString* kConsole_inputUserPassword(KonohaContext *kctx, const char *message)
 {
 	kString *s;
-	char *p = PLATAPI InputUserPassword(kctx, message);
+	char *p = CONSOLEAPI InputUserPassword(kctx, message);
 	if(p != NULL) {
 		s = KLIB new_kString(kctx, OnStack, p, strlen(p), 0);
 		free(p);

@@ -883,7 +883,7 @@ static KPackage *LoadPackageNULL(KonohaContext *kctx, kpackageId_t packageId, in
 static KPackage *GetPackageNULL(KonohaContext *kctx, kpackageId_t packageId, int option, KTraceInfo *trace)
 {
 	KLock(kctx->share->filepackMutex);
-	KPackage *pack = (KPackage *)map_getu(kctx, kctx->share->packageMapNO, packageId, uNULL);
+	KPackage *pack = (KPackage *)map_getu(kctx, kctx->share->packageMapNO, packageId, 0);
 	KUnlock(kctx->share->filepackMutex);
 	if(pack == NULL) {
 		pack = LoadPackageNULL(kctx, packageId, option, trace);
@@ -966,7 +966,7 @@ static kbool_t kNameSpace_ImportPackage(KonohaContext *kctx, kNameSpace *ns, con
 	if(ns->packageId != packageId) {
 		KPackage *pack = GetPackageNULL(kctx, packageId, option, trace);
 		if(pack != NULL) {
-			*pack->packageNS->builderApi = *ns->builderApi;
+			pack->packageNS->builderApi = ns->builderApi;
 			kNameSpace_ImportAll(kctx, ns, pack->packageNS, trace);
 			if(pack->packageHandler != NULL && pack->packageHandler->ExportNameSpace != NULL) {
 				pack->packageHandler->ExportNameSpace(kctx, pack->packageNS, ns, option, trace);
@@ -998,11 +998,9 @@ static void kNameSpace_UseDefaultVirtualMachine(KonohaContext *kctx, kNameSpace 
 {
 	KonohaFactory *factory = (KonohaFactory *)kctx->platApi;
 	factory->LoadPlatformModule(factory, "MiniVM", ReleaseModule);
-	ns->builderApi = factory->GetDefaultBuilderAPI();
+	ns->builderApi = factory->ExecutionEngineModule.GetDefaultBuilderAPI();
 }
 
 // --------------------------------------------------------------------------
 /* namespace method */
-
-
 

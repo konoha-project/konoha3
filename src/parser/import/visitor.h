@@ -38,9 +38,9 @@ static kbool_t kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kNode *block, 
 {
 	DBG_P("START CODE GENERATION..");
 	kNameSpace *ns = kNode_ns(block);
-	struct KVirtualCode *vcode = ns->builderApi->GenerateVirtualCode(kctx, mtd, block, option);
-	KMethodFunc func = ns->builderApi->GenerateMethodFunc(kctx, vcode);
-	ns->builderApi->SetMethodCode(kctx, (kMethodVar *)mtd, vcode, func);
+	struct KVirtualCode *vcode = ns->builderApi->ExecutionEngineModule->GenerateVirtualCode(kctx, mtd, block, option);
+	KMethodFunc func = ns->builderApi->ExecutionEngineModule->GenerateMethodFunc(kctx, vcode);
+	ns->builderApi->ExecutionEngineModule->SetMethodCode(kctx, (kMethodVar *)mtd, vcode, func);
 	return true;
 }
 
@@ -53,6 +53,6 @@ static void kMethod_SetFunc(KonohaContext *kctx, kMethod *mtd, KMethodFunc func)
 {
 	func = (func != NULL) ? func : KMethodFunc_invokeAbstractMethod;
 	((kMethodVar *)mtd)->invokeKMethodFunc = func;
-	((kMethodVar *)mtd)->vcode_start = PLATAPI GetDefaultBootCode();
+	((kMethodVar *)mtd)->vcode_start = PLATAPI ExecutionEngineModule.GetDefaultBootCode();
 }
 

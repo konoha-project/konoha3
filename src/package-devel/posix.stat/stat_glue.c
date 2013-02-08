@@ -30,9 +30,9 @@
 #include <sys/file.h>
 #include <dirent.h>
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -117,7 +117,7 @@ static KMETHOD System_stat(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	struct stat buf = {}; /* zero */
 	int ret = stat(systemPath, &buf);
 	if(ret == -1) {
@@ -133,7 +133,7 @@ static KMETHOD System_lstat(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
+	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	struct stat buf = {}; /* zero */
 	int ret = lstat(systemPath, &buf);
 	if(ret == -1) {

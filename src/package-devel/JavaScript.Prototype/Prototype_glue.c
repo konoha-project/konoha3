@@ -22,10 +22,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/konoha_common.h>
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/konoha_common.h>
+#include <konoha/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -145,27 +145,27 @@ static void KStackReturnTypeCheck(KonohaContext *kctx, KonohaStack *sfp, kMethod
 	}
 }
 
-//#define KDynamicCallArgument(sfp)         kctx->esp - sfp - 2
-//#define KDynamicCallSymbol(sfp)          (ksymbol_t)kctx->esp[-1].intValue
-//
-////## Prototype Prototype.(Object o);
-//static KMETHOD Prototype_(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	ksymbol_t symbol = KDynamicCallSymbol(sfp);
-//	KKeyValue *kvs = KLIB kObjectProto_GetKeyValue(kctx, sfp[0].asObject, symbol);
-//	if(kvs != NULL) {
-//		KClass *c = KClass_(kvs->attrTypeId);
-//		kParam *cparam = KClass_cparam(c);
-//		if(KClass_isFunc(c) && cparam->psize <= KDynamicCallArgument(sfp)) {
-//			KClass *thisClass = kObject_class(sfp[0].asObject), *returnType = KGetReturnType(sfp);
-//			kFunc *fo = (kFunc *)kvs->FuncValue;
-//			KStackSetFunc(sfp, fo);
-//			KStackDynamicTypeCheck(kctx, sfp, fo->method, thisClass);
-//			KStackCall(sfp);
-//			KStackReturnTypeCheck(kctx, sfp, fo->method, thisClass, returnType);
-//		}
-//	}
-//}
+#define KDynamicCallArgument(sfp)         kctx->esp - sfp - 2
+#define KDynamicCallSymbol(sfp)          (ksymbol_t)kctx->esp[-1].intValue
+
+//## Prototype Prototype.(Object o);
+static KMETHOD Prototype_(KonohaContext *kctx, KonohaStack *sfp)
+{
+	ksymbol_t symbol = KDynamicCallSymbol(sfp);
+	KKeyValue *kvs = KLIB kObjectProto_GetKeyValue(kctx, sfp[0].asObject, symbol);
+	if(kvs != NULL) {
+		KClass *c = KClass_(kvs->attrTypeId);
+		kParam *cparam = KClass_cparam(c);
+		if(KClass_isFunc(c) && cparam->psize <= KDynamicCallArgument(sfp)) {
+			KClass *thisClass = kObject_class(sfp[0].asObject), *returnType = KGetReturnType(sfp);
+			kFunc *fo = (kFunc *)kvs->FuncValue;
+			KStackSetFunc(sfp, fo);
+			KStackDynamicTypeCheck(kctx, sfp, fo->method, thisClass);
+			KStackCall(sfp);
+			KStackReturnTypeCheck(kctx, sfp, fo->method, thisClass, returnType);
+		}
+	}
+}
 
 static void prototype_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {

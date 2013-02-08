@@ -27,9 +27,9 @@
 //#define USING_SUGAR_AS_BUILTIN 1
 #define USE_AsciiToKonohaChar
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/klib.h>
+#include <konoha/konoha.h>
+#include <konoha/sugar.h>
+#include <konoha/klib.h>
 
 /* ************************************************************************ */
 
@@ -168,7 +168,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KLIB Knull(kctx, mod->cNode);
 	SugarModule_Setup(kctx, &mod->h, 0);
 
-	KDEFINE_INT_CONST ClassData[] = {   // minikonoha defined class
+	KDEFINE_INT_CONST ClassData[] = {   // konoha defined class
 		{"void", VirtualType_KClass,    (uintptr_t)KClass_void},
 		{"boolean", VirtualType_KClass, (uintptr_t)KClass_Boolean},
 		{"int",    VirtualType_KClass,  (uintptr_t)KClass_Int},
@@ -318,7 +318,7 @@ static KMETHOD KSymbol_toString(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(s);
 }
 
-#include <minikonoha/import/methoddecl.h>
+#include <konoha/import/methoddecl.h>
 
 void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 {
@@ -353,12 +353,12 @@ void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 static void KonohaContext_EnterCStack(KonohaContext *kctx, void **bottom)
 {
 	kctx->stack->cstack_bottom = bottom;
-	PLATAPI EnterEventContext(kctx, NULL);
+	PLATAPI EventModule.EnterEventContext(kctx, NULL);
 }
 
 static void KonohaContext_ExitCStack(KonohaContext *kctx)
 {
-	PLATAPI ExitEventContext(kctx, NULL);
+	PLATAPI EventModule.ExitEventContext(kctx, NULL);
 	kctx->stack->cstack_bottom = NULL;
 }
 
