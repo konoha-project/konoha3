@@ -38,9 +38,9 @@ extern "C" {
 #define K_CLASSTABLE_INITSIZE 64
 #define K_PAGESIZE        4096
 
-#define K_VERSION   "0.3"
-#define K_MAJOR_VERSION 0
-#define K_MINOR_VERSION 3
+#define K_VERSION   "3.0"
+#define K_MAJOR_VERSION 3
+#define K_MINOR_VERSION 0
 #define K_PATCH_LEVEL   0
 
 #include <konoha/stardate.h>
