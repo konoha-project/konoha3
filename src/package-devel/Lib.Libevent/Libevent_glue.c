@@ -40,13 +40,11 @@ typedef struct Cevent_base {
 
 typedef struct Cevent {
 	kObjectHeader h;
-	kString *key;
 	struct event *event;
 } kCevent;
 
 typedef struct Cbufferevent_socket {
 	kObjectHeader h;
-	kString *key;
 	struct bufferevent *bufev;
 } kCbufferevent_socket;
 
@@ -140,25 +138,21 @@ static void Cevent_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Cevent_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
-{
-	struct Cevent *ev = (struct Cevent *) o;
-	KRefTraceNullable(ev->key);
-}
+//static void Cevent_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+//{
+//	struct Cevent *ev = (struct Cevent *) o;
+//}
 
-//## Cevent Cevent.new(Cevent_base event_base, String key, int evd, int event, Func[int, int, Object arg] cb, EventCallBackArg cbArg);
+//## Cevent Cevent.new(Cevent_base event_base, int evd, int event, EventCallBackArg cbArg);
 static KMETHOD Cevent_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct Cevent *ev = (struct Cevent *) sfp[0].asObject;
 	struct Cevent_base *cEvent_base = (struct Cevent_base *)sfp[1].asObject;
-	kString *key = (kString *) sfp[2].asString;
-	evutil_socket_t evd = (evutil_socket_t)sfp[3].intValue;
-	short event = (short)(sfp[4].intValue & 0xffff);
-	kEventCallBackArg *cbArg = (kEventCallBackArg *)sfp[5].asObject;	//deliver callback method
+	evutil_socket_t evd = (evutil_socket_t)sfp[2].intValue;
+	short event = (short)(sfp[3].intValue & 0xffff);
+	kEventCallBackArg *cbArg = (kEventCallBackArg *)sfp[4].asObject;	//deliver callback method
 
 	ev->event = event_new(cEvent_base->event_base, evd, event, callback_1st, cbArg);
-	KFieldSet(ev, ev->key, key);
-	//event_add() will call in EventBase.event_add() after return this method
 	KReturn(ev);
 }
 
@@ -313,7 +307,7 @@ static kbool_t Cevent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	SETSTRUCTNAME(defCevent, Cevent);
 	defCevent.cflag     = KClassFlag_Final;
 	defCevent.init      = Cevent_Init;
-	defCevent.reftrace  = Cevent_Reftrace;
+//	defCevent.reftrace  = Cevent_Reftrace;
 	defCevent.free      = Cevent_Free;
 	KClass *CeventClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCevent, trace);
 
@@ -370,7 +364,7 @@ static kbool_t Cevent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 		_Public, _F(Cevent_base_event_dispatch), KType_Int, KType_Cevent_base, KMethodName_("event_dispatch"), 0,
 
 		// Cevent
-		_Public, _F(Cevent_new), KType_Cevent, KType_Cevent, KMethodName_("new"), 5, KType_Cevent_base, KFieldName_("Event_base"), KType_String, KFieldName_("key"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("event"), KType_EventCallBackArg, KFieldName_("CBarg"),
+		_Public, _F(Cevent_new), KType_Cevent, KType_Cevent, KMethodName_("new"), 4, KType_Cevent_base, KFieldName_("Event_base"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("event"), KType_EventCallBackArg, KFieldName_("CBarg"),
 
 #ifdef CUTCUT
 		// Cbufferevent_socket

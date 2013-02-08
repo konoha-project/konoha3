@@ -28,9 +28,10 @@ import("MiniKonoha.Map");
 import("MiniKonoha.NameSpace");
 import("Syntax.Null");
 
+class Event;
 class Event_base {
 	Cevent_base evbase;
-	@Private Map eventMap;	//no need?
+	@Private Map/*TODO Map[Event]*/ eventMap;
 
 	Event_base() {
 		evbase = new Cevent_base();
@@ -41,14 +42,10 @@ class Event_base {
 		return evbase.event_dispatch();
 	}
 
-	@Public int event_add(String key, int evd, int event, Func[void, int, int, Object] cb, Object cbArg, TimeVal tv) {
-		if (key.isNotNull()) {
-			Cevent ev = new Cevent(evbase, key, evd, event, new EventCallBackArg(cb, cbArg));
-			eventMap.set(key, ev);	//keep referance of 'ev', and deliver it to callback method
-			int ret =  System.event_add(ev, tv);
-			return ret;
-		} 
-		return -1;	// event_add() error status of libevent
+	@Public int event_add(Event ev, TimeVal tv) {
+		eventMap.set(ev.toString()/*TODO confirm "toString()" is unique && persisten ID*/, ev);
+		int ret =  System.event_add(ev.event, tv);
+		return ret;
 	}
 
 	//TODO
@@ -56,9 +53,20 @@ class Event_base {
 	// 				, int timout_set, int timout_usec)
 	//{}
 
-	@Public int event_del(String key) {
-		Cevent ev = event_Map.get(key) as Cevent;
-		eventMap.remove(key);
-		return System.event_del(ev);
+	@Public int event_del(Event ev) {
+		Event ev = eventMap.get(ev.toString()/*TODO confirm*/);
+		eventMap.remove(ev.toString()/*TODO confirm*/);
+		return System.event_del(ev.event);
 	}
 }
+
+class Event {
+	Cevent event;
+
+	Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb, Object cbArg) {
+		event = new Cevent(evbase.evbase, evd, evCat, new EventCallBackArg(cb, cbArg));
+	}
+}
+
+
+
