@@ -1,4 +1,4 @@
-#include "konoha/konoha.h"
+#include "konoha3/konoha.h"
 #include "test_konoha.h"
 
 #ifdef __cplusplus

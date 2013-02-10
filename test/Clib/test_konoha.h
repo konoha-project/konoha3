@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <syslog.h>
 #include <stdlib.h>
-#include "konoha/platform.h"
+#include "konoha3/platform.h"
 
 #ifndef TEST_KONOHA_H_
 #define TEST_KONOHA_H_
