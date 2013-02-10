@@ -220,6 +220,10 @@ class DseGroup {
 		this.dses.add(new Dse(host));
 	}
 
+	@Public void appendDse(Dse dse) {
+		this.dses.add(dse);
+	}
+
 	@Public void appendDTask(String filePath) {
 		int i = 0;
 		int size = this.dses.getSize();
