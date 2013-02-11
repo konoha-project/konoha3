@@ -194,7 +194,6 @@ static KMETHOD Cbufferevent_socket_new(KonohaContext *kctx, KonohaStack *sfp)
 
 	bev->event = event_new(cEvent_base->event_base, evd, event, callback_1st, cbArg);
 	KFieldSet(bev, bev->key, key);
-	//event_add() will call in EventBase.event_add() after return this method
 	KReturn(ev);
 }
 #endif

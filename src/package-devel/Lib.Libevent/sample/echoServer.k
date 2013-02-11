@@ -12,12 +12,19 @@ import("Lib.Libevent");
 
 
 void do_read(int evd, int event, Object arg) {
+	Event ev = arg as Event;
 	System.p("do_read() executed!!");
 	System.p("evd = " + evd + ", event = " + event);
-	System.p("arg = " + arg);
+	System.p("ev = " + ev);
 	Bytes buf = new Bytes(32);
 	int ret = System.recv(evd, buf, 0);
-	System.send(evd, buf, 0);
+	if (buf[0] == 0x03 || buf[0] == 0x04) {
+		System.send(evd, "socket close\n".toBytes(), 0);
+		ev.evBase.event_del(ev);
+		System.shutdown(evd, SHUT_RDWR);
+	} else {
+		System.send(evd, buf, 0);
+	}
 }
 
 void do_accept(int evd, int event, Object arg) {
@@ -38,7 +45,7 @@ void do_accept(int evd, int event, Object arg) {
 		System.evutil_make_socket_nonblocking(fd);
 		//{
 			//alloc_fd_state
-			Event ev = new Event(evBase, fd, EV_READ | EV_PERSIST, do_read, NULL);
+			Event ev = new Event(evBase, fd, EV_READ | EV_PERSIST, do_read);
 			evBase.event_add(ev, NULL/* NULL: no timeout(dispatching forever), timeout sets like "new TimeVal(sec, usec)")*/);
 		//}
 	}

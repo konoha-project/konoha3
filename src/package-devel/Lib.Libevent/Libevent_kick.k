@@ -48,13 +48,9 @@ class Event_base {
 		return ret;
 	}
 
-	//TODO
-	//@Public int event_add(String key, int evd, int event
-	// 				, int timout_set, int timout_usec)
-	//{}
-
 	@Public int event_del(Event ev) {
-		Event ev = eventMap.get(ev.toString()/*TODO confirm*/);
+		Event mapev = eventMap.get(ev.toString()/*TODO confirm*/) as Event;
+		System.p("mapev = " + mapev);
 		eventMap.remove(ev.toString()/*TODO confirm*/);
 		return System.event_del(ev.event);
 	}
@@ -62,11 +58,19 @@ class Event_base {
 
 class Event {
 	Cevent event;
+	Event_base evBase;
 
 	Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb, Object cbArg) {
 		event = new Cevent(evbase.evbase, evd, evCat, new EventCallBackArg(cb, cbArg));
+		evBase = evbase;
+	}
+
+	// use this instance as Callback argument
+	Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb) {
+		//this(evbase.evbase, evd, evCat, cb, this);
+		{
+			event = new Cevent(evbase.evbase, evd, evCat, new EventCallBackArg(cb, this));
+			evBase = evbase;
+		}
 	}
 }
-
-
-
