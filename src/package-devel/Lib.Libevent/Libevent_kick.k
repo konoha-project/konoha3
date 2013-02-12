@@ -43,15 +43,15 @@ class Event_base {
 	}
 
 	@Public int event_add(Event ev, TimeVal tv) {
-		eventMap.set(ev.toString()/*TODO confirm "toString()" is unique && persisten ID*/, ev);
+		eventMap.set(ev.getKey(), ev);
 		int ret =  System.event_add(ev.event, tv);
 		return ret;
 	}
 
 	@Public int event_del(Event ev) {
-		Event mapev = eventMap.get(ev.toString()/*TODO confirm*/) as Event;
+		Event mapev = eventMap.get(ev.getKey()) as Event;
 		System.p("mapev = " + mapev);
-		eventMap.remove(ev.toString()/*TODO confirm*/);
+		eventMap.remove(ev.getKey());
 		return System.event_del(ev.event);
 	}
 }
@@ -72,5 +72,22 @@ class Event {
 			event = new Cevent(evbase.evbase, evd, evCat, new EventCallBackArg(cb, this));
 			evBase = evbase;
 		}
+	}
+
+	String getKey() {
+		String ret;
+		@Const int evfd =  event.getEvfd();
+		@Const int events = event.getEvents();
+
+		if ((events & EV_SIGNAL) != 0) {
+			ret = "SIGNAL" + evfd.toString();
+		} else {
+			if (evfd == -1) {
+				ret = "TIMER";
+			} else {
+				ret = "IO" + evfd.toString();
+			}
+		}
+		return ret;
 	}
 }

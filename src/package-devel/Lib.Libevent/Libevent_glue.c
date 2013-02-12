@@ -26,6 +26,7 @@
 #include <konoha3/sugar.h>
 #include <konoha3/import/methoddecl.h>
 #include <event2/event.h>
+#include <event2/event_struct.h>
 #include <event2/bufferevent.h>
 
 #ifdef __cplusplus
@@ -154,6 +155,22 @@ static KMETHOD Cevent_new(KonohaContext *kctx, KonohaStack *sfp)
 
 	ev->event = event_new(cEvent_base->event_base, evd, event, callback_1st, cbArg);
 	KReturn(ev);
+}
+
+//## Cevent Cevent.getEvfd();
+// get event file descriptor
+static KMETHOD Cevent_getEvfd(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct Cevent *ev = (struct Cevent *) sfp[0].asObject;
+	KReturnUnboxValue(ev->event->ev_fd);
+}
+
+//## Cevent Cevent.getEvents();
+// get event category field
+static KMETHOD Cevent_getEvents(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct Cevent *ev = (struct Cevent *) sfp[0].asObject;
+	KReturnUnboxValue(ev->event->ev_events);
 }
 
 #ifdef CUTCUT
@@ -364,6 +381,8 @@ static kbool_t Cevent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 
 		// Cevent
 		_Public, _F(Cevent_new), KType_Cevent, KType_Cevent, KMethodName_("new"), 4, KType_Cevent_base, KFieldName_("Event_base"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("event"), KType_EventCallBackArg, KFieldName_("CBarg"),
+		_Public, _F(Cevent_getEvfd), KType_Int, KType_Cevent, KMethodName_("getEvfd"), 0, 
+		_Public, _F(Cevent_getEvents), KType_Int, KType_Cevent, KMethodName_("getEvents"), 0, 
 
 #ifdef CUTCUT
 		// Cbufferevent_socket
