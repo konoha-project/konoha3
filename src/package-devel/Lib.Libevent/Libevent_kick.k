@@ -28,12 +28,13 @@ import("MiniKonoha.Map");
 import("MiniKonoha.NameSpace");
 import("Syntax.Null");
 
+class Event;
 class Event_base {
-	CEvent_base evbase;
-	@Private Map eventMap;	//no need?
+	Cevent_base evbase;
+	@Private Map/*TODO Map[Event]*/ eventMap;
 
 	Event_base() {
-		evbase = new CEvent_base();
+		evbase = new Cevent_base();
 		eventMap = new Map();
 	}
 
@@ -41,25 +42,52 @@ class Event_base {
 		return evbase.event_dispatch();
 	}
 
-	@Public int event_add(String key, int evd, int event, Func[void, int, int, Object] cb, Object cbArg, TimeVal tv) {
-		if (key.isNotNull()) {
-			CEvent ev = new CEvent(evbase, key, evd, event, new CallBackArg(cb, cbArg));
-			System.p(eventMap);
-			eventMap.set(key, ev);	//keep referance of 'ev', and deliver it to callback method
-			int ret =  System.event_add(ev, tv);
-			return ret;
-		} 
-		return -1;	// event_add() error status of libevent
+	@Public int event_add(Event ev, TimeVal tv) {
+		eventMap.set(ev.getKey(), ev);
+		int ret =  System.event_add(ev.event, tv);
+		return ret;
 	}
 
-	//TODO
-	//@Public int event_add(String key, int evd, int event
-	// 				, int timout_set, int timout_usec)
-	//{}
+	@Public int event_del(Event ev) {
+		Event mapev = eventMap.get(ev.getKey()) as Event;
+		System.p("mapev = " + mapev);
+		eventMap.remove(ev.getKey());
+		return System.event_del(ev.event);
+	}
+}
 
-	@Public int event_del(String key) {
-		CEvent ev = event_Map.get(key) as CEvent;
-		eventMap.remove(key);
-		return System.event_del(ev);
+class Event {
+	Cevent event;
+	Event_base evBase;
+
+	Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb, Object cbArg) {
+		event = new Cevent(evbase.evbase, evd, evCat, new EventCallBackArg(cb, cbArg));
+		evBase = evbase;
+	}
+
+	// use this instance as Callback argument
+	Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb) {
+		//this(evbase.evbase, evd, evCat, cb, this);
+		{
+			event = new Cevent(evbase.evbase, evd, evCat, new EventCallBackArg(cb, this));
+			evBase = evbase;
+		}
+	}
+
+	String getKey() {
+		String ret;
+		@Const int evfd =  event.getEvfd();
+		@Const int events = event.getEvents();
+
+		if ((events & EV_SIGNAL) != 0) {
+			ret = "SIGNAL" + evfd.toString();
+		} else {
+			if (evfd == -1) {
+				ret = "TIMER";
+			} else {
+				ret = "IO" + evfd.toString();
+			}
+		}
+		return ret;
 	}
 }
