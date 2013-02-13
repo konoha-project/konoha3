@@ -33,6 +33,7 @@
 extern "C" {
 #endif
 
+
 /* ======================================================================== */
 typedef struct Cevent_base {
 	kObjectHeader h;
@@ -44,7 +45,7 @@ typedef struct Cevent {
 	struct event *event;
 } kCevent;
 
-typedef struct Cbufferevent{
+typedef struct Cbufferevent {
 	kObjectHeader h;
 	struct bufferevent *bev;
 } kCbufferevent;
@@ -70,6 +71,14 @@ typedef struct TimeVal {
 	kObjectHeader h;
 	struct timeval timeval;
 } kTimeVal;
+
+// TODO ----- should be implement in posix.socket package
+#include <sys/socket.h>
+typedef struct Sockaddr_in {
+	kObjectHeader h;
+	struct sockaddr_in sockaddr;
+} kSockaddr_in;
+// TODO should be implement in posix.socket package -----
 
 
 /* ======================================================================== */
@@ -178,6 +187,7 @@ static KMETHOD Cevent_getEvents(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ev->event->ev_events);
 }
 
+
 /* ======================================================================== */
 // Cbufferevent class
 
@@ -272,6 +282,15 @@ static KMETHOD Cbufferevent_setcb(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
+//## int Cbufferevent.socket_connect(Sockaddr_in sa);
+static KMETHOD Cbufferevent_socket_connect(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kCbufferevent *bev = (kCbufferevent *)sfp[0].asObject;
+	kSockaddr_in *sa = (kSockaddr_in *)sfp[1].asObject;
+	int ret = bufferevent_socket_connect(bev->bev, (struct sockaddr *)&sa->sockaddr, sizeof sa->sockaddr);
+	KReturnUnboxValue(ret);
+}
+
 
 /* ======================================================================== */
 // EventCBArg class
@@ -312,6 +331,7 @@ static KMETHOD EventCBArg_new(KonohaContext *kctx, KonohaStack *sfp)
 	KFieldSet(cbarg, cbarg->arg, cbArg);
 	KReturn(cbarg);
 }
+
 
 /* ======================================================================== */
 // BuffereventCBArg class
@@ -372,6 +392,7 @@ static KMETHOD BuffereventCBArg_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(bcbarg);
 }
 
+
 /* ======================================================================== */
 // TimeVal class
 
@@ -392,6 +413,33 @@ static KMETHOD TimeVal_new(KonohaContext *kctx, KonohaStack *sfp)
 	tv->timeval.tv_usec = usec;
 	KReturn(tv);
 }
+
+
+// TODO ----- should be implement in posix.socket package
+/* ======================================================================== */
+// Sockaddr_in class
+
+static void Sockaddr_in_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	struct Sockaddr_in *sa = (struct Sockaddr_in *) o;
+	memset(&sa->sockaddr, 0, sizeof (struct sockaddr));
+}
+
+//## Sockaddr_in Sockaddr_in.new(int family, int addr, int port);
+static KMETHOD Sockaddr_in_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct Sockaddr_in *sa = (struct Sockaddr_in *) sfp[0].asObject;
+	sa_family_t family	= (sa_family_t)sfp[1].intValue;
+	in_addr_t addr		= (in_addr_t)sfp[2].intValue;
+	in_port_t port		= (in_port_t)sfp[3].intValue;
+
+	sa->sockaddr.sin_family = family;
+	sa->sockaddr.sin_addr.s_addr = htonl(addr);
+	sa->sockaddr.sin_port = htons(port);
+	KReturn(sa);
+}
+// TODO should be implement in posix.socket package -----
+
 
 /* ======================================================================== */
 // System class
@@ -478,6 +526,13 @@ static kbool_t Cevent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	defTimeVal.init      = TimeVal_Init;
 	KClass *TimeValClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defTimeVal, trace);
 
+	// Sockaddr_in
+	KDEFINE_CLASS defSockaddr_in = {0};
+	SETSTRUCTNAME(defSockaddr_in, Sockaddr_in);
+	defSockaddr_in.cflag     = KClassFlag_Final;
+	defSockaddr_in.init      = Sockaddr_in_Init;
+	KClass *Sockaddr_inClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSockaddr_in, trace);
+
 
 	/* You can define methods with the following procedures. */
 	int KType_Cevent_base = Cevent_baseClass->typeId;
@@ -486,6 +541,7 @@ static kbool_t Cevent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	int KType_EventCBArg = EventCBArgClass->typeId;
 	int KType_BuffereventCBArg = BuffereventCBArgClass->typeId;
 	int KType_TimeVal = TimeValClass->typeId;
+	int KType_Sockaddr_in = Sockaddr_inClass->typeId;
 
 	/* define Generics parameter for callback method */
 	//eventCB_p
@@ -498,7 +554,7 @@ static kbool_t Cevent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	int KType_Cbev_dataCBfunc = Cbev_dataCBfunc->typeId;
 	//bev_eventCB_p
 	kparamtype_t bev_eventCB_p[] = {{KType_Cbufferevent, 0}, {KType_Int, 0}, {KType_Object, 0}};
-	KClass *Cbev_eventCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_void, 2, bev_eventCB_p);
+	KClass *Cbev_eventCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_void, 3, bev_eventCB_p);
 	int KType_Cbev_eventCBfunc = Cbev_eventCBfunc->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
@@ -517,12 +573,9 @@ static kbool_t Cevent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 		_Public, _F(Cevent_getEvents), KType_Int, KType_Cevent, KMethodName_("getEvents"), 0, 
 
 		// Cbufferevent
-		_Public, _F(Cbufferevent_new), KType_Cbufferevent, KType_Cbufferevent, KMethodName_("new"), 3, KType_Cevent_base, KFieldName_("Event_base"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("options"),
-
+		_Public, _F(Cbufferevent_new), KType_Cbufferevent, KType_Cbufferevent, KMethodName_("new"), 3, KType_Cevent_base, KFieldName_("Cevent_base"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("options"),
 		_Public, _F(Cbufferevent_setcb), KType_void, KType_Cbufferevent, KMethodName_("setcb"), 1, KType_BuffereventCBArg, KFieldName_("BuffereventCBArg"),
-
-
-
+		_Public, _F(Cbufferevent_socket_connect), KType_Int, KType_Cbufferevent, KMethodName_("socket_connect"), 1, KType_Sockaddr_in, KFieldName_("sockaddr"),
 
 		// EventCBArg
 		_Public, _F(EventCBArg_new), KType_EventCBArg, KType_EventCBArg, KMethodName_("new"), 2, KType_CeventCBfunc, KFieldName_("konoha_CB"), KType_Object, KFieldName_("CBarg"),
@@ -532,6 +585,9 @@ static kbool_t Cevent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 
 		// TimeVal
 		_Public, _F(TimeVal_new), KType_TimeVal, KType_TimeVal, KMethodName_("new"), 2, KType_Int, KFieldName_("tv_sec"), KType_Int, KFieldName_("tv_usec"),
+
+		// Sockaddr_in
+		_Public, _F(Sockaddr_in_new), KType_Sockaddr_in, KType_Sockaddr_in, KMethodName_("new"), 3, KType_Int, KFieldName_("family"), KType_Int, KFieldName_("addr"), KType_Int, KFieldName_("port"),
 
 		DEND, /* <= sentinel */
 	};
@@ -546,6 +602,14 @@ static kbool_t Cevent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 		{KDefineConstInt(EV_SIGNAL)},
 		{KDefineConstInt(EV_PERSIST)},
 		{KDefineConstInt(EV_ET)},
+
+		// bufferevent.h: enum bufferevent_options
+		{KDefineConstInt(BEV_OPT_CLOSE_ON_FREE)},
+		{KDefineConstInt(BEV_OPT_THREADSAFE)},
+		{KDefineConstInt(BEV_OPT_DEFER_CALLBACKS)},
+		{KDefineConstInt(BEV_OPT_UNLOCK_CALLBACKS)},
+
+		{KDefineConstInt(AF_INET)},// TODO should be implement in posix.socket package
 
 		//TODO add other constants
 
