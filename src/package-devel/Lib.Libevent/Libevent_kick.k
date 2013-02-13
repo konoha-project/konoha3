@@ -43,16 +43,16 @@ class Event_base {
 	}
 
 	@Public int event_add(Event ev, TimeVal tv) {
-		eventMap.set(ev.getKey(), ev);
-		int ret =  System.event_add(ev.event, tv);
+		evMap.set(ev.getKey(), ev);
+		int ret =  System.event_add(ev.cev, tv);
 		return ret;
 	}
 
 	@Public int event_del(Event ev) {
-		Event mapev = eventMap.get(ev.getKey()) as Event;
+		Event mapev = evMap.get(ev.getKey()) as Event;
 		System.p("mapev = " + mapev);
-		eventMap.remove(ev.getKey());
-		return System.event_del(ev.event);
+		evMap.remove(ev.getKey());
+		return System.event_del(ev.cev);
 	}
 }
 
@@ -60,18 +60,17 @@ class Event {
 	Cevent cev;
 	Event_base evBase;
 
-//	@Private Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb, Object cbArg) {
-//		ev= new Cevent(evbase.evbase, evd, evCat, new EventCallBackArg(cb, cbArg));
-//		this.evBase = evbase;
-//	}
+	Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb, Object cbArg) {
+		cev = new Cevent(evbase.cevbase, evd, evCat, new EventCBArg(cb, cbArg));
+		this.evBase = evbase;
+	}
 
 	// use this instance as Callback argument
 	Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb) {
-		//TODO ideal situation is "this(evbase.evbase, evd, evCat, cb, this);"
-		{
-			cev = new Cevent(evbase.cevbase, evd, evCat, new EventCallBackArg(cb, this));
-			this.evBase = evbase;
-		}
+		//TODO ideal situation is "this(evbase.evbase, evd, evCat, cb, this);" ---
+		cev = new Cevent(evbase.cevbase, evd, evCat, new EventCBArg(cb, this));
+		this.evBase = evbase;
+		// --- TODO
 	}
 
 	String getKey() {
