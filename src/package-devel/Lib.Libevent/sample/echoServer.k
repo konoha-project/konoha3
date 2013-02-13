@@ -47,6 +47,7 @@ void do_accept(int evd, int event, Object arg) {
 			//alloc_fd_state
 			Event ev = new Event(evBase, fd, EV_READ | EV_PERSIST, do_read);
 			evBase.event_add(ev, NULL/* NULL: no timeout(dispatching forever), timeout sets like "new TimeVal(sec, usec)")*/);
+			System.send(fd, "hello\n".toBytes(), 0);
 		//}
 	}
 }
