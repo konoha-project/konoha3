@@ -30,16 +30,16 @@ import("Syntax.Null");
 
 class Event;
 class Event_base {
-	Cevent_base evbase;
-	@Private Map/*TODO Map[Event]*/ eventMap;
+	Cevent_base cevbase;
+	@Private Map/*TODO Map[Event]*/ evMap;
 
 	Event_base() {
-		evbase = new Cevent_base();
+		cevbase = new Cevent_base();
 		evMap = new Map();
 	}
 
 	@Public int event_dispatch() {
-		return evbase.event_dispatch();
+		return cevbase.event_dispatch();
 	}
 
 	@Public int event_add(Event ev, TimeVal tv) {
@@ -57,7 +57,7 @@ class Event_base {
 }
 
 class Event {
-	Cevent ev;
+	Cevent cev;
 	Event_base evBase;
 
 //	@Private Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb, Object cbArg) {
@@ -69,15 +69,15 @@ class Event {
 	Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb) {
 		//TODO ideal situation is "this(evbase.evbase, evd, evCat, cb, this);"
 		{
-			ev = new Cevent(evbase.evbase, evd, evCat, new EventCallBackArg(cb, this));
+			cev = new Cevent(evbase.cevbase, evd, evCat, new EventCallBackArg(cb, this));
 			this.evBase = evbase;
 		}
 	}
 
 	String getKey() {
 		String ret;
-		@Const int evfd =  ev.getEvfd();
-		@Const int events = ev.getEvents();
+		@Const int evfd =  cev.getEvfd();
+		@Const int events = cev.getEvents();
 
 		if ((events & EV_SIGNAL) != 0) {
 			ret = "SIGNAL" + evfd.toString();
@@ -93,21 +93,21 @@ class Event {
 }
 
 class Bufferevent extends Event {
-	Cbufferevent bev;
+	Cbufferevent cbev;
 
 	Bufferevent(Event_base evbase, int fd, int options) {
-		bev =  new CBufferevent(evBase.evbase, fd, options);
+		cbev = new Cbufferevent(evbase.cevbase, fd, options);
 		this.evBase = evbase;
 	}
 
-	void bufferevent_setcb(
-		Func[void, Bufferevent, Object]	readcb,
-		Func[void, Bufferevent, Object]	writecb,
-		Func[void, Bufferevent, int, Object]	eventcb,
+	void setcb(
+		Func[void, Cbufferevent, Object]	readcb,
+		Func[void, Cbufferevent, Object]	writecb,
+		Func[void, Cbufferevent, int, Object]	eventcb,
 		Object cbArg
-	) {
-		bev.bufferevent_setcb(
-			new BufferEventCBArg(readcb, writecb, eventcb, cbArg)
-		);
+	) { cbev.setcb(new BuffereventCBArg(readcb, writecb, eventcb, cbArg)); }
+
+	int socket_connect(Sockaddr_in sa) {
+		return cbev.socket_connect(sa);
 	}
 }
