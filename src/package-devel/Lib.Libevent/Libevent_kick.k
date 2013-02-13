@@ -60,10 +60,10 @@ class Event {
 	Cevent ev;
 	Event_base evBase;
 
-	Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb, Object cbArg) {
-		ev= new Cevent(evbase.evbase, evd, evCat, new EventCallBackArg(cb, cbArg));
-		this.evBase = evbase;
-	}
+//	@Private Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb, Object cbArg) {
+//		ev= new Cevent(evbase.evbase, evd, evCat, new EventCallBackArg(cb, cbArg));
+//		this.evBase = evbase;
+//	}
 
 	// use this instance as Callback argument
 	Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb) {
@@ -100,7 +100,7 @@ class Bufferevent extends Event {
 		this.evBase = evbase;
 	}
 
-	@Public void bufferevent_setcb(
+	void bufferevent_setcb(
 		Func[void, Bufferevent, Object]	readcb,
 		Func[void, Bufferevent, Object]	writecb,
 		Func[void, Bufferevent, int, Object]	eventcb,
@@ -110,9 +110,4 @@ class Bufferevent extends Event {
 			new BufferEventCBArg(readcb, writecb, eventcb, cbArg)
 		);
 	}
-
-
-
-
-
 }
