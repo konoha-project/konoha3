@@ -35,7 +35,7 @@ class Event_base {
 
 	Event_base() {
 		evbase = new Cevent_base();
-		eventMap = new Map();
+		evMap = new Map();
 	}
 
 	@Public int event_dispatch() {
@@ -57,27 +57,27 @@ class Event_base {
 }
 
 class Event {
-	Cevent event;
+	Cevent ev;
 	Event_base evBase;
 
 	Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb, Object cbArg) {
-		event = new Cevent(evbase.evbase, evd, evCat, new EventCallBackArg(cb, cbArg));
-		evBase = evbase;
+		ev= new Cevent(evbase.evbase, evd, evCat, new EventCallBackArg(cb, cbArg));
+		this.evBase = evbase;
 	}
 
 	// use this instance as Callback argument
 	Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb) {
-		//this(evbase.evbase, evd, evCat, cb, this);
+		//TODO ideal situation is "this(evbase.evbase, evd, evCat, cb, this);"
 		{
-			event = new Cevent(evbase.evbase, evd, evCat, new EventCallBackArg(cb, this));
-			evBase = evbase;
+			ev = new Cevent(evbase.evbase, evd, evCat, new EventCallBackArg(cb, this));
+			this.evBase = evbase;
 		}
 	}
 
 	String getKey() {
 		String ret;
-		@Const int evfd =  event.getEvfd();
-		@Const int events = event.getEvents();
+		@Const int evfd =  ev.getEvfd();
+		@Const int events = ev.getEvents();
 
 		if ((events & EV_SIGNAL) != 0) {
 			ret = "SIGNAL" + evfd.toString();
@@ -90,4 +90,29 @@ class Event {
 		}
 		return ret;
 	}
+}
+
+class Bufferevent extends Event {
+	Cbufferevent bev;
+
+	Bufferevent(Event_base evbase, int fd, int options) {
+		bev =  new CBufferevent(evBase.evbase, fd, options);
+		this.evBase = evbase;
+	}
+
+	@Public void bufferevent_setcb(
+		Func[void, Bufferevent, Object]	readcb,
+		Func[void, Bufferevent, Object]	writecb,
+		Func[void, Bufferevent, int, Object]	eventcb,
+		Object cbArg
+	) {
+		bev.bufferevent_setcb(
+			new BufferEventCBArg(readcb, writecb, eventcb, cbArg)
+		);
+	}
+
+
+
+
+
 }
