@@ -28,6 +28,7 @@
 #include <event2/event.h>
 #include <event2/event_struct.h>
 #include <event2/bufferevent.h>
+#include <event2/buffer.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -271,26 +272,6 @@ static void Cbev_eventCB_1st(struct bufferevent *bev, short what, void *arg)
 	END_UnusedStack();
 }
 
-//## void Cbufferevent.setcb(BuffereventCBArg cbarg);
-static KMETHOD Cbufferevent_setcb(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kCbufferevent *bev = (kCbufferevent *)sfp[0].asObject;
-	kBuffereventCBArg *cbArg = (kBuffereventCBArg *)sfp[1].asObject;
-
-	KFieldSet(cbArg, cbArg->cbev, bev);
-	bufferevent_setcb(bev->bev, Cbev_readCB_1st, Cbev_writeCB_1st, Cbev_eventCB_1st, cbArg);
-	KReturnVoid();
-}
-
-//## int Cbufferevent.socket_connect(Sockaddr_in sa);
-static KMETHOD Cbufferevent_socket_connect(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kCbufferevent *bev = (kCbufferevent *)sfp[0].asObject;
-	kSockaddr_in *sa = (kSockaddr_in *)sfp[1].asObject;
-	int ret = bufferevent_socket_connect(bev->bev, (struct sockaddr *)&sa->sockaddr, sizeof sa->sockaddr);
-	KReturnUnboxValue(ret);
-}
-
 
 /* ======================================================================== */
 // EventCBArg class
@@ -468,6 +449,45 @@ static KMETHOD System_event_del(KonohaContext *kctx, KonohaStack* sfp)
 	KReturnUnboxValue(ret);
 }
 
+//## void System.bufferevent_setcb(Cbufferevent bev, BuffereventCBArg cbarg);
+static KMETHOD System_bufferevent_setcb(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kCbufferevent *bev = (kCbufferevent *)sfp[1].asObject;
+	kBuffereventCBArg *cbArg = (kBuffereventCBArg *)sfp[2].asObject;
+
+	KFieldSet(cbArg, cbArg->cbev, bev);
+	bufferevent_setcb(bev->bev, Cbev_readCB_1st, Cbev_writeCB_1st, Cbev_eventCB_1st, cbArg);
+	KReturnVoid();
+}
+
+//## int System.bufferevent_socket_connect(Cbufferevent bev, Sockaddr_in sa);
+static KMETHOD System_bufferevent_socket_connect(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kCbufferevent *bev = (kCbufferevent *)sfp[1].asObject;
+	kSockaddr_in *sa = (kSockaddr_in *)sfp[2].asObject;
+	int ret = bufferevent_socket_connect(bev->bev, (struct sockaddr *)&sa->sockaddr, sizeof sa->sockaddr);
+	KReturnUnboxValue(ret);
+}
+
+//## int System.bufferevent_enable(Cbufferevent bev, int event);
+static KMETHOD System_bufferevent_enable(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kCbufferevent *bev = (kCbufferevent *)sfp[1].asObject;
+	short event = (short)sfp[2].intValue;
+
+	int ret = bufferevent_enable(bev->bev, event);
+	KReturnUnboxValue(ret);
+}
+//## int System.evbuffer_add_printf(Cbufferevent bev, String msg);
+static KMETHOD System_evbuffer_add_printf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kCbufferevent *bev = (kCbufferevent *)sfp[1].asObject;
+	kString *msg = sfp[2].asString;
+
+	int ret = evbuffer_add_printf(bufferevent_get_output(bev->bev), kString_text(msg));
+	KReturnUnboxValue(ret);
+}
+
 
 /* ======================================================================== */
 
@@ -562,6 +582,10 @@ static kbool_t Cevent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 		_Public|_Static|_Const|_Im, _F(System_evutil_make_socket_nonblocking), KType_Int, KType_System, KMethodName_("evutil_make_socket_nonblocking"), 1, KType_Int, KFieldName_("fd"),
 		_Public|_Static|_Const|_Im, _F(System_event_add), KType_Int, KType_System, KMethodName_("event_add"), 2, KType_Cevent, KFieldName_("Cevent"), KType_TimeVal, KFieldName_("timeval"),
 		_Public|_Static|_Const|_Im, _F(System_event_del), KType_Int, KType_System, KMethodName_("event_del"), 1, KType_Cevent, KFieldName_("Cevent"),
+		_Public|_Static|_Const|_Im, _F(System_bufferevent_setcb), KType_void, KType_System, KMethodName_("bufferevent_setcb"), 2, KType_Cbufferevent, KFieldName_("cbev"), KType_BuffereventCBArg, KFieldName_("BuffereventCBArg"),
+		_Public|_Static|_Const|_Im, _F(System_bufferevent_socket_connect), KType_Int, KType_System, KMethodName_("bufferevent_socket_connect"), 2, KType_Cbufferevent, KFieldName_("cbev"), KType_Sockaddr_in, KFieldName_("sockaddr"),
+		_Public|_Static|_Const|_Im, _F(System_bufferevent_enable), KType_Int, KType_System, KMethodName_("bufferevent_enable"), 2, KType_Cbufferevent, KFieldName_("cbev"), KType_Int, KFieldName_("event"),
+		_Public|_Static|_Const|_Im, _F(System_evbuffer_add_printf), KType_Int, KType_System, KMethodName_("evbuffer_add_printf"), 2, KType_Cbufferevent, KFieldName_("cbev"), KType_String, KFieldName_("message"),
 
 		// Cevent_base
 		_Public, _F(Cevent_base_new), KType_Cevent_base, KType_Cevent_base, KMethodName_("new"), 0,
@@ -574,8 +598,6 @@ static kbool_t Cevent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 
 		// Cbufferevent
 		_Public, _F(Cbufferevent_new), KType_Cbufferevent, KType_Cbufferevent, KMethodName_("new"), 3, KType_Cevent_base, KFieldName_("Cevent_base"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("options"),
-		_Public, _F(Cbufferevent_setcb), KType_void, KType_Cbufferevent, KMethodName_("setcb"), 1, KType_BuffereventCBArg, KFieldName_("BuffereventCBArg"),
-		_Public, _F(Cbufferevent_socket_connect), KType_Int, KType_Cbufferevent, KMethodName_("socket_connect"), 1, KType_Sockaddr_in, KFieldName_("sockaddr"),
 
 		// EventCBArg
 		_Public, _F(EventCBArg_new), KType_EventCBArg, KType_EventCBArg, KMethodName_("new"), 2, KType_CeventCBfunc, KFieldName_("konoha_CB"), KType_Object, KFieldName_("CBarg"),
@@ -595,13 +617,22 @@ static kbool_t Cevent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 
 
 	KDEFINE_INT_CONST IntData[] = {
-		//for event_new()
+		// === for event_new() ===
 		{KDefineConstInt(EV_TIMEOUT)},
 		{KDefineConstInt(EV_READ)},
 		{KDefineConstInt(EV_WRITE)},
 		{KDefineConstInt(EV_SIGNAL)},
 		{KDefineConstInt(EV_PERSIST)},
 		{KDefineConstInt(EV_ET)},
+
+		// === for bufferevent ===
+		// bufferevent.h
+		{KDefineConstInt(BEV_EVENT_READING)},
+		{KDefineConstInt(BEV_EVENT_WRITING)},
+		{KDefineConstInt(BEV_EVENT_EOF)},
+		{KDefineConstInt(BEV_EVENT_ERROR)},
+		{KDefineConstInt(BEV_EVENT_TIMEOUT)},
+		{KDefineConstInt(BEV_EVENT_CONNECTED)},
 
 		// bufferevent.h: enum bufferevent_options
 		{KDefineConstInt(BEV_OPT_CLOSE_ON_FREE)},

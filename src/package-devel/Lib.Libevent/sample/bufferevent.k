@@ -5,6 +5,7 @@
 
 import("Syntax.JavaStyleClass");
 import("JavaStyle.Object");
+import("Syntax.CStyleBitwiseOperator");
 import("Lib.Libevent");
 
 void readCB(Cbufferevent bev, Object arg) {
@@ -24,6 +25,14 @@ void writeCB(Cbufferevent bev, Object arg) {
 
 void eventCB(Cbufferevent bev, int events, Object arg) {
 	System.p("called eventCB()");
+	System.p("bev = " + bev + ", events = " + events + ", arg = " + arg);
+
+	if ((events & BEV_EVENT_CONNECTED) != 0) {
+		System.p("Connect okay");
+	} else if ((events & (BEV_EVENT_ERROR | BEV_EVENT_EOF)) != 0) {
+		System.p("Closing");
+		//TODO close
+	}
 
 
 
@@ -35,12 +44,16 @@ int main() {
 	Object cbarg = bev as Object;
 	bev.setcb(readCB, writeCB, eventCB, cbarg);
 
-	if (bev.socket_connect(new Sockaddr_in(AF_INET, 0x7f000001, 8080)) < 0) {
+	int s = bev.socket_connect(new Sockaddr_in(AF_INET, 0x7f000001, 10000));
+	if (s > 0) {
 		bev = NULL;
 		evBase = NULL;
 		return -1;
 	}
 
+	//bev.enable(EV_READ | EV_WRITE);
+	//bev.evbuffer_add_printf("from client");
+	//System.p("event_dispatch()");
 	evBase.event_dispatch();
 	return 0;
 }

@@ -60,6 +60,8 @@ class Event {
 	Cevent cev;
 	Event_base evBase;
 
+	Event() {}
+
 	Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb, Object cbArg) {
 		cev = new Cevent(evbase.cevbase, evd, evCat, new EventCBArg(cb, cbArg));
 		this.evBase = evbase;
@@ -94,19 +96,32 @@ class Event {
 class Bufferevent extends Event {
 	Cbufferevent cbev;
 
+	Bufferevent() {}
+
 	Bufferevent(Event_base evbase, int fd, int options) {
 		cbev = new Cbufferevent(evbase.cevbase, fd, options);
 		this.evBase = evbase;
 	}
 
-	void setcb(
+	@Public void setcb(
 		Func[void, Cbufferevent, Object]	readcb,
 		Func[void, Cbufferevent, Object]	writecb,
 		Func[void, Cbufferevent, int, Object]	eventcb,
-		Object cbArg
-	) { cbev.setcb(new BuffereventCBArg(readcb, writecb, eventcb, cbArg)); }
+		Object cbArg) {
+		BuffereventCBArg cbarg = new BuffereventCBArg(readcb, writecb, eventcb, cbArg);
+		System.bufferevent_setcb(cbev, cbarg);
+	}
 
-	int socket_connect(Sockaddr_in sa) {
-		return cbev.socket_connect(sa);
+	@Public int socket_connect(Sockaddr_in sa) {
+		int s = System.bufferevent_socket_connect(cbev, sa);
+		return s;
+	}
+
+	int enable(int event) {
+		return System.bufferevent_enable(cbev, event);
+	}
+
+	int evbuffer_add_printf(String msg) {
+		return System.evbuffer_add_printf(cbev, msg);
 	}
 }
