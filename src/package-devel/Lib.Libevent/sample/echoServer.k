@@ -18,6 +18,7 @@ void do_read(int evd, int event, Object arg) {
 	System.p("ev = " + ev);
 	Bytes buf = new Bytes(32);
 	int ret = System.recv(evd, buf, 0);
+	System.p("buf = " + buf);
 	if (buf[0] == 0x03 || buf[0] == 0x04) {
 		System.send(evd, "socket close\n".toBytes(), 0);
 		ev.evBase.event_del(ev);
