@@ -569,11 +569,11 @@ static kbool_t Cevent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 	KClass *CeventCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_void, 3, eventCB_p);
 	int KType_CeventCBfunc = CeventCBfunc->typeId;
 	//bev_dataCB_p
-	kparamtype_t bev_dataCB_p[] = {{KType_Object/*TODO Bufferevent */, 0}, {KType_Object, 0}};
+	kparamtype_t bev_dataCB_p[] = {{KType_Cbufferevent, 0}, {KType_Object, 0}};
 	KClass *Cbev_dataCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_void, 2, bev_dataCB_p);
 	int KType_Cbev_dataCBfunc = Cbev_dataCBfunc->typeId;
 	//bev_eventCB_p
-	kparamtype_t bev_eventCB_p[] = {{KType_Object/*TODO Bufferevent */, 0}, {KType_Int, 0}, {KType_Object, 0}};
+	kparamtype_t bev_eventCB_p[] = {{KType_Cbufferevent, 0}, {KType_Int, 0}, {KType_Object, 0}};
 	KClass *Cbev_eventCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_void, 3, bev_eventCB_p);
 	int KType_Cbev_eventCBfunc = Cbev_eventCBfunc->typeId;
 

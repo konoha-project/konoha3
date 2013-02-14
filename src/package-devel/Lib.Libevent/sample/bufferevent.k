@@ -8,8 +8,7 @@ import("JavaStyle.Object");
 import("Syntax.CStyleBitwiseOperator");
 import("Lib.Libevent");
 
-void readCB(Object obev /*TODO Bufferevent bev*/, Object arg) {
-	Bufferevent bev = obev as Bufferevent;
+void readCB(Cbufferevent bev, Object arg) {
 	System.p("called readCB()");
 	bev.bufferevent_get_input();
 
@@ -17,16 +16,14 @@ void readCB(Object obev /*TODO Bufferevent bev*/, Object arg) {
 
 }
 
-void writeCB(Object obev /*TODO Bufferevent bev*/, Object arg) {
-	Bufferevent bev = obev as Bufferevent;
+void writeCB(Cbufferevent bev, Object arg) {
 	System.p("called writeCB()");
 
 
 
 }
 
-void eventCB(Object obev /*TODO Bufferevent bev*/, int events, Object arg) {
-	Bufferevent bev = obev as Bufferevent;
+void eventCB(Cbufferevent bev, int events, Object arg) {
 	System.p("called eventCB()");
 	System.p("bev = " + bev + ", events = " + events + ", arg = " + arg);
 
