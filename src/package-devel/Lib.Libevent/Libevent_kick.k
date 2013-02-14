@@ -104,9 +104,9 @@ class Bufferevent extends Event {
 	}
 
 	@Public void setcb(
-		Func[void, Cbufferevent, Object]	readcb,
-		Func[void, Cbufferevent, Object]	writecb,
-		Func[void, Cbufferevent, int, Object]	eventcb,
+		Func[void, Object/*TODO Bufferevent*/, Object]	readcb,
+		Func[void, Object/*TODO Bufferevent*/, Object]	writecb,
+		Func[void, Object/*TODO Bufferevent*/, int, Object]	eventcb,
 		Object cbArg) {
 		BuffereventCBArg cbarg = new BuffereventCBArg(readcb, writecb, eventcb, cbArg);
 		System.bufferevent_setcb(cbev, cbarg);
