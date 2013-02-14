@@ -22,15 +22,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <stdio.h>
-#include <iconv.h>
-#include <errno.h>
 #include <konoha3/konoha.h>
 #include <konoha3/sugar.h>
 #include <konoha3/klib.h>
 #include <konoha3/arch/minivm.h>
 
-#define LOG_FUNCTION_NAME "echo"
 #define ARGLENGTH 8
 
 #ifdef __cplusplus
@@ -160,27 +156,27 @@ static void BashBuilder_EmitIndent(KonohaContext *kctx, BashBuilder *builder)
 	if(!builder->isIndentEmitted) {
 		int i;
 		for(i = 0; i < builder->indent; i++) {
-			printf("    ");
+			PLATAPI printf_i("    ");
 		}
 		builder->isIndentEmitted = true;
 	}
 }
 
-static void BashBuilder_EmitNewLineWith(KonohaContext *kctx, BashBuilder *builder, const char* endline)
+static void BashBuilder_EmitNewLineWith(KonohaContext *kctx, BashBuilder *builder, const char *endline)
 {
 	BashBuilder_EmitIndent(kctx, builder);
 	builder->isIndentEmitted = false;
-	printf("%s\n", endline);
+	PLATAPI printf_i("%s\n", endline);
 }
 
-static void BashBuilder_EmitString(KonohaContext *kctx, BashBuilder *builder, const char* prefix, const char* str, const char* suffix)
+static void BashBuilder_EmitString(KonohaContext *kctx, BashBuilder *builder, const char *prefix, const char *str, const char *suffix)
 {
 	BashBuilder_EmitIndent(kctx, builder);
 	KLIB KBuffer_printf(kctx, &builder->bashCodeBuffer, "%s%s%s", prefix, str, suffix);
 	if(strcmp(prefix, "(") == 0 || strcmp(prefix, ")") == 0) {
-		printf("%s%s%s", " ", str, "");
+		PLATAPI printf_i("%s%s%s", " ", str, "");
 	} else {
-		printf("%s%s%s", prefix, str, suffix);
+		PLATAPI printf_i("%s%s%s", prefix, str, suffix);
 	}
 }
 
@@ -233,7 +229,7 @@ L_RETURN:
 	return ret;
 }
 
-static kbool_t BashBuilder_VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk, const char* prefix, const char* suffix)
+static kbool_t BashBuilder_VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk, const char *prefix, const char *suffix)
 {
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
 	BashBuilder_EmitString(kctx, bashBuilder, prefix, "", "");
@@ -479,7 +475,7 @@ static kbool_t BashBuilder_VisitFieldNode(KonohaContext *kctx, KBuilder *builder
 
 kbool_t LoadBashModule(KonohaFactory *factory, ModuleType type);
 static void compileAllDefinedMethodsInNameSpace(KonohaContext *kctx, kNameSpace *ns);
-static void SetUpBashShebang(void);
+static void SetUpBashShebang(KonohaContext *kctx);
 
 static bool BashBuilder_importPackage(KonohaContext *kctx, kNameSpace *ns, kString *package, kfileline_t uline)
 {
@@ -491,14 +487,13 @@ static bool BashBuilder_importPackage(KonohaContext *kctx, kNameSpace *ns, kStri
 	KImportPackage(ns, kString_text(package), trace);
 	compileAllDefinedMethodsInNameSpace(kctx, ns);
 
-
-	SetUpBashShebang();
+	SetUpBashShebang(kctx);
 	LoadBashModule(factory, ReleaseModule);
 	ns->builderApi = factory->ExecutionEngineModule.GetDefaultBuilderAPI();
 	return true;
 }
 
-static kbool_t BashBuilder_VisitNodeParams(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk, int beginIndex, const char* delimiter, const char* leftBracket, const char* rightBracket)
+static kbool_t BashBuilder_VisitNodeParams(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk, int beginIndex, const char *delimiter, const char *leftBracket, const char *rightBracket)
 {
 	unsigned i, n = kArray_size(expr->NodeList);
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
@@ -541,7 +536,7 @@ static void BashBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *
 	}
 	if(receiver->attrTypeId == KType_System && methodName[0] == 'p') {
 		// System.p
-		BashBuilder_EmitString(kctx, bashBuilder, LOG_FUNCTION_NAME, "", "");
+		BashBuilder_EmitString(kctx, bashBuilder, "echo", "", "");
 	}
 	else if(strcmp(methodName, "new") == 0) {
 	}
@@ -636,8 +631,7 @@ static kbool_t BashBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *bu
 	}
 
 	if(strcmp(KSymbol_text(mtd->mn), "lastExitStatus") == 0 && bashBuilder->isOutPut) {
-		char *str = (char *)KLIB KBuffer_text(kctx, &(bashBuilder->wb), NonZero);
-		PLATAPI printf_i("%s\n", str);
+		PLATAPI printf_i("%s\n", KLIB KBuffer_text(kctx, &(bashBuilder->wb), NonZero));
 		KLIB KBuffer_Free(&(bashBuilder->wb));
 		return true;
 	}
@@ -659,13 +653,13 @@ static kbool_t BashBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *bu
 	else {
 		kNode *receiver = kNode_At(node, 1);
 		const char *classname = KClass_text(KClass_(receiver->attrTypeId));
-		if(strcmp(KSymbol_text(mtd->mn), "newList") == 0) {
+		if((mtd->mn) == KSymbol_("newList")) {
 			isArray = true;
 		}
 		else {
 			BashBuilder_ConvertAndEmitMethodName(kctx, builder, node, thunk, receiver, mtd);
 		}
-		if(strcmp(KSymbol_text(mtd->mn), "eval") == 0) {
+		if(mtd->mn == KSymbol_("eval")) {
 			((BashBuilder *)builder)->isEvalMethod = true;
 		}
 		switch(KSymbol_prefixText_ID(mtd->mn)) {
@@ -973,9 +967,9 @@ static struct KVirtualCode* Bash_GenerateVirtualCode(KonohaContext *kctx, kMetho
 
 // -------------------------------------------------------------------------
 
-static void SetUpBashShebang(void)
+static void SetUpBashShebang(KonohaContext *kctx)
 {
-	fprintf(stdout, "#!/bin/bash\n");
+	PLATAPI printf_i("#!/bin/bash\n");
 }
 
 static KMETHOD KMethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
