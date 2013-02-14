@@ -513,13 +513,13 @@ static bool JSBuilder_importPackage(KonohaContext *kctx, kNameSpace *ns, kString
 {
 	KBaseTrace(trace);
 	KonohaFactory *factory = (KonohaFactory *)kctx->platApi;
-	
+
 	//factory->DeleteVirtualMachine(kctx);
 	SUGAR kNameSpace_UseDefaultVirtualMachine(kctx, ns);
 
 	KImportPackage(ns, kString_text(package), trace);
 	compileAllDefinedMethodsInNameSpace(kctx, ns);
-	
+
 	//factory->DeleteVirtualMachine(kctx);
 	LoadJavaScriptModule(factory, ReleaseModule);
 	ns->builderApi = factory->ExecutionEngineModule.GetDefaultBuilderAPI();
@@ -535,7 +535,7 @@ static bool JSBuilder_loadScript(KonohaContext *kctx, kNameSpace *ns, kString *p
 	//SUGAR kNameSpace_UseDefaultVirtualMachine(kctx, ns);
 		
 	KLIB kNameSpace_LoadScript(kctx, ns, path, trace);
-	
+
 
 	KonohaFactory *factory = (KonohaFactory *)kctx->platApi;
 	//LoadJavaScriptModule(factory, ReleaseModule);
