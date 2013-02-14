@@ -121,7 +121,11 @@ class Bufferevent extends Event {
 		return System.bufferevent_enable(cbev, event);
 	}
 
-	int evbuffer_add_printf(String msg) {
-		return System.evbuffer_add_printf(cbev, msg);
+	int write(Bytes msg) {
+		return System.bufferevent_write(cbev, msg);
+	}
+
+	int read(Bytes buf) {
+		return System.bufferevent_read(cbev, buf);
 	}
 }

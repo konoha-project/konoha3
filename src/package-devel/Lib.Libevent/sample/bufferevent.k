@@ -1,19 +1,26 @@
 /*
  * bufferevent sample
- * > telnet localhost 10000
+ * connect to 127.0.0.1:10000
+ *
+ * Most simple way is to use echoServer.k
  */
 
 import("Syntax.JavaStyleClass");
 import("JavaStyle.Object");
 import("Syntax.CStyleBitwiseOperator");
+import("Type.Bytes");
 import("Lib.Libevent");
 
 void readCB(Cbufferevent bev, Object arg) {
 	System.p("called readCB()");
-	bev.bufferevent_get_input();
 
+	Bytes buf = new Bytes(1024);
+	System.bufferevent_read(bev, buf);
+	System.p(buf);
 
-
+	if (buf.toString() == "hello") {
+		System.bufferevent_write(bev, "Hi!".toBytes())
+	}
 }
 
 void writeCB(Cbufferevent bev, Object arg) {
@@ -51,9 +58,9 @@ int main() {
 		return -1;
 	}
 
-	//bev.enable(EV_READ | EV_WRITE);
-	//bev.evbuffer_add_printf("from client");
-	//System.p("event_dispatch()");
+	bev.enable(EV_READ /*| EV_WRITE*/);
+	bev.write("from client".toBytes());
+	System.p("event_dispatch()");
 	evBase.event_dispatch();
 	return 0;
 }
