@@ -43,16 +43,16 @@ class Event_base {
 	}
 
 	@Public int event_add(Event ev, TimeVal tv) {
-		evMap.set(ev.getKey(), ev);
-		int ret =  System.event_add(ev.cev, tv);
+		evMap.set(ev.getKey(), ev);	//TODO
+		int ret =  cevbase.event_add(ev.cev, tv);
 		return ret;
 	}
 
 	@Public int event_del(Event ev) {
-		Event mapev = evMap.get(ev.getKey()) as Event;
+		Event mapev = evMap.get(ev.getKey()) as Event; //TODO
 		System.p("mapev = " + mapev);
-		evMap.remove(ev.getKey());
-		return System.event_del(ev.cev);
+		evMap.remove(ev.getKey());	//TODO
+		return cevbase.event_del(ev.cev);
 	}
 }
 
