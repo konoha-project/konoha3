@@ -73,7 +73,7 @@ static void Cevent_base_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void Cevent_base_Free(KonohaContext *kctx, kObject *o)
 {
 	struct Cevent_base *ev = (struct Cevent_base *) o;
-	if (ev->event_base != NULL) {
+	if(ev->event_base != NULL) {
 		event_base_free(ev->event_base);
 		ev->event_base = NULL;
 	}
@@ -187,7 +187,7 @@ static void Cbufferevent_socket_Free(KonohaContext *kctx, kObject *o)
 {
 	struct Cbufferevent_socket *bev = (struct Cbufferevent_socket *) o;
 
-	if (bev->bufev != NULL) {
+	if(bev->bufev != NULL) {
 		bufferevent_free(bev->bufev);
 		bev->bufev = NULL;
 	}
