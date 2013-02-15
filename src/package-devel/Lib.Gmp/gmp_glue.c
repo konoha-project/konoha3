@@ -63,7 +63,7 @@ static void Mpz_Free(KonohaContext *kctx, kObject *o)
 	mpz_clear(mpz->mpz);
 }
 
-static void Mpz_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+static void Mpz_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	/* This function is called when serializing the object. */
 	kMpz *p = (kMpz *)v[pos].asObject;
@@ -469,7 +469,7 @@ static void Mpf_Free(KonohaContext *kctx, kObject *o)
 	mpf_clear(mpf->mpf);
 }
 
-static void Mpf_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+static void Mpf_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	/* This function is called when serializing the object. */
 	kMpf *p = (kMpf *)v[pos].asObject;
@@ -939,13 +939,13 @@ static kbool_t gmp_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 	MpzDef.cflag = KClassFlag_Final;
 	MpzDef.init  = Mpz_Init;
 	MpzDef.free  = Mpz_Free;
-	MpzDef.p     = Mpz_p;
+	MpzDef.format     = Mpz_format;
 	static KDEFINE_CLASS MpfDef = {0};
 	SETSTRUCTNAME(MpfDef, Mpf);
 	MpfDef.cflag = KClassFlag_Final;
 	MpfDef.init  = Mpf_Init;
 	MpfDef.free  = Mpf_Free;
-	MpfDef.p     = Mpf_p;
+	MpfDef.format     = Mpf_format;
 
 	KClass *cMpz = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MpzDef, trace);
 	KClass *cMpf = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MpfDef, trace);

@@ -820,7 +820,7 @@ static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, k
 static void KBuffer_WriteValue(KonohaContext *kctx, KBuffer *wb, KClass *c, KonohaStack *sfp)
 {
 	if(KClass_Is(UnboxType, c)) {
-		c->p(kctx, sfp, 0, wb);
+		c->format(kctx, sfp, 0, wb);
 	}
 	else {
 		KLIB kObject_WriteToBuffer(kctx, sfp[0].asObject, false/*delim*/, wb, NULL, 0);

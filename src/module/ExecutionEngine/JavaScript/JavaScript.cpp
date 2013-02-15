@@ -445,7 +445,7 @@ static void JSBuilder_EmitKonohaValue(KonohaContext *kctx, KBuilder *builder, KC
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	ct->p(kctx, sfp, 0, &wb);
+	ct->format(kctx, sfp, 0, &wb);
 	char *str = (char *)KLIB KBuffer_text(kctx, &wb, NonZero);
 	JSBuilder_EmitString(kctx, builder, str, "", "");
 	KLIB KBuffer_Free(&wb);

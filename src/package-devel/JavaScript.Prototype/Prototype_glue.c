@@ -32,10 +32,10 @@ extern "C"{
 #endif
 
 
-static void kPrototype_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb)
+static void kPrototype_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	KLIB KBuffer_Write(kctx, wb, "{", 1);
-	KLIB kObjectProto_p(kctx, values, pos, wb, 0);
+	KLIB kObjectProto_format(kctx, v, pos, wb, 0);
 	KLIB KBuffer_Write(kctx, wb, "}", 1);
 }
 
@@ -46,7 +46,7 @@ static void prototype_defineClass(KonohaContext *kctx, kNameSpace *ns, int optio
 			.structname = "Prototype",
 			.typeId = KTypeAttr_NewId,
 			.baseTypeId = KType_Object,
-			.p = kPrototype_p,
+			.format = kPrototype_format,
 		};
 		KClass_Prototype = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defPrototype, trace);
 	}

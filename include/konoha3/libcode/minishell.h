@@ -103,7 +103,7 @@ static void DumpEval(KonohaContext *kctx, KBuffer *wb)
 		if(!KType_Is(UnboxType, ty)) {
 			ty = kObject_typeId(lsfp[0].asObject);
 		}
-		KClass_(ty)->p(kctx, lsfp, 0, wb);
+		KClass_(ty)->format(kctx, lsfp, 0, wb);
 		fflush(stdout);
 		PLATAPI printf_i("  (%s) %s\n", KType_text(ty), KLIB KBuffer_text(kctx, wb, EnsureZero));
 		base->evalty = KType_void;

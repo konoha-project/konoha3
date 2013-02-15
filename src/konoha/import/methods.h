@@ -78,7 +78,7 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	kObject_class(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
+	kObject_class(sfp[0].asObject)->format(kctx, sfp, 0, &wb);
 	KReturn(KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer));
 }
 

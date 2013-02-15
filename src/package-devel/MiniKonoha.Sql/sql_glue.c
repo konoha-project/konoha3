@@ -172,7 +172,7 @@ static void kResultSet_Free(KonohaContext *kctx, kObject *o)
 	rs->connectionNULL = NULL;
 }
 
-static void kResultSet_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+static void kResultSet_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	kResultSet *rs = (kResultSet *) v[0].asObject;
 	KLIB KBuffer_printf(kctx, wb, "{");
@@ -186,7 +186,7 @@ static void kResultSet_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *
 		krbp_t *val = &rs->column[i].val;
 		if(KType_Is(UnboxType, type)) {
 			KonohaValue sp[1]; sp[0].unboxValue = val[0].unboxValue;
-			KClass_(type)->p(kctx, sp, 0, wb);
+			KClass_(type)->format(kctx, sp, 0, wb);
 		} else {
 			KLIB kObject_WriteToBuffer(kctx, val[0].asObject, false/*delim*/, wb, NULL, 0);
 		}
@@ -511,7 +511,7 @@ static kbool_t sql_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 		.init = kResultSet_Init,
 		.free = kResultSet_Free,
 		.reftrace = kResultSet_Reftrace,
-		.p = kResultSet_p,
+		.format = kResultSet_format,
 	};
 
 	KClass *cConnection = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &ConnectionDef, trace);

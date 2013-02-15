@@ -96,7 +96,7 @@ static void kFileStatus_Free(KonohaContext *kctx, kObject *o)
 //	u_long   st_gen;    /* file generation number */
 //};
 
-static void kFileStatus_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+static void kFileStatus_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	kFileStatus *stat = (kFileStatus *)v[pos].asObject;
 	KLIB KBuffer_printf(kctx, wb, "{dev: %d, ", stat->stat->st_dev);
@@ -289,7 +289,7 @@ static void stat_defineClassAndMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 	defStat.cflag = KClassFlag_Final;
 	defStat.init  = kFileStatus_Init;
 	defStat.free  = kFileStatus_Free;
-	defStat.p     = kFileStatus_p;
+	defStat.format     = kFileStatus_format;
 	KClass *cStat = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defStat, trace);
 	int KType_Stat = cStat->typeId;
 	KDEFINE_METHOD MethodData[] = {

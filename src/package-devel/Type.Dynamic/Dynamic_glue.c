@@ -38,7 +38,7 @@ struct _kDynamic {
 //{
 //}
 //
-//static void Dynamic_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+//static void Dynamic_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 //{
 //}
 //

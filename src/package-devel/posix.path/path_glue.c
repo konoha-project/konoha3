@@ -405,7 +405,7 @@ static void kDir_Free(KonohaContext *kctx, kObject *o)
 	kDir_close(kctx, (kDir *)o);
 }
 
-static void kDir_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+static void kDir_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	kDir *dir = (kDir *)v[pos].asObject;
 	KLIB KBuffer_printf(kctx, wb, "DIR: %s", kString_text(dir->PathInfoNULL));
@@ -507,7 +507,7 @@ static void path_defineDIR(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trac
 	defDIR.init  = kDir_Init;
 	defDIR.reftrace  = kDir_Reftrace;
 	defDIR.free  = kDir_Free;
-	defDIR.p     = kDir_p;
+	defDIR.format     = kDir_format;
 	KClass *cDIR = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDIR, trace);
 	int KType_DIR = cDIR->typeId;
 	KDEFINE_METHOD MethodData[] = {

@@ -298,7 +298,7 @@ static void RegExp_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void RegExp_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+static void RegExp_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	kRegExp *re = v[pos].asRegExp;
 	KLIB KBuffer_printf(kctx, wb, "/%s/%s%s%s", kString_text(re->pattern),
@@ -626,7 +626,7 @@ static kbool_t regexp_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 			.cflag = 0,
 			.init = RegExp_Init,
 			.free = RegExp_Free,
-			.p    = RegExp_p,
+			.format = RegExp_format,
 		};
 		KClass_RegExp = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &RegExpDef, trace);
 	}

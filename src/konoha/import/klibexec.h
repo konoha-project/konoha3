@@ -694,10 +694,10 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 			return;
 		}
 	}
-	KClass_(KTypeAttr_Unmask(d->attrTypeId))->p(kctx, w->values, w->pos, w->wb);
+	KClass_(KTypeAttr_Unmask(d->attrTypeId))->format(kctx, w->values, w->pos, w->wb);
 }
 
-static int kObjectProto_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb, int count)
+static int kObjectProto_format(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb, int count)
 {
 	struct wbenv w = {values, wb, pos+1, count};
 	KLIB kObjectProto_DoEach(kctx, values[pos].asObject, &w, dumpProto);
@@ -710,7 +710,7 @@ static void DumpObject(KonohaContext *kctx, kObject *o, const char *file, const 
 	KonohaStack *lsfp = kctx->esp;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	KUnsafeFieldSet(lsfp[0].asObject, o);
-	kObject_class(o)->p(kctx, lsfp, 0, &wb);
+	kObject_class(o)->format(kctx, lsfp, 0, &wb);
 	const char *msg = KLIB KBuffer_text(kctx, &wb, EnsureZero);
 	if(file == NULL) {
 		PLATAPI printf_i("(%s)%s\n", KClass_text(kObject_class(o)), msg);
@@ -894,7 +894,7 @@ static void klib_Init(KonohaLibVar *l)
 	l->kObjectProto_SetUnboxValue = kObjectProto_SetUnboxValue;
 	l->kObjectProto_RemoveKey     = kObjectProto_RemoveKey;
 	l->kObjectProto_DoEach    = kObjectProto_DoEach;
-	l->kObjectProto_p         = kObjectProto_p;
+	l->kObjectProto_format    = kObjectProto_format;
 	l->DumpObject             = DumpObject;
 	l->KfileId                = KfileId;
 	l->KpackageId             = KpackageId;

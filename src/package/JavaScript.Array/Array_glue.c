@@ -420,23 +420,23 @@ static void kArray_join(KonohaContext *kctx, KBuffer *wb, kArray *a, const char 
 	if(kArray_Is(UnboxData, a)) {
 		for(i = 0; i < asize - 1; i++) {
 			lsfp[0].unboxValue = a->unboxItems[i];
-			KClass_p0->p(kctx, lsfp, 0, wb);
+			KClass_p0->format(kctx, lsfp, 0, wb);
 			KLIB KBuffer_Write(kctx, wb, separator, length);
 		}
 		if(asize > 0) {
 			lsfp[0].unboxValue = a->unboxItems[asize - 1];
-			KClass_p0->p(kctx, lsfp, 0, wb);
+			KClass_p0->format(kctx, lsfp, 0, wb);
 		}
 	}
 	else {
 		for(i = 0; i < asize - 1; i++) {
 			KUnsafeFieldSet(lsfp[0].asObject, a->ObjectItems[i]);
-			KClass_p0->p(kctx, lsfp, 0, wb);
+			KClass_p0->format(kctx, lsfp, 0, wb);
 			KLIB KBuffer_Write(kctx, wb, separator, length);
 		}
 		if(asize > 0) {
 			KUnsafeFieldSet(lsfp[0].asObject, a->ObjectItems[asize - 1]);
-			KClass_p0->p(kctx, lsfp, 0, wb);
+			KClass_p0->format(kctx, lsfp, 0, wb);
 		}
 	}
 	END_UnusedStack();

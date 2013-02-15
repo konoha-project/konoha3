@@ -818,7 +818,6 @@ struct KonohaFactory {
 		}\
 	} while(0)
 
-
 #define OLDTRACE_SWITCH_TO_KTrace(POLICY, ...)
 
 /* ------------------------------------------------------------------------ */
@@ -918,15 +917,15 @@ typedef struct KContextModule        KContextModule;
 struct KObjectVisitor;
 
 struct KonohaContextVar {
-	uintptr_t                         safepoint; // set to 1
-	KonohaStack                      *esp;
-	PlatformApi                      *platApi;
-	KonohaLib                        *klib;
-	KRuntime                         *share;
-	KRuntimeContextVar               *stack;
-	KRuntimeModule                  **modshare;
-	KContextModule                  **modlocal;
-	void                             *gcContext; // defined in each module
+	uintptr_t                  safepoint; // set to 1
+	KonohaStack               *esp;
+	PlatformApi               *platApi;
+	KonohaLib                 *klib;
+	KRuntime                  *share;
+	KRuntimeContextVar        *stack;
+	KRuntimeModule           **modshare;
+	KContextModule           **modlocal;
+	void                      *gcContext; // defined in each module
 };
 
 // share, local
@@ -971,16 +970,16 @@ struct KRuntimeVar {
 #define KonohaContext_Set(P, X)   KFlag_Set1(kshortflag_t, (X)->stack->flag, kContext_##P)
 
 struct KRuntimeContextVar {
-	KonohaStack*               stack;
+	KonohaStack               *stack;
 	size_t                     stacksize;
-	KonohaStack*               stack_uplimit;
+	KonohaStack               *stack_uplimit;
 	kArray                    *ContextConstList;
 	kArray                    *gcStack; /* ContextConstList */
 	KGrowingArray              cwb;
 	// local info
 	kshortflag_t               flag;
 	KonohaContext             *rootctx;
-	void*                      cstack_bottom;  // for GC
+	void                      *cstack_bottom;  // for GC
 	// Eval
 	ktypeattr_t                evalty;
 	kushort_t                  evalidx;
@@ -1071,7 +1070,7 @@ typedef struct krbp_t {
 	};
 } krbp_t;
 
-typedef enum {
+typedef enum kformat_t {
 	ToStringFormat, JSONFormat
 } kformat_t;
 
@@ -1081,7 +1080,7 @@ typedef enum {
 		void         (*free)(KonohaContext*, kObject *);\
 		kObject*     (*fnull)(KonohaContext*, KClass *);\
 		uintptr_t    (*unbox)(KonohaContext*, kObject *);\
-		void         (*p)(KonohaContext*, KonohaValue *, int, KBuffer *);\
+		void         (*format)(KonohaContext*, KonohaValue *, int, KBuffer *);\
 		int          (*compareTo)(KonohaContext *, kObject *, kObject *);\
 		int          (*compareUnboxValue)(uintptr_t, uintptr_t);\
 		kbool_t      (*hasField)(KonohaContext*, kObject*, ksymbol_t, ktypeattr_t);\
@@ -1488,19 +1487,19 @@ struct KVirtualCodeAPI {
 
 struct kMethodVar {
 	kObjectHeader     h;
-	KMethodFunc              invokeKMethodFunc;
+	KMethodFunc       invokeKMethodFunc;
 	union {
 		struct KVirtualCode     *vcode_start;
-		struct KVirtualCodeAPI   **virtualCodeApi_plus1;
+		struct KVirtualCodeAPI **virtualCodeApi_plus1;
 	};
-	uintptr_t         flag;
-	ktypeattr_t       typeId;       kmethodn_t  mn;
-	kparamId_t        paramid;      kparamId_t paramdom;
-	kshort_t          delta;        kpackageId_t packageId;
-	kToken           *SourceToken;
+	uintptr_t       flag;
+	ktypeattr_t     typeId;       kmethodn_t  mn;
+	kparamId_t      paramid;      kparamId_t paramdom;
+	kshort_t        delta;        kpackageId_t packageId;
+	kToken         *SourceToken;
 	union {
 		kNameSpace   *LazyCompileNameSpace;       // lazy compilation
-		kNode       *CompiledNode;
+		kNode        *CompiledNode;
 	};
 	uintptr_t         serialNumber;
 };
@@ -1795,7 +1794,7 @@ struct KonohaLibVar {
 	void                (*kObjectProto_SetUnboxValue)(KonohaContext*, kAbstractObject *, ksymbol_t, ktypeattr_t, uintptr_t);
 	void                (*kObjectProto_RemoveKey)(KonohaContext*, kAbstractObject *, ksymbol_t);
 	void                (*kObjectProto_DoEach)(KonohaContext*, kAbstractObject *, void *thunk, void (*f)(KonohaContext*, void *, KKeyValue *d));
-	int                 (*kObjectProto_p)(KonohaContext *, KonohaStack *, int, KBuffer *, int count);
+	int                 (*kObjectProto_format)(KonohaContext *, KonohaStack *, int, KBuffer *, int count);
 	void                (*kObject_WriteToBuffer)(KonohaContext *, kObject *, int, KBuffer *, KonohaValue *, int);
 
 	kString*            (*new_kString)(KonohaContext*, kArray *gcstack, const char *, size_t, int);
@@ -1819,8 +1818,8 @@ struct KonohaLibVar {
 	kbool_t             (*kNameSpace_ImportPackage)(KonohaContext*, kNameSpace*, const char *, KTraceInfo *);
 	kbool_t             (*kNameSpace_LoadScript)(KonohaContext*, kNameSpace*, const char *, KTraceInfo *);
 
-	KClass*        (*kNameSpace_GetClassByFullName)(KonohaContext*, kNameSpace *, const char *, size_t, KClass *);
-	KClass*        (*kNameSpace_DefineClass)(KonohaContext*, kNameSpace *, kString *, KDEFINE_CLASS *, KTraceInfo *);
+	KClass*             (*kNameSpace_GetClassByFullName)(KonohaContext*, kNameSpace *, const char *, size_t, KClass *);
+	KClass*             (*kNameSpace_DefineClass)(KonohaContext*, kNameSpace *, kString *, KDEFINE_CLASS *, KTraceInfo *);
 
 	kbool_t             (*kNameSpace_SetConstData)(KonohaContext *, kNameSpace *, ksymbol_t, ktypeattr_t, uintptr_t, KTraceInfo *);
 	kbool_t             (*kNameSpace_LoadConstData)(KonohaContext*, kNameSpace *, const char **d, KTraceInfo *);
@@ -1991,7 +1990,6 @@ typedef struct {
 	DBG_ASSERT(p != NULL);\
 	visitor->fn_visitRange(visitor, (kObject **)(BEGIN), (kObject **)(END));\
 } while(0)
-
 
 #define KCheckSafePoint(kctx, sfp) do {\
 	KLIB CheckSafePoint(kctx, sfp, 0);\

@@ -48,7 +48,7 @@ static void kSyntax_Init(KonohaContext *kctx, kObject *o, void *conf)
 /* --------------- */
 /* Symbol */
 
-static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+static void kSymbol_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	ksymbol_t symbol = (ksymbol_t)v[pos].unboxValue;
 	KLIB KBuffer_printf(kctx, wb, "%s%s", KSymbol_Fmt2(symbol));
@@ -116,10 +116,10 @@ static void KBuffer_WriteTokenText(KonohaContext *kctx, KBuffer *wb, kToken *tk)
 }
 #endif/*USE_SMALLBUILD*/
 
-static void kToken_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb)
+static void kToken_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 #ifndef USE_SMALLBUILD
-	kToken *tk = values[pos].asToken;
+	kToken *tk = v[pos].asToken;
 	KBuffer_WriteTokenSymbol(kctx, wb, tk);
 	if(IS_String(tk->text)) {
 		KLIB KBuffer_printf(kctx, wb, "'%s'", kString_text(tk->text));
@@ -129,13 +129,13 @@ static void kToken_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer 
 		kArray *a = tk->GroupTokenList;
 		KLIB KBuffer_Write(kctx, wb, "[", 1);
 		if(kArray_size(a) > 0) {
-			KUnsafeFieldSet(values[pos+1].asToken, a->TokenItems[0]);
-			kToken_p(kctx, values, pos+1, wb);
+			KUnsafeFieldSet(v[pos+1].asToken, a->TokenItems[0]);
+			kToken_format(kctx, v, pos+1, wb);
 		}
 		for(i = 1; i < kArray_size(a); i++) {
 			KLIB KBuffer_Write(kctx, wb, " ", 1);
-			KUnsafeFieldSet(values[pos+1].asToken, a->TokenItems[i]);
-			kToken_p(kctx, values, pos+1, wb);
+			KUnsafeFieldSet(v[pos+1].asToken, a->TokenItems[i]);
+			kToken_format(kctx, v, pos+1, wb);
 		}
 		KLIB KBuffer_Write(kctx, wb, "]", 1);
 	}
@@ -168,14 +168,14 @@ static void kNode_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visi
 }
 
 #ifndef USE_SMALLBUILD
-static void kNodeTerm_p(KonohaContext *kctx, kObject *o, KonohaValue *values, int pos, KBuffer *wb)
+static void kNodeTerm_format(KonohaContext *kctx, kObject *o, KonohaValue *v, int pos, KBuffer *wb)
 {
 	if(IS_Token(o)) {
 		KBuffer_WriteTokenText(kctx, wb, (kToken *)o);
 	}
 	else {
-		KUnsafeFieldSet(values[pos].asObject, o);
-		kObject_class(o)->p(kctx, values, pos, wb);
+		KUnsafeFieldSet(v[pos].asObject, o);
+		kObject_class(o)->format(kctx, v, pos, wb);
 	}
 }
 
@@ -199,10 +199,10 @@ static void KBuffer_WriteIndent(KonohaContext *kctx, KBuffer *wb, int pos)
 #endif
 
 
-static void kNode_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb)
+static void kNode_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 #ifndef USE_SMALLBUILD
-	kNode *expr = values[pos].asNode;
+	kNode *expr = v[pos].asNode;
 	KBuffer_WriteIndent(kctx, wb, pos);
 	KLIB KBuffer_Write(kctx, wb, "{", 1);
 	if(expr->attrTypeId == KType_var) {
@@ -216,13 +216,13 @@ static void kNode_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 	else {
 		KLIB KBuffer_printf(kctx, wb, "%s %s :%s ", KNode_text(kNode_node(expr)), KToken_t(expr->KeyOperatorToken), KType_text(expr->attrTypeId));
 	}
-	KLIB kObjectProto_p(kctx, values, pos, wb, 0);
+	KLIB kObjectProto_format(kctx, v, pos, wb, 0);
 	if(kNode_node(expr) == KNode_Error) {
 		KLIB KBuffer_printf(kctx, wb, "%s", kString_text(expr->ErrorMessage));
 	}
 	else if(kNode_node(expr) == KNode_Const) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("const "));
-		kNodeTerm_p(kctx, (kObject *)expr->ObjectConstValue, values, pos+1, wb);
+		kNodeTerm_format(kctx, (kObject *)expr->ObjectConstValue, v, pos+1, wb);
 	}
 	else if(kNode_node(expr) == KNode_New) {
 		KLIB KBuffer_printf(kctx, wb, "new %s", KType_text(expr->attrTypeId));
@@ -232,8 +232,8 @@ static void kNode_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 	}
 	else if(kNode_node(expr) == KNode_UnboxConst) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("const "));
-		values[pos+1].unboxValue = expr->unboxConstValue;
-		KClass_(expr->attrTypeId)->p(kctx, values, pos+1, wb);
+		v[pos+1].unboxValue = expr->unboxConstValue;
+		KClass_(expr->attrTypeId)->format(kctx, v, pos+1, wb);
 	}
 	else if(kNode_node(expr) == KNode_Local) {
 		KLIB KBuffer_printf(kctx, wb, "local sfp[%d]", (int)expr->index);
@@ -253,7 +253,7 @@ static void kNode_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *
 			KLIB KBuffer_Write(kctx, wb, "\n", 1);
 			KBuffer_WriteIndent(kctx, wb, pos+1);
 			KLIB KBuffer_printf(kctx, wb, "#%d :%s ", (int)i, KClass_text(kObject_class(expr->NodeList->ObjectItems[i])));
-			kNodeTerm_p(kctx, expr->NodeList->ObjectItems[i], values, pos+1, wb);
+			kNodeTerm_format(kctx, expr->NodeList->ObjectItems[i], v, pos+1, wb);
 		}
 		KLIB KBuffer_Write(kctx, wb, "]", 1);
 	}

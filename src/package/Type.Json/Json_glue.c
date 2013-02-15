@@ -63,7 +63,7 @@ static void kJson_Free(KonohaContext *kctx, kObject *o)
 }
 
 
-static void kJson_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+static void kJson_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 //	kJson *jo = (kJson *)v[pos].asObject;
 //	if(JSONAPI IsJsonType(&jo->jsonbuf, KJSON_STRING)) {
@@ -402,7 +402,7 @@ static kbool_t json_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		.cflag = KClassFlag_Final,
 		.init = kJson_Init,
 		.free = kJson_Free,
-		.p    = kJson_p,
+		.format    = kJson_format,
 	};
 	KClass *cJson = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &JsonDef, trace);
 

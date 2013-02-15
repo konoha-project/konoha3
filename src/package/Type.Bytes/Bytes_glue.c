@@ -53,7 +53,7 @@ static void kBytes_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+static void kBytes_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	kBytes *ba = v[pos].asBytes;
 	size_t i, j, n;
@@ -255,7 +255,7 @@ static kbool_t bytes_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 		defBytes.cflag   = KClassFlag_Final;
 		defBytes.free    = kBytes_Free;
 		defBytes.init    = kBytes_Init;
-		defBytes.p       = kBytes_p;
+		defBytes.format       = kBytes_format;
 		KClass_Bytes = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defBytes, trace);
 	}
 	int FN_index = KFieldName_("index");

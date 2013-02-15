@@ -351,7 +351,7 @@ static void BashBuilder_EmitKonohaValue(KonohaContext *kctx, KBuilder *builder, 
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	ct->p(kctx, sfp, 0, &wb);
+	ct->format(kctx, sfp, 0, &wb);
 	char *str = (char *)KLIB KBuffer_text(kctx, &wb, NonZero);
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
 	BashBuilder_EmitString(kctx, bashBuilder, str, "", "");

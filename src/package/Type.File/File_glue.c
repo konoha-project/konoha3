@@ -163,7 +163,7 @@ static void kFile_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kFile_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+static void kFile_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	kFile *file = (kFile *)v[pos].asObject;
 	if(file->PathInfoNULL != NULL) {
@@ -526,8 +526,8 @@ static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 			.cflag = KClassFlag_Final,
 			.init  = kFile_Init,
 			.reftrace = kFile_Reftrace,
-			.free  = kFile_Free,
-			.p     = kFile_p,
+			.free   = kFile_Free,
+			.format = kFile_format,
 		};
 		KClass_File = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defFile, trace);
 	}

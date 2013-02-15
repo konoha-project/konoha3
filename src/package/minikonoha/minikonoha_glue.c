@@ -60,7 +60,7 @@ static void kKonohaFactory_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-//static void kKonohaFactory_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+//static void kKonohaFactory_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 //{
 //	kKonohaFactory *file = (kKonohaFactory *)v[pos].asObject;
 //	if(file->PathInfoNULL != NULL) {
@@ -86,7 +86,7 @@ static void kKonoha_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-//static void kKonoha_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+//static void kKonoha_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 //{
 //	kKonoha *file = (kKonoha *)v[pos].asObject;
 //	if(file->PathInfoNULL != NULL) {

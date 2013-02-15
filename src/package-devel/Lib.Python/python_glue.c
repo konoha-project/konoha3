@@ -52,7 +52,7 @@ static void kPyObject_Init(KonohaContext *kctx, kObject *o, void *conf)
 	}
 }
 
-static void kPyObject_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+static void kPyObject_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	PyObject *pyo =  ((kPyObject *)v[pos].asObject)->self;
 	PyObject *str = pyo->ob_type->tp_str(pyo);
@@ -151,7 +151,7 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 //		// [TODO] throw Exception
 //	}
 //	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-//	kObject_class(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
+//	kObject_class(sfp[0].asObject)->format(kctx, sfp, 0, &wb, 0);
 //	struct kBytesVar *ba = (struct kBytesVar *)new_Bytes(kctx, KBuffer_bytesize(&wb));
 //	ba->buf = KLIB KBuffer_text(kctx, &wb, 1);
 //	KLIB KBuffer_Free(&wb);
@@ -181,7 +181,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 	// assert
 	DBG_ASSERT(po->self != NULL);
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	kObject_class(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
+	kObject_class(sfp[0].asObject)->format(kctx, sfp, 0, &wb);
 	kString *s = KLIB new_kString(kctx, OnStack, KLIB KBuffer_text(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
 	KLIB KBuffer_Free(&wb);
 	KReturn(s);
@@ -205,7 +205,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 	//else {
 	//	KBuffer wb;
 	//	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	//	kObject_class(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
+	//	kObject_class(sfp[0].asObject)->format(kctx, sfp, 0, &wb, 0);
 	//	kString *s = KLIB new_kString(kctx, KLIB KBuffer_text(kctx, &wb, 1), KBuffer_bytesize(&wb), 0);
 	//	KLIB KBuffer_Free(&wb);
 	//	KReturn(s);
@@ -489,7 +489,7 @@ static kbool_t python_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 			.cflag = 0,
 			.init = kPyObject_Init,
 			.free = kPyObject_Free,
-			.p    = kPyObject_p,
+			.format    = kPyObject_format,
 	};
 
 	KClass *cPython = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PythonDef, trace);

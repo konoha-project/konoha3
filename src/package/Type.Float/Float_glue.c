@@ -68,7 +68,7 @@ static void kFloat_Init(KonohaContext *kctx, kObject *o, void *conf)
 	n->unboxValue = (uintptr_t)conf;  // conf is unboxed data
 }
 
-static void kFloat_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
+static void kFloat_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
 	KLIB KBuffer_printf(kctx, wb, KFLOAT_FMT, v[pos].floatValue);
 }
@@ -252,7 +252,7 @@ static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		defFloat.cstruct_size = sizeof(kFloat);
 		defFloat.cflag = KClassFlag_int;
 		defFloat.init = kFloat_Init;
-		defFloat.p     = kFloat_p;
+		defFloat.format     = kFloat_format;
 		KClass_Float = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defFloat, trace);
 	}
 	int FN_x = KFieldName_("x");
