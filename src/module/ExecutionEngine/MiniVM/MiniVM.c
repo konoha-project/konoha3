@@ -23,11 +23,13 @@
  ***************************************************************************/
 
 #define USE_DIRECT_THREADED_CODE
+#define USE_EXECUTIONENGINE
 
 #include <konoha3/konoha.h>
 #include <konoha3/klib.h>
 #include <konoha3/sugar.h>
 #include <konoha3/arch/minivm.h>
+#include <konoha3/import/module.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,10 +61,10 @@ extern "C" {
 	MACRO(CHKSTACK)\
 
 #define OPCODE(T)  OPCODE_##T,
-typedef enum {
+typedef enum MiniVMOpCode {
 	OPDEFINE(OPCODE)
 	OPCODE_MAX,
-} MiniVM;
+} MiniVMOpCode;
 
 /* ------------------------------------------------------------------------ */
 /* [data] */
@@ -525,36 +527,6 @@ static bblock_t AsmJumpIfFalse(KonohaContext *kctx, KBuilder *builder, kNode *ex
 
 //----------------------------------------------------------------------------
 
-static kNode *Node_getFirstBlock(KonohaContext *kctx, kNode *stmt)
-{
-	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_BlockPattern, K_NULLBLOCK);
-}
-
-static kNode *Node_getElseNode(KonohaContext *kctx, kNode *stmt)
-{
-	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_else, K_NULLBLOCK);
-}
-
-static kNode *Node_getFirstExpr(KonohaContext *kctx, kNode *stmt)
-{
-	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
-}
-
-static kNode *kNode_GetNode(KonohaContext *kctx, kNode *stmt, ksymbol_t kw)
-{
-	return (kNode *) kNode_GetObject(kctx, stmt, kw, NULL);
-}
-
-static kMethod *CallNode_getMethod(kNode *expr)
-{
-	return expr->NodeList->MethodItems[0];
-}
-
-static int CallNode_getArgCount(kNode *expr)
-{
-	return kArray_size(expr->NodeList) - 2;
-}
-
 /* Visitor */
 
 static kbool_t KBuilder_VisitDoneNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
@@ -763,13 +735,13 @@ static kbool_t KBuilder_VisitIfNode(KonohaContext *kctx, KBuilder *builder, kNod
 	bblock_t lbELSE = new_BasicBlockLABEL(kctx);
 	bblock_t lbEND  = new_BasicBlockLABEL(kctx);
 	/* if */
-	AsmJumpIfFalse(kctx, builder, Node_getFirstExpr(kctx, stmt), &espidx, lbELSE);
+	AsmJumpIfFalse(kctx, builder, kNode_getFirstNode(kctx, stmt), &espidx, lbELSE);
 	/* then */
-	SUGAR VisitNode(kctx, builder, Node_getFirstBlock(kctx, stmt), &espidx);
+	SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), &espidx);
 	ASM_JMP(kctx, builder, lbEND);
 	/* else */
 	ASM_LABEL(kctx, builder, lbELSE);
-	SUGAR VisitNode(kctx, builder, Node_getElseNode(kctx, stmt), &espidx);
+	SUGAR VisitNode(kctx, builder, kNode_getElseBlock(kctx, stmt), &espidx);
 	//ASM(NOP);
 	/* endif */
 	ASM_LABEL(kctx, builder, lbEND);
@@ -786,8 +758,8 @@ static kbool_t KBuilder_VisitWhileNode(KonohaContext *kctx, KBuilder *builder, k
 	kNode_SetLabelNode(kctx, stmt, KSymbol_("break"),    lbBREAK);
 	ASM_LABEL(kctx, builder, lbCONTINUE);
 	KBuilder_AsmSAFEPOINT(kctx, builder, kNode_uline(stmt), espidx);
-	AsmJumpIfFalse(kctx, builder, Node_getFirstExpr(kctx, stmt), &espidx, lbBREAK);
-	SUGAR VisitNode(kctx, builder, Node_getFirstBlock(kctx, stmt), &espidx);
+	AsmJumpIfFalse(kctx, builder, kNode_getFirstNode(kctx, stmt), &espidx, lbBREAK);
+	SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), &espidx);
 	ASM_JMP(kctx, builder, lbCONTINUE);
 	ASM_LABEL(kctx, builder, lbBREAK);
 	//AssignLocal(kctx, builder, stackBase(thunk), stmt);
@@ -805,9 +777,9 @@ static kbool_t KBuilder_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder,
 	ASM_JMP(kctx, builder, lbENTRY);
 	ASM_LABEL(kctx, builder, lbCONTINUE);
 	KBuilder_AsmSAFEPOINT(kctx, builder, kNode_uline(stmt), espidx);
-	AsmJumpIfFalse(kctx, builder, Node_getFirstExpr(kctx, stmt), &espidx, lbBREAK);
+	AsmJumpIfFalse(kctx, builder, kNode_getFirstNode(kctx, stmt), &espidx, lbBREAK);
 	ASM_LABEL(kctx, builder, lbENTRY);
-	SUGAR VisitNode(kctx, builder, Node_getFirstBlock(kctx, stmt), &espidx);
+	SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), &espidx);
 	ASM_JMP(kctx, builder, lbCONTINUE);
 	ASM_LABEL(kctx, builder, lbBREAK);
 	//AssignLocal(kctx, builder, stackBase(thunk), stmt);
@@ -836,12 +808,12 @@ static kbool_t KBuilder_VisitForNode(KonohaContext *kctx, KBuilder *builder, kNo
 
 	{/* Head */
 		ASM_LABEL(kctx, builder, lbENTRY);
-		kNode *condNode = Node_getFirstExpr(kctx, stmt);
+		kNode *condNode = kNode_getFirstNode(kctx, stmt);
 		AsmJumpIfFalse(kctx, builder, condNode, &espidx, lbBREAK);
 	}
 	{/* Body */
 		ASM_LABEL(kctx, builder, lbBody);
-		SUGAR VisitNode(kctx, builder, Node_getFirstBlock(kctx, stmt), &espidx);
+		SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), &espidx);
 		ASM_JMP(kctx, builder, lbCONTINUE);
 	}
 	{/* Itr */

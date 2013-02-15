@@ -31,45 +31,6 @@ extern "C" {
 
 DEF_ARRAY_OP_NOPOINTER(INodePtr);
 
-/*----------------------------------------------------------------------------*/
-/* Konoha AST API */
-static kNode* kNode_getFirstBlock(KonohaContext *kctx, kNode *stmt)
-{
-	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_BlockPattern, K_NULLBLOCK);
-}
-
-static kNode* kNode_getElseBlock(KonohaContext *kctx, kNode *stmt)
-{
-	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_else, K_NULLBLOCK);
-}
-
-static kNode* kNode_getFirstNode(KonohaContext *kctx, kNode *stmt)
-{
-	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
-}
-
-static kMethod* CallNode_getMethod(kNode *expr)
-{
-	return expr->NodeList->MethodItems[0];
-}
-
-static kNode *kNode_GetNode(KonohaContext *kctx, kNode *stmt, ksymbol_t kw)
-{
-	return SUGAR kNode_GetNode(kctx, stmt, kw, NULL);
-}
-
-static int CallExpr_getArgCount(kNode *expr)
-{
-	return kArray_size(expr->NodeList) - 2;
-}
-
-static kString *kNode_getErrorMessage(KonohaContext *kctx, kNode *stmt)
-{
-	kString* msg = stmt->ErrorMessage;
-	DBG_ASSERT(IS_String(msg));
-	return msg;
-}
-
 static void kNode_SetLabelBlock(KonohaContext *kctx, kNode *stmt, ksymbol_t label, Block *block)
 {
 	KLIB kObjectProto_SetUnboxValue(kctx, stmt, label, KType_Int, (uintptr_t) block);
@@ -555,7 +516,7 @@ static kbool_t FuelVM_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder
 		return true;
 	}
 	int i, s = kMethod_Is(Static, mtd) ? 2 : 1;
-	int argc = CallExpr_getArgCount(expr);
+	int argc = CallNode_getArgCount(expr);
 	INode *Params[argc+2];
 
 	if(kMethod_Is(Static, mtd)) {
