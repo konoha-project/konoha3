@@ -60,9 +60,9 @@ static void kSymbol_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer
 static void kToken_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kTokenVar *tk = (kTokenVar *)o;
-	tk->uline     =   0;
+	tk->uline     = 0;
 	tk->tokenType = (ksymbol_t)(intptr_t)conf;
-	if(tk->tokenType == 0  || KSymbol_Unmask(tk->tokenType) != tk->tokenType) {
+	if(tk->tokenType == 0 || KSymbol_Unmask(tk->tokenType) != tk->tokenType) {
 		KUnsafeFieldInit(tk->text, TS_EMPTY);
 	}
 	else {
@@ -181,7 +181,7 @@ static void kNodeTerm_format(KonohaContext *kctx, kObject *o, KonohaValue *v, in
 
 #define DefineCase(NAME)  case KNode_##NAME:   return #NAME;
 
-static const char* KNode_text(knode_t node)
+static const char *KNode_text(knode_t node)
 {
 	switch(node) {
 	KNodeList(DefineCase)
@@ -263,7 +263,7 @@ static void kNode_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *
 
 // untyped node
 
-static kNode* new_UntypedNode(KonohaContext *kctx, kArray *gcstack, kNameSpace *ns)
+static kNode *new_UntypedNode(KonohaContext *kctx, kArray *gcstack, kNameSpace *ns)
 {
 	kNode *unode = (kNode *)new_(Node, ns, gcstack);
 	unode->syn = KNULL(Syntax);
@@ -300,7 +300,7 @@ static void kNode_AddParsedObject(KonohaContext *kctx, kNode *stmt, ksymbol_t ke
 	}
 }
 
-static kNode* kNode_AddNode(KonohaContext *kctx, kNode *self, kNode *node)
+static kNode *kNode_AddNode(KonohaContext *kctx, kNode *self, kNode *node)
 {
 	if(!IS_Array(self->NodeList)) {
 		KFieldSet(self, self->NodeList, new_(Array, 0, OnField));
@@ -312,7 +312,7 @@ static kNode* kNode_AddNode(KonohaContext *kctx, kNode *self, kNode *node)
 	return node;
 }
 
-static kNode* kNode_SetNodeAt(KonohaContext *kctx, kNode *self, size_t n, kNode *node)
+static kNode *kNode_SetNodeAt(KonohaContext *kctx, kNode *self, size_t n, kNode *node)
 {
 	DBG_ASSERT(IS_Array(self->NodeList));
 	DBG_ASSERT(n < kArray_size(self->NodeList));
@@ -339,7 +339,7 @@ static void kNode_InsertAfter(KonohaContext *kctx, kNode *self, kNode *target, k
 	}
 }
 
-static kNode* kNode_AddSeveral(KonohaContext *kctx, kNodeVar *self, int n, va_list ap)
+static kNode *kNode_AddSeveral(KonohaContext *kctx, kNodeVar *self, int n, va_list ap)
 {
 	int i;
 	if(!IS_Array(self->NodeList)) {
@@ -362,14 +362,14 @@ static kNode* kNode_AddSeveral(KonohaContext *kctx, kNodeVar *self, int n, va_li
 
 //#define kNode_Termnize(kctx, node, tk) kNode_Op(kctx, node, tk, 0)
 
-static kNode* kNode_Termnize(KonohaContext *kctx, kNode *node, kToken *termToken)
+static kNode *kNode_Termnize(KonohaContext *kctx, kNode *node, kToken *termToken)
 {
-       KFieldSet(node, node->TermToken, termToken);
-       node->syn = termToken->resolvedSyntaxInfo;
-       return node;
+	KFieldSet(node, node->TermToken, termToken);
+	node->syn = termToken->resolvedSyntaxInfo;
+	return node;
 }
 
-static kNode* kNode_Op(KonohaContext *kctx, kNode *node, kToken *keyToken, int n, ...)
+static kNode *kNode_Op(KonohaContext *kctx, kNode *node, kToken *keyToken, int n, ...)
 {
 	KFieldSet(node, node->KeyOperatorToken, keyToken);
 	node->syn = keyToken->resolvedSyntaxInfo;
@@ -395,7 +395,7 @@ static kNode* kNode_Op(KonohaContext *kctx, kNode *node, kToken *keyToken, int n
 //	return expr;
 //}
 
-static kNode* new_TypedNode(KonohaContext *kctx, kNameSpace *ns, int build, KClass *ty, int n, ...)
+static kNode *new_TypedNode(KonohaContext *kctx, kNameSpace *ns, int build, KClass *ty, int n, ...)
 {
 	kNode *node = new_(Node, ns, OnGcStack);
 	va_list ap;
@@ -409,7 +409,7 @@ static kNode* new_TypedNode(KonohaContext *kctx, kNameSpace *ns, int build, KCla
 
 static kNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kNode *self, kNameSpace *ns, KClass* reqc);
 
-static kNode* new_MethodNode(KonohaContext *kctx, kNameSpace *ns, KClass *reqc, kMethod *mtd, int n, ...)
+static kNode *new_MethodNode(KonohaContext *kctx, kNameSpace *ns, KClass *reqc, kMethod *mtd, int n, ...)
 {
 	kNode *expr = new_(Node, ns, OnGcStack);
 	KFieldSet(expr, expr->NodeList, new_(Array, 0, OnField));
@@ -422,7 +422,7 @@ static kNode* new_MethodNode(KonohaContext *kctx, kNameSpace *ns, KClass *reqc, 
 	return TypeCheckMethodParam(kctx, mtd, expr, ns, reqc);
 }
 
-static kNode* kNode_SetConst(KonohaContext *kctx, kNode *expr, KClass *typedClass, kObject *o)
+static kNode *kNode_SetConst(KonohaContext *kctx, kNode *expr, KClass *typedClass, kObject *o)
 {
 	if(typedClass == NULL) typedClass = kObject_class(o);
 	expr->attrTypeId = typedClass->typeId;
@@ -438,7 +438,7 @@ static kNode* kNode_SetConst(KonohaContext *kctx, kNode *expr, KClass *typedClas
 	return expr;
 }
 
-static kNode* kNode_SetUnboxConst(KonohaContext *kctx, kNode *expr, ktypeattr_t attrTypeId, uintptr_t unboxValue)
+static kNode *kNode_SetUnboxConst(KonohaContext *kctx, kNode *expr, ktypeattr_t attrTypeId, uintptr_t unboxValue)
 {
 	kNode_setnode(expr, KNode_UnboxConst);
 	expr->unboxConstValue = unboxValue;
@@ -447,7 +447,7 @@ static kNode* kNode_SetUnboxConst(KonohaContext *kctx, kNode *expr, ktypeattr_t 
 	return expr;
 }
 
-static kNode* kNode_SetVariable(KonohaContext *kctx, kNode *expr, knode_t build, ktypeattr_t attrTypeId, intptr_t index)
+static kNode *kNode_SetVariable(KonohaContext *kctx, kNode *expr, knode_t build, ktypeattr_t attrTypeId, intptr_t index)
 {
 	kNode_setnode(expr, build);
 	expr->attrTypeId = attrTypeId;
@@ -477,7 +477,7 @@ static kToken* kNode_GetToken(KonohaContext *kctx, kNode *stmt, ksymbol_t kw, kT
 	return def;
 }
 
-static kNode* kNode_GetNode(KonohaContext *kctx, kNode *stmt, ksymbol_t kw, kNode *def)
+static kNode *kNode_GetNode(KonohaContext *kctx, kNode *stmt, ksymbol_t kw, kNode *def)
 {
 	kNode *expr = (kNode *)kNode_GetObjectNULL(kctx, stmt, kw);
 	if(expr != NULL && IS_Node(expr)) {

@@ -55,4 +55,3 @@ static void kMethod_SetFunc(KonohaContext *kctx, kMethod *mtd, KMethodFunc func)
 	((kMethodVar *)mtd)->invokeKMethodFunc = func;
 	((kMethodVar *)mtd)->vcode_start = PLATAPI ExecutionEngineModule.GetDefaultBootCode();
 }
-

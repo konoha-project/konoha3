@@ -30,6 +30,7 @@
 #include <konoha3/konoha.h>
 #include <konoha3/sugar.h>
 #include <konoha3/klib.h>
+#include <konoha3/import/methoddecl.h>
 
 /* ************************************************************************ */
 
@@ -115,8 +116,8 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->h.setupModuleContext    = SugarModule_Setup;
 	KLIB KRuntime_SetModule(kctx, MOD_sugar, (KRuntimeModule *)mod, 0);
 
-	KonohaLibVar* l = (KonohaLibVar *)ctx->klib;
-	l->kNameSpace_GetClassByFullName       = kNameSpace_GetClassByFullName;
+	KonohaLibVar *l = (KonohaLibVar *)ctx->klib;
+	l->kNameSpace_GetClassByFullName  = kNameSpace_GetClassByFullName;
 	l->kNameSpace_DefineClass    = kNameSpace_DefineClass;
 	l->kNameSpace_LoadMethodData = kNameSpace_LoadMethodData;
 	l->kNameSpace_SetConstData   = kNameSpace_SetConstData;
@@ -179,58 +180,48 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	};
 	kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(ClassData), 0);
 
-//	mod->kNameSpace_SetTokenFunc       = kNameSpace_SetTokenFunc;
-	mod->Tokenize                      = Tokenize;
-	mod->ApplyMacroData                = ApplyMacroData;
-	mod->SetMacroData                  = SetMacroData;
-	mod->Preprocess                    = Preprocess;
-	mod->EvalTokenList                 = EvalTokenList;
-	mod->ParseTypePattern     = ParseTypePattern;
-	mod->kToken_ToBraceGroup = kToken_ToBraceGroup;
-	mod->kNode_AddParsedObject      = kNode_AddParsedObject;
-	mod->FindEndOfStatement = FindEndOfStatement;
-	mod->kNode_ParseFlag           = kNode_ParseFlag;
-	mod->kNode_GetToken            = kNode_GetToken;
-	mod->kNode_GetNode             = kNode_GetNode;
-//	mod->kNode_GetBlock            = kNode_GetBlock;
+	mod->Tokenize              = Tokenize;
+	mod->ApplyMacroData        = ApplyMacroData;
+	mod->SetMacroData          = SetMacroData;
+	mod->Preprocess            = Preprocess;
+	mod->EvalTokenList         = EvalTokenList;
+	mod->ParseTypePattern      = ParseTypePattern;
+	mod->kToken_ToBraceGroup   = kToken_ToBraceGroup;
+	mod->kNode_AddParsedObject = kNode_AddParsedObject;
+	mod->FindEndOfStatement    = FindEndOfStatement;
+	mod->kNode_ParseFlag       = kNode_ParseFlag;
+	mod->kNode_GetToken        = kNode_GetToken;
+	mod->kNode_GetNode         = kNode_GetNode;
 	mod->kNode_SetConst        = kNode_SetConst;
 	mod->kNode_SetUnboxConst   = kNode_SetUnboxConst;
-	mod->kNode_SetVariable          = kNode_SetVariable;
-	mod->TypeCheckNodeAt        = TypeCheckNodeAt;
-	mod->TypeCheckNodeByName        = TypeCheckNodeByName;
-//	mod->TypeCheckBlock               = TypeCheckBlock;
-	mod->TypeCheckMethodParam         = TypeCheckMethodParam;
-	mod->new_MethodNode               = new_MethodNode;
-	mod->AddLocalVariable  = AddLocalVariable;
-	mod->kNode_DeclType               = kNode_DeclType;
-	mod->TypeVariableNULL    = TypeVariableNULL;
+	mod->kNode_SetVariable     = kNode_SetVariable;
+	mod->TypeCheckNodeAt       = TypeCheckNodeAt;
+	mod->TypeCheckNodeByName   = TypeCheckNodeByName;
+	mod->TypeCheckMethodParam  = TypeCheckMethodParam;
+	mod->new_MethodNode        = new_MethodNode;
+	mod->AddLocalVariable      = AddLocalVariable;
+	mod->kNode_DeclType        = kNode_DeclType;
+	mod->TypeVariableNULL      = TypeVariableNULL;
 
-	mod->kNameSpace_DefineSyntax      = kNameSpace_DefineSyntax;
-	mod->kNameSpace_GetSyntax         = kNameSpace_GetSyntax;
-	mod->kSyntax_AddPattern  = kSyntax_AddPattern;
-	mod->kNameSpace_AddSyntax         = kNameSpace_AddSyntax;
+	mod->kNameSpace_DefineSyntax = kNameSpace_DefineSyntax;
+	mod->kNameSpace_GetSyntax    = kNameSpace_GetSyntax;
+	mod->kSyntax_AddPattern      = kSyntax_AddPattern;
+	mod->kNameSpace_AddSyntax    = kNameSpace_AddSyntax;
 	mod->kNameSpace_UseDefaultVirtualMachine = kNameSpace_UseDefaultVirtualMachine;
-//	mod->kNameSpace_AddSugarFunc      = kNameSpace_AddSugarFunc;
-//	mod->new_BlockNode                = new_BlockNode2;
-	mod->kNode_InsertAfter            = kNode_InsertAfter;
-	mod->kNode_AddNode                = kNode_AddNode;
-	mod->kNode_Op                     = kNode_Op;
-//	mod->kNode_Termnize               = kNode_Termnize;
-//	mod->new_UntypedOperatorNode      = new_UntypedOperatorNode;
-	mod->ParseSyntaxNode              = ParseSyntaxNode;
-	mod->ParseNode                    = ParseNode;
-	mod->ParseNewNode                 = ParseNewNode;
-	mod->AppendParsedNode                 = AppendParsedNode;
-//	mod->kNode_RightJoinNode          = kNode_RightJoinNode;
-	mod->kToken_ToError               = kToken_ToError;
-	mod->MessageNode                  = MessageNode;
-
-	mod->VisitNode                    = VisitNode;
+	mod->kNode_InsertAfter       = kNode_InsertAfter;
+	mod->kNode_AddNode           = kNode_AddNode;
+	mod->kNode_Op                = kNode_Op;
+	mod->ParseSyntaxNode         = ParseSyntaxNode;
+	mod->ParseNode               = ParseNode;
+	mod->ParseNewNode            = ParseNewNode;
+	mod->AppendParsedNode        = AppendParsedNode;
+	mod->kToken_ToError          = kToken_ToError;
+	mod->MessageNode             = MessageNode;
+	mod->VisitNode               = VisitNode;
 
 #ifndef USE_SMALLBUILD
 	mod->dumpToken      = dumpToken;
 	mod->dumpTokenArray = dumpTokenArray;
-//	mod->dumpNode       = dumpNode;
 #endif
 
 	DefineDefaultSyntax(kctx, KNULL(NameSpace));
@@ -251,15 +242,6 @@ static KMETHOD NameSpace_ImportPackage(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	kNameSpace_ImportPackage(kctx, sfp[0].asNameSpace, kString_text(sfp[1].asString), trace);
 }
-
-//// boolean NameSpace.import(String pkgname, String symbol);
-//static KMETHOD NameSpace_ImportPackageSymbol(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kString *key = sfp[2].asString;
-//	ksymbol_t keyword = KAsciiSymbol(kString_text(key), kString_size(key), _NEWID);
-//	KMakeTrace(trace, sfp);
-//	kNameSpace_ImportPackageSymbol(kctx, sfp[0].asNameSpace, kString_text(sfp[1].asString), keyword, trace);
-//}
 
 // boolean NameSpace.hate(String symbol);
 static KMETHOD NameSpace_hate(KonohaContext *kctx, KonohaStack *sfp)
@@ -318,20 +300,16 @@ static KMETHOD KSymbol_toString(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(s);
 }
 
-#include <konoha3/import/methoddecl.h>
-
 void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 {
 	KSetKLibFunc(0, ReportScriptMessage,           TRACE_ReportScriptMessage,           NULL);
 	KSetKLibFunc(0, kNameSpace_RequirePackage,      kNameSpace_RequirePackage,      NULL);
 	KSetKLibFunc(0, kNameSpace_ImportPackage,       kNameSpace_ImportPackage,       NULL);
 	KSetKLibFunc(0, kNameSpace_LoadScript,          kNameSpace_LoadScript,          NULL);
-//	KSetKLibFunc(0, kNameSpace_ImportPackageSymbol, kNameSpace_ImportPackageSymbol, NULL);
 	KSetKLibFunc(0, kNameSpace_GetConstNULL,        kNameSpace_GetConstNULL,        NULL);
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Compilation, _F(NameSpace_DefineConst), KType_Boolean, KType_NameSpace, KMethodName_("DefineConst"), 2, KType_Symbol, KFieldName_("symbol"), KType_Object, KFieldName_("value"),
 		_Public|_Compilation, _F(NameSpace_ImportPackage), KType_void, KType_NameSpace, KMethodName_("import"), 1, KType_String, KFieldName_("package"),
-//		_Public, _F(NameSpace_ImportPackageSymbol), KType_void, KType_NameSpace, KMethodName_("import"), 2, KType_String, KFieldName_("package"), KType_String, KFieldName_("symbol"),
 		_Public, _F(NameSpace_hate), KType_Boolean, KType_NameSpace, KMethodName_("hate"), 1, KType_String, KFieldName_("symbol"),
 		_Public|_Compilation, _F(NameSpace_loadScript), KType_void, KType_NameSpace, KMethodName_("load"), 1, KType_String, KFieldName_("filename"),
 		_Public|_Compilation, _F(NameSpace_loadScript), KType_void, KType_NameSpace, KMethodName_("include"), 1, KType_String, KFieldName_("filename"),

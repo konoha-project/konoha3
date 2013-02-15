@@ -111,16 +111,6 @@ static kbool_t KClass_SetClassFieldUnboxValue(KonohaContext *kctx, KClassVar *de
 	return false;
 }
 
-//// --------------------------------------------------------------------------
-//
-//// int NameSpace.getCid(String name, int defval)
-//static KMETHOD NameSpace_getCid(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	KClass *ct = KLIB kNameSpace_GetClassByFullName(kctx, sfp[0].asNameSpace, kString_text(sfp[1].asString), kString_size(sfp[1].asString), NULL);
-//	kint_t cid = ct != NULL ? ct->typeId : sfp[2].intValue;
-//	KReturnUnboxValue(cid);
-//}
-
 // ----------------------------------------------------------------------------
 /* define class */
 

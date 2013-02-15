@@ -30,7 +30,7 @@
 static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 {
 	if(verbose_sugar) {
-		if(n < 0) n = (short)tk->uline;
+		if(n < 0) n = (short) tk->uline;
 		DUMP_P("Token[%d] '%s' TokenType=%s%s", n, KToken_t(tk), KSymbol_Fmt2(tk->tokenType));
 		if(kToken_IsIndent(tk)) {
 			DUMP_P(" indent=+%d", tk->indent);
@@ -82,6 +82,5 @@ static void dumpTokenArray(KonohaContext *kctx, int nest, kArray *a, int s, int 
 		if(nest == 0) DUMP_P("<<<\n");
 	}
 }
-
 
 #endif

@@ -92,10 +92,6 @@ void main() {
         data = replace(args[i], data, "#include<", "#include<", "#include <");
         data = replace(args[i], data, "#include\"", "#include\"", "#include \"");
         data = replace(args[i], data, "while \\(", "while (", "while(");
-        data = replace(args[i], data, "->p\\(", "->p(", "->format(");
-        data = replace(args[i], data, "\\.p ", ".p ", ".format ");
-        data = replace(args[i], data, "_p\\(KonohaContext \\*kctx, KonohaValue \\*v, int pos, KBuffer \\*wb\\)", "_p(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)", "_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)");
-        data = replace(args[i], data, "_p\\(KonohaContext \\*kctx, KonohaValue \\*values, int pos, KBuffer \\*wb\\)", "_p(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb)", "_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)");
         data = replace(args[i], data, "\n\t\n", "\n\t\n", "\n\n");
         data = replace(args[i], data, ";\t\n", ";\t\n", ";\n");
         data = replace(args[i], data, "; \n", "; \n", ";\n");

@@ -41,7 +41,7 @@ static void ERROR_UnclosedToken(KonohaContext *kctx, kTokenVar *tk, const char *
 	}
 }
 
-#define KCheckStringPolicy(ch, policy)     if(ch < 0) { policy = StringPolicy_UTF8; }
+#define KCheckStringPolicy(ch, policy)  if(ch < 0) { policy = StringPolicy_UTF8; }
 static void kToken_SetParsedText(KonohaContext *kctx, kTokenVar *tk, ksymbol_t tokenType, const char *t, size_t len, int policy)
 {
 	if(IS_NOTNULL(tk)) {
@@ -474,7 +474,7 @@ static int CallTokenFunc(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Tokenize
 	return pos;
 }
 
-static kFunc** Tokenizer_funcTable(KonohaContext *kctx, Tokenizer *tokenizer, int kchar, int *sizeRef)
+static kFunc **Tokenizer_funcTable(KonohaContext *kctx, Tokenizer *tokenizer, int kchar, int *sizeRef)
 {
 	kFunc *fo = tokenizer->FuncItems[kchar];
 	if(IS_Array(fo)) {

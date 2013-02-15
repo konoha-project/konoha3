@@ -31,7 +31,7 @@ extern "C" {
 /* ------------------------------------------------------------------------ */
 /* [perror] */
 
-static int IsPrintableMessage(KonohaContext *kctx, KParserContext *sugarContext, kinfotag_t taglevel)
+static kbool_t IsPrintableMessage(KonohaContext *kctx, KParserContext *sugarContext, kinfotag_t taglevel)
 {
 	if(sugarContext->isBlockedErrorMessage) return false;
 	if(verbose_sugar) return true;
@@ -44,7 +44,7 @@ static int IsPrintableMessage(KonohaContext *kctx, KParserContext *sugarContext,
 	return true;
 }
 
-static kString* new_StringMessage(KonohaContext *kctx, kArray *gcstack, KBuffer *wb, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
+static kString *new_StringMessage(KonohaContext *kctx, kArray *gcstack, KBuffer *wb, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
 {
 	const char *msg = TAG_t(taglevel);
 	if(uline > 0) {
@@ -58,7 +58,7 @@ static kString* new_StringMessage(KonohaContext *kctx, kArray *gcstack, KBuffer 
 	return KLIB KBuffer_Stringfy(kctx, wb, gcstack, StringPolicy_ASCII|StringPolicy_FreeKBuffer);
 }
 
-static kString* KParserContext_PrintMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
+static kString *KParserContext_PrintMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
 {
 	KParserContext *sugarContext = KGetParserContext(kctx);
 	if(IsPrintableMessage(kctx, sugarContext, taglevel)) {
@@ -99,7 +99,7 @@ static void kNode_ToError(KonohaContext *kctx, kNode *node, kString *errmsg)
 	//node->stackbase = ns == NULL ? 0 : ns->genv->localScope.varsize;
 }
 
-static kNode* MessageNode(KonohaContext *kctx, kNode *node, kTokenNULL *tk, kNameSpaceNULL *ns, kinfotag_t taglevel, const char *fmt, ...)
+static kNode *MessageNode(KonohaContext *kctx, kNode *node, kTokenNULL *tk, kNameSpaceNULL *ns, kinfotag_t taglevel, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -157,7 +157,7 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 
 #ifdef USE_SMALLBUILD
 
-static kNode* ERROR_SyntaxErrorToken(KonohaContext *kctx, kNode *stmt, kToken *tk)
+static kNode *ERROR_SyntaxErrorToken(KonohaContext *kctx, kNode *stmt, kToken *tk)
 {
 	return kNodeToken_Message(kctx, stmt, tk, ErrTag, "syntax error at %s", KToken_t(tk));
 }
@@ -166,7 +166,7 @@ static kNode* ERROR_SyntaxErrorToken(KonohaContext *kctx, kNode *stmt, kToken *t
 
 #else
 
-static kNode* ERROR_UndefinedEscapeSequence(KonohaContext *kctx, kNode *stmt, kToken *tk)
+static kNode *ERROR_UndefinedEscapeSequence(KonohaContext *kctx, kNode *stmt, kToken *tk)
 {
 	return kNodeToken_Message(kctx, stmt, tk, ErrTag, "undefined escape sequence: \"%s\"", kString_text(tk->text));
 }

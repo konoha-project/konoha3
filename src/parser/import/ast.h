@@ -188,7 +188,7 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 
 static int FindOperator(KonohaContext *kctx, kNode *node, kArray *tokenList, int beginIdx, int endIdx)
 {
-	int isPrePosition = true;
+	kbool_t isPrePosition = true;
 	int opIdx = beginIdx, i, precedence = 0;
 	kToken *typeToken = NULL;
 	for(i = beginIdx; i < endIdx; i++) {

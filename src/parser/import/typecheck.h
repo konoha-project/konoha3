@@ -126,7 +126,7 @@ static void PutConstNode(KonohaContext *kctx, kNode *expr, KonohaStack *sfp)
 	}
 }
 
-static kNode* MakeNodeConst(KonohaContext *kctx, kNode *expr, KClass *rtype)
+static kNode *MakeNodeConst(KonohaContext *kctx, kNode *expr, KClass *rtype)
 {
 	size_t i, size = kArray_size(expr->NodeList), psize = size - 2;
 	kMethod *mtd = expr->NodeList->MethodItems[0];
@@ -195,7 +195,7 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KC
 	return SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "%s is requested, but %s is given", KClass_text(reqClass), KClass_text(typedClass));
 }
 
-static kNode* TypeCheckNodeAt(KonohaContext *kctx, kNode *node, size_t pos, kNameSpace *ns, KClass *reqClass, int pol)
+static kNode *TypeCheckNodeAt(KonohaContext *kctx, kNode *node, size_t pos, kNameSpace *ns, KClass *reqClass, int pol)
 {
 	DBG_ASSERT(IS_Array(node->NodeList));
 	DBG_ASSERT(pos < kArray_size(node->NodeList));
@@ -210,7 +210,7 @@ static kNode* TypeCheckNodeAt(KonohaContext *kctx, kNode *node, size_t pos, kNam
 	return texpr;
 }
 
-static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t symbol, kNameSpace *ns, KClass *reqc, int pol)
+static kNode *TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t symbol, kNameSpace *ns, KClass *reqc, int pol)
 {
 	kNode *expr = (kNode *)kNode_GetObjectNULL(kctx, stmt, symbol);
 	if(expr != NULL) {
@@ -248,7 +248,7 @@ static kNode* TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t sy
 	return NULL; //error
 }
 
-static kNode* TypeCheckNodeList(KonohaContext *kctx, kNode *block, size_t n, kNameSpace *ns, KClass *reqc)
+static kNode *TypeCheckNodeList(KonohaContext *kctx, kNode *block, size_t n, kNameSpace *ns, KClass *reqc)
 {
 	kArray *nodeList = block->NodeList;
 	kNode *stmt = nodeList->NodeItems[n];
@@ -273,7 +273,7 @@ static kNode* TypeCheckNodeList(KonohaContext *kctx, kNode *block, size_t n, kNa
 //	return kNode_Type(kctx, node, KNode_Push, expr->attrTypeId);
 //}
 
-static kNode* TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, KClass *reqc)
+static kNode *TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, KClass *reqc)
 {
 	int i, size = kNode_GetNodeListSize(kctx, block) - 1, hasValue = (reqc->typeId != KType_void);
 	KDump(block);
@@ -326,7 +326,7 @@ static struct KGammaLocalData *kNameSpace_PopGamma(KonohaContext *kctx, kNameSpa
 
 // --------------------------------------------------------------------------
 
-//static kNode* kMethod_ParseBodyNode(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *source, kfileline_t uline, int baseIndent)
+//static kNode *kMethod_ParseBodyNode(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *source, kfileline_t uline, int baseIndent)
 //{
 //	const char *script = kString_text(source);
 //	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList, 0};
@@ -380,4 +380,3 @@ static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t 
 	RESET_GCSTACK();
 	return mtd;
 }
-

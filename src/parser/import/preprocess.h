@@ -40,7 +40,7 @@
 //	return false;
 //}
 //
-//static kArray* new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, int beginIdx, int endIdx)
+//static kArray *new_SubsetArray(KonohaContext *kctx, kArray *gcstack, kArray *a, int beginIdx, int endIdx)
 //{
 //	kArray *newa = new_(Array, endIdx - beginIdx, gcstack);
 //	int i;
@@ -241,7 +241,7 @@ static int GroupTokenList(KonohaContext *kctx, kToken *openToken, kArray *tokenL
 	return endIdx;
 }
 
-static kArray* kArray_AppendList(KonohaContext *kctx, kArray *a, kArray *tokenList, int beginIdx, int endIdx)
+static kArray *kArray_AppendList(KonohaContext *kctx, kArray *a, kArray *tokenList, int beginIdx, int endIdx)
 {
 	int i;
 	for(i = beginIdx; i < endIdx; i++) {
@@ -351,15 +351,6 @@ static void Preprocess(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, i
 		KLIB kArray_Add(kctx, bufferList, tk);
 	}
 }
-
-//						if(kSyntax_Is(Macro, syntax)) {
-//							if(syn->macroParamSize == 0) {
-//								ApplyMacroData(kctx, tokens, syntax->macroDataNULL, 0, kArray_size(syntax->macroDataNULL), 0, NULL);
-//							}
-//							else {
-//								currentIdx = ApplyMacroDataSyntax(kctx, tokens, syn, macroParam, source, currentIdx);
-//							}
-//						}
 
 static void ResetPreprocess(KonohaContext *kctx, kTokenVar *tk, void *thunk)
 {

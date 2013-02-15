@@ -25,7 +25,7 @@
 // --------------------------------------------------------------------------
 /* ConstTable */
 
-static KKeyValue* kNameSpace_GetLocalConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t queryKey)
+static KKeyValue *kNameSpace_GetLocalConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t queryKey)
 {
 	KKeyValue *kvs = KLIB KDict_GetNULL(kctx, &(ns->constTable), queryKey);
 	if(kvs != NULL && kvs->attrTypeId == VirtualType_Text) {
@@ -74,7 +74,7 @@ static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksym
 	}
 }
 
-static KKeyValue* kNameSpace_GetConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t queryKey, int isLocalOnly)
+static KKeyValue *kNameSpace_GetConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t queryKey, int isLocalOnly)
 {
 	KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
 	if(foundKeyValue == NULL) {
@@ -139,7 +139,7 @@ static KMETHOD NameSpace_DefineConst(KonohaContext *kctx, KonohaStack *sfp)
 
 // ---------------------------------------------------------------------------
 
-static kSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword)
+static kSyntax *kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword)
 {
 	KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, keyword, false/*isLocalOnly*/);
 	if(kvs != NULL && KTypeAttr_Unmask(kvs->attrTypeId) == KType_Syntax) {
@@ -169,7 +169,7 @@ static void kNameSpace_ListSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t
 	}
 }
 
-static kArray* kNameSpace_GetSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword)
+static kArray *kNameSpace_GetSyntaxList(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword)
 {
 	ksymbol_t queryKey = keyword | KSymbolAttr_SyntaxList;
 	KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, queryKey);
@@ -244,10 +244,11 @@ static void kNameSpace_ImportSyntax2(KonohaContext *kctx, kNameSpace *ns, kSynta
 	kNameSpace_ResetSyntaxList(kctx, ns, syn->keyword);
 }
 
-static void kNameSpace_ImportSyntaxAsKeyValue(KonohaContext *kctx, void */*kNameSpace*/ns, KKeyValue *kvs)
+static void kNameSpace_ImportSyntaxAsKeyValue(KonohaContext *kctx, void *arg, KKeyValue *kvs)
 {
+	kNameSpace *ns = (kNameSpace *) arg;
 	if(KTypeAttr_Unmask(kvs->attrTypeId) == KType_Syntax) {
-		kNameSpace_ImportSyntax2(kctx, (kNameSpace *)ns, (kSyntax *)kvs->ObjectValue);
+		kNameSpace_ImportSyntax2(kctx, ns, (kSyntax *)kvs->ObjectValue);
 	}
 }
 
@@ -280,7 +281,7 @@ static void kNameSpace_AddSyntax(KonohaContext *kctx, kNameSpace *ns, kSyntax *s
 static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef, KTraceInfo *trace)
 {
 	while(syndef->keyword != KSymbol_END) {
-		kSyntaxVar* syn = new_(SyntaxVar, ns, ns->NameSpaceConstList);
+		kSyntaxVar *syn = new_(SyntaxVar, ns, ns->NameSpaceConstList);
 		syn->keyword = syndef->keyword;
 		syn->packageNameSpace = ns;
 		syn->flag = ((kshortflag_t)syndef->flag);
@@ -316,24 +317,6 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 
 // ---------------------------------------------------------------------------
 /* ClassName in ConstTable */
-
-//static KClass *kNameSpace_GetClass(KonohaContext *kctx, kNameSpace *ns, ksymbol_t uname, KClass *defaultClass)
-//{
-//	KClass *ct = NULL;
-//	if(ns->typeVariableItems != NULL) {
-//		size_t i;
-//		for(i = 0; i < ns->typesize; i++) {
-//			if(ns->typeVariableItems[i].key == uname) {
-//				return (KClass *)ns->typeVariableItems[i].unboxValue;
-//			}
-//		}
-//	}
-//	KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, uname);
-//	if(kvs != NULL && KTypeAttr_Unmask(kvs->attrTypeId) == VirtualType_KClass) {
-//		return (KClass *)kvs->unboxValue;
-//	}
-//	return (ct != NULL) ? ct : defaultClass;
-//}
 
 static KClass *kNameSpace_GetClassByFullName(KonohaContext *kctx, kNameSpace *ns, const char *name, size_t len, KClass *defaultClass)
 {
