@@ -4647,11 +4647,6 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		unbox,\
 		compareTo,\
 		compareUnboxValue,\
-		hasField,\
-		getFieldObjectValue,\
-		setFieldObjectValue,\
-		getFieldUnboxValue,\
-		setFieldUnboxValue,\
 		initdef,\
 		isSubType,\
 		realtype) {\
@@ -4671,11 +4666,6 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		unbox,\
 		compareTo,\
 		compareUnboxValue,\
-		hasField,\
-		getFieldObjectValue,\
-		setFieldObjectValue,\
-		getFieldUnboxValue,\
-		setFieldUnboxValue,\
 		initdef,\
 		isSubType,\
 		realtype}
@@ -4696,11 +4686,6 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		0/*unbox*/,\
 		FN_COMPARE/*compareTo*/,\
 		0/*compareUnboxValue*/,\
-		0/*hasField*/,\
-		0/*getFieldObjectValue*/,\
-		0/*setFieldObjectValue*/,\
-		0/*getFieldUnboxValue*/,\
-		0/*setFieldUnboxValue*/,\
 		0/*initdef*/,\
 		0/*isSubType*/,\
 		0/*realtype*/)

@@ -76,11 +76,6 @@ static KDEFINE_CLASS DummyDef = {
 		0/*unbox*/,
 		0/*compareObject*/,
 		0/*compareUnboxValue*/,
-		0/*hasField*/,
-		0/*getFieldObjectValue*/,
-		0/*setFieldObjectValue*/,
-		0/*getFieldUnboxValue*/,
-		0/*setFieldUnboxValue*/,
 		0/*initdef*/,
 		0/*isSubType*/,
 		0/*realtype*/

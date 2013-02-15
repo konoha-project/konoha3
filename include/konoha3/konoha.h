@@ -654,7 +654,7 @@ struct KonohaFactory {
 	kbool_t  (*LoadPlatformModule)(struct KonohaFactory*, const char *moduleName, ModuleType);
 
 	// file load
-	const char* (*FormatPackagePath)(KonohaContext *, char *buf, size_t bufsiz, const char *packageName, const char *ext);
+	const char *(*FormatPackagePath)(KonohaContext *, char *buf, size_t bufsiz, const char *packageName, const char *ext);
 	KPackageHandler* (*LoadPackageHandler)(KonohaContext *, const char *packageName);
 	void (*BEFORE_LoadScript)(KonohaContext *, const char *filename);
 	int (*loadScript)(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *));
@@ -692,8 +692,8 @@ struct KonohaFactory {
 		void  (*ReportCaughtException)(KonohaContext *, kException *e, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
 		void  (*ReportDebugMessage)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
 		int   (*InputUserApproval)(KonohaContext *, const char *message, const char *yes, const char *no, int defval);
-		char* (*InputUserText)(KonohaContext *, const char *message, int flag);
-		char* (*InputUserPassword)(KonohaContext *, const char *message);
+		char *(*InputUserText)(KonohaContext *, const char *message, int flag);
+		char *(*InputUserPassword)(KonohaContext *, const char *message);
 	} ConsoleModule;
 
 	/* Garbage Collection API */
@@ -728,15 +728,15 @@ struct KonohaFactory {
 	/* I18N Module */
 	struct I18NModule {
 		const KModuleInfo *I18NInfo;
-		uintptr_t   (*iconv_open_i)(KonohaContext *, const char* tocode, const char* fromcode, KTraceInfo *);
+		uintptr_t   (*iconv_open_i)(KonohaContext *, const char *tocode, const char *fromcode, KTraceInfo *);
 		size_t      (*iconv_i)(KonohaContext *, uintptr_t iconv, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft, int *isTooBigRef, KTraceInfo *trace);
 		int         (*iconv_close_i)(KonohaContext *, uintptr_t iconv);
-		const char* systemCharset;
+		const char *systemCharset;
 		kbool_t     (*isSystemCharsetUTF8)(KonohaContext *);
 		uintptr_t   (*iconvUTF8ToSystemCharset)(KonohaContext *, KTraceInfo *);
 		uintptr_t   (*iconvSystemCharsetToUTF8)(KonohaContext *, KTraceInfo *);
-		const char* (*formatSystemPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
-		const char* (*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
+		const char *(*formatSystemPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
+		const char *(*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
 	} I18NModule;
 
 	/* ExecutionEngine */
@@ -752,7 +752,7 @@ struct KonohaFactory {
 		struct JsonBuf* (*CreateJson)(KonohaContext *, struct JsonBuf *jsonbuf, KJSONTYPE type, ...);
 		kbool_t     (*ParseJson)(KonohaContext *, struct JsonBuf *, const char *, size_t, KTraceInfo *);
 		void        (*FreeJson)(KonohaContext *, struct JsonBuf *);
-		const char* (*JsonToNewText)(KonohaContext *, struct JsonBuf *);
+		const char *(*JsonToNewText)(KonohaContext *, struct JsonBuf *);
 		size_t      (*DoJsonEach)(KonohaContext *, struct JsonBuf *, void *thunk, void (*doEach)(KonohaContext *, const char *key, size_t len, struct JsonBuf *, void *));
 
 		kbool_t     (*RetrieveJsonKeyValue)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, struct JsonBuf *newbuf);
@@ -762,7 +762,7 @@ struct KonohaFactory {
 		kbool_t     (*GetJsonBoolean)(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, kbool_t defval);
 		int64_t     (*GetJsonInt)(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, int64_t defval);
 		double      (*GetJsonFloat)(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, double defval);
-		const char* (*GetJsonText)(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, const char *defval);
+		const char *(*GetJsonText)(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, const char *defval);
 		size_t      (*GetJsonSize)(KonohaContext *kctx, struct JsonBuf *jsonbuf);
 		kbool_t     (*RetrieveJsonArrayAt)(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf);
 		kbool_t     (*SetJsonArrayAt)(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf);
@@ -1083,25 +1083,19 @@ typedef enum kformat_t {
 		void         (*format)(KonohaContext*, KonohaValue *, int, KBuffer *);\
 		int          (*compareTo)(KonohaContext *, kObject *, kObject *);\
 		int          (*compareUnboxValue)(uintptr_t, uintptr_t);\
-		kbool_t      (*hasField)(KonohaContext*, kObject*, ksymbol_t, ktypeattr_t);\
-		kObject*     (*getFieldObjectValue)(KonohaContext*, kObject*, ksymbol_t, ktypeattr_t);\
-		void         (*setFieldObjectValue)(KonohaContext*, kObject*, ksymbol_t, ktypeattr_t, kObject *);\
-		uintptr_t    (*getFieldUnboxValue)(KonohaContext*, kObject*, ksymbol_t, ktypeattr_t);\
-		void         (*setFieldUnboxValue)(KonohaContext*, kObject*, ksymbol_t, ktypeattr_t, uintptr_t);\
 		void         (*initdef)(KonohaContext*, KClassVar*, KTraceInfo *);\
 		kbool_t      (*isSubType)(KonohaContext*, KClass*, KClass *);\
 		KClass*      (*realtype)(KonohaContext*, KClass*, KClass *)
 
-
 typedef struct KDEFINE_CLASS {
 	const char *structname;
 	ktypeattr_t     typeId;         kshortflag_t    cflag;
-	ktypeattr_t     baseTypeId;     ktypeattr_t         superTypeId;
+	ktypeattr_t     baseTypeId;     ktypeattr_t     superTypeId;
 	ktypeattr_t     rtype;          kushort_t       cparamsize;
 	struct kparamtype_t   *cParamItems;
-	size_t     cstruct_size;
+	size_t         cstruct_size;
 	KClassField   *fieldItems;
-	kushort_t  fieldsize;       kushort_t fieldAllocSize;
+	kushort_t      fieldsize;       kushort_t fieldAllocSize;
 	CLASSAPI;
 } KDEFINE_CLASS;
 
@@ -1426,7 +1420,7 @@ struct kParamVar {
 #define IS_Method(o)                 (kObject_baseTypeId(o) == KType_Method)
 
 #ifdef USE_MethodFlagData
-static const char* MethodFlagData[] = {
+static const char *MethodFlagData[] = {
 	"Public", "Virtual", "Final", "Const", "Static", "Immutable", "Compilation",
 	"Coercion", "Restricted", "FastCall", "SmartReturn", "Variadic", "Iterative",
 	"CCompatible", "JSCompatible", "JavaCompatible", "Accountable",
@@ -1911,7 +1905,7 @@ typedef struct {
 typedef struct {
 	const char *key;
 	uintptr_t ty;
-	const char* value;
+	const char *value;
 } KDEFINE_TEXT_CONST;
 
 typedef struct {

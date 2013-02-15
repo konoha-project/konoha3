@@ -37,5 +37,6 @@ int main(int argc, const char *argv[])
     assert(sizeof(intptr_t) == sizeof(kint_t));
     assert(sizeof(kshort_t) * 2 == sizeof(intptr_t));
     fprintf(stderr, "%d\n", (int)sizeof(kObject));
+    fprintf(stderr, "%d\n", (int)sizeof(KClass));
     return 0;
 }
