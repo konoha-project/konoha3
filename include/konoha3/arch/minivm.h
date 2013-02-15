@@ -169,15 +169,15 @@ typedef struct OPNSET {
 #define VPARAM_NMOV       3, VMT_R, VMT_R, VMT_TY
 typedef struct OPNMOV {
 	KCODE_HEAD;
-	kreg_t a;
-	kreg_t b;
+	kreg_t dst;
+	kreg_t src;
 	KClass* ty;
 } OPNMOV;
 
 #ifndef OPEXEC_NMOV
 #define OPEXEC_NMOV() do {\
 	OPNMOV *op = (OPNMOV *)pc;\
-	rbp[op->a].unboxValue = rbp[op->b].unboxValue;\
+	rbp[op->dst].unboxValue = rbp[op->src].unboxValue;\
 } while(0)
 #endif
 
@@ -185,8 +185,8 @@ typedef struct OPNMOV {
 #define VPARAM_NMOVx      4, VMT_R, VMT_R, VMT_FX, VMT_TY
 typedef struct OPNMOVx {
 	KCODE_HEAD;
-	kreg_t a;
-	kreg_t b;
+	kreg_t dst;
+	kreg_t src;
 	uintptr_t bx;
 	KClass* ty;
 } OPNMOVx;
@@ -194,7 +194,7 @@ typedef struct OPNMOVx {
 #ifndef OPEXEC_NMOVx
 #define OPEXEC_NMOVx() do {\
 	OPNMOVx *op = (OPNMOVx *)pc;\
-	rbp[op->a].unboxValue = (rbp[op->b].asObject)->fieldUnboxItems[op->bx];\
+	rbp[op->src].unboxValue = (rbp[op->dst].asObject)->fieldUnboxItems[op->bx];\
 } while(0)
 #endif
 

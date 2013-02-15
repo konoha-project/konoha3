@@ -472,7 +472,7 @@ static kbool_t FuelVM_VisitNullNode(KonohaContext *kctx, KBuilder *builder, kNod
 
 static kbool_t FuelVM_VisitLocalNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	INode *Inst;
+	INode *Inst = NULL;
 	if((Inst = IRBuilder_FindLocalVarByHash(BLD(builder), ConvertToTypeId(kctx, expr->attrTypeId), expr->index)) == 0) {
 		Inst = CreateLocal(BLD(builder), ConvertToTypeId(kctx, expr->attrTypeId));
 		IField_setHash((IField *) Inst, expr->index);
