@@ -11,7 +11,7 @@ depend:
 	curl -O http://llvm.org/releases/${VERSION}/llvm-${VERSION}.src.tar.gz
 	tar zxf ${LLVM}.src.tar.gz
 	mkdir -p ${BUILD}
-	make -f `pwd`/src/module-devel/FuelVM/Makefile -C ${BUILD} build BASEDIR=`pwd`
+	make -f `pwd`/src/module/ExecutionEngine/FuelVM/Makefile -C ${BUILD} build BASEDIR=`pwd`
 
 .PHONY : build
 build:
