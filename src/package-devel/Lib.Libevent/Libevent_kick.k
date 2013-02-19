@@ -77,16 +77,16 @@ class Event {
 
 	String getKey() {
 		String ret;
-		@Const int evfd =  cev.getEvfd();
+		@Const int id = cev.getID();
 		@Const int events = cev.getEvents();
 
 		if ((events & EV_SIGNAL) != 0) {
-			ret = "SIGNAL" + evfd.toString();
+			ret = "SIGNAL" + id.toString();
 		} else {
-			if (evfd == -1) {
-				ret = "TIMER";
+			if (id == -1) {
+				ret = "TIMER" + id.toString();
 			} else {
-				ret = "IO" + evfd.toString();
+				ret = "IO" + id.toString();
 			}
 		}
 		return ret;
@@ -113,7 +113,7 @@ class Bufferevent extends Event {
 	}
 
 	@Public int socket_connect(Sockaddr_in sa) {
-		int s = System.bufferevent_socket_connect(cbev, sa);
+		int s = System.bufferevent_socket_connect(cbev, sa);	//TODO	cbev class
 		return s;
 	}
 

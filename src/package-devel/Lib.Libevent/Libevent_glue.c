@@ -173,12 +173,12 @@ static KMETHOD Cevent_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(ev);
 }
 
-//## Cevent Cevent.getEvfd();
+//## Cevent Cevent.getID();
 // get event file descriptor
-static KMETHOD Cevent_getEvfd(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Cevent_getID(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct Cevent *ev = (struct Cevent *) sfp[0].asObject;
-	KReturnUnboxValue(ev->event->ev_fd);
+	KReturnUnboxValue(ev->event);
 }
 
 //## Cevent Cevent.getEvents();
@@ -606,7 +606,7 @@ static kbool_t Cevent_base_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, 
 
 		// Cevent
 		_Public, _F(Cevent_new), KType_Cevent, KType_Cevent, KMethodName_("new"), 4, KType_Cevent_base, KFieldName_("Cevent_base"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("event"), KType_EventCBArg, KFieldName_("CBarg"),
-		_Public, _F(Cevent_getEvfd), KType_Int, KType_Cevent, KMethodName_("getEvfd"), 0, 
+		_Public, _F(Cevent_getID), KType_Int, KType_Cevent, KMethodName_("getID"), 0, 
 		_Public, _F(Cevent_getEvents), KType_Int, KType_Cevent, KMethodName_("getEvents"), 0, 
 
 		// Cbufferevent
