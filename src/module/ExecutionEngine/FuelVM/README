@@ -3,7 +3,7 @@ Getting started
 First of all, you have to get llvm-3.2 from llvm's offical site and build it
 for yourself. Luckily, this is easy:
   cd PATH_TO_KONOHA
-  make -f src/module-devel/FuelVM/Makefile
+  make -f src/module/ExecutionEngine/FuelVM/Makefile
 
 and build your konoha.
 
