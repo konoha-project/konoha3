@@ -34,7 +34,7 @@ extern "C" {
 #endif
 
 #ifndef LOG2
-#define LOG2(N) ((unsigned)((sizeof(void *) * 8) - __builtin_clzl(N - 1)))
+#define LOG2(N) ((unsigned)((sizeof(void *) * 8) - __builtin_clzl((N) - 1)))
 #endif
 
 /* ARRAY */

@@ -76,7 +76,7 @@ typedef enum map_status_t {
 
 struct map_api {
     map_record_t *(*_get)(kmap_t *m, struct JSONString *key);
-    map_status_t  (*_Set)(kmap_t *m, struct JSONString *key, uint64_t val);
+    map_status_t  (*_set)(kmap_t *m, struct JSONString *key, uint64_t val);
     map_record_t *(*_next)(kmap_t *m, kmap_iterator *itr);
     void (*_remove)(kmap_t *m, struct JSONString *key);
     void (*_init)(kmap_t *m, unsigned init);
@@ -97,7 +97,7 @@ static inline map_record_t *kmap_get(kmap_t *m, struct JSONString *key)
 
 static inline map_status_t kmap_set(kmap_t *m, struct JSONString *key, uint64_t val)
 {
-    return m->h.base.api->_Set(m, key, val);
+    return m->h.base.api->_set(m, key, val);
 }
 
 static inline void kmap_remove(kmap_t *m, struct JSONString *key)
