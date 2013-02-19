@@ -14,7 +14,7 @@ if(APPLE)
 	# support MacPorts
 	FIND_PATH(EVENT_INCLUDE_DIR event.h
 		PATHS
-		/opt/local/include/
+		/opt/local/include/event2
 		NO_CMAKE_SYSTEM_PATH
 	)
 	FIND_LIBRARY(EVENT_LIBRARIES NAMES event libevent
@@ -24,7 +24,7 @@ if(APPLE)
 	)
 endif(APPLE)
 
-FIND_PATH(EVENT_INCLUDE_DIR event.h PATHS /opt/local/include)
+FIND_PATH(EVENT_INCLUDE_DIR event.h PATHS /opt/local/include/event2)
 string(REGEX REPLACE "(.*)/include/?" "\\1" EVENT_INCLUDE_BASE_DIR "${EVENT_INCLUDE_DIR}")
 
 FIND_LIBRARY(EVENT_LIBRARIES NAMES event libevent
