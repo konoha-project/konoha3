@@ -212,18 +212,66 @@ static void JSBuilder_EmitString(KonohaContext *kctx, KBuilder *builder, const c
 	PLATAPI printf_i("%s%s%s", prefix, str, suffix);
 }
 
+static void JSBuilder_EmitNewLineWithEndOfStatement(KonohaContext *kctx, KBuilder *builder, kNode *node)
+{
+	if(kNode_node(node) == KNode_Block) {
+		JSBuilder_EmitNewLineWith(kctx, builder, ")();");
+	}
+	else if(kNode_isExpr(kctx, node)){
+		JSBuilder_EmitNewLineWith(kctx, builder, ";");
+	}
+	else {
+		JSBuilder_EmitNewLineWith(kctx, builder, "");
+	}
+}
+
+static void JSBuilder_EmitAssignStmtPrefix(KonohaContext *kctx, KBuilder *builder, kNode *node)
+{
+	if(kNode_node(kNode_At(node, 1)) == KNode_Field){
+		JSBuilder_EmitString(kctx, builder, "this.", "", "");
+	}
+	else {
+		JSBuilder_EmitString(kctx, builder, "var ", "", "");
+	}
+}
+
+static kbool_t JSBuilder_VisitNodeList(KonohaContext *kctx, KBuilder *builder, kNode *block, void *thunk)
+{
+	JSBuilder *jsBuilder = (JSBuilder *)builder;
+	size_t i;
+	for (i = 0; i < kArray_size(block->NodeList); ++i) {
+		kNode *node = block->NodeList->NodeItems[i];
+
+		if(node == K_NULLNODE || kNode_node(node) == KNode_Done) {
+			continue;
+		}
+
+		//while(kNode_node(node) == KNode_Block && kArray_size(node->NodeList) == 1) {
+		//	node = node->NodeList->NodeItems[0];
+		//}
+
+		if(kNode_node(node) == KNode_Assign) {
+			JSBuilder_EmitAssignStmtPrefix(kctx, builder, node);	
+		}
+
+		jsBuilder->isExprNode = kNode_isExpr(kctx, node);
+		kbool_t ret = SUGAR VisitNode(kctx, builder, node, thunk);
+
+		JSBuilder_EmitNewLineWithEndOfStatement(kctx, builder, node);
+
+		if(!ret) return false;
+	}
+	return true;
+}
+
 static kbool_t JSBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, kNode *block, void *thunk)
 {
-	size_t i;
-	kbool_t ret = true;
 	JSBuilder *jsBuilder = (JSBuilder *)builder;
 	kbool_t isExprBlock = jsBuilder->isExprNode;
 	DBG_ASSERT(kNode_node(block) == KNode_Block);
 	if(!IS_Array(block->NodeList)) {
-		JSBuilder_EmitString(kctx, builder, "{ /* ERROR: block->NodeList is not Array. */ }", "", "");
 		return true;
 	}
-	DBG_ASSERT(IS_Array(block->NodeList));
 	if(!kNode_IsRootNode(block)) {
 		if(kNode_node(kNode_GetParent(kctx, block)) == 0) {
 			// Closure
@@ -232,40 +280,7 @@ static kbool_t JSBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, 
 		JSBuilder_EmitNewLineWith(kctx, builder, isExprBlock ? "(function() {" : "{");
 		jsBuilder->indent++;
 	}
-	for (i = 0; ret && i < kArray_size(block->NodeList); ++i) {
-		kNode *node = block->NodeList->NodeItems[i];
-
-		if(node == K_NULLNODE || kNode_node(node) == KNode_Done) {
-			continue;
-		}
-
-		while(kNode_node(node) == KNode_Block && kArray_size(node->NodeList) == 1) {
-			node = node->NodeList->NodeItems[0];
-		}
-
-		jsBuilder->isExprNode = kNode_isExpr(kctx, node);
-
-		if(kNode_node(node) == KNode_Assign) {
-			if(kNode_node(kNode_At(node, 1)) == KNode_Field){
-				JSBuilder_EmitString(kctx, builder, "this.", "", "");
-			}
-			else {
-				JSBuilder_EmitString(kctx, builder, "var ", "", "");
-			}
-		}
-
-		ret = SUGAR VisitNode(kctx, builder, node, thunk);
-
-		if(kNode_node(node) == KNode_Block) {
-			JSBuilder_EmitNewLineWith(kctx, builder, ")();");
-		}
-		else if(kNode_isExpr(kctx, node)){
-			JSBuilder_EmitNewLineWith(kctx, builder, ";");
-		}
-		else {
-			JSBuilder_EmitNewLineWith(kctx, builder, "");
-		}
-	}
+	kbool_t ret = JSBuilder_VisitNodeList(kctx, builder, block, thunk);	
 	if(!kNode_IsRootNode(block)) {
 		jsBuilder->indent--;
 		JSBuilder_EmitString(kctx, builder, isExprBlock ? "})()" : "}", "", "");
@@ -513,13 +528,9 @@ static bool JSBuilder_loadScript(KonohaContext *kctx, kNameSpace *ns, kString *p
 	char pathbuf[512];
 	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), KFileLine_textFileName(trace->pline), kString_text(package));
 
-	//SUGAR kNameSpace_UseDefaultVirtualMachine(kctx, ns);
-
 	KLIB kNameSpace_LoadScript(kctx, ns, path, trace);
 
-
 	KonohaFactory *factory = (KonohaFactory *)kctx->platApi;
-	//LoadJavaScriptModule(factory, ReleaseModule);
 	ns->builderApi = factory->ExecutionEngineModule.GetDefaultBuilderAPI();
 	return true;
 }
@@ -635,8 +646,6 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 			JSBuilder_EmitString(kctx, builder, methodName, " = ", "");
 			break;
 		case kSymbolPrefix_TO:
-			//iJSBuilder_EmitString(kctx, builder, "/*Convert*/", "", "");
-			//JSBuilder_EmitString(kctx, builder, "to", methodName, "");
 			if(strcmp(className, "float") == 0 && strcmp(methodName, "Number") == 0) {
 				JSBuilder_EmitString(kctx, builder, " | 0", "", "");
 			}
