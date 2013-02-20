@@ -463,32 +463,7 @@ static KMETHOD TimeVal_new(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 
-// TODO ----- should be implement in posix.socket package
-/* ======================================================================== */
-// Sockaddr_in class
-
-static void Sockaddr_in_Init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	struct Sockaddr_in *sa = (struct Sockaddr_in *) o;
-	memset(&sa->sockaddr, 0, sizeof (struct sockaddr));
-}
-
-//## Sockaddr_in Sockaddr_in.new(int family, int addr, int port);
-static KMETHOD Sockaddr_in_new(KonohaContext *kctx, KonohaStack *sfp)
-{
-	struct Sockaddr_in *sa = (struct Sockaddr_in *) sfp[0].asObject;
-	sa_family_t family	= (sa_family_t)sfp[1].intValue;
-	in_addr_t addr		= (in_addr_t)sfp[2].intValue;
-	in_port_t port		= (in_port_t)sfp[3].intValue;
-
-	sa->sockaddr.sin_family = family;
-	sa->sockaddr.sin_addr.s_addr = htonl(addr);
-	sa->sockaddr.sin_port = htons(port);
-	KReturn(sa);
-}
 // TODO should be implement in posix.socket package -----
-
-
 /* ======================================================================== */
 // Sockaddr_in class
 
@@ -521,56 +496,6 @@ static KMETHOD System_evutil_make_socket_nonblocking(KonohaContext *kctx, Konoha
 {
 	evutil_socket_t evd = (evutil_socket_t)sfp[1].intValue;
 	int ret = evutil_make_socket_nonblocking(evd);
-	KReturnUnboxValue(ret);
-}
-
-//## void System.bufferevent_setcb(Cbufferevent bev, BuffereventCBArg cbarg);
-static KMETHOD System_bufferevent_setcb(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kCbufferevent *bev = (kCbufferevent *)sfp[1].asObject;
-	kBuffereventCBArg *cbArg = (kBuffereventCBArg *)sfp[2].asObject;
-
-	KFieldSet(cbArg, cbArg->cbev, bev);
-	bufferevent_setcb(bev->bev, Cbev_readCB_1st, Cbev_writeCB_1st, Cbev_eventCB_1st, cbArg);
-	KReturnVoid();
-}
-
-//## int System.bufferevent_socket_connect(Cbufferevent bev, Sockaddr_in sa);
-static KMETHOD System_bufferevent_socket_connect(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kCbufferevent *bev = (kCbufferevent *)sfp[1].asObject;
-	kSockaddr_in *sa = (kSockaddr_in *)sfp[2].asObject;
-	int ret = bufferevent_socket_connect(bev->bev, (struct sockaddr *)&sa->sockaddr, sizeof sa->sockaddr);
-	KReturnUnboxValue(ret);
-}
-
-//## int System.bufferevent_enable(Cbufferevent bev, int event);
-static KMETHOD System_bufferevent_enable(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kCbufferevent *bev = (kCbufferevent *)sfp[1].asObject;
-	short event = (short)sfp[2].intValue;
-
-	int ret = bufferevent_enable(bev->bev, event);
-	KReturnUnboxValue(ret);
-}
-
-//## int System.bufferevent_write(Cbufferevent bev, Bytes buf);
-static KMETHOD System_bufferevent_write(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kCbufferevent *bev = (kCbufferevent *)sfp[1].asObject;
-	kBytes *buf = sfp[2].asBytes;
-
-	int ret = bufferevent_write(bev->bev, buf->byteptr, buf->bytesize);
-	KReturnUnboxValue(ret);
-}
-
-//## int System.bufferevent_read(Cbufferevent bev, Bytes buf);
-static KMETHOD System_bufferevent_read(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kCbufferevent *bev = (kCbufferevent *)sfp[1].asObject;
-	kBytes *buf = sfp[2].asBytes;
-
-	int ret = bufferevent_read(bev->bev, buf->buf, buf->bytesize);
 	KReturnUnboxValue(ret);
 }
 

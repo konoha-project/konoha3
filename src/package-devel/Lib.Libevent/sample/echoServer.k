@@ -18,7 +18,7 @@ void do_read(int evd, int event, Object arg) {
 	System.p("ev = " + ev);
 	Bytes buf = new Bytes(32);
 	if (System.recv(evd, buf, 0) <= 0) {
-		System.event_del(ev.cev);
+		ev.event_del();
 		System.shutdown(evd, SHUT_RDWR);
 	} else {
 		System.p("buf = \n" + buf);
