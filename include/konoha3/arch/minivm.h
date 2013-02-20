@@ -194,7 +194,7 @@ typedef struct OPNMOVx {
 #ifndef OPEXEC_NMOVx
 #define OPEXEC_NMOVx() do {\
 	OPNMOVx *op = (OPNMOVx *)pc;\
-	rbp[op->src].unboxValue = (rbp[op->dst].asObject)->fieldUnboxItems[op->bx];\
+	rbp[op->dst].unboxValue = (rbp[op->src].asObject)->fieldUnboxItems[op->bx];\
 } while(0)
 #endif
 

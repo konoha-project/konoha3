@@ -22,6 +22,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#ifdef __linux__
+#define _XOPEN_SOURCE 500 /* Needed to get getpgid and getsid */
+#define _BSD_SOURCE       /* Needed to get setgroups */
+#endif
 #include <unistd.h>
 #include <signal.h>
 #include <sys/types.h>
