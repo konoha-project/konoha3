@@ -276,6 +276,7 @@ static kbool_t JSBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, 
 static kbool_t JSBuilder_VisitExprNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
 	((JSBuilder *)builder)->isExprNode = true;
+	//JSBuilder_EmitString(kctx, builder, "/*", GetNodeTypeName(node), "*/");
 	return SUGAR VisitNode(kctx, builder, node, thunk);
 }
 
@@ -634,7 +635,11 @@ static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *bu
 			JSBuilder_EmitString(kctx, builder, methodName, " = ", "");
 			break;
 		case kSymbolPrefix_TO:
-			// TODO
+			//iJSBuilder_EmitString(kctx, builder, "/*Convert*/", "", "");
+			//JSBuilder_EmitString(kctx, builder, "to", methodName, "");
+			if(strcmp(className, "float") == 0 && strcmp(methodName, "Number") == 0) {
+				JSBuilder_EmitString(kctx, builder, " | 0", "", "");
+			}
 			break;
 		default:
 			if(strcmp(className, "Func") == 0) {
