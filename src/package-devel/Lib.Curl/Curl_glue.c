@@ -452,32 +452,72 @@ static int diagnosisCurlFaultType(KonohaContext *kctx, CURLcode res, int UserFau
 		return UserFault | SoftwareFault | SystemFault | ExternalFault;
 
 	case CURLE_FTP_WEIRD_SERVER_REPLY:  /* 8 */
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_REMOTE_ACCESS_DENIED:    /* 9 a service was denied by the server
 	                                    due to lack of access - when login fails
 	                                    this is not returned. */
+#else
+	case CURLE_FTP_ACCESS_DENIED:
+#endif
 		return UserFault | SoftwareFault | ExternalFault;
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_OBSOLETE10:              /* 10 - NOT USED */
+#else
+	case CURLE_FTP_USER_PASSWORD_INCORRECT:
+#endif
 	case CURLE_FTP_WEIRD_PASS_REPLY:    /* 11 */
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_OBSOLETE12:              /* 12 - NOT USED */
+#else
+	case CURLE_FTP_WEIRD_USER_REPLY:
+#endif
 	case CURLE_FTP_WEIRD_PASV_REPLY:    /* 13 */
 	case CURLE_FTP_WEIRD_227_FORMAT:    /* 14 */
 	case CURLE_FTP_CANT_GET_HOST:       /* 15 */
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_OBSOLETE16:              /* 16 - NOT USED */
+#else
+	case CURLE_FTP_CANT_RECONNECT:
+#endif
+
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_FTP_COULDNT_SET_TYPE:    /* 17 */
+#else
+	case CURLE_FTP_COULDNT_SET_BINARY:
+#endif
 	case CURLE_PARTIAL_FILE:            /* 18 */
 	case CURLE_FTP_COULDNT_RETR_FILE:   /* 19 */
 		return ExternalFault;
 
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_OBSOLETE20:              /* 20 - NOT USED */
+#else
+	case CURLE_FTP_WRITE_ERROR:
+#endif
+
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_QUOTE_ERROR:             /* 21 - quote command failure */
+#else
+	case CURLE_FTP_QUOTE_ERROR:
+#endif
 		return UserFault | SoftwareFault | ExternalFault;
 
 	case CURLE_HTTP_RETURNED_ERROR:     /* 22 */
 		return UserFault | SoftwareFault ;
 
 	case CURLE_WRITE_ERROR:             /* 23 */
+
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_OBSOLETE24:              /* 24 - NOT USED */
+#else
+	case CURLE_MALFORMAT_USER:
+#endif
+
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_UPLOAD_FAILED:           /* 25 - failed upload "command" */
+#else
+	case CURLE_FTP_COULDNT_STOR_FILE:
+#endif
 	case CURLE_READ_ERROR:              /* 26 - couldn't open/read from file */
 	case CURLE_OUT_OF_MEMORY:           /* 27 */
 		/* Note: case CURLE_OUT_OF_MEMORY may sometimes indicate a conversion error
@@ -489,15 +529,28 @@ static int diagnosisCurlFaultType(KonohaContext *kctx, CURLcode res, int UserFau
 	case CURLE_OPERATION_TIMEDOUT:      /* 28 - the timeout time was reached */
 		return UserFault | SoftwareFault | SystemFault | ExternalFault;
 
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_OBSOLETE29:              /* 29 - NOT USED */
+#else
+	case CURLE_FTP_COULDNT_SET_ASCII:
+#endif
 	case CURLE_FTP_PORT_FAILED:         /* 30 - FTP PORT operation failed */
 		return UserFault | SoftwareFault;
 
 	case CURLE_FTP_COULDNT_USE_REST:    /* 31 - the REST command failed */
 		return UserFault | SoftwareFault ;
 
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_OBSOLETE32:              /* 32 - NOT USED */
+#else
+	case CURLE_FTP_COULDNT_GET_SIZE:
+#endif
+
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_RANGE_ERROR:             /* 33 - RANGE "command" didn't work */
+#else
+	case CURLE_HTTP_RANGE_ERROR:
+#endif
 		return UserFault | ExternalFault ;
 
 	case CURLE_HTTP_POST_ERROR:         /* 34 */
@@ -516,7 +569,11 @@ static int diagnosisCurlFaultType(KonohaContext *kctx, CURLcode res, int UserFau
 	case CURLE_LDAP_SEARCH_FAILED:      /* 39 */
 		return UserFault | ExternalFault;
 
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_OBSOLETE40:              /* 40 - NOT USED */
+#else
+	case CURLE_LIBRARY_NOT_FOUND:
+#endif
 	case CURLE_FUNCTION_NOT_FOUND:      /* 41 */
 	case CURLE_ABORTED_BY_CALLBACK:     /* 42 */
 		return UserFault | SystemFault;
@@ -524,21 +581,40 @@ static int diagnosisCurlFaultType(KonohaContext *kctx, CURLcode res, int UserFau
 	case CURLE_BAD_FUNCTION_ARGUMENT:   /* 43 */
 		return UserFault | SoftwareFault | SystemFault;
 
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_OBSOLETE44:              /* 44 - NOT USED */
+#else
+	case CURLE_BAD_CALLING_ORDER:
+#endif
+
 	case CURLE_INTERFACE_FAILED:        /* 45 - CURLOPT_INTERFACE failed */
 		return UserFault | SoftwareFault | SystemFault;
 
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_OBSOLETE46:              /* 46 - NOT USED */
+#else
+	case CURLE_BAD_PASSWORD_ENTERED:
+#endif
+
 	case CURLE_TOO_MANY_REDIRECTS :     /* 47 - catch endless re-direct loops */
 		return ExternalFault;
 
 	case CURLE_UNKNOWN_TELNET_OPTION:   /* 48 - User specified an unknown option */
 	case CURLE_TELNET_OPTION_SYNTAX :   /* 49 - Malformed telnet option */
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_OBSOLETE50:              /* 50 - NOT USED */
+#else
+	case CURLE_OBSOLETE:
+#endif
+
 		return UserFault | SoftwareFault;
 
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_PEER_FAILED_VERIFICATION: /* 51 - peer's certificate or fingerprint
 	                                     wasn't verified fine */
+#else
+	case CURLE_SSL_PEER_CERTIFICATE:
+#endif
 		return SystemFault | ExternalFault;
 	case CURLE_GOT_NOTHING:             /* 52 - when this is a specific error */
 		return ExternalFault;
@@ -550,7 +626,11 @@ static int diagnosisCurlFaultType(KonohaContext *kctx, CURLcode res, int UserFau
 
 	case CURLE_SEND_ERROR:              /* 55 - failed sending network data */
 	case CURLE_RECV_ERROR:              /* 56 - failure in receiving network data */
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_OBSOLETE57:              /* 57 - NOT IN USE */
+#else
+	case CURLE_SHARE_IN_USE:
+#endif
 		return SystemFault | ExternalFault;
 
 	case CURLE_SSL_CERTPROBLEM:         /* 58 - problem with the local certificate */
@@ -563,7 +643,11 @@ static int diagnosisCurlFaultType(KonohaContext *kctx, CURLcode res, int UserFau
 		return UserFault | SoftwareFault | SystemFault | ExternalFault;
 
 	case CURLE_FILESIZE_EXCEEDED:       /* 63 - Maximum file size exceeded */
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_USE_SSL_FAILED:          /* 64 - Requested FTP SSL level failed */
+#else
+	case CURLE_FTP_SSL_FAILED:
+#endif
 	case CURLE_SEND_FAIL_REWIND:        /* 65 - Sending the data requires a rewind
 	                                    that failed */
 		return SystemFault | ExternalFault;
@@ -577,12 +661,21 @@ static int diagnosisCurlFaultType(KonohaContext *kctx, CURLcode res, int UserFau
 	case CURLE_TFTP_NOTFOUND:           /* 68 - file not found on server */
 	case CURLE_TFTP_PERM:               /* 69 - permission problem on server */
 		return UserFault | SoftwareFault | ExternalFault;
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_REMOTE_DISK_FULL:        /* 70 - out of disk space on server */
+#else
+	case CURLE_TFTP_DISKFULL:
+#endif
 		return ExternalFault;
 
 	case CURLE_TFTP_ILLEGAL:            /* 71 - Illegal TFTP operation */
 	case CURLE_TFTP_UNKNOWNID:          /* 72 - Unknown transfer ID */
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_REMOTE_FILE_EXISTS:      /* 73 - File already exists */
+#else
+	case CURLE_TFTP_EXISTS:
+#endif
+
 
 	case CURLE_TFTP_NOSUCHUSER:         /* 74 - No such user */
 		return UserFault | SoftwareFault | ExternalFault;
@@ -595,30 +688,44 @@ static int diagnosisCurlFaultType(KonohaContext *kctx, CURLcode res, int UserFau
 	                                    CURLOPT_CONV_FROM_UTF8_FUNCTION */
 		return SystemFault | ExternalFault;
 
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_SSL_CACERT_BADFILE:      /* 77 - could not load CACERT file: missing
 	                                    or wrong format */
 		return SystemFault;
+#endif
+
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_REMOTE_FILE_NOT_FOUND:   /* 78 - remote file not found */
 		return ExternalFault;
+#endif
 
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_SSH:                     /* 79 - error from the SSH layer: somewhat
 	                                    generic so the error message will be of
 	                                    interest when this has happened */
 		return SystemFault | ExternalFault;
+#endif
 
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_SSL_SHUTDOWN_FAILED:     /* 80 - Failed to shut down the SSL
 	                                    connection */
 		return SystemFault | ExternalFault;
+#endif
 
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_AGAIN:                   /* 81 - socket is not ready for send/recv:
 	                                    wait till it's ready and try again (Added
 	                                    in 7.18.2) */
 		return SystemFault | ExternalFault;
+#endif
 	case CURLE_SSL_CRL_BADFILE:         /* 82 - could not load CRL file: missing or
 	                                    wrong format (Added in 7.19.0) */
 		return SystemFault;
+#if (LIBCURL_VERSION_NUM >= 0x071000) /* curl_version >= 7.16.0 */
 	case CURLE_SSL_ISSUER_ERROR:        /* 83 - Issuer check failed.  (Added in
 	                                    7.19.0) */
+		return SystemFault | ExternalFault;
+#endif
 #if LIBCURL_VERSION_MAJOR >= 7 && LIBCURL_VERSION_MINOR >= 20
 	case CURLE_FTP_PRET_FAILED:         /* 84 - a PRET command failed */
 	case CURLE_RTSP_CSEQ_ERROR:         /* 85 - mismatch of RTSP CSeq numbers */
