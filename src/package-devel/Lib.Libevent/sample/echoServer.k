@@ -19,8 +19,10 @@ void do_read(int evd, int event, Object arg) {
 	Bytes buf = new Bytes(32);
 	int ret = System.recv(evd, buf, 0);
 	System.p("buf = \n" + buf);
-	if (buf[0] == 0x03 || buf[0] == 0x04) {
-		System.send(evd, "socket close\n".toBytes(), 0);
+	if (ret <= 0 || buf[0] == 0x04) {
+		if (buf[0] == 0x04) {
+			System.send(evd, "socket close request received\n".toBytes(), 0);
+		}
 		ev.event_del();
 		System.shutdown(evd, SHUT_RDWR);
 	} else {
