@@ -11,7 +11,7 @@ import("Syntax.CStyleBitwiseOperator");
 import("Type.Bytes");
 import("Lib.Libevent");
 
-void readCB(Cbufferevent bev, Object arg) {
+void readCB(cbufferevent bev, Object arg) {
 	System.p("called readCB()");
 
 	Bytes buf = new Bytes(1024);
@@ -23,14 +23,14 @@ void readCB(Cbufferevent bev, Object arg) {
 	}
 }
 
-void writeCB(Cbufferevent bev, Object arg) {
+void writeCB(cbufferevent bev, Object arg) {
 	System.p("called writeCB()");
 
 
 
 }
 
-void eventCB(Cbufferevent bev, int events, Object arg) {
+void eventCB(cbufferevent bev, int events, Object arg) {
 	System.p("called eventCB()");
 	System.p("bev = " + bev + ", events = " + events + ", arg = " + arg);
 
@@ -46,8 +46,8 @@ void eventCB(Cbufferevent bev, int events, Object arg) {
 }
 
 int main() {
-	Event_base evBase = new Event_base();
-	Bufferevent bev = new Bufferevent(evBase, -1, BEV_OPT_CLOSE_ON_FREE);	// == bufferevent_socket_new()
+	event_base evBase = new event_base();
+	bufferevent bev = new bufferevent(evBase, -1, BEV_OPT_CLOSE_ON_FREE);	// == bufferevent_socket_new()
 	Object cbarg = bev as Object;
 	bev.setcb(readCB, writeCB, eventCB, cbarg);
 

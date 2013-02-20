@@ -28,13 +28,13 @@ import("MiniKonoha.Map");
 import("MiniKonoha.NameSpace");
 import("Syntax.Null");
 
-class Event;
-class Event_base {
-	Cevent_base cevbase;
-	@Private Map/*TODO Map[Event]*/ evMap;
+class event;
+class event_base {
+	cevent_base cevbase;
+	@Private Map/*TODO Map[event]*/ evMap;
 
-	Event_base() {
-		cevbase = new Cevent_base();
+	event_base() {
+		cevbase = new cevent_base();
 		evMap = new Map();
 	}
 
@@ -42,37 +42,35 @@ class Event_base {
 		return cevbase.event_dispatch();
 	}
 
-	void event_add(Event ev) {
+	void event_add(event ev) {
 		evMap.set(ev.getKey(), ev);	//TODO
 	}
 
-	void event_del(Event ev) {
-		Event mapev = evMap.get(ev.getKey()) as Event; //TODO
-		System.p("remove mapev = " + mapev);
+	void event_del(event ev) {
 		evMap.remove(ev.getKey());	//TODO
 	}
 }
 
-class Event {
-	Cevent cev;
-	Event_base evBase;
+class event {
+	cevent cev;
+	event_base evBase;
 
-	Event() {}
+	event() {}
 
-	Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb, Object cbArg) {
-		cev = new Cevent(evbase.cevbase, evd, evCat, new EventCBArg(cb, cbArg));
+	event(event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb, Object cbArg) {
+		cev = new cevent(evbase.cevbase, evd, evCat, new eventCBArg(cb, cbArg));
 		this.evBase = evbase;
 	}
 
 	// use this instance as Callback argument
-	Event(Event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb) {
+	event(event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb) {
 		//TODO ideal situation is "this(evbase.evbase, evd, evCat, cb, this);" ---
-		cev = new Cevent(evbase.cevbase, evd, evCat, new EventCBArg(cb, this));
+		cev = new cevent(evbase.cevbase, evd, evCat, new eventCBArg(cb, this));
 		this.evBase = evbase;
 		// --- TODO
 	}
 
-	@Public int event_add(TimeVal tv) {
+	@Public int event_add(ctimeval tv) {
 		this.evBase.event_add(this);
 		return cev.event_add(tv);
 	}
@@ -100,22 +98,22 @@ class Event {
 	}
 }
 
-class Bufferevent extends Event {
-	Cbufferevent cbev;
+class bufferevent extends event {
+	cbufferevent cbev;
 
-	Bufferevent() {}
+	bufferevent() {}
 
-	Bufferevent(Event_base evbase, int fd, int options) {
-		cbev = new Cbufferevent(evbase.cevbase, fd, options);
+	bufferevent(event_base evbase, int fd, int options) {
+		cbev = new cbufferevent(evbase.cevbase, fd, options);
 		this.evBase = evbase;
 	}
 
 	@Public void setcb(
-		Func[void, Cbufferevent, Object]	readcb,
-		Func[void, Cbufferevent, Object]	writecb,
-		Func[void, Cbufferevent, int, Object]	eventcb,
+		Func[void, cbufferevent, Object]	readcb,
+		Func[void, cbufferevent, Object]	writecb,
+		Func[void, cbufferevent, int, Object]	eventcb,
 		Object cbArg) {
-		BuffereventCBArg cbarg = new BuffereventCBArg(readcb, writecb, eventcb, cbArg);
+		buffereventCBArg cbarg = new buffereventCBArg(readcb, writecb, eventcb, cbArg);
 		cbev.bufferevent_setcb(cbarg);
 	}
 
@@ -124,8 +122,8 @@ class Bufferevent extends Event {
 		return s;
 	}
 
-	int enable(int event) {
-		return cbev.bufferevent_enable(event);
+	int enable(int evflag) {
+		return cbev.bufferevent_enable(evflag);
 	}
 
 	int write(Bytes msg) {
