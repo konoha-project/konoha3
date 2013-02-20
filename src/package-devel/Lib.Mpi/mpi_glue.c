@@ -115,13 +115,15 @@ static void MPIRequest_ptr_Free(KonohaContext *kctx , kObject *po)
 static void MPIData_ptr_Free(KonohaContext *kctx , kObject *po)
 {
 	kMPIData *p = toRawPtr(kMPIData *, po);
-	switch(p->typeId) {
-		case KMPI_BYTES: break;
-		case KMPI_FARRAY: KFree(p->fa, p->size * sizeof(kfloat_t)); break;
-		case KMPI_IARRAY: KFree(p->ia, p->size * sizeof(kint_t)); break;
-		default: abort();
+	if (p != NULL) {
+		switch(p->typeId) {
+			case KMPI_BYTES: break;
+			case KMPI_FARRAY: KFree(p->fa, p->size * sizeof(kfloat_t)); break;
+			case KMPI_IARRAY: KFree(p->ia, p->size * sizeof(kint_t)); break;
+			default: abort();
+		}
+		KFree(p, sizeof(kMPIData));
 	}
-	KFree(p, sizeof(kMPIData));
 }
 
 /* ------------------------------------------------------------------------ */
