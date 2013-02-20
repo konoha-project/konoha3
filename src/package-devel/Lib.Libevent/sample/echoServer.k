@@ -19,12 +19,13 @@ void do_read(int evd, int event, Object arg) {
 	Bytes buf = new Bytes(32);
 	if (System.recv(evd, buf, 0) <= 0) {
 		System.event_del(ev.cev);
-		System.close(evd);
+		System.shutdown(evd, SHUT_RDWR);
+	} else {
+		System.p("buf = \n" + buf);
 	}
-	System.p("buf = \n" + buf);
 	if (buf[0] == 0x03 || buf[0] == 0x04) {
-		System.send(evd, "socket close\n".toBytes(), 0);
-		ev.evBase.event_del(ev);
+		System.send(evd, "recv close request\n".toBytes(), 0);
+		ev.event_del();
 		System.shutdown(evd, SHUT_RDWR);
 	} else {
 		System.send(evd, buf, 0);
@@ -50,7 +51,7 @@ void do_accept(int evd, int event, Object arg) {
 		//{
 			//alloc_fd_state
 			Event ev = new Event(evBase, fd, EV_READ | EV_PERSIST, do_read);
-			evBase.event_add(ev, NULL/* NULL: no timeout(dispatching forever), timeout sets like "new TimeVal(sec, usec)")*/);
+			ev.event_add(NULL/* NULL: no timeout(dispatching forever), timeout sets like "new TimeVal(sec, usec)")*/);
 			System.send(fd, "hello\n".toBytes(), 0);
 		//}
 	}
@@ -73,7 +74,7 @@ void main() {
 	}
 
 	Event ev = new Event(evBase, listener, EV_READ | EV_PERSIST, do_accept, evBase);
-	evBase.event_add(ev, NULL);
+	ev.event_add(NULL);
 	evBase.event_dispatch();
 }
 

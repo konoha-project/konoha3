@@ -42,17 +42,14 @@ class Event_base {
 		return cevbase.event_dispatch();
 	}
 
-	@Public int event_add(Event ev, TimeVal tv) {
-		evMap.set(ev.getKey(), ev);
-		int ret =  System.event_add(ev.cev, tv);
-		return ret;
+	void event_add(Event ev) {
+		evMap.set(ev.getKey(), ev);	//TODO
 	}
 
-	@Public int event_del(Event ev) {
-		Event mapev = evMap.get(ev.getKey()) as Event;
-		System.p("mapev = " + mapev);
-		evMap.remove(ev.getKey());
-		return System.event_del(ev.cev);
+	void event_del(Event ev) {
+		Event mapev = evMap.get(ev.getKey()) as Event; //TODO
+		System.p("remove mapev = " + mapev);
+		evMap.remove(ev.getKey());	//TODO
 	}
 }
 
@@ -73,6 +70,16 @@ class Event {
 		cev = new Cevent(evbase.cevbase, evd, evCat, new EventCBArg(cb, this));
 		this.evBase = evbase;
 		// --- TODO
+	}
+
+	@Public int event_add(TimeVal tv) {
+		this.evBase.event_add(this);
+		return cev.event_add(tv);
+	}
+
+	@Public int event_del() {
+		this.evBase.event_del(this);
+		return cev.event_del();
 	}
 
 	String getKey() {
@@ -109,23 +116,23 @@ class Bufferevent extends Event {
 		Func[void, Cbufferevent, int, Object]	eventcb,
 		Object cbArg) {
 		BuffereventCBArg cbarg = new BuffereventCBArg(readcb, writecb, eventcb, cbArg);
-		System.bufferevent_setcb(cbev, cbarg);
+		cbev.bufferevent_setcb(cbarg);
 	}
 
 	@Public int socket_connect(Sockaddr_in sa) {
-		int s = System.bufferevent_socket_connect(cbev, sa);	//TODO	cbev class
+		int s = cbev.bufferevent_socket_connect(sa);
 		return s;
 	}
 
 	int enable(int event) {
-		return System.bufferevent_enable(cbev, event);
+		return cbev.bufferevent_enable(event);
 	}
 
 	int write(Bytes msg) {
-		return System.bufferevent_write(cbev, msg);
+		return cbev.bufferevent_write(msg);
 	}
 
 	int read(Bytes buf) {
-		return System.bufferevent_read(cbev, buf);
+		return cbev.bufferevent_read(buf);
 	}
 }

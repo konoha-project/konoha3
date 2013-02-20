@@ -15,11 +15,11 @@ void readCB(Cbufferevent bev, Object arg) {
 	System.p("called readCB()");
 
 	Bytes buf = new Bytes(1024);
-	System.bufferevent_read(bev, buf);
+	bev.bufferevent_read(buf);
 	System.p(buf);
 
 	if (buf.toString() == "hello") {
-		System.bufferevent_write(bev, "Hi!".toBytes())
+		bev.bufferevent_write("Hi!".toBytes())
 	}
 }
 
