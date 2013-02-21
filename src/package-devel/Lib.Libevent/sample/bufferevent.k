@@ -2,7 +2,7 @@
  * bufferevent sample
  * connect to 127.0.0.1:10000
  *
- * Most simple way is to use echoServer.k
+ * Most simple way is to use with echoServer.k
  */
 
 import("Syntax.JavaStyleClass");
@@ -41,8 +41,6 @@ void eventCB(cbufferevent bev, int events, Object arg) {
 		//TODO close
 	}
 
-
-
 }
 
 int main() {
@@ -61,7 +59,7 @@ int main() {
 	bev.enable(EV_READ /*| EV_WRITE*/);
 	bev.write("from client".toBytes());
 	System.p("event_dispatch()");
-	evBase.event_dispatch();
+	evBase.cevbase.event_dispatch();
 	return 0;
 }
 

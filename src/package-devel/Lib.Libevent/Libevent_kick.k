@@ -38,10 +38,6 @@ class event_base {
 		evMap = new Map();
 	}
 
-	@Public int event_dispatch() {
-		return cevbase.event_dispatch();
-	}
-
 	void event_add(event ev) {
 		evMap.set(ev.getKey(), ev);	//TODO
 	}
@@ -70,8 +66,11 @@ class event {
 		// --- TODO
 	}
 
-	@Static event evsignal_new(event_base evbase, int signo, Func[void, int, int, Object] cb, Object cbArg) {
-		return new event(evbase, signo, EV_SIGNAL|EV_PERSIST, cb, cbArg);
+	@Static event signal_new(event_base evbase, int signo, Func[void, int, int, Object] cb, Object cbArg) {
+		event ev = new event();
+		ev.cev = cevent.signal_new(evbase.cevbase, signo, new eventCBArg(cb, cbArg));
+		ev.evBase = evbase;
+		return ev;
 	}
 
 	@Public int event_add(ctimeval tv) {

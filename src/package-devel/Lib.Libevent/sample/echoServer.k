@@ -47,7 +47,7 @@ void do_accept(int evd, int evflag, Object arg) {
 		close(fd);	//XXX replace all closes with EVUTIL_CLOSESOCKET
 	*/
 	} else {
-		System.evutil_make_socket_nonblocking(fd);
+		cevent_base.evutil_make_socket_nonblocking(fd);
 		//{
 			//alloc_fd_state
 			event ev = new event(evBase, fd, EV_READ | EV_PERSIST, do_read);
@@ -62,14 +62,14 @@ void signal_handler(int sig, int evflag, Object arg) {
 	System.p("signal_handler() executed!!");
 	System.p("evBase = " + evBase);
 	System.p("signal = " + sig + ", evflag = " + evflag);
-	//event_base_loopbrask(evBase);
+	evBase.cevbase.event_loopbreak();
 }
 
 void main() {
 	event_base evBase = new event_base();
 
 	int listener = System.socket(AF_INET, SOCK_STREAM, 0);
-	System.evutil_make_socket_nonblocking(listener);
+	cevent_base.evutil_make_socket_nonblocking(listener);
 
 	if (System.bind(listener, "", 10000, AF_INET) != 0) {
 		System.p("bind() error");	//TODO: LogText?
@@ -83,9 +83,9 @@ void main() {
 
 	event ev = new event(evBase, listener, EV_READ | EV_PERSIST, do_accept, evBase);
 	ev.event_add(NULL);
-	event sig = event.evsignal_new(evBase, 1/*10USR1*/, signal_handler, evBase);
+	event sig = event.signal_new(evBase, 1/*HUP*/, signal_handler, evBase);
 	sig.event_add(NULL);
-	evBase.event_dispatch();
+	evBase.cevbase.event_dispatch();
 }
 
 main();
