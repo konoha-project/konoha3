@@ -246,9 +246,9 @@ static kbool_t JSBuilder_VisitNodeList(KonohaContext *kctx, KBuilder *builder, k
 			continue;
 		}
 
-		//while(kNode_node(node) == KNode_Block && kArray_size(node->NodeList) == 1) {
-		//	node = node->NodeList->NodeItems[0];
-		//}
+		while(kNode_node(node) == KNode_Block && kArray_size(node->NodeList) == 1) {
+			node = node->NodeList->NodeItems[0];
+		}
 
 		if(kNode_node(node) == KNode_Assign) {
 			JSBuilder_EmitAssignStmtPrefix(kctx, builder, node);	
@@ -708,9 +708,6 @@ static kbool_t JSBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *buil
 		default:
 			JSBuilder_VisitNodeParams(kctx, builder, node, thunk, 2, ", ", isArray ? "[" : "(", isArray ? "]" : ")");
 			break;
-		}
-		if(mtd->mn == KMethodName_("import") || mtd->mn == KMethodName_("load") || mtd->mn == KMethodName_("include")) {
-			JSBuilder_EmitNewLineWith(kctx, builder, ";");
 		}
 	}
 	return true;
