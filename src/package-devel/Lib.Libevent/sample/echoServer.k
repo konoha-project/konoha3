@@ -57,6 +57,14 @@ void do_accept(int evd, int evflag, Object arg) {
 	}
 }
 
+void signal_handler(int sig, int evflag, Object arg) {
+	event_base evBase = arg as event_base;
+	System.p("signal_handler() executed!!");
+	System.p("evBase = " + evBase);
+	System.p("signal = " + sig + ", evflag = " + evflag);
+	//event_base_loopbrask(evBase);
+}
+
 void main() {
 	event_base evBase = new event_base();
 
@@ -75,6 +83,8 @@ void main() {
 
 	event ev = new event(evBase, listener, EV_READ | EV_PERSIST, do_accept, evBase);
 	ev.event_add(NULL);
+	event sig = event.evsignal_new(evBase, 1/*10USR1*/, signal_handler, evBase);
+	sig.event_add(NULL);
 	evBase.event_dispatch();
 }
 

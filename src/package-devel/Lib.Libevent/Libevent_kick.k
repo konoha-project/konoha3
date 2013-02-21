@@ -70,6 +70,10 @@ class event {
 		// --- TODO
 	}
 
+	@Static event evsignal_new(event_base evbase, int signo, Func[void, int, int, Object] cb, Object cbArg) {
+		return new event(evbase, signo, EV_SIGNAL|EV_PERSIST, cb, cbArg);
+	}
+
 	@Public int event_add(ctimeval tv) {
 		this.evBase.event_add(this);
 		return cev.event_add(tv);
