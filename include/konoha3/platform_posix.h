@@ -115,7 +115,6 @@ static kbool_t LoadPlatformModuleWithParameter(KonohaFactory *factory, const cha
 			if(load != NULL) {
 				return load(factory, type);
 			}
-
 		}
 	}
 	return false;
