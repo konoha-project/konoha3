@@ -5,6 +5,12 @@ import("Syntax.Null");
 import("MiniKonoha.Map");
 import("JavaStyle.Object");
 import("JavaScript.Array");
+
+class Window{
+	@Public void setInterval(Func[void] code, int millisec){ };
+	@Public void setTimeout(Func[void] code, int millisec){ };
+}
+
 /*
 class DomElement;
 class DomAttr;
