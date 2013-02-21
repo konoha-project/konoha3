@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #define USE_EXECUTIONENGINE
+#include <string.h>
 #include <konoha3/konoha.h>
 #include <konoha3/sugar.h>
 #include <konoha3/klib.h>
@@ -75,6 +76,10 @@ public:
 static JSContext *globalJSContext = NULL;
 
 #endif
+
+//FIXME: Very bad, experimental implementation. fix later.
+static char *profileTargetFunctionName;
+
 
 typedef struct JSBuilder {
 	struct KBuilderCommon common;
@@ -917,6 +922,13 @@ static void JSBuilder_Init(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 	}
 }
 
+static void JSBuilder_EmitProfilerRegistCode(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
+{
+	const char *mn = KSymbol_text(mtd->mn);
+	JSBuilder_EmitString(kctx, builder, "profiler.registMethod(window, \"", mn, "\", \"window\");");
+	JSBuilder_EmitNewLineWith(kctx, builder, "");	
+}
+
 static void JSBuilder_Free(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 {
 	JSBuilder *jsBuilder = (JSBuilder *)builder;
@@ -929,6 +941,9 @@ static void JSBuilder_Free(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 		if(strcmp(KSymbol_text(mtd->mn), "new") == 0) {
 			KClass *kclass = KClass_(mtd->typeId);
 			JSBuilder_EmitClassFooter(kctx, builder, kclass);
+		}
+		if(profileTargetFunctionName != NULL && strcmp(KSymbol_text(mtd->mn), profileTargetFunctionName) == 0) {
+			JSBuilder_EmitProfilerRegistCode(kctx, builder, mtd);
 		}
 	}
 #if 0
@@ -1034,14 +1049,29 @@ static const struct KBuilderAPI *GetDefaultBuilderAPI(void)
 
 // -------------------------------------------------------------------------
 
-kbool_t LoadJavaScriptModule(KonohaFactory *factory, ModuleType type)
+kbool_t LoadJavaScriptModuleWithParameter(KonohaFactory *factory, ModuleType type, const char* param)
 {
+	if(param != NULL) {
+		//FIXME: Very bad, experimental implementation. fix later.
+		factory->printf_i("// JSM params %s\n", param);
+		if(strncmp(param, "prof=", 5) == 0){
+			profileTargetFunctionName = (char *)malloc(strlen(param) - 5 + 1);
+			strcpy(profileTargetFunctionName, param + 5); 
+			factory->printf_i("// JSM profile target = %s\n", profileTargetFunctionName);
+		}
+	}
+
 #ifdef HAVE_LIBV8
 	globalJSContext = new JSContext();
 #endif
 
 	memcpy(&factory->ExecutionEngineModule, &V8_Module, sizeof(V8_Module));
 	return true;
+}
+
+kbool_t LoadJavaScriptModule(KonohaFactory *factory, ModuleType type)
+{
+	return LoadJavaScriptModuleWithParameter(factory, type, NULL);
 }
 
 } /* extern "C" */

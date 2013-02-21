@@ -308,6 +308,19 @@ kbool_t KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *nam
 	return false;
 }
 
+kbool_t KonohaFactory_LoadPlatformModuleWithParameter(KonohaFactory *factory, const char *name, ModuleType option, const char *moduleparam)
+{
+	if(factory->LoadPlatformModuleWithParameter == NULL || moduleparam == NULL) {
+		return KonohaFactory_LoadPlatformModule(factory, name, option);
+	}
+	if(!factory->LoadPlatformModuleWithParameter(factory, name, option, moduleparam)) {
+		factory->LoggerModule.syslog_i(ErrTag, "failed to load platform module: %s\n", name);
+		factory->printf_i("failed to load platform module: %s\n", name);
+		return true;
+	}
+	return false;
+}
+
 void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv)
 {
 	int i;
@@ -316,11 +329,21 @@ void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformA
 		const char *t = argv[i];
 		if(t[0] == '-' && t[1] == 'M') {   /* -MName */
 			const char *moduleName = t + 2;
+			const char *moduleParams = NULL;
+			const char *comma;
 			if(moduleName[0] == 0 && i+1 < argc) {  /* -M Name */
 				i++;
 				moduleName = argv[i];
 			}
-			KonohaFactory_LoadPlatformModule(factory, moduleName, ReleaseModule);
+			if((comma = strchr(moduleName, ',')) != NULL) {
+				size_t realModuleNameLength = comma - moduleName;
+				char *realModuleName = ALLOCA(char, realModuleNameLength + 1);
+				strncpy(realModuleName, moduleName, realModuleNameLength);
+				realModuleName[realModuleNameLength] = '\0';
+				moduleParams = moduleName + realModuleNameLength + 1;
+				moduleName = realModuleName;
+			}
+			KonohaFactory_LoadPlatformModuleWithParameter(factory, moduleName, ReleaseModule, moduleParams);
 		}
 	}
 }
