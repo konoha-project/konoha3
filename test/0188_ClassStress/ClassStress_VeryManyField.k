@@ -34,8 +34,8 @@ class C {
 	int a9, b9, c9, d9, e9, f9, g9, h9, i9, j9, k9;
 	int l9, m9, n9, o9, p9, q9, r9, s9, t9, u9, v9;
 	int w9, x9, y9, z9;
+	C() {}
 }
-
 void test() {
 	C c = new C();
 	assert(c.a0 == 0);
