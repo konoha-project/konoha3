@@ -256,7 +256,7 @@ static kString* String_replaceFirst(KonohaContext *kctx, kString *self, kString 
 	const char *end  = text + kString_size(self);
 	const char *pos  = strstr(text, kString_text(oldText));
 	const size_t oldLen = kString_size(oldText);
-	if(pos == NULL)
+	if(pos == NULL || oldLen == 0)
 		return self;
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
@@ -271,7 +271,7 @@ static kString* String_replace(KonohaContext *kctx, kString *self, const char *o
 	const char *text = kString_text(self);
 	const char *end  = text + kString_size(self);
 	const char *pos  = strstr(text, oldText);
-	if(pos == NULL)
+	if(pos == NULL || oldLen == 0)
 		return self;
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
