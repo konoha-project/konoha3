@@ -66,10 +66,13 @@ class event {
 		// --- TODO
 	}
 
+	/*
+	  same as C Macro in libevent event2/event.h:
+		#define evsignal_new(b, x, cb, arg)				\
+			event_new((b), (x), EV_SIGNAL|EV_PERSIST, (cb), (arg))
+	*/
 	@Static event signal_new(event_base evbase, int signo, Func[void, int, int, Object] cb, Object cbArg) {
-		event ev = new event();
-		ev.cev = cevent.signal_new(evbase.cevbase, signo, new eventCBArg(cb, cbArg));
-		ev.evBase = evbase;
+		event ev = new event(evbase, signo, EV_SIGNAL | EV_PERSIST, cb, cbArg);
 		return ev;
 	}
 

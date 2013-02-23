@@ -202,6 +202,42 @@ static KMETHOD cevent_event_assign(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
+#define tvIsNull(tv_p)	((tv_p)->timeval.tv_sec == 0 && (tv_p)->timeval.tv_usec == 0)
+//## int cevent.event_add(cevent_base event, ctimeval tv);
+static KMETHOD cevent_event_add(KonohaContext *kctx, KonohaStack* sfp)
+{
+	kcevent *kcev = (kcevent *)sfp[0].asObject;
+	kctimeval *tv = (kctimeval *)sfp[1].asObject;
+	int ret = event_add(kcev->event, tvIsNull(tv) ? NULL : &tv->timeval);
+	KReturnUnboxValue(ret);
+}
+
+//## int cevent.event_del(cevent event);
+static KMETHOD cevent_event_del(KonohaContext *kctx, KonohaStack* sfp)
+{
+	kcevent *kcev = (kcevent *)sfp[0].asObject;
+	int ret = event_del(kcev->event);
+	KReturnUnboxValue(ret);
+}
+
+//## int cevent.event_pending(short events, ctimeval tv);
+static KMETHOD cevent_event_pending(KonohaContext *kctx, KonohaStack* sfp)
+{
+	kcevent *kcev = (kcevent *)sfp[0].asObject;
+	short events = (short)sfp[1].intValue;
+	kctimeval *tv = (kctimeval *)sfp[2].asObject;
+	int ret = event_pending(kcev->event, events, tvIsNull(tv) ? NULL : &tv->timeval);
+	KReturnUnboxValue(ret);
+}
+
+//## int cevent.event_initialized();
+static KMETHOD cevent_event_initialized(KonohaContext *kctx, KonohaStack* sfp)
+{
+	kcevent *kcev = (kcevent *)sfp[0].asObject;
+	int ret = event_initialized(kcev->event);
+	KReturnUnboxValue(ret);
+}
+
 //## cevent cevent.event_free();
 static KMETHOD cevent_event_free(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -210,6 +246,8 @@ static KMETHOD cevent_event_free(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
+/*
+USE event.signal_new() in Libevent_kick.k
 //## cevent cevent.signal_new(cevent_base event_base, int signo, eventCBArg cbArg);
 static KMETHOD cevent_signal_new(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -221,9 +259,26 @@ static KMETHOD cevent_signal_new(KonohaContext *kctx, KonohaStack *sfp)
 	ev->event = evsignal_new(cEvent_base->event_base, signo, cevent_callback_1st, cbArg);
 	KReturn(ev);
 }
+*/
 
-//## int cevent.event_add(cevent_base event, ctimeval tv);
-static KMETHOD cevent_event_add(KonohaContext *kctx, KonohaStack* sfp)
+/*
+USE event.signal_assign() in Libevent_kick.k
+//## cevent cevent.signal_assign(cevent_base event_base, int evd, int event, eventCBArg cbArg);
+static KMETHOD cevent_signal_assign(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct cevent *ev = (struct cevent *) sfp[0].asObject;
+	struct cevent_base *cEvent_base = (struct cevent_base *)sfp[1].asObject;
+	evutil_socket_t evd = (evutil_socket_t)sfp[2].intValue;
+	short event = (short)(sfp[3].intValue & 0xffff);
+	keventCBArg *cbArg = (keventCBArg *)sfp[4].asObject;	//deliver callback method
+
+	int ret = evsignal_assign(ev->event, cEvent_base->event_base, evd, event, cevent_callback_1st, cbArg);
+	KReturnUnboxValue(ret);
+}
+*/
+
+//## int cevent.signal_add(cevent_base event, ctimeval tv);
+static KMETHOD cevent_signal_add(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
 	kctimeval *tv = (kctimeval *)sfp[1].asObject;
@@ -231,8 +286,8 @@ static KMETHOD cevent_event_add(KonohaContext *kctx, KonohaStack* sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## int cevent.event_del(cevent event);
-static KMETHOD cevent_event_del(KonohaContext *kctx, KonohaStack* sfp)
+//## int cevent.signal_del(cevent event);
+static KMETHOD cevent_signal_del(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
 	int ret = event_del(kcev->event);
@@ -640,7 +695,10 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		_Public, _F(cevent_event_add), KType_Int, KType_cevent, KMethodName_("event_add"), 1, KType_ctimeval, KFieldName_("timeval"),
 		_Public, _F(cevent_event_del), KType_Int, KType_cevent, KMethodName_("event_del"), 0,
 		_Public, _F(cevent_event_free), KType_void, KType_cevent, KMethodName_("event_free"), 0,
+		/*
+		USE event.signal_new() in Libevent_kick.k
 		_Public, _F(cevent_signal_new), KType_cevent, KType_cevent, KMethodName_("signal_new"), 3, KType_cevent_base, KFieldName_("cevent_base"), KType_Int, KFieldName_("signo"), KType_eventCBArg, KFieldName_("CBarg"),
+		*/
 		_Public, _F(cevent_getID), KType_Int, KType_cevent, KMethodName_("getID"), 0, 
 		_Public, _F(cevent_getEvents), KType_Int, KType_cevent, KMethodName_("getEvents"), 0, 
 

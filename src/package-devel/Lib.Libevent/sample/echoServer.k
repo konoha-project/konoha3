@@ -81,10 +81,14 @@ void main() {
 		return;
 	}
 
+	//IO event
 	event ev = new event(evBase, listener, EV_READ | EV_PERSIST, do_accept, evBase);
 	ev.event_add(NULL);
+
+	//signal event
 	event sig = event.signal_new(evBase, 1/*HUP*/, signal_handler, evBase);
 	sig.event_add(NULL);
+
 	evBase.cevbase.event_dispatch();
 }
 
