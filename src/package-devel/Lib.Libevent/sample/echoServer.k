@@ -71,7 +71,7 @@ void signal_handler(int sig, int evflag, Object arg) {
 void timer_handler(int fd, int evflag, Object arg) {
 	event tm = arg as event;
 	System.p("timer_handler() executed!!");
-	System.p("evBase = " + evBase);
+	System.p("tm = " + tm);
 	System.p("timer = " + fd + ", evflag = " + evflag);
 	
 	tm.timer_add(new ctimeval(2, 0);
@@ -104,11 +104,9 @@ void main() {
 	sigterm.event_add(NULL);
 
 	//timer event
-	/*
-	event tm = new event();
+	event tm = event.timer_new(evBase, timer_handler, NULL);
 	tm.timer_assign(evBase, timer_handler, tm);	//set cbArg
 	tm.timer_add(new ctimeval(2, 0));
-	*/
 
 	evBase.cevbase.event_dispatch();
 }
