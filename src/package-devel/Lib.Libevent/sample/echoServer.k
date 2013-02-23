@@ -51,7 +51,7 @@ void do_accept(int evd, int evflag, Object arg) {
 		//{
 			//alloc_fd_state
 			event ev = new event(evBase, fd, EV_READ | EV_PERSIST, do_read);
-			ev.event_add(NULL/* NULL: no timeout(dispatching forever), timeout sets like "new TimeVal(sec, usec)")*/);
+			ev.event_add(NULL/* NULL: no timeout(dispatching forever), timeout sets like "new ctimeval(sec, usec)")*/);
 			System.send(fd, "hello\n".toBytes(), 0);
 		//}
 	}
@@ -62,7 +62,19 @@ void signal_handler(int sig, int evflag, Object arg) {
 	System.p("signal_handler() executed!!");
 	System.p("evBase = " + evBase);
 	System.p("signal = " + sig + ", evflag = " + evflag);
-	evBase.cevbase.event_loopbreak();
+
+	if (sig == 1) {
+		evBase.cevbase.event_loopbreak();
+	}
+}
+
+void timer_handler(int fd, int evflag, Object arg) {
+	event tm = arg as event;
+	System.p("timer_handler() executed!!");
+	System.p("evBase = " + evBase);
+	System.p("timer = " + fd + ", evflag = " + evflag);
+	
+	tm.timer_add(new ctimeval(2, 0);
 }
 
 void main() {
@@ -86,8 +98,17 @@ void main() {
 	ev.event_add(NULL);
 
 	//signal event
-	event sig = event.signal_new(evBase, 1/*HUP*/, signal_handler, evBase);
-	sig.event_add(NULL);
+	event sighup = event.signal_new(evBase, 1/*HUP*/, signal_handler, evBase);
+	sighup.event_add(NULL);
+	event sigterm = event.signal_new(evBase, 15/*TERM*/, signal_handler, evBase);
+	sigterm.event_add(NULL);
+
+	//timer event
+	/*
+	event tm = new event();
+	tm.timer_assign(evBase, timer_handler, tm);	//set cbArg
+	tm.timer_add(new ctimeval(2, 0));
+	*/
 
 	evBase.cevbase.event_dispatch();
 }

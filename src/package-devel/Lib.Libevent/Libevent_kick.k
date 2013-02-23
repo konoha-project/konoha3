@@ -48,7 +48,7 @@ class event_base {
 }
 
 class event {
-	cevent cev;
+	@Private cevent cev;
 	event_base evBase;
 
 	event() {}
@@ -66,16 +66,6 @@ class event {
 		// --- TODO
 	}
 
-	/*
-	  same as C Macro in libevent event2/event.h:
-		#define evsignal_new(b, x, cb, arg)				\
-			event_new((b), (x), EV_SIGNAL|EV_PERSIST, (cb), (arg))
-	*/
-	@Static event signal_new(event_base evbase, int signo, Func[void, int, int, Object] cb, Object cbArg) {
-		event ev = new event(evbase, signo, EV_SIGNAL | EV_PERSIST, cb, cbArg);
-		return ev;
-	}
-
 	@Public int event_add(ctimeval tv) {
 		this.evBase.event_add(this);
 		return cev.event_add(tv);
@@ -86,7 +76,101 @@ class event {
 		return cev.event_del();
 	}
 
-	String getKey() {
+	@Public void event_pending(int events, ctimeval tv) {
+		cev.event_pending(events, tv);
+	}
+
+	@Public void event_free() {
+		cev.event_free();
+	}
+
+	@Public void event_active(int res, int ncalls) {
+		cev.event_active(res, ncalls);
+	}
+
+	@Public int event_initialized() {
+		return cev.event_initialized();
+	}
+
+	@Public int event_assign(event_base evbase, int evd, int evCat, Func[void, int, int, Object] cb, Object cbArg) {
+		return cev.event_assign(evbase.cevbase, evd, evCat, new eventCBArg(cb, cbArg));
+	}
+
+	/* --- evtimer ---
+	same as C Macro in libevent event2/event.h:
+
+		#define evtimer_assign(ev, b, cb, arg) \
+			event_assign((ev), (b), -1, 0, (cb), (arg))
+		#define evtimer_new(b, cb, arg)	       event_new((b), -1, 0, (cb), (arg))
+		#define evtimer_add(ev, tv)		event_add((ev), (tv))
+		#define evtimer_del(ev)			event_del(ev)
+		#define evtimer_pending(ev, tv)		event_pending((ev), EV_TIMEOUT, (tv))
+		#define evtimer_initialized(ev)		event_initialized(ev)
+	*/
+	@Static event timer_new(event_base evbase, Func[void, int, int, Object] cb, Object cbArg) {
+		event ev = new event(evbase, -1, 0, cb, cbArg);
+		return ev;
+	}
+
+	@Public int timer_add(ctimeval tv) {
+		return event_add(tv);
+	}
+
+	@Public int timer_del() {
+		return event_del();
+	}
+
+	@Public int timer_assign(event_base evbase, Func[void, int, int, Object] cb, Object cbArg) {
+		return event_assign(evbase, -1, 0, cb, cbArg);
+	}
+
+	@Public int timer_pending(ctimeval tv) {
+		return event_pending(EV_TIMEOUT, tv);
+	}
+
+	@Public int timer_initialized() {
+		return event_initialized();
+	}
+
+	/* --- evsignal ---
+	same as C Macro in libevent event2/event.h:
+
+		#define evsignal_add(ev, tv)		event_add((ev), (tv))
+		#define evsignal_assign(ev, b, x, cb, arg)			\
+			event_assign((ev), (b), (x), EV_SIGNAL|EV_PERSIST, cb, (arg))
+		#define evsignal_new(b, x, cb, arg)				\
+			event_new((b), (x), EV_SIGNAL|EV_PERSIST, (cb), (arg))
+		#define evsignal_del(ev)		event_del(ev)
+		#define evsignal_pending(ev, tv)	event_pending((ev), EV_SIGNAL, (tv))
+		#define evsignal_initialized(ev)	event_initialized(ev)
+	*/
+	@Static event signal_new(event_base evbase, int signo, Func[void, int, int, Object] cb, Object cbArg) {
+		event ev = new event(evbase, signo, EV_SIGNAL | EV_PERSIST, cb, cbArg);
+		return ev;
+	}
+
+	@Public int signal_add(ctimeval tv) {
+		return event_add(tv);
+	}
+
+	@Public int signal_del() {
+		return event_del();
+	}
+
+	@Public int signal_assign(event_base evbase, int evd, Func[void, int, int, Object] cb, Object cbArg) {
+		return event_assign(evbase, evd, EV_SIGNAL | EV_PERSIST, cb, cbArg);
+	}
+
+	@Public int signal_pending(ctimeval tv) {
+		return event_pending(EV_SIGNAL, tv);
+	}
+
+	@Public int signal_initialized() {
+		return event_initialized();
+	}
+
+
+	@Private String getKey() {
 		String ret;
 		@Const int id = cev.getID();
 		@Const int events = cev.getEvents();

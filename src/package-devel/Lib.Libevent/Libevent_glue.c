@@ -238,11 +238,21 @@ static KMETHOD cevent_event_initialized(KonohaContext *kctx, KonohaStack* sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## cevent cevent.event_free();
+//## void cevent.event_free();
 static KMETHOD cevent_event_free(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct cevent *ev = (struct cevent *) sfp[0].asObject;
 	event_free(ev->event);
+	KReturnVoid();
+}
+
+//## void cevent.event_active(int res, int ncalls);
+static KMETHOD cevent_event_active(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct cevent *ev = (struct cevent *) sfp[0].asObject;
+	int res = sfp[1].intValue;
+	short ncalls = (short)sfp[2].intValue;
+	event_active(ev->event, res, ncalls);
 	KReturnVoid();
 }
 
@@ -691,10 +701,13 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 
 		// cevent
 		_Public, _F(cevent_new), KType_cevent, KType_cevent, KMethodName_("new"), 4, KType_cevent_base, KFieldName_("cevent_base"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("event"), KType_eventCBArg, KFieldName_("CBarg"),
-		_Public, _F(cevent_event_assign), KType_Int, KType_cevent, KMethodName_("assign"), 4, KType_cevent_base, KFieldName_("cevent_base"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("event"), KType_eventCBArg, KFieldName_("CBarg"),
+		_Public, _F(cevent_event_assign), KType_Int, KType_cevent, KMethodName_("event_assign"), 4, KType_cevent_base, KFieldName_("cevent_base"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("event"), KType_eventCBArg, KFieldName_("CBarg"),
 		_Public, _F(cevent_event_add), KType_Int, KType_cevent, KMethodName_("event_add"), 1, KType_ctimeval, KFieldName_("timeval"),
 		_Public, _F(cevent_event_del), KType_Int, KType_cevent, KMethodName_("event_del"), 0,
+		_Public, _F(cevent_event_pending), KType_Int, KType_cevent, KMethodName_("event_pending"), 2, KType_Int, KFieldName_("events"), KType_Int, KFieldName_("ctimeval"),
+		_Public, _F(cevent_event_initialized), KType_Int, KType_cevent, KMethodName_("event_initialized"), 0,
 		_Public, _F(cevent_event_free), KType_void, KType_cevent, KMethodName_("event_free"), 0,
+		_Public, _F(cevent_event_active), KType_void, KType_cevent, KMethodName_("event_active"), 2, KType_Int, KFieldName_("res"), KType_Int, KFieldName_("ncalls"),
 		/*
 		USE event.signal_new() in Libevent_kick.k
 		_Public, _F(cevent_signal_new), KType_cevent, KType_cevent, KMethodName_("signal_new"), 3, KType_cevent_base, KFieldName_("cevent_base"), KType_Int, KFieldName_("signo"), KType_eventCBArg, KFieldName_("CBarg"),
@@ -769,7 +782,7 @@ static kbool_t Libevent_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNa
 KDEFINE_PACKAGE *Libevent_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "libevent2", "0.1");
+	KSetPackageName(d, "libevent2.0.19", "0.1");
 	d.PackupNameSpace	= Libevent_PackupNameSpace;
 	d.ExportNameSpace	= Libevent_ExportNameSpace;
 	return &d;
