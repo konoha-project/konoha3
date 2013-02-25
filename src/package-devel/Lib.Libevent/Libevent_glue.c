@@ -151,6 +151,47 @@ static void cevent_callback_1st(evutil_socket_t evd, short event, void *arg) {
 	END_UnusedStack();
 }
 
+int event_reinit(struct event_base *base);
+const char *event_base_get_method(const struct event_base *);
+int event_base_get_features(const struct event_base *base);
+struct event_base *event_base_new_with_config(const struct event_config *);
+int event_base_loop(struct event_base *, int);
+int event_base_loopexit(struct event_base *, const struct timeval *);
+int event_base_got_exit(struct event_base *);
+int event_base_got_break(struct event_base *);
+int event_base_once(struct event_base *, evutil_socket_t, short, event_callback_fn, void *, const struct timeval *);	//TODO no need?
+int event_base_priority_init(struct event_base *, int);
+int event_priority_set(struct event *, int);
+const struct timeval *event_base_init_common_timeout(struct event_base *base,
+	const struct timeval *duration);
+void event_base_dump_events(struct event_base *, FILE *);
+int event_base_gettimeofday_cached(struct event_base *base, struct timeval *tv);
+
+-- event_config --
+const char **event_get_supported_methods(void);
+struct event_config *event_config_new(void);
+void event_config_free(struct event_config *cfg);
+int event_config_avoid_method(struct event_config *cfg, const char *method);
+int event_config_require_features(struct event_config *cfg, int feature);
+int event_config_set_flag(struct event_config *cfg, int flag);
+int event_config_set_num_cpus_hint(struct event_config *cfg, int cpus);
+
+
+-- event log --
+void event_set_log_callback(event_log_cb cb);
+
+
+void event_set_fatal_callback(event_fatal_cb cb);
+
+
+const char *event_get_version(void);
+ev_uint32_t event_get_version_number(void);
+void event_set_mem_functions(
+	void *(*malloc_fn)(size_t sz),
+	void *(*realloc_fn)(void *ptr, size_t sz),
+	void (*free_fn)(void *ptr));
+
+
 
 /* ======================================================================== */
 // cevent class
@@ -323,6 +364,19 @@ static KMETHOD cevent_getEvents(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 
+int event_base_set(struct event_base *, struct event *);
+evutil_socket_t event_get_fd(const struct event *ev);
+struct event_base *event_get_base(const struct event *ev);
+short event_get_events(const struct event *ev);
+event_callback_fn event_get_callback(const struct event *ev);
+void *event_get_callback_arg(const struct event *ev);
+void event_get_assignment(const struct event *event,
+    struct event_base **base_out, evutil_socket_t *fd_out, short *events_out,
+    event_callback_fn *callback_out, void **arg_out);
+
+
+
+
 /* ======================================================================== */
 // cbufferevent class
 
@@ -455,6 +509,280 @@ static KMETHOD cbufferevent_read(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = bufferevent_read(bev->bev, buf->buf, buf->bytesize);
 	KReturnUnboxValue(ret);
 }
+
+
+int bufferevent_socket_connect_hostname(struct bufferevent *,
+	struct evdns_base *, int, const char *, int);
+int bufferevent_socket_get_dns_error(struct bufferevent *bev);
+int bufferevent_base_set(struct event_base *base, struct bufferevent *bufev);
+struct event_base *bufferevent_get_base(struct bufferevent *bev);
+int bufferevent_priority_set(struct bufferevent *bufev, int pri);
+int bufferevent_setfd(struct bufferevent *bufev, evutil_socket_t fd);
+evutil_socket_t bufferevent_getfd(struct bufferevent *bufev);
+struct bufferevent *bufferevent_get_underlying(struct bufferevent *bufev);
+int bufferevent_write_buffer(struct bufferevent *bufev, struct evbuffer *buf);
+int bufferevent_read_buffer(struct bufferevent *bufev, struct evbuffer *buf);
+struct evbuffer *bufferevent_get_input(struct bufferevent *bufev);
+struct evbuffer *bufferevent_get_output(struct bufferevent *bufev);
+int bufferevent_disable(struct bufferevent *bufev, short event);
+short bufferevent_get_enabled(struct bufferevent *bufev);
+int bufferevent_set_timeouts(struct bufferevent *bufev,
+	const struct timeval *timeout_read, const struct timeval *timeout_write);
+void bufferevent_setwatermark(struct bufferevent *bufev, short events,
+	size_t lowmark, size_t highmark);
+void bufferevent_lock(struct bufferevent *bufev);
+void bufferevent_unlock(struct bufferevent *bufev);
+int bufferevent_flush(struct bufferevent *bufev, short iotype,
+	enum bufferevent_flush_mode mode);
+struct bufferevent *
+bufferevent_filter_new(struct bufferevent *underlying,
+		       bufferevent_filter_cb input_filter,
+		       bufferevent_filter_cb output_filter,
+		       int options,
+		       void (*free_context)(void *),
+		       void *ctx);
+int bufferevent_pair_new(struct event_base *base, int options,
+	struct bufferevent *pair[2]);
+struct bufferevent *bufferevent_pair_get_partner(struct bufferevent *bev);
+int bufferevent_set_rate_limit(struct bufferevent *bev,
+    struct ev_token_bucket_cfg *cfg);
+struct bufferevent_rate_limit_group *bufferevent_rate_limit_group_new(
+	struct event_base *base,
+	const struct ev_token_bucket_cfg *cfg);
+int bufferevent_rate_limit_group_set_cfg(
+	struct bufferevent_rate_limit_group *,
+	const struct ev_token_bucket_cfg *);
+int bufferevent_add_to_rate_limit_group(struct bufferevent *bev,
+	struct bufferevent_rate_limit_group *g);
+int bufferevent_remove_from_rate_limit_group(struct bufferevent *bev);
+ev_ssize_t bufferevent_get_read_limit(struct bufferevent *bev);
+ev_ssize_t bufferevent_get_write_limit(struct bufferevent *bev);
+ev_ssize_t bufferevent_get_max_to_read(struct bufferevent *bev);
+ev_ssize_t bufferevent_get_max_to_write(struct bufferevent *bev);
+int bufferevent_decrement_read_limit(struct bufferevent *bev, ev_ssize_t decr);
+int bufferevent_decrement_write_limit(struct bufferevent *bev, ev_ssize_t decr);
+
+-- ev_token_bucket_cfg --
+struct ev_token_bucket_cfg *ev_token_bucket_cfg_new(
+	size_t read_rate, size_t read_burst,
+	size_t write_rate, size_t write_burst,
+	const struct timeval *tick_len);
+void ev_token_bucket_cfg_free(struct ev_token_bucket_cfg *cfg);
+
+
+-- bufferevent_rate_limit_group --
+int bufferevent_rate_limit_group_set_min_share(
+	struct bufferevent_rate_limit_group *, size_t);
+void bufferevent_rate_limit_group_free(struct bufferevent_rate_limit_group *);
+ev_ssize_t bufferevent_rate_limit_group_get_read_limit(
+	struct bufferevent_rate_limit_group *);
+ev_ssize_t bufferevent_rate_limit_group_get_write_limit(
+	struct bufferevent_rate_limit_group *);
+int bufferevent_rate_limit_group_decrement_read(
+	struct bufferevent_rate_limit_group *, ev_ssize_t);
+int bufferevent_rate_limit_group_decrement_write(
+	struct bufferevent_rate_limit_group *, ev_ssize_t);
+void bufferevent_rate_limit_group_get_totals(
+	struct bufferevent_rate_limit_group *grp,
+	ev_uint64_t *total_read_out, ev_uint64_t *total_written_out);
+void bufferevent_rate_limit_group_reset_totals(
+	struct bufferevent_rate_limit_group *grp);
+
+
+
+
+
+/* ======================================================================== */
+// evbuffer class
+int evbuffer_enable_locking(struct evbuffer *buf, void *lock);
+void evbuffer_lock(struct evbuffer *buf);
+void evbuffer_unlock(struct evbuffer *buf);
+int evbuffer_set_flags(struct evbuffer *buf, ev_uint64_t flags);
+int evbuffer_clear_flags(struct evbuffer *buf, ev_uint64_t flags);
+size_t evbuffer_get_length(const struct evbuffer *buf);
+size_t evbuffer_get_contiguous_space(const struct evbuffer *buf);
+int evbuffer_expand(struct evbuffer *buf, size_t datlen);
+int evbuffer_reserve_space(struct evbuffer *buf, ev_ssize_t size,
+	struct evbuffer_iovec *vec, int n_vec);
+int evbuffer_commit_space(struct evbuffer *buf,
+	struct evbuffer_iovec *vec, int n_vecs);
+int evbuffer_add(struct evbuffer *buf, const void *data, size_t datlen);
+int evbuffer_remove(struct evbuffer *buf, void *data, size_t datlen);
+ev_ssize_t evbuffer_copyout(struct evbuffer *buf, void *data_out, size_t datlen);
+int evbuffer_remove_buffer(struct evbuffer *src, struct evbuffer *dst,
+	size_t datlen);
+char *evbuffer_readln(struct evbuffer *buffer, size_t *n_read_out,
+	enum evbuffer_eol_style eol_style);
+int evbuffer_add_buffer(struct evbuffer *outbuf, struct evbuffer *inbuf);
+int evbuffer_add_reference(struct evbuffer *outbuf,
+	const void *data, size_t datlen,
+	evbuffer_ref_cleanup_cb cleanupfn, void *cleanupfn_arg);
+int evbuffer_add_file(struct evbuffer *outbuf, int fd, ev_off_t offset,
+	ev_off_t length);
+int evbuffer_add_printf(struct evbuffer *buf, const char *fmt, ...);	//TODO use String?
+int evbuffer_add_vprintf(struct evbuffer *buf, const char *fmt, va_list ap);
+int evbuffer_drain(struct evbuffer *buf, size_t len);
+int evbuffer_write(struct evbuffer *buffer, evutil_socket_t fd);
+int evbuffer_write_atmost(struct evbuffer *buffer, evutil_socket_t fd,
+	ev_ssize_t howmuch);
+int evbuffer_read(struct evbuffer *buffer, evutil_socket_t fd, int howmuch);
+struct evbuffer_ptr evbuffer_search(struct evbuffer *buffer, const char *what, size_t len, const struct evbuffer_ptr *start);
+struct evbuffer_ptr evbuffer_search_range(struct evbuffer *buffer, const char *what, size_t len, const struct evbuffer_ptr *start, const struct evbuffer_ptr *end);
+int evbuffer_ptr_set(struct evbuffer *buffer, struct evbuffer_ptr *ptr,
+	size_t position, enum evbuffer_ptr_how how);
+struct evbuffer_ptr evbuffer_search_eol(struct evbuffer *buffer,
+	struct evbuffer_ptr *start, size_t *eol_len_out,
+	enum evbuffer_eol_style eol_style);
+int evbuffer_peek(struct evbuffer *buffer, ev_ssize_t len, struct evbuffer_ptr *start_at, struct evbuffer_iovec *vec_out, int n_vec);
+struct evbuffer_cb_entry *evbuffer_add_cb(struct evbuffer *buffer, evbuffer_cb_func cb, void *cbarg);
+int evbuffer_remove_cb_entry(struct evbuffer *buffer, struct evbuffer_cb_entry *ent);
+int evbuffer_remove_cb(struct evbuffer *buffer, evbuffer_cb_func cb, void *cbarg);
+int evbuffer_cb_set_flags(struct evbuffer *buffer, struct evbuffer_cb_entry *cb, ev_uint32_t flags);
+int evbuffer_cb_clear_flags(struct evbuffer *buffer, struct evbuffer_cb_entry *cb, ev_uint32_t flags);
+unsigned char *evbuffer_pullup(struct evbuffer *buf, ev_ssize_t size);
+int evbuffer_prepend(struct evbuffer *buf, const void *data, size_t size);
+int evbuffer_prepend_buffer(struct evbuffer *dst, struct evbuffer* src);
+int evbuffer_freeze(struct evbuffer *buf, int at_front);
+int evbuffer_unfreeze(struct evbuffer *buf, int at_front);
+int evbuffer_defer_callbacks(struct evbuffer *buffer, struct event_base *base);
+
+
+
+/* ======================================================================== */
+// evhttp class
+-- evhttp --
+struct evhttp *evhttp_new(struct event_base *base);
+int evhttp_bind_socket(struct evhttp *http, const char *address, ev_uint16_t port);
+struct evhttp_bound_socket *evhttp_bind_socket_with_handle(struct evhttp *http, const char *address, ev_uint16_t port);
+int evhttp_accept_socket(struct evhttp *http, evutil_socket_t fd);
+struct evhttp_bound_socket *evhttp_accept_socket_with_handle(struct evhttp *http, evutil_socket_t fd);
+struct evhttp_bound_socket *evhttp_bind_listener(struct evhttp *http, struct evconnlistener *listener);
+void evhttp_del_accept_socket(struct evhttp *http, struct evhttp_bound_socket *bound_socket);
+void evhttp_free(struct evhttp* http);
+void evhttp_set_max_headers_size(struct evhttp* http, ev_ssize_t max_headers_size);
+void evhttp_set_max_body_size(struct evhttp* http, ev_ssize_t max_body_size);
+void evhttp_set_allowed_methods(struct evhttp* http, ev_uint16_t methods);
+int evhttp_set_cb(struct evhttp *http, const char *path,
+	void (*cb)(struct evhttp_request *, void *), void *cb_arg);
+int evhttp_del_cb(struct evhttp *, const char *);
+void evhttp_set_gencb(struct evhttp *http,
+	void (*cb)(struct evhttp_request *, void *), void *arg);
+int evhttp_add_virtual_host(struct evhttp* http, const char *pattern,
+	struct evhttp* vhost);
+int evhttp_remove_virtual_host(struct evhttp* http, struct evhttp* vhost);
+int evhttp_add_server_alias(struct evhttp *http, const char *alias);
+int evhttp_remove_server_alias(struct evhttp *http, const char *alias);
+void evhttp_set_timeout(struct evhttp *http, int timeout_in_secs);
+
+
+-- evhttp_bound_socket --
+struct evconnlistener *evhttp_bound_socket_get_listener(struct evhttp_bound_socket *bound);
+evutil_socket_t evhttp_bound_socket_get_fd(struct evhttp_bound_socket *bound_socket);
+
+
+-- evhttp_request --
+void evhttp_send_error(struct evhttp_request *req, int error,
+	const char *reason);
+void evhttp_send_reply(struct evhttp_request *req, int code,
+	const char *reason, struct evbuffer *databuf);
+void evhttp_send_reply_start(struct evhttp_request *req, int code,
+	const char *reason);
+void evhttp_send_reply_chunk(struct evhttp_request *req,
+	struct evbuffer *databuf);
+void evhttp_send_reply_end(struct evhttp_request *req);
+struct evhttp_request *evhttp_request_new(
+	void (*cb)(struct evhttp_request *, void *), void *arg);
+void evhttp_request_set_chunked_cb(struct evhttp_request *,
+	void (*cb)(struct evhttp_request *, void *));
+void evhttp_request_free(struct evhttp_request *req);
+void evhttp_request_own(struct evhttp_request *req);
+int evhttp_request_is_owned(struct evhttp_request *req);
+struct evhttp_connection *evhttp_request_get_connection(struct evhttp_request *req);
+void evhttp_cancel_request(struct evhttp_request *req);
+const char *evhttp_request_get_uri(const struct evhttp_request *req);
+const struct evhttp_uri *evhttp_request_get_evhttp_uri(const struct evhttp_request *req);
+enum evhttp_cmd_type evhttp_request_get_command(const struct evhttp_request *req);
+int evhttp_request_get_response_code(const struct evhttp_request *req);
+struct evkeyvalq *evhttp_request_get_input_headers(struct evhttp_request *req);
+struct evkeyvalq *evhttp_request_get_output_headers(struct evhttp_request *req);
+struct evbuffer *evhttp_request_get_input_buffer(struct evhttp_request *req);
+struct evbuffer *evhttp_request_get_output_buffer(struct evhttp_request *req);
+const char *evhttp_request_get_host(struct evhttp_request *req);
+
+
+-- evhttp_connection --
+struct evhttp_connection *evhttp_connection_base_new(
+	struct event_base *base, struct evdns_base *dnsbase,
+	const char *address, unsigned short port);
+struct bufferevent *evhttp_connection_get_bufferevent(
+	struct evhttp_connection *evcon);
+struct event_base *evhttp_connection_get_base(struct evhttp_connection *req);
+void evhttp_connection_set_max_headers_size(struct evhttp_connection *evcon,
+	ev_ssize_t new_max_headers_size);
+void evhttp_connection_set_max_body_size(struct evhttp_connection* evcon,
+	ev_ssize_t new_max_body_size);
+void evhttp_connection_free(struct evhttp_connection *evcon);
+void evhttp_connection_set_local_address(struct evhttp_connection *evcon,
+	const char *address);
+void evhttp_connection_set_local_port(struct evhttp_connection *evcon,
+	ev_uint16_t port);
+void evhttp_connection_set_timeout(struct evhttp_connection *evcon,
+	int timeout_in_secs);
+void evhttp_connection_set_retries(struct evhttp_connection *evcon,
+	int retry_max);
+void evhttp_connection_set_closecb(struct evhttp_connection *evcon,
+	void (*)(struct evhttp_connection *, void *), void *);
+void evhttp_connection_get_peer(struct evhttp_connection *evcon,
+	char **address, ev_uint16_t *port);
+int evhttp_make_request(struct evhttp_connection *evcon,
+	struct evhttp_request *req,
+	enum evhttp_cmd_type type, const char *uri);
+
+
+-- evkeyvalq --
+const char *evhttp_find_header(const struct evkeyvalq *headers,
+    const char *key);
+int evhttp_remove_header(struct evkeyvalq *headers, const char *key);
+int evhttp_add_header(struct evkeyvalq *headers, const char *key, const char *value);
+void evhttp_clear_headers(struct evkeyvalq *headers);
+
+
+-- uri --
+struct evhttp_uri *evhttp_uri_new(void);
+void evhttp_uri_set_flags(struct evhttp_uri *uri, unsigned flags);
+const char *evhttp_uri_get_scheme(const struct evhttp_uri *uri);
+const char *evhttp_uri_get_userinfo(const struct evhttp_uri *uri);
+const char *evhttp_uri_get_host(const struct evhttp_uri *uri);
+int evhttp_uri_get_port(const struct evhttp_uri *uri);
+const char *evhttp_uri_get_path(const struct evhttp_uri *uri);
+const char *evhttp_uri_get_query(const struct evhttp_uri *uri);
+const char *evhttp_uri_get_fragment(const struct evhttp_uri *uri);
+int evhttp_uri_set_scheme(struct evhttp_uri *uri, const char *scheme);
+int evhttp_uri_set_userinfo(struct evhttp_uri *uri, const char *userinfo);
+int evhttp_uri_set_host(struct evhttp_uri *uri, const char *host);
+int evhttp_uri_set_port(struct evhttp_uri *uri, int port);
+int evhttp_uri_set_path(struct evhttp_uri *uri, const char *path);
+int evhttp_uri_set_query(struct evhttp_uri *uri, const char *query);
+int evhttp_uri_set_fragment(struct evhttp_uri *uri, const char *fragment);
+struct evhttp_uri *evhttp_uri_parse_with_flags(const char *source_uri,
+	unsigned flags);
+struct evhttp_uri *evhttp_uri_parse(const char *source_uri);
+void evhttp_uri_free(struct evhttp_uri *uri);
+char *evhttp_uri_join(struct evhttp_uri *uri, char *buf, size_t limit);
+
+
+-- util --
+char *evhttp_encode_uri(const char *str);
+char *evhttp_uriencode(const char *str, ev_ssize_t size, int space_to_plus);
+char *evhttp_decode_uri(const char *uri);
+char *evhttp_uridecode(const char *uri, int decode_plus, size_t *size_out);
+int evhttp_parse_query(const char *uri, struct evkeyvalq *headers);
+int evhttp_parse_query_str(const char *uri, struct evkeyvalq *headers);
+char *evhttp_htmlescape(const char *html);
+
+
+
+
 
 
 /* ======================================================================== */
@@ -785,7 +1113,7 @@ static kbool_t Libevent_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNa
 KDEFINE_PACKAGE *Libevent_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "libevent2.0.19", "0.1");
+	KSetPackageName(d, "libevent2.0.19", "0.1"); //TODO use event_get_version();
 	d.PackupNameSpace	= Libevent_PackupNameSpace;
 	d.ExportNameSpace	= Libevent_ExportNameSpace;
 	return &d;
