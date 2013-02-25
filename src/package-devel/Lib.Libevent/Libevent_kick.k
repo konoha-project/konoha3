@@ -181,7 +181,7 @@ class event {
 		if ((events & EV_SIGNAL) != 0) {
 			ret = "SIGNAL" + id.toString();
 		} else {
-			if (id == -1) {
+			if (id/*TODO event_get_fd()*/ == -1) {
 				ret = "TIMER" + id.toString();
 			} else {
 				ret = "IO" + id.toString();

@@ -311,7 +311,7 @@ static KMETHOD cevent_signal_del(KonohaContext *kctx, KonohaStack* sfp)
 static KMETHOD cevent_getID(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct cevent *ev = (struct cevent *) sfp[0].asObject;
-	KReturn(ev->event);
+	KReturnUnboxValue((uintptr_t)ev->event);
 }
 
 //## cevent cevent.getEvents();
