@@ -287,6 +287,8 @@ static KMETHOD cevent_signal_assign(KonohaContext *kctx, KonohaStack *sfp)
 }
 */
 
+/*
+USE event.signal_add(), signal_del in Libevent_kick.k
 //## int cevent.signal_add(cevent_base event, ctimeval tv);
 static KMETHOD cevent_signal_add(KonohaContext *kctx, KonohaStack* sfp)
 {
@@ -303,6 +305,7 @@ static KMETHOD cevent_signal_del(KonohaContext *kctx, KonohaStack* sfp)
 	int ret = event_del(kcev->event);
 	KReturnUnboxValue(ret);
 }
+*/
 
 //## cevent cevent.getID();
 static KMETHOD cevent_getID(KonohaContext *kctx, KonohaStack *sfp)

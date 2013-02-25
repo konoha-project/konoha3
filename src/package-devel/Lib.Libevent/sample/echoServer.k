@@ -68,13 +68,21 @@ void signal_handler(int sig, int evflag, Object arg) {
 	}
 }
 
-void timer_handler(int fd, int evflag, Object arg) {
-	event tm = arg as event;
-	System.p("timer_handler() executed!!");
-	System.p("tm = " + tm);
+void timer_handler_once(int fd, int evflag, Object arg) {
+	event tev = arg as event;
+	System.p("timer_handler_once() executed!!");
+	System.p("tev = " + tev);
+	System.p("timer = " + fd + ", evflag = " + evflag);
+	tev.event_del();
+}
+
+void timer_handler_freq(int fd, int evflag, Object arg) {
+	event tev = arg as event;
+	System.p("timer_handler_freq() executed!!");
+	System.p("tev = " + tev);
 	System.p("timer = " + fd + ", evflag = " + evflag);
 	
-	//tm.timer_add(new ctimeval(2, 0);
+	tev.timer_add(new ctimeval(10, 0));
 }
 
 void main() {
@@ -104,11 +112,12 @@ void main() {
 	sigterm.event_add(NULL);
 
 	//timer event
-	event tm = event.timer_new(evBase, timer_handler, NULL);
-	tm.timer_assign(evBase, timer_handler, tm);	//set cbArg
-	tm.timer_add(new ctimeval(2, 0));
+	event tm1 = event.timer_new(evBase, timer_handler_once, NULL);
+	tm1.timer_assign(evBase, timer_handler_once, tm1);	//set cbArg
+	tm1.timer_add(new ctimeval(2, 0));
 
-	event tm2 = event.timer_new(evBase, timer_handler, NULL);
+	event tm2 = event.timer_new(evBase, timer_handler_freq, NULL);
+	tm2.timer_assign(evBase, timer_handler_freq, tm2);	//set cbArg
 	tm2.timer_add(new ctimeval(10, 0));
 
 	evBase.cevbase.event_dispatch();

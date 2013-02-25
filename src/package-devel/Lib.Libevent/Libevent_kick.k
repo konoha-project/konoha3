@@ -49,6 +49,7 @@ class event_base {
 
 class event {
 	@Private cevent cev;
+	@Private ctimeval ctv;
 	event_base evBase;
 
 	event() {}
@@ -67,11 +68,13 @@ class event {
 	}
 
 	@Public int event_add(ctimeval tv) {
+		ctv = tv;
 		this.evBase.event_add(this);
 		return cev.event_add(tv);
 	}
 
 	@Public int event_del() {
+		ctv = NULL;
 		this.evBase.event_del(this);
 		return cev.event_del();
 	}
