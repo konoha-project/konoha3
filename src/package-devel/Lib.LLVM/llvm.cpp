@@ -5251,7 +5251,7 @@ static kbool_t llvm_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE *Llvm_Init(void)
+KDEFINE_PACKAGE *LLVM_Init(void)
 {
 	InitializeNativeTarget();
 	static KDEFINE_PACKAGE d = {

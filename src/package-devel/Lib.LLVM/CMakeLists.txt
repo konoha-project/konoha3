@@ -83,7 +83,7 @@ message(FATAL ERROR
 endif(${LLVM_VERSION} VERSION_LESS "2.8")
 
 set(PACKAGE_EXTRA_LIBRARY ${LLVMLIBS})
-	add_konoha_package(Lib.Llvm)
+	add_konoha_package(Lib.LLVM)
 else(LLVM_CONFIG)
 show_package_warning(llvm)
 endif(LLVM_CONFIG)
