@@ -83,9 +83,9 @@ class event {
 		cev.event_pending(events, tv);
 	}
 
-	@Public void event_free() {
-		cev.event_free();
-	}
+//	@Public void event_free() {
+//		cev.event_free();
+//	}
 
 	@Public void event_active(int res, int ncalls) {
 		cev.event_active(res, ncalls);
