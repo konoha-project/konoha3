@@ -82,6 +82,12 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer));
 }
 
+//## method Object Object.new();
+static KMETHOD Object_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturn(sfp[0].asObject);
+}
+
 //## @Const method boolean Object.opEQ(Object x);
 static KMETHOD Object_opEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -327,6 +333,7 @@ static void LoadDefaultMethod(KonohaContext *kctx, kNameSpace *ns)
 		_Public|_Im|_Const|_Virtual, _F(Object_toString), KType_String, KType_Object, KMethodName_To(KType_String), 0,
 		_Public|_Im|_Final|_Const, _F(Object_isNull),   KType_Boolean, KType_Object, KMethodName_("IsNull"), 0,
 		_Public|_Im|_Final|_Const, _F(Object_isNotNull), KType_Boolean, KType_Object, KMethodName_("IsNotNull"), 0,
+		_Public|_Virtual, _F(Object_new), KType_Object, KType_Object, KMethodName_("new"), 0,
 		_Public|_Im|_Const, _F(Boolean_toString), KType_String, KType_Boolean, KMethodName_To(KType_String), 0,
 		_Public|_Im|_Const, _F(Boolean_opNOT), KType_Boolean, KType_Boolean, KMethodName_("!"), 0,
 		_Public|_Im|_Const, _F(Boolean_opEQ), KType_Boolean, KType_Boolean, KMethodName_("=="), 1, KType_Boolean, FN_x,
