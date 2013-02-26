@@ -151,8 +151,42 @@ static void cevent_callback_1st(evutil_socket_t evd, short event, void *arg) {
 	END_UnusedStack();
 }
 
-int event_reinit(struct event_base *base);
-const char *event_base_get_method(const struct event_base *);
+//## int cevent_base.event_reinit();
+static KMETHOD cevent_base_event_reinit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	int ret = event_reinit(eb->event_base);
+	KReturnUnboxValue(ret);
+}
+
+//## String cevent_base.get_method();
+static KMETHOD cevent_base_get_method(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	const char *method = event_base_get_method(eb->event_base);
+	KReturn(KLIB new_kString(kctx, OnStack, method, strlen(method), StringPolicy_ASCII));
+}
+
+//## Array[String] cevent_base.get_supported_methods();
+static KMETHOD cevent_base_get_supported_methods(KonohaContext *kctx, KonohaStack *sfp)
+{
+	INIT_GCSTACK();
+	const char **methods = event_get_supported_methods();
+
+	//TODO check array usage. refered src/package-devel/MiniKonoha.Map/Map_glue.c: Map_keys()
+	KClass *cArray = KClass_p0(kctx, KClass_Array, KType_String);
+	kArray *ret = (kArray *)(KLIB new_kObject(kctx, _GcStack, cArray, 10));
+	int i;
+	for (i = 0; methods[i] != NULL; i++) {
+		kString *str = KLIB new_kString(kctx, OnStack, methods[i], strlen(methods[i]), StringPolicy_ASCII);
+		KLIB kArray_Add(kctx, ret, str);
+	}
+	KReturnWith(ret, RESET_GCSTACK());
+}
+
+
+/*
+TODO
 int event_base_get_features(const struct event_base *base);
 struct event_base *event_base_new_with_config(const struct event_config *);
 int event_base_loop(struct event_base *, int);
@@ -168,7 +202,6 @@ void event_base_dump_events(struct event_base *, FILE *);
 int event_base_gettimeofday_cached(struct event_base *base, struct timeval *tv);
 
 -- event_config --
-const char **event_get_supported_methods(void);
 struct event_config *event_config_new(void);
 void event_config_free(struct event_config *cfg);
 int event_config_avoid_method(struct event_config *cfg, const char *method);
@@ -190,6 +223,7 @@ void event_set_mem_functions(
 	void *(*malloc_fn)(size_t sz),
 	void *(*realloc_fn)(void *ptr, size_t sz),
 	void (*free_fn)(void *ptr));
+*/
 
 
 
@@ -364,6 +398,8 @@ static KMETHOD cevent_getEvents(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 
+/*
+TODO
 int event_base_set(struct event_base *, struct event *);
 evutil_socket_t event_get_fd(const struct event *ev);
 struct event_base *event_get_base(const struct event *ev);
@@ -373,7 +409,7 @@ void *event_get_callback_arg(const struct event *ev);
 void event_get_assignment(const struct event *event,
     struct event_base **base_out, evutil_socket_t *fd_out, short *events_out,
     event_callback_fn *callback_out, void **arg_out);
-
+*/
 
 
 
@@ -511,6 +547,8 @@ static KMETHOD cbufferevent_read(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 
+/*
+TODO
 int bufferevent_socket_connect_hostname(struct bufferevent *,
 	struct evdns_base *, int, const char *, int);
 int bufferevent_socket_get_dns_error(struct bufferevent *bev);
@@ -587,13 +625,15 @@ void bufferevent_rate_limit_group_get_totals(
 	ev_uint64_t *total_read_out, ev_uint64_t *total_written_out);
 void bufferevent_rate_limit_group_reset_totals(
 	struct bufferevent_rate_limit_group *grp);
-
+*/
 
 
 
 
 /* ======================================================================== */
 // evbuffer class
+/*
+TODO
 int evbuffer_enable_locking(struct evbuffer *buf, void *lock);
 void evbuffer_lock(struct evbuffer *buf);
 void evbuffer_unlock(struct evbuffer *buf);
@@ -645,11 +685,14 @@ int evbuffer_prepend_buffer(struct evbuffer *dst, struct evbuffer* src);
 int evbuffer_freeze(struct evbuffer *buf, int at_front);
 int evbuffer_unfreeze(struct evbuffer *buf, int at_front);
 int evbuffer_defer_callbacks(struct evbuffer *buffer, struct event_base *base);
-
+*/
 
 
 /* ======================================================================== */
 // evhttp class
+
+/*
+TODO
 -- evhttp --
 struct evhttp *evhttp_new(struct event_base *base);
 int evhttp_bind_socket(struct evhttp *http, const char *address, ev_uint16_t port);
@@ -779,6 +822,7 @@ char *evhttp_uridecode(const char *uri, int decode_plus, size_t *size_out);
 int evhttp_parse_query(const char *uri, struct evkeyvalq *headers);
 int evhttp_parse_query_str(const char *uri, struct evkeyvalq *headers);
 char *evhttp_htmlescape(const char *html);
+*/
 
 
 
@@ -1029,6 +1073,13 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		_Public, _F(cevent_base_new), KType_cevent_base, KType_cevent_base, KMethodName_("new"), 0,
 		_Public, _F(cevent_base_event_dispatch), KType_Int, KType_cevent_base, KMethodName_("event_dispatch"), 0,
 		_Public, _F(cevent_base_event_loopbreak), KType_Int, KType_cevent_base, KMethodName_("event_loopbreak"), 0,
+		_Public, _F(cevent_base_event_reinit), KType_Int, KType_cevent_base, KMethodName_("event_reinit"), 0,
+		_Public, _F(cevent_base_get_method), KType_String, KType_cevent_base, KMethodName_("get_method"), 0,
+		_Public|_Static, _F(cevent_base_get_supported_methods), KType_Array, KType_cevent_base, KMethodName_("get_supported_methods"), 0,
+
+
+
+
 
 		// cevent
 		_Public, _F(cevent_new), KType_cevent, KType_cevent, KMethodName_("new"), 4, KType_cevent_base, KFieldName_("cevent_base"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("event"), KType_eventCBArg, KFieldName_("CBarg"),
