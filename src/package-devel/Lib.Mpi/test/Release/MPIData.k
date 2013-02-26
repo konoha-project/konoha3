@@ -5,10 +5,11 @@ import("Java.String");
 import("Lib.Mpi");
 
 void test_bytes() {
-	Bytes b = "hello".asBytes();
+	Bytes b = "hello".toBytes();
 	MPIData d = MPIData.fromBytes(b);
 	Bytes b2 = d.toBytes();
-	p(b2.asString());
+	String s = new String(b2);
+	System.p(s);
 }
 
 void test_farray() {
@@ -18,13 +19,13 @@ void test_farray() {
 		d.setf(i, 0.0 + i);
 		i=i+1;
 	}
-	p("size = " + d.getSize());
-	p("offset = " + d.getOffset());
-	p("[5] = " + d.getf(5));
+	System.p("size = " + d.getSize());
+	System.p("offset = " + d.getOffset());
+	System.p("[5] = " + d.getf(5));
 	d.setOffset(6);
-	p("size = " + d.getSize());
-	p("offset = " + d.getOffset());
-	p("[0] = " + d.getf(0));
+	System.p("size = " + d.getSize());
+	System.p("offset = " + d.getOffset());
+	System.p("[0] = " + d.getf(0));
 }
 
 void test_iarray() {
@@ -34,13 +35,13 @@ void test_iarray() {
 		d.seti(i, i);
 		i=i+1;
 	}
-	p("size = " + d.getSize());
-	p("offset = " + d.getOffset());
-	p("[5] = " + d.geti(5));
+	System.p("size = " + d.getSize());
+	System.p("offset = " + d.getOffset());
+	System.p("[5] = " + d.geti(5));
 	d.setOffset(6);
-	p("size = " + d.getSize());
-	p("offset = " + d.getOffset());
-	p("[0] = " + d.geti(0));
+	System.p("size = " + d.getSize());
+	System.p("offset = " + d.getOffset());
+	System.p("[0] = " + d.geti(0));
 }
 
 test_bytes();

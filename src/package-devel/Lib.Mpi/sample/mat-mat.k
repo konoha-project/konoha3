@@ -1,5 +1,6 @@
 import("konoha");
 import("Type.Bytes");
+import("Type.Float");
 import("Lib.Mpi");
 
 float fabs(float f) {
