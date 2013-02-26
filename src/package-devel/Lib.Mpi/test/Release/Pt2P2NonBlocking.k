@@ -6,16 +6,17 @@ import("Lib.Mpi");
 void test_bytes() {
 	MPIComm w = MPIComm.getWorld();
 	if(w.getRank() == 0) {
-		MPIData d = MPIData.fromBytes("this_is_konoha".asBytes());
+		MPIData d = MPIData.fromBytes("this_is_konoha".toBytes());
 		d.setOffset(8);
 		w.iSend(d, 6, 1, 0);
 	} else {
-		MPIData d = MPIData.fromBytes("hello ".asBytes());
+		MPIData d = MPIData.fromBytes("hello ".toBytes());
 		d.setOffset(6);
 		MPIRequest req = w.iRecv(d, 6, 0, 0);
 		req.wait();
 		d.setOffset(0);
-		p(d.toBytes().asString());
+		String s = new String(d.toBytes();)
+		System.p(s);
 	}
 }
 
@@ -34,10 +35,10 @@ void test_iarray() {
 		MPIRequest req = w.iRecv(d, 2, 0, 0);
 		req.wait();
 		d.setOffset(0);
-		p(d.getSize());
-		p(d.geti(0));
-		p(d.geti(1));
-		p(d.geti(2));
+		System.p(d.getSize());
+		System.p(d.geti(0));
+		System.p(d.geti(1));
+		System.p(d.geti(2));
 	}
 }
 
@@ -56,10 +57,10 @@ void test_farray() {
 		MPIRequest req = w.iRecv(d, 2, 0, 0);
 		req.wait();
 		d.setOffset(0);
-		p(d.getSize());
-		p(d.getf(0));
-		p(d.getf(1));
-		p(d.getf(2));
+		System.p(d.getSize());
+		System.p(d.getf(0));
+		System.p(d.getf(1));
+		System.p(d.getf(2));
 	}
 }
 

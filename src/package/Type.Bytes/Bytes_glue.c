@@ -39,8 +39,8 @@ static void kBytes_Init(KonohaContext *kctx, kObject *o, void *conf)
 	struct kBytesVar *ba = (struct kBytesVar *)o;
 	DBG_ASSERT((size_t)conf >= 0);
 	ba->bytesize = 0;
-	//ba->bytesize = (size_t)conf;
-	//ba->byteptr = (ba->bytesize > 0) ? (const char *)KCalloc((size_t)conf, 1, NULL) : NULL;
+	ba->bytesize = (size_t)conf;
+	ba->byteptr = (ba->bytesize > 0) ? (const char *)KCalloc((size_t)conf, 1, NULL) : NULL;
 }
 
 static void kBytes_Free(KonohaContext *kctx, kObject *o)
