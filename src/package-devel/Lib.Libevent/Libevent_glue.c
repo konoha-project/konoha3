@@ -37,6 +37,12 @@ extern "C" {
 
 
 /* ======================================================================== */
+#include <sys/time.h>
+typedef struct ctimeval {
+	kObjectHeader h;
+	struct timeval timeval;
+} kctimeval;
+
 typedef struct cevent_base {
 	kObjectHeader h;
 	struct event_base *event_base;
@@ -45,6 +51,7 @@ typedef struct cevent_base {
 typedef struct cevent {
 	kObjectHeader h;
 	struct event *event;
+	kctimeval *kctimeval;
 } kcevent;
 
 typedef struct cbufferevent {
@@ -67,12 +74,6 @@ typedef struct buffereventCBArg {	//callback-method argument wrapper
 	kFunc *kcb[NUM_BuffereventCB];		// konoha call back methods
 	kObject *arg;
 } kbuffereventCBArg;
-
-#include <sys/time.h>
-typedef struct ctimeval {
-	kObjectHeader h;
-	struct timeval timeval;
-} kctimeval;
 
 // TODO ----- should be implement in posix.socket package
 #include <sys/socket.h>
@@ -159,6 +160,7 @@ static void cevent_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct cevent *ev = (struct cevent *) o;
 	ev->event = NULL;
+	KFieldInit(ev, ev->kctimeval, K_NULL);
 }
 
 static void cevent_Free(KonohaContext *kctx, kObject *o)
@@ -169,12 +171,14 @@ static void cevent_Free(KonohaContext *kctx, kObject *o)
 		event_free(ev->event);
 		ev->event = NULL;
 	}
+	KFieldInit(ev, ev->kctimeval, K_NULL);
 }
 
-//static void cevent_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
-//{
-//	struct cevent *ev = (struct cevent *) o;
-//}
+static void cevent_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+{
+	struct cevent *ev = (struct cevent *) o;
+	KRefTrace(ev->kctimeval);
+}
 
 //## cevent cevent.new(cevent_base event_base, int evd, int event, eventCBArg cbArg);
 static KMETHOD cevent_new(KonohaContext *kctx, KonohaStack *sfp)
@@ -208,6 +212,7 @@ static KMETHOD cevent_event_add(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
 	kctimeval *tv = (kctimeval *)sfp[1].asObject;
+	KUnsafeFieldSet(kcev->kctimeval, tv);
 	int ret = event_add(kcev->event, tvIsNull(tv) ? NULL : &tv->timeval);
 	KReturnUnboxValue(ret);
 }
@@ -216,6 +221,7 @@ static KMETHOD cevent_event_add(KonohaContext *kctx, KonohaStack* sfp)
 static KMETHOD cevent_event_del(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
+	KUnsafeFieldSet(kcev->kctimeval, K_NULL);	//delete reference
 	int ret = event_del(kcev->event);
 	KReturnUnboxValue(ret);
 }
@@ -625,7 +631,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	SETSTRUCTNAME(defcevent, cevent);
 	defcevent.cflag     = KClassFlag_Final;
 	defcevent.init      = cevent_Init;
-//	defcevent.reftrace  = cevent_Reftrace;
+	defcevent.reftrace  = cevent_Reftrace;
 	defcevent.free      = cevent_Free;
 	KClass *ceventClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevent, trace);
 
