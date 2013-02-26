@@ -11,26 +11,26 @@ import("Syntax.CStyleBitwiseOperator");
 import("Type.Bytes");
 import("Lib.Libevent");
 
-void readCB(cbufferevent bev, Object arg) {
+void readCB(bufferevent bev, Object arg) {
 	System.p("called readCB()");
 
 	Bytes buf = new Bytes(1024);
-	bev.bufferevent_read(buf);
+	bev.read(buf);
 	System.p(buf);
 
 	if (buf.toString() == "hello") {
-		bev.bufferevent_write("Hi!".toBytes())
+		bev.write("Hi!".toBytes())
 	}
 }
 
-void writeCB(cbufferevent bev, Object arg) {
+void writeCB(bufferevent bev, Object arg) {
 	System.p("called writeCB()");
 
 
 
 }
 
-void eventCB(cbufferevent bev, int events, Object arg) {
+void eventCB(bufferevent bev, int events, Object arg) {
 	System.p("called eventCB()");
 	System.p("bev = " + bev + ", events = " + events + ", arg = " + arg);
 
@@ -49,8 +49,9 @@ int main() {
 	Object cbarg = bev as Object;
 	bev.setcb(readCB, writeCB, eventCB, cbarg);
 
-	int s = bev.socket_connect(new Sockaddr_in(AF_INET, 0x7f000001, 10000));
-	if (s > 0) {
+	int s = bev.socket_connect(new sockaddr_in(AF_INET, 0x7f000001, 10000));
+	System.p(s);
+	if (s < 0) {
 		bev = NULL;
 		evBase = NULL;
 		return -1;
@@ -59,7 +60,7 @@ int main() {
 	bev.enable(EV_READ /*| EV_WRITE*/);
 	bev.write("from client".toBytes());
 	System.p("event_dispatch()");
-	evBase.cevbase.event_dispatch();
+	evBase.event_dispatch();
 	return 0;
 }
 
