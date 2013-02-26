@@ -87,32 +87,32 @@ typedef struct Sockaddr_in {
 // cevent_base class
 static void cevent_base_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct cevent_base *ev = (struct cevent_base *) o;
-	ev->event_base = NULL;
+	struct cevent_base *eb = (struct cevent_base *) o;
+	eb->event_base = NULL;
 }
 
 static void cevent_base_Free(KonohaContext *kctx, kObject *o)
 {
-	struct cevent_base *ev = (struct cevent_base *) o;
-	if(ev->event_base != NULL) {
-		event_base_free(ev->event_base);
-		ev->event_base = NULL;
+	struct cevent_base *eb = (struct cevent_base *) o;
+	if(eb->event_base != NULL) {
+		event_base_free(eb->event_base);
+		eb->event_base = NULL;
 	}
 }
 
 //## cevent_base cevent_base.new();
 static KMETHOD cevent_base_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kcevent_base *ev = (kcevent_base *)sfp[0].asObject;
-	ev->event_base = event_base_new();
-	KReturn(ev);
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	eb->event_base = event_base_new();
+	KReturn(eb);
 }
 
 //## cevent_base cevent_base.event_dispatch();
 static KMETHOD cevent_base_event_dispatch(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kcevent_base *ev = (kcevent_base *)sfp[0].asObject;
-	int ret = event_base_dispatch(ev->event_base);
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	int ret = event_base_dispatch(eb->event_base);
 	KReturnUnboxValue(ret);
 }
 
