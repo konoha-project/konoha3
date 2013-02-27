@@ -1,7 +1,7 @@
 KONOHA SCRIPTING LANGUAGE
 =========================
 
-WHAT IS MINIKONOHA?
+WHAT IS KONOHA?
 ---------------
 
 Konoha is a scripting language, characterized by: 
@@ -19,7 +19,7 @@ INSTALL AND TRY
 
 At first, you'll download the latest konoha.
 
-	$ git clone git://github.com/konoha-project/minikonoha.git
+	$ git clone git://github.com/konoha-project/konoha3.git
 
 You'll have to make a few steps. Type in:
 
@@ -35,12 +35,12 @@ information, you will ckeck at: http://www.cmake.org/
 If Konoha is installed successfully, you can try Konoha as 
 an interactive mode.
 
-	$ minikonoha
-	MiniKonoha 0.1 (Old Riga) (75b3d2f6, Oct  1 2012)
-	[gcc 4.2.1 (Gentoo 4.2.1_p5666-r1, Apple Inc. build 5666) (dot 3)]
-	options: bmgc minivm sugar
-	>>> System.p("hello world");
-	 - ((shell):1) hello world
+	$ konoha
+	[gcc 4.7.2 20120921 (Red Hat 4.7.2-2)]
+	modules: minivm bmgengc iconv
+	>>> System.p("Hello World!");
+	 - ((shell):1) Hello World!
+	>>> 
 
 DO YOU WANT TO KNOW MORE?
 -------------------------
