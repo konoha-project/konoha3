@@ -192,8 +192,8 @@ static KMETHOD cevent_event_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(ev);
 }
 
+//## constructor for signal event
 //## cevent cevent.new(cevent_base event_base, int evd, Func[void, int, int, Object] cb, Object cbArg);
-//## for signal event
 static KMETHOD cevent_signal_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct cevent *ev = (struct cevent *) sfp[0].asObject;
@@ -207,8 +207,8 @@ static KMETHOD cevent_signal_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(ev);
 }
 
+//## constructor for timer event
 //## cevent cevent.new(cevent_base event_base, Func[void, int, int, Object] cb, Object cbArg);
-//## for timer event
 static KMETHOD cevent_timer_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct cevent *ev = (struct cevent *) sfp[0].asObject;
@@ -261,7 +261,7 @@ static KMETHOD cevent_timer_assign(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 #define tvIsNull(tv_p)	((tv_p)->timeval.tv_sec == 0 && (tv_p)->timeval.tv_usec == 0)
-//## int cevent.event_add(cevent_base event, ctimeval tv);
+//## int cevent.event_add(cevent_base event, timeval tv);
 static KMETHOD cevent_event_add(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
@@ -280,13 +280,31 @@ static KMETHOD cevent_event_del(KonohaContext *kctx, KonohaStack* sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## int cevent.event_pending(short events, ctimeval tv);
+//## int cevent.event_pending(short events, timeval tv);
 static KMETHOD cevent_event_pending(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
 	short events = (short)sfp[1].intValue;
 	kctimeval *tv = (kctimeval *)sfp[2].asObject;
 	int ret = event_pending(kcev->event, events, tvIsNull(tv) ? NULL : &tv->timeval);
+	KReturnUnboxValue(ret);
+}
+
+//## int cevent.signal_pending(timeval tv);
+static KMETHOD cevent_signal_pending(KonohaContext *kctx, KonohaStack* sfp)
+{
+	kcevent *kcev = (kcevent *)sfp[0].asObject;
+	kctimeval *tv = (kctimeval *)sfp[1].asObject;
+	int ret = evsignal_pending(kcev->event, tvIsNull(tv) ? NULL : &tv->timeval);
+	KReturnUnboxValue(ret);
+}
+
+//## int cevent.timer_pending(timeval tv);
+static KMETHOD cevent_timer_pending(KonohaContext *kctx, KonohaStack* sfp)
+{
+	kcevent *kcev = (kcevent *)sfp[0].asObject;
+	kctimeval *tv = (kctimeval *)sfp[1].asObject;
+	int ret = evtimer_pending(kcev->event, tvIsNull(tv) ? NULL : &tv->timeval);
 	KReturnUnboxValue(ret);
 }
 
@@ -486,7 +504,7 @@ static KMETHOD cbufferevent_read(KonohaContext *kctx, KonohaStack *sfp)
 
 
 /* ======================================================================== */
-// ctimeval class
+// timeval class
 
 static void ctimeval_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
@@ -495,7 +513,7 @@ static void ctimeval_Init(KonohaContext *kctx, kObject *o, void *conf)
 	tv->timeval.tv_usec = 0;
 }
 
-//## ctimeval ctimeval.new(int tv_sec, int tv_usec);
+//## timeval timeval.new(int tv_sec, int tv_usec);
 static KMETHOD ctimeval_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct ctimeval *tv = (struct ctimeval *) sfp[0].asObject;
@@ -630,8 +648,14 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		_Public, _F(cevent_event_add), KType_Int, KType_cevent, KMethodName_("signal_add"), 1, KType_ctimeval, KFieldName_("timeval"),
 		_Public, _F(cevent_event_add), KType_Int, KType_cevent, KMethodName_("timer_add"), 1, KType_ctimeval, KFieldName_("timeval"),
 		_Public, _F(cevent_event_del), KType_Int, KType_cevent, KMethodName_("event_del"), 0,
-		_Public, _F(cevent_event_pending), KType_Int, KType_cevent, KMethodName_("event_pending"), 2, KType_Int, KFieldName_("events"), KType_Int, KFieldName_("ctimeval"),
+		_Public, _F(cevent_event_del), KType_Int, KType_cevent, KMethodName_("signal_del"), 0,
+		_Public, _F(cevent_event_del), KType_Int, KType_cevent, KMethodName_("timer_del"), 0,
+		_Public, _F(cevent_event_pending), KType_Int, KType_cevent, KMethodName_("event_pending"), 2, KType_Int, KFieldName_("events"), KType_Int, KFieldName_("timeval"),
+		_Public, _F(cevent_signal_pending), KType_Int, KType_cevent, KMethodName_("signal_pending"), 1, KType_Int, KFieldName_("timeval"),
+		_Public, _F(cevent_timer_pending), KType_Int, KType_cevent, KMethodName_("timer_pending"), 1, KType_Int, KFieldName_("timeval"),
 		_Public, _F(cevent_event_initialized), KType_Int, KType_cevent, KMethodName_("event_initialized"), 0,
+		_Public, _F(cevent_event_initialized), KType_Int, KType_cevent, KMethodName_("signal_initialized"), 0,
+		_Public, _F(cevent_event_initialized), KType_Int, KType_cevent, KMethodName_("timer_initialized"), 0,
 		_Public, _F(cevent_event_free), KType_void, KType_cevent, KMethodName_("event_free"), 0,
 		_Public, _F(cevent_event_active), KType_void, KType_cevent, KMethodName_("event_active"), 2, KType_Int, KFieldName_("res"), KType_Int, KFieldName_("ncalls"),
 		_Public, _F(cevent_getEvents), KType_Int, KType_cevent, KMethodName_("getEvents"), 0, 
