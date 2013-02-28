@@ -131,7 +131,7 @@ static KMETHOD cevent_base_evutil_make_socket_nonblocking(KonohaContext *kctx, K
 /*
  * cevent_base Class 1st stage callback from event_base_dispatch(), NEVER BE CALLED FROM OTHERS.
  */
-static void cevent_callback_1st(evutil_socket_t evd, short event, void *arg) {
+static void cevent_CB_method_invoke(evutil_socket_t evd, short event, void *arg) {
 	kcevent *ev = arg;
 	KonohaContext *kctx = ev->kctx;
 
@@ -185,10 +185,10 @@ static KMETHOD cevent_event_new(KonohaContext *kctx, KonohaStack *sfp)
 	struct cevent_base *cEvent_base = (struct cevent_base *)sfp[1].asObject;
 	evutil_socket_t evd = (evutil_socket_t)sfp[2].intValue;
 	short event = (short)(sfp[3].intValue & 0xffff);
-	ev->kcb = sfp[4].asFunc;
-	ev->kcbArg = sfp[5].asObject;	//deliver callback method
+	KFieldSet(ev, ev->kcb, sfp[4].asFunc);
+	KFieldSet(ev, ev->kcbArg, sfp[5].asObject);	//deliver to callback method
 
-	ev->event = event_new(cEvent_base->event_base, evd, event, cevent_callback_1st, ev);
+	ev->event = event_new(cEvent_base->event_base, evd, event, cevent_CB_method_invoke, ev);
 	KReturn(ev);
 }
 
@@ -200,10 +200,10 @@ static KMETHOD cevent_signal_new(KonohaContext *kctx, KonohaStack *sfp)
 	ev->kctx = kctx;
 	struct cevent_base *cEvent_base = (struct cevent_base *)sfp[1].asObject;
 	evutil_socket_t evd = (evutil_socket_t)sfp[2].intValue;
-	ev->kcb = sfp[3].asFunc;
-	ev->kcbArg = sfp[4].asObject;	//deliver callback method
+	KFieldSet(ev, ev->kcb, sfp[3].asFunc);
+	KFieldSet(ev, ev->kcbArg, sfp[4].asObject);	//deliver to callback method
 
-	ev->event = evsignal_new(cEvent_base->event_base, evd, cevent_callback_1st, ev);
+	ev->event = evsignal_new(cEvent_base->event_base, evd, cevent_CB_method_invoke, ev);
 	KReturn(ev);
 }
 
@@ -214,10 +214,10 @@ static KMETHOD cevent_timer_new(KonohaContext *kctx, KonohaStack *sfp)
 	struct cevent *ev = (struct cevent *) sfp[0].asObject;
 	ev->kctx = kctx;
 	struct cevent_base *cEvent_base = (struct cevent_base *)sfp[1].asObject;
-	ev->kcb = sfp[2].asFunc;
-	ev->kcbArg = sfp[3].asObject;	//deliver callback method
+	KFieldSet(ev, ev->kcb, sfp[2].asFunc);
+	KFieldSet(ev, ev->kcbArg, sfp[3].asObject);	//deliver to callback method
 
-	ev->event = evtimer_new(cEvent_base->event_base, cevent_callback_1st, ev);
+	ev->event = evtimer_new(cEvent_base->event_base, cevent_CB_method_invoke, ev);
 	KReturn(ev);
 }
 
@@ -228,10 +228,10 @@ static KMETHOD cevent_event_assign(KonohaContext *kctx, KonohaStack *sfp)
 	struct cevent_base *cEvent_base = (struct cevent_base *)sfp[1].asObject;
 	evutil_socket_t evd = (evutil_socket_t)sfp[2].intValue;
 	short event = (short)(sfp[3].intValue & 0xffff);
-	ev->kcb = sfp[4].asFunc;
-	ev->kcbArg = sfp[5].asObject;	//deliver callback method
+	KFieldSet(ev, ev->kcb, sfp[4].asFunc);
+	KFieldSet(ev, ev->kcbArg, sfp[5].asObject);	//deliver to callback method
 
-	int ret = event_assign(ev->event, cEvent_base->event_base, evd, event, cevent_callback_1st, ev);
+	int ret = event_assign(ev->event, cEvent_base->event_base, evd, event, cevent_CB_method_invoke, ev);
 	KReturnUnboxValue(ret);
 }
 
@@ -241,10 +241,10 @@ static KMETHOD cevent_signal_assign(KonohaContext *kctx, KonohaStack *sfp)
 	struct cevent *ev = (struct cevent *) sfp[0].asObject;
 	struct cevent_base *cEvent_base = (struct cevent_base *)sfp[1].asObject;
 	evutil_socket_t evd = (evutil_socket_t)sfp[2].intValue;
-	ev->kcb = sfp[3].asFunc;
-	ev->kcbArg = sfp[4].asObject;	//deliver callback method
+	KFieldSet(ev, ev->kcb, sfp[3].asFunc);
+	KFieldSet(ev, ev->kcbArg, sfp[4].asObject);	//deliver to callback method
 
-	int ret = evsignal_assign(ev->event, cEvent_base->event_base, evd, cevent_callback_1st, ev);
+	int ret = evsignal_assign(ev->event, cEvent_base->event_base, evd, cevent_CB_method_invoke, ev);
 	KReturnUnboxValue(ret);
 }
 
@@ -253,10 +253,10 @@ static KMETHOD cevent_timer_assign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct cevent *ev = (struct cevent *) sfp[0].asObject;
 	struct cevent_base *cEvent_base = (struct cevent_base *)sfp[1].asObject;
-	ev->kcb = sfp[2].asFunc;
-	ev->kcbArg = sfp[3].asObject;	//deliver callback method
+	KFieldSet(ev, ev->kcb, sfp[2].asFunc);
+	KFieldSet(ev, ev->kcbArg, sfp[3].asObject);	//deliver to callback method
 
-	int ret = evtimer_assign(ev->event, cEvent_base->event_base, cevent_callback_1st, ev);
+	int ret = evtimer_assign(ev->event, cEvent_base->event_base, cevent_CB_method_invoke, ev);
 	KReturnUnboxValue(ret);
 }
 
@@ -392,7 +392,7 @@ static void Cbev_dataCB_dispatcher(kFunc *datacb, struct bufferevent *bev, void 
 /*
  * cbufferevent Class (*buffer_data_cb)() 1st stage callback from event_base_dispatch(), NEVER BE CALLED FROM OTHERS.
  */
-static void Cbev_readCB_1st(struct bufferevent *bev, void *arg)
+static void cbev_readCB_method_invoke(struct bufferevent *bev, void *arg)
 {
 	kcbufferevent *kcbev = arg;
 	Cbev_dataCB_dispatcher(kcbev->readcb, bev, arg);
@@ -401,7 +401,7 @@ static void Cbev_readCB_1st(struct bufferevent *bev, void *arg)
 /*
  * cbufferevent Class (*buffer_data_cb)() 1st stage callback from event_base_dispatch(), NEVER BE CALLED FROM OTHERS.
  */
-static void Cbev_writeCB_1st(struct bufferevent *bev, void *arg)
+static void cbev_writeCB_method_invoke(struct bufferevent *bev, void *arg)
 {
 	kcbufferevent *kcbev = arg;
 	Cbev_dataCB_dispatcher(kcbev->writecb, bev, arg);
@@ -410,7 +410,7 @@ static void Cbev_writeCB_1st(struct bufferevent *bev, void *arg)
 /*
  * cbufferevent Class (*buffer_event_cb)() 1st stage callback from event_base_dispatch(), NEVER BE CALLED FROM OTHERS.
  */
-static void Cbev_eventCB_1st(struct bufferevent *bev, short what, void *arg)
+static void cbev_eventCB_method_invoke(struct bufferevent *bev, short what, void *arg)
 {
 	kcbufferevent *kcbev = arg;
 	KonohaContext *kctx = kcbev->kctx;
@@ -441,7 +441,7 @@ static KMETHOD cbufferevent_setcb(KonohaContext *kctx, KonohaStack *sfp)
 	KFieldSet(kcbe, kcbe->writecb, sfp[2].asFunc);
 	KFieldSet(kcbe, kcbe->eventcb, sfp[3].asFunc);
 	KFieldSet(kcbe, kcbe->kcbArg, sfp[4].asObject);
-	bufferevent_setcb(kcbe->bev, Cbev_readCB_1st, Cbev_writeCB_1st, Cbev_eventCB_1st, kcbe);
+	bufferevent_setcb(kcbe->bev, cbev_readCB_method_invoke, cbev_writeCB_method_invoke, cbev_eventCB_method_invoke, kcbe);
 	KReturnVoid();
 }
 
@@ -541,63 +541,53 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	/* If you want to create Generic class like Array<T>, see konoha.map package */
 	// cevent_base
 	KDEFINE_CLASS defcevent_base = {0};
-	SETSTRUCTNAME(defcevent_base, cevent_base);
-	defcevent_base.cflag     = KClassFlag_Final;	//must be final in C
-	defcevent_base.init      = cevent_base_Init;
-	defcevent_base.free      = cevent_base_Free;
-	KClass *cevent_baseClass;
-	{
-		const char *className = "event_base";
-		cevent_baseClass = KLIB kNameSpace_DefineClass(kctx, ns, KLIB new_kString(kctx, OnStack, className, strlen(className), StringPolicy_ASCII), &defcevent_base, trace);
-	}
+	defcevent_base.structname	= "event_base";
+	defcevent_base.typeId		= KTypeAttr_NewId;
+	defcevent_base.cstruct_size	= sizeof(kcevent_base);
+	defcevent_base.cflag		= KClassFlag_Final;	//must be final in C
+	defcevent_base.init			= cevent_base_Init;
+	defcevent_base.free			= cevent_base_Free;
+	KClass *cevent_baseClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevent_base, trace);
 
 	// cevent
 	KDEFINE_CLASS defcevent = {0};
-	SETSTRUCTNAME(defcevent, cevent);
-	defcevent.cflag     = KClassFlag_Final;
-	defcevent.init      = cevent_Init;
-	defcevent.reftrace  = cevent_Reftrace;
-	defcevent.free      = cevent_Free;
-	KClass *ceventClass;
-	{
-		const char *className = "event";
-		ceventClass = KLIB kNameSpace_DefineClass(kctx, ns, KLIB new_kString(kctx, OnStack, className, strlen(className), StringPolicy_ASCII), &defcevent, trace);
-	}
+	defcevent.structname	= "event";
+	defcevent.typeId		= KTypeAttr_NewId;
+	defcevent.cstruct_size	= sizeof(kcevent);
+	defcevent.cflag			= KClassFlag_Final;
+	defcevent.init			= cevent_Init;
+	defcevent.reftrace		= cevent_Reftrace;
+	defcevent.free			= cevent_Free;
+	KClass *ceventClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevent, trace);
 
 	// cbufferevent
 	KDEFINE_CLASS defcbufferevent = {0};
-	SETSTRUCTNAME(defcbufferevent, cbufferevent);
-	defcbufferevent.cflag     = KClassFlag_Final;
-	defcbufferevent.init      = cbufferevent_Init;
-	defcbufferevent.reftrace  = cbufferevent_Reftrace;
-	defcbufferevent.free      = cbufferevent_Free;
-	KClass *cbuffereventClass;
-	{
-		const char *className = "bufferevent";
-		cbuffereventClass = KLIB kNameSpace_DefineClass(kctx, ns, KLIB new_kString(kctx, OnStack, className, strlen(className), StringPolicy_ASCII), &defcbufferevent, trace);
-	}
+	defcbufferevent.structname	= "bufferevent";
+	defcbufferevent.typeId		= KTypeAttr_NewId;
+	defcbufferevent.cstruct_size = sizeof(kcbufferevent);
+	defcbufferevent.cflag		= KClassFlag_Final;
+	defcbufferevent.init		= cbufferevent_Init;
+	defcbufferevent.reftrace	= cbufferevent_Reftrace;
+	defcbufferevent.free		= cbufferevent_Free;
+	KClass *cbuffereventClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcbufferevent, trace);
 
 	// ctimeval
 	KDEFINE_CLASS defctimeval = {0};
-	SETSTRUCTNAME(defctimeval, ctimeval);
-	defctimeval.cflag     = KClassFlag_Final;
-	defctimeval.init      = ctimeval_Init;
-	KClass *ctimevalClass;
-	{
-		const char *className = "timeval";
-		ctimevalClass = KLIB kNameSpace_DefineClass(kctx, ns, KLIB new_kString(kctx, OnStack, className, strlen(className), StringPolicy_ASCII), &defctimeval, trace);
-	}
+	defctimeval.structname	= "timeval";
+	defctimeval.typeId		= KTypeAttr_NewId;
+	defctimeval.cstruct_size = sizeof(kctimeval);
+	defctimeval.cflag		= KClassFlag_Final;
+	defctimeval.init		= ctimeval_Init;
+	KClass *ctimevalClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defctimeval, trace);
 
 	// Sockaddr_in
 	KDEFINE_CLASS defSockaddr_in = {0};
-	SETSTRUCTNAME(defSockaddr_in, Sockaddr_in);
-	defSockaddr_in.cflag     = KClassFlag_Final;
-	defSockaddr_in.init      = Sockaddr_in_Init;
-	KClass *Sockaddr_inClass;
-	{
-		const char *className = "sockaddr_in";
-		Sockaddr_inClass = KLIB kNameSpace_DefineClass(kctx, ns, KLIB new_kString(kctx, OnStack, className, strlen(className), StringPolicy_ASCII), &defSockaddr_in, trace);
-	}
+	defSockaddr_in.structname	= "sockaddr_in";
+	defSockaddr_in.typeId		= KTypeAttr_NewId;
+	defSockaddr_in.cstruct_size	= sizeof(kSockaddr_in);
+	defSockaddr_in.cflag		= KClassFlag_Final;
+	defSockaddr_in.init			= Sockaddr_in_Init;
+	KClass *Sockaddr_inClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSockaddr_in, trace);
 
 
 	/* You can define methods with the following procedures. */
