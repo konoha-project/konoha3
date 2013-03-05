@@ -337,7 +337,8 @@ static int kSubProc_exec(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
 			//if(fork()) {
 			//	exit(0);
 			//}
-			ignoreSigchld(kctx, trace);
+			//TODO: if ignoreSigchld is disabled, zombie process may be created
+			//ignoreSigchld(kctx, trace);
 		}
 //		if(!IS_NULL(sp->cwd)) { // TODO!!
 //			if(chdir(kString_text((sp->cwd))) != 0) {
