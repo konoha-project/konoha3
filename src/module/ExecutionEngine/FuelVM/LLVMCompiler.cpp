@@ -87,7 +87,13 @@ static void InitLLVM()
 	InitializeNativeTarget();
 	InitializeNativeTargetAsmPrinter();
 	GlobalModule = new Module("LLVM", getGlobalContext());
-	GlobalModule->setTargetTriple(LLVM_HOSTTRIPLE);
+	GlobalModule->setTargetTriple(
+#if LLVM_VERSION >= 302
+			sys::getDefaultTargetTriple()
+#else
+			sys::getHostTriple()
+#endif
+			);
 	std::string Error;
 	GlobalEngine = EngineBuilder(GlobalModule)
 		.setEngineKind(EngineKind::JIT)
