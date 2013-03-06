@@ -33,18 +33,12 @@
 extern "C" {
 #endif
 
-typedef struct kCurlVar kCurl;
-
-struct kCurlVar {
+typedef struct kCurlVar {
 	kObjectHeader h;
 	CURL *curl;
 	kString *URLInfoNULL;
 	struct curl_slist *headers;
-
-	/* used by CURLOPT_WRITEFUNCTION */
-	KonohaContext *lctx;
-	struct kBytesVar *bytesNULL;
-};
+} kCurl;
 
 #define LogCurlStrError(res)  LogText("CurlError", curl_easy_strerror(res))
 #define LogWrongOption(opt)   LogText("WrongOption", getOptionSymbol(opt))
@@ -61,7 +55,7 @@ static const char *getOptionSymbol(CURLoption opt)
 {
 	switch(opt) {
 	CASE_CURLOPT(AUTOREFERER);
-	//		CASE_CURLOPT(BINARYTRANSFER);
+	//CASE_CURLOPT(BINARYTRANSFER);
 	CASE_CURLOPT(COOKIESESSION);
 	CASE_CURLOPT(CRLF);
 	CASE_CURLOPT(DNS_USE_GLOBAL_CACHE);
@@ -73,19 +67,19 @@ static const char *getOptionSymbol(CURLoption opt)
 	CASE_CURLOPT(FTP_USE_EPRT);
 	CASE_CURLOPT(FTP_USE_EPSV);
 	CASE_CURLOPT(FTPAPPEND);
-	//		CASE_CURLOPT(FTPASCII);
+	//CASE_CURLOPT(FTPASCII);
 	CASE_CURLOPT(FTPLISTONLY);
 	CASE_CURLOPT(HEADER);
 	CASE_CURLOPT(HTTPGET);
 	CASE_CURLOPT(HTTPPROXYTUNNEL);
-	//		CASE_CURLOPT(MUTE);
+	//CASE_CURLOPT(MUTE);
 	CASE_CURLOPT(NETRC);
 	CASE_CURLOPT(NOBODY);
 	CASE_CURLOPT(NOPROGRESS);
 	CASE_CURLOPT(NOSIGNAL);
 	CASE_CURLOPT(POST);
 	CASE_CURLOPT(PUT);
-	//		CASE_CURLOPT(RETURNTRANSFER);
+	//CASE_CURLOPT(RETURNTRANSFER);
 	CASE_CURLOPT(SSL_VERIFYPEER);
 	CASE_CURLOPT(TRANSFERTEXT);
 	CASE_CURLOPT(UNRESTRICTED_AUTH);
@@ -98,8 +92,8 @@ static const char *getOptionSymbol(CURLoption opt)
 	CASE_CURLOPT(FTPSSLAUTH);
 	CASE_CURLOPT(HTTP_VERSION);
 	CASE_CURLOPT(HTTPAUTH);
-	//	case CURLAUTH_ANY:
-	//	case CURLAUTH_ANYSAFE:
+	//case CURLAUTH_ANY:
+	//case CURLAUTH_ANYSAFE:
 	CASE_CURLOPT(INFILESIZE);
 	CASE_CURLOPT(LOW_SPEED_LIMIT);
 	CASE_CURLOPT(LOW_SPEED_TIME);
@@ -122,7 +116,7 @@ static const char *getOptionSymbol(CURLoption opt)
 	CASE_CURLOPT(COOKIEFILE);
 	CASE_CURLOPT(COOKIEJAR);
 	CASE_CURLOPT(CUSTOMREQUEST);
-	//	CASE_CURLOPT(EGBSOCKET);
+	//CASE_CURLOPT(EGBSOCKET);
 	CASE_CURLOPT(ENCODING);
 	CASE_CURLOPT(FTPPORT);
 	CASE_CURLOPT(INTERFACE);
@@ -135,12 +129,12 @@ static const char *getOptionSymbol(CURLoption opt)
 	CASE_CURLOPT(REFERER);
 	CASE_CURLOPT(SSL_CIPHER_LIST);
 	CASE_CURLOPT(SSLCERT);
-	//	CASE_CURLOPT(SSLCERTPASSWD);
+	//CASE_CURLOPT(SSLCERTPASSWD);
 	CASE_CURLOPT(SSLCERTTYPE);
 	CASE_CURLOPT(SSLENGINE);
 	CASE_CURLOPT(SSLENGINE_DEFAULT);
 	CASE_CURLOPT(SSLKEY);
-	//	CASE_CURLOPT(SSLKEYPASSWD);
+	//CASE_CURLOPT(SSLKEYPASSWD);
 	CASE_CURLOPT(SSLKEYTYPE);
 	CASE_CURLOPT(URL);
 	CASE_CURLOPT(USERAGENT);
@@ -156,24 +150,6 @@ static const char *getOptionSymbol(CURLoption opt)
 	return "UnknownOption";
 }
 
-///* Bytes call back */
-//static size_t write_Bytes(char *buffer, size_t size, size_t nitems, void *obj)
-//{
-//	kCurl *curl = (kCurl *) obj;
-//	KonohaContext *kctx = curl->lctx;
-//	struct kBytesVar *res = (struct kBytesVar *) curl->bytes;
-//	char *buf = res->buf;
-//	size *= nitems;
-//	res->buf = (char *)KMalloc_UNTRACE(res->bytesize + size);
-//	if(res->bytesize) {
-//		memcpy(res->buf, (void *)buf, res->bytesize);
-//		KFree(buf, res->bytesize);
-//	}
-//	memcpy(res->buf + res->bytesize, (void *)buffer, size);
-//	res->bytesize += size;
-//	return size;
-//}
-
 /* ------------------------------------------------------------------------ */
 
 #define toCURL(o)         ((kCurl *)o)->curl
@@ -182,8 +158,6 @@ static void kCurl_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct kCurlVar *c = (struct kCurlVar *)o;
 	c->curl = curl_easy_init();
-	c->lctx = NULL;
-	c->bytesNULL = NULL;
 }
 
 static void kCurl_Free(KonohaContext *kctx, kObject *o)
@@ -202,7 +176,6 @@ static void kCurl_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visi
 {
 	struct kCurlVar *c = (struct kCurlVar *)o;
 	KRefTraceNullable(c->URLInfoNULL);
-	KRefTraceNullable(c->bytesNULL);
 }
 
 /* ------------------------------------------------------------------------ */
