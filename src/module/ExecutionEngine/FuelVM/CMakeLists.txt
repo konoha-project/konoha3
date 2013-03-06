@@ -7,6 +7,7 @@ set(LLVM_INSTALL_DIR "" CACHE STRING "Install dir which llvm installed")
 
 FIND_PROGRAM(LLVM_CONFIG
    NAMES llvm-config
+         llvm-config-3.2
          llvm-config-3.1
          llvm-config-3.0
          llvm-config-2.9
@@ -69,7 +70,7 @@ if(LLVM_CONFIG)
     set(K_LLVM_VERSION ${LLVM_VERSION})
     string(REPLACE "." "0" K_LLVM_VERSION ${K_LLVM_VERSION})
     string(REPLACE "svn" "" K_LLVM_VERSION ${K_LLVM_VERSION})
-    if(${LLVM_VERSION} VERSION_EQUAL "3.2")
+    if(${LLVM_VERSION} VERSION_GREATER "2.9")
         add_definitions(-DLLVM_VERSION=${K_LLVM_VERSION})
         add_definitions(-DFUELVM_USE_LLVM=1)
         include_directories(${LLVM_INCLUDEDIR})
