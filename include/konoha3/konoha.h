@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <konoha3/stardate.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +44,6 @@ extern "C" {
 #define K_MINOR_VERSION 0
 #define K_PATCH_LEVEL   0
 
-#include <konoha3/stardate.h>
 #define K_DATE      ((K_YEAR - 2006) * (12 * 24 * 32) + (K_MONTH * (24 * 32) + ((K_DAY * 24) + K_HOUR)))
 
 #ifndef K_REVISION
@@ -52,12 +52,6 @@ extern "C" {
 
 #ifndef K_PROGNAME
 #define K_PROGNAME  "Konoha"
-/* - 2012/06/14 */
-//#define K_CODENAME "Miyajima"
-/*2012/06/14 -  */
-//#define K_CODENAME "The Summer Palace, Beijing"
-/*2012/09/22 - 2013/01/23 */
-//#define K_CODENAME "Old Riga"
 /*2012/01/24 - */
 #define K_CODENAME "Rome"  // eternal city
 #else
@@ -74,6 +68,10 @@ extern "C" {
 
 #if defined(HAVE_CONFIG_H) && !defined(HAVE_BZERO)
 #define bzero(s, n) memset(s, 0, n)
+#endif
+
+#ifdef __cplusplus
+} /* extern "C" */
 #endif
 
 #ifndef PLATAPIFORM_KERNEL
@@ -97,6 +95,10 @@ extern "C" {
 #include <konoha3/stdbool.h>
 #endif
 #include <stdint.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 #ifdef __GCC__
@@ -2092,10 +2094,16 @@ extern kbool_t Konoha_LoadScript(KonohaContext* konoha, const char *scriptfile);
 extern kbool_t Konoha_Eval(KonohaContext* konoha, const char *script, kfileline_t uline);
 extern kbool_t Konoha_Run(KonohaContext* konoha);  // TODO
 
-#include "klib.h"
+extern KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);
+extern int Konoha_Destroy(KonohaContext *kctx);
+
+extern kbool_t KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *name, ModuleType option);
+extern void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv);
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
+
+#include "klib.h"
 
 #endif /* MINIOKNOHA_H_ */
