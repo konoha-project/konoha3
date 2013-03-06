@@ -131,7 +131,7 @@ String join(String[] a, String separator) {
 	return ret;
 }
 
-String getPipeString(String prevname, String varname, String[] args, int startindex, int argsize, boolean enableStdout, int index) {
+String getPipeString(String prevname, String varname, String[] args, int startindex, int argsize, boolean enableStdout, int index, boolean ignoreErrorStatus) {
 	String ret = "";
 	if(prevname != "" && !isCommandUseTty(args[startindex])) {
 		ret = ret + prevname + ".pipe(" + varname + ", false);\n";
@@ -172,11 +172,15 @@ String getPipeString(String prevname, String varname, String[] args, int startin
 			ret = ret + varname + ".bg();\n";
 		}
 	}
+	if(!ignoreErrorStatus) {
+		//ret = ret + "if(" + varname + ".getStatus() != 0) { exit(" + varname + ".getStatus()); }\n";
+		ret = ret + "assert(" + varname + ".getStatus() == 0);\n";
+	}
 	ret = ret + "global.lastExitStatus = " + varname + ".getStatus();\n";
 	return ret;
 }
 
-String generateSubProcSequence(String[] args, boolean enableStdout) {
+String generateSubProcSequence(String[] args, boolean enableStdout, boolean ignoreErrorStatus) {
 	if(defined(DEBUG)) {
 		System.p(args);
 	}
@@ -220,7 +224,7 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 			ret = ret + varname + ".setArgumentList(" + expandArgs(args.slice(startindex + 1, startindex + 1 + argsize)) + ");\n";
 		}
 		if(index >= 0) {
-			ret = ret + getPipeString(prevname, varname, args, startindex, argsize, enableStdout, index);
+			ret = ret + getPipeString(prevname, varname, args, startindex, argsize, enableStdout, index, ignoreErrorStatus);
 		}
 		else {
 			if(redirectindex >= 0) {
@@ -234,7 +238,7 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 					ret = ret + varname + ".setOutputStream(stdout);\n";
 				}
 			}
-			ret = ret + getPipeString(prevname, varname, args, startindex, argsize, enableStdout, index);
+			ret = ret + getPipeString(prevname, varname, args, startindex, argsize, enableStdout, index, ignoreErrorStatus);
 			break;
 		}
 		prevname = varname;
@@ -256,7 +260,36 @@ Node TypeShell(Node node, NameSpace ns, Object o) {
 
 int ParseShell(Node node, Symbol sym, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
 	Token firstToken = tokenList[beginIdx];
-	if(firstToken.Is("$Symbol") && SubProc.isCommand(firstToken.getParsedText())) {
+	boolean ignoreErrorStatus = false;
+	boolean isSymbol = false;
+	if(firstToken.Is("!")) {
+		ignoreErrorStatus = true;
+		firstToken = tokenList[beginIdx + 1];
+		beginIdx = beginIdx + 1;
+	}
+	if(firstToken.getParsedText() == "/") {
+		int i = beginIdx + 1;
+		String cmd = "/";
+		while(i < endIdx) {
+			Token currentToken = tokenList[i];
+			if(currentToken.Is("$Member")) {
+				cmd = cmd + ".";
+			}
+			cmd = cmd + currentToken.getParsedText();
+			if(currentToken.isBeforeWhiteSpace()) {
+				beginIdx = i;
+				currentToken.setParsedText("$Symbol", cmd, 0, cmd.getlength());
+				firstToken = currentToken;
+				break;
+			}
+			i = i + 1;
+		}
+		isSymbol = true;
+	}
+	if(defined(DEBUG)) {
+		System.p(firstToken);
+	}
+	if((isSymbol || firstToken.Is("$Symbol")) && SubProc.isCommand(firstToken.getParsedText())) {
 		int i = beginIdx + 1;
 		while(i < endIdx) {
 			if(tokenList[i].Is("()")) {
@@ -265,10 +298,22 @@ int ParseShell(Node node, Symbol sym, Token[] tokenList, int beginIdx, int opera
 			i = i + 1;
 		}
 		String[] args = concatTokenList(tokenList.slice(beginIdx, i));
+		if(defined(DEBUG)) {
+			System.p(args);
+		}
 		if(!SubProc.isCommand(args[0])) {
 			return -1;
 		}
-		Token[] subprocTokens = node.getNameSpace().Preprocess(generateSubProcSequence(args, true));
+		if(defined(OUTPUT_CMD)) {
+			int j = 0;
+			stdout.print("execute command: ");
+			while(j < args.getlength()) {
+				stdout.print(args[j] + " ");
+				j = j + 1;
+			}
+			stdout.println("");
+		}
+		Token[] subprocTokens = node.getNameSpace().Preprocess(generateSubProcSequence(args, true, ignoreErrorStatus));
 		Node sequence = node.ParseNewNode(subprocTokens, 0, subprocTokens.getlength(), false);
 		node.AddParsedObject("$SubprocSequence", sequence);
 		return i;
@@ -314,16 +359,30 @@ int TokenizeDollarVariable(Token tk, String source) {
 
 int ParseDollarVariable(Node node, Symbol sym, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
 	NameSpace ns = node.getNameSpace();
+	boolean ignoreErrorStatus = false;
 	if(defined(DEBUG)) {
 		System.p(node);
 	}
 	String text = tokenList[operatorIdx].getParsedText();
 	if(text.startsWith("$(") && text.endsWith(")")) {
 		String[] args = text.substring(2, text.getlength() - 1).split(" ");
+		if(args[0] == "!") {
+			ignoreErrorStatus = true;
+			args.removeAt(0);
+		}
 		if(!SubProc.isCommand(args[0])) {
 			return -1;
 		}
-		Token[] tokens = ns.Preprocess(generateSubProcSequence(args, false));
+		if(defined(OUTPUT_CMD)) {
+			int j = 0;
+			stdout.print("execute command: ");
+			while(j < args.getlength()) {
+				stdout.print(args[j] + " ");
+				j = j + 1;
+			}
+			stdout.println("");
+		}
+		Token[] tokens = ns.Preprocess(generateSubProcSequence(args, false, ignoreErrorStatus));
 		Node sequence = node.ParseNewNode(tokens, 0, tokens.getlength(), false);
 		node.AddParsedObject("$SubprocSequence", sequence);
 		return endIdx;
