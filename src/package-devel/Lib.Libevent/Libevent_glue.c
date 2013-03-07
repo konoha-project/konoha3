@@ -117,15 +117,15 @@ typedef struct connection_peer {
 	int port;
 } kconnection_peer;
 
-typedef struct cevhttp_uri {
-	kObjectHeader h;
-	struct evhttp_uri *uri;
-} kcevhttp_uri;
-
 typedef struct cevkeyvalq {
 	kObjectHeader h;
 	struct evkeyvalq *keyvalq;
 } kcevkeyvalq;
+
+typedef struct cevhttp_uri {
+	kObjectHeader h;
+	struct evhttp_uri *uri;
+} kcevhttp_uri;
 
 typedef struct cevdns_base {
 	kObjectHeader h;
@@ -359,7 +359,7 @@ static KMETHOD cevent_event_add(KonohaContext *kctx, KonohaStack* sfp)
 static KMETHOD cevent_event_del(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
-	KFieldSet(kcev, kcev->kctimeval, K_NULL);	//delete reference
+	KFieldInit(kcev, kcev->kctimeval, K_NULL);	//delete reference
 	int ret = event_del(kcev->event);
 	KReturnUnboxValue(ret);
 }
@@ -398,14 +398,6 @@ static KMETHOD cevent_event_initialized(KonohaContext *kctx, KonohaStack* sfp)
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
 	int ret = event_initialized(kcev->event);
 	KReturnUnboxValue(ret);
-}
-
-//## void cevent.event_free();
-static KMETHOD cevent_event_free(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kcevent *ev = (kcevent *) sfp[0].asObject;
-	event_free(ev->event);
-	KReturnVoid();
 }
 
 //## void cevent.event_active(int res, int ncalls);
@@ -766,9 +758,9 @@ static void cevhttp_CB_method_invoke(struct evhttp_request *req, void * arg)
 
 	BEGIN_UnusedStack(lsfp);
 	KClass *returnType = kMethod_GetReturnType(cbarg->kcb->method);
-	KUnsafeFieldSet(lsfp[0].asObject, K_NULL);
-	KUnsafeFieldSet(lsfp[1].asObject, (kObject *)kreq);
-	KUnsafeFieldSet(lsfp[2].asObject, cbarg->kcb->env);
+	KStackSetObjectValue(lsfp[0].asObject, K_NULL);
+	KStackSetObjectValue(lsfp[1].asObject, (kObject *)kreq);
+	KStackSetObjectValue(lsfp[2].asObject, cbarg->kcb->env);
 
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, cbarg->kcb, 2);
 	KStackCall(lsfp);
@@ -894,6 +886,17 @@ static KMETHOD cevhttp_set_timeout(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ======================================================================== */
 // evhttp_bound_socket class
+/*
+ * "evhttp_bound_socket" has no "new()" method,
+ * because it will be executed by new_() macro
+ * in evhttp.bind_socket_with_handle() or others.
+ */
+
+static void cevhttp_bound_socket_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kcevhttp_bound_socket *req = (kcevhttp_bound_socket *) o;
+	req->socket = NULL;
+}
 
 //## evconnlistener evhttp_bound_socket.get_listener();
 static KMETHOD cevhttp_bound_socket_get_listener(KonohaContext *kctx, KonohaStack *sfp)
@@ -957,9 +960,9 @@ static void cevhttp_request_CB_method_invoke(struct evhttp_request *req, void * 
 
 	BEGIN_UnusedStack(lsfp);
 	KClass *returnType = kMethod_GetReturnType(cbarg->kcb->method);
-	KUnsafeFieldSet(lsfp[0].asObject, K_NULL);
-	KUnsafeFieldSet(lsfp[1].asObject, (kObject *)cbarg);
-	KUnsafeFieldSet(lsfp[2].asObject, (kObject *)cbarg->kcb->env);
+	KStackSetObjectValue(lsfp[0].asObject, K_NULL);
+	KStackSetObjectValue(lsfp[1].asObject, (kObject *)cbarg);
+	KStackSetObjectValue(lsfp[2].asObject, (kObject *)cbarg->kcb->env);
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, cbarg->kcb, 2);
 	KStackCall(lsfp);
 	END_UnusedStack();
@@ -1043,9 +1046,9 @@ static void cevhttp_request_chunked_CB_method_invoke(struct evhttp_request *req,
 
 	BEGIN_UnusedStack(lsfp);
 	KClass *returnType = kMethod_GetReturnType(cbarg->chunked_kcb->method);
-	KUnsafeFieldSet(lsfp[0].asObject, K_NULL);
-	KUnsafeFieldSet(lsfp[1].asObject, (kObject *)cbarg);
-	KUnsafeFieldSet(lsfp[2].asObject, (kObject *)cbarg->chunked_kcb->env);
+	KStackSetObjectValue(lsfp[0].asObject, K_NULL);
+	KStackSetObjectValue(lsfp[1].asObject, (kObject *)cbarg);
+	KStackSetObjectValue(lsfp[2].asObject, (kObject *)cbarg->chunked_kcb->env);
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, cbarg->chunked_kcb, 2);
 	KStackCall(lsfp);
 	END_UnusedStack();
@@ -1181,7 +1184,9 @@ static KMETHOD cevhttp_request_get_host(KonohaContext *kctx, KonohaStack *sfp)
 static void cevhttp_connection_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kcevhttp_connection *con = (struct cevhttp_connection *) o;
+	con->kctx = NULL;
 	con->evcon = NULL;
+	KFieldInit(con, con->close_kcb, K_NULL);
 }
 
 static void cevhttp_connection_Free(KonohaContext *kctx, kObject *o)
@@ -1191,6 +1196,12 @@ static void cevhttp_connection_Free(KonohaContext *kctx, kObject *o)
 		evhttp_connection_free(con->evcon);
 		con->evcon = NULL;
 	}
+}
+
+static void cevhttp_connection_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+{
+	kcevhttp_connection *con = (kcevhttp_connection *) o;
+	KRefTrace(con->close_kcb);
 }
 
 //## evhttp evhttp_connection.new(event_base base, evdns_base dnsbase, String address, int port);
@@ -1295,9 +1306,9 @@ static void cevhttp_connection_closeCB_method_invoke(struct evhttp_connection *c
 
 	BEGIN_UnusedStack(lsfp);
 	KClass *returnType = kMethod_GetReturnType(cbarg->close_kcb->method);
-	KUnsafeFieldSet(lsfp[0].asObject, K_NULL);
-	KUnsafeFieldSet(lsfp[1].asObject, (kObject *)cbarg);
-	KUnsafeFieldSet(lsfp[2].asObject, (kObject *)cbarg->close_kcb->env);
+	KStackSetObjectValue(lsfp[0].asObject, K_NULL);
+	KStackSetObjectValue(lsfp[1].asObject, (kObject *)cbarg);
+	KStackSetObjectValue(lsfp[2].asObject, (kObject *)cbarg->close_kcb->env);
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, cbarg->close_kcb, 2);
 	KStackCall(lsfp);
 	END_UnusedStack();
@@ -1638,16 +1649,12 @@ static KMETHOD cevhttp_uri_htmlescape(KonohaContext *kctx, KonohaStack *sfp)
 
 
 /* ======================================================================== */
-// evhttp_bound_socket class
-static void cevhttp_bound_socket_Init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	kcevhttp_bound_socket *req = (kcevhttp_bound_socket *) o;
-	req->socket = NULL;
-}
-
-
-/* ======================================================================== */
 // evconnlistener class
+/*
+ * "evconnlistener" has no "new()" method,
+ * because it will be executed by new_() macro
+ * in evhttp_bound_socket.get_listener()
+ */
 static void cevconnlistener_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kcevconnlistener *evclistener = (kcevconnlistener *) o;
@@ -1657,6 +1664,10 @@ static void cevconnlistener_Init(KonohaContext *kctx, kObject *o, void *conf)
 
 /* ======================================================================== */
 // evhttp_set_cb_arg class
+/*
+ * "evhttp_set_cb_arg" has no "new()" method,
+ * because it will be executed by new_() macro
+ */
 static void evhttp_set_cb_arg_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kevhttp_set_cb_arg *cbarg = (kevhttp_set_cb_arg *) o;
@@ -1835,6 +1846,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	defcevhttp_connection.cstruct_size	= sizeof(kcevhttp_connection);
 	defcevhttp_connection.cflag			= KClassFlag_Final;
 	defcevhttp_connection.init			= cevhttp_connection_Init;
+	defcevhttp_connection.reftrace		= cevhttp_connection_Reftrace;
 	defcevhttp_connection.free			= cevhttp_connection_Free;
 	KClass_cevhttp_connection			= KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevhttp_connection, trace);
 
@@ -1964,7 +1976,6 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		_Public, _F(cevent_event_initialized), KType_Int, KType_cevent, KMethodName_("event_initialized"), 0,
 		_Public, _F(cevent_event_initialized), KType_Int, KType_cevent, KMethodName_("signal_initialized"), 0,
 		_Public, _F(cevent_event_initialized), KType_Int, KType_cevent, KMethodName_("timer_initialized"), 0,
-		_Public, _F(cevent_event_free), KType_void, KType_cevent, KMethodName_("event_free"), 0,
 		_Public, _F(cevent_event_active), KType_void, KType_cevent, KMethodName_("event_active"), 2, KType_Int, KFieldName_("res"), KType_Int, KFieldName_("ncalls"),
 		_Public, _F(cevent_getEvents), KType_Int, KType_cevent, KMethodName_("getEvents"), 0, 
 
