@@ -114,7 +114,7 @@ static RawEvent* dequeueRawEventFromLocalQueue(LocalQueue *queue)
 //			kFunc *handler_func = (kFunc *)ctx->sighandlers[ctx->signal];
 //			if(handler_func != NULL) {
 //				ksfp_t *lsfp = ctx->esp + 1; // for safety
-//				lsfp[K_CALLDELTA + 1].ivalue = ctx->signal;
+//				KStackSetUnboxValue(lsfp[K_CALLDELTA + 1].intValue, ctx->signal);
 //				knh_Func_invoke(ctx, handler_func, lsfp, 1/* argc */);
 //			}
 //		}

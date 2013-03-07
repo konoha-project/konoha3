@@ -310,11 +310,11 @@ typedef struct OPCALL {
 	OPCALL *op = (OPCALL *)pc;\
 	kMethod *mtd_ = rbp[op->thisidx + K_MTDIDX2].calledMethod;\
 	KonohaStack *sfp_ = (KonohaStack *)(rbp + op->thisidx); \
-	KUnsafeFieldSet(sfp_[K_RTNIDX].asObject, op->tyo);\
-	sfp_[K_RTNIDX].calledFileLine = op->uline;\
-	sfp_[K_SHIFTIDX].previousStack = (KonohaStack *)(rbp);\
-	sfp_[K_PCIDX].pc = PC_NEXT(pc);\
-	sfp_[K_MTDIDX].calledMethod = mtd_;\
+	KStackSetObjectValue(sfp_[K_RTNIDX].asObject, op->tyo);\
+	KStackSetUnboxValue(sfp_[K_RTNIDX].calledFileLine, op->uline);\
+	KStackSetUnboxValue(sfp_[K_SHIFTIDX].previousStack, (KonohaStack *)(rbp));\
+	KStackSetUnboxValue(sfp_[K_PCIDX].pc, PC_NEXT(pc));\
+	KStackSetUnboxValue(sfp_[K_MTDIDX].calledMethod, mtd_);\
 	((KonohaContextVar *)kctx)->esp = (KonohaStack *)(rbp + op->espshift);\
 	(mtd_)->invokeKMethodFunc(kctx, sfp_); \
 } while(0)

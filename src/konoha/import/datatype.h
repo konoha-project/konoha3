@@ -91,10 +91,10 @@ static void kObject_WriteToBuffer(KonohaContext *kctx, kObject *o, int isDelim, 
 			}
 		}
 		if(KType_Is(UnboxType, kObject_typeId(o))) {
-			sfp[pos].unboxValue = kObject_Unbox(o);
+			KStackSetUnboxValue(sfp[pos].unboxValue, kObject_Unbox(o));
 		}
 		else {
-			KUnsafeFieldSet(sfp[pos].asObject, o);
+			KStackSetObjectValue(sfp[pos].asObject, o);
 		}
 		kObject_class(o)->format(kctx, sfp, pos, wb);
 	}

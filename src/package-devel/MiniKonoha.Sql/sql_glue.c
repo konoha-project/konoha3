@@ -185,7 +185,8 @@ static void kResultSet_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuf
 		ktypeattr_t type = rs->column[i].type;
 		krbp_t *val = &rs->column[i].val;
 		if(KType_Is(UnboxType, type)) {
-			KonohaValue sp[1]; sp[0].unboxValue = val[0].unboxValue;
+			KonohaValue sp[1];
+			KStackSetUnboxValue(sp[0].unboxValue, val[0].unboxValue);
 			KClass_(type)->format(kctx, sp, 0, wb);
 		} else {
 			KLIB kObject_WriteToBuffer(kctx, val[0].asObject, false/*delim*/, wb, NULL, 0);
@@ -489,7 +490,7 @@ static KMETHOD ResultSet_get(KonohaContext *kctx, KonohaStack *sfp)
 		ResultSet_getFloat(kctx, sfp);
 	} else {
 		kObject *returnValue = KLIB Knull(kctx, retClass);
-		sfp[K_RTNIDX].unboxValue = kObject_Unbox(returnValue);
+		KStackSetUnboxValue(sfp[K_RTNIDX].unboxValue, kObject_Unbox(returnValue));
 		KReturn(returnValue);
 	}
 }

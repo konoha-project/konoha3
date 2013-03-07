@@ -24,6 +24,7 @@
 
 #include <konoha3/konoha.h>
 #include <konoha3/sugar.h>
+#include <konoha3/import/methoddecl.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -53,11 +54,9 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 	else {
 		returnValue = KLIB Knull(kctx, targetClass);
 	}
-	sfp[K_RTNIDX].unboxValue = kObject_Unbox(returnValue);
+	KStackSetUnboxValue(sfp[K_RTNIDX].unboxValue, kObject_Unbox(returnValue));
 	KReturn(returnValue);
 }
-
-#include <konoha3/import/methoddecl.h>
 
 static void object_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
