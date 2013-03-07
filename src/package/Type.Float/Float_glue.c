@@ -303,7 +303,8 @@ static KMETHOD TypeCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	kToken *tk = expr->TermToken;
-	sfp[4].floatValue = strtod(kString_text(tk->text), NULL);   // just using tramsformation float
+	// just using tramsformation float
+	KStackSetUnboxValue(sfp[4].floatValue, strtod(kString_text(tk->text), NULL));
 	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_float, sfp[4].unboxValue));
 }
 

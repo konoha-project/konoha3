@@ -35,24 +35,22 @@ static KMETHOD Object_to(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KClass *selfClass = kObject_class(sfp[0].asObject), *targetClass = KGetReturnType(sfp);
 	if(selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass)) {
-		sfp[K_RTNIDX].unboxValue = kObject_Unbox(sfp[0].asObject);
+		KStackSetUnboxValue(sfp[K_RTNIDX].unboxValue, kObject_Unbox(sfp[0].asObject));
 		KReturnField(sfp[0].asObject);
 	}
 	else {
 		kNameSpace *ns = KGetLexicalNameSpace(sfp);
 		DBG_ASSERT(IS_NameSpace(ns));
 		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, selfClass, targetClass);
-//		DBG_P("BEFORE >>>>>>>>>>> %lld\n", sfp[0].unboxValue);
-		sfp[0].unboxValue = kObject_Unbox(sfp[0].asObject);
-//		DBG_P("AFTER >>>>>>>>>>> %lld\n", sfp[0].unboxValue);
+		KStackSetUnboxValue(sfp[0].unboxValue, kObject_Unbox(sfp[0].asObject));
 		if(mtd != NULL && sfp[K_MTDIDX].calledMethod != mtd /* to avoid infinite loop */) {
-			sfp[K_MTDIDX].calledMethod = mtd;
+			KStackSetUnboxValue(sfp[K_MTDIDX].calledMethod, mtd);
 			mtd->invokeKMethodFunc(kctx, sfp);
 			return;
 		}
 	}
 	kObject *returnValue = KLIB Knull(kctx, targetClass);
-	sfp[K_RTNIDX].unboxValue = kObject_Unbox(returnValue);
+	KStackSetUnboxValue(sfp[K_RTNIDX].unboxValue, kObject_Unbox(returnValue));
 	KReturnField(returnValue);
 }
 
@@ -67,11 +65,9 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 		kNameSpace *ns = KGetLexicalNameSpace(sfp);
 		DBG_ASSERT(IS_NameSpace(ns));
 		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, kObject_class(self), KClass_String);
-//		DBG_P("BEFORE >>>>>>>>>>> %s %lld\n", KType_text(kObject_typeId(self)), sfp[0].unboxValue);
-		sfp[0].unboxValue = kObject_Unbox(self);
-//		DBG_P("AFTER >>>>>>>>>>> %lld\n", sfp[0].unboxValue);
+		KStackSetUnboxValue(sfp[0].unboxValue, kObject_Unbox(self));
 		if(mtd != NULL && sfp[K_MTDIDX].calledMethod != mtd /* to avoid infinite loop */) {
-			sfp[K_MTDIDX].calledMethod = mtd;
+			KStackSetUnboxValue(sfp[K_MTDIDX].calledMethod, mtd);
 			mtd->invokeKMethodFunc(kctx, sfp);
 			return;
 		}
@@ -274,7 +270,7 @@ static KMETHOD String_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFuncVar *fo = (kFuncVar *)sfp[0].asFunc;
-//	KFieldSet(fo, fo->self, sfp[1].asObject);
+	//KFieldSet(fo, fo->self, sfp[1].asObject);
 	KFieldSet(fo, fo->method,  sfp[2].asMethod);
 	KReturn(fo);
 }
@@ -284,7 +280,7 @@ static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFunc* fo = sfp[0].asFunc;
 	DBG_ASSERT(IS_Func(fo));
-//	KUnsafeFieldSet(sfp[0].asObject, fo->self);
+	//KStackSetObjectValue(sfp[0].asObject, fo->self);
 
 	KStackCallAgain(sfp, fo->method);
 }

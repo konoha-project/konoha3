@@ -29,12 +29,12 @@ typedef enum {
 static int CallParseFunc(KonohaContext *kctx, kFunc *fo, kNode *node, ksymbol_t symbol, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx)
 {
 	BEGIN_UnusedStack(lsfp);
-	KUnsafeFieldSet(lsfp[1].asNode, node);
-	lsfp[2].intValue = symbol;
-	KUnsafeFieldSet(lsfp[3].asArray, tokenList);
-	lsfp[4].intValue = beginIdx;
-	lsfp[5].intValue = operatorIdx;
-	lsfp[6].intValue = endIdx;
+	KStackSetObjectValue(lsfp[1].asNode, node);
+	KStackSetUnboxValue(lsfp[2].intValue, symbol);
+	KStackSetObjectValue(lsfp[3].asArray, tokenList);
+	KStackSetUnboxValue(lsfp[4].intValue, beginIdx);
+	KStackSetUnboxValue(lsfp[5].intValue, operatorIdx);
+	KStackSetUnboxValue(lsfp[6].intValue, endIdx);
 	CallSugarMethod(kctx, lsfp, fo, 6, (kObject *)KNULL(Int));
 	END_UnusedStack();
 	if(kNode_IsError(node)) return endIdx;

@@ -52,9 +52,9 @@ static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kNameSpa
 {
 	INIT_GCSTACK();
 	BEGIN_UnusedStack(lsfp);
-	KUnsafeFieldSet(lsfp[1].asNode, expr);
-	KUnsafeFieldSet(lsfp[2].asNameSpace, ns);
-	KUnsafeFieldSet(lsfp[3].asObject, reqType);
+	KStackSetObjectValue(lsfp[1].asNode, expr);
+	KStackSetObjectValue(lsfp[2].asNameSpace, ns);
+	KStackSetObjectValue(lsfp[3].asObject, reqType);
 	CallSugarMethod(kctx, lsfp, fo, 4, UPCAST(K_NULLNODE));
 	END_UnusedStack();
 	RESET_GCSTACK();
@@ -107,22 +107,22 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn, kNode *expr, kNameSpac
 static void PutConstNode(KonohaContext *kctx, kNode *expr, KonohaStack *sfp)
 {
 	if(kNode_node(expr) == KNode_Const) {
-		KUnsafeFieldSet(sfp[0].asObject, expr->ObjectConstValue);
-		sfp[0].unboxValue = kObject_Unbox(expr->ObjectConstValue);
+		KStackSetObjectValue(sfp[0].asObject, expr->ObjectConstValue);
+		KStackSetUnboxValue(sfp[0].unboxValue, kObject_Unbox(expr->ObjectConstValue));
 	} else if(kNode_node(expr) == KNode_UnboxConst) {
-		sfp[0].unboxValue = expr->unboxConstValue;
+		KStackSetUnboxValue(sfp[0].unboxValue, expr->unboxConstValue);
 	} else if(kNode_node(expr) == KNode_New) {
-		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->attrTypeId), 0));
+		KStackSetObjectValue(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->attrTypeId), 0));
 //	} else if(kNode_node(expr) == KNode_MethodCall) {   /* case Object Object.boxing(UnboxType Val) */
 //		kMethod *mtd = expr->NodeList->MethodItems[0];
 //		kNode *texpr = expr->NodeList->NodeItems[1];
 //		assert(mtd->mn == MN_box && kArray_size(expr->NodeList) == 2);
 //		assert(KType_Is(UnboxType, expr->attrTypeId) == true);
-//		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->attrTypeId), texpr->unboxConstValue));
+//		KStackSetObjectValue(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->attrTypeId), texpr->unboxConstValue));
 	} else {
 		assert(kNode_node(expr) == KNode_Null);
-		KUnsafeFieldSet(sfp[0].asObject, KLIB Knull(kctx, KClass_(expr->attrTypeId)));
-		sfp[0].unboxValue = 0;
+		KStackSetObjectValue(sfp[0].asObject, KLIB Knull(kctx, KClass_(expr->attrTypeId)));
+		KStackSetUnboxValue(sfp[0].unboxValue, 0);
 	}
 }
 

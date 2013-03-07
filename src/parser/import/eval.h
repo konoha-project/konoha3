@@ -39,8 +39,8 @@ static kstatus_t kMethod_RunEval(KonohaContext *kctx, kMethod *mtd, ktypeattr_t 
 	BEGIN_UnusedStack(lsfp);
 	KRuntimeContextVar *runtime = kctx->stack;
 	if(runtime->evalty != KType_void) {
-		KUnsafeFieldSet(lsfp[1].asObject, runtime->stack[runtime->evalidx].asObject);
-		lsfp[1].intValue = runtime->stack[runtime->evalidx].intValue;
+		KStackSetObjectValue(lsfp[1].asObject, runtime->stack[runtime->evalidx].asObject);
+		KStackSetUnboxValue(lsfp[1].intValue,  runtime->stack[runtime->evalidx].intValue);
 	}
 	KStackSetMethodAll(lsfp, KLIB Knull(kctx, KClass_(rtype)), uline, mtd, 1);
 	kstatus_t result = K_CONTINUE;

@@ -457,10 +457,10 @@ static int CallTokenFunc(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Tokenize
 {
 	DBG_ASSERT(IS_Func(fo));
 	BEGIN_UnusedStack(lsfp);
-	KUnsafeFieldSet(lsfp[0].asNameSpace, tokenizer->ns);
-	KUnsafeFieldSet(lsfp[1].asToken, tk);
-	lsfp[1].unboxValue = (uintptr_t)tokenizer;
-	KUnsafeFieldSet(lsfp[2].asString, preparedString);
+	KStackSetObjectValue(lsfp[0].asNameSpace, tokenizer->ns);
+	KStackSetObjectValue(lsfp[1].asToken, tk);
+	KStackSetUnboxValue(lsfp[1].unboxValue, (uintptr_t)tokenizer);
+	KStackSetObjectValue(lsfp[2].asString, preparedString);
 	CallSugarMethod(kctx, lsfp, fo, 2, KLIB Knull(kctx, KClass_Int));
 	END_UnusedStack();
 	int pos = lsfp[K_RTNIDX].intValue + tok_start;

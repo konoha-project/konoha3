@@ -137,10 +137,10 @@ static void cevent_CB_method_invoke(evutil_socket_t evd, short event, void *arg)
 
 	BEGIN_UnusedStack(lsfp);
 	KClass *returnType = kMethod_GetReturnType(ev->kcb->method);
-	KUnsafeFieldSet(lsfp[0].asObject, K_NULL);
-	lsfp[1].intValue = evd;
-	lsfp[2].intValue = event;
-	KUnsafeFieldSet(lsfp[3].asObject, ev->kcbArg);
+	KStackSetObjectValue(lsfp[0].asObject, K_NULL);
+	KStackSetUnboxValue(lsfp[1].intValue, evd);
+	KStackSetUnboxValue(lsfp[2].intValue, event);
+	KStackSetObjectValue(lsfp[3].asObject, ev->kcbArg);
 
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, ev->kcb, 3);
 	KStackCall(lsfp);
@@ -266,7 +266,7 @@ static KMETHOD cevent_event_add(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
 	kctimeval *tv = (kctimeval *)sfp[1].asObject;
-	KUnsafeFieldSet(kcev->kctimeval, tv);
+	KStackSetObjectValue(kcev->kctimeval, tv);
 	int ret = event_add(kcev->event, tvIsNull(tv) ? NULL : &tv->timeval);
 	KReturnUnboxValue(ret);
 }
@@ -275,7 +275,7 @@ static KMETHOD cevent_event_add(KonohaContext *kctx, KonohaStack* sfp)
 static KMETHOD cevent_event_del(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
-	KUnsafeFieldInit(kcev->kctimeval, K_NULL);	//delete reference
+	KFieldSet(kcev, kcev->kctimeval, K_NULL);	//delete reference
 	int ret = event_del(kcev->event);
 	KReturnUnboxValue(ret);
 }
@@ -399,9 +399,9 @@ static void Cbev_dataCB_dispatcher(kFunc *datacb, struct bufferevent *bev, void 
 
 	BEGIN_UnusedStack(lsfp);
 	KClass *returnType = kMethod_GetReturnType(datacb->method);
-	KUnsafeFieldSet(lsfp[0].asObject, K_NULL/*(kObject *)kcbev*/);
-	KUnsafeFieldSet(lsfp[1].asObject, (kObject *)kcbev);
-	KUnsafeFieldSet(lsfp[2].asObject, kcbev->kcbArg);
+	KStackSetObjectValue(lsfp[0].asObject, K_NULL/*(kObject *)kcbev*/);
+	KStackSetObjectValue(lsfp[1].asObject, (kObject *)kcbev);
+	KStackSetObjectValue(lsfp[2].asObject, kcbev->kcbArg);
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, datacb, 2);
 	KStackCall(lsfp);
 	END_UnusedStack();
@@ -436,10 +436,10 @@ static void cbev_eventCB_method_invoke(struct bufferevent *bev, short what, void
 
 	BEGIN_UnusedStack(lsfp);
 	KClass *returnType = kMethod_GetReturnType(kcbev->eventcb->method);
-	KUnsafeFieldSet(lsfp[0].asObject, K_NULL);
-	KUnsafeFieldSet(lsfp[1].asObject, (kObject *)kcbev);
-	lsfp[2].intValue = what;
-	KUnsafeFieldSet(lsfp[3].asObject, (kObject *)kcbev->kcbArg);
+	KStackSetObjectValue(lsfp[0].asObject, K_NULL);
+	KStackSetObjectValue(lsfp[1].asObject, (kObject *)kcbev);
+	KStackSetUnboxValue(lsfp[2].intValue, what);
+	KStackSetObjectValue(lsfp[3].asObject, (kObject *)kcbev->kcbArg);
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, kcbev->eventcb, 3);
 	KStackCall(lsfp);
 	END_UnusedStack();

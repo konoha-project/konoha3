@@ -128,9 +128,9 @@ static void CallMethod(KonohaContext *kctx, kMethod *Mtd, uchar ParamSize, kObje
 	KonohaStack *stack_top = kctx->esp - ParamSize;
 	KonohaStack *sfp = stack_top + K_CALLDELTA;
 	((KonohaContextVar *)kctx)->esp = sfp + ParamSize;
-	sfp[K_MTDIDX].calledMethod = Mtd;
-	sfp[K_RTNIDX].calledFileLine = uline;
-	KUnsafeFieldSet(sfp[K_RTNIDX].asObject, object);
+	KStackSetUnboxValue(sfp[K_MTDIDX].calledMethod, Mtd);
+	KStackSetUnboxValue(sfp[K_RTNIDX].calledFileLine, uline);
+	KStackSetObjectValue(sfp[K_RTNIDX].asObject, object);
 	Mtd->invokeKMethodFunc(kctx, sfp);
 	//if(IsUnboxed)
 	//	Val.ival = sfp[K_RTNIDX].intValue;
@@ -143,14 +143,14 @@ static void CallMethod(KonohaContext *kctx, kMethod *Mtd, uchar ParamSize, kObje
 static void PushUnboxedValue(KonohaContext *kctx, SValue Val)
 {
 	KonohaStack *sp = kctx->esp;
-	sp[0+K_CALLDELTA].unboxValue = Val.bits;
+	KStackSetUnboxValue(sp[0+K_CALLDELTA].unboxValue, Val.bits);
 	((KonohaContextVar *)kctx)->esp = kctx->esp + 1;
 }
 
 static void PushBoxedValue(KonohaContext *kctx, SValue Val)
 {
 	KonohaStack *sp = kctx->esp;
-	sp[0+K_CALLDELTA].asObject   = (kObject *) Val.ptr;
+	KStackSetObjectValue(sp[0+K_CALLDELTA].asObject, (kObject *) Val.ptr);
 	((KonohaContextVar *)kctx)->esp = kctx->esp + 1;
 }
 
@@ -172,7 +172,7 @@ static SValue PopBoxedValue(KonohaContext *kctx)
 
 static void RaiseError(KonohaContext *kctx, KonohaStack *sfp, kString *ErrorInfo, int exception, int fault, kfileline_t uline)
 {
-	sfp[K_RTNIDX].calledFileLine = uline;
+	KStackSetUnboxValue(sfp[K_RTNIDX].calledFileLine, uline);
 	KLIB KRuntime_raise(kctx, exception, fault, ErrorInfo, sfp);
 }
 

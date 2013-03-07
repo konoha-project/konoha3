@@ -1,8 +1,17 @@
 #include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
-#include <llvm/IRBuilder.h>
+#if LLVM_VERSION >= 302
+#include "llvm/IRBuilder.h"
+#else
+#include "llvm/Support/IRBuilder.h"
+#endif
 #include <llvm/Intrinsics.h>
+#if LLVM_VERSION <= 301
+#include "llvm/Target/TargetData.h"
+#else
 #include <llvm/DataLayout.h>
+#endif
+
 #include <llvm/Pass.h>
 #include <llvm/PassManager.h>
 #include <llvm/Support/Host.h>
@@ -78,7 +87,13 @@ static void InitLLVM()
 	InitializeNativeTarget();
 	InitializeNativeTargetAsmPrinter();
 	GlobalModule = new Module("LLVM", getGlobalContext());
-	GlobalModule->setTargetTriple(LLVM_HOSTTRIPLE);
+	GlobalModule->setTargetTriple(
+#if LLVM_VERSION >= 301
+			sys::getDefaultTargetTriple()
+#else
+			sys::getHostTriple()
+#endif
+			);
 	std::string Error;
 	GlobalEngine = EngineBuilder(GlobalModule)
 		.setEngineKind(EngineKind::JIT)
@@ -120,14 +135,16 @@ static IntrinsicInfo MathIntrinsic[] = {
 	DEFINE_INTRINSIC( 0, cos, 1),
 	DEFINE_INTRINSIC( 1, exp, 1),
 	DEFINE_INTRINSIC( 2, exp2, 1),
-	DEFINE_INTRINSIC( 3, fabs, 1),
-	DEFINE_INTRINSIC( 4, floor, 1),
-	DEFINE_INTRINSIC( 5, log, 1),
-	DEFINE_INTRINSIC( 6, log10, 1),
-	DEFINE_INTRINSIC( 7, log2, 1),
-	DEFINE_INTRINSIC( 8, sqrt, 1),
-	DEFINE_INTRINSIC( 9, pow, 2),
-	DEFINE_INTRINSIC(10, powi, 2)
+	DEFINE_INTRINSIC( 3, log, 1),
+	DEFINE_INTRINSIC( 4, log10, 1),
+	DEFINE_INTRINSIC( 5, log2, 1),
+	DEFINE_INTRINSIC( 6, sqrt, 1),
+	DEFINE_INTRINSIC( 7, pow, 2),
+	DEFINE_INTRINSIC( 8, powi, 2),
+#if LLVM_VERSION >= 302
+	DEFINE_INTRINSIC( 9, fabs, 1),
+	DEFINE_INTRINSIC(10, floor, 1),
+#endif
 };
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
@@ -143,16 +160,18 @@ static Function *CreateMathIntrinsic(unsigned Idx)
 		CASE_INTRINSIC( 0, cos, 1);
 		CASE_INTRINSIC( 1, exp, 1);
 		CASE_INTRINSIC( 2, exp2, 1);
-		CASE_INTRINSIC( 3, fabs, 1);
-		CASE_INTRINSIC( 4, floor, 1);
-		CASE_INTRINSIC( 5, log, 1);
-		CASE_INTRINSIC( 6, log10, 1);
-		CASE_INTRINSIC( 7, log2, 1);
-		CASE_INTRINSIC( 8, sqrt, 1);
-		CASE_INTRINSIC( 9, pow, 2);
-		case 10:
+		CASE_INTRINSIC( 3, log, 1);
+		CASE_INTRINSIC( 4, log10, 1);
+		CASE_INTRINSIC( 5, log2, 1);
+		CASE_INTRINSIC( 6, sqrt, 1);
+		CASE_INTRINSIC( 7, pow, 2);
+		case 8:
 			List.push_back(IntTy);
 			return Intrinsic::getDeclaration(GlobalModule, Intrinsic::powi, List);
+#if LLVM_VERSION >= 302
+		CASE_INTRINSIC( 9, fabs, 1);
+		CASE_INTRINSIC(10, floor, 1);
+#endif
 		default:
 			break;
 	}
@@ -1228,7 +1247,12 @@ static void EmitRecompilationCheck(LLVMIRBuilder *writer, Function *F, BasicBloc
 		builder->CreateBr(MergeBB);
 	}
 	builder->SetInsertPoint(MergeBB);
-	F->addFnAttr(Attributes::NoInline);
+#if LLVM_VERSION <= 301
+#define NO_INLNIE_ATTR Attribute::NoInline
+#else
+#define NO_INLNIE_ATTR Attributes::NoInline
+#endif
+	F->addFnAttr(NO_INLNIE_ATTR);
 }
 
 static void EmitPrologue(LLVMIRBuilder *writer, FuelIRBuilder *builder, IMethod *Mtd, int option)
