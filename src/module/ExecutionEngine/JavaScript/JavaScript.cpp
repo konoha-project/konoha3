@@ -453,14 +453,14 @@ static void JSBuilder_EmitKonohaValue(KonohaContext *kctx, KBuilder *builder, KC
 static void JSBuilder_EmitConstValue(KonohaContext *kctx, KBuilder *builder, kObject *obj)
 {
 	KonohaStack sfp[1];
-	sfp[0].asObject = obj;
+	KStackSetObjectValue(sfp[0].asObject, obj);
 	JSBuilder_EmitKonohaValue(kctx, builder, kObject_class(obj), sfp);
 }
 
 static void JSBuilder_EmitUnboxConstValue(KonohaContext *kctx, KBuilder *builder, KClass *ct, unsigned long long unboxVal)
 {
 	KonohaStack sfp[1];
-	sfp[0].unboxValue = unboxVal;
+	KStackSetUnboxValue(sfp[0].unboxValue, unboxVal);
 	JSBuilder_EmitKonohaValue(kctx, builder, ct, sfp);
 }
 

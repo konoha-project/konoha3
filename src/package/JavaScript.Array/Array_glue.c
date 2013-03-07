@@ -263,8 +263,8 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 //		for(i=0; i != asize; ++i) {
 //			uintptr_t tmp = a->unboxItems[i];
 //			BEGIN_UnusedStack(lsfp, K_CALLDELTA + 1);
-//			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
-//			lsfp[K_CALLDELTA+1].unboxValue = tmp;
+//			KStackSetObjectValue(lsfp[K_CALLDELTA+0].asObject, K_NULL);
+//			KStackSetUnboxValue(lsfp[K_CALLDELTA+1].unboxValue, tmp);
 //			{
 //				KonohaStack *sfp = lsfp + K_CALLDELTA;
 //				KStackSetMethodAll(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, KClass_(resolve_type)));
@@ -278,8 +278,8 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 //		for(i=0; i != asize; ++i) {
 //			kObject *tmp  = a->ObjectItems[i];
 //			BEGIN_UnusedStack(lsfp, K_CALLDELTA + 1);
-//			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
-//			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
+//			KStackSetObjectValue(lsfp[K_CALLDELTA+0].asObject, K_NULL);
+//			KStackSetObjectValue(lsfp[K_CALLDELTA+1].asObject, tmp);
 //			{
 //				KonohaStack *sfp = lsfp + K_CALLDELTA;
 //				KStackSetMethodAll(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, KClass_(resolve_type)));
@@ -306,9 +306,9 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 //		uintptr_t tmp = 0;
 //		BEGIN_UnusedStack(lsfp, K_CALLDELTA + 2);
 //		for(i=0; i != asize; ++i) {
-//			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
-//			lsfp[K_CALLDELTA+1].unboxValue = tmp;
-//			lsfp[K_CALLDELTA+2].unboxValue = a->unboxItems[i];
+//			KStackSetObjectValue(lsfp[K_CALLDELTA+0].asObject, K_NULL);
+//			KStackSetUnboxValue(lsfp[K_CALLDELTA+1].unboxValue, tmp);
+//			KStackSetUnboxValue(lsfp[K_CALLDELTA+2].unboxValue, a->unboxItems[i]);
 //			{
 //				KonohaStack *sfp = lsfp + K_CALLDELTA;
 //				KStackSetMethodAll(sfp, 0/*UL*/, f->mtd, 2, KLIB Knull(kctx, KClass_(resolve_type)));
@@ -325,15 +325,15 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 //		kObject *nulobj = KLIB Knull(kctx, KClass_(resolve_type));
 //		BEGIN_UnusedStack(lsfp, K_CALLDELTA + 2);
 //		for(i=0; i != asize; ++i) {
-//			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, nulobj);
-//			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
-//			KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, a->ObjectItems[i]);
+//			KStackSetObjectValue(lsfp[K_CALLDELTA+0].asObject, nulobj);
+//			KStackSetObjectValue(lsfp[K_CALLDELTA+1].asObject, tmp);
+//			KStackSetObjectValue(lsfp[K_CALLDELTA+2].asObject, a->ObjectItems[i]);
 //			{
 //				KonohaStack *sfp = lsfp + K_CALLDELTA;
 //				KStackSetMethodAll(sfp, 0/*UL*/, f->mtd, 2, nulobj);
 //				KStackCall(sfp);
 //			}
-//			KUnsafeFieldSet(tmp, lsfp[0].asObject);
+//			tmp = lsfp[0].asObject; /* FIXME(ide) I think, it is dangerous but I don't know how to fix it. */
 //		}
 //		END_UnusedStack();
 //		KReturnWith(tmp, RESET_GCSTACK());
@@ -419,23 +419,23 @@ static void kArray_join(KonohaContext *kctx, KBuffer *wb, kArray *a, const char 
 	KClass *KClass_p0 = KClass_(kObject_p0(a));
 	if(kArray_Is(UnboxData, a)) {
 		for(i = 0; i < asize - 1; i++) {
-			lsfp[0].unboxValue = a->unboxItems[i];
+			KStackSetUnboxValue(lsfp[0].unboxValue, a->unboxItems[i]);
 			KClass_p0->format(kctx, lsfp, 0, wb);
 			KLIB KBuffer_Write(kctx, wb, separator, length);
 		}
 		if(asize > 0) {
-			lsfp[0].unboxValue = a->unboxItems[asize - 1];
+			KStackSetUnboxValue(lsfp[0].unboxValue, a->unboxItems[asize - 1]);
 			KClass_p0->format(kctx, lsfp, 0, wb);
 		}
 	}
 	else {
 		for(i = 0; i < asize - 1; i++) {
-			KUnsafeFieldSet(lsfp[0].asObject, a->ObjectItems[i]);
+			KStackSetObjectValue(lsfp[0].asObject, a->ObjectItems[i]);
 			KClass_p0->format(kctx, lsfp, 0, wb);
 			KLIB KBuffer_Write(kctx, wb, separator, length);
 		}
 		if(asize > 0) {
-			KUnsafeFieldSet(lsfp[0].asObject, a->ObjectItems[asize - 1]);
+			KStackSetObjectValue(lsfp[0].asObject, a->ObjectItems[asize - 1]);
 			KClass_p0->format(kctx, lsfp, 0, wb);
 		}
 	}

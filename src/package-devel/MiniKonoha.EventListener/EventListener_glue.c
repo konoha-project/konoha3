@@ -416,14 +416,14 @@ static KMETHOD System_SetSafepoint(KonohaContext *kctx, KonohaStack *sfp)
 //## void System.setEventInvokeFunc(Func f);
 static KMETHOD System_SetEventInvokeFunc(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaContext_getEventContext(kctx)->invokeFuncNULL = sfp[1].asFunc;
+	KUnsafeFieldSet(KonohaContext_getEventContext(kctx)->invokeFuncNULL, sfp[1].asFunc);
 	KReturnVoid();
 }
 
 //## void System.setEnqFunc(Func f);
 static KMETHOD System_SetEnqFunc(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaContext_getEventContext(kctx)->enqFuncNULL = sfp[1].asFunc;
+	KUnsafeFieldSet(KonohaContext_getEventContext(kctx)->enqFuncNULL, sfp[1].asFunc);
 	KReturnVoid();
 }
 
@@ -435,8 +435,8 @@ static void enqueueEventToGlobalQueue(KonohaContext *kctx, RawEvent rawEvent)
 	ev->j = (json_t *)rawEvent;
 	KClass *returnType = kMethod_GetReturnType(KonohaContext_getEventContext(kctx)->enqFuncNULL->method);
 	BEGIN_UnusedStack(lsfp);
-	KUnsafeFieldSet(lsfp[0].asObject, K_NULL);
-	KUnsafeFieldSet(lsfp[1].asObject, (kObject *)ev);
+	KStackSetObjectValue(lsfp[0].asObject, K_NULL);
+	KStackSetObjectValue(lsfp[1].asObject, (kObject *)ev);
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, KonohaContext_getEventContext(kctx)->enqFuncNULL, 1);
 	KStackCall(lsfp);
 	END_UnusedStack();

@@ -254,12 +254,12 @@ static int ReplaceToken(KonohaContext *kctx, kFunc *fo, kNameSpace *ns, kArray *
 {
 	DBG_ASSERT(IS_Func(fo));
 	BEGIN_UnusedStack(lsfp);
-	KUnsafeFieldSet(lsfp[1].asNameSpace, ns);
-	KUnsafeFieldSet(lsfp[2].asArray, tokenList);
-	lsfp[3].unboxValue = (uintptr_t)beginIdx;
-	lsfp[4].unboxValue = (uintptr_t)beginIdx;
-	lsfp[5].unboxValue = (uintptr_t)beginIdx;
-	KUnsafeFieldSet(lsfp[6].asArray, bufferList);
+	KStackSetObjectValue(lsfp[1].asNameSpace, ns);
+	KStackSetObjectValue(lsfp[2].asArray, tokenList);
+	KStackSetUnboxValue(lsfp[3].unboxValue, (uintptr_t)beginIdx);
+	KStackSetUnboxValue(lsfp[4].unboxValue, (uintptr_t)beginIdx);
+	KStackSetUnboxValue(lsfp[5].unboxValue, (uintptr_t)beginIdx);
+	KStackSetObjectValue(lsfp[6].asArray, bufferList);
 	CallSugarMethod(kctx, lsfp, fo, 6, KLIB Knull(kctx, KClass_Int));
 	END_UnusedStack();
 	return((int)lsfp[K_RTNIDX].intValue);
