@@ -88,7 +88,7 @@ static void InitLLVM()
 	InitializeNativeTargetAsmPrinter();
 	GlobalModule = new Module("LLVM", getGlobalContext());
 	GlobalModule->setTargetTriple(
-#if LLVM_VERSION >= 302
+#if LLVM_VERSION >= 301
 			sys::getDefaultTargetTriple()
 #else
 			sys::getHostTriple()
