@@ -38,9 +38,8 @@ static void kBytes_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct kBytesVar *ba = (struct kBytesVar *)o;
 	DBG_ASSERT((size_t)conf >= 0);
-	ba->bytesize = 0;
-	//ba->bytesize = (size_t)conf;
-	//ba->byteptr = (ba->bytesize > 0) ? (const char *)KCalloc((size_t)conf, 1, NULL) : NULL;
+	ba->bytesize = (size_t)conf;
+	ba->byteptr = (ba->bytesize > 0) ? (const char *)KCalloc((size_t)conf, 1, NULL) : NULL;
 }
 
 static void kBytes_Free(KonohaContext *kctx, kObject *o)
@@ -89,7 +88,8 @@ static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].asBytes;
 	size_t size = (size_t)sfp[1].intValue;
-	assert(ba->byteptr == NULL);
+	if(ba->byteptr == NULL)
+		KFree(ba->buf, ba->bytesize);
 	((struct kBytesVar *)ba)->byteptr  = (const char *)KCalloc(size, 1, NULL);
 	((struct kBytesVar *)ba)->bytesize = size;
 	KReturn(ba);

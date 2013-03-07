@@ -60,6 +60,7 @@ static inline void kstack_deinit(kstack_t *stack, int check_stack)
 
 static inline void kstack_push(kstack_t *stack, JSON v)
 {
+    JSONObject_Retain(v);
     ARRAY_add(JSON, stack, v);
 }
 
@@ -70,9 +71,12 @@ static inline JSON kstack_pop(kstack_t *stack)
     return ARRAY_get(JSON, stack, size);
 }
 
-static inline void kstack_move(kstack_t *stack, JSON *list, unsigned beginIdx, unsigned length)
+static inline void kstack_move(kstack_t *stack, JSON *dst, unsigned beginIdx, unsigned length)
 {
-    memcpy(list, stack->list+beginIdx, length*sizeof(JSON));
+    JSON *src = stack->list + beginIdx, *end = src + length;
+    while (src < end) {
+        *dst++ = *src++;
+    }
     stack->size -= length;
 }
 

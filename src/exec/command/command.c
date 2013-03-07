@@ -224,20 +224,17 @@ static kbool_t Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **a
 // -------------------------------------------------------------------------
 // ** main **
 
-void KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *name, ModuleType option);
-void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv);
-KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);
-int Konoha_Destroy(KonohaContext *kctx);
-
 int main(int argc, char *argv[])
 {
-	if(getenv("KONOHA_DEBUG") != NULL) {
+	struct KonohaFactory factory = {};
+	KonohaFactory_SetDefaultFactory(&factory, PosixFactory, argc, argv);
+
+	if(factory.getenv_i("KONOHA_DEBUG") != NULL) {
 		verbose_debug = 1;
 		verbose_sugar = 1;
 		verbose_code = 1;
 	}
-	struct KonohaFactory factory = {};
-	KonohaFactory_SetDefaultFactory(&factory, PosixFactory, argc, argv);
+
 	KonohaContext* konoha = KonohaFactory_CreateKonoha(&factory);
 	Konoha_ParseCommandOption(konoha, argc, argv);
 	return Konoha_Destroy(konoha);

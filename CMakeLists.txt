@@ -129,7 +129,7 @@ else()
 endif()
 
 add_definitions(-DHAVE_CONFIG_H)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.h.cmake
 		${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 set(ExtraLibs)
@@ -170,6 +170,7 @@ macro(add_test_with_property test_name)
 		"KONOHA_HOME=${PARENT_BINARY_DIR}")
 endmacro(add_test_with_property test_name)
 
+option(TEST_FULL   "Testing Full TestCase" OFF)
 option(TEST_STRESS "Use Stress Test" OFF)
 macro(add_konoha_test test_name test_file)
 	if(test_name MATCHES "Stress")
@@ -184,12 +185,19 @@ macro(add_konoha_test test_name test_file)
 	endif(test_name MATCHES "Stress")
 endmacro(add_konoha_test test_name test_file)
 
-file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/*.k)
-foreach(f ${test_files})
-	string(REPLACE // / f ${f})
-	string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}/test/ "" test_name ${f})
-	add_konoha_test(${test_name} ${f})
-endforeach(f ${test_files})
+macro(ADD_TEST_DIR dir)
+	file(GLOB_RECURSE test_files ${dir}/*.k)
+	foreach(f ${test_files})
+		string(REPLACE // / f ${f})
+		string(REPLACE ${dir} "" test_name ${f})
+		add_konoha_test(${test_name} ${f})
+	endforeach(f ${test_files})
+endmacro(ADD_TEST_DIR dir)
+
+ADD_TEST_DIR(${CMAKE_CURRENT_SOURCE_DIR}/test/)
+if(TEST_FULL)
+	ADD_TEST_DIR(${CMAKE_CURRENT_SOURCE_DIR}/test-dev/)
+endif(TEST_FULL)
 
 macro(SET_CXX_PROPERTY_IF_MSVC TARGET)
 	if(MSVC)

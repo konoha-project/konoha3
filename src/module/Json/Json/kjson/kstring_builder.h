@@ -113,7 +113,7 @@ static inline void string_builder_add_hex_no_check(string_builder *sb, uint32_t 
     sb->buf.size += e - p;
 }
 
-static inline void string_builder_add_int(string_builder *sb, intptr_t i)
+static inline void string_builder_add_int(string_builder *sb, int32_t i)
 {
     ARRAY_ensureSize(char, &sb->buf, 12/* = sizeof("-2147483648") */);
     char *p = sb->buf.list + ARRAY_size(sb->buf);

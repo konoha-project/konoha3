@@ -1,14 +1,13 @@
-
 // written by shinpei nakata
 
 import("Type.Float");
-import("JavaScript.Math");
 import("Type.Bytes");
+import("JavaScript.Math");
 import("JavaScript.String");
-import("Syntax.GlobalVariable");
+import("JavaScript.Array");
 import("MiniKonoha.NameSpace");
 import("Syntax.JavaStyleClass");
-import("JavaScript.Array");
+import("Syntax.GlobalVariable");
 import("Syntax.CStyleWhile");
 import("Syntax.JavaNewArray");
 
@@ -190,11 +189,11 @@ void getAmbientOcclusion(RayIntersection isect, Vec ambientOcclusion) {
 			interSectsPlane(plane,occlsect);
 
 			if(occlsect.hit) {
-				hitCount += 1;
+				hitCount = hitCount + 1;
 			}
-			i += 1;
+			i = 1 + 1;
 		} 
-		j += 1;
+		j = j + 1;
 	}
 	float fntheta = ntheta;
 	float fnphi = nphi;
@@ -255,9 +254,9 @@ void render(int[] byteImage, int width, int height, int numberOfSubSamples) {
 						fimg[p+1] = fimg[p+1] + ambientOcclusion.y;
 						fimg[p+2] = fimg[p+2] + ambientOcclusion.z;
 					}
-					u += 1;
+					u = u + 1;
 				}
-				v += 1;
+				v = v + 1;
 			}
 			int p1 = 3 * (fy * fwidth + fx);
 			int num = numberOfSubSamples * numberOfSubSamples;
@@ -269,9 +268,9 @@ void render(int[] byteImage, int width, int height, int numberOfSubSamples) {
 			byteImage[p1] = clamp(fimg[p1]);
 			byteImage[p1 + 1] = clamp(fimg[p1 +1]);
 			byteImage[p1 + 2] = clamp(fimg[p1 + 2]);
-			x += 1;
+			x = x + 1;
 		}
-		y += 1;
+		y = y + 1;
 	}
 }
 
@@ -298,7 +297,7 @@ void run() {
 	while (i < size) {
 		String simg = " " + img[i];
 		System.p(simg);
-		i += 1;
+		i = i + 1;
 	}
 	System.p("");
 }

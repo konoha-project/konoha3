@@ -4,6 +4,7 @@ import("Syntax.JavaStyleClass");
 
 class C0 {
 	int x0;
+	C0() {}
 }
 
 class C1 extends C0 {
@@ -81,7 +82,6 @@ class C18 extends C17 {
 class C19 extends C18 {
 	int x19;
 }
-
 
 
 void test() {

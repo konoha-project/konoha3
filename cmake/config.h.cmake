@@ -1,3 +1,6 @@
+#ifndef CONFIG_H_CMAKE
+#define CONFIG_H_CMAKE
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #cmakedefine HAVE_DLFCN_H 1
 
@@ -70,3 +73,4 @@
 /* Define to 1 if you have the `bzero' function. */
 #cmakedefine HAVE_LIBV8 1
 
+#endif /* end of include guard */

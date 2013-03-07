@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
-
+#undef __SSE2__
 #ifdef __SSE2__
 #include <emmintrin.h>
 #endif
@@ -77,10 +77,13 @@ static JSON JSONUString_new(JSONMemoryPool *jm, string_builder *builder)
     JSONString *o = (JSONString *) JSONMemoryPool_Alloc(jm, sizeof(*o), &malloced);
     if(len <= JSONSTRING_INLINE_SIZE) {
         memcpy(o->text, s, len-1);
+        free(s);
         s = o->text;
     }
     JSONString_init(o, s, len-1);
-    return toJSON(ValueU(o));
+    JSON json = toJSON(ValueU(o));
+    JSON_Init(json);
+    return json;
 }
 
 static unsigned JSONString_hashCode(JSONString *key)
@@ -113,7 +116,7 @@ static void JSONObject_free(JSON json)
 {
     JSONObject *o = toObj(json.val);
     JSON_Release(json);
-    if(JSON_CanFree(json)) {
+    if (JSON_CanFree(json)) {
         kmap_dispose(&o->child);
         JSON_dispose(json);
         JSONMemoryPool_Free(0, o);
@@ -124,7 +127,7 @@ static void _JSONString_free(JSONString *obj)
 {
     JSON json = toJSON(ValueS(obj));
     JSON_Release(json);
-    if(JSON_CanFree(json)) {
+    if (JSON_CanFree(json)) {
         if(obj->length > JSONSTRING_INLINE_SIZE) {
             free((char *)obj->str);
         }
@@ -143,7 +146,7 @@ static void JSONArray_free(JSON json)
 {
     JSONArray *a = toAry(json.val);
     JSON_Release(json);
-    if(JSON_CanFree(json)) {
+    if (JSON_CanFree(json)) {
         JSON *s, *e;
 
         FOR_EACH_ARRAY(a->array, s, e) {
@@ -206,9 +209,7 @@ KJSON_API void JSONArray_append(JSONMemoryPool *jm, JSON json, JSON o)
 static void _JSONObject_set(JSONObject *o, JSONString *key, JSON value)
 {
     assert(JSON_type(value) < 16);
-    if((JSON_type(value) & 1) == 1) {
-        JSON_Retain(value);
-    }
+    JSONObject_Retain(value);
     kmap_set(&o->child, key, value.bits);
 }
 
@@ -224,6 +225,22 @@ KJSON_API void JSONObject_set(JSONMemoryPool *jm, JSON json, const char *keyword
 {
     JSONString *key = toStr(JSONString_new(jm, keyword, keylen).val);
     _JSONObject_set(toObj(json.val), key, value);
+}
+
+KJSON_API void JSONObject_removeObject(JSONMemoryPool *jm, JSON json, JSONString *key)
+{
+
+    JSONObject *o = toObj(json.val);
+    kmap_remove(&o->child, key);
+}
+
+KJSON_API void JSONObject_remove(JSONMemoryPool *jm, JSON json, const char *keyword, size_t keylen)
+{
+    JSONString tmp;
+    tmp.str = (char *)keyword;
+    tmp.length = keylen;
+    tmp.hashcode = 0;
+    JSONObject_removeObject(jm, json, &tmp);
 }
 
 /* Parser functions */
@@ -427,7 +444,10 @@ static void parseEscape(input_stream *ins, string_builder *sb, uint8_t c)
         case 'r': c = '\r';  break;
         case 't': c = '\t';  break;
         case 'u': parseUnicode(ins, sb); return;
-        default: THROW(&ins->exception, PARSER_EXCEPTION, "Illegal escape token");
+        default: {
+            string_builder_dispose(sb);
+            THROW(&ins->exception, PARSER_EXCEPTION, "Illegal escape token");
+        }
     }
     string_builder_add(sb, c);
 }
@@ -699,18 +719,20 @@ KJSON_API JSON parseJSON(JSONMemoryPool *jm, const char *s, const char *e)
     return json;
 }
 
-KJSON_API JSON JSON_get(JSON json, const char *key, size_t len)
+static inline JSON JSONObject_get(JSON json, JSONString *key)
 {
     JSONObject *o = toObj(json.val);
+    map_record_t *r = kmap_get(&o->child, key);
+    return (r) ? toJSON(ValueP(r->v)) : JSON_NOP();
+}
 
+KJSON_API JSON JSON_get(JSON json, const char *key, size_t len)
+{
     JSONString tmp;
     tmp.str = (char *)key;
     tmp.length = len;
     tmp.hashcode = 0;
-    map_record_t *r = kmap_get(&o->child, &tmp);
-    if(r) {
-    }
-    return (r) ? toJSON(ValueP(r->v)) : JSON_NOP();
+    return JSONObject_get(json, &tmp);
 }
 
 static void _JSONString_toString(string_builder *sb, JSONString *o)
@@ -834,13 +856,13 @@ static void JSONUString_toString(string_builder *sb, JSON json)
 
 static void JSONInt32_toString(string_builder *sb, JSON json)
 {
-    intptr_t i = toInt32(json.val);
+    int32_t i = toInt32(json.val);
     string_builder_add_int(sb, i);
 }
 static void JSONInt64_toString(string_builder *sb, JSON json)
 {
     JSONInt64 *o = toInt64(json.val);
-    string_builder_add_int(sb, o->val);
+    string_builder_add_int64(sb, o->val);
 }
 
 static void JSONDouble_toString(string_builder *sb, JSON json)

@@ -115,13 +115,15 @@ static void MPIRequest_ptr_Free(KonohaContext *kctx , kObject *po)
 static void MPIData_ptr_Free(KonohaContext *kctx , kObject *po)
 {
 	kMPIData *p = toRawPtr(kMPIData *, po);
-	switch(p->typeId) {
-		case KMPI_BYTES: break;
-		case KMPI_FARRAY: KFree(p->fa, p->size * sizeof(kfloat_t)); break;
-		case KMPI_IARRAY: KFree(p->ia, p->size * sizeof(kint_t)); break;
-		default: abort();
+	if (p != NULL) {
+		switch(p->typeId) {
+			case KMPI_BYTES: break;
+			case KMPI_FARRAY: KFree(p->fa, p->size * sizeof(kfloat_t)); break;
+			case KMPI_IARRAY: KFree(p->ia, p->size * sizeof(kint_t)); break;
+			default: abort();
+		}
+		KFree(p, sizeof(kMPIData));
 	}
-	KFree(p, sizeof(kMPIData));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -376,19 +378,19 @@ static KMETHOD MPIRequest_cancel(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-///* ------------------------------------------------------------------------ */
-////## MPIData MPIData.fromBytes(Bytes b)
-//static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kMPIData *d = newMPIData(kctx);
-//	d->type = MPI_CHAR;
-//	d->b = sfp[1].asBytes;
-//	d->size = sfp[1].asBytes->bytesize;
-//	d->offset = 0;
-//	d->typeId = KMPI_BYTES;
-//	KReturn(new_ReturnCppObject(kctx, sfp, WRAP(d)));
-//}
-//
+/* ------------------------------------------------------------------------ */
+//## MPIData MPIData.fromBytes(Bytes b)
+static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMPIData *d = newMPIData(kctx);
+	d->type = MPI_CHAR;
+	d->b = sfp[1].asBytes;
+	d->size = sfp[1].asBytes->bytesize;
+	d->offset = 0;
+	d->typeId = KMPI_BYTES;
+	KReturn(new_ReturnCppObject(kctx, sfp, WRAP(d)));
+}
+
 ////## MPIData MPIData.fromIntArray(Array[int] a)
 //static KMETHOD MPIData_fromIntArray(KonohaContext *kctx, KonohaStack *sfp)
 //{
@@ -608,7 +610,7 @@ static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 		_Public, _F(MPIRequest_cancel), KType_Boolean, KType_MPIRequest, KMethodName_("cancel"), 0,
 
 		/* class MPIData */
-		//_Public|_Static, _F(MPIData_fromBytes), KType_MPIData, KType_MPIData, KMethodName_("fromBytes"), 1, KType_Bytes, KFieldName_("b"),
+		_Public|_Static, _F(MPIData_fromBytes), KType_MPIData, KType_MPIData, KMethodName_("fromBytes"), 1, KType_Bytes, KFieldName_("b"),
 		//_Public|_Static, _F(MPIData_fromIntArray), KType_MPIData, KType_MPIData, KMethodName_("fromIntArray"), 1, KType_Array, KFieldName_("b"),
 		//_Public|_Static, _F(MPIData_fromFloatArray), KType_MPIData, KType_MPIData, KMethodName_("fromFloatArray"), 1, KType_Array, KFieldName_("b"),
 		_Public|_Static, _F(MPIData_newFloatArray), KType_MPIData, KType_MPIData, KMethodName_("newFloatArray"), 1, KType_Int, KFieldName_("n"),
