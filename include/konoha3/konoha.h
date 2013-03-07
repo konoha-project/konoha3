@@ -368,6 +368,7 @@ typedef enum {
 } ModuleType;
 
 typedef kbool_t (*ModuleLoadFunc)(KonohaFactory *, ModuleType);
+typedef kbool_t (*ModuleLoadWithParameterFunc)(KonohaFactory *, ModuleType, const char *);
 
 #define KDEFINE_PACKAGE KPackageHandler
 typedef struct KPackageHandlerVar KPackageHandler;
@@ -654,6 +655,7 @@ struct KonohaFactory {
 
 	/* high-level functions */
 	kbool_t  (*LoadPlatformModule)(struct KonohaFactory*, const char *moduleName, ModuleType);
+	kbool_t  (*LoadPlatformModuleWithParameter)(struct KonohaFactory*, const char *moduleName, ModuleType, const char *moduleParam);
 
 	// file load
 	const char *(*FormatPackagePath)(KonohaContext *, char *buf, size_t bufsiz, const char *packageName, const char *ext);

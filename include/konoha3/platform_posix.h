@@ -96,13 +96,20 @@ static kbool_t FormatModulePath(KonohaFactory *factory, char *buf, size_t bufsiz
 	return HasFile(buf);
 }
 
-static kbool_t LoadPlatformModule(KonohaFactory *factory, const char *moduleName, ModuleType type)
+static kbool_t LoadPlatformModuleWithParameter(KonohaFactory *factory, const char *moduleName, ModuleType type, const char *param)
 {
 	char pathbuf[K_PATHMAX];
 	if(FormatModulePath(factory, pathbuf, sizeof(pathbuf), moduleName, K_OSDLLEXT)) {
 		void *gluehdr = dlopen(pathbuf, RTLD_LAZY);  // don't close until the program ends
 		if(gluehdr != NULL) {
 			char funcbuf[256];
+			if(param != NULL) {
+				snprintf(funcbuf, sizeof(funcbuf), "Load%sModuleWithParameter", moduleName);
+				ModuleLoadWithParameterFunc load = (ModuleLoadWithParameterFunc)dlsym(gluehdr, funcbuf);
+				if(load != NULL) {
+					return load(factory, type, param);
+				}
+			}
 			snprintf(funcbuf, sizeof(funcbuf), "Load%sModule", moduleName);
 			ModuleLoadFunc load = (ModuleLoadFunc)dlsym(gluehdr, funcbuf);
 			if(load != NULL) {
@@ -111,6 +118,11 @@ static kbool_t LoadPlatformModule(KonohaFactory *factory, const char *moduleName
 		}
 	}
 	return false;
+}
+
+static kbool_t LoadPlatformModule(KonohaFactory *factory, const char *moduleName, ModuleType type)
+{
+	return LoadPlatformModuleWithParameter(factory, moduleName, type, NULL);
 }
 
 // -------------------------------------------------------------------------
@@ -950,7 +962,8 @@ static kunused void PosixFactory(KonohaFactory *factory)
 	factory->ThreadModule.thread_cond_broadcast_i= kpthread_cond_broadcast;
 	factory->ThreadModule.thread_cond_destroy_i  = kpthread_cond_destroy;
 
-	factory->LoadPlatformModule   = LoadPlatformModule;
+	factory->LoadPlatformModule  = LoadPlatformModule;
+	factory->LoadPlatformModuleWithParameter  = LoadPlatformModuleWithParameter;
 	factory->FormatPackagePath   = FormatPackagePath;
 	factory->LoadPackageHandler  = LoadPackageHandler;
 	factory->BEFORE_LoadScript   = BEFORE_LoadScript;
