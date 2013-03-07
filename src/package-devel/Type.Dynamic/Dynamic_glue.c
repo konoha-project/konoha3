@@ -57,7 +57,7 @@ static kbool_t kMethod_CheckMethodKStackCall(KonohaContext *kctx, KonohaStack *s
 			return false;
 		}
 		if(KClass_Is(UnboxType, paramClass)) {
-			sfp[i].unboxValue = kObject_Unbox(sfp[i].asObject);
+			KStackSetUnboxValue(sfp[i].unboxValue, kObject_Unbox(sfp[i].asObject));
 		}
 	}
 	return true;
@@ -77,7 +77,7 @@ static KMETHOD Dynamic_(KonohaContext *kctx, KonohaStack *sfp)
 	if(mtd != NULL) {
 		if(kMethod_CheckMethodKStackCall(kctx, sfp, mtd, argc)) {
 			KStackSetArgc(sfp, argc);
-			sfp[K_MTDIDX].calledMethod = mtd;
+			KStackSetUnboxValue(sfp[K_MTDIDX].calledMethod, mtd);
 			//kObject *returnValue = sfp[K_RTNIDX].asObject;
 			KStackCall(sfp);
 			return;

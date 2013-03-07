@@ -1631,23 +1631,23 @@ struct kSystemVar {
 #define BEGIN_UnusedStack(SFP) KonohaStack *SFP = kctx->esp + K_CALLDELTA, *esp_ = kctx->esp; KStackCheckOverflow(kctx->stack->topStack);
 #define END_UnusedStack()      ((KonohaContextVar *)kctx)->esp = esp_;
 
-#define KStackSetLine(SFP, UL)    SFP[K_RTNIDX].calledFileLine   = UL
+#define KStackSetLine(SFP, UL)    KStackSetUnboxValue(SFP[K_RTNIDX].calledFileLine, UL)
 #define KStackSetArgc(SFP, ARGC)  ((KonohaContextVar *)kctx)->esp = (SFP + ARGC + 1)
 
 #define KStackSetMethodAll(SFP, DEFVAL, UL, MTD, ARGC) { \
-		KUnsafeFieldSet(SFP[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
+		KStackSetObjectValue(SFP[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
 		KStackSetLine(SFP, UL);\
 		KStackSetArgc(SFP, ARGC);\
-		SFP[K_MTDIDX].calledMethod = MTD; \
+		KStackSetUnboxValue(SFP[K_MTDIDX].calledMethod, MTD); \
 	} \
 
 
 #define KStackSetFunc(SFP, FO) do {\
-	SFP[K_MTDIDX].calledMethod = (FO)->method;\
+	KStackSetUnboxValue(SFP[K_MTDIDX].calledMethod, (FO)->method);\
 }while(0);\
 
 #define KStackSetFuncAll(SFP, DEFVAL, UL, FO, ARGC) { \
-		KUnsafeFieldSet(SFP[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
+		KStackSetObjectValue(SFP[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
 		KStackSetLine(SFP, UL);\
 		KStackSetArgc(SFP, ARGC);\
 		KStackSetFunc(SFP, FO);\
@@ -1655,14 +1655,14 @@ struct kSystemVar {
 
 // if you want to ignore (exception), use KRuntime_tryCallMethod
 #define KStackCall(SFP) { \
-		SFP[K_SHIFTIDX].previousStack = kctx->stack->topStack;\
+		KStackSetUnboxValue(SFP[K_SHIFTIDX].previousStack, kctx->stack->topStack);\
 		kctx->stack->topStack = SFP;\
 		(SFP[K_MTDIDX].calledMethod)->invokeKMethodFunc(kctx, SFP);\
 		kctx->stack->topStack = SFP[K_SHIFTIDX].previousStack;\
 	} \
 
 #define KStackCallAgain(SFP, MTD) { \
-		SFP[K_MTDIDX].calledMethod = MTD;\
+		KStackSetUnboxValue(SFP[K_MTDIDX].calledMethod, MTD);\
 		(MTD)->invokeKMethodFunc(kctx, SFP);\
 	} \
 
@@ -1958,7 +1958,9 @@ typedef struct {
 
 #define KUnsafeFieldInit(VAR, VAL) OBJECT_SET(VAR, VAL)
 #define KUnsafeFieldSet( VAR, VAL) (VAR) = (VAL) /* for c-compiler type check */
-#define KStackSet(VAR, VAL)  (VAR) = (VAL)
+
+#define KStackSetObjectValue(VAR, VAL)  KUnsafeFieldSet(VAR, VAL)
+#define KStackSetUnboxValue(VAR, VAL)   (VAR) = (VAL)
 
 #define KFieldInit(PARENT, VAR, VAL) GC_WRITE_BARRIER(kctx, PARENT, VAR, VAL); KUnsafeFieldInit(VAR, VAL)
 #define KFieldSet(PARENT, VAR, VAL)  GC_WRITE_BARRIER(kctx, PARENT, VAR, VAL); KUnsafeFieldSet( VAR, VAL)
@@ -1998,40 +2000,40 @@ typedef struct {
 #define KGetLexicalNameSpace(sfp)    sfp[K_NSIDX].asNameSpace
 
 #define KReturnWith(VAL, CLEANUP) do {\
-	KUnsafeFieldSet(sfp[K_RTNIDX].asObject, ((kObject *)VAL));\
+	KStackSetObjectValue(sfp[K_RTNIDX].asObject, ((kObject *)VAL));\
 	CLEANUP;\
 	KCheckSafePoint(kctx, sfp);\
 	return; \
 } while(0)
 
 #define KReturnDefaultValue() do {\
-	sfp[K_RTNIDX].intValue = 0;\
+	KStackSetUnboxValue(sfp[K_RTNIDX].intValue, 0);\
 	return; \
 } while(0)
 
 #define KReturnField(vv) do {\
-	KUnsafeFieldSet(sfp[(-(K_CALLDELTA))].asObject, ((kObject *)vv));\
+	KStackSetObjectValue(sfp[(-(K_CALLDELTA))].asObject, ((kObject *)vv));\
 	return; \
 } while(0)
 
 #define KReturn(vv) do {\
-	KUnsafeFieldSet(sfp[(-(K_CALLDELTA))].asObject, ((kObject *)vv));\
+	KStackSetObjectValue(sfp[(-(K_CALLDELTA))].asObject, ((kObject *)vv));\
 	KCheckSafePoint(kctx, sfp);\
 	return; \
 } while(0)
 
 #define KReturnInt(d) do {\
-	sfp[K_RTNIDX].intValue = d; \
+	KStackSetUnboxValue(sfp[K_RTNIDX].intValue, d); \
 	return; \
 } while(0)
 
 #define KReturnUnboxValue(d) do {\
-	sfp[K_RTNIDX].unboxValue = d; \
+	KStackSetUnboxValue(sfp[K_RTNIDX].unboxValue, d); \
 	return; \
 } while(0)
 
 #define KReturnFloatValue(c) do {\
-	sfp[(-(K_CALLDELTA))].floatValue = c; \
+	KStackSetUnboxValue(sfp[(-(K_CALLDELTA))].floatValue, c); \
 	return; \
 } while(0)
 

@@ -121,7 +121,7 @@ static void KStackDynamicTypeCheck(KonohaContext *kctx, KonohaStack *sfp, kMetho
 		paramType = paramType->realtype(kctx, paramType, thisClass);
 		if(objectType == paramType || objectType->isSubType(kctx, objectType, paramType)) {
 			if(KClass_Is(UnboxType, paramType)) {
-				sfp[i+1].unboxValue = kObject_Unbox(sfp[i+1].asObject);
+				KStackSetUnboxValue(sfp[i+1].unboxValue, kObject_Unbox(sfp[i+1].asObject));
 			}
 			continue; // OK
 		}

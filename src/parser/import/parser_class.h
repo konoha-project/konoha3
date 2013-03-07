@@ -129,12 +129,12 @@ static void kToken_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer 
 		kArray *a = tk->GroupTokenList;
 		KLIB KBuffer_Write(kctx, wb, "[", 1);
 		if(kArray_size(a) > 0) {
-			KUnsafeFieldSet(v[pos+1].asToken, a->TokenItems[0]);
+			KStackSetObjectValue(v[pos+1].asToken, a->TokenItems[0]);
 			kToken_format(kctx, v, pos+1, wb);
 		}
 		for(i = 1; i < kArray_size(a); i++) {
 			KLIB KBuffer_Write(kctx, wb, " ", 1);
-			KUnsafeFieldSet(v[pos+1].asToken, a->TokenItems[i]);
+			KStackSetObjectValue(v[pos+1].asToken, a->TokenItems[i]);
 			kToken_format(kctx, v, pos+1, wb);
 		}
 		KLIB KBuffer_Write(kctx, wb, "]", 1);
@@ -174,7 +174,7 @@ static void kNodeTerm_format(KonohaContext *kctx, kObject *o, KonohaValue *v, in
 		KBuffer_WriteTokenText(kctx, wb, (kToken *)o);
 	}
 	else {
-		KUnsafeFieldSet(v[pos].asObject, o);
+		KStackSetObjectValue(v[pos].asObject, o);
 		kObject_class(o)->format(kctx, v, pos, wb);
 	}
 }

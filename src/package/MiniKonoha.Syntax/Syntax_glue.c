@@ -435,7 +435,8 @@ static KMETHOD Node_AppendParsedNode(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *tokenList = sfp[1].asArray;
 	int beginIdx = sfp[2].intValue;
 	int endIdx = sfp[3].intValue;
-	const char *requiredTokenText = IS_NULL(sfp[4].asString) ? NULL : kString_text(sfp[4].asString);
+	kString *str = sfp[4].asString;
+	const char *requiredTokenText = IS_NULL(str) ? NULL : kString_text(str);
 	KReturn(SUGAR AppendParsedNode(kctx, node, tokenList, beginIdx, endIdx, NULL, ParseExpressionOption, requiredTokenText));
 }
 

@@ -366,21 +366,21 @@ static INode *FoldICall(FuelIRBuilder *builder, ICall *Inst)
 	enum TypeId Type = ToUnBoxType(Inst->base.Type);
 	KClass  *kclass = KClass_(ToKType(kctx, Type));
 	kObject *DefObj = KLIB Knull(kctx, kclass);
-	KUnsafeFieldSet(lsfp[K_RTNIDX].asObject, DefObj);
-	lsfp[K_RTNIDX].unboxValue = kObject_Unbox(DefObj);
+	KStackSetObjectValue(lsfp[K_RTNIDX].asObject, DefObj);
+	KStackSetUnboxValue(lsfp[K_RTNIDX].unboxValue, kObject_Unbox(DefObj));
 
 	FOR_EACH_ARRAY__(Inst->Params, x, i, 1) {
 		IConstant *C = (IConstant *) *x;
 		if(IsUnBoxedType(C->base.Type)) {
-			lsfp[i-1].unboxValue = C->Value.bits;
+			KStackSetUnboxValue(lsfp[i-1].unboxValue, C->Value.bits);
 		} else {
-			KUnsafeFieldSet(lsfp[i-1].asObject, C->Value.obj);
-			lsfp[i-1].unboxValue = kObject_Unbox(C->Value.obj);
+			KStackSetObjectValue(lsfp[i-1].asObject, C->Value.obj);
+			KStackSetUnboxValue(lsfp[i-1].unboxValue, kObject_Unbox(C->Value.obj));
 		}
 	}
 	if(Inst->Op == VirtualCall) {
 		kNameSpace *ns = builder->Method->ns;
-		KUnsafeFieldSet(lsfp[K_NSIDX].asNameSpace, ns);
+		KStackSetObjectValue(lsfp[K_NSIDX].asNameSpace, ns);
 	}
 	KStackSetMethodAll(lsfp, DefObj, Inst->uline, mtd, psize);
 	KStackCall(lsfp);

@@ -132,8 +132,9 @@ static KMETHOD NameSpace_DefineConst(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KMakeTrace(trace, sfp);
 	ksymbol_t symbol = (ksymbol_t)sfp[1].intValue;
-	KClass *c = kObject_class(sfp[2].asObject);
-	uintptr_t unboxValue = KClass_Is(UnboxType, c) ? kObject_Unbox(sfp[2].asObject) : (uintptr_t)sfp[2].asObject;
+	kObject  *value = sfp[2].asObject;
+	KClass   *c = kObject_class(value);
+	uintptr_t unboxValue = KClass_Is(UnboxType, c) ? kObject_Unbox(value) : (uintptr_t)value;
 	KReturnUnboxValue(kNameSpace_SetConstData(kctx, sfp[0].asNameSpace, symbol, c->typeId, unboxValue, trace));
 }
 

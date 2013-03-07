@@ -709,7 +709,7 @@ static void DumpObject(KonohaContext *kctx, kObject *o, const char *file, const 
 	KBuffer wb;
 	KonohaStack *lsfp = kctx->esp;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	KUnsafeFieldSet(lsfp[0].asObject, o);
+	KStackSetObjectValue(lsfp[0].asObject, o);
 	kObject_class(o)->format(kctx, lsfp, 0, &wb);
 	const char *msg = KLIB KBuffer_text(kctx, &wb, EnsureZero);
 	if(file == NULL) {
@@ -773,10 +773,10 @@ static void PushParam(KonohaContext *kctx, KonohaStack *sfp, const char *fmt, va
 {
 	switch(fmt[0]) {
 	case 'u': case 'i': case 'd':
-		sfp[0].unboxValue = (uintptr_t)va_arg(ap, uintptr_t);
+		KStackSetUnboxValue(sfp[0].unboxValue, (uintptr_t)va_arg(ap, uintptr_t));
 		break;
 	case 'O':
-		KUnsafeFieldSet(sfp[0].asObject, (kObject *)va_arg(ap, kObject *));
+		KStackSetObjectValue(sfp[0].asObject, (kObject *)va_arg(ap, kObject *));
 		break;
 	}
 }
@@ -790,7 +790,7 @@ static uintptr_t ApplySystemFunc(KonohaContext *kctx, uintptr_t defval, const ch
 	if(mtd != NULL) {
 		KClass *returnType = kMethod_GetReturnType(mtd);
 		BEGIN_UnusedStack(lsfp);
-		KUnsafeFieldSet(lsfp[0].asNameSpace, ns);
+		KStackSetObjectValue(lsfp[0].asNameSpace, ns);
 		for(i = 0; i < psize; i++) {
 			va_list ap;
 			va_start(ap, param);

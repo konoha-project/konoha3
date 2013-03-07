@@ -170,8 +170,8 @@ static void kNameSpace_LookupMethodWithInlineCache(KonohaContext *kctx, KonohaSt
 		mtd =  KLIB kNameSpace_GetMethodBySignatureNULL(kctx, ns, ct, mtd->mn, mtd->paramdom, 0, NULL);
 		cache[0] = mtd;
 	}
-	sfp[0].unboxValue = kObject_Unbox(sfp[0].asObject);
-	sfp[K_MTDIDX].calledMethod = mtd;
+	KStackSetUnboxValue(sfp[0].unboxValue, kObject_Unbox(sfp[0].asObject));
+	KStackSetUnboxValue(sfp[K_MTDIDX].calledMethod, mtd);
 }
 
 static KVirtualCode *KonohaVirtualMachine_Run(KonohaContext *, KonohaStack *, KVirtualCode *);
