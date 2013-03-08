@@ -657,7 +657,7 @@ static KMETHOD cevhttp_bind_socket(KonohaContext *kctx, KonohaStack *sfp)
 	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
 	kString *addr = sfp[1].asString;
 	int port = sfp[2].intValue;
-	int ret = evhttp_bind_socket(http->evhttp, addr->text, port);
+	int ret = evhttp_bind_socket(http->evhttp, kString_text(addr), port);
 	KReturnUnboxValue(ret);
 }
 
@@ -669,7 +669,7 @@ static KMETHOD cevhttp_bind_socket_with_handle(KonohaContext *kctx, KonohaStack 
 	int port = sfp[2].intValue;
 
 	kcevhttp_bound_socket *ret = (kcevhttp_bound_socket *)new_(cevhttp_bound_socket, 0, OnStack);
-	struct evhttp_bound_socket *socket = evhttp_bind_socket_with_handle(http->evhttp, addr->text, port);
+	struct evhttp_bound_socket *socket = evhttp_bind_socket_with_handle(http->evhttp, kString_text(addr), port);
 	KFieldSet(ret, ret->socket, socket);
 	KReturn(ret);
 }
@@ -806,7 +806,7 @@ static int cevhttp_set_cb_common(bool isGencb, KonohaContext *kctx, KonohaStack 
 		evhttp_set_gencb(http->evhttp, cevhttp_CB_method_invoke, set_cb_cbarg);
 		ret = 0;
 	} else {
-		if ((ret = evhttp_set_cb(http->evhttp, uri->text, cevhttp_CB_method_invoke, set_cb_cbarg)) == 0) {
+		if ((ret = evhttp_set_cb(http->evhttp, kString_text(uri), cevhttp_CB_method_invoke, set_cb_cbarg)) == 0) {
 			KLIB kArray_Add(kctx, http->cbargArray, fo); //set the reference to kArray in evhttp class
 		}
 	}
@@ -824,7 +824,7 @@ static KMETHOD cevhttp_del_cb(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
 	kString *uri = (kString *)sfp[1].asString;
-	int ret = evhttp_del_cb(http->evhttp, uri->text);
+	int ret = evhttp_del_cb(http->evhttp, kString_text(uri));
 
 	//TODO delete member from cbargArray
 
@@ -844,7 +844,7 @@ static KMETHOD cevhttp_add_virtual_host(KonohaContext *kctx, KonohaStack *sfp)
 	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
 	kString *pattern = sfp[1].asString;
 	kcevhttp *vhost = (kcevhttp *)sfp[2].asObject;
-	int ret = evhttp_add_virtual_host(http->evhttp, pattern->text, vhost->evhttp);
+	int ret = evhttp_add_virtual_host(http->evhttp, kString_text(pattern), vhost->evhttp);
 	KReturnUnboxValue(ret);
 }
 
@@ -862,7 +862,7 @@ static KMETHOD cevhttp_add_server_alias(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
 	kString *alias = sfp[1].asString;
-	int ret = evhttp_add_server_alias(http->evhttp, alias->text);
+	int ret = evhttp_add_server_alias(http->evhttp, kString_text(alias));
 	KReturnUnboxValue(ret);
 }
 
@@ -871,7 +871,7 @@ static KMETHOD cevhttp_remove_server_alias(KonohaContext *kctx, KonohaStack *sfp
 {
 	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
 	kString *alias = sfp[1].asString;
-	int ret = evhttp_remove_server_alias(http->evhttp, alias->text);
+	int ret = evhttp_remove_server_alias(http->evhttp, kString_text(alias));
 	KReturnUnboxValue(ret);
 }
 
@@ -987,7 +987,7 @@ static KMETHOD cevhttp_request_send_error(KonohaContext *kctx, KonohaStack *sfp)
 	kcevhttp_request *req = (kcevhttp_request *)sfp[0].asObject;
 	int error = sfp[1].intValue;
 	kString *reason = sfp[2].asString;
-	evhttp_send_error(req->req, error, reason->text);
+	evhttp_send_error(req->req, error, kString_text(reason));
 	KReturnVoid();
 }
 
@@ -998,7 +998,7 @@ static KMETHOD cevhttp_request_send_reply(KonohaContext *kctx, KonohaStack *sfp)
 	int code = sfp[1].intValue;
 	kString *reason = sfp[2].asString;
 	kcevbuffer *databuf = (kcevbuffer *)sfp[3].asObject;
-	evhttp_send_reply(req->req, code, reason->text, databuf->buf);
+	evhttp_send_reply(req->req, code, kString_text(reason), databuf->buf);
 	KReturnVoid();
 }
 
@@ -1008,7 +1008,7 @@ static KMETHOD cevhttp_request_send_reply_start(KonohaContext *kctx, KonohaStack
 	kcevhttp_request *req = (kcevhttp_request *)sfp[0].asObject;
 	int code = sfp[1].intValue;
 	kString *reason = sfp[2].asString;
-	evhttp_send_reply_start(req->req, code, reason->text);
+	evhttp_send_reply_start(req->req, code, kString_text(reason));
 	KReturnVoid();
 }
 
@@ -1213,7 +1213,7 @@ static KMETHOD cevhttp_connection_new(KonohaContext *kctx, KonohaStack *sfp)
 	kString *addr = sfp[3].asString;
 	int port = sfp[4].intValue;
 	assert(port >= 0);
-	con->evcon = evhttp_connection_base_new(base->event_base, dnsbase->base, addr->text, (unsigned short)port);
+	con->evcon = evhttp_connection_base_new(base->event_base, dnsbase->base, kString_text(addr), (unsigned short)port);
 	KReturn(con);
 }
 
@@ -1258,7 +1258,7 @@ static KMETHOD cevhttp_connection_set_local_address(KonohaContext *kctx, KonohaS
 {
 	kcevhttp_connection *con = (kcevhttp_connection *)sfp[0].asObject;
 	kString *addr = sfp[1].asString;
-	evhttp_connection_set_local_address(con->evcon, addr->text);
+	evhttp_connection_set_local_address(con->evcon, kString_text(addr));
 	KReturnVoid();
 }
 
@@ -1348,7 +1348,7 @@ static KMETHOD cevhttp_connection_make_request(KonohaContext *kctx, KonohaStack 
 	kcevhttp_request *req = (kcevhttp_request *)sfp[1].asObject;
 	int type = sfp[2].intValue;
 	kString *uri = sfp[3].asString;
-	int ret = evhttp_make_request(con->evcon, req->req, type, uri->text);
+	int ret = evhttp_make_request(con->evcon, req->req, type, kString_text(uri));
 	KReturnUnboxValue(ret);
 }
 
@@ -1382,7 +1382,7 @@ static KMETHOD cevkeyvalq_find_header(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevkeyvalq *headers = (kcevkeyvalq *)sfp[0].asObject;
 	kString *key = sfp[1].asString;
-	const char *ret = evhttp_find_header(headers->keyvalq, key->text);
+	const char *ret = evhttp_find_header(headers->keyvalq, kString_text(key));
 	KReturn(KLIB new_kString(kctx, OnStack, ret, strlen(ret), StringPolicy_UTF8));
 }
 
@@ -1391,7 +1391,7 @@ static KMETHOD cevkeyvalq_remove_header(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevkeyvalq *headers = (kcevkeyvalq *)sfp[0].asObject;
 	kString *key = sfp[1].asString;
-	KReturnUnboxValue(evhttp_remove_header(headers->keyvalq, key->text));
+	KReturnUnboxValue(evhttp_remove_header(headers->keyvalq, kString_text(key)));
 }
 
 //## int evkeyvalq.add_header(String key, String value);
@@ -1400,7 +1400,7 @@ static KMETHOD cevkeyvalq_add_header(KonohaContext *kctx, KonohaStack *sfp)
 	kcevkeyvalq *headers = (kcevkeyvalq *)sfp[0].asObject;
 	kString *key = sfp[1].asString;
 	kString *value = sfp[2].asString;
-	KReturnUnboxValue(evhttp_add_header(headers->keyvalq, key->text, value->text));
+	KReturnUnboxValue(evhttp_add_header(headers->keyvalq, kString_text(key), kString_text(value)));
 }
 
 //## void evkeyvalq.clear_header();;
@@ -1506,7 +1506,7 @@ static KMETHOD cevhttp_uri_set_scheme(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_uri *uri = (kcevhttp_uri *)sfp[0].asObject;
 	kString *scheme = sfp[1].asString;
-	KReturnUnboxValue(evhttp_uri_set_scheme(uri->uri, scheme->text));
+	KReturnUnboxValue(evhttp_uri_set_scheme(uri->uri, kString_text(scheme)));
 }
 
 //## int evhttp_uri.set_userinfo(String userinfo);
@@ -1514,7 +1514,7 @@ static KMETHOD cevhttp_uri_set_userinfo(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_uri *uri = (kcevhttp_uri *)sfp[0].asObject;
 	kString *userinfo = sfp[1].asString;
-	KReturnUnboxValue(evhttp_uri_set_userinfo(uri->uri, userinfo->text));
+	KReturnUnboxValue(evhttp_uri_set_userinfo(uri->uri, kString_text(userinfo)));
 }
 
 //## int evhttp_uri.set_host(String host);
@@ -1522,7 +1522,7 @@ static KMETHOD cevhttp_uri_set_host(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_uri *uri = (kcevhttp_uri *)sfp[0].asObject;
 	kString *host = sfp[1].asString;
-	KReturnUnboxValue(evhttp_uri_set_host(uri->uri, host->text));
+	KReturnUnboxValue(evhttp_uri_set_host(uri->uri, kString_text(host)));
 }
 
 //## int evhttp_uri.set_port(int port);
@@ -1538,7 +1538,7 @@ static KMETHOD cevhttp_uri_set_path(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_uri *uri = (kcevhttp_uri *)sfp[0].asObject;
 	kString *path = sfp[1].asString;
-	KReturnUnboxValue(evhttp_uri_set_path(uri->uri, path->text));
+	KReturnUnboxValue(evhttp_uri_set_path(uri->uri, kString_text(path)));
 }
 
 //## int evhttp_uri.set_query(String query);
@@ -1546,7 +1546,7 @@ static KMETHOD cevhttp_uri_set_query(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_uri *uri = (kcevhttp_uri *)sfp[0].asObject;
 	kString *query = sfp[1].asString;
-	KReturnUnboxValue(evhttp_uri_set_query(uri->uri, query->text));
+	KReturnUnboxValue(evhttp_uri_set_query(uri->uri, kString_text(query)));
 }
 
 //## int evhttp_uri.set_fragment(String fragment);
@@ -1554,7 +1554,7 @@ static KMETHOD cevhttp_uri_set_fragment(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_uri *uri = (kcevhttp_uri *)sfp[0].asObject;
 	kString *fragment = sfp[1].asString;
-	KReturnUnboxValue(evhttp_uri_set_fragment(uri->uri, fragment->text));
+	KReturnUnboxValue(evhttp_uri_set_fragment(uri->uri, kString_text(fragment)));
 }
 
 //## evhttp_uri evhttp_uri.parse_with_flags(String source_uri, int flags);
@@ -1563,7 +1563,7 @@ static KMETHOD cevhttp_uri_parse_with_flags(KonohaContext *kctx, KonohaStack *sf
 	kcevhttp_uri *uri = (kcevhttp_uri *)sfp[0].asObject;
 	kString *source_uri = sfp[1].asString;
 	unsigned int flags = sfp[2].intValue;
-	uri->uri = evhttp_uri_parse_with_flags(source_uri->text, flags);
+	uri->uri = evhttp_uri_parse_with_flags(kString_text(source_uri), flags);
 	KReturn(uri);
 }
 
@@ -1572,7 +1572,7 @@ static KMETHOD cevhttp_uri_parse(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_uri *uri = (kcevhttp_uri *)sfp[0].asObject;
 	kString *source_uri = sfp[1].asString;
-	uri->uri = evhttp_uri_parse(source_uri->text);
+	uri->uri = evhttp_uri_parse(kString_text(source_uri));
 	KReturn(uri);
 }
 
@@ -1589,7 +1589,7 @@ static KMETHOD cevhttp_uri_join(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD cevhttp_uri_encode_uri(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *str = sfp[1].asString;
-	char *encoded = evhttp_encode_uri(str->text);
+	char *encoded = evhttp_encode_uri(kString_text(str));
 	kString *retStr = KLIB new_kString(kctx, OnStack, encoded, strlen(encoded), StringPolicy_ASCII);
 	free(encoded);
 	KReturn(retStr);
@@ -1601,7 +1601,7 @@ static KMETHOD cevhttp_uri_uriencode(KonohaContext *kctx, KonohaStack *sfp)
 	kString *str = sfp[1].asString;
 	int size = sfp[2].intValue;
 	int space_to_plus = sfp[3].intValue;
-	char *encoded = evhttp_uriencode(str->text, size, space_to_plus);
+	char *encoded = evhttp_uriencode(kString_text(str), size, space_to_plus);
 	kString *retStr = KLIB new_kString(kctx, OnStack, encoded, strlen(encoded), StringPolicy_ASCII);
 	free(encoded);
 	KReturn(retStr);
@@ -1611,7 +1611,7 @@ static KMETHOD cevhttp_uri_uriencode(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD cevhttp_uri_decode_uri(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *uri = sfp[1].asString;
-	char *decoded = evhttp_decode_uri(uri->text);
+	char *decoded = evhttp_decode_uri(kString_text(uri));
 	kString *retStr = KLIB new_kString(kctx, OnStack, decoded, strlen(decoded), StringPolicy_UTF8);
 	free(decoded);
 	KReturn(retStr);
@@ -1623,7 +1623,7 @@ static KMETHOD cevhttp_uri_uridecode(KonohaContext *kctx, KonohaStack *sfp)
 	kString *uri = sfp[1].asString;
 	int decode_plus = sfp[2].intValue;
 	size_t size_out;
-	char *decoded = evhttp_uridecode(uri->text, decode_plus, &size_out);
+	char *decoded = evhttp_uridecode(kString_text(uri), decode_plus, &size_out);
 	kString *retStr = KLIB new_kString(kctx, OnStack, decoded, size_out, StringPolicy_UTF8);
 	free(decoded);
 	KReturn(retStr);
@@ -1634,14 +1634,14 @@ static KMETHOD cevhttp_uri_parse_query_str(KonohaContext *kctx, KonohaStack *sfp
 {
 	kString *uri = sfp[1].asString;
 	kcevkeyvalq *headers = (kcevkeyvalq *)sfp[2].asObject;
-	KReturnUnboxValue(evhttp_parse_query_str(uri->text, headers->keyvalq));
+	KReturnUnboxValue(evhttp_parse_query_str(kString_text(uri), headers->keyvalq));
 }
 
 //## @Static String evhttp_uri.htmlescape(String html);
 static KMETHOD cevhttp_uri_htmlescape(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *html = sfp[1].asString;
-	char *escaped = evhttp_htmlescape(html->text);
+	char *escaped = evhttp_htmlescape(kString_text(html));
 	kString *retStr = KLIB new_kString(kctx, OnStack, escaped, strlen(escaped), StringPolicy_ASCII);
 	free(escaped);
 	KReturn(retStr);
