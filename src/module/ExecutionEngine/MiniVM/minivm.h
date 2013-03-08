@@ -65,6 +65,7 @@ typedef struct KVirtualCode {
 		KClass *ct[OPARGSIZE];
 		char *u[OPARGSIZE];
 	};
+	uintptr_t unused;
 } KVirtualCode;
 
 typedef enum {
