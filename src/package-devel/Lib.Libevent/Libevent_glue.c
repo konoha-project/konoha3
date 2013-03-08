@@ -438,7 +438,7 @@ static void cbufferevent_Free(KonohaContext *kctx, kObject *o)
 	kcbufferevent *bev = (kcbufferevent *) o;
 
 	bev->kctx = NULL;
-	if (bev->bev != NULL) {
+	if(bev->bev != NULL) {
 		bufferevent_free(bev->bev);
 		bev->bev = NULL;
 	}

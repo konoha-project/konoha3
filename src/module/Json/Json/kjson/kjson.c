@@ -116,7 +116,7 @@ static void JSONObject_free(JSON json)
 {
     JSONObject *o = toObj(json.val);
     JSON_Release(json);
-    if (JSON_CanFree(json)) {
+    if(JSON_CanFree(json)) {
         kmap_dispose(&o->child);
         JSON_dispose(json);
         JSONMemoryPool_Free(0, o);
@@ -127,7 +127,7 @@ static void _JSONString_free(JSONString *obj)
 {
     JSON json = toJSON(ValueS(obj));
     JSON_Release(json);
-    if (JSON_CanFree(json)) {
+    if(JSON_CanFree(json)) {
         if(obj->length > JSONSTRING_INLINE_SIZE) {
             free((char *)obj->str);
         }
@@ -146,7 +146,7 @@ static void JSONArray_free(JSON json)
 {
     JSONArray *a = toAry(json.val);
     JSON_Release(json);
-    if (JSON_CanFree(json)) {
+    if(JSON_CanFree(json)) {
         JSON *s, *e;
 
         FOR_EACH_ARRAY(a->array, s, e) {

@@ -250,7 +250,7 @@ static int ParseNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int be
 	return endIdx;
 }
 
-static kNode* ParseNewNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int *beginIdx, int endIdx, ParseOption option, const char *requiredTokenText)
+static kNode *ParseNewNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int *beginIdx, int endIdx, ParseOption option, const char *requiredTokenText)
 {
 	kNode *node = new_UntypedNode(kctx, OnGcStack, ns);
 	int nextIdx = ParseNode(kctx, node, tokenList, beginIdx[0], endIdx, option, requiredTokenText);
@@ -288,7 +288,7 @@ static kNode *AppendParsedNode(KonohaContext *kctx, kNode *node, kArray *tokenLi
 	return node;
 }
 
-static kNode* ParseSource(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline, int baseIndent)
+static kNode *ParseSource(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline, int baseIndent)
 {
 	kNode *node;
 	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList, 0};
