@@ -620,6 +620,7 @@ static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
 	size_t i = 0;
 	KonohaStack *p = sfp+1;
+	KLIB KArray_Expand(kctx, &((struct _kAbstractArray *)a)->a, (kctx->esp - p) * sizeof(uintptr_t));
 	if(kArray_Is(UnboxData, a)) {
 		for(i = 0; p + i < kctx->esp; i++) {
 			a->unboxItems[i] = p[i].unboxValue;
