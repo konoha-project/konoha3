@@ -228,7 +228,6 @@ static void cevent_CB_method_invoke(evutil_socket_t evd, short event, void *arg)
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, ev->kcb, 3);
 	KStackCall(lsfp);
 	END_UnusedStack();
-	return;
 }
 
 
@@ -359,7 +358,7 @@ static KMETHOD cevent_event_add(KonohaContext *kctx, KonohaStack* sfp)
 static KMETHOD cevent_event_del(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
-	KFieldInit(kcev, kcev->kctimeval, K_NULL);	//delete reference
+	KFieldSet(kcev, kcev->kctimeval, (kctimeval *)K_NULL);	//delete reference
 	int ret = event_del(kcev->event);
 	KReturnUnboxValue(ret);
 }
@@ -474,7 +473,7 @@ static void Cbev_dataCB_dispatcher(kFunc *datacb, struct bufferevent *bev, void 
 #if 1	// this compile switch is just to check libevent behavior at coding. If stoped by assert(), please change compile switch to '0'.
 	assert(bev == kcbev->bev);
 #else
-	KFieldSet(kcbev, kcbev->bev, bev);
+	kcbev->bev = bev;
 #endif
 
 	BEGIN_UnusedStack(lsfp);
@@ -495,7 +494,6 @@ static void cbev_readCB_method_invoke(struct bufferevent *bev, void *arg)
 {
 	kcbufferevent *kcbev = arg;
 	Cbev_dataCB_dispatcher(kcbev->readcb, bev, arg);
-	return;
 }
 
 /*
@@ -506,7 +504,6 @@ static void cbev_writeCB_method_invoke(struct bufferevent *bev, void *arg)
 {
 	kcbufferevent *kcbev = arg;
 	Cbev_dataCB_dispatcher(kcbev->writecb, bev, arg);
-	return;
 }
 
 /*
@@ -520,7 +517,7 @@ static void cbev_eventCB_method_invoke(struct bufferevent *bev, short what, void
 #if 1	// this compile switch is just to check libevent behavior at coding. If stoped by assert(), please change compile switch to '0'.
 	assert(bev == kcbev->bev);
 #else
-	KFieldSet(kcbev, kcbev->bev, bev);
+	kcbev->bev = bev;
 #endif
 
 	BEGIN_UnusedStack(lsfp);
@@ -532,7 +529,6 @@ static void cbev_eventCB_method_invoke(struct bufferevent *bev, short what, void
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, kcbev->eventcb, 3);
 	KStackCall(lsfp);
 	END_UnusedStack();
-	return;
 }
 
 //## void bufferevent.setcb(
@@ -632,12 +628,8 @@ static void cevhttp_Free(KonohaContext *kctx, kObject *o)
 
 static void cevhttp_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
-	size_t i;
 	kcevhttp *http = (kcevhttp *) o;
 	KRefTrace(http->cbargArray);
-	for (i = 0; i < kArray_size(http->cbargArray); i++) {
-		KRefTrace(http->cbargArray->ObjectItems[i]);
-	}
 }
 
 //## evhttp evhttp.new();
@@ -668,9 +660,9 @@ static KMETHOD cevhttp_bind_socket_with_handle(KonohaContext *kctx, KonohaStack 
 	kString *addr = sfp[1].asString;
 	int port = sfp[2].intValue;
 
-	kcevhttp_bound_socket *ret = (kcevhttp_bound_socket *)new_(cevhttp_bound_socket, 0, OnStack);
+	kcevhttp_bound_socket *ret = (kcevhttp_bound_socket *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
 	struct evhttp_bound_socket *socket = evhttp_bind_socket_with_handle(http->evhttp, addr->text, port);
-	KFieldSet(ret, ret->socket, socket);
+	ret->socket = socket;
 	KReturn(ret);
 }
 
@@ -688,9 +680,9 @@ static KMETHOD cevhttp_accept_socket_with_handle(KonohaContext *kctx, KonohaStac
 	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
 	int fd = sfp[1].intValue;
 
-	kcevhttp_bound_socket *ret = (kcevhttp_bound_socket *)new_(cevhttp_bound_socket, 0, OnStack);
+	kcevhttp_bound_socket *ret = (kcevhttp_bound_socket *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
 	struct evhttp_bound_socket *socket = evhttp_accept_socket_with_handle(http->evhttp, fd);
-	KFieldSet(ret, ret->socket, socket);
+	ret->socket = socket;
 	KReturn(ret);
 }
 
@@ -700,9 +692,9 @@ static KMETHOD cevhttp_bind_listener(KonohaContext *kctx, KonohaStack *sfp)
 	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
 	kcevconnlistener *listener = (kcevconnlistener *)sfp[1].asObject;
 
-	kcevhttp_bound_socket *ret = (kcevhttp_bound_socket *)new_(cevhttp_bound_socket, 0, OnStack);
+	kcevhttp_bound_socket *ret = (kcevhttp_bound_socket *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
 	struct evhttp_bound_socket *socket = evhttp_bind_listener(http->evhttp, listener->listener);
-	KFieldSet(ret, ret->socket, socket);
+	ret->socket = socket;
 	KReturn(ret);
 }
 
@@ -765,7 +757,6 @@ static void cevhttp_CB_method_invoke(struct evhttp_request *req, void * arg)
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, cbarg->kcb, 2);
 	KStackCall(lsfp);
 	END_UnusedStack();
-	return;
 }
 
 //
@@ -780,7 +771,7 @@ static int cevhttp_set_cb_common(bool isGencb, KonohaContext *kctx, KonohaStack 
 		cb = (kFunc *)sfp[1].asFunc;
 		cbarg = sfp[2].asObject;
 	} else {
-		uri = (kString *)sfp[1].asString;
+		uri = sfp[1].asString;
 		cb = (kFunc *)sfp[2].asFunc;
 		cbarg = sfp[3].asObject;
 	}
@@ -823,7 +814,7 @@ static KMETHOD cevhttp_set_cb(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD cevhttp_del_cb(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
-	kString *uri = (kString *)sfp[1].asString;
+	kString *uri = sfp[1].asString;
 	int ret = evhttp_del_cb(http->evhttp, uri->text);
 
 	//TODO delete member from cbargArray
@@ -902,9 +893,9 @@ static void cevhttp_bound_socket_Init(KonohaContext *kctx, kObject *o, void *con
 static KMETHOD cevhttp_bound_socket_get_listener(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_bound_socket *bound = (kcevhttp_bound_socket *)sfp[0].asObject;
-	kcevconnlistener *ret = (kcevconnlistener *)new_(cevconnlistener, 0, OnStack);
+	kcevconnlistener *ret = (kcevconnlistener *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
 	struct evconnlistener *listener = evhttp_bound_socket_get_listener(bound->socket);
-	KFieldSet(ret, ret->listener, listener);
+	ret->listener = listener;
 	KReturn(ret);
 }
 
@@ -955,7 +946,7 @@ static void cevhttp_request_CB_method_invoke(struct evhttp_request *req, void * 
 #if 1	// this compile switch is just to check libevent behavior at coding. If stoped by assert(), please change compile switch to '0'.
 	assert(cbarg->req == req);
 #else
-	KFieldSet(cbarg, cbarg->req, req);
+	cbarg->req = req;
 #endif
 
 	BEGIN_UnusedStack(lsfp);
@@ -966,7 +957,6 @@ static void cevhttp_request_CB_method_invoke(struct evhttp_request *req, void * 
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, cbarg->kcb, 2);
 	KStackCall(lsfp);
 	END_UnusedStack();
-	return;
 }
 
 //## evhttp evhttp_request.new(Func[void, evhttp_request, Object] cb, Object arg);
@@ -1041,7 +1031,7 @@ static void cevhttp_request_chunked_CB_method_invoke(struct evhttp_request *req,
 #if 1	// this compile switch is just to check libevent behavior at coding. If stoped by assert(), please change compile switch to '0'.
 	assert(cbarg->req == req);
 #else
-	KFieldSet(cbarg, arg->req, req);
+	arg->req = req;
 #endif
 
 	BEGIN_UnusedStack(lsfp);
@@ -1052,7 +1042,6 @@ static void cevhttp_request_chunked_CB_method_invoke(struct evhttp_request *req,
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, cbarg->chunked_kcb, 2);
 	KStackCall(lsfp);
 	END_UnusedStack();
-	return;
 }
 
 //## void evhttp_request.set_chunked_cb(Func[void, evhttp_request, Object] cb, Object arg);
@@ -1087,9 +1076,9 @@ static KMETHOD cevhttp_request_is_owned(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD cevhttp_request_get_connection(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_request *req = (kcevhttp_request *)sfp[0].asObject;
-	kcevhttp_connection *ret = (kcevhttp_connection *)new_(cevhttp_connection, 0, OnStack);
+	kcevhttp_connection *ret = (kcevhttp_connection *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
 	struct evhttp_connection *evcon = evhttp_request_get_connection(req->req);
-	KFieldSet(ret, ret->evcon, evcon);
+	ret->evcon = evcon;
 	KReturn(ret);
 }
 
@@ -1113,8 +1102,8 @@ static KMETHOD cevhttp_request_get_uri(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD cevhttp_request_get_evhttp_uri(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_request *req = (kcevhttp_request *)sfp[0].asObject;
-	kcevhttp_uri *ret = (kcevhttp_uri *)new_(cevhttp_uri, 0, OnField);
-	ret->uri = (struct evhttp_uri *)evhttp_request_get_evhttp_uri(req->req);	//TODO confirm, doesn't use KFieldSet() macro
+	kcevhttp_uri *ret = (kcevhttp_uri *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+	ret->uri = (struct evhttp_uri *)evhttp_request_get_evhttp_uri(req->req);
 	KReturn(ret);
 }
 
@@ -1138,7 +1127,7 @@ static KMETHOD cevhttp_request_get_response_code(KonohaContext *kctx, KonohaStac
 static KMETHOD cevhttp_request_get_input_headers(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_request *req = (kcevhttp_request *)sfp[0].asObject;
-	kcevkeyvalq *ret = (kcevkeyvalq *)new_(cevkeyvalq, 0, OnField);
+	kcevkeyvalq *ret = (kcevkeyvalq *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
 	ret->keyvalq = evhttp_request_get_input_headers(req->req);
 	KReturn(ret);
 }
@@ -1147,7 +1136,7 @@ static KMETHOD cevhttp_request_get_input_headers(KonohaContext *kctx, KonohaStac
 static KMETHOD cevhttp_request_get_output_headers(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_request *req = (kcevhttp_request *)sfp[0].asObject;
-	kcevkeyvalq *ret = (kcevkeyvalq *)new_(cevkeyvalq, 0, OnField);
+	kcevkeyvalq *ret = (kcevkeyvalq *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
 	ret->keyvalq = evhttp_request_get_output_headers(req->req);
 	KReturn(ret);
 }
@@ -1156,7 +1145,7 @@ static KMETHOD cevhttp_request_get_output_headers(KonohaContext *kctx, KonohaSta
 static KMETHOD cevhttp_request_get_input_buffer(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_request *req = (kcevhttp_request *)sfp[0].asObject;
-	kcevbuffer *ret = (kcevbuffer *)new_(cevbuffer, 0, OnField);
+	kcevbuffer *ret = (kcevbuffer *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
 	ret->buf = evhttp_request_get_input_buffer(req->req);
 	KReturn(ret);
 }
@@ -1165,7 +1154,7 @@ static KMETHOD cevhttp_request_get_input_buffer(KonohaContext *kctx, KonohaStack
 static KMETHOD cevhttp_request_get_output_buffer(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_request *req = (kcevhttp_request *)sfp[0].asObject;
-	kcevbuffer *ret = (kcevbuffer *)new_(cevbuffer, 0, OnField);
+	kcevbuffer *ret = (kcevbuffer *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
 	ret->buf = evhttp_request_get_output_buffer(req->req);
 	KReturn(ret);
 }
@@ -1221,7 +1210,7 @@ static KMETHOD cevhttp_connection_new(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD cevhttp_connection_get_bufferevent(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_connection *con = (kcevhttp_connection *)sfp[0].asObject;
-	kcbufferevent *ret = (kcbufferevent *)new_(cbufferevent, 0, OnField);
+	kcbufferevent *ret = (kcbufferevent *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
 	ret->bev = evhttp_connection_get_bufferevent(con->evcon);
 	KReturn(ret);
 }
@@ -1230,7 +1219,7 @@ static KMETHOD cevhttp_connection_get_bufferevent(KonohaContext *kctx, KonohaSta
 static KMETHOD cevhttp_connection_get_base(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_connection *con = (kcevhttp_connection *)sfp[0].asObject;
-	kcevent_base *ret = (kcevent_base *)new_(cevent_base, 0, OnField);
+	kcevent_base *ret = (kcevent_base *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
 	ret->event_base = evhttp_connection_get_base(con->evcon);
 	KReturn(ret);
 }
@@ -1301,7 +1290,7 @@ static void cevhttp_connection_closeCB_method_invoke(struct evhttp_connection *c
 #if 1	// this compile switch is just to check libevent behavior at coding. If stoped by assert(), please change compile switch to '0'.
 	assert(cbarg->evcon == con);
 #else
-	KFieldSet(cbarg, cbarg->con, con);
+	cbarg->evcon = con;
 #endif
 
 	BEGIN_UnusedStack(lsfp);
@@ -1312,7 +1301,6 @@ static void cevhttp_connection_closeCB_method_invoke(struct evhttp_connection *c
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, cbarg->close_kcb, 2);
 	KStackCall(lsfp);
 	END_UnusedStack();
-	return;
 }
 
 //## void evhttp_connection.set_closecb(Func[void, evhttp_connection, Object] cb, Object arg);
@@ -1331,7 +1319,7 @@ static KMETHOD cevhttp_connection_set_closecb(KonohaContext *kctx, KonohaStack *
 static KMETHOD cevhttp_connection_get_peer(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevhttp_connection *con = (kcevhttp_connection *)sfp[0].asObject;
-	kconnection_peer *ret = (kconnection_peer *)new_(connection_peer, 0, OnStack);
+	kconnection_peer *ret = (kconnection_peer *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
 	char *addr;
 	ev_uint16_t port;
 	evhttp_connection_get_peer(con->evcon, &addr, &port);
