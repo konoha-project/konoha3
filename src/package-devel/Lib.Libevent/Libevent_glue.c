@@ -230,6 +230,81 @@ static void cevent_CB_method_invoke(evutil_socket_t evd, short event, void *arg)
 	END_UnusedStack();
 }
 
+//## int cevent_base.event_reinit();
+static KMETHOD cevent_base_event_reinit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	int ret = event_reinit(eb->event_base);
+	KReturnUnboxValue(ret);
+}
+
+//## String cevent_base.get_method();
+static KMETHOD cevent_base_get_method(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	const char *method = event_base_get_method(eb->event_base);
+	KReturn(KLIB new_kString(kctx, OnStack, method, strlen(method), StringPolicy_ASCII));
+}
+
+//## Array[String] cevent_base.get_supported_methods();
+static KMETHOD cevent_base_get_supported_methods(KonohaContext *kctx, KonohaStack *sfp)
+{
+	INIT_GCSTACK();
+	const char **methods = event_get_supported_methods();
+
+	//TODO check array usage. refered src/package-devel/MiniKonoha.Map/Map_glue.c: Map_keys()
+	KClass *cArray = KClass_p0(kctx, KClass_Array, KType_String);
+	kArray *ret = (kArray *)(KLIB new_kObject(kctx, _GcStack, cArray, 10));
+	int i;
+	for (i = 0; methods[i] != NULL; i++) {
+		kString *str = KLIB new_kString(kctx, OnStack, methods[i], strlen(methods[i]), StringPolicy_ASCII);
+		KLIB kArray_Add(kctx, ret, str);
+	}
+	KReturnWith(ret, RESET_GCSTACK());
+}
+
+
+/*
+TODO
+int event_base_get_features(const struct event_base *base);
+struct event_base *event_base_new_with_config(const struct event_config *);
+int event_base_loop(struct event_base *, int);
+int event_base_loopexit(struct event_base *, const struct timeval *);
+int event_base_got_exit(struct event_base *);
+int event_base_got_break(struct event_base *);
+int event_base_once(struct event_base *, evutil_socket_t, short, event_callback_fn, void *, const struct timeval *);	//TODO no need?
+int event_base_priority_init(struct event_base *, int);
+int event_priority_set(struct event *, int);
+const struct timeval *event_base_init_common_timeout(struct event_base *base,
+	const struct timeval *duration);
+void event_base_dump_events(struct event_base *, FILE *);
+int event_base_gettimeofday_cached(struct event_base *base, struct timeval *tv);
+
+-- event_config --
+struct event_config *event_config_new(void);
+void event_config_free(struct event_config *cfg);
+int event_config_avoid_method(struct event_config *cfg, const char *method);
+int event_config_require_features(struct event_config *cfg, int feature);
+int event_config_set_flag(struct event_config *cfg, int flag);
+int event_config_set_num_cpus_hint(struct event_config *cfg, int cpus);
+
+
+-- event log --
+void event_set_log_callback(event_log_cb cb);
+
+
+void event_set_fatal_callback(event_fatal_cb cb);
+
+
+const char *event_get_version(void);
+ev_uint32_t event_get_version_number(void);
+void event_set_mem_functions(
+	void *(*malloc_fn)(size_t sz),
+	void *(*realloc_fn)(void *ptr, size_t sz),
+	void (*free_fn)(void *ptr));
+*/
+
+
 
 static void cevent_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
@@ -419,6 +494,21 @@ static KMETHOD cevent_getEvents(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 
+/*
+TODO
+int event_base_set(struct event_base *, struct event *);
+evutil_socket_t event_get_fd(const struct event *ev);
+struct event_base *event_get_base(const struct event *ev);
+short event_get_events(const struct event *ev);
+event_callback_fn event_get_callback(const struct event *ev);
+void *event_get_callback_arg(const struct event *ev);
+void event_get_assignment(const struct event *event,
+    struct event_base **base_out, evutil_socket_t *fd_out, short *events_out,
+    event_callback_fn *callback_out, void **arg_out);
+*/
+
+
+
 /* ======================================================================== */
 // bufferevent class
 
@@ -587,6 +677,154 @@ static KMETHOD cbufferevent_read(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = bufferevent_read(bev->bev, buf->buf, buf->bytesize);
 	KReturnUnboxValue(ret);
 }
+
+
+/*
+TODO
+int bufferevent_socket_get_dns_error(struct bufferevent *bev);
+int bufferevent_base_set(struct event_base *base, struct bufferevent *bufev);
+struct event_base *bufferevent_get_base(struct bufferevent *bev);
+int bufferevent_priority_set(struct bufferevent *bufev, int pri);
+int bufferevent_setfd(struct bufferevent *bufev, evutil_socket_t fd);
+evutil_socket_t bufferevent_getfd(struct bufferevent *bufev);
+struct bufferevent *bufferevent_get_underlying(struct bufferevent *bufev);
+int bufferevent_write_buffer(struct bufferevent *bufev, struct evbuffer *buf);
+int bufferevent_read_buffer(struct bufferevent *bufev, struct evbuffer *buf);
+struct evbuffer *bufferevent_get_input(struct bufferevent *bufev);
+struct evbuffer *bufferevent_get_output(struct bufferevent *bufev);
+int bufferevent_disable(struct bufferevent *bufev, short event);
+short bufferevent_get_enabled(struct bufferevent *bufev);
+int bufferevent_set_timeouts(struct bufferevent *bufev,
+	const struct timeval *timeout_read, const struct timeval *timeout_write);
+void bufferevent_setwatermark(struct bufferevent *bufev, short events,
+	size_t lowmark, size_t highmark);
+void bufferevent_lock(struct bufferevent *bufev);
+void bufferevent_unlock(struct bufferevent *bufev);
+int bufferevent_flush(struct bufferevent *bufev, short iotype,
+	enum bufferevent_flush_mode mode);
+struct bufferevent *
+bufferevent_filter_new(struct bufferevent *underlying,
+		       bufferevent_filter_cb input_filter,
+		       bufferevent_filter_cb output_filter,
+		       int options,
+		       void (*free_context)(void *),
+		       void *ctx);
+int bufferevent_pair_new(struct event_base *base, int options,
+	struct bufferevent *pair[2]);
+struct bufferevent *bufferevent_pair_get_partner(struct bufferevent *bev);
+int bufferevent_set_rate_limit(struct bufferevent *bev,
+    struct ev_token_bucket_cfg *cfg);
+struct bufferevent_rate_limit_group *bufferevent_rate_limit_group_new(
+	struct event_base *base,
+	const struct ev_token_bucket_cfg *cfg);
+int bufferevent_rate_limit_group_set_cfg(
+	struct bufferevent_rate_limit_group *,
+	const struct ev_token_bucket_cfg *);
+int bufferevent_add_to_rate_limit_group(struct bufferevent *bev,
+	struct bufferevent_rate_limit_group *g);
+int bufferevent_remove_from_rate_limit_group(struct bufferevent *bev);
+ev_ssize_t bufferevent_get_read_limit(struct bufferevent *bev);
+ev_ssize_t bufferevent_get_write_limit(struct bufferevent *bev);
+ev_ssize_t bufferevent_get_max_to_read(struct bufferevent *bev);
+ev_ssize_t bufferevent_get_max_to_write(struct bufferevent *bev);
+int bufferevent_decrement_read_limit(struct bufferevent *bev, ev_ssize_t decr);
+int bufferevent_decrement_write_limit(struct bufferevent *bev, ev_ssize_t decr);
+
+-- ev_token_bucket_cfg --
+struct ev_token_bucket_cfg *ev_token_bucket_cfg_new(
+	size_t read_rate, size_t read_burst,
+	size_t write_rate, size_t write_burst,
+	const struct timeval *tick_len);
+void ev_token_bucket_cfg_free(struct ev_token_bucket_cfg *cfg);
+
+
+-- bufferevent_rate_limit_group --
+int bufferevent_rate_limit_group_set_min_share(
+	struct bufferevent_rate_limit_group *, size_t);
+void bufferevent_rate_limit_group_free(struct bufferevent_rate_limit_group *);
+ev_ssize_t bufferevent_rate_limit_group_get_read_limit(
+	struct bufferevent_rate_limit_group *);
+ev_ssize_t bufferevent_rate_limit_group_get_write_limit(
+	struct bufferevent_rate_limit_group *);
+int bufferevent_rate_limit_group_decrement_read(
+	struct bufferevent_rate_limit_group *, ev_ssize_t);
+int bufferevent_rate_limit_group_decrement_write(
+	struct bufferevent_rate_limit_group *, ev_ssize_t);
+void bufferevent_rate_limit_group_get_totals(
+	struct bufferevent_rate_limit_group *grp,
+	ev_uint64_t *total_read_out, ev_uint64_t *total_written_out);
+void bufferevent_rate_limit_group_reset_totals(
+	struct bufferevent_rate_limit_group *grp);
+*/
+
+
+
+
+/* ======================================================================== */
+// evbuffer class
+/*
+TODO
+int evbuffer_enable_locking(struct evbuffer *buf, void *lock);
+void evbuffer_lock(struct evbuffer *buf);
+void evbuffer_unlock(struct evbuffer *buf);
+int evbuffer_set_flags(struct evbuffer *buf, ev_uint64_t flags);
+int evbuffer_clear_flags(struct evbuffer *buf, ev_uint64_t flags);
+size_t evbuffer_get_length(const struct evbuffer *buf);
+size_t evbuffer_get_contiguous_space(const struct evbuffer *buf);
+int evbuffer_expand(struct evbuffer *buf, size_t datlen);
+int evbuffer_reserve_space(struct evbuffer *buf, ev_ssize_t size,
+	struct evbuffer_iovec *vec, int n_vec);
+int evbuffer_commit_space(struct evbuffer *buf,
+	struct evbuffer_iovec *vec, int n_vecs);
+int evbuffer_add(struct evbuffer *buf, const void *data, size_t datlen);
+int evbuffer_remove(struct evbuffer *buf, void *data, size_t datlen);
+ev_ssize_t evbuffer_copyout(struct evbuffer *buf, void *data_out, size_t datlen);
+int evbuffer_remove_buffer(struct evbuffer *src, struct evbuffer *dst,
+	size_t datlen);
+char *evbuffer_readln(struct evbuffer *buffer, size_t *n_read_out,
+	enum evbuffer_eol_style eol_style);
+int evbuffer_add_buffer(struct evbuffer *outbuf, struct evbuffer *inbuf);
+int evbuffer_add_reference(struct evbuffer *outbuf,
+	const void *data, size_t datlen,
+	evbuffer_ref_cleanup_cb cleanupfn, void *cleanupfn_arg);
+int evbuffer_add_file(struct evbuffer *outbuf, int fd, ev_off_t offset,
+	ev_off_t length);
+int evbuffer_add_printf(struct evbuffer *buf, const char *fmt, ...);	//TODO use String?
+int evbuffer_add_vprintf(struct evbuffer *buf, const char *fmt, va_list ap);
+int evbuffer_drain(struct evbuffer *buf, size_t len);
+int evbuffer_write(struct evbuffer *buffer, evutil_socket_t fd);
+int evbuffer_write_atmost(struct evbuffer *buffer, evutil_socket_t fd,
+	ev_ssize_t howmuch);
+int evbuffer_read(struct evbuffer *buffer, evutil_socket_t fd, int howmuch);
+struct evbuffer_ptr evbuffer_search(struct evbuffer *buffer, const char *what, size_t len, const struct evbuffer_ptr *start);
+struct evbuffer_ptr evbuffer_search_range(struct evbuffer *buffer, const char *what, size_t len, const struct evbuffer_ptr *start, const struct evbuffer_ptr *end);
+int evbuffer_ptr_set(struct evbuffer *buffer, struct evbuffer_ptr *ptr,
+	size_t position, enum evbuffer_ptr_how how);
+struct evbuffer_ptr evbuffer_search_eol(struct evbuffer *buffer,
+	struct evbuffer_ptr *start, size_t *eol_len_out,
+	enum evbuffer_eol_style eol_style);
+int evbuffer_peek(struct evbuffer *buffer, ev_ssize_t len, struct evbuffer_ptr *start_at, struct evbuffer_iovec *vec_out, int n_vec);
+struct evbuffer_cb_entry *evbuffer_add_cb(struct evbuffer *buffer, evbuffer_cb_func cb, void *cbarg);
+int evbuffer_remove_cb_entry(struct evbuffer *buffer, struct evbuffer_cb_entry *ent);
+int evbuffer_remove_cb(struct evbuffer *buffer, evbuffer_cb_func cb, void *cbarg);
+int evbuffer_cb_set_flags(struct evbuffer *buffer, struct evbuffer_cb_entry *cb, ev_uint32_t flags);
+int evbuffer_cb_clear_flags(struct evbuffer *buffer, struct evbuffer_cb_entry *cb, ev_uint32_t flags);
+unsigned char *evbuffer_pullup(struct evbuffer *buf, ev_ssize_t size);
+int evbuffer_prepend(struct evbuffer *buf, const void *data, size_t size);
+int evbuffer_prepend_buffer(struct evbuffer *dst, struct evbuffer* src);
+int evbuffer_freeze(struct evbuffer *buf, int at_front);
+int evbuffer_unfreeze(struct evbuffer *buf, int at_front);
+int evbuffer_defer_callbacks(struct evbuffer *buffer, struct event_base *base);
+*/
+
+
+/* ======================================================================== */
+// evhttp class
+
+
+
+
+
 
 
 /* ======================================================================== */
@@ -1944,6 +2182,13 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		_Public, _F(cevent_base_new), KType_cevent_base, KType_cevent_base, KMethodName_("new"), 0,
 		_Public, _F(cevent_base_event_dispatch), KType_Int, KType_cevent_base, KMethodName_("event_dispatch"), 0,
 		_Public, _F(cevent_base_event_loopbreak), KType_Int, KType_cevent_base, KMethodName_("event_loopbreak"), 0,
+		_Public, _F(cevent_base_event_reinit), KType_Int, KType_cevent_base, KMethodName_("event_reinit"), 0,
+		_Public, _F(cevent_base_get_method), KType_String, KType_cevent_base, KMethodName_("get_method"), 0,
+		_Public|_Static, _F(cevent_base_get_supported_methods), KType_Array, KType_cevent_base, KMethodName_("get_supported_methods"), 0,
+
+
+
+
 
 		// cevent
 		_Public, _F(cevent_event_new), KType_cevent, KType_cevent, KMethodName_("new"), 5, KType_cevent_base, KFieldName_("cevent_base"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("event"), KType_ceventCBfunc, KFieldName_("konoha_CB"), KType_Object, KFieldName_("CBarg"),
@@ -2133,7 +2378,7 @@ static kbool_t Libevent_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNa
 KDEFINE_PACKAGE *Libevent_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "libevent2.0.19", "0.1");
+	KSetPackageName(d, "libevent2.0.19", "0.1"); //TODO use event_get_version();
 	d.PackupNameSpace	= Libevent_PackupNameSpace;
 	d.ExportNameSpace	= Libevent_ExportNameSpace;
 	return &d;
