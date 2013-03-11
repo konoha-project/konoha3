@@ -308,10 +308,36 @@ kbool_t KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *nam
 	return false;
 }
 
+static void KonohaFactory_syslog_i(int priority, const char *message, ...)
+{
+	/*FIXME(ide)
+	 * If we cannot load default modules at KonohaFactory_LoadPlatformModule and
+	 * we emit log info with facotry->syslog_i. */
+	//abort();
+}
+
+static void KonohaFactory_SetDefaultLoggerModule(KonohaFactory *factory)
+{
+	if(factory->LoggerModule.LoggerInfo == NULL) {
+		factory->LoggerModule.TraceDataLog = DefaultTraceLog;  // for safety
+		factory->LoggerModule.syslog_i     = KonohaFactory_syslog_i;
+	}
+}
+
+static void KonohaFactory_UnsetDefaultLoggerModule(KonohaFactory *factory)
+{
+	if(factory->LoggerModule.syslog_i == KonohaFactory_syslog_i) {
+		factory->LoggerModule.syslog_i = NULL;
+	}
+}
+
 void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv)
 {
 	int i;
 	SetPlatformApi(factory);
+
+	KonohaFactory_SetDefaultLoggerModule(factory);
+
 	for(i = 0; i < argc; i++) {
 		const char *t = argv[i];
 		if(t[0] == '-' && t[1] == 'M') {   /* -MName */
@@ -323,22 +349,12 @@ void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformA
 			KonohaFactory_LoadPlatformModule(factory, moduleName, ReleaseModule);
 		}
 	}
-}
-
-static void KonohaFactory_syslog_i(int priority, const char *message, ...)
-{
-	/*FIXME(ide)
-	 * If we cannot load default modules at KonohaFactory_LoadPlatformModule and
-	 * we emit log info with facotry->syslog_i. */
-	//abort();
+	KonohaFactory_UnsetDefaultLoggerModule(factory);
 }
 
 static void KonohaFactory_Check(KonohaFactory *factory)
 {
-	if(factory->LoggerModule.LoggerInfo == NULL) {
-		factory->LoggerModule.TraceDataLog = DefaultTraceLog;  // for safety
-		factory->LoggerModule.syslog_i     = KonohaFactory_syslog_i;
-	}
+	KonohaFactory_SetDefaultLoggerModule(factory);
 	if(factory->ExecutionEngineModule.ExecutionEngineInfo == NULL) {
 		const char *mod = factory->getenv_i("KONOHA_VM");
 		if(mod == NULL) mod = "MiniVM";
@@ -378,9 +394,7 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 		factory->DiagnosisModule.DiagnosisNetworking      = DiagnosisNetworking;
 		factory->DiagnosisModule.DiagnosisCheckSoftwareTestIsPass = DiagnosisCheckSoftwareTestIsPass;
 	}
-	if(factory->LoggerModule.syslog_i == KonohaFactory_syslog_i) {
-		factory->LoggerModule.syslog_i = NULL;
-	}
+	KonohaFactory_UnsetDefaultLoggerModule(factory);
 }
 
 KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory)
