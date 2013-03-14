@@ -38,6 +38,8 @@ extern "C" {
 
 
 /* ======================================================================== */
+#define tvIsNull(tv_p)	((tv_p)->timeval.tv_sec == 0 && (tv_p)->timeval.tv_usec == 0)
+
 #include <sys/time.h>
 typedef struct ctimeval {
 	kObjectHeader h;
@@ -48,6 +50,11 @@ typedef struct cevent_base {
 	kObjectHeader h;
 	struct event_base *event_base;
 } kcevent_base;
+
+typedef struct cevent_config {
+	kObjectHeader h;
+	struct event_config *event_config;
+} kcevent_config;
 
 typedef struct cevent {
 	kObjectHeader h;
@@ -133,6 +140,7 @@ typedef struct cevdns_base {
 } kcevdns_base;
 
 static KClass *KClass_cevent_base;
+static KClass *KClass_cevent_config;
 static KClass *KClass_cbufferevent;
 static KClass *KClass_cevhttp_bound_socket;
 static KClass *KClass_evhttp_set_cb_arg;
@@ -154,16 +162,16 @@ typedef struct Sockaddr_in {
 
 
 /* ======================================================================== */
-// cevent_base class
+// event_base class
 static void cevent_base_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kcevent_base *eb = (kcevent_base *) o;
 	eb->event_base = NULL;
 }
 
-//static void cevent_base_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+//static void event_base_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 //{
-//	struct cevent_base *evbase = (struct cevent_base *) o;
+//	kcevent_base *evbase = (kcevent_base *) o;
 //}
 
 static void cevent_base_Free(KonohaContext *kctx, kObject *o)
@@ -175,7 +183,7 @@ static void cevent_base_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-//## cevent_base cevent_base.new();
+//## event_base event_base.new();
 static KMETHOD cevent_base_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
@@ -183,7 +191,16 @@ static KMETHOD cevent_base_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(eb);
 }
 
-//## cevent_base cevent_base.event_dispatch();
+//## event_base event_base.new(event_config config);
+static KMETHOD cevent_base_new_with_config(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	kcevent_config *ec = (kcevent_config *)sfp[1].asObject;
+	eb->event_base = event_base_new_with_config(ec->event_config);
+	KReturn(eb);
+}
+
+//## int event_base.event_dispatch();
 static KMETHOD cevent_base_event_dispatch(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
@@ -191,7 +208,7 @@ static KMETHOD cevent_base_event_dispatch(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## int cevent_base.event_loopbreak();
+//## int event_base.event_loopbreak();
 static KMETHOD cevent_base_event_loopbreak(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevent_base *ev = (kcevent_base *)sfp[0].asObject;
@@ -199,7 +216,7 @@ static KMETHOD cevent_base_event_loopbreak(KonohaContext *kctx, KonohaStack *sfp
 	KReturnUnboxValue(ret);
 }
 
-//## int cevent_base.evutil_make_socket_nonblocking(int fd);
+//## int event_base.evutil_make_socket_nonblocking(int fd);
 static KMETHOD cevent_base_evutil_make_socket_nonblocking(KonohaContext *kctx, KonohaStack* sfp)
 {
 	evutil_socket_t evd = (evutil_socket_t)sfp[1].intValue;
@@ -208,10 +225,8 @@ static KMETHOD cevent_base_evutil_make_socket_nonblocking(KonohaContext *kctx, K
 }
 
 
-/* ======================================================================== */
-// cevent class
 /*
- * cevent_base Class 1st stage callback from event_base_dispatch(),
+ * event_base Class 1st stage callback from event_base_dispatch(),
  * NEVER BE CALLED FROM OTHERS.
  */
 static void cevent_CB_method_invoke(evutil_socket_t evd, short event, void *arg) {
@@ -230,7 +245,7 @@ static void cevent_CB_method_invoke(evutil_socket_t evd, short event, void *arg)
 	END_UnusedStack();
 }
 
-//## int cevent_base.event_reinit();
+//## int event_base.event_reinit();
 static KMETHOD cevent_base_event_reinit(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
@@ -238,7 +253,7 @@ static KMETHOD cevent_base_event_reinit(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## String cevent_base.get_method();
+//## String event_base.get_method();
 static KMETHOD cevent_base_get_method(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
@@ -246,7 +261,7 @@ static KMETHOD cevent_base_get_method(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(KLIB new_kString(kctx, OnStack, method, strlen(method), StringPolicy_ASCII));
 }
 
-//## Array[String] cevent_base.get_supported_methods();
+//## Array[String] event_base.get_supported_methods();
 static KMETHOD cevent_base_get_supported_methods(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
@@ -264,25 +279,126 @@ static KMETHOD cevent_base_get_supported_methods(KonohaContext *kctx, KonohaStac
 }
 
 
-/*
-TODO
-int event_base_get_features(const struct event_base *base);
-struct event_base *event_base_new_with_config(const struct event_config *);
-int event_base_loop(struct event_base *, int);
-int event_base_loopexit(struct event_base *, const struct timeval *);
-int event_base_got_exit(struct event_base *);
-int event_base_got_break(struct event_base *);
-int event_base_once(struct event_base *, evutil_socket_t, short, event_callback_fn, void *, const struct timeval *);	//TODO no need?
-int event_base_priority_init(struct event_base *, int);
-int event_priority_set(struct event *, int);
-const struct timeval *event_base_init_common_timeout(struct event_base *base,
-	const struct timeval *duration);
-void event_base_dump_events(struct event_base *, FILE *);
-int event_base_gettimeofday_cached(struct event_base *base, struct timeval *tv);
+//## int event_base.get_features();
+static KMETHOD cevent_base_get_features(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	int ret = event_base_get_features(eb->event_base);
+	KReturnUnboxValue(ret);
+}
 
+//## int event_base.loop(int flags);
+static KMETHOD cevent_base_loop(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	int ret = event_base_loop(eb->event_base, sfp[1].intValue);
+	KReturnUnboxValue(ret);
+}
+
+//## int event_base.loopexit(timeval tv);
+static KMETHOD cevent_base_loopexit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	kctimeval *tv = (kctimeval *)sfp[1].asObject;
+	int ret = event_base_loopexit(eb->event_base, tvIsNull(tv) ? NULL : &tv->timeval);
+	KReturnUnboxValue(ret);
+}
+
+//## int event_base.got_exit();
+static KMETHOD cevent_base_got_exit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	int ret = event_base_got_exit(eb->event_base);
+	KReturnUnboxValue(ret);
+}
+
+//## int event_base.got_break();
+static KMETHOD cevent_base_got_break(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	int ret = event_base_got_break(eb->event_base);
+	KReturnUnboxValue(ret);
+}
+
+/*
+int event_base_once(struct event_base *, evutil_socket_t, short, event_callback_fn, void *, const struct timeval *);	//TODO is this need?
+*/
+
+//## int event_base.priority_init(int npriorities);
+static KMETHOD cevent_base_priority_init(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	int ret = event_base_priority_init(eb->event_base, sfp[1].intValue);
+	KReturnUnboxValue(ret);
+}
+
+//## timeout event_base.init_common_timeout(timeval duration);
+static KMETHOD cevent_base_init_common_timeout(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	kctimeval *duration = (kctimeval *)sfp[1].asObject;
+	kctimeval *ret = (kctimeval *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+
+	/*
+	TODO
+	libevent's event_base_init_common_timeout() has return pointer value.
+	copied values here, but it may need a pointer probably.
+	*/
+	const struct timeval *cmnto = event_base_init_common_timeout(eb->event_base, tvIsNull(duration) ? NULL : &duration->timeval);
+	ret->timeval.tv_sec = cmnto->tv_sec;
+	ret->timeval.tv_usec = cmnto->tv_usec;
+	KReturn(ret);
+}
+
+//## void event_base.dump_events(String fname, String mode);
+static KMETHOD cevent_base_dump_events(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	kString *fname = sfp[1].asString;
+	kString *mode = sfp[2].asString;
+	FILE *f = fopen(kString_text(fname), kString_text(mode));
+	event_base_dump_events(eb->event_base, f);
+	fclose(f);
+	KReturnVoid();
+}
+
+//## int event_base.gettimeofday_cached(timeval tv);
+static KMETHOD cevent_base_gettimeofday_cached(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *eb = (kcevent_base *)sfp[0].asObject;
+	kctimeval *tv = (kctimeval *)sfp[1].asObject;
+	int ret = event_base_gettimeofday_cached(eb->event_base, tvIsNull(tv) ? NULL : &tv->timeval);
+	KReturnUnboxValue(ret);
+}
+
+/* ======================================================================== */
+// event_config class
+static void cevent_config_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kcevent_config *ec = (kcevent_config *) o;
+	ec->event_config = NULL;
+}
+
+static void cevent_config_Free(KonohaContext *kctx, kObject *o)
+{
+	kcevent_config *ec = (kcevent_config *) o;
+	if(ec->event_config != NULL) {
+		event_config_free(ec->event_config);
+		ec->event_config = NULL;
+	}
+}
+
+//## event_config event_config.new();
+static KMETHOD cevent_config_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_config *ec = (kcevent_config *)sfp[0].asObject;
+	ec->event_config = event_config_new();
+	KReturn(ec);
+}
+
+
+/*
 -- event_config --
-struct event_config *event_config_new(void);
-void event_config_free(struct event_config *cfg);
 int event_config_avoid_method(struct event_config *cfg, const char *method);
 int event_config_require_features(struct event_config *cfg, int feature);
 int event_config_set_flag(struct event_config *cfg, int flag);
@@ -306,6 +422,8 @@ void event_set_mem_functions(
 
 
 
+/* ======================================================================== */
+// event class
 static void cevent_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kcevent *ev = (kcevent *) o;
@@ -335,7 +453,7 @@ static void cevent_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 	KRefTrace(ev->kctimeval);
 }
 
-//## cevent cevent.new(cevent_base event_base, int evd, int event, Func[void, int, int, Object] cb, Object cbArg);
+//## event event.new(event_base event_base, int evd, int event, Func[void, int, int, Object] cb, Object cbArg);
 static KMETHOD cevent_event_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevent *ev = (kcevent *) sfp[0].asObject;
@@ -351,7 +469,7 @@ static KMETHOD cevent_event_new(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## constructor for signal event
-//## cevent cevent.new(cevent_base event_base, int evd, Func[void, int, int, Object] cb, Object cbArg);
+//## event event.new(event_base event_base, int evd, Func[void, int, int, Object] cb, Object cbArg);
 static KMETHOD cevent_signal_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevent *ev = (kcevent *) sfp[0].asObject;
@@ -366,7 +484,7 @@ static KMETHOD cevent_signal_new(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## constructor for timer event
-//## cevent cevent.new(cevent_base event_base, Func[void, int, int, Object] cb, Object cbArg);
+//## event event.new(event_base event_base, Func[void, int, int, Object] cb, Object cbArg);
 static KMETHOD cevent_timer_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevent *ev = (kcevent *) sfp[0].asObject;
@@ -379,7 +497,7 @@ static KMETHOD cevent_timer_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(ev);
 }
 
-//## cevent cevent.event_assign(cevent_base event_base, int evd, int event, Func[void, int, int, Object] cb, Object cbArg);
+//## event event.event_assign(event_base event_base, int evd, int event, Func[void, int, int, Object] cb, Object cbArg);
 static KMETHOD cevent_event_assign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevent *ev = (kcevent *) sfp[0].asObject;
@@ -393,7 +511,7 @@ static KMETHOD cevent_event_assign(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## cevent cevent.signal_assign(cevent_base event_base, int evd, Func[void, int, int, Object] cb, Object cbArg);
+//## event event.signal_assign(event_base event_base, int evd, Func[void, int, int, Object] cb, Object cbArg);
 static KMETHOD cevent_signal_assign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevent *ev = (kcevent *) sfp[0].asObject;
@@ -406,7 +524,7 @@ static KMETHOD cevent_signal_assign(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## cevent cevent.timer_assign(cevent_base event_base, Func[void, int, int, Object] cb, Object cbArg);
+//## event event.timer_assign(event_base event_base, Func[void, int, int, Object] cb, Object cbArg);
 static KMETHOD cevent_timer_assign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevent *ev = (kcevent *) sfp[0].asObject;
@@ -418,8 +536,7 @@ static KMETHOD cevent_timer_assign(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-#define tvIsNull(tv_p)	((tv_p)->timeval.tv_sec == 0 && (tv_p)->timeval.tv_usec == 0)
-//## int cevent.event_add(cevent_base event, timeval tv);
+//## int event.event_add(event_base event, timeval tv);
 static KMETHOD cevent_event_add(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
@@ -429,7 +546,7 @@ static KMETHOD cevent_event_add(KonohaContext *kctx, KonohaStack* sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## int cevent.event_del(cevent event);
+//## int event.event_del(event event);
 static KMETHOD cevent_event_del(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
@@ -438,7 +555,7 @@ static KMETHOD cevent_event_del(KonohaContext *kctx, KonohaStack* sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## int cevent.event_pending(short events, timeval tv);
+//## int event.event_pending(short events, timeval tv);
 static KMETHOD cevent_event_pending(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
@@ -448,7 +565,7 @@ static KMETHOD cevent_event_pending(KonohaContext *kctx, KonohaStack* sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## int cevent.signal_pending(timeval tv);
+//## int event.signal_pending(timeval tv);
 static KMETHOD cevent_signal_pending(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
@@ -457,7 +574,7 @@ static KMETHOD cevent_signal_pending(KonohaContext *kctx, KonohaStack* sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## int cevent.timer_pending(timeval tv);
+//## int event.timer_pending(timeval tv);
 static KMETHOD cevent_timer_pending(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
@@ -466,7 +583,7 @@ static KMETHOD cevent_timer_pending(KonohaContext *kctx, KonohaStack* sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## int cevent.event_initialized();
+//## int event.event_initialized();
 static KMETHOD cevent_event_initialized(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
@@ -474,7 +591,7 @@ static KMETHOD cevent_event_initialized(KonohaContext *kctx, KonohaStack* sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## void cevent.event_active(int res, int ncalls);
+//## void event.event_active(int res, int ncalls);
 static KMETHOD cevent_event_active(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevent *ev = (kcevent *) sfp[0].asObject;
@@ -485,7 +602,7 @@ static KMETHOD cevent_event_active(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 
-//## cevent cevent.getEvents();
+//## event event.getEvents();
 // get event category field
 static KMETHOD cevent_getEvents(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -496,6 +613,7 @@ static KMETHOD cevent_getEvents(KonohaContext *kctx, KonohaStack *sfp)
 
 /*
 TODO
+int event_priority_set(struct event *, int);
 int event_base_set(struct event_base *, struct event *);
 evutil_socket_t event_get_fd(const struct event *ev);
 struct event_base *event_get_base(const struct event *ev);
@@ -543,7 +661,7 @@ static void cbufferevent_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisito
 	KRefTrace(bev->kcbArg);
 }
 
-//## bufferevent bufferevent.new(cevent_base event_base, int evd, int option);
+//## bufferevent bufferevent.new(event_base event_base, int evd, int option);
 static KMETHOD cbufferevent_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
@@ -818,8 +936,6 @@ int evbuffer_defer_callbacks(struct evbuffer *buffer, struct event_base *base);
 */
 
 
-/* ======================================================================== */
-// evhttp class
 
 
 
@@ -975,7 +1091,7 @@ static KMETHOD cevhttp_set_allowed_methods(KonohaContext *kctx, KonohaStack *sfp
 }
 
 /*
- * cevhttp Class 1st stage callback from event_base_dispatch(),
+ * evhttp Class 1st stage callback from event_base_dispatch(),
  * NEVER BE CALLED FROM OTHERS.
  */
 static void cevhttp_CB_method_invoke(struct evhttp_request *req, void * arg)
@@ -1173,7 +1289,7 @@ static void cevhttp_request_Reftrace(KonohaContext *kctx, kObject *o, KObjectVis
 }
 
 /*
- * cevhttp_request Class 1st stage callback by libevent framework,
+ * evhttp_request Class 1st stage callback by libevent framework,
  * NEVER BE CALLED FROM OTHERS.
  */
 static void cevhttp_request_CB_method_invoke(struct evhttp_request *req, void * arg)
@@ -1258,7 +1374,7 @@ static KMETHOD cevhttp_request_reply_end(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 /*
- * cevhttp_request Class 1st stage callback by libevent framework,
+ * evhttp_request Class 1st stage callback by libevent framework,
  * NEVER BE CALLED FROM OTHERS.
  */
 static void cevhttp_request_chunked_CB_method_invoke(struct evhttp_request *req, void * arg)
@@ -1517,7 +1633,7 @@ static KMETHOD cevhttp_connection_set_retries(KonohaContext *kctx, KonohaStack *
 }
 
 /*
- * cevhttp_connection Class 1st stage callback by libevent framework,
+ * evhttp_connection Class 1st stage callback by libevent framework,
  * NEVER BE CALLED FROM OTHERS.
  */
 static void cevhttp_connection_closeCB_method_invoke(struct evhttp_connection *con, void * arg)
@@ -1975,7 +2091,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	KRequirePackage("Type.Bytes", trace);
 	/* Class Definition */
 	/* If you want to create Generic class like Array<T>, see konoha.map package */
-	// cevent_base
+	// event_base
 	KDEFINE_CLASS defcevent_base = {0};
 	defcevent_base.structname	= "event_base";
 	defcevent_base.typeId		= KTypeAttr_NewId;
@@ -1985,7 +2101,17 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	defcevent_base.free			= cevent_base_Free;
 	KClass_cevent_base = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevent_base, trace);
 
-	// cevent
+	// event_config
+	KDEFINE_CLASS defcevent_config = {0};
+	defcevent_config.structname	= "event_config";
+	defcevent_config.typeId		= KTypeAttr_NewId;
+	defcevent_config.cstruct_size	= sizeof(kcevent_config);
+	defcevent_config.cflag		= KClassFlag_Final;	//must be final in C
+	defcevent_config.init			= cevent_config_Init;
+	defcevent_config.free			= cevent_config_Free;
+	KClass_cevent_config = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevent_config, trace);
+
+	// event
 	KDEFINE_CLASS defcevent = {0};
 	defcevent.structname	= "event";
 	defcevent.typeId		= KTypeAttr_NewId;
@@ -1996,7 +2122,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	defcevent.free			= cevent_Free;
 	KClass *ceventClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevent, trace);
 
-	// cbufferevent
+	// bufferevent
 	KDEFINE_CLASS defcbufferevent = {0};
 	defcbufferevent.structname	= "bufferevent";
 	defcbufferevent.typeId		= KTypeAttr_NewId;
@@ -2007,7 +2133,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	defcbufferevent.free		= cbufferevent_Free;
 	KClass_cbufferevent = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcbufferevent, trace);
 
-	// cevbuffer
+	// evbuffer
 	KDEFINE_CLASS defcevbuffer = {0};
 	defcevbuffer.structname	= "evbuffer";
 	defcevbuffer.typeId		= KTypeAttr_NewId;
@@ -2017,7 +2143,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	defcevbuffer.free      = cevbuffer_Free;
 	KClass_cevbuffer = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevbuffer, trace);
 
-	// cevhttp
+	// evhttp
 	KDEFINE_CLASS defcevhttp = {0};
 	defcevhttp.structname	= "evhttp";
 	defcevhttp.typeId		= KTypeAttr_NewId;
@@ -2036,7 +2162,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	defevhttp_set_cb_arg.reftrace  = evhttp_set_cb_arg_Reftrace;
 	KClass_evhttp_set_cb_arg = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defevhttp_set_cb_arg, trace);
 
-	// cevhttp_bound_socket
+	// evhttp_bound_socket
 	KDEFINE_CLASS defcevhttp_bound_socket = {0};
 	defcevhttp_bound_socket.structname	= "evhttp_bound_socket";
 	defcevhttp_bound_socket.typeId		= KTypeAttr_NewId;
@@ -2045,7 +2171,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	defcevhttp_bound_socket.init		= cevhttp_bound_socket_Init;
 	KClass_cevhttp_bound_socket = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevhttp_bound_socket, trace);
 
-	// cevhttp_request
+	// evhttp_request
 	KDEFINE_CLASS defcevhttp_request = {0};
 	defcevhttp_request.structname	= "evhttp_request";
 	defcevhttp_request.typeId		= KTypeAttr_NewId;
@@ -2056,7 +2182,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	defcevhttp_request.free			= cevhttp_request_Free;
 	KClass_cevhttp_request = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevhttp_request, trace);
 
-	// cevconnlistener
+	// evconnlistener
 	KDEFINE_CLASS defcevconnlistener = {0};
 	defcevconnlistener.structname	= "evconnlistener";
 	defcevconnlistener.typeId		= KTypeAttr_NewId;
@@ -2065,7 +2191,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	defcevconnlistener.init		= cevconnlistener_Init;
 	KClass_cevconnlistener = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevconnlistener, trace);
 
-	// cevhttp_connection
+	// evhttp_connection
 	KDEFINE_CLASS defcevhttp_connection = {0};
 	defcevhttp_connection.structname	= "evhttp_connection";
 	defcevhttp_connection.typeId		= KTypeAttr_NewId;
@@ -2086,7 +2212,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	defconnection_peer.reftrace		= connection_peer_Reftrace;
 	KClass_connection_peer = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defconnection_peer, trace);
 
-	// cevhttp_uri
+	// evhttp_uri
 	KDEFINE_CLASS defcevhttp_uri = {0};
 	defcevhttp_uri.structname	= "evhttp_uri";
 	defcevhttp_uri.typeId		= KTypeAttr_NewId;
@@ -2096,7 +2222,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	defcevhttp_uri.free			= cevhttp_uri_Free;
 	KClass_cevhttp_uri			= KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevhttp_uri, trace);
 
-	// cevkeyvalq
+	// evkeyvalq
 	KDEFINE_CLASS defcevkeyvalq = {0};
 	defcevkeyvalq.structname	= "evkeyvalq";
 	defcevkeyvalq.typeId		= KTypeAttr_NewId;
@@ -2135,6 +2261,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 
 	/* You can define methods with the following procedures. */
 	int KType_cevent_base = KClass_cevent_base->typeId;
+	int KType_cevent_config = KClass_cevent_config->typeId;
 	int KType_cevent = ceventClass->typeId;
 	int KType_cbufferevent = KClass_cbufferevent->typeId;
 	int KType_cevbuffer = KClass_cevbuffer->typeId;
@@ -2177,20 +2304,30 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 
 	KDEFINE_METHOD MethodData[] = {
 
-		// cevent_base
+		// event_base
 		_Public|_Static, _F(cevent_base_evutil_make_socket_nonblocking), KType_Int, KType_cevent_base, KMethodName_("evutil_make_socket_nonblocking"), 1, KType_Int, KFieldName_("fd"),
 		_Public, _F(cevent_base_new), KType_cevent_base, KType_cevent_base, KMethodName_("new"), 0,
+		_Public, _F(cevent_base_new_with_config), KType_cevent_base, KType_cevent_base, KMethodName_("new"), 1, KType_cevent_config, KFieldName_("config"),
 		_Public, _F(cevent_base_event_dispatch), KType_Int, KType_cevent_base, KMethodName_("event_dispatch"), 0,
 		_Public, _F(cevent_base_event_loopbreak), KType_Int, KType_cevent_base, KMethodName_("event_loopbreak"), 0,
 		_Public, _F(cevent_base_event_reinit), KType_Int, KType_cevent_base, KMethodName_("event_reinit"), 0,
 		_Public, _F(cevent_base_get_method), KType_String, KType_cevent_base, KMethodName_("get_method"), 0,
 		_Public|_Static, _F(cevent_base_get_supported_methods), KType_Array, KType_cevent_base, KMethodName_("get_supported_methods"), 0,
+		_Public, _F(cevent_base_get_features), KType_Int, KType_cevent_base, KMethodName_("get_features"), 0,
+		_Public, _F(cevent_base_loop), KType_Int, KType_cevent_base, KMethodName_("loop"), 1, KType_Int, KFieldName_("flags"),
+		_Public, _F(cevent_base_got_exit), KType_Int, KType_cevent_base, KMethodName_("get_exit"), 0,
+		_Public, _F(cevent_base_got_break), KType_Int, KType_cevent_base, KMethodName_("get_break"), 0,
+		//TODO place event_base_once declaration
+		_Public, _F(cevent_base_loopexit), KType_Int, KType_cevent_base, KMethodName_("loopexit"), 1, KType_ctimeval, KFieldName_("tv"),
+		_Public, _F(cevent_base_priority_init), KType_Int, KType_cevent_base, KMethodName_("priority_init"), 1, KType_Int, KFieldName_("npriorities"),
+		_Public, _F(cevent_base_init_common_timeout), KType_ctimeval, KType_cevent_base, KMethodName_("init_common_timeout"), 1, KType_ctimeval, KFieldName_("duration"),
+		_Public, _F(cevent_base_dump_events), KType_void, KType_cevent_base, KMethodName_("dump_events"), 2, KType_String, KFieldName_("fname"), KType_String, KFieldName_("mode"),
+		_Public, _F(cevent_base_gettimeofday_cached), KType_Int, KType_cevent_base, KMethodName_("gettimeofday_cached"), 1, KType_ctimeval, KFieldName_("tv"),
 
+		// event_config
+		_Public, _F(cevent_config_new), KType_cevent_config, KType_cevent_config, KMethodName_("new"), 0,
 
-
-
-
-		// cevent
+		// event
 		_Public, _F(cevent_event_new), KType_cevent, KType_cevent, KMethodName_("new"), 5, KType_cevent_base, KFieldName_("cevent_base"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("event"), KType_ceventCBfunc, KFieldName_("konoha_CB"), KType_Object, KFieldName_("CBarg"),
 		_Public, _F(cevent_signal_new), KType_cevent, KType_cevent, KMethodName_("new"), 4, KType_cevent_base, KFieldName_("cevent_base"), KType_Int, KFieldName_("signo"), KType_ceventCBfunc, KFieldName_("konoha_CB"), KType_Object, KFieldName_("CBarg"),
 		_Public, _F(cevent_timer_new), KType_cevent, KType_cevent, KMethodName_("new"), 3, KType_cevent_base, KFieldName_("cevent_base"), KType_ceventCBfunc, KFieldName_("konoha_CB"), KType_Object, KFieldName_("CBarg"),
@@ -2212,7 +2349,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		_Public, _F(cevent_event_active), KType_void, KType_cevent, KMethodName_("event_active"), 2, KType_Int, KFieldName_("res"), KType_Int, KFieldName_("ncalls"),
 		_Public, _F(cevent_getEvents), KType_Int, KType_cevent, KMethodName_("getEvents"), 0, 
 
-		// cbufferevent
+		// bufferevent
 		_Public, _F(cbufferevent_new), KType_cbufferevent, KType_cbufferevent, KMethodName_("new"), 3, KType_cevent_base, KFieldName_("cevent_base"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("options"),
 		_Public, _F(cbufferevent_setcb), KType_void, KType_cbufferevent, KMethodName_("setcb"), 4, KType_Cbev_dataCBfunc, KFieldName_("readCB"), KType_Cbev_dataCBfunc, KFieldName_("writeCB"), KType_Cbev_eventCBfunc, KFieldName_("eventCB"), KType_Object, KFieldName_("CBarg"),
 		_Public, _F(cbufferevent_socket_connect), KType_Int, KType_cbufferevent, KMethodName_("socket_connect"), 1, KType_Sockaddr_in, KFieldName_("sockaddr"),
@@ -2220,7 +2357,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		_Public, _F(cbufferevent_write), KType_Int, KType_cbufferevent, KMethodName_("write"), 1, KType_Bytes, KFieldName_("writebuffer"),
 		_Public, _F(cbufferevent_read), KType_Int, KType_cbufferevent, KMethodName_("read"), 1, KType_Bytes, KFieldName_("readbuffer"),
 
-		// cevhttp
+		// evhttp
 		_Public, _F(cevhttp_new), KType_cevhttp, KType_cevhttp, KMethodName_("new"), 1, KType_cevent_base, KFieldName_("cevent_base"),
 		_Public, _F(cevhttp_bind_socket), KType_Int, KType_cevhttp, KMethodName_("bind_socket"), 2, KType_String, KFieldName_("address"), KType_Int, KFieldName_("port"),
 		_Public, _F(cevhttp_bind_socket_with_handle), KType_cevhttp_bound_socket, KType_cevhttp, KMethodName_("bind_socket_with_handle"), 2, KType_String, KFieldName_("address"), KType_Int, KFieldName_("port"),
@@ -2240,11 +2377,11 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		_Public, _F(cevhttp_remove_server_alias), KType_Int, KType_cevhttp, KMethodName_("remove_server_alias"), 1, KType_String, KFieldName_("alias"),
 		_Public, _F(cevhttp_set_timeout), KType_void, KType_cevhttp, KMethodName_("set_timeout"), 1, KType_Int, KFieldName_("timeout_in_secs"),
 
-		// cevhttp_bound_socket
+		// evhttp_bound_socket
 		_Public, _F(cevhttp_bound_socket_get_listener), KType_cevconnlistener, KType_cevhttp_bound_socket, KMethodName_("get_listener"), 0,
 		_Public, _F(cevhttp_bound_socket_get_fd), KType_Int, KType_cevhttp_bound_socket, KMethodName_("get_fd"), 0,
 
-		// cevhttp_request
+		// evhttp_request
 		_Public, _F(cevhttp_request_new), KType_cevhttp_request, KType_cevhttp_request, KMethodName_("new"), 2, KType_cevhttp_requestCBfunc, KFieldName_("cb"), KType_Object, KFieldName_("arg"),
 		_Public, _F(cevhttp_request_send_error), KType_void, KType_cevhttp_request, KMethodName_("send_error"), 2, KType_Int, KFieldName_("error"), KType_String, KFieldName_("reason"),
 		_Public, _F(cevhttp_request_send_reply), KType_void, KType_cevhttp_request, KMethodName_("send_reply"), 3, KType_Int, KFieldName_("code"), KType_String, KFieldName_("reason"), KType_cevbuffer, KFieldName_("databuf"),
@@ -2266,7 +2403,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		_Public, _F(cevhttp_request_get_output_buffer), KType_cevbuffer, KType_cevhttp_request, KMethodName_("get_output_buffer"), 0,
 		_Public, _F(cevhttp_request_get_host), KType_String, KType_cevhttp_request, KMethodName_("get_host"), 0,
 
-		// cevhttp_connection
+		// evhttp_connection
 		_Public, _F(cevhttp_connection_new), KType_cevhttp_connection, KType_cevhttp_connection, KMethodName_("new"), 4, KType_cevent_base, KFieldName_("event_base"), KType_cevdns_base, KFieldName_("dnsbase"), KType_String, KFieldName_("address"), KType_Int, KFieldName_("port"),
 		_Public, _F(cevhttp_connection_get_bufferevent), KType_cevbuffer, KType_cevhttp_connection, KMethodName_("get_bufferevent"), 0,
 		_Public, _F(cevhttp_connection_get_base), KType_cevent_base, KType_cevhttp_connection, KMethodName_("get_base"), 0,
@@ -2280,13 +2417,13 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		_Public, _F(cevhttp_connection_get_peer), KType_connection_peer, KType_cevhttp_connection, KMethodName_("get_peer"), 0,
 		_Public, _F(cevhttp_connection_make_request), KType_Int, KType_cevhttp_connection, KMethodName_("make_request"), 3, KType_cevhttp_request, KFieldName_("req"), KType_Int, KFieldName_("evhttp_cmd_type"), KType_String, KFieldName_("uri"),
 
-		// cevkeyvalq
+		// evkeyvalq
 		_Public, _F(cevkeyvalq_find_header), KType_String, KType_cevkeyvalq, KMethodName_("find_header"), 1, KType_String, KFieldName_("key"),
 		_Public, _F(cevkeyvalq_remove_header), KType_Int, KType_cevkeyvalq, KMethodName_("remove_header"), 1, KType_String, KFieldName_("key"),
 		_Public, _F(cevkeyvalq_add_header), KType_Int, KType_cevkeyvalq, KMethodName_("add_header"), 2, KType_String, KFieldName_("key"), KType_String, KFieldName_("value"),
 		_Public, _F(cevkeyvalq_clear_header), KType_Int, KType_cevkeyvalq, KMethodName_("clear_header"), 0,
 
-		// cevhttp_uri
+		// evhttp_uri
 		_Public, _F(cevhttp_uri_new), KType_cevhttp_uri, KType_cevhttp_uri, KMethodName_("new"), 0,
 		_Public, _F(cevhttp_uri_set_flags), KType_void, KType_cevhttp_uri, KMethodName_("set_flags"), 1, KType_Int, KFieldName_("flags"),
 		_Public|_Im, _F(cevhttp_uri_get_scheme), KType_String, KType_cevhttp_uri, KMethodName_("get_scheme"), 0,
@@ -2314,7 +2451,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		_Static|_Public, _F(cevhttp_uri_parse_query_str), KType_Int, KType_cevhttp_uri, KMethodName_("parse_query_str"), 2, KType_String, KFieldName_("uri"), KType_cevkeyvalq, KFieldName_("headers"),
 		_Static|_Public, _F(cevhttp_uri_htmlescape), KType_String, KType_cevhttp_uri, KMethodName_("htmlescape"), 1, KType_String, KFieldName_("html"),
 
-		// ctimeval
+		// timeval
 		_Public, _F(ctimeval_new), KType_ctimeval, KType_ctimeval, KMethodName_("new"), 2, KType_Int, KFieldName_("tv_sec"), KType_Int, KFieldName_("tv_usec"),
 
 		// Sockaddr_in
