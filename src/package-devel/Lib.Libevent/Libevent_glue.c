@@ -638,7 +638,6 @@ static KMETHOD cevhttp_new(KonohaContext *kctx, KonohaStack *sfp)
 	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
 	kcevent_base *ceb = (kcevent_base *)sfp[1].asObject;
 	http->evhttp = evhttp_new(ceb->event_base);
-	//TODO confirm to use 'OnField' for new object
 	KFieldSet(http, http->cbargArray, new_(Array, 0, OnField));	//refered "KFieldInit(ns, ns->NameSpaceConstList, new_(Array, 0, OnField));"	in src/konoha/import/datatype.h
 	KReturn(http);
 }
@@ -760,29 +759,15 @@ static void cevhttp_CB_method_invoke(struct evhttp_request *req, void * arg)
 }
 
 //
-static int cevhttp_set_cb_common(bool isGencb, KonohaContext *kctx, KonohaStack *sfp)
+static int cevhttp_set_cb_common(KonohaContext *kctx, kcevhttp *http, kString *uri, kFunc *cb, kObject *cbarg, bool isGencb)
 {
-	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
-	kString *uri = NULL;
-	kFunc *cb = NULL;
-	kObject *cbarg = NULL;
-
-	if (isGencb) {
-		cb = (kFunc *)sfp[1].asFunc;
-		cbarg = sfp[2].asObject;
-	} else {
-		uri = sfp[1].asString;
-		cb = (kFunc *)sfp[2].asFunc;
-		cbarg = sfp[3].asObject;
-	}
-
 	kevhttp_set_cb_arg *set_cb_cbarg = (kevhttp_set_cb_arg *)(new_(evhttp_set_cb_arg, 0, OnField));
 	int ret;
 
 	set_cb_cbarg->kctx = kctx;
 	kFuncVar *fo;
 	{
-		// copy kFunc Object to use 'env' as CBarg	TODO check
+		// copy kFunc Object to use 'env' as CBarg
 		kMethod *cbmtd = cb->method;
 		kParam *pa = kMethod_GetParam(cbmtd);
 		KClass *ct = KLIB KClass_Generics(kctx, KClass_Func, pa->rtype, pa->psize, (kparamtype_t *)pa->paramtypeItems);
@@ -807,7 +792,11 @@ static int cevhttp_set_cb_common(bool isGencb, KonohaContext *kctx, KonohaStack 
 //## int evhttp.set_cb(String uri, Func[void, evhttp_request, Object] cb, Object cbarg);
 static KMETHOD cevhttp_set_cb(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturnUnboxValue(cevhttp_set_cb_common(false, kctx, sfp));
+	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
+	kString *uri = sfp[1].asString;
+	kFunc *cb = (kFunc *)sfp[2].asFunc;
+	kObject *cbarg = sfp[3].asObject;
+	KReturnUnboxValue(cevhttp_set_cb_common(kctx, http, uri, cb, cbarg, false));
 }
 
 //## int evhttp.del_cb(String uri);
@@ -825,7 +814,10 @@ static KMETHOD cevhttp_del_cb(KonohaContext *kctx, KonohaStack *sfp)
 //## void evhttp.set_gencb(Func[void, evhttp_request, Object] cb, Object cbarg);
 static KMETHOD cevhttp_set_gencb(KonohaContext *kctx, KonohaStack *sfp)
 {
-	cevhttp_set_cb_common(true, kctx, sfp);
+	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
+	kFunc *cb = (kFunc *)sfp[1].asFunc;
+	kObject *cbarg = sfp[2].asObject;
+	cevhttp_set_cb_common(kctx, http, NULL, cb, cbarg, true);
 	KReturnVoid();
 }
 
