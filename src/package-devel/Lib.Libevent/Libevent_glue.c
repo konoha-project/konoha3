@@ -429,7 +429,7 @@ static void cevent_Init(KonohaContext *kctx, kObject *o, void *conf)
 	kcevent *ev = (kcevent *) o;
 	ev->kctx = NULL;
 	ev->event = NULL;
-	KFieldInit(ev, ev->kcb, K_NULL);
+	KFieldInit(ev, ev->kcb, KNULL(Func));
 	KFieldInit(ev, ev->kcbArg, K_NULL);
 	KFieldInit(ev, ev->kctimeval, K_NULL);
 }
@@ -635,9 +635,9 @@ static void cbufferevent_Init(KonohaContext *kctx, kObject *o, void *conf)
 	kcbufferevent *bev = (kcbufferevent *) o;
 	bev->kctx = NULL;
 	bev->bev = NULL;
-	KFieldInit(bev, bev->readcb, K_NULL);
-	KFieldInit(bev, bev->writecb, K_NULL);
-	KFieldInit(bev, bev->eventcb, K_NULL);
+	KFieldInit(bev, bev->readcb, KNULL(Func));
+	KFieldInit(bev, bev->writecb, KNULL(Func));
+	KFieldInit(bev, bev->eventcb, KNULL(Func));
 	KFieldInit(bev, bev->kcbArg, K_NULL);
 }
 
@@ -968,7 +968,7 @@ static void cevhttp_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kcevhttp *http = (kcevhttp *) o;
 	http->evhttp = NULL;
-	KFieldInit(http, http->cbargArray, K_NULL);
+	KFieldInit(http, http->cbargArray, KNULL(Array));
 }
 
 static void cevhttp_Free(KonohaContext *kctx, kObject *o)
@@ -992,7 +992,6 @@ static KMETHOD cevhttp_new(KonohaContext *kctx, KonohaStack *sfp)
 	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
 	kcevent_base *ceb = (kcevent_base *)sfp[1].asObject;
 	http->evhttp = evhttp_new(ceb->event_base);
-	//TODO confirm to use 'OnField' for new object
 	KFieldSet(http, http->cbargArray, new_(Array, 0, OnField));	//refered "KFieldInit(ns, ns->NameSpaceConstList, new_(Array, 0, OnField));"	in src/konoha/import/datatype.h
 	KReturn(http);
 }
@@ -1114,29 +1113,15 @@ static void cevhttp_CB_method_invoke(struct evhttp_request *req, void * arg)
 }
 
 //
-static int cevhttp_set_cb_common(bool isGencb, KonohaContext *kctx, KonohaStack *sfp)
+static int cevhttp_set_cb_common(KonohaContext *kctx, kcevhttp *http, kString *uri, kFunc *cb, kObject *cbarg, bool isGencb)
 {
-	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
-	kString *uri = NULL;
-	kFunc *cb = NULL;
-	kObject *cbarg = NULL;
-
-	if (isGencb) {
-		cb = (kFunc *)sfp[1].asFunc;
-		cbarg = sfp[2].asObject;
-	} else {
-		uri = sfp[1].asString;
-		cb = (kFunc *)sfp[2].asFunc;
-		cbarg = sfp[3].asObject;
-	}
-
 	kevhttp_set_cb_arg *set_cb_cbarg = (kevhttp_set_cb_arg *)(new_(evhttp_set_cb_arg, 0, OnField));
 	int ret;
 
 	set_cb_cbarg->kctx = kctx;
 	kFuncVar *fo;
 	{
-		// copy kFunc Object to use 'env' as CBarg	TODO check
+		// copy kFunc Object to use 'env' as CBarg
 		kMethod *cbmtd = cb->method;
 		kParam *pa = kMethod_GetParam(cbmtd);
 		KClass *ct = KLIB KClass_Generics(kctx, KClass_Func, pa->rtype, pa->psize, (kparamtype_t *)pa->paramtypeItems);
@@ -1161,7 +1146,11 @@ static int cevhttp_set_cb_common(bool isGencb, KonohaContext *kctx, KonohaStack 
 //## int evhttp.set_cb(String uri, Func[void, evhttp_request, Object] cb, Object cbarg);
 static KMETHOD cevhttp_set_cb(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturnUnboxValue(cevhttp_set_cb_common(false, kctx, sfp));
+	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
+	kString *uri = sfp[1].asString;
+	kFunc *cb = (kFunc *)sfp[2].asFunc;
+	kObject *cbarg = sfp[3].asObject;
+	KReturnUnboxValue(cevhttp_set_cb_common(kctx, http, uri, cb, cbarg, false));
 }
 
 //## int evhttp.del_cb(String uri);
@@ -1179,7 +1168,10 @@ static KMETHOD cevhttp_del_cb(KonohaContext *kctx, KonohaStack *sfp)
 //## void evhttp.set_gencb(Func[void, evhttp_request, Object] cb, Object cbarg);
 static KMETHOD cevhttp_set_gencb(KonohaContext *kctx, KonohaStack *sfp)
 {
-	cevhttp_set_cb_common(true, kctx, sfp);
+	kcevhttp *http = (kcevhttp *)sfp[0].asObject;
+	kFunc *cb = (kFunc *)sfp[1].asFunc;
+	kObject *cbarg = sfp[2].asObject;
+	cevhttp_set_cb_common(kctx, http, NULL, cb, cbarg, true);
 	KReturnVoid();
 }
 
@@ -1268,8 +1260,8 @@ static void cevhttp_request_Init(KonohaContext *kctx, kObject *o, void *conf)
 	kcevhttp_request *req = (kcevhttp_request *) o;
 	req->kctx = NULL;
 	req->req = NULL;
-	KFieldInit(req, req->kcb, K_NULL);
-	KFieldInit(req, req->chunked_kcb, K_NULL);
+	KFieldInit(req, req->kcb, KNULL(Func));
+	KFieldInit(req, req->chunked_kcb, KNULL(Func));
 }
 
 static void cevhttp_request_Free(KonohaContext *kctx, kObject *o)
@@ -1529,7 +1521,7 @@ static void cevhttp_connection_Init(KonohaContext *kctx, kObject *o, void *conf)
 	kcevhttp_connection *con = (struct cevhttp_connection *) o;
 	con->kctx = NULL;
 	con->evcon = NULL;
-	KFieldInit(con, con->close_kcb, K_NULL);
+	KFieldInit(con, con->close_kcb, KNULL(Func));
 }
 
 static void cevhttp_connection_Free(KonohaContext *kctx, kObject *o)
@@ -1700,7 +1692,7 @@ static KMETHOD cevhttp_connection_make_request(KonohaContext *kctx, KonohaStack 
 static void connection_peer_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kconnection_peer *peer = (kconnection_peer *) o;
-	KFieldInit(peer, peer->address, K_NULL);
+	KFieldInit(peer, peer->address, KNULL(String));
 	peer->port = 0;
 }
 
@@ -2015,8 +2007,8 @@ static void evhttp_set_cb_arg_Init(KonohaContext *kctx, kObject *o, void *conf)
 	kevhttp_set_cb_arg *cbarg = (kevhttp_set_cb_arg *) o;
 
 	cbarg->kctx = NULL;
-	KFieldInit(cbarg, cbarg->kcb, K_NULL);
-	KFieldInit(cbarg, cbarg->uri, K_NULL);
+	KFieldInit(cbarg, cbarg->kcb, KNULL(Func));
+	KFieldInit(cbarg, cbarg->uri, KNULL(String));
 }
 
 static void evhttp_set_cb_arg_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
