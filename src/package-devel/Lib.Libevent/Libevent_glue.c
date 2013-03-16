@@ -1198,6 +1198,7 @@ static KMETHOD cevhttp_connection_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(con);
 }
 
+#ifdef LIBEVENT_2_0_17_LATER
 //## bufferevent evhttp_connection.get_bufferevent();
 static KMETHOD cevhttp_connection_get_bufferevent(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -1206,6 +1207,7 @@ static KMETHOD cevhttp_connection_get_bufferevent(KonohaContext *kctx, KonohaSta
 	ret->bev = evhttp_connection_get_bufferevent(con->evcon);
 	KReturn(ret);
 }
+#endif
 
 //## event_base evhttp_connection.get_base();
 static KMETHOD cevhttp_connection_get_base(KonohaContext *kctx, KonohaStack *sfp)
@@ -2015,7 +2017,9 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 
 		// cevhttp_connection
 		_Public, _F(cevhttp_connection_new), KType_cevhttp_connection, KType_cevhttp_connection, KMethodName_("new"), 4, KType_cevent_base, KFieldName_("event_base"), KType_cevdns_base, KFieldName_("dnsbase"), KType_String, KFieldName_("address"), KType_Int, KFieldName_("port"),
+#ifdef LIBEVENT_2_0_17_LATER
 		_Public, _F(cevhttp_connection_get_bufferevent), KType_cevbuffer, KType_cevhttp_connection, KMethodName_("get_bufferevent"), 0,
+#endif
 		_Public, _F(cevhttp_connection_get_base), KType_cevent_base, KType_cevhttp_connection, KMethodName_("get_base"), 0,
 		_Public, _F(cevhttp_connection_set_max_headers_size), KType_void, KType_cevhttp_connection, KMethodName_("set_max_headers_size"), 1, KType_Int, KFieldName_("new_max_headers_size"),
 		_Public, _F(cevhttp_connection_set_max_body_size), KType_void, KType_cevhttp_connection, KMethodName_("set_max_body_size"), 1, KType_Int, KFieldName_("new_max_body_size"),
