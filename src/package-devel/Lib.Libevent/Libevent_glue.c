@@ -396,14 +396,45 @@ static KMETHOD cevent_config_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(ec);
 }
 
+//## int event_config.avoid_method(String method);
+static KMETHOD cevent_config_avoid_method(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_config *ec = (kcevent_config *)sfp[0].asObject;
+	kString *method = sfp[1].asString;
+	int ret = event_config_avoid_method(ec->event_config, kString_text(method));
+	KReturnUnboxValue(ret);
+}
+
+//## int event_config.require_features(int feature);
+static KMETHOD cevent_config_require_features(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_config *ec = (kcevent_config *)sfp[0].asObject;
+	int feature = sfp[1].intValue;
+	int ret = event_config_require_features(ec->event_config, feature);
+	KReturnUnboxValue(ret);
+}
+
+//## int event_config.set_flag(int feature);
+static KMETHOD cevent_config_set_flag(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_config *ec = (kcevent_config *)sfp[0].asObject;
+	int flag = sfp[1].intValue;
+	int ret = event_config_set_flag(ec->event_config, flag);
+	KReturnUnboxValue(ret);
+}
+
+//## int event_config.set_num_cpus_hint(int cpus);
+static KMETHOD cevent_config_set_num_cpus_hint(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_config *ec = (kcevent_config *)sfp[0].asObject;
+	int cpus = sfp[1].intValue;
+	int ret = event_config_set_num_cpus_hint(ec->event_config, cpus);
+	KReturnUnboxValue(ret);
+}
+
+
 
 /*
--- event_config --
-int event_config_avoid_method(struct event_config *cfg, const char *method);
-int event_config_require_features(struct event_config *cfg, int feature);
-int event_config_set_flag(struct event_config *cfg, int flag);
-int event_config_set_num_cpus_hint(struct event_config *cfg, int cpus);
-
 
 -- event log --
 void event_set_log_callback(event_log_cb cb);
@@ -2324,6 +2355,10 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 
 		// event_config
 		_Public, _F(cevent_config_new), KType_cevent_config, KType_cevent_config, KMethodName_("new"), 0,
+		_Public, _F(cevent_config_avoid_method), KType_Int, KType_cevent_config, KMethodName_("avoid_method"), 1, KType_String, KFieldName_("method"),
+		_Public, _F(cevent_config_require_features), KType_Int, KType_cevent_config, KMethodName_("require_features"), 1, KType_Int, KFieldName_("feature"),
+		_Public, _F(cevent_config_set_flag), KType_Int, KType_cevent_config, KMethodName_("set_flag"), 1, KType_Int, KFieldName_("flag"),
+		_Public, _F(cevent_config_set_num_cpus_hint), KType_Int, KType_cevent_config, KMethodName_("set_num_cpus_hint"), 1, KType_Int, KFieldName_("cpus"),
 
 		// event
 		_Public, _F(cevent_event_new), KType_cevent, KType_cevent, KMethodName_("new"), 5, KType_cevent_base, KFieldName_("cevent_base"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("event"), KType_ceventCBfunc, KFieldName_("konoha_CB"), KType_Object, KFieldName_("CBarg"),
