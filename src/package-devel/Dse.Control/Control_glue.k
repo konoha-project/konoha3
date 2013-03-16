@@ -5,7 +5,7 @@ import("Syntax.GlobalVariable");
 import("Type.Bytes");
 import("Type.File");
 import("Type.Json");
-import("Java.Class");
+import("JavaStyle.Class");
 import("JavaScript.String");
 import("JavaScript.Array");
 import("JavaScript.Date");

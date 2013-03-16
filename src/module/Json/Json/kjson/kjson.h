@@ -169,7 +169,7 @@ static inline void JSON_Retain(JSON json)
 
 static inline void JSONObject_Retain(JSON json)
 {
-    if ((JSON_type(json) & 1) == 1) {
+    if((JSON_type(json) & 1) == 1) {
         JSON_Retain(json);
     }
 }

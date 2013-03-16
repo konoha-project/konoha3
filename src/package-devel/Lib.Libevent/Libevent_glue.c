@@ -646,7 +646,7 @@ static void cbufferevent_Free(KonohaContext *kctx, kObject *o)
 	kcbufferevent *bev = (kcbufferevent *) o;
 
 	bev->kctx = NULL;
-	if (bev->bev != NULL) {
+	if(bev->bev != NULL) {
 		bufferevent_free(bev->bev);
 		bev->bev = NULL;
 	}
@@ -1552,6 +1552,7 @@ static KMETHOD cevhttp_connection_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(con);
 }
 
+#ifdef LIBEVENT_2_0_17_LATER
 //## bufferevent evhttp_connection.get_bufferevent();
 static KMETHOD cevhttp_connection_get_bufferevent(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -1560,6 +1561,7 @@ static KMETHOD cevhttp_connection_get_bufferevent(KonohaContext *kctx, KonohaSta
 	ret->bev = evhttp_connection_get_bufferevent(con->evcon);
 	KReturn(ret);
 }
+#endif
 
 //## event_base evhttp_connection.get_base();
 static KMETHOD cevhttp_connection_get_base(KonohaContext *kctx, KonohaStack *sfp)
@@ -1771,6 +1773,7 @@ static KMETHOD cevhttp_uri_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(uri);
 }
 
+#ifdef LIBEVENT_2_0_11_LATER
 //## void evhttp_uri.set_flags(int flags);
 static KMETHOD cevhttp_uri_set_flags(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -1779,6 +1782,7 @@ static KMETHOD cevhttp_uri_set_flags(KonohaContext *kctx, KonohaStack *sfp)
 	evhttp_uri_set_flags(uri->uri, flags);
 	KReturnVoid();
 }
+#endif
 
 //## String evhttp_uri.get_scheme();
 static KMETHOD cevhttp_uri_get_scheme(KonohaContext *kctx, KonohaStack *sfp)
@@ -1891,6 +1895,7 @@ static KMETHOD cevhttp_uri_set_fragment(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(evhttp_uri_set_fragment(uri->uri, kString_text(fragment)));
 }
 
+#if LIBEVENT_2_0_11_LATER
 //## evhttp_uri evhttp_uri.parse_with_flags(String source_uri, int flags);
 static KMETHOD cevhttp_uri_parse_with_flags(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -1900,6 +1905,7 @@ static KMETHOD cevhttp_uri_parse_with_flags(KonohaContext *kctx, KonohaStack *sf
 	uri->uri = evhttp_uri_parse_with_flags(kString_text(source_uri), flags);
 	KReturn(uri);
 }
+#endif
 
 //## evhttp_uri evhttp_uri.parse(String source_uri);
 static KMETHOD cevhttp_uri_parse(KonohaContext *kctx, KonohaStack *sfp)
@@ -2397,7 +2403,9 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 
 		// evhttp_connection
 		_Public, _F(cevhttp_connection_new), KType_cevhttp_connection, KType_cevhttp_connection, KMethodName_("new"), 4, KType_cevent_base, KFieldName_("event_base"), KType_cevdns_base, KFieldName_("dnsbase"), KType_String, KFieldName_("address"), KType_Int, KFieldName_("port"),
+#ifdef LIBEVENT_2_0_17_LATER
 		_Public, _F(cevhttp_connection_get_bufferevent), KType_cevbuffer, KType_cevhttp_connection, KMethodName_("get_bufferevent"), 0,
+#endif
 		_Public, _F(cevhttp_connection_get_base), KType_cevent_base, KType_cevhttp_connection, KMethodName_("get_base"), 0,
 		_Public, _F(cevhttp_connection_set_max_headers_size), KType_void, KType_cevhttp_connection, KMethodName_("set_max_headers_size"), 1, KType_Int, KFieldName_("new_max_headers_size"),
 		_Public, _F(cevhttp_connection_set_max_body_size), KType_void, KType_cevhttp_connection, KMethodName_("set_max_body_size"), 1, KType_Int, KFieldName_("new_max_body_size"),
@@ -2417,7 +2425,9 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 
 		// evhttp_uri
 		_Public, _F(cevhttp_uri_new), KType_cevhttp_uri, KType_cevhttp_uri, KMethodName_("new"), 0,
+#if LIBEVENT_2_0_11_LATER
 		_Public, _F(cevhttp_uri_set_flags), KType_void, KType_cevhttp_uri, KMethodName_("set_flags"), 1, KType_Int, KFieldName_("flags"),
+#endif
 		_Public|_Im, _F(cevhttp_uri_get_scheme), KType_String, KType_cevhttp_uri, KMethodName_("get_scheme"), 0,
 		_Public|_Im, _F(cevhttp_uri_get_userinfo), KType_String, KType_cevhttp_uri, KMethodName_("get_userinfo"), 0,
 		_Public|_Im, _F(cevhttp_uri_get_host), KType_String, KType_cevhttp_uri, KMethodName_("get_host"), 0,
@@ -2432,7 +2442,9 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		_Public, _F(cevhttp_uri_set_path), KType_Int, KType_cevhttp_uri, KMethodName_("set_path"), 1, KType_String, KFieldName_("path"),
 		_Public, _F(cevhttp_uri_set_query), KType_Int, KType_cevhttp_uri, KMethodName_("set_query"), 1, KType_String, KFieldName_("query"),
 		_Public, _F(cevhttp_uri_set_fragment), KType_Int, KType_cevhttp_uri, KMethodName_("set_fragment"), 1, KType_String, KFieldName_("fragment"),
+#if LIBEVENT_2_0_11_LATER
 		_Public, _F(cevhttp_uri_parse_with_flags), KType_cevhttp_uri, KType_cevhttp_uri, KMethodName_("parse_with_flags"), 2, KType_String, KFieldName_("source_uri"), KType_Int, KFieldName_("flags"),
+#endif
 		_Public, _F(cevhttp_uri_parse), KType_cevhttp_uri, KType_cevhttp_uri, KMethodName_("parse"), 1, KType_String, KFieldName_("source_uri"),
 		_Public, _F(cevhttp_uri_join), KType_cevhttp_uri, KType_cevhttp_uri, KMethodName_("join"), 1, KType_Bytes, KFieldName_("buf"),
 
