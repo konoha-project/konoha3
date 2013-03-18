@@ -27,6 +27,9 @@
 
 #include "apr_strings.h"
 #include "http_log.h"
+#undef PACKAGE_NAME
+#undef PACKAGE_STRING
+#undef PACKAGE_VERSION
 #ifndef K_USE_PTHREAD
 #define K_USE_PTHREAD 1
 #endif

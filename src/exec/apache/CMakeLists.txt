@@ -5,7 +5,10 @@ if(USE_APACHE_PLATFORM)
 project(mod_konoha)
 set(TARGET mod_konoha)
 set(SRCS ${CMAKE_CURRENT_SOURCE_DIR}/mod_konoha.c)
-find_program(APXS_BIN apxs PATHS /usr/local/httpd/bin /etc/httpd/bin)
+find_program(APXS_BIN
+        NAMES   apxs
+                apxs2
+        PATHS /usr/local/httpd/bin /etc/httpd/bin)
 
 if(APXS_BIN)
 	if(APPLE)
@@ -37,6 +40,7 @@ if(APXS_BIN)
 		${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}.slo
 		${CMAKE_CURRENT_SOURCE_DIR}/.libs
 		COMMAND make -C ${CMAKE_CURRENT_SOURCE_DIR}
+		KONOHA_BUILD_DIR="${PACKAGE_BUILD_DIR}"
 		DEPENDS ${SRCS})
 	add_custom_target(mod_konoha ALL DEPENDS
 		${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}.la
