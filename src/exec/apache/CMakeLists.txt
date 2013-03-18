@@ -11,7 +11,17 @@ if(APXS_BIN)
 	if(APPLE)
 		set(MAKEFILE macosx)
 	elseif(UNIX)
-		set(MAKEFILE centos) # TODO
+		if(EXISTS "/etc/issue")
+			set(LINUX_NAME "")
+			file(READ "/etc/issue" LINUX_ISSUE)
+			if(LINUX_ISSUE MATCHES "CentOS")
+				set(MAKEFILE centos)
+			elseif(LINUX_ISSUE MATCHES "Debian")
+				set(MAKEFILE ubuntu)
+			elseif(LINUX_ISSUE MATCHES "Ubuntu")
+				set(MAKEFILE ubuntu)
+			endif()
+		endif(EXISTS "/etc/issue")
 	endif(APPLE)
 	add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Makefile
 		COMMAND ln -s ${CMAKE_CURRENT_SOURCE_DIR}/${MAKEFILE}.mk
@@ -19,7 +29,8 @@ if(APXS_BIN)
 	add_custom_target(link_mod_konoha_Makefile ALL DEPENDS
 		${CMAKE_CURRENT_SOURCE_DIR}/Makefile
 		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/macosx.mk
-		${CMAKE_CURRENT_SOURCE_DIR}/centos.mk)
+		${CMAKE_CURRENT_SOURCE_DIR}/centos.mk
+		${CMAKE_CURRENT_SOURCE_DIR}/ubuntu.mk)
 	add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}.la
 		${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}.lo
 		${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}.o
