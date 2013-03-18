@@ -23,9 +23,11 @@
  ***************************************************************************/
 
 #include <unistd.h> /* for off64_t @ CentOS on 32bit */
-#if defined( __i386__) &&  defined( __linux__) && !defined(__off64_t_defined)
+#if defined(__linux__) && !defined(__off64_t_defined)
+#	if defined(__i386__) || defined(__arm__)
 typedef unsigned long long int off64_t;
-#endif
+#	endif /* (__i386__) || (__arm__) */
+#endif /* (__linux__) && !(__off64_t_defined) */
 
 #include "httpd.h"
 #include "http_config.h"

@@ -35,7 +35,7 @@
 #include <konoha3/klib.h>
 #include <konoha3/platform.h>
 #include <konoha3/import/methoddecl.h>
-#include "../../package-devel/apache/apache_glue.h"
+#include "../../package-devel/Lib.Apache/apache_glue.h"
 
 #ifndef K_PREFIX
 #define K_PREFIX  "/usr/local"
