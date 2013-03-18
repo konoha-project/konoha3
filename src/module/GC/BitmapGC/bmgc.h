@@ -70,8 +70,8 @@ extern "C" {
 #define MINOR_COUNT 16
 #endif
 
-#ifdef _WIN64
 #ifdef _MSC_VER
+#include <stdint.h>
 #include <intrin.h>
 static uint32_t CTZ(uint32_t x)
 {
@@ -91,14 +91,15 @@ static uint32_t FFS(uint32_t x)
 	return CTZ(x) + 1;
 }
 #else /* defined(_MSC_VER) */
+#ifdef _WIN64
 #define FFS(n) __builtin_ffsll(n)
 #define CLZ(n) __builtin_clzll(n)
 #define CTZ(x) __builtin_ctzll(x)
-#endif /* defined(_MSC_VER) */
 #else /* defined(_WIN64) */
 #define FFS(n) __builtin_ffsl(n)
 #define CLZ(n) __builtin_clzl(n)
 #define CTZ(x) __builtin_ctzl(x)
+#endif
 #endif
 
 #define BITMAP_FULL ((uintptr_t)(-1))
@@ -460,14 +461,14 @@ static bitmap_t *bitmap_dummy = &bitmap_empty;
 static Segment segment_dummy = {};
 
 static const unsigned int BITMAP_LIMIT[][SEGMENT_LEVEL] = {
-	{/* klass0 */}, {/* klass1 */}, {/* klass2 */}, {/* klass3 */}, {/* klass4 */},
+	{0/* klass0 */}, {0/* klass1 */}, {0/* klass2 */}, {0/* klass3 */}, {0/* klass4 */},
 #define BITMAP_SIZE_IN_EACH_LEVEL(KLASS, N0, N1, N2) {N0, N1, N2},
 	BITMAP_INFO_LIST(BITMAP_SIZE_IN_EACH_LEVEL)
 #undef BITMAP_SIZE_IN_EACH_LEVEL
 };
 
 static const unsigned int BITMAP_OFFSET[][SEGMENT_LEVEL] = {
-	{/* klass0 */}, {/* klass1 */}, {/* klass2 */}, {/* klass3 */}, {/* klass4 */},
+	{0/* klass0 */}, {0/* klass1 */}, {0/* klass2 */}, {0/* klass3 */}, {0/* klass4 */},
 #define OFFSET(TYPE, FIELD) ((unsigned) ((unsigned long)&(((struct BM##TYPE *) 0)->FIELD))/sizeof(bitmap_t))
 #define BITMAP_OFFSET(K, N0, N1, N2) {OFFSET(K, m0), OFFSET(K, m1), OFFSET(K, m2)},
 	BITMAP_INFO_LIST(BITMAP_OFFSET)
@@ -1012,8 +1013,9 @@ static void BitPtr0_inc(AllocationPointer *p)
 	uintptr_t bpidx  = BP(p, 0).idx;
 	uintptr_t bpmask = BP(p, 0).mask;
 	bitmap_t *bm = AP_BITMAP_N(p, 0, bpidx);
+	uintptr_t rot;
 	BM_SET(*bm, bpmask);
-	uintptr_t rot = bpmask >> (BITS - 1);
+	rot = bpmask >> (BITS - 1);
 
 	BP(p, 0).mask = (bpmask << 1) | rot;
 }
@@ -1085,11 +1087,12 @@ static void BitPtr_searchUnfilledNode(AllocationPointer *ap, BitPtr *bp, int lev
 		bitmap_t mask = 1;
 		while(1) {
 			uintptr_t temp = *bm;
+			bitmap_t *bitmap;
 			mask = (temp + 1UL) & ~temp;
 			if(mask == 0) {
 				break;
 			}
-			bitmap_t *bitmap = AP_BITMAP_N(ap, level-1, bitptrToIndex(bm - base, mask));
+			bitmap = AP_BITMAP_N(ap, level-1, bitptrToIndex(bm - base, mask));
 			if(BM_IS_FULL(*bitmap)) {
 				BM_SET(*bm, mask);
 				continue;
@@ -1144,6 +1147,7 @@ static void *tryAlloc(HeapManager *mng, SubHeap *h)
 {
 	AllocationPointer *p = &h->p;
 	void *temp;
+	bool isEmpty;
 	if(isMarked(p)) {
 		if(findNextFreeNode(p) == false) {
 			if(nextSegment(mng, h, p) == false) {
@@ -1153,7 +1157,7 @@ static void *tryAlloc(HeapManager *mng, SubHeap *h)
 	}
 	temp = p->blockptr;
 	prefetch_(temp, 0, 0);
-	bool isEmpty = inc(p, h);
+	isEmpty = inc(p, h);
 
 #ifdef USE_GENERATIONAL_GC
 	bitmap_Set(&mng->flags, GC_MAJOR_FLAG,
@@ -1640,9 +1644,10 @@ static void bmgc_gc_Init(HeapManager *mng, enum gc_mode mode)
 
 #define OBJECT_LOAD_BLOCK_INFO(o, seg, index, klass) do {\
 	uintptr_t addr, offset;\
+	NodeHeader *head;\
 	addr   = ((uintptr_t)o) & ~(SEGMENT_SIZE - 1UL);\
 	offset = ((uintptr_t)o) &  (SEGMENT_SIZE - 1UL);\
-	NodeHeader *head = (NodeHeader *) addr;\
+	head = (NodeHeader *) addr;\
 	seg   = head->seg;\
 	klass = head->klass;\
 	index = offset >> klass;\
@@ -1654,11 +1659,12 @@ static void bitmap_mark(bitmap_t bm, Segment *seg, uintptr_t idx, uintptr_t mask
 		size_t i;
 		for (i = 1; i < SEGMENT_LEVEL-1; ++i) {
 			uintptr_t bpidx, bpmask;
+			bitmap_t *bm1;
 			BITPTR_INIT_(bpidx, bpmask, idx);
 #ifdef USE_CONCURRENT_GC
-			bitmap_t *bm1 = SEG_TRACE_BITMAP_N(seg, i, bpidx);
+			bm1 = SEG_TRACE_BITMAP_N(seg, i, bpidx);
 #else
-			bitmap_t *bm1 = SEG_BITMAP_N(seg, i, bpidx);
+			bm1 = SEG_BITMAP_N(seg, i, bpidx);
 #endif
 			BM_SET(*bm1, bpmask);
 			if(!BM_IS_FULL(*bm1))
@@ -1694,13 +1700,14 @@ static void mark_mstack(HeapManager *mng, kObject *o, MarkStack *mstack)
 	Segment *seg;
 	int index, klass;
 	uintptr_t bpidx, bpmask;
+	bitmap_t *bm;
 	OBJECT_LOAD_BLOCK_INFO(o, seg, index, klass);
 	BITPTR_INIT_(bpidx, bpmask, index);
 #ifdef USE_CONCURRENT_GC
-	bitmap_t *bm  = SEG_TRACE_BITMAP_N(seg, 0, bpidx);
+	bm  = SEG_TRACE_BITMAP_N(seg, 0, bpidx);
 	prefetch_(SEG_TRACE_BITMAP_N(seg, 1, 0), 1, 1);
 #else
-	bitmap_t *bm  = SEG_BITMAP_N(seg, 0, bpidx);
+	bm  = SEG_BITMAP_N(seg, 0, bpidx);
 	prefetch_(SEG_BITMAP_N(seg, 1, 0), 1, 1);
 #endif
 
@@ -1843,7 +1850,7 @@ static void bmgc_gc_mark(HeapManager *mng, enum gc_mode mode)
 	KonohaContext *kctx = mng->kctx;
 	MarkStack *mstack = mstack_Init(&mng->mstack);
 	kObject *ref = NULL;
-	ObjectGraphTracer tracer = {};
+	ObjectGraphTracer tracer = {{0}};
 	tracer.base.fn_visit      = ObjectGraphTracer_visit;
 	tracer.base.fn_visitRange = ObjectGraphTracer_visitRange;
 	tracer.mng    = mng;
@@ -2147,21 +2154,22 @@ static kbool_t KisObject(KonohaContext *kctx, void *ptr)
 {
 	HeapManager *mng = (HeapManager *)kctx->gcContext;
 	kObject *o = (kObject *) ptr;
+	size_t i;
 	if((uintptr_t) o % PowerOf2(SUBHEAP_KLASS_MIN) != 0)
 		return false;
 
-	size_t i;
 	FOR_EACH_ARRAY_(mng->managed_heap_a, i) {
 		kObject *s = (kObject *) ARRAY_n(mng->managed_heap_a, i);
 		kObject *e = (kObject *) ARRAY_n(mng->managed_heap_end_a, i);
 		if(s < o && o < e) {
 			Segment *seg;
 			uintptr_t klass, index;
+			uintptr_t bpidx, bpmask;
+			bitmap_t *bm;
 			OBJECT_LOAD_BLOCK_INFO(o, seg, index, klass);
 			DBG_ASSERT((uintptr_t) o % PowerOf2(klass) == 0);
-			uintptr_t bpidx, bpmask;
 			BITPTR_INIT_(bpidx, bpmask, index);
-			bitmap_t *bm = SEG_BITMAP_N(seg, 0, bpidx);
+			bm = SEG_BITMAP_N(seg, 0, bpidx);
 			if(BM_TEST(*bm, bpmask)) {
 				return true;
 			}

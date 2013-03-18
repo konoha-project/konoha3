@@ -32,32 +32,72 @@ extern "C" {
 #endif
 
 struct JSONString;
+#if defined(_MSC_VER)
+#pragma pack(push, 8)
+#endif
 typedef struct kmap_record {
     unsigned hash;
     struct JSONString *k;
     uint64_t v;
-} __attribute__((__aligned__(8))) map_record_t;
+}
+#if defined(__GNUC__)
+__attribute__((__aligned__(8)))
+#endif
+map_record_t;
+#if defined(_MSC_VER)
+#pragma pack(pop)
+#endif
 
 struct map_api;
 typedef struct map_api kmap_api_t;
 
+#if defined(_MSC_VER)
+#pragma pack(push, 1)
+#endif
 struct map_base {
     const kmap_api_t *api;
     map_record_t *records;
-} __attribute__ ((packed));
+}
+#if defined(__GNUC__)
+__attribute__ ((packed));
+#endif
+#if defined(_MSC_VER)
+;
+#pragma pack(pop)
+#endif
 
+#if defined(_MSC_VER)
+#pragma pack(push, 8)
+#endif
 typedef struct hashmap_t {
     struct map_base base;
     unsigned used_size;
     unsigned record_size_mask;
-} __attribute__((__aligned__(8))) hashmap_t;
+}
+#if defined(__GNUC__)
+__attribute__((__aligned__(8)))
+#endif
+hashmap_t;
+#if defined(_MSC_VER)
+#pragma pack(pop)
+#endif
 
 #define DICTMAP_THRESHOLD 3
+#if defined(_MSC_VER)
+#pragma pack(push, 8)
+#endif
 typedef struct dictmap_t {
     struct map_base base;
     unsigned  used_size;
     unsigned  hash_list[DICTMAP_THRESHOLD];
-} __attribute__((__aligned__(8))) dictmap_t;
+}
+#if defined(__GNUC__)
+__attribute__((__aligned__(8)))
+#endif
+dictmap_t;
+#if defined(_MSC_VER)
+#pragma pack(pop)
+#endif
 
 typedef union kmap_t {
     hashmap_t h;

@@ -97,11 +97,11 @@ static kinline kString* KSymbol_GetString(KonohaContext *kctx, ksymbol_t sym)
 static kinline const char* KSymbol_prefixText(ksymbol_t sym)
 {
 	size_t mask = ((size_t)(KSymbol_Attr(sym)) >> ((sizeof(ksymbol_t) * 8)-3));
-	DBG_ASSERT(mask < 8);
 	static const char* prefixes[] = {
 		/*000*/ "",   /*001*/ "set", /*010*/ "get", /*011*/ "@",
 		/*100*/ "",   /*101*/ "as",  /*110*/ "to",  /*111*/ "$",
 	};
+	DBG_ASSERT(mask < 8);
 	return prefixes[mask];
 }
 
@@ -154,7 +154,6 @@ static kinline uintptr_t map_getu(KonohaContext *kctx, KHashMap *kmp, uintptr_t 
 
 static kinline const char* TAG_t(kinfotag_t t)
 {
-	DBG_ASSERT(t <= NoneTag);
 	static const char* tags[] = {
 		"(error) ", /*CritTag*/
 		"(error) ", /*ErrTag*/
@@ -164,6 +163,7 @@ static kinline const char* TAG_t(kinfotag_t t)
 		"(debug) ", /*DebugTag*/
 		"", /* NoneTag*/
 	};
+	DBG_ASSERT(t <= NoneTag);
 	return tags[(int)t];
 }
 

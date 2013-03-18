@@ -107,25 +107,28 @@ static inline char *put_i(char *p, int64_t value)
 
 static inline void string_builder_add_hex_no_check(string_builder *sb, uint32_t i)
 {
+    char *p, *e;
     ARRAY_ensureSize(char, &sb->buf, 4/* = sizeof("abcd") */);
-    char *p = sb->buf.list + ARRAY_size(sb->buf);
-    char *e = put_x(p, i);
+    p = sb->buf.list + ARRAY_size(sb->buf);
+    e = put_x(p, i);
     sb->buf.size += e - p;
 }
 
 static inline void string_builder_add_int(string_builder *sb, int32_t i)
 {
+    char *p, *e;
     ARRAY_ensureSize(char, &sb->buf, 12/* = sizeof("-2147483648") */);
-    char *p = sb->buf.list + ARRAY_size(sb->buf);
-    char *e = put_i(p, i);
+    p = sb->buf.list + ARRAY_size(sb->buf);
+    e = put_i(p, i);
     sb->buf.size += e - p;
 }
 
 static inline void string_builder_add_int64(string_builder *sb, int64_t i)
 {
+    char *p, *e;
     ARRAY_ensureSize(char, &sb->buf, 20/* = sizeof("-9223372036854775807") */);
-    char *p = sb->buf.list + ARRAY_size(sb->buf);
-    char *e = put_i(p, i);
+    p = sb->buf.list + ARRAY_size(sb->buf);
+    e = put_i(p, i);
     sb->buf.size += e - p;
 }
 
@@ -162,10 +165,11 @@ static inline void string_builder_dispose(string_builder *sb)
 static inline char *string_builder_tostring(string_builder *sb,
         size_t *len, int ensureZero)
 {
+    char *list;
     if(ensureZero) {
         ARRAY_add(char, &sb->buf, '\0');
     }
-    char *list = sb->buf.list;
+    list = sb->buf.list;
     *len = (size_t) sb->buf.size;
     sb->buf.list     = NULL;
     sb->buf.size     = 0;

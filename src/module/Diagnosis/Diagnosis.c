@@ -118,8 +118,10 @@ static int DiagnosisSystemError(KonohaContext *kctx, int userFault)
 		return userFault | SystemFault;  /* running software can be wrong.. */
 	case EFAULT: /* 14 Bad address */
 		return userFault | SoftwareFault; /* At the C-Level */
+#if defined(ENOTBLK)
 	case ENOTBLK: /* 15 Node device required */
 		return SystemFault; /* in case of unmount device */
+#endif
 	case EBUSY: /* 16 Device or resource busy */
 		return SystemFault;
 	case EEXIST: /*17 File exists */
@@ -149,9 +151,11 @@ static int DiagnosisSystemError(KonohaContext *kctx, int userFault)
 		return userFault | SoftwareFault;
 	case ENOTTY: /* 25 Not a typewriter */
 		return userFault | SoftwareFault | SystemFault;
+#if defined(ETXTBSY)
 	case ETXTBSY:  /* 26 Text file busy */
 		/* It's illegal to write to a binary while it is executing- */
 		return userFault | SoftwareFault;
+#endif
 	case EFBIG: /* 27 File too large */
 		return userFault | SoftwareFault;
 	case ENOSPC: /* 28 No space left on device */
@@ -177,9 +181,10 @@ static int DiagnosisSystemError(KonohaContext *kctx, int userFault)
 	case ENOSYS: /* 38 Function not implemented  UNSHRE*/
 	case ENOTEMPTY: /* 39 Directory not empty */
 		return userFault | SoftwareFault | SystemFault;
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
 	case ELOOP: /* 40 Too many symbolic links encountered */
 		return SystemFault;
-		/*** ***/
+	/*** ***/
 	//case EWOULDBLOCK: /* Operation would block */
 	case ENOMSG:   /* No message of desired type */
 	case EIDRM:    /* Identifier removed */
@@ -215,6 +220,7 @@ static int DiagnosisSystemError(KonohaContext *kctx, int userFault)
 	//case EDOTDOT:   /* RFS specific error */
 	case EBADMSG:   /* Not a data message */
 	case EOVERFLOW: /* Value too large for defined data type */
+#endif
 	//case ENOTUNIQ: /* Name not unique on network */
 	//case EBADFD:  /* File descriptor in bad state */
 	//case EREMCHG: /* Remote address changed */
@@ -226,6 +232,7 @@ static int DiagnosisSystemError(KonohaContext *kctx, int userFault)
 	case EILSEQ:  /* Illegal byte sequence */
 	//case ERESTART:/* Interrupted system call should be restarted */
 	//case ESTRPIPE:/* Streams pipe error */
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
 	case EUSERS:  /* Too many users */
 	case ENOTSOCK: /* Socket operation on non-socket */
 	case EDESTADDRREQ: /* Destination address required */
@@ -256,12 +263,15 @@ static int DiagnosisSystemError(KonohaContext *kctx, int userFault)
 	case EALREADY: /* Operation already in progress */
 	case EINPROGRESS: /* Operation now in progress */
 	case ESTALE:  /* Stale NFS file handle */
+#endif
 	//case EUCLEAN: /* Structure needs cleaning */
 	//case ENOTNAM: /* Not a XENIX named type file */
 	//case ENAVAIL: /* No XENIX semaphores available */
 	//case EISNAM:  /* Is a named type file */
 	//case EREMOTEIO: /* Remote I/O error */
+#if defined(EDQUOT)
 	case EDQUOT:  /* Quota exceeded */
+#endif
 	//case ENOMEDIUM: /* No medium found */
 	//case EMEDIUMTYPE: /* Wrong medium type */
 		break;
@@ -306,8 +316,8 @@ static int DiagnosisSystemError(KonohaContext *kctx, int userFault)
 
 static kbool_t DiagnosisCheckSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
-	DBG_P("filename='%s', line=%d", filename, line);
 	kbool_t res = false;
+	DBG_P("filename='%s', line=%d", filename, line);
 //#if HAVE_DB_H
 //	res = DiagnosisFetchCoverageLog(kctx, filename, line);
 //#endif

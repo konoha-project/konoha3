@@ -86,7 +86,11 @@ static KMETHOD Complex_csinl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
+#if !defined(__CYGWIN__)
 	long double ret = csinl(zl);
+#else
+	long double ret = csin(zl);
+#endif
 	KReturnFloatValue(ret);
 }
 
@@ -113,7 +117,11 @@ static KMETHOD Complex_ccosl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
+#if !defined(__CYGWIN__)
 	long double ret = ccosl(zl);
+#else
+	long double ret = ccos(zl);
+#endif
 	KReturnFloatValue(ret);
 }
 
@@ -140,7 +148,11 @@ static KMETHOD Complex_ctanl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
+#if !defined(__CYGWIN__)
 	long double ret = ctanl(zl);
+#else
+	long double ret = ctan(zl);
+#endif
 	KReturnFloatValue(ret);
 }
 
@@ -167,7 +179,11 @@ static KMETHOD Complex_casinl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
+#if !defined(__CYGWIN__)
 	long double ret = casinl(zl);
+#else
+	long double ret = casin(zl);
+#endif
 	KReturnFloatValue(ret);
 }
 
@@ -194,7 +210,11 @@ static KMETHOD Complex_cacosl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
+#if !defined(__CYGWIN__)
 	long double ret = cacosl(zl);
+#else
+	long double ret = cacos(zl);
+#endif
 	KReturnFloatValue(ret);
 }
 
@@ -221,7 +241,11 @@ static KMETHOD Complex_catanl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
+#if !defined(__CYGWIN__)
 	long double ret = catanl(zl);
+#else
+	long double ret = catan(zl);
+#endif
 	KReturnFloatValue(ret);
 }
 
@@ -526,7 +550,11 @@ static KMETHOD Complex_cpowl(KonohaContext *kctx, KonohaStack *sfp)
 	long double real = (long double)sfp[1].floatValue;
 	long double imaginary = (long double)sfp[2].floatValue;
 	long double _Complex y = real + I * imaginary;
+#if !defined(__CYGWIN__)
 	long double ret = cpowl(x, y);
+#else
+	long double ret = cpow(x, y);
+#endif
 	KReturnFloatValue(ret);
 }
 

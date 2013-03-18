@@ -26,7 +26,7 @@ static KMETHOD PatternMatch_Expression(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
 	int returnIdx = beginIdx;
-	kNode *expr = ParseNewNode(kctx, kNode_ns(stmt), tokenList, &returnIdx, endIdx, ParseExpressionOption|OnlyPatternMatch, NULL);
+	kNode *expr = ParseNewNode(kctx, kNode_ns(stmt), tokenList, &returnIdx, endIdx, (ParseOption)(ParseExpressionOption|OnlyPatternMatch), NULL);
 	if(expr != K_NULLNODE) {
 		kNode_AddParsedObject(kctx, stmt, name, UPCAST(expr));
 	}
@@ -455,7 +455,7 @@ static kNode *MakeNodeSetter(KonohaContext *kctx, kNode *expr, kNameSpace *ns, k
 	KClass *c = KClass_(mtd->typeId);
 	kParam *pa = kMethod_GetParam(mtd);
 	int i, psize = pa->psize + 1;
-	kparamtype_t p[psize];
+	kparamtype_t *p = ALLOCA(kparamtype_t, psize);
 	for(i = 0; i < (int) pa->psize; i++) {
 		p[i].attrTypeId = pa->paramtypeItems[i].attrTypeId;
 	}

@@ -213,9 +213,10 @@ L_RETURN:
 
 static kbool_t BashBuilder_VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk, const char *prefix, const char *suffix)
 {
+	kbool_t ret;
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
 	BashBuilder_EmitString(kctx, bashBuilder, prefix, "", "");
-	kbool_t ret = SUGAR VisitNode(kctx, builder, expr, thunk);
+	ret = SUGAR VisitNode(kctx, builder, expr, thunk);
 	BashBuilder_EmitString(kctx, bashBuilder, suffix, "", "");
 	return ret;
 }
@@ -239,11 +240,11 @@ static kbool_t BashBuilder_VisitErrorNode(KonohaContext *kctx, KBuilder *builder
 
 static kbool_t BashBuilder_VisitReturnNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
+	kNode *expr = kNode_getFirstNode(kctx, stmt);
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
 	if(bashBuilder->visitingMethod->mn != 0) {
 		BashBuilder_EmitString(kctx, bashBuilder, "return ", "", "");
 	}
-	kNode* expr = kNode_getFirstNode(kctx, stmt);
 	if(expr != NULL && IS_Node(expr)) {
 		SUGAR VisitNode(kctx, builder, expr, thunk);
 	}
@@ -253,10 +254,11 @@ static kbool_t BashBuilder_VisitReturnNode(KonohaContext *kctx, KBuilder *builde
 
 static kbool_t BashBuilder_VisitIfNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void* thunk)
 {
-	BashBuilder *bashBuilder = (BashBuilder *)builder;
-	BashBuilder_VisitNode(kctx, builder, kNode_getFirstNode(kctx, stmt), thunk, "if [ ", " ]; then ");
-	SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
+	kNode *thenNode = kNode_getFirstNode(kctx, stmt);
 	kNode *elseNode = kNode_getElseBlock(kctx, stmt);
+	BashBuilder *bashBuilder = (BashBuilder *)builder;
+	BashBuilder_VisitNode(kctx, builder, thenNode, thunk, "if [ ", " ]; then ");
+	SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
 	if(elseNode != K_NULLBLOCK) {
 		BashBuilder_EmitString(kctx, bashBuilder, "else", "", "");
 		SUGAR VisitNode(kctx, builder, elseNode, thunk);
@@ -313,11 +315,12 @@ static kbool_t BashBuilder_VisitThrowNode(KonohaContext *kctx, KBuilder *builder
 
 static kbool_t BashBuilder_VisitTryNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void* thunk)
 {
-	BashBuilder *bashBuilder = (BashBuilder *)builder;
-	BashBuilder_EmitNewLineWith(kctx, bashBuilder, "try ");
-	SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
+	kNode *tryNode     = kNode_getFirstBlock(kctx, stmt);
 	kNode *catchNode   = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("catch"),   K_NULLBLOCK);
 	kNode *finallyNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("finally"), K_NULLBLOCK);
+	BashBuilder *bashBuilder = (BashBuilder *)builder;
+	BashBuilder_EmitNewLineWith(kctx, bashBuilder, "try ");
+	SUGAR VisitNode(kctx, builder, tryNode, thunk);
 	if(catchNode != K_NULLBLOCK) {
 		BashBuilder_EmitString(kctx, bashBuilder, "catch(e) ", "", "");
 		SUGAR VisitNode(kctx, builder, catchNode, thunk);
@@ -331,12 +334,12 @@ static kbool_t BashBuilder_VisitTryNode(KonohaContext *kctx, KBuilder *builder, 
 
 static void BashBuilder_EmitKonohaValue(KonohaContext *kctx, KBuilder *builder, KClass* ct, KonohaStack* sfp)
 {
+	BashBuilder *bashBuilder = (BashBuilder *)builder;
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	ct->format(kctx, sfp, 0, &wb);
-	char *str = (char *)KLIB KBuffer_text(kctx, &wb, NonZero);
-	BashBuilder *bashBuilder = (BashBuilder *)builder;
-	BashBuilder_EmitString(kctx, bashBuilder, str, "", "");
+	BashBuilder_EmitString(kctx, bashBuilder,
+			(char *) KLIB KBuffer_text(kctx, &wb, NonZero), "", "");
 	KLIB KBuffer_Free(&wb);
 }
 
@@ -461,8 +464,9 @@ static void SetUpBashShebang(KonohaContext *kctx);
 
 static bool BashBuilder_importPackage(KonohaContext *kctx, kNameSpace *ns, kString *package, kfileline_t uline)
 {
+	KonohaFactory *factory;
 	KBaseTrace(trace);
-	KonohaFactory *factory = (KonohaFactory *)kctx->platApi;
+	factory = (KonohaFactory *)kctx->platApi;
 
 	SUGAR kNameSpace_UseDefaultVirtualMachine(kctx, ns);
 
@@ -815,8 +819,9 @@ static void BashBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder,
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
 	KClass *kclass = KClass_(mtd->typeId);
 	KBuffer wb;
+	kParam *params;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	kParam *params = kMethod_GetParam(mtd);
+	params = kMethod_GetParam(mtd);
 	bashBuilder->args = params;
 	if(mtd->typeId == KType_NameSpace) {
 		// Top level functions
@@ -873,16 +878,17 @@ static void BashBuilder_EmitClassFooter(KonohaContext *kctx, KBuilder *builder, 
 
 static void BashBuilder_Init(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 {
-	BashBuilder *bashBuilder = (BashBuilder *)builder;
+	BashBuilder *bashBuilder = (BashBuilder *) builder;
+
+	KClass *kclass = KClass_(mtd->typeId);
+	KClass *base   = KClass_(kclass->superTypeId);
+
 	kbool_t isConstractor = false;
 	bashBuilder->visitingMethod = mtd;
 	bashBuilder->isIndentEmitted = false;
 	bashBuilder->indent = 0;
 	KLIB KBuffer_Init(&bashBuilder->buffer, &bashBuilder->bashCodeBuffer);
 	KLIB KDict_Init(kctx, &bashBuilder->localValList);
-
-	KClass *kclass = KClass_(mtd->typeId);
-	KClass *base   = KClass_(kclass->superTypeId);
 
 	if(mtd->mn != 0) {
 		// Functions
@@ -935,9 +941,11 @@ static void BashBuilder_Free(KonohaContext *kctx, KBuilder *builder, kMethod *mt
 
 static struct KVirtualCode* Bash_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kNode *block, int option)
 {
+	BashBuilder builderbuf = {{0}}, *builder;
+	kNameSpace *ns;
 	INIT_GCSTACK();
-	BashBuilder builderbuf = {}, *builder = &builderbuf;
-	kNameSpace *ns = kNode_ns(block);
+	builder = &builderbuf;
+	ns = kNode_ns(block);
 	builder->common.api = ns->builderApi;
 	builder->visitingMethod = mtd;
 	BashBuilder_Init(kctx, (KBuilder *)builder, mtd);

@@ -46,9 +46,13 @@ static const char *GetProfile()
 static FILE *GetLogFile(void)
 {
 	if(stdlog2 == NULL) {
-		if(filename2 == NULL) return stdout;
 		char result_file[256];
+		if(filename2 == NULL) return stdout;
+#if defined(_MSC_VER)
+		_snprintf(result_file, sizeof(result_file), "%s.%s_tested", filename2, GetProfile());
+#else
 		snprintf(result_file, sizeof(result_file), "%s.%s_tested", filename2, GetProfile());
+#endif
 		stdlog2 = fopen(result_file, "w");
 		if(stdlog2 == NULL) {
 			fprintf(stdout, "cannot open logfile: %s (%s)\n", result_file, strerror(errno));
@@ -91,17 +95,19 @@ static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)
 		//filename = (filename == NULL) ? "shell" : filename;
 		char proof_file[256];
 		char result_file[256];
+		FILE *fp, *fp2;
+		int ret;
 		PLATAPI snprintf_i(proof_file, sizeof(proof_file), "%s.%s_proof",  filename, GetProfile());
 		PLATAPI snprintf_i(result_file, sizeof(result_file),  "%s.%s_tested", filename, GetProfile());
-		FILE *fp = fopen(proof_file, "r");
+		fp = fopen(proof_file, "r");
 		if(fp == NULL) {
 			fprintf(stdout, "no proof file: %s\n", proof_file);
 			((KonohaFactory *)kctx->platApi)->exitStatus = 1;
 			return;
 		}
-		FILE *fp2 = fopen(result_file, "r");
+		fp2 = fopen(result_file, "r");
 		DBG_ASSERT(fp2 != NULL);
-		int ret = check_result2(fp, fp2);
+		ret = check_result2(fp, fp2);
 		if(ret != 0) {
 			fprintf(stdout, "proof file mismatched: %s\n", proof_file);
 			((KonohaFactory *)kctx->platApi)->exitStatus = 78;
@@ -127,8 +133,9 @@ static int TEST_vprintf(const char *fmt, va_list ap)
 static int TEST_printf(const char *fmt, ...)
 {
 	va_list ap;
+	int res;
 	va_start(ap, fmt);
-	int res = vfprintf(GetLogFile(), fmt, ap);
+	res = vfprintf(GetLogFile(), fmt, ap);
 	va_end(ap);
 	return res;
 }

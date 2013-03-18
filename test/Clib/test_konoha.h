@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <syslog.h>
+//#include <syslog.h>
 #include <stdlib.h>
 #include "konoha3/platform.h"
 

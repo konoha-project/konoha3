@@ -222,7 +222,7 @@ static kNode *TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t sy
 			}
 			if(tk->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
 				int beginIdx = 0;
-				expr = ParseNewNode(kctx, ns, tk->GroupTokenList, &beginIdx, kArray_size(tk->GroupTokenList), ParseMetaPatternOption|ParseBlockOption, NULL);
+				expr = ParseNewNode(kctx, ns, tk->GroupTokenList, &beginIdx, kArray_size(tk->GroupTokenList), (ParseOption)(ParseMetaPatternOption|ParseBlockOption), NULL);
 				KLIB kObjectProto_SetObject(kctx, stmt, symbol, kObject_typeId(expr), expr);
 			}
 		}
@@ -362,7 +362,7 @@ static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t 
 	}
 	kNode *node = ParseSource(kctx, ns, kString_text(text), uline, baseIndent);
 	struct KGammaLocalData newgma = {0};
-	KGammaStackDecl lvarItems[32 + param->psize];
+	KGammaStackDecl *lvarItems = ALLOCA(KGammaStackDecl, (32 + param->psize));
 	bzero(lvarItems, sizeof(KGammaStackDecl) * (32 + param->psize));
 	newgma.currentWorkingMethod = mtd;
 	newgma.thisClass = KClass_((mtd)->typeId);

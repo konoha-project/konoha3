@@ -26,6 +26,10 @@
 #include <konoha3/konoha_common.h>
 #include <konoha3/import/methoddecl.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct kConsoleVar kConsole;
 struct kConsoleVar {
 	kObjectHeader h;

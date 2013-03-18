@@ -29,6 +29,20 @@ extern "C" {
 #include "kjson/kjson.c"
 #include <konoha3/konoha.h>
 #define JSONAPI PLATAPI JsonModule.
+
+static JSON JSONUString_new2(JSONMemoryPool *jm, const char *s, size_t len)
+{
+    bool malloced;
+    char *str;
+    JSONString *o = (JSONString *) JSONMemoryPool_Alloc(jm, sizeof(*o), &malloced);
+    JSON json = toJSON(ValueU(o));
+    JSON_Init(json);
+    str = (len > JSONSTRING_INLINE_SIZE) ? (char *) malloc(len) : o->text;
+    memcpy(str, s, len);
+    JSONString_init(o, (const char *)str, len);
+    return json;
+}
+
 // -------------------------------------------------------------------------
 /* JSON Parse/ToString API */
 
@@ -36,7 +50,11 @@ struct JsonBuf {
 	uint64_t json_i;
 };
 
-#define AsJSON(JSONBUF) (toJSON(JSONBUF->json_i))
+#if defined(_MSC_VER)
+#define AsJSON(JSONBUF) (*(JSON *)(&(JSONBUF)->json_i))
+#else
+#define AsJSON(JSONBUF) (toJSON((JSONBUF)->json_i))
+#endif
 
 static kbool_t IsJsonType(struct JsonBuf *jsonbuf, KJSONTYPE type)
 {
@@ -61,7 +79,7 @@ static uint64_t NewJsonI(JSONMemoryPool *pool, KJSONTYPE type, va_list ap)
 		case KJSON_ARRAY:    return JSONArray_new(pool, 0).bits;
 		case KJSON_STRING:   {
 			const char *s = va_arg(ap, const char *);
-			return JSONString_new(pool, s, strlen(s)).bits;
+			return JSONUString_new2(pool, s, strlen(s)).bits;
 		}
 		case KJSON_INT:      return JSONInt_new(pool, va_arg(ap, intptr_t)).bits;
 		case KJSON_DOUBLE:   return JSONDouble_new(va_arg(ap, double)).bits;
@@ -144,10 +162,11 @@ static kbool_t SetJsonKeyValue(KonohaContext *kctx, struct JsonBuf *jsonbuf, con
 
 static kbool_t SetJsonValue(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, KJSONTYPE type, ...)
 {
+	JSON val;
+	kbool_t ret = true;
 	va_list ap;
 	va_start(ap, type);
-	JSON val = toJSON(NewJsonI((JSONMemoryPool *)(JSONAPI JsonHandler), type, ap));
-	kbool_t ret = true;
+	val = toJSON(NewJsonI((JSONMemoryPool *)(JSONAPI JsonHandler), type, ap));
 	if(key != NULL) {
 		size_t keylen = KeyLen(key, keylen_or_zero);
 		JSONObject_set((JSONMemoryPool *)(JSONAPI JsonHandler), AsJSON(jsonbuf), key, keylen, val);
@@ -192,10 +211,11 @@ static double GetJsonFloat(KonohaContext *kctx, struct JsonBuf *jsonbuf, const c
 
 static const char *GetJsonText(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, const char *defval)
 {
+	size_t length;
 	JSON json = AsJSON(jsonbuf);
 	if(key == NULL)
 		return JSONString_get(json);
-	size_t length = KeyLen(key, keylen_or_zero);
+	length = KeyLen(key, keylen_or_zero);
 	return JSON_getString(json, key, &length);
 }
 
@@ -239,9 +259,9 @@ static kbool_t AppendJsonArray(KonohaContext *kctx, struct JsonBuf *jsonbuf, str
 // -------------------------------------------------------------------------
 static void InitJsonContext(KonohaContext *kctx)
 {
+	KonohaFactory *factory = (KonohaFactory *) kctx->platApi;
 	JSONMemoryPool *mp = (JSONMemoryPool *) malloc(sizeof(JSONMemoryPool));
 	JSONMemoryPool_Init(mp);
-	KonohaFactory *factory = (KonohaFactory *) kctx->platApi;
 	factory->JsonModule.JsonHandler = (void *) mp;
 }
 

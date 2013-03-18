@@ -23,7 +23,11 @@
  ***************************************************************************/
 
 #include <stdint.h>
+#if !defined(_MSC_VER) || __STDC_VERSION__ >= 199901L
 #include <stdbool.h>
+#else
+#include <konoha3/stdbool.h>
+#endif
 
 #ifndef KJSON_NUMBOX_H_
 #define KJSON_NUMBOX_H_
@@ -73,8 +77,9 @@ static inline Value ValueF(double d) {
 
 static inline Value ValueI(int32_t ival) {
     uint64_t n = (uint64_t)ival;
+    Value v;
     n = n & 0x00000000ffffffffLL;
-    Value v; v.bits = n | TAG(Int32); return v;
+    v.bits = n | TAG(Int32); return v;
 }
 
 static inline Value ValueIO(struct JSONInt64 *oval) {

@@ -230,7 +230,11 @@ static KMETHOD Int_toString(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const method String String.toInt();
 static KMETHOD String_toInt(KonohaContext *kctx, KonohaStack *sfp)
 {
+#if defined(_MSC_VER)
+	KReturnUnboxValue((kint_t)_strtoi64(kString_text(sfp[0].asString), NULL, 10));
+#else
 	KReturnUnboxValue((kint_t)strtoll(kString_text(sfp[0].asString), NULL, 10));
+#endif
 }
 
 //## @Const @Immutable method String String.opAdd(@Coercion String x);

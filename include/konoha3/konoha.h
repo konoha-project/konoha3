@@ -385,14 +385,14 @@ static inline int setjmp_mingw(_JBTYPE* t)
 }
 #define ksetjmp  setjmp_mingw
 #elif defined(__MINGW32__) || defined(_MSC_VER)
-#define ksetjmp  _Setjmp
+#define ksetjmp  _setjmp
 #else
 #define ksetjmp  setjmp
 #endif
 #define klongjmp longjmp
 #endif /*jmpbuf_i*/
 
-#ifdef _MSC_VER
+#if defined(__MINGW32__) || defined(_MSC_VER)
 #include <malloc.h>
 #endif
 #define ALLOCA(T, SIZE) ((T *)alloca((SIZE) * sizeof(T)))
@@ -1670,8 +1670,13 @@ struct kSystemVar {
 /* ----------------------------------------------------------------------- */
 /* Package */
 
+#if defined(_MSC_VER)
+#define KPACKNAME(N, V) \
+	K_DATE, N, V, 0, 0
+#else
 #define KPACKNAME(N, V) \
 	.name = N, .version = V, .konoha_Checksum = K_DATE
+#endif
 
 #define KSetPackageName(VAR, N, V) do{\
 	VAR.name = N; VAR.version = V; VAR.konoha_Checksum = K_DATE;\
@@ -2081,7 +2086,9 @@ typedef struct {
 #ifndef likely
 #define likely(x)     __builtin_expect(!!(x), 1)
 #endif
-#else
+
+#else /* !defined(__GNUC__) */
+
 #ifndef unlikely
 #define unlikely(x)   (x)
 #endif
@@ -2091,16 +2098,24 @@ typedef struct {
 #endif
 #endif
 
+#if !defined(_MSC_VER)
+#define KONOHA_EXPORT(TYPE) extern TYPE
+#define KONOHA_IMPORT(TYPE) extern TYPE
+#else
+#define KONOHA_EXPORT(TYPE) __declspec(dllexport) extern TYPE
+#define KONOHA_IMPORT(TYPE) __declspec(dllimport) extern TYPE
+#endif
+
 ///* Konoha API */
-extern kbool_t Konoha_LoadScript(KonohaContext* konoha, const char *scriptfile);
-extern kbool_t Konoha_Eval(KonohaContext* konoha, const char *script, kfileline_t uline);
-extern kbool_t Konoha_Run(KonohaContext* konoha);  // TODO
+KONOHA_EXPORT(kbool_t) Konoha_LoadScript(KonohaContext* konoha, const char *scriptfile);
+KONOHA_EXPORT(kbool_t) Konoha_Eval(KonohaContext* konoha, const char *script, kfileline_t uline);
+KONOHA_EXPORT(kbool_t) Konoha_Run(KonohaContext* konoha);  // TODO
 
-extern KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);
-extern int Konoha_Destroy(KonohaContext *kctx);
+KONOHA_EXPORT(KonohaContext *) KonohaFactory_CreateKonoha(KonohaFactory *factory);
+KONOHA_EXPORT(int) Konoha_Destroy(KonohaContext *kctx);
 
-extern kbool_t KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *name, ModuleType option);
-extern void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv);
+KONOHA_EXPORT(kbool_t) KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *name, ModuleType option);
+KONOHA_EXPORT(void) KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv);
 
 #ifdef __cplusplus
 } /* extern "C" */

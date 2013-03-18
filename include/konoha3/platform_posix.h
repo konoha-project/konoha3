@@ -41,6 +41,11 @@ extern "C" {
 #endif
 #endif
 
+#if defined(__CYGWIN__)
+#undef K_OSDLLEXT
+#define K_OSDLLEXT        ".dll"
+#endif
+
 #ifdef PATH_MAX
 #define K_PATHMAX PATH_MAX
 #else

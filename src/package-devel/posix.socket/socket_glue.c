@@ -547,7 +547,11 @@ KMETHOD System_shutdown(KonohaContext *kctx, KonohaStack* sfp)
 //## int System.sockatmark(int socket);
 KMETHOD System_sockatmark(KonohaContext *kctx, KonohaStack* sfp)
 {
+#if !defined(__CYGWIN__)
 	int ret = sockatmark(WORD2INT(sfp[1].intValue));
+#else
+	int ret = -1;
+#endif
 	if(ret < 0) {
 		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			LogText("@", "sockadmark"),
@@ -676,11 +680,15 @@ static kbool_t socket_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 			// send & recv flags
 			{KDefineConstInt(MSG_OOB)},
 			{KDefineConstInt(MSG_PEEK)},
+#if !defined(__CYGWIN__)
 			{KDefineConstInt(MSG_DONTROUTE)},
+#endif
 			{KDefineConstInt(MSG_OOB)},
 			{KDefineConstInt(MSG_TRUNC)},
 			{KDefineConstInt(MSG_DONTWAIT)},
+#if !defined(__CYGWIN__)
 			{KDefineConstInt(MSG_EOR)},
+#endif
 			{KDefineConstInt(MSG_WAITALL)},
 #ifdef	__linux__
 			{KDefineConstInt(MSG_CONFIRM)},

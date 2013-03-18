@@ -24,11 +24,15 @@
 
 #include <stdio.h>
 #include <errno.h>
+#if !defined(_MSC_VER)
 #include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
+#if !defined(_MSC_VER)
 #include <sys/file.h>
 #include <dirent.h>
+#endif
 
 #include <konoha3/konoha.h>
 #include <konoha3/sugar.h>
@@ -135,7 +139,11 @@ static KMETHOD System_lstat(KonohaContext *kctx, KonohaStack *sfp)
 	kString *path = sfp[1].asString;
 	const char *systemPath = PLATAPI I18NModule.formatSystemPath(kctx, buffer, sizeof(buffer), kString_text(path), kString_size(path), trace);
 	struct stat buf = {}; /* zero */
+#if defined(__MINGW32__) || defined(_MSC_VER)
+	int ret = stat(systemPath, &buf);
+#else
 	int ret = lstat(systemPath, &buf);
+#endif
 	if(ret == -1) {
 		int fault = KLIB DiagnosisFaultType(kctx, kString_GuessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "lstat", LogText("path", kString_text(path)), LogErrno);
@@ -335,7 +343,6 @@ static void stat_defineClassAndMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 
 static kbool_t stat_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	//	KRequireKonohaCommonModule(trace);
 	stat_defineClassAndMethod(kctx, ns, trace);
 	return true;
 }
@@ -349,11 +356,10 @@ static kbool_t stat_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 
 KDEFINE_PACKAGE *stat_Init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("posix", "1.0"),
-		.PackupNameSpace    = stat_PackupNameSpace,
-		.ExportNameSpace   = stat_ExportNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {};
+	KSetPackageName(d, "posix", "1.0");
+	d.PackupNameSpace = stat_PackupNameSpace;
+	d.ExportNameSpace = stat_ExportNameSpace;
 	return &d;
 }
 

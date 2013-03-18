@@ -110,7 +110,6 @@ void test_gc(KonohaContext *kctx)
 	}
 }
 
-#ifdef _WIN64
 #ifdef _MSC_VER
 #include <intrin.h>
 static uint32_t CLZ(uint32_t x)
@@ -122,16 +121,17 @@ static uint32_t CLZ(uint32_t x)
 static uint32_t FFS(uint32_t x)
 {
 	if(x == 0) return 0;
-	return CTZ(x) + 1;
+	return CLZ(x) + 1;
 }
 #else /* defined(_MSC_VER) */
+#ifdef _WIN64
 #define FFS(n) __builtin_ffsll(n)
 #define CLZ(n) __builtin_clzll(n)
-#endif /* defined(_MSC_VER) */
 #else /* defined(_WIN64) */
 #define FFS(n) __builtin_ffsl(n)
 #define CLZ(n) __builtin_clzl(n)
 #endif
+#endif /* defined(_MSC_VER) */
 
 static uintptr_t myffs(uintptr_t val)
 {

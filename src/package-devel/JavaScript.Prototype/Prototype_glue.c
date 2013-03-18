@@ -42,12 +42,11 @@ static void kPrototype_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuf
 static void prototype_defineClass(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	if(KClass_Prototype == NULL) {
-		KDEFINE_CLASS defPrototype = {
-			.structname = "Prototype",
-			.typeId = KTypeAttr_NewId,
-			.baseTypeId = KType_Object,
-			.format = kPrototype_format,
-		};
+		KDEFINE_CLASS defPrototype = {};
+		defPrototype.structname = "Prototype",
+		defPrototype.typeId = KTypeAttr_NewId,
+		defPrototype.baseTypeId = KType_Object,
+		defPrototype.format = kPrototype_format,
 		KClass_Prototype = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defPrototype, trace);
 	}
 }

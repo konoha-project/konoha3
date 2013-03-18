@@ -92,10 +92,17 @@ macro(add_konoha_package _PKGNAME)
 			add_custom_target(copy_${_PKGNAME}_testfile ALL DEPENDS
 				${PACKAGE_TEST_FILE})
 		endif(PACKAGE_TEST_FILE)
-		add_custom_command(OUTPUT ${PARENT_BINARY_DIR}/package/${_PKGNAME}
-			COMMAND ${CMAKE_COMMAND} -E create_symlink
-			${CMAKE_CURRENT_BINARY_DIR}
-			${PARENT_BINARY_DIR}/package/${_PKGNAME})
+		if(MSVC OR MINGW)
+			add_custom_command(OUTPUT ${PARENT_BINARY_DIR}/package/${_PKGNAME}
+				COMMAND ${CMAKE_COMMAND} -E copy_directory
+				${CMAKE_CURRENT_BINARY_DIR}
+				${PARENT_BINARY_DIR}/package/${_PKGNAME})
+		else()
+			add_custom_command(OUTPUT ${PARENT_BINARY_DIR}/package/${_PKGNAME}
+				COMMAND ${CMAKE_COMMAND} -E create_symlink
+				${CMAKE_CURRENT_BINARY_DIR}
+				${PARENT_BINARY_DIR}/package/${_PKGNAME})
+		endif()
 		add_custom_target(create_symlink_${_PKGNAME} ALL DEPENDS
 			${PARENT_BINARY_DIR}/package/${_PKGNAME})
 	else(NOT __NOT_BUILD)
