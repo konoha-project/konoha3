@@ -1,0 +1,17 @@
+scriptPath
+setWriterCharset
+setReaderCharset
+close
+getc
+putc
+readLine
+print
+println
+println
+flush
+isatty
+getfileno
+read
+read
+write
+write

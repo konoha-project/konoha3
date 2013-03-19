@@ -1,0 +1,12 @@
+{
+    "package" : "Deos.DCaseCloud",
+        "version" : "0.0",
+        "status"  : "stable",
+        "platform"  : "",
+        "dependency package" : [
+            {
+                "package" : "",
+                "version" : ""
+            }
+        ]
+}

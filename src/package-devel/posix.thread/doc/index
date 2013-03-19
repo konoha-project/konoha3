@@ -1,0 +1,13 @@
+create
+join
+exit
+cancel
+detach
+self
+equal
+lock
+trylock
+unlock
+wait
+signal
+broadcast

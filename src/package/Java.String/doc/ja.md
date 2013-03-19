@@ -1,4 +1,4 @@
-﻿JavaScript.String-JavaScriptで提供される文字列型
+﻿Java.String-Javaで提供される文字列型
 =======================
 
 String
