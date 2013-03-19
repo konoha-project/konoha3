@@ -368,7 +368,7 @@ static KMETHOD cevent_base_gettimeofday_cached(KonohaContext *kctx, KonohaStack 
  */
 static void cevent_base_log_CB_invoke(int severity, const char *msg)
 {
-	if(Log_callback.kcb != NULL) {
+	if(Log_callback.kctx != NULL && Log_callback.kcb != NULL) {
 		KonohaContext *kctx = Log_callback.kctx;
 		BEGIN_UnusedStack(lsfp);
 		KClass *returnType = kMethod_GetReturnType(Log_callback.kcb->method);
@@ -398,7 +398,7 @@ static KMETHOD cevent_base_set_log_callback(KonohaContext *kctx, KonohaStack *sf
  */
 static void cevent_base_fatal_CB_invoke(int err)
 {
-	if(Fatal_callback.kcb != NULL) {
+	if(Fatal_callback.kctx != NULL && Fatal_callback.kcb != NULL) {
 		KonohaContext *kctx = Fatal_callback.kctx;
 		BEGIN_UnusedStack(lsfp);
 		KClass *returnType = kMethod_GetReturnType(Fatal_callback.kcb->method);
