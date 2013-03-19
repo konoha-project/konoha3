@@ -1,3 +1,18 @@
-Lib.Openssl-パッケージの1行説明文
+Lib.Openssl-OpenSSLのKonohaバインド
 ====================
-パッケージの説明文
+
+MD5
+---
+### コンストラクタ
+#### MD5.new()
+### メソッド
+#### int MD5.update(String n)
+#### String MD5.final()
+
+SHA1
+---
+### コンストラクタ
+#### SHA1.new()
+### メソッド
+#### int SHA1.update(String n)
+#### String SHA1.final()
