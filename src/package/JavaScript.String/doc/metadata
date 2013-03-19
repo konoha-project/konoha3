@@ -1,12 +1,10 @@
 {
     "package" : "JavaScript.String",
-        "version" : "0.0",
+        "version" : "1.0",
         "status"  : "stable",
-        "platform"  : "",
+        "platform"  : "win7/osx/linux",
         "dependency package" : [
-            {
-                "package" : "",
-                "version" : ""
-            }
+            {"package" : "Common.StringUtil",  "version" : "1.0"},
+            {"package" : "JavaScript.Ragexp",  "version" : "1.0"},
         ]
 }
