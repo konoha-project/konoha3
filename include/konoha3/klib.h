@@ -152,9 +152,9 @@ static kinline uintptr_t map_getu(KonohaContext *kctx, KHashMap *kmp, uintptr_t 
 	return def;
 }
 
-static kinline const char* TAG_t(kinfotag_t t)
+static kinline const char *TAG_t(kinfotag_t t)
 {
-	static const char* tags[] = {
+	static const char *tags[] = {
 		"(error) ", /*CritTag*/
 		"(error) ", /*ErrTag*/
 		"(warning) ", /*WarnTag*/

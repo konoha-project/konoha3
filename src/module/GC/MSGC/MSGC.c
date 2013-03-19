@@ -467,7 +467,7 @@ static kGCObject1 *new_ObjectArena1(GcManager *mng, size_t arenasize)
 	//KonohaContext *kctx = mng->kctx;
 	size_t pageindex = MSGC(1).arena_table.size;
 	int i = 0;
-	kGCObject0 *p, *tmp;
+	kGCObject1 *p, *tmp;
 	if(unlikely(!(pageindex < MSGC(1).arena_table.capacity))) {
 		size_t oldsize = MSGC(1).arena_table.capacity;
 		size_t newsize = oldsize * 2;
@@ -736,7 +736,7 @@ static void msgc_gc_mark(GcManager *mng)
 	KonohaContext *kctx = mng->kctx;
 	MarkStack *mstack = mstack_Init(&mng->mstack);
 	kObject *ref = NULL;
-	ObjectGraphTracer tracer = {0};
+	ObjectGraphTracer tracer = {{0}};
 	tracer.base.fn_visit      = ObjectGraphTracer_visit;
 	tracer.base.fn_visitRange = ObjectGraphTracer_visitRange;
 	tracer.mng    = mng;
