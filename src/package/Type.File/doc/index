@@ -1,3 +1,4 @@
+File
 scriptPath
 setWriterCharset
 setReaderCharset
@@ -7,11 +8,8 @@ putc
 readLine
 print
 println
-println
 flush
 isatty
 getfileno
 read
-read
-write
 write
