@@ -28,7 +28,6 @@ static kNode* kNode_CheckReturnType(KonohaContext *kctx, kNode *node)
 	if(node->attrTypeId != KType_void) {
 		kNode *stmt = new_TypedNode(kctx, kNode_ns(node), KNode_Return, KClass_void, 0);
 		kNode_AddParsedObject(kctx, stmt, KSymbol_ExprPattern, UPCAST(node));
-		DBG_ASSERT(stmt->stackbase == 0);
 		return stmt;
 	}
 	return node;

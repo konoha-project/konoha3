@@ -442,16 +442,17 @@ typedef enum KNode_Type {
 	KNode_MAX
 } KNode_;
 
-#define kNode_node(o)             (kObject_HashCode(o))
-#define kNode_setnode(o, node)    kObject_SetHashCode(o, (node))
+#define kNode_node(o)             ((o)->nodeType)
+#define kNode_setnode(o, node)    ((kNodeVar *)(o))->nodeType = (node)
 #define kNode_IsConstValue(o)     (KNode_Const <= kNode_node(o) && kNode_node(o) <= KNode_UnboxConst)
 #define kNode_IsValue(o)          (KNode_Const <= kNode_node(o) && kNode_node(o) <= KNode_Field)
 
 struct kNodeVar {
 	kObjectHeader h;
+	kshort_t nodeType; ktypeattr_t attrTypeId;
 	union {
-		struct kNodeVar   *Parent;   /* if parent is a NameSpace, it is a root node */
-		kNameSpace        *RootNodeNameSpace;
+		kNode      *Parent;   /* if parent is a NameSpace, it is a root node */
+		kNameSpace *RootNodeNameSpace;
 	};
 	union {
 		kToken        *KeyOperatorToken;     // Node
@@ -469,7 +470,6 @@ struct kNodeVar {
 		intptr_t       index;
 		kObject*       ObjectConstValue;
 	};
-	kshort_t stackbase; ktypeattr_t attrTypeId;
 };
 
 #define kNode_uline(O)   (O)->KeyOperatorToken->uline

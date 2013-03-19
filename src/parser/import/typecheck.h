@@ -22,32 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-static kNode *kNode_Rebase(KonohaContext *kctx, kNode *node, size_t stackbase)
-{
-	if(!kNode_IsValue(node)/* && node->stackbase != stackbase*/) {
-		size_t i, size = kNode_GetNodeListSize(kctx, node);
-		if(kNode_node(node) == KNode_Block) {
-			for(i = 0; i < size; i++) {
-				kNode *sub = node->NodeList->NodeItems[i];
-				if(kNode_IsValue(sub)) continue;
-				kNode_Rebase(kctx, sub, stackbase + (sub->stackbase - node->stackbase));
-			}
-		}
-		else if(IS_Array(node->NodeList)) {
-			for(i = 1; i < size; i++) {
-				kNode *sub = node->NodeList->NodeItems[i];
-				if(kNode_IsValue(sub)) continue;
-				kNode_Rebase(kctx, sub, (i - 1) + stackbase + K_CALLDELTA);
-			}
-		}
-		else if(IS_Node(node->NodeToPush)) {
-			kNode_Rebase(kctx, node->NodeToPush, stackbase);
-		}
-		node->stackbase = stackbase;
-	}
-	return node;
-}
-
 static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kNameSpace *ns, kObject *reqType)
 {
 	INIT_GCSTACK();
@@ -70,7 +44,6 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn, kNode *expr, kNameSpac
 {
 	kObject *reqType = KLIB Knull(kctx, reqtc);
 	int varsize = ns->genv->localScope.varsize;
-	expr->stackbase = varsize;
 	if(syn->TypeFuncNULL != NULL) {
 		kNode *texpr = CallTypeFunc(kctx, syn->TypeFuncNULL, expr, ns, reqType);
 		if(kNode_IsError(texpr) || texpr->attrTypeId != KType_var) {
@@ -264,23 +237,14 @@ static kNode *TypeCheckNodeList(KonohaContext *kctx, kNode *block, size_t n, kNa
 	}
 	return stmt;
 }
-//
-//static kNode *PushNode(KonohaContext *kctx, kNameSpace *ns, size_t stackbase, kNode *expr)
-//{
-//	kNode *node = KNewNode(ns);
-//	KFieldSet(node, node->NodeToPush, expr);
-//	node->stackbase = stackbase;
-//	return kNode_Type(kctx, node, KNode_Push, expr->attrTypeId);
-//}
 
 static kNode *TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, KClass *reqc)
 {
-	int i, size = kNode_GetNodeListSize(kctx, block) - 1, hasValue = (reqc->typeId != KType_void);
+	int i, size = kNode_GetNodeListSize(kctx, block) - 1;
+	kbool_t hasValue = (reqc->typeId != KType_void);
 	KDump(block);
-	DBG_P(">>>>>>>> stackbase=%d size=%d, varsize=%d, reqc=%s", block->stackbase, size, ns->genv->localScope.varsize, KClass_text(reqc));
-	if(hasValue) {
+	DBG_P(">>>>>>>> size=%d, varsize=%d, reqc=%s", size, ns->genv->localScope.varsize, KClass_text(reqc));
 
-	}
 	for(i = 0; i < size; i++) {
 		kNode *stmt = TypeCheckNodeList(kctx, block, i, ns, KClass_void);
 		if(kNode_IsError(stmt)) {
@@ -297,7 +261,7 @@ static kNode *TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, 
 	else {
 		kNode_Type(kctx, block, KNode_Block, KType_void);
 	}
-	DBG_P(">>>>>>>> stackbase=%d, size=%d, typed=%s", block->stackbase, size, KType_text(block->attrTypeId));
+	DBG_P(">>>>>>>> size=%d, typed=%s", size, KType_text(block->attrTypeId));
 	return block;
 }
 
