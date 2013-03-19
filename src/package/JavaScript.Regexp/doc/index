@@ -1,0 +1,13 @@
+getglobal
+getignoreCase
+getmultiline
+getsource
+getlastIndex
+match
+replace
+search
+split
+split
+exec
+test
+create

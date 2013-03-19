@@ -1,0 +1,17 @@
+getSize
+keys
+hasKey
+get
+get
+getBoolean
+getFloat
+getInt
+getString
+parse
+set
+set
+add
+setBoolean
+setFloat
+setInt
+setString

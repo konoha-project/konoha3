@@ -1,0 +1,11 @@
+close
+query
+getInsertId
+getInt
+getBoolean
+getFloat
+getString
+get
+next
+getSize
+getName
