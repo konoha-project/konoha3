@@ -27,6 +27,9 @@
 
 #include "apr_strings.h"
 #include "http_log.h"
+#undef PACKAGE_NAME
+#undef PACKAGE_STRING
+#undef PACKAGE_VERSION
 #ifndef K_USE_PTHREAD
 #define K_USE_PTHREAD 1
 #endif
@@ -35,7 +38,7 @@
 #include <konoha3/klib.h>
 #include <konoha3/platform.h>
 #include <konoha3/import/methoddecl.h>
-#include "../../package-devel/apache/apache_glue.h"
+#include "../../package-devel/Lib.Apache/apache_glue.h"
 
 #ifndef K_PREFIX
 #define K_PREFIX  "/usr/local"

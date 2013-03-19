@@ -15,11 +15,11 @@ APXS=apxs
 APACHECTL=apachectl
 
 #   additional defines, includes and libraries
-#DEFS=-Dmy_define=my_value
-INCLUDES=-I../../include
+DEFS=-DHAVE_CONFIG_H
+INCLUDES=-I../../../include -I$(KONOHA_BUILD_DIR)
 #LIBS=
 CFLAGS=-g -O2 -Wall
-LDFLAGS=-L/usr/local/lib -lminikonoha
+LDFLAGS=-L$(KONOHA_BUILD_DIR) -lkonoha
 #-std=c99
 
 #   the default target

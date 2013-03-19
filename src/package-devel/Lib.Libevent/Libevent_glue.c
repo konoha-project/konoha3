@@ -963,6 +963,8 @@ static KMETHOD cbufferevent_read(KonohaContext *kctx, KonohaStack *sfp)
 
 /*
 TODO
+int bufferevent_socket_connect_hostname(struct bufferevent *,
+	struct evdns_base *, int, const char *, int);
 int bufferevent_socket_get_dns_error(struct bufferevent *bev);
 int bufferevent_base_set(struct event_base *base, struct bufferevent *bufev);
 struct event_base *bufferevent_get_base(struct bufferevent *bev);
