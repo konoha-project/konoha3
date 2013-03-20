@@ -3,6 +3,11 @@ getignoreCase
 getmultiline
 getsource
 getlastIndex
+global
+ignoreCase
+multiline
+source
+lastIndex
 match
 replace
 search

@@ -1,3 +1,3 @@
-JavaStyle.Class-パッケージの1行説明文
+JavaStyle.Class-Javaスタイルのクラス定義構文
 ====================
-パッケージの説明文
+このパッケージはSyntax.JavaStyleClassのエイリアスである。
