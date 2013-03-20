@@ -1,3 +1,9 @@
-Syntax.CStyleBitwiseOperator-パッケージの1行説明文
+Syntax.CStyleBitwiseOperator-C言語で提供されるビット演算
 ====================
-パッケージの説明文
+以下のビット演算子が提供される。
+### ~
+### <<
+### >>
+### &
+### |
+### ^

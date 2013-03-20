@@ -1,3 +1,5 @@
-Syntax.GoStyleIncrement-パッケージの1行説明文
+Syntax.GoStyleIncrement-インクリメント演算子
 ====================
-パッケージの説明文
+以下の演算子が追加されます。
+* ++
+* --

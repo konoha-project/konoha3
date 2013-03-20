@@ -1,12 +1,12 @@
 {
     "package" : "JavaStyle.Class",
-        "version" : "0.0",
+        "version" : "1.0",
         "status"  : "stable",
-        "platform"  : "",
+        "platform"  : "win7/osx/linux",
         "dependency package" : [
             {
-                "package" : "",
-                "version" : ""
+                "package" : "Syntax.JavaStyleClass",
+                "version" : "1.0"
             }
         ]
 }

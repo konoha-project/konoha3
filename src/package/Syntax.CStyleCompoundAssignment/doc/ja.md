@@ -1,3 +1,3 @@
-Syntax.CStyleCompoundAssignment-パッケージの1行説明文
+Syntax.CStyleCompoundAssignment-C言語で提供される複合代入演算子
 ====================
-パッケージの説明文
+このパッケージはSyntax.CStyleSelfAssignmentのエイリアスです。
