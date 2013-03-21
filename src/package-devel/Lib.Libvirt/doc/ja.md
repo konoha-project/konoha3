@@ -1,3 +1,2 @@
-Lib.Libvirt-パッケージの1行説明文
+Lib.Libvirt-libvert��konoha�o�C���h
 ====================
-パッケージの説明文
