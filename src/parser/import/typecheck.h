@@ -104,6 +104,7 @@ static kNode *MakeNodeConst(KonohaContext *kctx, kNode *expr, KClass *rtype)
 	size_t i, size = kArray_size(expr->NodeList), psize = size - 2;
 	kMethod *mtd = expr->NodeList->MethodItems[0];
 	BEGIN_UnusedStack(lsfp);
+	KStackSetObjectValue(lsfp[K_NSIDX].asNameSpace, kNode_ns(expr));
 	for(i = 1; i < size; i++) {
 		PutConstNode(kctx, expr->NodeList->NodeItems[i], lsfp + i - 1);
 	}
