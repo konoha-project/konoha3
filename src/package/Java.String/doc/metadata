@@ -6,6 +6,6 @@
 	"dependency package" : [
 		{"package" : "JavaStyle.Object", "version" : "1.0"},
 		{"package" : "Type.Float", "version" : "1.0"},
-		{"package" : "Common.StringUtil", "version" : "1.0"},
-	],
+		{"package" : "Common.StringUtil", "version" : "1.0"}
+	]
 }
