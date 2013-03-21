@@ -762,9 +762,9 @@ static void KRuntime_raise(KonohaContext *kctx, int symbol, int fault, kString *
 		e->fault  = fault;
 		runtime->topStack = top;
 		//runtime->faultInfo = fault;
-//		if(optionalErrorInfo != NULL) {
-		KUnsafeFieldSet(runtime->ThrownException, e);
-//		}
+		if(true/*optionalErrorInfo != NULL*/) {
+			KUnsafeFieldSet(runtime->ThrownException, e);
+		}
 		PLATAPI longjmp_i(*runtime->evaljmpbuf, symbol);  // in setjmp 0 means good
 	}
 	KExit(EXIT_FAILURE);

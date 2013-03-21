@@ -766,6 +766,9 @@ static KMETHOD TypeCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp)
 		texpr = TypeCheckMethodParam(kctx, mtd, expr, ns, reqc);
 		KReturn(texpr);
 	}
+	if(kNode_IsError(texpr)) {
+		KReturn(texpr);
+	}
 	KReturn(expr);
 }
 
@@ -916,11 +919,13 @@ static KMETHOD TypeCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Statement_if(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
-	TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
-	kNode *thenNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, reqc, TypeCheckPolicy_AllowEmpty);
-	if(thenNode != NULL && !kNode_IsError(thenNode)) {
-		SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_else, ns, KClass_(thenNode->attrTypeId), TypeCheckPolicy_AllowEmpty);
-		KReturn(kNode_Type(stmt, KNode_If, thenNode->attrTypeId));
+	kNode *condNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
+	if(!kNode_IsError(condNode)) {
+		kNode *thenNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, reqc, TypeCheckPolicy_AllowEmpty);
+		if(thenNode != NULL && !kNode_IsError(thenNode)) {
+			SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_else, ns, KClass_(thenNode->attrTypeId), TypeCheckPolicy_AllowEmpty);
+			KReturn(kNode_Type(stmt, KNode_If, thenNode->attrTypeId));
+		}
 	}
 }
 

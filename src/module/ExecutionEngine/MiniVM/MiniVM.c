@@ -956,7 +956,7 @@ static kbool_t MiniVM_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder
 		ASM(LOOKUP, SFP_(thisidx), kNode_ns(node), mtd);
 	}
 	int esp_ = SFP_(thisidx + argc + 1);
-	ASM(CALL, KBuilder_uline(builder), SFP_(thisidx), esp_, KLIB Knull(kctx, KClass_(node->attrTypeId)));
+	ASM(CALL, kNode_uline(node), SFP_(thisidx), esp_, KLIB Knull(kctx, KClass_(node->attrTypeId)));
 
 	builder->stackbase = stackbase;
 	builder->Value = builder->stackbase;
