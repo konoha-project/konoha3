@@ -4,9 +4,6 @@
         "status"  : "stable",
         "platform"  : "",
         "dependency package" : [
-            {
-                "package" : "",
-                "version" : ""
-            }
+            {"package" : "Type.Float", "version" : "0.3"}
         ]
 }

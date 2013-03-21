@@ -5,8 +5,8 @@
         "platform"  : "",
         "dependency package" : [
             {
-                "package" : "",
-                "version" : ""
+                "package" : "Type.File",
+                "version" : "0.3"
             }
         ]
 }
