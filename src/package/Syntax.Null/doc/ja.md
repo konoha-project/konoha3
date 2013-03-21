@@ -1,3 +1,5 @@
-Syntax.Null-パッケージの1行説明文
+Syntax.Null-KonohaにおけるNULLの定義
 ====================
-パッケージの説明文
+### 定数
+null 
+NULL
