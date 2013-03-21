@@ -1,4 +1,4 @@
-JavaScript.JavaScriptで提供されるオブジェクト
+JavaScript.Date-JavaScriptで提供されるオブジェクト
 ====================
 
 Date
