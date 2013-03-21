@@ -1,8 +1,7 @@
-parse
 NBestParse
 NBestInit
 NBestNext
-parseToNode
+ParseToNode
 destroy
 next
 prev
@@ -23,3 +22,5 @@ beta
 prob
 wcost
 cost
+Tagger
+MecabNode
