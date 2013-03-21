@@ -235,31 +235,33 @@ static int InputUserApproval(KonohaContext *kctx, const char *message, const cha
 	char buff[BUFSIZ] = {0};
 	const char *ykey = defval ? "Y" : "y";
 	const char *nkey = defval ? "n" : "N";
+	char *ret;
 	if(message == NULL || message[strlen(message)] == '\0') message = "Do you approve?";
 	if(yes == NULL || yes[0] == '\0') yes = "yes";
 	if(no == NULL || no[0] == '\0') no = "no";
 	fprintf(stdout, "%s (%s %s, %s %s): ", message, yes, ykey, no, nkey);
-	fgets(buff, BUFSIZ, stdin);
+	ret = fgets(buff, BUFSIZ, stdin);
 	if(defval) {
 		return ((buff[0] == 'N' || buff[0] == 'n') && buff[1] == '\n') ? false : true;
 	}
 	else {
 		return ((buff[0] == 'Y' || buff[0] == 'y') && buff[1] == '\n') ? false : true;
 	}
+	(void)ret; /* remove compiler warn :: ignoring return value */
 }
 
 static char *InputUserPassword(KonohaContext *kctx, const char *message)
 {
 	char buff[BUFSIZ] = {0};
 	size_t len;
-	char *p;
+	char *p, *ret;
 #if defined(__MINGW32__) || defined(_MSC_VER)
 	HANDLE stdInput = GetStdHandle(STD_INPUT_HANDLE);
 	DWORD oldMode;
 	fprintf(stdout, "%s", message);
 	GetConsoleMode(stdInput, &oldMode);
 	SetConsoleMode(stdInput, 0);
-	fgets(buff, BUFSIZ, stdin);
+	ret = fgets(buff, BUFSIZ, stdin);
 	SetConsoleMode(stdInput, oldMode);
 #else
 	struct termios tm, tm_save;
@@ -270,7 +272,7 @@ static char *InputUserPassword(KonohaContext *kctx, const char *message)
 	tm.c_lflag &= ~ECHO;
 	tm.c_lflag |= ECHONL;
 	tcsetattr(fileno(stdin), TCSANOW, &tm);
-	fgets(buff, BUFSIZ, stdin);
+	ret = fgets(buff, BUFSIZ, stdin);
 	tcsetattr(fileno(stdin), TCSANOW, &tm_save);
 #endif
 	len = strlen(buff) + 1;
@@ -278,6 +280,7 @@ static char *InputUserPassword(KonohaContext *kctx, const char *message)
 	if(p != NULL) {
 		memcpy(p, buff, len);
 	}
+	(void)ret; /* remove compiler warn :: ignoring return value */
 	return p;
 }
 
