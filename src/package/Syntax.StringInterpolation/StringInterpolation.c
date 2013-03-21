@@ -211,7 +211,7 @@ static kbool_t StringInterpolation_ExportNameSpace(KonohaContext *kctx, kNameSpa
 KDEFINE_PACKAGE *StringInterpolation_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "Konoha", "1.0");
+	KSetPackageName(d, "StringInterpolation", "1.0");
 	d.PackupNameSpace = StringInterpolation_PackupNameSpace;
 	d.ExportNameSpace = StringInterpolation_ExportNameSpace;
 	return &d;

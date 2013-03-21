@@ -1,12 +1,12 @@
 {
     "package" : "Syntax.StringInterpolation",
-        "version" : "0.0",
-        "status"  : "stable",
-        "platform"  : "",
-        "dependency package" : [
-            {
-                "package" : "",
-                "version" : ""
-            }
-        ]
+    "version" : "0.0",
+    "status"  : "stable",
+    "platform"  : "",
+    "dependency package" : [
+        {
+            "package" : "",
+            "version" : ""
+        }
+    ]
 }
