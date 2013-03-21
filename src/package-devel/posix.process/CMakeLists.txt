@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
 if(NOT MINGW AND NOT MSVC)
-set(PACKAGE_SOURCE_CODE process_glue.c)
-add_konoha_package(posix.process)
+	set(PACKAGE_SOURCE_CODE process_glue.c)
+	add_konoha_package(posix.process)
 endif()
