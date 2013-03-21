@@ -554,33 +554,12 @@ typedef enum {
 DefineBasicTypeList(TypeDefMacro)
 
 #define kAbstractObject                 const void
-//typedef const struct kObjectVar         kObject;
-//typedef struct kObjectVar               kObjectVar;
-//typedef const struct kBooleanVar        kBoolean;
-//typedef struct kBooleanVar              kBooleanVar;
-//typedef const struct kIntVar            kInt;
-//typedef struct kIntVar                  kIntVar;
-//typedef const struct kStringVar         kString;
-//typedef struct kStringVar               kStringVar;
-//typedef const struct kArrayVar          kArray;
-//typedef struct kArrayVar                kArrayVar;
-//typedef const struct kParamVar          kParam;
-//typedef struct kParamVar                kParamVar;
-//typedef const struct kMethodVar         kMethod;
-//typedef struct kMethodVar               kMethodVar;
-//typedef const struct kFuncVar           kFunc;
-//typedef struct kFuncVar                 kFuncVar;
-//typedef const struct kExceptionVar           kException;
-//typedef struct kExceptionVar                 kExceptionVar;
-//typedef struct kNameSpaceVar            kNameSpace;
-//typedef struct kNameSpaceVar            kNameSpaceVar;
 
 /* sugar.h */
-
-typedef const struct kTokenVar          kToken;
-typedef struct kTokenVar                kTokenVar;
-typedef struct kNodeVar                 kNode;
-typedef struct kNodeVar                 kNodeVar;
+typedef const struct kTokenVar   kToken;
+typedef struct kTokenVar         kTokenVar;
+typedef struct kNodeVar          kNode;
+typedef struct kNodeVar          kNodeVar;
 
 #define kTokenNULL kToken
 #define kNodeNULL  kNode
@@ -2064,12 +2043,10 @@ typedef struct {
 #define DBG_ASSERT(a)       assert(a)
 #define TODO_ASSERT(a)      assert(a)
 #endif /* _MSC_VER */
-#define SAFECHECK(T)        (T)
 #define DBG_P(fmt, ...)     PLATAPI ConsoleModule.ReportDebugMessage(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__)
 #define DBG_ABORT(fmt, ...) PLATAPI ConsoleModule.ReportDebugMessage(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__); DBG_ASSERT(kctx == NULL)
 #define DUMP_P(fmt, ...)    PLATAPI printf_i(fmt, ## __VA_ARGS__)
 #else
-#define SAFECHECK(T)        (1)
 #define KNH_ASSERT(a)
 #define DBG_ASSERT(a)
 #define TODO_ASSERT(a)
