@@ -133,6 +133,9 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 		if(result) {
 			KMakeTraceUL(trace, sfp, kNode_uline(stmt));
 			result = KLIB kNameSpace_SetConstData(kctx, ns, unboxKey, type, unboxValue, trace);
+			if(!result) {
+				kNode_Message(kctx, stmt, ErrTag, "constant value is already defined: %s%s", KSymbol_Fmt2(unboxKey));
+			}
 		}
 		else {
 			kNode_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", KSymbol_Fmt2(unboxKey));
