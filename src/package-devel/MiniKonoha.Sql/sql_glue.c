@@ -34,6 +34,10 @@
 #include "konoha_sql.config.h"
 #endif
 
+#ifndef kunused
+#define kunused __attribute__((unused))
+#endif /* kunused */
+
 typedef void KCursor;
 typedef void DBHandler;
 struct kResultSet;
@@ -246,13 +250,13 @@ static void ResultSet_SetFloat(KonohaContext *kctx, kResultSet *rs, unsigned Idx
 	rs->column[Idx].val.floatValue = val;
 }
 
-static kint_t parseInt(char *ptr, size_t len)
+static kunused kint_t parseInt(char *ptr, size_t len)
 {
 	char *endptr = ptr + len;
 	return strtoll(ptr, &endptr, 10);
 }
 
-static kfloat_t parseFloat(char *ptr, size_t len)
+static kunused kfloat_t parseFloat(char *ptr, size_t len)
 {
 	char *endptr = ptr + len;
 	return strtod(ptr, &endptr);

@@ -85,7 +85,7 @@ static DBHandler *POSTGRESQL_qopen(KonohaContext *kctx, const char *url, KTraceI
 	pport = (port[0]) ? port : NULL;
 	pdbnm = (dbnm[0]) ? dbnm : NULL;
 
-	conn = PQsetdbLogin(phost, port, NULL/* option */, NULL /* tty */, pdbnm, NULL /* user */, NULL /* passwd */);
+	conn = PQsetdbLogin(phost, pport, NULL/* option */, NULL /* tty */, pdbnm, puser, ppass);
 	if(PQstatus(conn) != CONNECTION_OK) {
 		/*FIXME Trace */
 		fprintf(stderr, "Connection to database failed: %s", PQerrorMessage(conn));
