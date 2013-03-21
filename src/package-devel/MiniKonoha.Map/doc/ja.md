@@ -1,3 +1,30 @@
-MiniKonoha.Map-繝代ャ繧ｱ繝ｼ繧ｸ縺ｮ1陦瑚ｪｬ譏取枚
+MiniKonoha.Map-KonohaのMapライブラリ
 ====================
-繝代ャ繧ｱ繝ｼ繧ｸ縺ｮ隱ｬ譏取枚
+
+# Mapクラス
+## メソッド
+
+### @Public @Final Map[Object] Map[Object].new()
+
+---
+
+### @Public @Final @Const @Immutable boolean Map[Object].has(String key)
+
+---
+
+### @Public @Final @Const @Immutable 0 Map[Object].get(String key)
+
+---
+
+### @Public @Final void Map[Object].set(String key, 0 value)
+
+---
+
+### @Public @Final void Map[Object].remove(String key)
+
+---
+
+### @Public @Final @Const @Immutable Array[String] Map[Object].keys()
+
+---
+
