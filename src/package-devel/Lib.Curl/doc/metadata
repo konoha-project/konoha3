@@ -1,0 +1,10 @@
+{
+	"package" : "Lib.Curl",
+	"version" : "0.1",
+	"status" : "developing",
+	"platform" : "osx/linux",
+	"dependency package" : [{
+		"package" : "Type.File",
+		"version" : "0.1"
+	}]
+}

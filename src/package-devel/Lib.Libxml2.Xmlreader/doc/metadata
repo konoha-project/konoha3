@@ -1,0 +1,10 @@
+{
+	"package" : "Lib.Libxml2.Xmlreader",
+	"version" : "0.1",
+	"status" : "develping",
+	"platform" : "osx/linux",
+	"dependency package" : [{
+		"package" : "",
+		"version" : ""
+	}]
+}

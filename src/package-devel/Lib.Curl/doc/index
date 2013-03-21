@@ -1,0 +1,10 @@
+new
+SetOptBoolean
+SetOptInt
+SetOptString
+SetOptFile
+appendHeader
+perform
+receiveString
+getInfo
+Curl
