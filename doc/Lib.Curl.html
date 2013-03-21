@@ -1,0 +1,125 @@
+<html>
+<head>
+</head>
+<body>
+<h1 id="lib.curl-curlのkonohaバインド">Lib.Curl-Curlのkonohaバインド</h1>
+<h2 id="メソッド">メソッド</h2>
+<h3 id="curl-curl.new">Curl Curl.new()</h3>
+<hr />
+<h3 id="void-curl.setoptint-type-file-data">void Curl.setOpt(int type, FILE data)</h3>
+<hr />
+<h3 id="void-curl.setoptint-type-string-data">void Curl.setOpt(int type, String data)</h3>
+<hr />
+<h3 id="void-curl.setoptint-type-int-data">void Curl.setOpt(int type, int data)</h3>
+<hr />
+<h3 id="void-curl.setoptint-type-boolean-data">void Curl.setOpt(int type, boolean data)</h3>
+<hr />
+<h3 id="void-curl.appendheaderstring-headers">void Curl.appendHeader(String headers)</h3>
+<hr />
+<h3 id="boolean-curl.perform">boolean Curl.perform()</h3>
+<hr />
+<h3 id="string-curl.receivestring">String Curl.receiveString()</h3>
+<hr />
+<h3 id="dynamic-curl.getinfoint-type">dynamic Curl.getInfo(int type)</h3>
+<hr />
+<h2 id="定数">定数</h2>
+<ul>
+<li>CURLOPT_AUTOREFERER</li>
+<li>CURLOPT_COOKIESESSION</li>
+<li>CURLOPT_CRLF</li>
+<li>CURLOPT_DNS_USE_GLOBAL_CACHE</li>
+<li>CURLOPT_FAILONERROR</li>
+<li>CURLOPT_FILETIME</li>
+<li>CURLOPT_FOLLOWLOCATION</li>
+<li>CURLOPT_FORBID_REUSE</li>
+<li>CURLOPT_FRESH_CONNECT</li>
+<li>CURLOPT_FTP_USE_EPRT</li>
+<li>CURLOPT_FTP_USE_EPSV</li>
+<li>CURLOPT_FTPAPPEND</li>
+<li>CURLOPT_FTPLISTONLY</li>
+<li>CURLOPT_HEADER</li>
+<li>CURLOPT_HTTPGET</li>
+<li>CURLOPT_HTTPPROXYTUNNEL</li>
+<li>CURLOPT_NETRC</li>
+<li>CURLOPT_NOBODY</li>
+<li>CURLOPT_NOPROGRESS</li>
+<li>CURLOPT_NOSIGNAL</li>
+<li>CURLOPT_POST</li>
+<li>CURLOPT_PUT</li>
+<li>CURLOPT_SSL_VERIFYPEER</li>
+<li>CURLOPT_TRANSFERTEXT</li>
+<li>CURLOPT_UNRESTRICTED_AUTH</li>
+<li>CURLOPT_UPLOAD</li>
+<li>CURLOPT_VERBOSE</li>
+<li>CURLOPT_BUFFERSIZE</li>
+<li>CURLOPT_CLOSEPOLICY</li>
+<li>CURLOPT_CONNECTTIMEOUT</li>
+<li>CURLOPT_DNS_CACHE_TIMEOUT</li>
+<li>CURLOPT_FTPSSLAUTH</li>
+<li>CURLOPT_HTTP_VERSION</li>
+<li>CURLOPT_HTTPAUTH</li>
+<li>CURLAUTH_ANY</li>
+<li>CURLAUTH_ANYSAFE</li>
+<li>CURLOPT_INFILESIZE</li>
+<li>CURLOPT_LOW_SPEED_LIMIT</li>
+<li>CURLOPT_LOW_SPEED_TIME</li>
+<li>CURLOPT_MAXCONNECTS</li>
+<li>CURLOPT_MAXREDIRS</li>
+<li>CURLOPT_PORT</li>
+<li>CURLOPT_PROXYAUTH</li>
+<li>CURLOPT_PROXYPORT</li>
+<li>CURLOPT_PROXYTYPE</li>
+<li>CURLOPT_RESUME_FROM</li>
+<li>CURLOPT_SSL_VERIFYHOST</li>
+<li>CURLOPT_SSLVERSION</li>
+<li>CURLOPT_TIMECONDITION</li>
+<li>CURLOPT_TIMEOUT</li>
+<li>CURLOPT_TIMEVALUE</li>
+<li>CURLOPT_CAINFO</li>
+<li>CURLOPT_CAPATH</li>
+<li>CURLOPT_COOKIE</li>
+<li>CURLOPT_COOKIEFILE</li>
+<li>CURLOPT_COOKIEJAR</li>
+<li>CURLOPT_CUSTOMREQUEST</li>
+<li>CURLOPT_ENCODING</li>
+<li>CURLOPT_FTPPORT</li>
+<li>CURLOPT_INTERFACE</li>
+<li>CURLOPT_KRB4LEVEL</li>
+<li>CURLOPT_POSTFIELDS</li>
+<li>CURLOPT_PROXY</li>
+<li>CURLOPT_PROXYUSERPWD</li>
+<li>CURLOPT_RANDOM_FILE</li>
+<li>CURLOPT_RANGE</li>
+<li>CURLOPT_REFERER</li>
+<li>CURLOPT_SSL_CIPHER_LIST</li>
+<li>CURLOPT_SSLCERT</li>
+<li>CURLOPT_SSLCERTTYPE</li>
+<li>CURLOPT_SSLENGINE</li>
+<li>CURLOPT_SSLENGINE_DEFAULT</li>
+<li>CURLOPT_SSLKEY</li>
+<li>CURLOPT_SSLKEYTYPE</li>
+<li>CURLOPT_URL</li>
+<li>CURLOPT_USERAGENT</li>
+<li>CURLOPT_USERPWD</li>
+<li>CURLOPT_FILE</li>
+<li>CURLOPT_WRITEDATA</li>
+<li>CURLOPT_READDATA</li>
+<li>CURLOPT_STDERR</li>
+<li>CURLOPT_WRITEHEADER</li>
+<li>CURLINFO_HEADER_SIZE</li>
+<li>CURLINFO_REQUEST_SIZE</li>
+<li>CURLINFO_REDIRECT_TIME</li>
+<li>CURLINFO_TOTAL_TIME</li>
+<li>CURLINFO_NAMELOOKUP_TIME</li>
+<li>CURLINFO_CONNECT_TIME</li>
+<li>CURLINFO_PRETRANSFER_TIME</li>
+<li>CURLINFO_STARTTRANSFER_TIME</li>
+<li>CURLINFO_SIZE_UPLOAD</li>
+<li>CURLINFO_SIZE_DOWNLOAD</li>
+<li>CURLINFO_SPEED_DOWNLOAD</li>
+<li>CURLINFO_SPEED_UPLOAD</li>
+<li>CURLINFO_EFFECTIVE_URL</li>
+<li>CURLINFO_CONTENT_TYPE</li>
+</ul>
+</body>
+</html>
