@@ -1,8 +1,8 @@
-MiniKonoha.Map-KonohaのMapライブラリ
+MiniKonoha.Map-Konoha縺ｮMap繝ｩ繧､繝悶Λ繝ｪ
 ====================
 
-# Mapクラス
-## メソッド
+# Map繧ｯ繝ｩ繧ｹ
+## 繝｡繧ｽ繝�繝�
 
 ### @Public @Final Map[Object] Map[Object].new()
 

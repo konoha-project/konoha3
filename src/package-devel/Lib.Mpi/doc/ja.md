@@ -1,14 +1,14 @@
-Lib.Mpi-mpich‚ÌƒoƒCƒ“ƒfƒBƒ“ƒO
+Lib.Mpi-mpichã®ãƒã‚¤ãƒ³ãƒ‡ã‚£ãƒ³ã‚°
 ====================
-# MPIƒNƒ‰ƒX
-## ƒƒ\ƒbƒh
+# MPIã‚¯ãƒ©ã‚¹
+## ãƒ¡ã‚½ãƒƒãƒ‰
 
 ###@Public @Static float MPI.getWtime()
 
 ---
 
-# MPICommƒNƒ‰ƒX
-## ƒƒ\ƒbƒh
+# MPICommã‚¯ãƒ©ã‚¹
+## ãƒ¡ã‚½ãƒƒãƒ‰
 
 ###@Public int MPIComm.barrier()
 
@@ -74,8 +74,8 @@ Lib.Mpi-mpich‚ÌƒoƒCƒ“ƒfƒBƒ“ƒO
 
 ---
 
-# MPIRequestƒNƒ‰ƒX
-## ƒƒ\ƒbƒh
+# MPIRequestã‚¯ãƒ©ã‚¹
+## ãƒ¡ã‚½ãƒƒãƒ‰
 
 @Public boolean MPIRequest.wait()
 
@@ -89,8 +89,8 @@ Lib.Mpi-mpich‚ÌƒoƒCƒ“ƒfƒBƒ“ƒO
 
 ---
 
-# MPIDataƒNƒ‰ƒX
-## ƒƒ\ƒbƒh
+# MPIDataã‚¯ãƒ©ã‚¹
+## ãƒ¡ã‚½ãƒƒãƒ‰
 
 @Public @Static MPIData MPIData.fromBytes(Bytes b)
 
