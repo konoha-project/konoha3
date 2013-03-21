@@ -45,7 +45,7 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 	kNode_Set(CatchContinue, stmt, true);  // set before TypeCheck Block
 	kNode_Set(CatchBreak, stmt, true);
 	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
-	KReturn(kNode_Type(kctx, stmt, KNode_While, KType_void));
+	KReturn(kNode_Type(stmt, KNode_While, KType_void));
 }
 
 static KMETHOD Statement_do(KonohaContext *kctx, KonohaStack *sfp)
@@ -59,7 +59,7 @@ static KMETHOD Statement_do(KonohaContext *kctx, KonohaStack *sfp)
 	kNode_Set(CatchContinue, stmt, true);  // set before TypeCheck Block
 	kNode_Set(CatchBreak, stmt, true);
 	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
-	KReturn(kNode_Type(kctx, stmt, KNode_DoWhile, KType_void));
+	KReturn(kNode_Type(stmt, KNode_DoWhile, KType_void));
 }
 
 static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
@@ -69,7 +69,7 @@ static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 	while(p != NULL) {
 		if(kNode_Is(CatchBreak, p)) {
 			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_("break"), KType_Node, p);
-			KReturn(kNode_Type(kctx, stmt, KNode_Break, KType_void));
+			KReturn(kNode_Type(stmt, KNode_Break, KType_void));
 		}
 		p = kNode_GetParentNULL(p);
 	}
@@ -83,7 +83,7 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 	while(p != NULL) {
 		if(kNode_Is(CatchContinue, p)) {
 			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_("continue"), KType_Node, p);
-			KReturn(kNode_Type(kctx, stmt, KNode_Continue, KType_void));
+			KReturn(kNode_Type(stmt, KNode_Continue, KType_void));
 		}
 		p = kNode_GetParentNULL(p);
 	}

@@ -94,7 +94,7 @@ static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 	kNode_Set(CatchBreak, stmt, true);
 	//kNode_Set(RedoLoop, stmt, true);
 	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
-	KReturn(kNode_Type(kctx, stmt, KNode_For, KType_void));
+	KReturn(kNode_Type(stmt, KNode_For, KType_void));
 }
 
 /* copied from Syntax.CStyleWhile */
@@ -105,7 +105,7 @@ static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 	while(p != NULL) {
 		if(kNode_Is(CatchBreak, p)) {
 			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_("break"), KType_Node, p);
-			KReturn(kNode_Type(kctx, stmt, KNode_Break, KType_void));
+			KReturn(kNode_Type(stmt, KNode_Break, KType_void));
 		}
 		p = kNode_GetParentNULL(p);
 	}
@@ -119,7 +119,7 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 	while(p != NULL) {
 		if(kNode_Is(CatchContinue, p)) {
 			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_("continue"), KType_Node, p);
-			KReturn(kNode_Type(kctx, stmt, KNode_Continue, KType_void));
+			KReturn(kNode_Type(stmt, KNode_Continue, KType_void));
 		}
 		p = kNode_GetParentNULL(p);
 	}

@@ -43,7 +43,7 @@ static KMETHOD Expression_LispOperator(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = kNode_ns(expr);
 	if(beginIdx == currentIdx && beginIdx + 1 < endIdx) {
 		kTokenVar *opToken = tokenList->TokenVarItems[beginIdx];
-		kNode_Type(kctx, expr, KNode_Block, KType_var);
+		kNode_Type(expr, KNode_Block, KType_var);
 		int i = beginIdx + 1;
 		SUGAR kNode_Op(kctx, expr, opToken, 0);
 		while(i < endIdx) {

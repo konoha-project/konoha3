@@ -497,7 +497,7 @@ static inline kNameSpace *kNode_GetNameSpace(KonohaContext *kctx, kNode *node)
 #define kNode_SetParent(kctx, node, parent)   KFieldSet(node, node->Parent, parent)
 
 
-static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeType, ktypeattr_t attrTypeId)
+static inline kNode *kNode_Type(kNode *node, knode_t nodeType, ktypeattr_t attrTypeId)
 {
 	if(kNode_node(node) != KNode_Error) {
 		kNode_setnode(node, nodeType);

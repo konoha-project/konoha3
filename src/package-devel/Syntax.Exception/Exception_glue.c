@@ -166,7 +166,7 @@ static KMETHOD Statement_try(KonohaContext *kctx, KonohaStack *sfp)
 	//	ret = SUGAR TypeCheckBlock(kctx, finallyNode, gma);
 	//}
 	//if(ret) {
-	//	kNode_Type(kctx, stmt, TRY);
+	//	kNode_Type(stmt, TRY);
 	//}
 	KReturnUnboxValue(ret);
 }
@@ -188,7 +188,7 @@ static KMETHOD Statement_catch(KonohaContext *kctx, KonohaStack *sfp)
 	//	kNode *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, K_NULLNODE);
 	//	KLIB kObjectProto_SetObject(kctx, parentNode, KSymbol_NodePattern, KType_Exception, expr);
 	//	KLIB kObjectProto_SetObject(kctx, parentNode, KSymbol_("catch"), KType_Node, stmt);
-	//	kNode_Type(kctx, stmt, KNode_Done, KType_void);
+	//	kNode_Type(stmt, KNode_Done, KType_void);
 	//} else {
 	//	kNode_Message(kctx, stmt, ErrTag, "upper stmt is not try/catch");
 	//	KReturnUnboxValue(false);
@@ -208,7 +208,7 @@ static KMETHOD Statement_finally(KonohaContext *kctx, KonohaStack *sfp)
 	//	if(tryNode != NULL) {
 	//		ret = SUGAR TypeCheckBlock(kctx, finallyNode, gma);
 	//		KLIB kObjectProto_SetObject(kctx, tryNode, KSymbol_("finally"), KType_Node, finallyNode);
-	//		kNode_Type(kctx, stmt, KNode_Done, KType_void);
+	//		kNode_Type(stmt, KNode_Done, KType_void);
 	//	}
 	//}
 

@@ -324,7 +324,7 @@ static void kNode_AddMethodDeclNode(KonohaContext *kctx, kNode *bk, kToken *toke
 			if(classParentBlock == NULL) {
 				classParentBlock = KNewNode(ns);
 				SUGAR kNode_AddNode(kctx, classParentBlock, classNode);
-				kNode_Type(kctx, classParentBlock, KNode_Block, KType_void);
+				kNode_Type(classParentBlock, KNode_Block, KType_void);
 			}
 
 			/* Create 'NameSpace.AddMethodDecl(stmt)' */
@@ -387,7 +387,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	kToken_SetTypeId(kctx, tokenClassName, ns, definedClass->typeId);
 	kNode_AddMethodDeclNode(kctx, block, tokenClassName, stmt);
-	KReturn(kNode_Type(kctx, stmt, KNode_Done, KType_void));
+	KReturn(kNode_Type(stmt, KNode_Done, KType_void));
 }
 
 static KMETHOD PatternMatch_ClassName(KonohaContext *kctx, KonohaStack *sfp)

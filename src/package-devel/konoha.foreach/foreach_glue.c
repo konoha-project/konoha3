@@ -137,9 +137,9 @@
 //		kNode_Set(CatchContinue, IfNode, true);
 //		isOkay = SUGAR TypeCheckBlock(kctx, block, gma);
 //		if(isOkay) {
-//			kNode_Type(kctx, IfNode, LOOP);
+//			kNode_Type(IfNode, LOOP);
 //			kNode_SetObject(kctx, stmt, KSymbol_NodePattern, block);
-//			kNode_Type(kctx, stmt, BLOCK);
+//			kNode_Type(stmt, BLOCK);
 //		}
 //	}
 //	KReturnUnboxValue(isOkay);

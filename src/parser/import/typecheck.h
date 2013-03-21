@@ -120,7 +120,7 @@ static kNode *BoxNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KClass* 
 {
 	kNode *node = KNewNode(ns);
 	KFieldSet(node, node->NodeToPush, expr);
-	return kNode_Type(kctx, node, KNode_Box, expr->attrTypeId);
+	return kNode_Type(node, KNode_Box, expr->attrTypeId);
 }
 
 static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KClass* reqClass, int pol)
@@ -248,18 +248,18 @@ static kNode *TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, 
 	for(i = 0; i < size; i++) {
 		kNode *stmt = TypeCheckNodeList(kctx, block, i, ns, KClass_void);
 		if(kNode_IsError(stmt)) {
-			return hasValue ? stmt : kNode_Type(kctx, block, KNode_Block, KType_void);  // untyped
+			return hasValue ? stmt : kNode_Type(block, KNode_Block, KType_void);  // untyped
 		}
 	}
 	if(size >= 0) {
 		kNode *stmt = TypeCheckNodeList(kctx, block, size, ns, reqc);
 		if(kNode_IsError(stmt)) {
-			return hasValue ? stmt : kNode_Type(kctx, block, KNode_Block, KType_void);  // untyped
+			return hasValue ? stmt : kNode_Type(block, KNode_Block, KType_void);  // untyped
 		}
-		kNode_Type(kctx, block, KNode_Block, stmt->attrTypeId);
+		kNode_Type(block, KNode_Block, stmt->attrTypeId);
 	}
 	else {
-		kNode_Type(kctx, block, KNode_Block, KType_void);
+		kNode_Type(block, KNode_Block, KType_void);
 	}
 	DBG_P(">>>>>>>> size=%d, typed=%s", size, KType_text(block->attrTypeId));
 	return block;

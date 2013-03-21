@@ -276,7 +276,7 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 		 * 3: ditto
 		 * 4: ...
 		 */
-		kNode_Type(kctx, texpr, KNode_Function, envCt->typeId);
+		kNode_Type(texpr, KNode_Function, envCt->typeId);
 		KFieldSet(expr, texpr->NodeList, new_(Array, 0, OnField));
 		KLIB kArray_Add(kctx, texpr->NodeList, mtd);
 		KLIB kArray_Add(kctx, texpr->NodeList, KLIB Knull(kctx, EnvObjectClass));

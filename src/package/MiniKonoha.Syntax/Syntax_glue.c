@@ -272,7 +272,7 @@ static KMETHOD Node_TypeCheckNodeAt(KonohaContext *kctx, KonohaStack *sfp)
 //## void Node.SetType(int type);
 static KMETHOD Node_SetType(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kNode_Type(kctx, sfp[0].asNode, sfp[1].intValue, KType_void);
+	kNode_Type(sfp[0].asNode, sfp[1].intValue, KType_void);
 	KReturnVoid();
 }
 
@@ -336,7 +336,7 @@ static KMETHOD Node_LookupNode(KonohaContext *kctx, KonohaStack *sfp)
 //## void Node.done();
 static KMETHOD Node_done(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kNode_Type(kctx, sfp[0].asNode, KNode_Done, KType_void);
+	kNode_Type(sfp[0].asNode, KNode_Done, KType_void);
 	KReturnVoid();
 }
 
@@ -732,7 +732,7 @@ static void Syntax_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceI
 //			}
 //			r = 1;
 //		}
-//		kNode_Type(kctx, stmt, KNode_Done, KType_void);
+//		kNode_Type(stmt, KNode_Done, KType_void);
 //	}
 //	KReturnUnboxValue(r);
 //}
