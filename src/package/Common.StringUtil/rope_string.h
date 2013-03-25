@@ -43,18 +43,19 @@ extern "C" {
  * Pooled-String   | xxxxxxxxxxxxxxxxxxxxxxxxxx1xxxxx
  */
 
-#define S_FLAG_MASK_BASE (7)
+#define S_FLAG_MASK_BEGIN (7)
+#define S_FLAG_MASK_END   (S_FLAG_MASK_BEGIN + 3)
 #define S_FLAG_LINER     ((1UL << (0)))
 #define S_FLAG_NOFREE    ((1UL << (1)))
 #define S_FLAG_ROPE      ((1UL << (2)))
 #define S_FLAG_INLINE    (S_FLAG_NOFREE)
 #define S_FLAG_EXTERNAL  (S_FLAG_LINER | S_FLAG_NOFREE)
 
-#define MASK_LINER    ((S_FLAG_LINER   ) << S_FLAG_MASK_BASE)
-//#define MASK_NOFREE ((S_FLAG_NOFREE  ) << S_FLAG_MASK_BASE)
-#define MASK_ROPE     ((S_FLAG_ROPE    ) << S_FLAG_MASK_BASE)
-#define MASK_INLINE   ((S_FLAG_INLINE  ) << S_FLAG_MASK_BASE)
-#define MASK_EXTERNAL ((S_FLAG_EXTERNAL) << S_FLAG_MASK_BASE)
+#define MASK_LINER    ((S_FLAG_LINER   ) << S_FLAG_MASK_BEGIN)
+//#define MASK_NOFREE ((S_FLAG_NOFREE  ) << S_FLAG_MASK_BEGIN)
+#define MASK_ROPE     ((S_FLAG_ROPE    ) << S_FLAG_MASK_BEGIN)
+#define MASK_INLINE   ((S_FLAG_INLINE  ) << S_FLAG_MASK_BEGIN)
+#define MASK_EXTERNAL ((S_FLAG_EXTERNAL) << S_FLAG_MASK_BEGIN)
 
 #define StringBase_length(s) ((s)->length)
 typedef struct kStringBase {
@@ -87,7 +88,7 @@ typedef struct kInlineString {
 
 static inline uint32_t kStringBase_flag(kStringBase *s)
 {
-	uint32_t flag = ((~0U) & (s)->h.magicflag) >> S_FLAG_MASK_BASE;
+	uint32_t flag = (((1 << S_FLAG_MASK_END)-1) & (s)->h.magicflag) >> S_FLAG_MASK_BEGIN;
 	DBG_ASSERT(flag <= S_FLAG_ROPE);
 	return flag;
 }
