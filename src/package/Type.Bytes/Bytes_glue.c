@@ -180,6 +180,7 @@ static KMETHOD String_new_fromBytes_withDefaultDecode(KonohaContext *kctx, Konoh
 		KBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KBuffer_convertCharset(kctx, &wb, "UTF-8", I18NAPI systemCharset, ba->buf, ba->bytesize, trace);
+		KLIB KBuffer_text(kctx, &wb, EnsureZero); /* String must be Null terminated */
 		s = KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer);
 	}
 	KReturn(s);
@@ -193,12 +194,11 @@ static KMETHOD String_new_fromSubBytes_withDefaultDecode(KonohaContext *kctx, Ko
 	int length = sfp[3].intValue;
 	kString *s = TS_EMPTY;
 	if(ba->bytesize != 0) {
-		// At this point, we assuem 'ba' is null terminated.
-		DBG_ASSERT(ba->buf[ba->bytesize-1] == '\0');
 		KMakeTrace(trace, sfp);
 		KBuffer wb;
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 		KBuffer_convertCharset(kctx, &wb, "UTF-8", I18NAPI systemCharset, ba->buf + offset, length, trace);
+		KLIB KBuffer_text(kctx, &wb, EnsureZero); /* String must be Null terminated */
 		s = KLIB KBuffer_Stringfy(kctx, &wb, OnStack, StringPolicy_FreeKBuffer);
 	}
 	KReturn(s);

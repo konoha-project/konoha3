@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
-
 find_program(PYTHON_CONFIG NAMES python-config)
 if(PYTHON_CONFIG)
 	execute_process(
@@ -16,4 +14,3 @@ if(PYTHON_CONFIG)
 else(PYTHON_CONFIG)
 	show_package_warning(python)
 endif(PYTHON_CONFIG)
-

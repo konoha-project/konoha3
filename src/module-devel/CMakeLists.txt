@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
-
 macro(GET_MODULE_NAME _STR _RESULT)
 	string(REPLACE "/" ";" _tmp ${_STR})
 	list(REVERSE _tmp)
@@ -17,10 +15,17 @@ macro(add_konoha_module ModuleName)
 	add_library(${ModuleName} SHARED ${MODULE_SOURCE_CODE})
 	target_link_libraries(${ModuleName} ${MODULE_EXTRA_LIBRARY})
 	set_target_properties(${ModuleName} PROPERTIES PREFIX "")
+if(MSVC OR MINGW)
+	add_custom_command(OUTPUT ${PARENT_BINARY_DIR}/module/${ModuleName}
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+		${CMAKE_CURRENT_BINARY_DIR}
+		${PARENT_BINARY_DIR}/module/${ModuleName})
+else()
 	add_custom_command(OUTPUT ${PARENT_BINARY_DIR}/module/${ModuleName}
 		COMMAND ${CMAKE_COMMAND} -E create_symlink
 		${CMAKE_CURRENT_BINARY_DIR}
 		${PARENT_BINARY_DIR}/module/${ModuleName})
+endif()
 	add_custom_target(create_symlink_${ModuleName} ALL DEPENDS
 		${PARENT_BINARY_DIR}/module/${ModuleName})
 	install(TARGETS ${ModuleName} DESTINATION ${KONOHA_MODULE_DIR}/${ModuleName})

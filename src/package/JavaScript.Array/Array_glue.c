@@ -713,7 +713,7 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_ASSERT(mtd != NULL);
 	KFieldSet(expr, expr->NodeList->MethodItems[0], mtd);
 	KFieldSet(expr, expr->NodeList->NodeItems[1], SUGAR kNode_SetVariable(kctx, KNewNode(ns), KNode_New, reqc->typeId, kArray_size(expr->NodeList) - 2));
-	KReturn(kNode_Type(kctx, expr, KNode_MethodCall, reqc->typeId));
+	KReturn(kNode_Type(expr, KNode_MethodCall, reqc->typeId));
 }
 
 static KMETHOD Expression_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)

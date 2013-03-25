@@ -1,0 +1,9 @@
+{
+    "package" : "Type.Complex",
+        "version" : "0.0",
+        "status"  : "stable",
+        "platform"  : "",
+        "dependency package" : [
+            {"package" : "Type.Float", "version" : "0.3"}
+        ]
+}

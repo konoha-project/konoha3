@@ -236,6 +236,22 @@ static KMETHOD System_open_mode(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
+//## int System.close(int fd)
+static KMETHOD System_close(KonohaContext *kctx, KonohaStack *sfp)
+{
+	int fd = sfp[1].intValue;
+	int ret = close(fd);
+	if(ret == -1) {
+		// TODO: throw
+		KMakeTrace(trace, sfp);
+		int fault = KLIB DiagnosisFaultType(kctx, SystemError, trace);
+		KTraceErrorPoint(trace, fault, "close",
+						LogInt("fd", fd)
+			);
+	}
+	KReturnUnboxValue(ret);
+}
+
 //## int System.fchdir(int fd)
 static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -292,6 +308,7 @@ static kbool_t fd_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int optio
 		_Public|_Static|_Const|_Im, _F(System_getdtablesize), KType_Int, KType_System, KMethodName_("getdtablesize"), 0,
 		_Public|_Static|_Im, _F(System_open),      KType_Int,     KType_System, KMethodName_("open"),   2, KType_String, KFieldName_("pathname"), KType_Int, KFieldName_("flags"),
 		_Public|_Static|_Im, _F(System_open_mode), KType_Int,     KType_System, KMethodName_("open"),   3, KType_String, KFieldName_("pathname"), KType_Int, KFieldName_("flags"), KType_Int, KFieldName_("mode"),
+		_Public|_Static|_Im, _F(System_close),      KType_Int,     KType_System, KMethodName_("close"),   1, KType_Int, KFieldName_("fd"),
 		_Public|_Static|_Im, _F(System_fchdir),    KType_Boolean, KType_System, KMethodName_("fchdir"), 1, KType_Int,    KFieldName_("fd"),
 		_Public|_Static|_Im, _F(System_isatty),    KType_Boolean, KType_System, KMethodName_("isatty"), 1, KType_Int,    KFieldName_("fd"),
 		_Public|_Static|_Im, _F(System_ttyname),   KType_String, KType_System, KMethodName_("ttyname"), 1, KType_Int,    KFieldName_("fd"),

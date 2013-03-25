@@ -1,0 +1,7 @@
+{
+    "package" : "Lib.Gmp",
+        "version" : "1.0",
+        "status"  : "stable",
+        "platform"  : "osx/linux",
+        "dependency package" : []
+}

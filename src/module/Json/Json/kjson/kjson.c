@@ -28,7 +28,9 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#if !defined(_MSC_VER) || __STDC_VERSION__ >= 199901L
 #include <inttypes.h>
+#endif
 #include <limits.h>
 #undef __SSE2__
 #ifdef __SSE2__
@@ -46,6 +48,15 @@ extern "C" {
         THROW(&(EXCEPTION), PARSER_EXCEPTION, MESSAGE);\
     }\
 } while(0)
+
+#if defined(_MSC_VER)
+static uint32_t CLZ(uint32_t x)
+{
+    unsigned long r = 0;
+    _BitScanReverse(&r, x);
+    return 63 - r;
+}
+#endif
 
 static inline bool JSON_CanFree(JSON json)
 {
@@ -215,9 +226,10 @@ static void _JSONObject_set(JSONObject *o, JSONString *key, JSON value)
 
 KJSON_API void JSONObject_setObject(JSONMemoryPool *jm, JSON json, JSON key, JSON value)
 {
+    JSONObject *o;
     assert(JSON_TYPE_CHECK(Object, json));
     assert(JSON_TYPE_CHECK(String, key));
-    JSONObject *o = toObj(json.val);
+    o = toObj(json.val);
     _JSONObject_set(o, toStr(key.val), value);
 }
 
@@ -455,15 +467,17 @@ static void parseEscape(input_stream *ins, string_builder *sb, uint8_t c)
 static JSON parseString(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
 {
     const uint8_t *state1, *state2;
+    unsigned length;
+    string_builder sb;
     THROW_IF(c != '"', ins->exception, "Missing open quote at start of JSONString");
     state1 = _input_stream_save(ins);
     c = skipBSorDoubleQuote(ins);
     state2 = _input_stream_save(ins);
-    unsigned length = state2 - state1 - 1;
+    length = state2 - state1 - 1;
     if(c == '"') {/* fast path */
         return JSONString_new(jm, (char *)state1, length);
     }
-    string_builder sb; string_builder_init(&sb);
+    string_builder_init(&sb);
     if(length > 0) {
         string_builder_add_string(&sb, (const char *) state1, length);
     }
@@ -488,7 +502,6 @@ static JSON parseString(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
 
 static JSON parseChild(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
 {
-    c = skip_space(ins, c);
     typedef JSON (*parseJSON)(JSONMemoryPool *jm, input_stream *ins, uint8_t c);
     static const parseJSON dispatch_func[] = {
         parseNOP,
@@ -499,27 +512,33 @@ static JSON parseChild(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
         parseBoolean,
         parseNull
     };
+    c = skip_space(ins, c);
     return dispatch_func[0x7 & string_table[(int)c]](jm, ins, c);
 }
 
 static JSON parseObject(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
 {
+    unsigned stack_top;
+    JSON json;
     THROW_IF(c != '{', ins->exception, "Missing open brace '{' at start of json object");
-    unsigned stack_top = kstack_size(&ins->stack);
+    stack_top = kstack_size(&ins->stack);
     for(c = skip_space(ins, NEXT(ins)); EOS(ins); c = skip_space(ins, NEXT(ins))) {
+        JSON key;
+        JSON val;
+
         if(c == '}') {
             break;
         }
         THROW_IF(c != '"', ins->exception, "Missing open quote for element key");
 
-        JSON key = parseString(jm, ins, c);
+        key = parseString(jm, ins, c);
         THROW_IF(key.bits == 0, ins->exception, "JSONObject with extra comma");
         JSONString_hashCode(toStr(key.val));
         kstack_push(&ins->stack, key);
         c = skip_space(ins, NEXT(ins));
         THROW_IF(c != ':', ins->exception, "Missing ':' after key in object");
 
-        JSON val = parseChild(jm, ins, NEXT(ins));
+        val = parseChild(jm, ins, NEXT(ins));
         kstack_push(&ins->stack, val);
         c = skip_space(ins, NEXT(ins));
         if(c == '}') {
@@ -527,25 +546,30 @@ static JSON parseObject(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
         }
         THROW_IF(c != ',', ins->exception, "Missing comma or end of JSON Object '}'");
     }
-    unsigned field_size = (kstack_size(&ins->stack) - stack_top) / 2;
-    JSON json = JSONObject_new(jm, field_size);
-    JSONObject *obj = toObj(json.val);
-    while(field_size-- > 0) {
-        JSONString *key;
-        JSON val;
-        val = kstack_pop(&ins->stack);
-        key = toStr(kstack_pop(&ins->stack).val);
-        assert(val.bits != 0 && key);
-        _JSONObject_set(obj, key, val);
+    {
+        unsigned field_size = (kstack_size(&ins->stack) - stack_top) / 2;
+        JSONObject *obj;
+        json = JSONObject_new(jm, field_size);
+        obj = toObj(json.val);
+        while(field_size-- > 0) {
+            JSONString *key;
+            JSON val;
+            val = kstack_pop(&ins->stack);
+            key = toStr(kstack_pop(&ins->stack).val);
+            assert(val.bits != 0 && key);
+            _JSONObject_set(obj, key, val);
+        }
+        assert(kstack_size(&ins->stack) == stack_top);
     }
-    assert(kstack_size(&ins->stack) == stack_top);
     return json;
 }
 
 static JSON parseArray(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
 {
+    unsigned stack_top;
+    JSON json;
     THROW_IF(c != '[', ins->exception, "Missing open brace '[' at start of json array");
-    unsigned stack_top = kstack_size(&ins->stack);
+    stack_top = kstack_size(&ins->stack);
     c = skip_space(ins, NEXT(ins));
     if(c == ']') {
         /* array with no elements "[]" */
@@ -561,25 +585,27 @@ static JSON parseArray(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
         }
         THROW_IF(c != ',', ins->exception, "Missing comma or end of JSON Array ']'");
     }
-
-    unsigned element_size = kstack_size(&ins->stack) - stack_top;
-    JSON json = JSONArray_new(jm, element_size);
-    JSONArray *a = toAry(json.val);
-    kstack_move(&ins->stack, a->array.list, stack_top, element_size);
-    assert(kstack_size(&ins->stack) == stack_top);
-    a->array.size += element_size;
+    {
+        unsigned element_size = kstack_size(&ins->stack) - stack_top;
+        JSONArray *a;
+        json = JSONArray_new(jm, element_size);
+        a = toAry(json.val);
+        kstack_move(&ins->stack, a->array.list, stack_top, element_size);
+        assert(kstack_size(&ins->stack) == stack_top);
+        a->array.size += element_size;
+    }
     return json;
 }
 
 static JSON parseNumber(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
 {
-    assert((c == '-' || ('0' <= c && c <= '9')) && "It do not seem as Number");
     kjson_type type = JSON_Int32;
     const uint8_t *state1, *state2;
-    state1 = _input_stream_save(ins);
     bool negative = false;
     int64_t val = 0;
     JSON n;
+    assert((c == '-' || ('0' <= c && c <= '9')) && "It do not seem as Number");
+    state1 = _input_stream_save(ins);
     if(c == '-') { negative = true; c = NEXT(ins); }
     if(c == '0') { c = NEXT(ins); }
     else if('1' <= c && c <= '9') {
@@ -702,19 +728,21 @@ KJSON_API JSON parseJSON(JSONMemoryPool *jm, const char *s, const char *e)
 {
     input_stream insbuf;
     input_stream *ins = new_string_input_stream(&insbuf, s, e - s);
-    kexception_handler_init(&ins->exception);
     JSON json;
-    TRY(ins->exception) {
-        json = parseJSON_stream(jm, ins);
-    }
-    CATCH(PARSER_EXCEPTION) {
-        const char *emessage = ins->exception.error_message;
-        json = JSONError_new(jm, emessage);
-        ins->exception.has_error = 1;
-        goto L_finally;
-    }
-    FINALLY() {
-        input_stream_delete(ins);
+    kexception_handler_init(&ins->exception);
+    {
+        TRY(ins->exception) {
+            json = parseJSON_stream(jm, ins);
+        }
+        CATCH(PARSER_EXCEPTION) {
+            const char *emessage = ins->exception.error_message;
+            json = JSONError_new(jm, emessage);
+            ins->exception.has_error = 1;
+            goto L_finally;
+        }
+        FINALLY() {
+            input_stream_delete(ins);
+        }
     }
     return json;
 }
@@ -756,8 +784,8 @@ static void JSONObject_toString(string_builder *sb, JSON json)
 {
     map_record_t *r;
     kmap_iterator itr = {0};
-    string_builder_add(sb, '{');
     JSONObject *o = toObj(json.val);
+    string_builder_add(sb, '{');
     if((r = kmap_next(&o->child, &itr)) != NULL) {
         JSONObjectElement_toString(sb, r);
         while((r = kmap_next(&o->child, &itr)) != NULL) {
@@ -869,7 +897,11 @@ static void JSONDouble_toString(string_builder *sb, JSON json)
 {
     double d = toDouble(json.val);
     char buf[64];
+#if defined(_MSC_VER)
+    int len = _snprintf(buf, 64, "%g", d);
+#else
     int len = snprintf(buf, 64, "%g", d);
+#endif
     string_builder_add_string(sb, buf, len);
 }
 

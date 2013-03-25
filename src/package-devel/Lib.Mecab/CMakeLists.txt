@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 find_library(HAVE_LIBMECAB NAMES mecab)
 
 set(PACKAGE_SOURCE_CODE mecab_glue.c)

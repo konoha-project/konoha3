@@ -24,9 +24,13 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #define KJSON_MALLOC(N) malloc(N)
 #define KJSON_FREE(PTR) free(PTR)
 #include "karray.h"
+#if defined(_MSC_VER)
+#include <intrin.h>
+#endif
 
 #ifndef KJSON_MEMORY_H
 #define KJSON_MEMORY_H
@@ -35,6 +39,10 @@
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#ifndef __GNUC__
+#define    __builtin_expect(a, b)    (a)
 #endif
 
 #ifndef unlikely
@@ -46,7 +54,11 @@ extern "C" {
 #endif
 
 #ifndef LOG2
+#if defined(_MSC_VER)
+#define LOG2(N) ((uint32_t)((sizeof(void *) * 8) - CLZ(N - 1)))
+#else
 #define LOG2(N) ((unsigned)((sizeof(void *) * 8) - __builtin_clzl(N - 1)))
+#endif
 #endif
 
 #define PowerOf2(N) (1UL << N)
@@ -109,19 +121,23 @@ static void *JSONMemoryPool_Alloc(JSONMemoryPool *pool, size_t n, bool *malloced
         return malloc(n);
     }
 
-    size_t size = ALIGN(n, 1 << MIN_ALIGN_LOG2);
-    unsigned index = LOG2(size) - MIN_ALIGN_LOG2;
-    BlockInfo *block = ARRAY_get(BlockInfo, &pool->current_block, index);
-    if(likely((block->current + size - block->base) <= MEMORYBLOCK_SIZE)) {
-        char *ptr = block->current;
-        block->current = block->current + size;
-        return (void *) ptr;
+    {
+        size_t size = ALIGN(n, 1 << MIN_ALIGN_LOG2);
+        unsigned index = LOG2(size) - MIN_ALIGN_LOG2;
+        BlockInfo *block = ARRAY_get(BlockInfo, &pool->current_block, index);
+        if(likely((block->current + size - block->base) <= MEMORYBLOCK_SIZE)) {
+            char *ptr = block->current;
+            block->current = block->current + size;
+            return (void *) ptr;
+        }
+        {
+            PageData *page = ARRAY_get(PageData, &pool->array, index);
+            newblock = malloc(MEMORYBLOCK_SIZE);
+            block->base    = (char *)newblock;
+            block->current = (char *)newblock + size;
+            ARRAY_add(CharPtr, &page->block, block->base);
+        }
     }
-    PageData *page = ARRAY_get(PageData, &pool->array, index);
-    newblock = malloc(MEMORYBLOCK_SIZE);
-    block->base    = (char *)newblock;
-    block->current = (char *)newblock + size;
-    ARRAY_add(CharPtr, &page->block, block->base);
 #else
     newblock = malloc(n);
 #endif

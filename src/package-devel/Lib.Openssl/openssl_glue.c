@@ -102,7 +102,7 @@ static kbool_t openssl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 
 	int FN_x = KFieldName_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(kMD5_Init),   KType_SHA1,   KType_MD5, KMethodName_("new"), 0,
+		_Public, _F(kMD5_Init),   KType_MD5,   KType_MD5, KMethodName_("new"), 0,
 		_Public, _F(kMD5_Update), KType_Int,   KType_MD5, KMethodName_("update"), 1, KType_String, FN_x,
 		_Public, _F(kMD5_Final),  KType_String, KType_MD5, KMethodName_("final"), 0,
 		_Public, _F(kSHA1_Init),   KType_SHA1,   KType_SHA1, KMethodName_("new"), 0,

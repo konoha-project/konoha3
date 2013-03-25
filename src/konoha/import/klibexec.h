@@ -279,6 +279,7 @@ KLIBDECL void KDict_Remove(KonohaContext *kctx, KDict *dict, ksymbol_t queryKey)
 KLIBDECL void KDict_MergeData(KonohaContext *kctx, KDict *dict, KKeyValue *kvs, size_t nitems, int isOverride)
 {
 	size_t i;
+	kbool_t *foundItems;
 	if(KDict_size(dict) == 0) {
 		KDict_Ensure(kctx, dict, nitems);
 		memcpy(dict->data.keyValueItems, kvs, nitems * sizeof(KKeyValue));
@@ -286,7 +287,7 @@ KLIBDECL void KDict_MergeData(KonohaContext *kctx, KDict *dict, KKeyValue *kvs, 
 		KDict_Sort(kctx, dict);
 		return;
 	}
-	kbool_t foundItems[nitems];
+	foundItems = ALLOCA(kbool_t, nitems);
 	bzero(foundItems, sizeof(kbool_t) * nitems);
 	for(i = 0; i < nitems; i++) {
 		KKeyValue *stored = KLIB KDict_GetNULL(kctx, dict, kvs[i].key);
@@ -761,9 +762,9 @@ static void KRuntime_raise(KonohaContext *kctx, int symbol, int fault, kString *
 		e->fault  = fault;
 		runtime->topStack = top;
 		//runtime->faultInfo = fault;
-//		if(optionalErrorInfo != NULL) {
-		KUnsafeFieldSet(runtime->ThrownException, e);
-//		}
+		if(true/*optionalErrorInfo != NULL*/) {
+			KUnsafeFieldSet(runtime->ThrownException, e);
+		}
 		PLATAPI longjmp_i(*runtime->evaljmpbuf, symbol);  // in setjmp 0 means good
 	}
 	KExit(EXIT_FAILURE);

@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 set(PACKAGE_SOURCE_CODE subproc_glue.c)
 if(NOT MINGW AND NOT MSVC)
 	#add_custom_command(OUTPUT

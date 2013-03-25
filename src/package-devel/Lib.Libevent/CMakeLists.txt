@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 find_package(LibEvent)
 if(EVENT_FOUND)
 	include_directories(${EVENT_INCLUDE_DIR})

@@ -99,7 +99,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 		result = SUGAR EvalTokenList(kctx, &range, NULL/*trace*/);
 		KTokenSeq_Pop(kctx, range);
 		RESET_GCSTACK();
-		kNode_Type(kctx, stmt, KNode_Done, KType_void);
+		kNode_Type(stmt, KNode_Done, KType_void);
 	}
 	KReturnUnboxValue(result == K_CONTINUE);
 }
@@ -133,11 +133,14 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 		if(result) {
 			KMakeTraceUL(trace, sfp, kNode_uline(stmt));
 			result = KLIB kNameSpace_SetConstData(kctx, ns, unboxKey, type, unboxValue, trace);
+			if(!result) {
+				kNode_Message(kctx, stmt, ErrTag, "constant value is already defined: %s%s", KSymbol_Fmt2(unboxKey));
+			}
 		}
 		else {
 			kNode_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", KSymbol_Fmt2(unboxKey));
 		}
-		constNode = kNode_Type(kctx, stmt, KNode_Done, KType_void);
+		constNode = kNode_Type(stmt, KNode_Done, KType_void);
 	}
 	KReturn(constNode);
 }

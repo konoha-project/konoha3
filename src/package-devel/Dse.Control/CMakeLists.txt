@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 if(UNIX OR APPLE)
 	find_program(HAVE_DSE NAMES dse)
 	if(HAVE_DSE)

@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 find_library(HAVE_LIBVIRT NAMES libvirt)
 if(HAVE_LIBVIRT)
 	set(PACKAGE_EXTRA_LIBRARY ${HAVE_LIBVIRT})

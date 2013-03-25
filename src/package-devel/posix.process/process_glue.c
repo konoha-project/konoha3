@@ -33,7 +33,7 @@
 #include <sys/time.h>
 
 #include <grp.h>
-#ifdef __linux__
+#if defined(__linux__) || defined(__CYGWIN__)
 #include <sys/wait.h>
 #endif
 

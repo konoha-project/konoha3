@@ -131,10 +131,11 @@ static kbool_t string_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	int FN_t = KFieldName_("t");
 	int FN_s = KFieldName_("s");
 	int FN_n = KFieldName_("n");
-	KDEFINE_CLASS StringUtilDef = {
-		STRUCTNAME(StringUtil),
-		.cflag = 0,
-	};
+
+	KDEFINE_CLASS StringUtilDef = {};
+	SETSTRUCTNAME(StringUtilDef, StringUtil);
+	StringUtilDef.cflag = 0;
+
 	KClass *cStringUtil = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &StringUtilDef, trace);
 	int KType_StringUtil = cStringUtil->typeId;
 

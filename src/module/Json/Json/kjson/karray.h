@@ -22,9 +22,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#if !defined(_MSC_VER) || __STDC_VERSION__ >= 199901L
 #include <stdbool.h>
+#else
+#include <konoha3/stdbool.h>
+#endif
 #include <stdlib.h>
 #include <assert.h>
+#if defined(_MSC_VER)
+#include <intrin.h>
+#endif
 
 #ifndef KJSON_ARRAY_H_
 #define KJSON_ARRAY_H_
@@ -34,7 +41,15 @@ extern "C" {
 #endif
 
 #ifndef LOG2
+#if defined(_MSC_VER)
+#define LOG2(N) ((uint32_t)((sizeof(void *) * 8) - CLZ(N - 1)))
+#else
 #define LOG2(N) ((unsigned)((sizeof(void *) * 8) - __builtin_clzl((N) - 1)))
+#endif
+#endif
+
+#if defined(_MSC_VER)
+#define inline __inline
 #endif
 
 /* ARRAY */

@@ -26,7 +26,7 @@ static KMETHOD PatternMatch_Expression(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
 	int returnIdx = beginIdx;
-	kNode *expr = ParseNewNode(kctx, kNode_ns(stmt), tokenList, &returnIdx, endIdx, ParseExpressionOption|OnlyPatternMatch, NULL);
+	kNode *expr = ParseNewNode(kctx, kNode_ns(stmt), tokenList, &returnIdx, endIdx, (ParseOption)(ParseExpressionOption|OnlyPatternMatch), NULL);
 	if(expr != K_NULLNODE) {
 		kNode_AddParsedObject(kctx, stmt, name, UPCAST(expr));
 	}
@@ -419,7 +419,7 @@ static KMETHOD TypeCheck_AndOperator(KonohaContext *kctx, KonohaStack *sfp)
 	if(!kNode_IsError(returnNode)) {
 		returnNode = TypeCheckNodeAt(kctx, expr, 2, ns, KClass_Boolean, 0);
 		if(!kNode_IsError(returnNode)) {
-			returnNode = kNode_Type(kctx, expr, KNode_And, KType_Boolean);
+			returnNode = kNode_Type(expr, KNode_And, KType_Boolean);
 		}
 	}
 	KReturn(returnNode);
@@ -432,7 +432,7 @@ static KMETHOD TypeCheck_OrOperator(KonohaContext *kctx, KonohaStack *sfp)
 	if(!kNode_IsError(returnNode)) {
 		returnNode = TypeCheckNodeAt(kctx, expr, 2, ns, KClass_Boolean, 0);
 		if(!kNode_IsError(returnNode)) {
-			returnNode = kNode_Type(kctx, expr, KNode_Or, KType_Boolean);
+			returnNode = kNode_Type(expr, KNode_Or, KType_Boolean);
 		}
 	}
 	KReturn(returnNode);
@@ -455,7 +455,7 @@ static kNode *MakeNodeSetter(KonohaContext *kctx, kNode *expr, kNameSpace *ns, k
 	KClass *c = KClass_(mtd->typeId);
 	kParam *pa = kMethod_GetParam(mtd);
 	int i, psize = pa->psize + 1;
-	kparamtype_t p[psize];
+	kparamtype_t *p = ALLOCA(kparamtype_t, psize);
 	for(i = 0; i < (int) pa->psize; i++) {
 		p[i].attrTypeId = pa->paramtypeItems[i].attrTypeId;
 	}
@@ -492,7 +492,7 @@ static KMETHOD TypeCheck_Assign(KonohaContext *kctx, KonohaStack *sfp)
 			returnNode = SUGAR MessageNode(kctx, expr, leftHandNode->TermToken, ns, ErrTag, "read only: %s", KToken_t(leftHandNode->TermToken));
 		}
 		else {
-			returnNode = kNode_Type(kctx, expr, KNode_Assign, leftHandNode->attrTypeId);
+			returnNode = kNode_Type(expr, KNode_Assign, leftHandNode->attrTypeId);
 		}
 	}
 	else if(kNode_IsGetter(leftHandNode)) {
@@ -632,7 +632,7 @@ static kNodeVar* TypeMethodCallNode(KonohaContext *kctx, kNodeVar *expr, kMethod
 	else if(kMethod_Is(SmartReturn, mtd) && reqClass->typeId != KType_var) {
 		typedClass = reqClass;
 	}
-	kNode_Type(kctx, expr, KNode_MethodCall, typedClass->typeId);
+	kNode_Type(expr, KNode_MethodCall, typedClass->typeId);
 	return expr;
 }
 
@@ -675,7 +675,7 @@ static kNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kNode *exp
 		KClass *rtype = ResolveTypeVariable(kctx, KClass_(pa->rtype), thisClass);
 		return MakeNodeConst(kctx, expr, rtype);
 	}
-	return kNode_Rebase(kctx, expr, ns->genv->localScope.varsize);
+	return expr;
 }
 
 //static kNode *TypeCheckDynamicCallParams(KonohaContext *kctx, kNode *stmt, kNodeVar *expr, kMethod *mtd, kNameSpace *ns, kString *name, kmethodn_t mn, KClass *reqClass)
@@ -764,6 +764,9 @@ static KMETHOD TypeCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	if(mtd != NULL) {
 		texpr = TypeCheckMethodParam(kctx, mtd, expr, ns, reqc);
+		KReturn(texpr);
+	}
+	if(kNode_IsError(texpr)) {
 		KReturn(texpr);
 	}
 	KReturn(expr);
@@ -916,11 +919,13 @@ static KMETHOD TypeCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Statement_if(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
-	TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
-	kNode *thenNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, reqc, TypeCheckPolicy_AllowEmpty);
-	if(thenNode != NULL && !kNode_IsError(thenNode)) {
-		SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_else, ns, KClass_(thenNode->attrTypeId), TypeCheckPolicy_AllowEmpty);
-		KReturn(kNode_Type(kctx, stmt, KNode_If, thenNode->attrTypeId));
+	kNode *condNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
+	if(!kNode_IsError(condNode)) {
+		kNode *thenNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, reqc, TypeCheckPolicy_AllowEmpty);
+		if(thenNode != NULL && !kNode_IsError(thenNode)) {
+			SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_else, ns, KClass_(thenNode->attrTypeId), TypeCheckPolicy_AllowEmpty);
+			KReturn(kNode_Type(stmt, KNode_If, thenNode->attrTypeId));
+		}
 	}
 }
 
@@ -974,7 +979,7 @@ static KMETHOD Statement_else(KonohaContext *kctx, KonohaStack *sfp)
 		DBG_ASSERT(elseNode != NULL);
 		SUGAR kNode_AddParsedObject(kctx, ifNode, KSymbol_else, elseNode);
 		SUGAR TypeCheckNodeByName(kctx, ifNode, KSymbol_else, ns, KClass_(ifNode->attrTypeId), 0);
-		KReturn(kNode_Type(kctx, stmt, KNode_Done, KType_void));
+		KReturn(kNode_Type(stmt, KNode_Done, KType_void));
 	}
 	else {
 		KReturn(kNode_Message(kctx, stmt, ErrTag, "else is not statement"));
@@ -994,7 +999,7 @@ static KMETHOD Statement_return(KonohaContext *kctx, KonohaStack *sfp)
 			KLIB kObjectProto_RemoveKey(kctx, stmt, KSymbol_ExprPattern);
 		}
 	}
-	KReturn(kNode_Type(kctx, stmt, KNode_Return, KType_void));
+	KReturn(kNode_Type(stmt, KNode_Return, KType_void));
 }
 
 /* TypeDecl */
@@ -1048,7 +1053,7 @@ static void kNode_DeclType(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, kty
 	if(newstmt != NULL && !kNode_IsError(stmt)) {
 		kNode_Set(OpenBlock, stmt, true);
 		kNode_AddNode(kctx, stmt, newstmt);
-		kNode_Type(kctx, stmt, KNode_Block, KType_void);
+		kNode_Type(stmt, KNode_Block, KType_void);
 	}
 }
 
@@ -1201,7 +1206,7 @@ static KMETHOD Statement_ParamDecl(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	if(pa != NULL && IS_Param(pa)) {
 		KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_ParamPattern, KType_Param, pa);
-		KReturn(kNode_Type(kctx, stmt, KNode_Done, KType_void));
+		KReturn(kNode_Type(stmt, KNode_Done, KType_void));
 	}
 	KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "expected parameter declaration"));
 }
@@ -1259,7 +1264,7 @@ static KMETHOD Statement_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		RESET_GCSTACK();
 	}
-	KReturn(kNode_Type(kctx, stmt, KNode_Done, KType_void));
+	KReturn(kNode_Type(stmt, KNode_Done, KType_void));
 }
 
 /* ------------------------------------------------------------------------ */

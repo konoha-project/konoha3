@@ -1,0 +1,12 @@
+{
+    "package" : "JavaScript.Math",
+    "version" : "0.3",
+    "status"  : "stable",
+    "platform"  : "win7/osx/linux",
+    "dependency package" : [
+        {
+            "package" : "",
+            "version" : ""
+        }
+    ]
+}

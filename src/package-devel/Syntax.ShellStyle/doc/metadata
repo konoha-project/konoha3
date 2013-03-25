@@ -1,0 +1,22 @@
+{
+    "package" : "Syntax.ShellStyle",
+        "version" : "0.0",
+        "status"  : "stable",
+        "platform"  : "",
+        "dependency package" : [
+            {"package" : "Syntax.GlobalVariable", "version" : "0.3"},
+            {"package" : "Syntax.CStyleWhile", "version" : "0.3"},
+            {"package" : "Syntax.Null", "version" : "0.3"},
+            {"package" : "posix.process", "version" : "0.3"},
+            {"package" : "posix.path", "version" : "0.3"},
+            {"package" : "dscript.subproc", "version" : "0.3"},
+            {"package" : "JavaScript.Array", "version" : "0.3"},
+            {"package" : "JavaScript.Math", "version" : "0.3"},
+            {"package" : "JavaScript.String", "version" : "0.3"},
+            {"package" : "Type.File", "version" : "0.3"},
+            {"package" : "Syntax.StringInterpolation", "version" : "0.3"},
+            {"package" : "MiniKonoha.Eval", "version" : "0.3"},
+            {"package" : "MiniKonoha.NameSpace", "version" : "0.3"},
+            {"package" : "MiniKonoha.Syntax", "version" : "0.3"}
+        ]
+}

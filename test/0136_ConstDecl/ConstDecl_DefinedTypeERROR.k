@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("MiniKonoha.NameSpace");  // konoha.const is obsolete
+import("MiniKonoha.NameSpace");
 
 const String = 10;
 System.p(String);

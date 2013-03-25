@@ -69,9 +69,7 @@ static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksym
 		}
 		return true;
 	}
-	else {
-		return false;
-	}
+	return false;
 }
 
 static KKeyValue *kNameSpace_GetConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t queryKey, int isLocalOnly)

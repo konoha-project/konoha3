@@ -28,6 +28,9 @@
 #include "kmemory_pool.h"
 #include "knumbox.h"
 #include "kmap.h"
+#if defined(_MSC_VER)
+#include <intrin.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,6 +40,10 @@ extern "C" {
 #define KJSON_API static
 #else
 #define KJSON_API
+#endif
+
+#ifndef __GNUC__
+#define __builtin_expect(a, b)  (a)
 #endif
 
 #ifndef unlikely
@@ -142,8 +149,9 @@ static inline bool JSON_isValid(JSON json)
 }
 
 static inline kjson_type JSON_type(JSON json) {
+    uint64_t tag;
     Value v; v.bits = (uint64_t)json.val.bits;
-    uint64_t tag = Tag(v);
+    tag = Tag(v);
     return (IsDouble((v)))?
         JSON_Double : (kjson_type) ((tag >> TagBitShift) & 15);
 }
@@ -204,9 +212,10 @@ static inline double JSON_getDouble(JSON json, const char *key, size_t len)
 static inline const char *JSON_getString(JSON json, const char *key, size_t *len)
 {
     JSON obj = JSON_get(json, key, *len);
+    JSONString *s;
     if(!JSON_isValid(obj))
         return NULL;
-    JSONString *s = toStr(obj.val);
+    s = toStr(obj.val);
     *len = s->length;
     return s->str;
 }
@@ -214,9 +223,10 @@ static inline const char *JSON_getString(JSON json, const char *key, size_t *len
 static inline JSON *JSON_getArray(JSON json, const char *key, size_t *len)
 {
     JSON obj = JSON_get(json, key, *len);
+    JSONArray *a;
     if(!JSON_isValid(obj))
         return NULL;
-    JSONArray *a = toAry(obj.val);
+    a = toAry(obj.val);
     *len = a->array.size;
     return a->array.list;
 }
@@ -240,7 +250,11 @@ static inline char *JSON_toString(JSON json)
     return s;
 }
 
+#if defined(_MSC_VER)
+#define JSON_TYPE_CHECK(T, O) (JSON_type((O)) == JSON_##T)
+#else
 #define JSON_TYPE_CHECK(T, O) (JSON_type(((JSON)O)) == JSON_##T)
+#endif
 
 typedef struct JSONArray_iterator {
     JSON      *Itr, *End;
@@ -269,11 +283,23 @@ typedef struct JSONObject_iterator {
 #endif
 
 #ifndef LOG2
+#if defined(_MSC_VER)
+#define LOG2(N) ((uint32_t)((sizeof(void *) * 8) - CLZ(N - 1)))
+#else
 #define LOG2(N) ((uint32_t)((sizeof(void *) * 8) - __builtin_clzl(N - 1)))
+#endif
 #endif
 
 #ifdef __cplusplus
 static inline JSON toJSON(Value v) {
+    JSON json;
+    json.bits = v.bits;
+    return json;
+}
+#elif defined(_MSC_VER)
+static __forceinline JSON toJSON(v)
+    Value v;
+{
     JSON json;
     json.bits = v.bits;
     return json;
@@ -341,12 +367,13 @@ static inline JSONString *JSONString_init(JSONString *buffer, const char *str, s
 /* [New API] */
 static inline JSON JSONString_new(JSONMemoryPool *jm, const char *s, size_t len)
 {
+    char *str;
     bool malloced;
     JSONString *o = (JSONString *) JSONMemoryPool_Alloc(jm, sizeof(*o), &malloced);
     JSON json = toJSON(ValueS(o));
     JSON_Init(json);
     assert(len >= 0);
-    char *str = (len > JSONSTRING_INLINE_SIZE) ? (char *) malloc(len) : o->text;
+    str = (len > JSONSTRING_INLINE_SIZE) ? (char *) malloc(len) : o->text;
     memcpy(str, s, len);
     JSONString_init(o, (const char *)str, len);
     return json;
@@ -450,12 +477,13 @@ static inline JSON JSONObject_iterator_next(JSONObject_iterator *itr, JSON *val)
 {
     JSONObject *o = itr->obj;
     map_record_t *r;
+    JSON obj;
     while((r = kmap_next(&o->child, (kmap_iterator *) itr)) != NULL) {
         JSONString *key = r->k;
         *val = toJSON(ValueP(r->v));
         return toJSON(ValueS(key));
     }
-    JSON obj; obj.bits = 0;
+    obj.bits = 0;
     *val = obj;
     return obj;
 }

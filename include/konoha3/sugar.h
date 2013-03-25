@@ -442,16 +442,17 @@ typedef enum KNode_Type {
 	KNode_MAX
 } KNode_;
 
-#define kNode_node(o)             (kObject_HashCode(o))
-#define kNode_setnode(o, node)    kObject_SetHashCode(o, (node))
+#define kNode_node(o)             ((o)->nodeType)
+#define kNode_setnode(o, node)    ((kNodeVar *)(o))->nodeType = (node)
 #define kNode_IsConstValue(o)     (KNode_Const <= kNode_node(o) && kNode_node(o) <= KNode_UnboxConst)
 #define kNode_IsValue(o)          (KNode_Const <= kNode_node(o) && kNode_node(o) <= KNode_Field)
 
 struct kNodeVar {
 	kObjectHeader h;
+	kshort_t nodeType; ktypeattr_t attrTypeId;
 	union {
-		struct kNodeVar   *Parent;   /* if parent is a NameSpace, it is a root node */
-		kNameSpace        *RootNodeNameSpace;
+		kNode      *Parent;   /* if parent is a NameSpace, it is a root node */
+		kNameSpace *RootNodeNameSpace;
 	};
 	union {
 		kToken        *KeyOperatorToken;     // Node
@@ -469,7 +470,6 @@ struct kNodeVar {
 		intptr_t       index;
 		kObject*       ObjectConstValue;
 	};
-	kshort_t stackbase; ktypeattr_t attrTypeId;
 };
 
 #define kNode_uline(O)   (O)->KeyOperatorToken->uline
@@ -497,7 +497,7 @@ static inline kNameSpace *kNode_GetNameSpace(KonohaContext *kctx, kNode *node)
 #define kNode_SetParent(kctx, node, parent)   KFieldSet(node, node->Parent, parent)
 
 
-static inline kNode *kNode_Type(KonohaContext *kctx, kNode *node, knode_t nodeType, ktypeattr_t attrTypeId)
+static inline kNode *kNode_Type(kNode *node, knode_t nodeType, ktypeattr_t attrTypeId)
 {
 	if(kNode_node(node) != KNode_Error) {
 		kNode_setnode(node, nodeType);
@@ -748,11 +748,17 @@ struct KBuilderAPI {
 };
 
 /* ------------------------------------------------------------------------ */
+#ifdef __cplusplus
+#define __CONST_CAST__(T, expr) (const_cast<T>(expr))
+#else
+#define __CONST_CAST__(T, expr) ((T)(expr))
+#endif
 
 static inline void kToken_SetTypeId(KonohaContext *kctx, kToken *tk, kNameSpace *ns, ktypeattr_t type)
 {
-	((kTokenVar *)tk)->resolvedTypeId = type;
-	((kTokenVar *)tk)->resolvedSyntaxInfo = SUGAR kNameSpace_GetSyntax(kctx, ns, KSymbol_TypePattern);
+	kTokenVar *token = __CONST_CAST__(kTokenVar *, tk);
+	token->resolvedTypeId = type;
+	token->resolvedSyntaxInfo = SUGAR kNameSpace_GetSyntax(kctx, ns, KSymbol_TypePattern);
 }
 
 #define kNode_isSymbolTerm(expr)   1

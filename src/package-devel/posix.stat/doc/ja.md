@@ -1,0 +1,22 @@
+posix.stat-パッケージの1行説明文
+====================
+
+### Stat System.stat(String path)
+### Stat System.lstat(String path)
+### Stat System.fstat(int fd)
+### int Stat.getdev()
+### int Stat.getino()
+### int Stat.getmode()
+### int Stat.getnlink()
+### int Stat.getuid()
+### int Stat.getgid()
+### int Stat.getsize()
+### int Stat.getatime()
+### int Stat.getmtime()
+### int Stat.getctime()
+### int Stat.getrdev()
+### int Stat.getblocks()
+### int Stat.getblksize()
+### int Stat.getflags()
+### int Stat.getgen()
+### int Stat.getbirthtime()

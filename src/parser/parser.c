@@ -39,6 +39,7 @@ extern "C" {
 #endif
 
 // global variable
+KONOHA_EXPORT(int) verbose_sugar;
 int verbose_sugar = 0;
 
 #include "import/perror.h"
@@ -105,8 +106,8 @@ static void SugarModule_Setup(KonohaContext *kctx, struct KRuntimeModule *def, i
 	}
 }
 
-kbool_t Konoha_LoadScript(KonohaContext* kctx, const char *scriptname);
-kbool_t Konoha_Eval(KonohaContext* kctx, const char *script, kfileline_t uline);
+KONOHA_EXPORT(kbool_t) Konoha_LoadScript(KonohaContext* kctx, const char *scriptname);
+KONOHA_EXPORT(kbool_t) Konoha_Eval(KonohaContext* kctx, const char *script, kfileline_t uline);
 
 void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
@@ -353,7 +354,7 @@ static kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size
 	return result;
 }
 
-kbool_t Konoha_LoadScript(KonohaContext* kctx, const char *scriptname)
+KONOHA_EXPORT(kbool_t) Konoha_LoadScript(KonohaContext* kctx, const char *scriptname)
 {
 	KBeginKonohaContext();
 	PLATAPI BEFORE_LoadScript(kctx, scriptname);
@@ -363,7 +364,7 @@ kbool_t Konoha_LoadScript(KonohaContext* kctx, const char *scriptname)
 	return res;
 }
 
-kbool_t Konoha_Eval(KonohaContext* kctx, const char *script, kfileline_t uline)
+KONOHA_EXPORT(kbool_t) Konoha_Eval(KonohaContext* kctx, const char *script, kfileline_t uline)
 {
 	KBeginKonohaContext();
 	if(verbose_sugar) {

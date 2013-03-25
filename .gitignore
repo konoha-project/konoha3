@@ -20,6 +20,7 @@
 GPATH
 GRTAGS
 GTAGS
+GSYMS
 *.k.tested
 *_tested
 OLD

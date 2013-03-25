@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-extern int verbose_debug;
+KONOHA_EXPORT(int) verbose_debug;
 
 #ifdef __cplusplus
 } /* extern "C" */

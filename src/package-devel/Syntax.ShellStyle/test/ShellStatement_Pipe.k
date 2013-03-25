@@ -2,4 +2,4 @@
 
 import("Syntax.ShellStyle");
 
-ls | grep hoge
+ls / | grep home

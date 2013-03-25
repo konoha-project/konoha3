@@ -1,0 +1,12 @@
+{
+    "package" : "Type.File",
+        "version" : "1.0",
+        "status"  : "stable",
+        "platform"  : "win7/osx/linux",
+        "dependency package" : [
+            {
+                "package" : "Type.Bytes",
+                "version" : "1.0"
+            }
+        ]
+}

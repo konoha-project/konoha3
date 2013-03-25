@@ -1,0 +1,7 @@
+{
+    "package" : "Syntax.CStyleFor",
+        "version" : "1.0",
+        "status"  : "stable",
+        "platform"  : "win7/osx/linux",
+        "dependency package" : []
+}

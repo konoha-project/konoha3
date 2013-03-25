@@ -259,18 +259,21 @@ static void kSubProc_execOnChild(KonohaContext *kctx, kSubProc *sbp, KTraceInfo 
 	}
 }
 
-static kbool_t ignoreSigchld(KonohaContext *kctx, KTraceInfo *trace)
-{
-	/* Ignore SIGCHLD signale to prevent zombie process. */
-	struct sigaction sa;
-	sa.sa_handler = SIG_IGN;
-	sa.sa_flags = SA_NOCLDWAIT;
-	if(sigaction(SIGCHLD, &sa, NULL) == -1) {
-		KTraceApi(trace, SystemFault, "sigaction", LogErrno);
-		return false;
-	}
-	return true;
-}
+//TODO: if ignoreSigchld is disabled, zombie process may be created
+//static kbool_t ignoreSigchld(KonohaContext *kctx, KTraceInfo *trace)
+//{
+//	/* Ignore SIGCHLD signale to prevent zombie process. */
+//	struct sigaction sa;
+//	sa.sa_handler = SIG_IGN;
+//#if !defined(__CYGWIN__)
+//	sa.sa_flags = SA_NOCLDWAIT;
+//#endif
+//	if(sigaction(SIGCHLD, &sa, NULL) == -1) {
+//		KTraceApi(trace, SystemFault, "sigaction", LogErrno);
+//		return false;
+//	}
+//	return true;
+//}
 
 static int kSubProc_exec(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
 {
@@ -1102,6 +1105,10 @@ static int subproc_wait(KonohaContext *kctx, int pid, kshortflag_t flag, int tim
 	sig_t alarm_oldset  = SIG_ERR;
 	sig_t keyInt_oldset = SIG_ERR;
 	sig_t ret = SIG_ERR;
+#elif defined(__CYGWIN__)
+	_sig_func_ptr alarm_oldset  = SIG_ERR;
+	_sig_func_ptr keyInt_oldset = SIG_ERR;
+	_sig_func_ptr ret = SIG_ERR;
 #endif
 	if(timeout > 0) {
 		if(sigsetjmp(env, 1)) {
@@ -1397,6 +1404,8 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 			__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
 #elif defined(__APPLE__) || defined(__NetBSD__)
 			sig_t oldset = signal(SIGPIPE, SIG_IGN);
+#elif defined(__CYGWIN__)
+			_sig_func_ptr oldset = signal(SIGPIPE, SIG_IGN);
 #endif
 			if(fwrite(kString_text(s), sizeof(char), kString_size(s), sp->wfp) > 0) {
 //				fputc('\n', p->w.fp);

@@ -1,0 +1,30 @@
+JavaScript.Array-JavaScriptで提供される配列型
+====================
+
+Array[T]
+--------------------
+### T Array.pop()
+### int Array.push(T value)
+### Array Array.reverse()
+### T Array.shift()
+### Array[T] Array.splice(int index, int length)
+### int Array.unshift(T value)
+### Array[T] Array.concat(Array[T] a1)
+### String Array.join()
+### String Array.join(String separator)
+### Array[T] Array.slice(int begin)
+### Array[T] Array.slice(int begin, int end)
+### int Array.indexOf(T value)
+### int Array.indexOf(T value, int fromIndex)
+### int Array.lastIndexOf(T value)
+### int Array.lastIndexOf(T value, int fromIndex)
+### T Array.removeAt(int index)
+### void Array.set(int index, T value)
+### T Array.get(int index)
+### int Array.getSize()
+### int Array.getlength()
+### void Array.clear()
+### void Array.add(T value)
+### Array[T] Array.new(int size)
+### Array[T] Array.newArray(int size)
+### Array[T] Array.[]()

@@ -1,0 +1,12 @@
+{
+    "package" : "dscript.subproc",
+        "version" : "0.0",
+        "status"  : "stable",
+        "platform"  : "",
+        "dependency package" : [
+            {
+                "package" : "Type.File",
+                "version" : "0.3"
+            }
+        ]
+}

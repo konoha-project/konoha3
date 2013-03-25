@@ -41,6 +41,10 @@ extern "C" {
 
 /* memory config */
 
+#ifndef __GNUC__
+#define __builtin_expect(a, b) (a)
+#endif
+
 #ifndef unlikely
 #define unlikely(x)   __builtin_expect(!!(x), 0)
 #endif
@@ -433,6 +437,8 @@ static kGCObject0 *new_ObjectArena0(GcManager *mng, size_t arenasize)
 	ObjectPageTable_t *oat;
 	//KonohaContext *kctx = mng->kctx;
 	size_t pageindex = MSGC(0).arena_table.size;
+	int i = 0;
+	kGCObject0 *p, *tmp;
 	if(unlikely(!(pageindex < MSGC(0).arena_table.capacity))) {
 		size_t oldsize = MSGC(0).arena_table.capacity;
 		size_t newsize = oldsize * 2;
@@ -443,11 +449,10 @@ static kGCObject0 *new_ObjectArena0(GcManager *mng, size_t arenasize)
 	DBG_ASSERT(sizeof(ObjectPage1_t) == K_PAGESIZE);
 	oat = &MSGC(0).arena_table.table[pageindex];
 	ObjectArenaTable_Init0(mng, oat, arenasize);
-	kGCObject0 *p = oat->head0->slots;
+	p = oat->head0->slots;
 	p->ref5_tail = (kGCObject0 *)&(oat->bottom0[-1]);
 
-	int i = 0;
-	kGCObject0 *tmp = p;
+	tmp = p;
 	while(tmp != &oat->head0->slots[PageObjectSize(0)]) {
 		tmp = tmp->ref;
 		i++;
@@ -461,6 +466,8 @@ static kGCObject1 *new_ObjectArena1(GcManager *mng, size_t arenasize)
 	ObjectPageTable_t *oat;
 	//KonohaContext *kctx = mng->kctx;
 	size_t pageindex = MSGC(1).arena_table.size;
+	int i = 0;
+	kGCObject1 *p, *tmp;
 	if(unlikely(!(pageindex < MSGC(1).arena_table.capacity))) {
 		size_t oldsize = MSGC(1).arena_table.capacity;
 		size_t newsize = oldsize * 2;
@@ -471,11 +478,10 @@ static kGCObject1 *new_ObjectArena1(GcManager *mng, size_t arenasize)
 	DBG_ASSERT(sizeof(ObjectPage1_t) == K_PAGESIZE);
 	oat = &MSGC(1).arena_table.table[pageindex];
 	ObjectArenaTable_Init1(mng, oat, arenasize);
-	kGCObject1 *p = oat->head1->slots;
+	p = oat->head1->slots;
 	p->ref5_tail = (kGCObject1 *)&(oat->bottom1[-1]);
 
-	int i = 0;
-	kGCObject1 *tmp = p;
+	tmp = p;
 	while(tmp != &oat->head1->slots[PageObjectSize(1)]) {
 		tmp = tmp->ref;
 		i++;
@@ -489,6 +495,8 @@ static kGCObject2 *new_ObjectArena2(GcManager *mng, size_t arenasize)
 	ObjectPageTable_t *oat;
 	//KonohaContext *kctx = mng->kctx;
 	size_t pageindex = MSGC(2).arena_table.size;
+	int i = 0;
+	kGCObject2 *p, *tmp;
 	if(unlikely(!(pageindex < MSGC(2).arena_table.capacity))) {
 		size_t oldsize = MSGC(2).arena_table.capacity;
 		size_t newsize = oldsize * 2;
@@ -499,11 +507,10 @@ static kGCObject2 *new_ObjectArena2(GcManager *mng, size_t arenasize)
 	DBG_ASSERT(sizeof(ObjectPage2_t) == K_PAGESIZE);
 	oat = &MSGC(2).arena_table.table[pageindex];
 	ObjectArenaTable_Init2(mng, oat, arenasize);
-	kGCObject2 *p = oat->head2->slots;
+	p = oat->head2->slots;
 	p->ref5_tail = (kGCObject2 *)&(oat->bottom2[-1]);
 
-	int i = 0;
-	kGCObject2 *tmp = p;
+	tmp = p;
 	while(tmp != &oat->head2->slots[PageObjectSize(2)]) {
 		tmp = tmp->ref;
 		i++;
@@ -642,8 +649,9 @@ static kObject *mstack_next(MarkStack *mstack)
 
 static void KnewGcContext(KonohaContext *kctx)
 {
+	GcManager *mng;
 	((KonohaContextVar *)kctx)->gcContext = Arena_Init(kctx);
-	GcManager *mng = (GcManager *)kctx->gcContext;
+	mng = (GcManager *)kctx->gcContext;
 	mng->kctx = kctx;
 	MSGC_SETUP(0);
 	MSGC_SETUP(1);
@@ -728,7 +736,7 @@ static void msgc_gc_mark(GcManager *mng)
 	KonohaContext *kctx = mng->kctx;
 	MarkStack *mstack = mstack_Init(&mng->mstack);
 	kObject *ref = NULL;
-	ObjectGraphTracer tracer = {};
+	ObjectGraphTracer tracer = {{0}};
 	tracer.base.fn_visit      = ObjectGraphTracer_visit;
 	tracer.base.fn_visitRange = ObjectGraphTracer_visitRange;
 	tracer.mng    = mng;
@@ -833,8 +841,8 @@ static kObjectVar *KallocObject(KonohaContext *kctx, size_t size, KTraceInfo *tr
 {
 	GcManager *mng = (GcManager *)kctx->gcContext;
 	int page_size = (size / sizeof(kGCObject0)) >> 1;
-	DBG_ASSERT(page_size <= 4);
 	kGCObject *o = NULL;
+	DBG_ASSERT(page_size <= 4);
 	FREELIST_POP(o,page_size);
 	MSGC(page_size).freelist.size -= 1;
 	do_bzero((void *)o, size);

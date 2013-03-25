@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 set(APACHE_LOCATION)
 find_path(APACHE_INCLUDE_DIR
           NAMES httpd.h

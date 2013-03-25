@@ -23,10 +23,16 @@
  ***************************************************************************/
 
 #define USE_FILE 1
+#if defined(_MSC_VER)
+#include <io.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#else
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/file.h>
+#endif
 #include <errno.h>
 #include <stdio.h>
 
@@ -143,7 +149,7 @@ static void TRACE_fflush(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
 static void kFile_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct kFileVar *file = (struct kFileVar *)o;
-	file->fp = (conf != NULL) ? conf : NULL;
+	file->fp = (FILE *)((conf != NULL) ? conf : NULL);
 	file->PathInfoNULL = NULL;
 	file->readerIconv = ICONV_NULL;
 	file->writerIconv = ICONV_NULL;
@@ -519,16 +525,15 @@ static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	KRequireKonohaCommonModule(trace);
 	KRequirePackage("Type.Bytes", trace);
 	if(KClass_File == NULL) {
-		KDEFINE_CLASS defFile = {
-			.structname = "File",
-			.typeId = KTypeAttr_NewId,
-			.cstruct_size = sizeof(kFile),
-			.cflag = KClassFlag_Final,
-			.init  = kFile_Init,
-			.reftrace = kFile_Reftrace,
-			.free   = kFile_Free,
-			.format = kFile_format,
-		};
+		KDEFINE_CLASS defFile = {};
+		defFile.structname = "File";
+		defFile.typeId = KTypeAttr_NewId;
+		defFile.cstruct_size = sizeof(kFile);
+		defFile.cflag = KClassFlag_Final;
+		defFile.init  = kFile_Init;
+		defFile.reftrace = kFile_Reftrace;
+		defFile.free   = kFile_Free;
+		defFile.format = kFile_format;
 		KClass_File = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defFile, trace);
 	}
 	file_defineMethod(kctx, ns, trace);
@@ -550,11 +555,10 @@ static kbool_t file_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 
 KDEFINE_PACKAGE *File_Init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("konoha", "1.0"),
-		.PackupNameSpace    = file_PackupNameSpace,
-		.ExportNameSpace   = file_ExportNameSpace,
-	};
+	static KDEFINE_PACKAGE d;
+	KSetPackageName(d, "file", "1.0");
+	d.PackupNameSpace    = file_PackupNameSpace;
+	d.ExportNameSpace   = file_ExportNameSpace;
 	return &d;
 }
 

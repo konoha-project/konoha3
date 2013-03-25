@@ -1,0 +1,7 @@
+{
+    "package" : "Lib.Konoha",
+    "version" : "1.0",
+    "status"  : "stable",
+    "platform"  : "",
+    "dependency package" : []
+}

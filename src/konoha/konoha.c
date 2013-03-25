@@ -104,8 +104,8 @@ static kbool_t KRuntime_SetModule(KonohaContext *kctx, int x, KRuntimeModule *d,
 
 static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx);
 static void ReftraceAll(KonohaContext *kctx, KObjectVisitor *visitor);
-KonohaContext *KonohaFactory_CreateKonoha(KonohaFactory *factory);
-int            Konoha_Destroy(KonohaContext *kctx);
+KONOHA_EXPORT(KonohaContext *) KonohaFactory_CreateKonoha(KonohaFactory *factory);
+KONOHA_EXPORT(int)             Konoha_Destroy(KonohaContext *kctx);
 
 static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformApi *platApi)
 {
@@ -298,7 +298,7 @@ static kbool_t DiagnosisCheckSoftwareTestIsPass(KonohaContext *kctx, const char 
 // -------------------------------------------------------------------------
 /* Konoha C API */
 
-kbool_t KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *name, ModuleType option)
+KONOHA_EXPORT(kbool_t) KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *name, ModuleType option)
 {
 	if(!factory->LoadPlatformModule(factory, name, option)) {
 		factory->LoggerModule.syslog_i(ErrTag, "failed to load platform module: %s\n", name);
@@ -331,7 +331,7 @@ static void KonohaFactory_UnsetDefaultLoggerModule(KonohaFactory *factory)
 	}
 }
 
-void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv)
+KONOHA_EXPORT(void) KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv)
 {
 	int i;
 	SetPlatformApi(factory);
@@ -397,7 +397,7 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 	KonohaFactory_UnsetDefaultLoggerModule(factory);
 }
 
-KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory)
+KONOHA_EXPORT(KonohaContext *) KonohaFactory_CreateKonoha(KonohaFactory *factory)
 {
 	KonohaFactory *platapi = (KonohaFactory *)factory->malloc_i(sizeof(KonohaFactory));
 	KonohaFactory_Check(factory);
@@ -406,7 +406,7 @@ KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory)
 	return (KonohaContext *)new_KonohaContext(NULL, (PlatformApi *)platapi);
 }
 
-int Konoha_Destroy(KonohaContext *kctx)
+KONOHA_EXPORT(int) Konoha_Destroy(KonohaContext *kctx)
 {
 	KonohaFactory *platapi = (KonohaFactory *)kctx->platApi;
 	int exitStatus = platapi->exitStatus;

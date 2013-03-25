@@ -139,7 +139,11 @@ static KMETHOD Json_toInt(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else if(JSONAPI IsJsonType(&jo->jsonbuf, KJSON_STRING)) {
 		const char *text = JSONAPI GetJsonText(kctx, &jo->jsonbuf, NULL, 0, "0");
+#if defined(_MSC_VER)
+		int64_t n = _strtoi64(text, NULL, 10);
+#else
 		int64_t n = strtoll(text, NULL, 10);
+#endif
 		KReturnUnboxValue((intptr_t)n);
 	}
 	else if(JSONAPI IsJsonType(&jo->jsonbuf, KJSON_BOOLEAN)) {
@@ -396,14 +400,13 @@ static KMETHOD Json_SetInt(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t json_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("Type.Float", trace);
-	KDEFINE_CLASS JsonDef = {
-		.structname = "Json",
-		.typeId = KTypeAttr_NewId,
-		.cflag = KClassFlag_Final,
-		.init = kJson_Init,
-		.free = kJson_Free,
-		.format    = kJson_format,
-	};
+	KDEFINE_CLASS JsonDef = {};
+	JsonDef.structname = "Json";
+	JsonDef.typeId = KTypeAttr_NewId;
+	JsonDef.cflag  = KClassFlag_Final;
+	JsonDef.init   = kJson_Init;
+	JsonDef.free   = kJson_Free;
+	JsonDef.format = kJson_format;
 	KClass *cJson = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &JsonDef, trace);
 
 	int FN_k = KFieldName_("key");
@@ -450,11 +453,10 @@ static kbool_t json_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 
 KDEFINE_PACKAGE *Json_Init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("json", "1.0"),
-		.PackupNameSpace    = json_PackupNameSpace,
-		.ExportNameSpace   = json_ExportNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {};
+	KSetPackageName(d, "json", "1.0");
+	d.PackupNameSpace = json_PackupNameSpace;
+	d.ExportNameSpace = json_ExportNameSpace;
 	return &d;
 }
 

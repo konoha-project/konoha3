@@ -6,7 +6,12 @@ if [ "${BRANCH}" = "-" ]; then
     BRANCH=""
 fi
 
-for i in Debug #Compressed Release
+TARGET=Debug
+if [ "${BUILD}" = "full" ]; then
+  TARGET="${TARGET} Compressed Release"
+fi
+
+for i in ${TARGET}
 do
 (
   mkdir -p $i${BRANCH}

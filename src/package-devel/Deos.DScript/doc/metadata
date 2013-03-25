@@ -1,0 +1,21 @@
+{
+    "package" : "Deos.DScript",
+        "version" : "0.0",
+        "status"  : "stable",
+        "platform"  : "",
+        "dependency package" : [
+            {"package" : "Deos.DCaseCloud", "version" : "0.3"},
+            {"package" : "Dse.Control", "version" : "0.3"},
+            {"package" : "JavaScript.Array", "version" : "0.3"},
+            {"package" : "JavaScript.String", "version" : "0.3"},
+            {"package" : "Lib.Openssl", "version" : "0.3"},
+            {"package" : "MiniKonoha.Eval", "version" : "0.3"},
+            {"package" : "MiniKonoha.NameSpace", "version" : "0.3"},
+            {"package" : "MiniKonoha.Syntax", "version" : "0.3"},
+            {"package" : "Syntax.CStyleWhile", "version" : "0.3"},
+            {"package" : "Syntax.GlobalVariable", "version" : "0.3"},
+            {"package" : "Syntax.JavaStyleClass", "version" : "0.3"},
+            {"package" : "Syntax.Null", "version" : "0.3"},
+            {"package" : "Type.Json", "version" : "0.3"}
+        ]
+}

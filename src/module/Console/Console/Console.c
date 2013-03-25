@@ -27,9 +27,15 @@ extern "C" {
 #endif
 
 #include <stdio.h>
+#if defined(__MINGW32__) || defined(_MSC_VER)
+#include <windows.h>
+#else
 #include <sys/ioctl.h>
 #include <termios.h>
+#if !defined(__CYGWIN__)
 #include <sys/ttydefaults.h>
+#endif
+#endif
 #include <konoha3/konoha.h>
 #include <konoha3/klib.h>
 
@@ -38,8 +44,6 @@ extern "C" {
 
 static const char *BeginTag(KonohaContext *kctx, kinfotag_t t)
 {
-	DBG_ASSERT(t <= NoneTag);
-	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
 	static const char *tags[] = {
 		"\x1b[1m\x1b[31m", /*CritTag*/
 		"\x1b[1m\x1b[31m", /*ErrTag*/
@@ -49,13 +53,13 @@ static const char *BeginTag(KonohaContext *kctx, kinfotag_t t)
 		"", /*DebugTag*/
 		"", /* NoneTag*/
 	};
+	DBG_ASSERT(t <= NoneTag);
+	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
 	return tags[(int)t];
 }
 
 static const char *EndTag(KonohaContext *kctx, kinfotag_t t)
 {
-	DBG_ASSERT(t <= NoneTag);
-	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
 	static const char *tags[] = {
 			"\x1b[0m", /*CritTag*/
 			"\x1b[0m", /*ErrTag*/
@@ -65,6 +69,8 @@ static const char *EndTag(KonohaContext *kctx, kinfotag_t t)
 			"", /* Debug */
 			"", /* NoneTag*/
 	};
+	DBG_ASSERT(t <= NoneTag);
+	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
 	return tags[(int)t];
 }
 
@@ -101,10 +107,17 @@ static void KBuffer_WriteValue(KonohaContext *kctx, KBuffer *wb, KClass *c, Kono
 
 static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaStack *bottomStack, KonohaStack *topStack)
 {
+	const char *exceptionName;
+	const char *optionalMessage;
+	int fault;
+	KonohaStack *sfp;
+	KBuffer wb;
+
 	DBG_ASSERT(IS_Exception(e));
-	const char *exceptionName = KSymbol_text(e->symbol);
-	const char *optionalMessage = kString_text(e->Message);
-	int fault = e->fault;
+	exceptionName = KSymbol_text(e->symbol);
+	optionalMessage = kString_text(e->Message);
+	fault = e->fault;
+
 	PLATAPI printf_i("%s", BeginTag(kctx, ErrTag));
 	if(optionalMessage != NULL && optionalMessage[0] != 0) {
 		PLATAPI printf_i("%s: SoftwareFault %s", exceptionName, optionalMessage);
@@ -127,15 +140,17 @@ static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaS
 	PLATAPI printf_i("%s\n", EndTag(kctx, ErrTag));
 	PLATAPI printf_i("%sStackTrace\n", BeginTag(kctx, InfoTag));
 
-	KonohaStack *sfp = topStack;
-	KBuffer wb;
+	sfp = topStack;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	while(bottomStack < sfp) {
 		kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 		kfileline_t uline = sfp[K_RTNIDX].calledFileLine;
 		const char *file = PLATAPI shortFilePath(KFileLine_textFileName(uline));
+		KClass *cThis;
+		unsigned i;
+		kParam *param;
 		PLATAPI printf_i(" [%ld] (%s:%d) %s.%s%s(", (sfp - kctx->stack->stack), file, (kushort_t)uline, kMethod_Fmt3(mtd));
-		KClass *cThis = KClass_(mtd->typeId);
+		cThis = KClass_(mtd->typeId);
 		if(!KClass_Is(UnboxType, cThis)) {
 			cThis = kObject_class(sfp[0].asObject);
 		}
@@ -144,13 +159,13 @@ static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaS
 			PLATAPI printf_i("this=(%s) %s, ", KClass_text(cThis), KLIB KBuffer_text(kctx, &wb, 1));
 			KLIB KBuffer_Free(&wb);
 		}
-		unsigned i;
-		kParam *param = kMethod_GetParam(mtd);
+		param = kMethod_GetParam(mtd);
 		for(i = 0; i < param->psize; i++) {
+			KClass *c;
 			if(i > 0) {
 				PLATAPI printf_i(", ");
 			}
-			KClass *c = KClass_(param->paramtypeItems[i].attrTypeId);
+			c = KClass_(param->paramtypeItems[i].attrTypeId);
 			c = c->realtype(kctx, c, cThis);
 			KBuffer_WriteValue(kctx, &wb, c, sfp + i + 1);
 			PLATAPI printf_i("%s=(%s) %s", KSymbol_text(KSymbol_Unmask(param->paramtypeItems[i].name)), KClass_text(c), KLIB KBuffer_text(kctx, &wb, 1));
@@ -179,6 +194,7 @@ static char *myreadline(const char *prompt)
 	static int checkCTL = 0;
 	int ch, pos = 0;
 	static char linebuf[1024]; // THREAD-UNSAFE
+	char *p;
 	fputs(prompt, stdout);
 	while((ch = fgetc(stdin)) != EOF) {
 		if(ch == '\r') continue;
@@ -199,7 +215,7 @@ static char *myreadline(const char *prompt)
 		pos++;
 	}
 	if(ch == EOF) return NULL;
-	char *p = (char *)malloc(pos+1);
+	p = (char *)malloc(pos+1);
 	memcpy(p, linebuf, pos+1);
 	return p;
 }
@@ -219,22 +235,35 @@ static int InputUserApproval(KonohaContext *kctx, const char *message, const cha
 	char buff[BUFSIZ] = {0};
 	const char *ykey = defval ? "Y" : "y";
 	const char *nkey = defval ? "n" : "N";
+	char *ret;
 	if(message == NULL || message[strlen(message)] == '\0') message = "Do you approve?";
 	if(yes == NULL || yes[0] == '\0') yes = "yes";
 	if(no == NULL || no[0] == '\0') no = "no";
 	fprintf(stdout, "%s (%s %s, %s %s): ", message, yes, ykey, no, nkey);
-	fgets(buff, BUFSIZ, stdin);
+	ret = fgets(buff, BUFSIZ, stdin);
 	if(defval) {
 		return ((buff[0] == 'N' || buff[0] == 'n') && buff[1] == '\n') ? false : true;
 	}
 	else {
 		return ((buff[0] == 'Y' || buff[0] == 'y') && buff[1] == '\n') ? false : true;
 	}
+	(void)ret; /* remove compiler warn :: ignoring return value */
 }
 
 static char *InputUserPassword(KonohaContext *kctx, const char *message)
 {
 	char buff[BUFSIZ] = {0};
+	size_t len;
+	char *p, *ret;
+#if defined(__MINGW32__) || defined(_MSC_VER)
+	HANDLE stdInput = GetStdHandle(STD_INPUT_HANDLE);
+	DWORD oldMode;
+	fprintf(stdout, "%s", message);
+	GetConsoleMode(stdInput, &oldMode);
+	SetConsoleMode(stdInput, 0);
+	ret = fgets(buff, BUFSIZ, stdin);
+	SetConsoleMode(stdInput, oldMode);
+#else
 	struct termios tm, tm_save;
 	fprintf(stdout, "%s", message);
 	tcgetattr(fileno(stdin), &tm);
@@ -243,13 +272,15 @@ static char *InputUserPassword(KonohaContext *kctx, const char *message)
 	tm.c_lflag &= ~ECHO;
 	tm.c_lflag |= ECHONL;
 	tcsetattr(fileno(stdin), TCSANOW, &tm);
-	fgets(buff, BUFSIZ, stdin);
+	ret = fgets(buff, BUFSIZ, stdin);
 	tcsetattr(fileno(stdin), TCSANOW, &tm_save);
-	size_t len = strlen(buff) + 1;
-	char *p = malloc(len);
+#endif
+	len = strlen(buff) + 1;
+	p = (char *) malloc(len);
 	if(p != NULL) {
 		memcpy(p, buff, len);
 	}
+	(void)ret; /* remove compiler warn :: ignoring return value */
 	return p;
 }
 
@@ -257,11 +288,6 @@ static char *InputUserPassword(KonohaContext *kctx, const char *message)
 
 kbool_t LoadConsoleModule(KonohaFactory *factory, ModuleType type)
 {
-//	void *handler = dlopen("libreadline" K_OSDLLEXT, RTLD_LAZY);
-//	if(handler != NULL) {
-//		factory->readline_i = (char *(*)(const char *))dlsym(handler, "readline");
-//		factory->add_history_i = (int (*)(const char *))dlsym(handler, "add_history");
-//	}
 	static KModuleInfo ModuleInfo = {
 		"Console", "0.1", 0, "term",
 	};

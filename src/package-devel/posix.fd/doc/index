@@ -1,0 +1,13 @@
+lseek
+ftruncate
+fchmod
+flock
+sync
+fchown
+fsync
+getdtablesize
+open
+open
+fchdir
+isatty
+ttyname

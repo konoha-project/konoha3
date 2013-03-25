@@ -1,0 +1,7 @@
+{
+	"package" : "Lib.Mecab",
+	"version" : "0.1",
+	"status" : "develping",
+	"platform" : "osx/linux",
+	"dependency package" : []
+}
