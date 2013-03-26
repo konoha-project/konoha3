@@ -83,6 +83,7 @@ static inline JSON JSONError_new(JSONMemoryPool *jm, const char *emessage)
 static JSON JSONUString_new(JSONMemoryPool *jm, string_builder *builder)
 {
     size_t len;
+	JSON json;
     bool malloced;
     char *s = string_builder_tostring(builder, &len, 1);
     JSONString *o = (JSONString *) JSONMemoryPool_Alloc(jm, sizeof(*o), &malloced);
@@ -92,7 +93,7 @@ static JSON JSONUString_new(JSONMemoryPool *jm, string_builder *builder)
         s = o->text;
     }
     JSONString_init(o, s, len-1);
-    JSON json = toJSON(ValueU(o));
+    json = toJSON(ValueU(o));
     JSON_Init(json);
     return json;
 }

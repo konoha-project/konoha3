@@ -107,7 +107,7 @@ static KMETHOD Node_ParseNewNode(KonohaContext *kctx, KonohaStack *sfp)
 	kArray   *tokenList = sfp[1].asArray;
 	int beginIdx = (int)sfp[2].intValue;
 	int endIdx   = (int)sfp[3].intValue;
-	ParseOption opt = (sfp[4].boolValue == true) ? ParseMetaPatternOption : 0;
+	ParseOption opt = (sfp[4].boolValue == true) ? ParseMetaPatternOption : ParseExpressionOption;
 	KReturn(SUGAR ParseNewNode(kctx, kNode_ns(stmt), tokenList, &beginIdx, endIdx, opt, NULL));
 }
 

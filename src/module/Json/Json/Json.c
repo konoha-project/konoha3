@@ -152,10 +152,11 @@ static kbool_t RetrieveJsonKeyValue(KonohaContext *kctx, struct JsonBuf *jsonbuf
 static kbool_t SetJsonKeyValue(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, struct JsonBuf *otherbuf)
 {
 	JSON json = AsJSON(jsonbuf);
+	size_t keylen;
 	if(!JSON_TYPE_CHECK(Object, json)) {
 		return false;
 	}
-	size_t keylen = KeyLen(key, keylen_or_zero);
+	keylen = KeyLen(key, keylen_or_zero);
 	JSONObject_set((JSONMemoryPool *)(JSONAPI JsonHandler), json, key, keylen, AsJSON(otherbuf));
 	return true;
 }
@@ -166,7 +167,7 @@ static kbool_t SetJsonValue(KonohaContext *kctx, struct JsonBuf *jsonbuf, const 
 	kbool_t ret = true;
 	va_list ap;
 	va_start(ap, type);
-	val = toJSON(NewJsonI((JSONMemoryPool *)(JSONAPI JsonHandler), type, ap));
+	val = toJSON(ValueP(NewJsonI((JSONMemoryPool *)(JSONAPI JsonHandler), type, ap)));
 	if(key != NULL) {
 		size_t keylen = KeyLen(key, keylen_or_zero);
 		JSONObject_set((JSONMemoryPool *)(JSONAPI JsonHandler), AsJSON(jsonbuf), key, keylen, val);
@@ -240,7 +241,7 @@ static kbool_t SetJsonArrayAt(KonohaContext *kctx, struct JsonBuf *jsonbuf, size
 {
 	JSON json = AsJSON(jsonbuf);
 	if(JSON_TYPE_CHECK(Array, json)) {
-		JSONArray_set(json, index, toJSON(otherbuf->json_i));
+		JSONArray_set(json, index, toJSON(ValueP(otherbuf->json_i)));
 		return true;
 	}
 	return false;
@@ -250,7 +251,7 @@ static kbool_t AppendJsonArray(KonohaContext *kctx, struct JsonBuf *jsonbuf, str
 {
 	JSON json = AsJSON(jsonbuf);
 	if(JSON_TYPE_CHECK(Array, json)) {
-		JSONArray_append((JSONMemoryPool *)(JSONAPI JsonHandler), json, toJSON(otherbuf->json_i));
+		JSONArray_append((JSONMemoryPool *)(JSONAPI JsonHandler), json, toJSON(ValueP(otherbuf->json_i)));
 		return true;
 	}
 	return false;
