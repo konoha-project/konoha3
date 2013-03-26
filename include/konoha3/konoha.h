@@ -608,7 +608,7 @@ struct KonohaFactory {
 	/* message */
 	int    (*printf_i)(const char *fmt, ...) __PRINTFMT(2, 3);
 	int    (*vprintf_i)(const char *fmt, va_list args);
-	int    (*snprintf_i)(char *str, size_t size, const char *fmt, ...);
+	int    (*snprintf_i)(char *str, size_t size, const char *fmt, ...) __PRINTFMT(3, 4);
 	int    (*vsnprintf_i)(char *str, size_t size, const char *fmt, va_list args);
 	char  *(*readline_i)(const char *prompt);
 	int    (*add_history_i)(const char *);
@@ -1723,7 +1723,7 @@ struct KonohaLibVar {
 	void*               (*KBuffer_Alloca)(KonohaContext *, KBuffer *, size_t);
 	void                (*KBuffer_Write)(KonohaContext*, KBuffer *, const char *, size_t);
 	void                (*KBuffer_vprintf)(KonohaContext*, KBuffer *, const char *fmt, va_list ap);
-	void                (*KBuffer_printf)(KonohaContext*, KBuffer *, const char *fmt, ...);
+	void                (*KBuffer_printf)(KonohaContext*, KBuffer *, const char *fmt, ...) __PRINTFMT(3, 4);
 	const char*         (*KBuffer_text)(KonohaContext*, KBuffer *, int);
 	void                (*KBuffer_Free)(KBuffer *);
 	kString*            (*KBuffer_Stringfy)(KonohaContext *, KBuffer *, kArray *gcstack, int isClear);
@@ -1822,7 +1822,7 @@ struct KonohaLibVar {
 	uintptr_t           (*ApplySystemFunc)(KonohaContext *, uintptr_t defval, const char *name, const char *param, ...);
 
 	void                (*KRuntime_raise)(KonohaContext*, int symbol, int fault, kString *Nullable, KonohaStack *);
-	void                (*ReportScriptMessage)(KonohaContext *, KTraceInfo *, kinfotag_t, const char *fmt, ...);
+	void                (*ReportScriptMessage)(KonohaContext *, KTraceInfo *, kinfotag_t, const char *fmt, ...)  __PRINTFMT(4, 5);
 	int                 (*DiagnosisFaultType)(KonohaContext *kctx, int fault, KTraceInfo *);
 	void                (*DumpObject)(KonohaContext *, kObject *, const char *, const char *, int);
 };
