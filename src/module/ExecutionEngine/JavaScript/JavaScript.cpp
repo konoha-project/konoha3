@@ -33,7 +33,7 @@
 #include <v8.h>
 #endif
 
-#define LOG_FUNCTION_NAME "p"
+#define LOG_FUNCTION_NAME "console.log"
 
 extern "C" {
 
