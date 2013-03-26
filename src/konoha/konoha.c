@@ -107,7 +107,7 @@ static void ReftraceAll(KonohaContext *kctx, KObjectVisitor *visitor);
 KONOHA_EXPORT(KonohaContext *) KonohaFactory_CreateKonoha(KonohaFactory *factory);
 KONOHA_EXPORT(int)             Konoha_Destroy(KonohaContext *kctx);
 
-static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformApi *platApi)
+static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, PlatformApi *platApi)
 {
 	KonohaContextVar *newctx;
 	static volatile size_t ctxid_counter = 0;
@@ -222,7 +222,7 @@ static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 /* ------------------------------------------------------------------------ */
 /* konoha api */
 
-KonohaContext* konoha_open(const PlatformApi *platform)
+KonohaContext* konoha_open(PlatformApi *platform)
 {
 	assert(0);  // obsolate
 	InitKonoha();

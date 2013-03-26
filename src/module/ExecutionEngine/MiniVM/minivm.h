@@ -79,7 +79,7 @@ typedef enum {
 	VMT_TY,
 	VMT_F,        /*function*/
 	VMT_Object,
-	VMT_HCACHE,
+	VMT_HCACHE
 } KVirtualCodeType;
 
 #define PC_NEXT(pc)   pc+1
@@ -286,7 +286,7 @@ typedef struct OPLOOKUP {
 	kreg_t thisidx;
 	kNameSpace* ns;
 	kMethod*    mtd;
-	ktypeattr_t typeId; kparamId_t signature;  // invisible
+	ktypeattr_t typeId; kparamId_t signature;  /* invisible */
 } OPLOOKUP;
 
 #ifndef OPEXEC_LOOKUP
