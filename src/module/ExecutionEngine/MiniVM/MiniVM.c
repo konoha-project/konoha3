@@ -22,7 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#ifndef _MSC_VER
 #define USE_DIRECT_THREADED_CODE
+#endif
 #define USE_EXECUTIONENGINE
 
 #include <konoha3/konoha.h>
@@ -262,7 +264,7 @@ struct KBuilder { /* MiniVM Builder */
 	intptr_t   InstructionSize;
 };
 
-typedef struct BasicBlock {
+typedef struct tagBasicBlock {
 	long     incoming;
 	bblock_t newid;
 	bblock_t nextid;
@@ -605,8 +607,40 @@ typedef struct LocalVarInfo {
 	ktypeattr_t type;
 } LocalVarInfo;
 
+#ifdef _MSC_VER
+#include <stdint.h>
+#include <intrin.h>
+static uint32_t CTZ(uint32_t x)
+{
+	unsigned long r = 0;
+	_BitScanForward(&r, x);
+	return r;
+}
+static uint32_t CLZ(uint32_t x)
+{
+	unsigned long r = 0;
+	_BitScanReverse(&r, x);
+	return 63 - r;
+}
+static uint32_t FFS(uint32_t x)
+{
+	if(x == 0) return 0;
+	return CTZ(x) + 1;
+}
+#else /* defined(_MSC_VER) */
+#ifdef _WIN64
+#define FFS(n) __builtin_ffsll(n)
+#define CLZ(n) __builtin_clzll(n)
+#define CTZ(x) __builtin_ctzll(x)
+#else /* defined(_WIN64) */
+#define FFS(n) __builtin_ffsl(n)
+#define CLZ(n) __builtin_clzl(n)
+#define CTZ(x) __builtin_ctzl(x)
+#endif
+#endif
+
 #ifndef LOG2
-#define LOG2(N) ((unsigned)((sizeof(void *) * 8) - __builtin_clzl((N) - 1)))
+#define LOG2(N) ((unsigned)((sizeof(void *) * 8) - CLZ((N) - 1)))
 #endif
 
 static intptr_t AddLocal(KonohaContext *kctx, KBuilder *builder, intptr_t index, ksymbol_t sym, ktypeattr_t type)
@@ -1289,7 +1323,7 @@ static struct KVirtualCode *MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMet
 {
 	KVirtualCode *vcode;
 	KBuffer wb;
-	KBuilder builderbuf = {}, *builder = &builderbuf;
+	KBuilder builderbuf = {0}, *builder = &builderbuf;
 	kNameSpace *ns = kNode_ns(block);
 
 	INIT_GCSTACK();
@@ -1341,7 +1375,7 @@ static struct KVirtualCode *BOOTCODE_NCALL = NULL;
 static void SetUpBootCode(void)
 {
 	if(BOOTCODE_ENTER == NULL) {
-		static struct KVirtualCode InitCode[6] = {};
+		static struct KVirtualCode InitCode[6] = {0};
 		struct OPTHCODE thcode = {OP_(THCODE), 4 * sizeof(KVirtualCode), _THCODE};
 		struct OPNCALL ncall = {OP_(NCALL)};
 		struct OPENTER enter = {OP_(ENTER)};

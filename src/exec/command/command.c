@@ -59,6 +59,9 @@ extern int verbose_sugar;
 #define strcasecmp stricmp
 #endif
 
+int verbose_debug;
+int verbose_sugar;
+
 static void CommandLine_Define(KonohaContext *kctx, char *keyvalue, KTraceInfo *trace)
 {
 	char *p = strchr(keyvalue, '=');

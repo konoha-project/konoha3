@@ -58,6 +58,8 @@ extern "C" {
 #define K_PREFIX  "/usr/local"
 #endif
 
+extern int verbose_debug;
+
 // -------------------------------------------------------------------------
 /* LoadPlatformModule */
 
