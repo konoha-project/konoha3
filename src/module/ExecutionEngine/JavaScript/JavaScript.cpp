@@ -114,7 +114,7 @@ enum kSymbolPrefix{
 	kSymbolPrefix_IS,
 	kSymbolPrefix_UNKNOWN,
 	kSymbolPrefix_TO,
-	kSymbolPrefix_DOLLAR,
+	kSymbolPrefix_DOLLAR
 };
 
 static enum kSymbolPrefix KSymbol_prefixText_ID(ksymbol_t sym)
@@ -457,7 +457,7 @@ static void JSBuilder_EmitConstValue(KonohaContext *kctx, KBuilder *builder, kOb
 	JSBuilder_EmitKonohaValue(kctx, builder, kObject_class(obj), sfp);
 }
 
-static void JSBuilder_EmitUnboxConstValue(KonohaContext *kctx, KBuilder *builder, KClass *ct, unsigned long long unboxVal)
+static void JSBuilder_EmitUnboxConstValue(KonohaContext *kctx, KBuilder *builder, KClass *ct, uint64_t unboxVal)
 {
 	KonohaStack sfp[1];
 	KStackSetUnboxValue(sfp[0].unboxValue, unboxVal);

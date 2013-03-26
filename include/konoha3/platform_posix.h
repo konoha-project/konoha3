@@ -233,7 +233,7 @@ static void loadI18N(KonohaFactory *plat, const char *defaultCharSet)
 
 // -------------------------------------------------------------------------
 
-static unsigned long long getTimeMilliSecond(void)
+static uint64_t getTimeMilliSecond(void)
 {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
@@ -783,8 +783,6 @@ static kunused void diagnosis(void)
 
 static const char* BeginTag(KonohaContext *kctx, kinfotag_t t)
 {
-	DBG_ASSERT(t <= NoneTag);
-	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
 	static const char* tags[] = {
 		"\x1b[1m\x1b[31m", /*CritTag*/
 		"\x1b[1m\x1b[31m", /*ErrTag*/
@@ -794,13 +792,13 @@ static const char* BeginTag(KonohaContext *kctx, kinfotag_t t)
 		"", /*DebugTag*/
 		"", /* NoneTag*/
 	};
+	DBG_ASSERT(t <= NoneTag);
+	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
 	return tags[(int)t];
 }
 
 static const char* EndTag(KonohaContext *kctx, kinfotag_t t)
 {
-	DBG_ASSERT(t <= NoneTag);
-	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
 	static const char* tags[] = {
 			"\x1b[0m", /*CritTag*/
 			"\x1b[0m", /*ErrTag*/
@@ -810,6 +808,8 @@ static const char* EndTag(KonohaContext *kctx, kinfotag_t t)
 			"", /* Debug */
 			"", /* NoneTag*/
 	};
+	DBG_ASSERT(t <= NoneTag);
+	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
 	return tags[(int)t];
 }
 

@@ -603,7 +603,7 @@ struct KonohaFactory {
 	const char *(*getenv_i)(const char *);
 
 	// time
-	unsigned long long (*getTimeMilliSecond)(void);
+	uint64_t (*getTimeMilliSecond)(void);
 
 	/* message */
 	int    (*printf_i)(const char *fmt, ...) __PRINTFMT(2, 3);

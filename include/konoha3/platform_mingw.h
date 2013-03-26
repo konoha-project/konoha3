@@ -223,7 +223,7 @@ static void loadI18N(KonohaFactory *plat, const char *defaultCharSet)
 
 // -------------------------------------------------------------------------
 
-static unsigned long long getTimeMilliSecond(void)
+static uint64_t getTimeMilliSecond(void)
 {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
