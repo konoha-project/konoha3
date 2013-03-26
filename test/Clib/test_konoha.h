@@ -33,6 +33,10 @@
 extern "C" {
 #endif
 
+/* FIXME */
+int verbose_debug;
+int verbose_sugar;
+
 static KonohaContext *CreateContext()
 {
 	struct KonohaFactory factory = {};

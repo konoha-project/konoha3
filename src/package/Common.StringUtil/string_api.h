@@ -25,39 +25,17 @@
 #ifndef STRING_API_H
 #define STRING_API_H
 
+#include <konoha3/konoha.h>
+
+#ifdef _MSC_VER
+#include <string.h>
+#define strncasecmp _strnicmp
+typedef unsigned char uint8_t;
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/*
- * Get the bytesize from text and number of multibyte characters.
- * e.g.) MultibyteText_bytesize("あいうえお", 3) => 9
- */
-static size_t MultibyteText_bytesize(const char *text, size_t size)
-{
-	const unsigned char *pos = (const unsigned char *)text;
-	size_t i, mindex = 0;
-	for(i = 0; i < size; i++) {
-		mindex += utf8len(*(pos + mindex));
-	}
-	return mindex;
-}
-
-/*
- * Get the number of multibyte characters from text and bytesize.
- * e.g.) MultibyteText_length("あいうえお", 9) => 3
- */
-static size_t MultibyteText_length(const char *text, size_t size)
-{
-	size_t length = 0;
-	const unsigned char *pos = (const unsigned char *)text;
-	const unsigned char *end = pos + size;
-	while(pos < end) {
-		pos += utf8len(*pos);
-		length++;
-	}
-	return length;
-}
 
 static int MultiByteChar_length(unsigned char s)
 {
@@ -71,6 +49,36 @@ static int MultiByteChar_length(unsigned char s)
 		return 4;
 	//assert(0 && "Invalid encoding");
 	return 0;
+}
+
+/*
+ * Get the number of multibyte characters from text and bytesize.
+ * e.g.) MultibyteText_length("あいうえお", 9) => 3
+ */
+static size_t MultibyteText_length(const char *text, size_t size)
+{
+	size_t length = 0;
+	const unsigned char *pos = (const unsigned char *)text;
+	const unsigned char *end = pos + size;
+	while(pos < end) {
+		pos += MultiByteChar_length(*pos);
+		length++;
+	}
+	return length;
+}
+
+/*
+ * Get the bytesize from text and number of multibyte characters.
+ * e.g.) MultibyteText_bytesize("あいうえお", 3) => 9
+ */
+static size_t MultibyteText_bytesize(const char *text, size_t size)
+{
+	const unsigned char *pos = (const unsigned char *)text;
+	size_t i, mindex = 0;
+	for(i = 0; i < size; i++) {
+		mindex += MultiByteChar_length(*(pos + mindex));
+	}
+	return mindex;
 }
 
 static size_t MultibyteString_length(KonohaContext *kctx, kString *self)

@@ -25,9 +25,15 @@
 #ifndef MODULE_H
 #define MODULE_H
 
+#ifdef _MSC_VER
+#ifndef kunused
+#define kunused
+#endif /* kunused */
+#else /* _MSC_VER */
 #ifndef kunused
 #define kunused __attribute__((unused))
 #endif /* kunused */
+#endif /* _MSC_VER */
 
 #ifdef USE_EXECUTIONENGINE
 /*----------------------------------------------------------------------------*/

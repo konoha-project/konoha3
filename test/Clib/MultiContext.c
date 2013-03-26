@@ -25,6 +25,10 @@
 #include "konoha3/konoha.h"
 #include "konoha3/platform.h"
 
+/* FIXME */
+int verbose_debug;
+int verbose_sugar;
+
 int main(int argc, const char *argv[])
 {
 	struct KonohaFactory factory = {};
