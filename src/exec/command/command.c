@@ -22,9 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <konoha3/konoha.h>
-#include <konoha3/sugar.h>
-#include <konoha3/klib.h>
+#include "konoha3/konoha.h"
+#include "konoha3/sugar.h"
+#include "konoha3/klib.h"
 
 #ifdef __GNUC__
 #include <getopt.h>
@@ -32,12 +32,12 @@
 #include "./getopt.c"
 #endif /*__GNUC__ */
 
+#include "konoha3/platform.h"
+#include "konoha3/libcode/minishell.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-kstatus_t MODSUGAR_Eval(KonohaContext *kctx, const char *script, size_t len, kfileline_t uline);
-kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, KTraceInfo *trace);
 
 // -------------------------------------------------------------------------
 // getopt
@@ -45,22 +45,12 @@ kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len,
 static int compileonly_flag = 0;
 static int interactive_flag = 0;
 
-extern int verbose_debug;
-int verbose_code;
-extern int verbose_sugar;
-
-#include <konoha3/platform.h>
-#include <konoha3/libcode/minishell.h>
-
 // -------------------------------------------------------------------------
 // KonohaContext
 
 #ifdef _MSC_VER
 #define strcasecmp stricmp
 #endif
-
-int verbose_debug;
-int verbose_sugar;
 
 static void CommandLine_Define(KonohaContext *kctx, char *keyvalue, KTraceInfo *trace)
 {
@@ -132,6 +122,10 @@ static void CommandLine_SetARGV(KonohaContext *kctx, int argc, char** argv, KTra
 	RESET_GCSTACK();
 }
 
+int verbose_debug;
+int verbose_sugar;
+int verbose_code;
+
 static struct option long_options2[] = {
 	/* These options set a flag. */
 	{"verbose",         no_argument,       &verbose_debug, 1},
@@ -189,9 +183,9 @@ static kbool_t Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **a
 			// already checked in KonohaFactory_SetDefaultModule
 			if(optarg != NULL && strcmp(optarg, "OutputTest") == 0) {
 				KonohaContext_Set(Debug, kctx);
-				verbose_debug = 0;
-				verbose_sugar = 0;
-				verbose_code  = 0;
+				((KonohaFactory *)kctx->platApi)->verbose_debug = 0;
+				((KonohaFactory *)kctx->platApi)->verbose_sugar = 0;
+				((KonohaFactory *)kctx->platApi)->verbose_code  = 0;
 			}
 			break;
 
@@ -229,12 +223,12 @@ static kbool_t Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **a
 
 int main(int argc, char *argv[])
 {
-	if(getenv("KONOHA_DEBUG") != NULL) {
-		verbose_debug = 1;
-		verbose_sugar = 1;
-		verbose_code = 1;
-	}
 	struct KonohaFactory factory = {};
+	if(getenv("KONOHA_DEBUG") != NULL) {
+		factory.verbose_debug = 1;
+		factory.verbose_sugar = 1;
+		factory.verbose_code = 1;
+	}
 	KonohaFactory_SetDefaultFactory(&factory, PosixFactory, argc, argv);
 	KonohaContext* konoha = KonohaFactory_CreateKonoha(&factory);
 	Konoha_ParseCommandOption(konoha, argc, argv);

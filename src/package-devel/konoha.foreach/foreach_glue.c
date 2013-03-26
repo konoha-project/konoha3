@@ -24,10 +24,10 @@
 //
 ///* ************************************************************************ */
 //
-//#include <konoha3/konoha.h>
-//#include <konoha3/sugar.h>
-//#include <konoha3/klib.h>
-//#include <konoha3/konoha_common.h>
+//#include "konoha3/konoha.h"
+//#include "konoha3/sugar.h"
+//#include "konoha3/klib.h"
+//#include "konoha3/konoha_common.h"
 //
 //#ifdef __cplusplus
 //extern "C" {

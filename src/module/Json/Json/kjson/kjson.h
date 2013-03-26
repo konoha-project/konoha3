@@ -283,11 +283,7 @@ typedef struct JSONObject_iterator {
 #endif
 
 #ifndef LOG2
-#if defined(_MSC_VER)
 #define LOG2(N) ((uint32_t)((sizeof(void *) * 8) - CLZ(N - 1)))
-#else
-#define LOG2(N) ((uint32_t)((sizeof(void *) * 8) - __builtin_clzl(N - 1)))
-#endif
 #endif
 
 #ifdef __cplusplus

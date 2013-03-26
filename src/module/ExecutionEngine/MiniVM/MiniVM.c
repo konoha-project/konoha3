@@ -27,9 +27,9 @@
 #endif
 #define USE_EXECUTIONENGINE
 
-#include <konoha3/konoha.h>
-#include <konoha3/sugar.h>
-#include <konoha3/import/module.h>
+#include "konoha3/konoha.h"
+#include "konoha3/sugar.h"
+#include "konoha3/import/module.h"
 #include "minivm.h"
 
 #ifdef __cplusplus
@@ -606,38 +606,6 @@ typedef struct LocalVarInfo {
 	ksymbol_t   sym;
 	ktypeattr_t type;
 } LocalVarInfo;
-
-#ifdef _MSC_VER
-#include <stdint.h>
-#include <intrin.h>
-static uint32_t CTZ(uint32_t x)
-{
-	unsigned long r = 0;
-	_BitScanForward(&r, x);
-	return r;
-}
-static uint32_t CLZ(uint32_t x)
-{
-	unsigned long r = 0;
-	_BitScanReverse(&r, x);
-	return 63 - r;
-}
-static uint32_t FFS(uint32_t x)
-{
-	if(x == 0) return 0;
-	return CTZ(x) + 1;
-}
-#else /* defined(_MSC_VER) */
-#ifdef _WIN64
-#define FFS(n) __builtin_ffsll(n)
-#define CLZ(n) __builtin_clzll(n)
-#define CTZ(x) __builtin_ctzll(x)
-#else /* defined(_WIN64) */
-#define FFS(n) __builtin_ffsl(n)
-#define CLZ(n) __builtin_clzl(n)
-#define CTZ(x) __builtin_ctzl(x)
-#endif
-#endif
 
 #ifndef LOG2
 #define LOG2(N) ((unsigned)((sizeof(void *) * 8) - CLZ((N) - 1)))
@@ -1323,7 +1291,7 @@ static struct KVirtualCode *MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMet
 {
 	KVirtualCode *vcode;
 	KBuffer wb;
-	KBuilder builderbuf = {0}, *builder = &builderbuf;
+	KBuilder builderbuf = {{0}}, *builder = &builderbuf;
 	kNameSpace *ns = kNode_ns(block);
 
 	INIT_GCSTACK();
@@ -1375,7 +1343,7 @@ static struct KVirtualCode *BOOTCODE_NCALL = NULL;
 static void SetUpBootCode(void)
 {
 	if(BOOTCODE_ENTER == NULL) {
-		static struct KVirtualCode InitCode[6] = {0};
+		static struct KVirtualCode InitCode[6] = {{0}};
 		struct OPTHCODE thcode = {OP_(THCODE), 4 * sizeof(KVirtualCode), _THCODE};
 		struct OPNCALL ncall = {OP_(NCALL)};
 		struct OPENTER enter = {OP_(ENTER)};

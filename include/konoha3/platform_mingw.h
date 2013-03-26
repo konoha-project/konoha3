@@ -25,10 +25,6 @@
 #ifndef PLATFORM_MINGW_H_
 #define PLATFORM_MINGW_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifdef K_USE_PTHREAD
 #include <pthread.h>
 #endif
@@ -48,7 +44,6 @@ extern "C" {
 #include <stdlib.h>
 #include <setjmp.h>
 #include <sys/time.h>
-//#include <dlfcn.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -56,11 +51,27 @@ extern "C" {
 
 #define kunused __attribute__((unused))
 
-#include <konoha3/klib.h>
+#include "konoha3/klib.h"
 
 #ifndef K_PREFIX
 #define K_PREFIX  "/usr/local"
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef _WIN64
+#define FFS(n) __builtin_ffsll(n)
+#define CLZ(n) __builtin_clzll(n)
+#define CTZ(x) __builtin_ctzll(x)
+#else /* defined(_WIN64) */
+
+#define FFS(n) __builtin_ffsl(n)
+#define CLZ(n) __builtin_clzl(n)
+#define CTZ(x) __builtin_ctzl(x)
+#endif
+
 
 // -------------------------------------------------------------------------
 /* LoadPlatformModule */
@@ -971,7 +982,7 @@ static kunused void PosixFactory(KonohaFactory *factory)
 	//factory->LoggerModule.TraceDataLog          = TraceDataLog;
 	//factory->DiagnosisErrorCode    = DEOS_DiagnosisErrorCode;
 
-	factory->ConsoleModule.ReportDebugMessage    = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
+	factory->ConsoleModule.ReportDebugMessage    = (!factory->verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
 	factory->ConsoleModule.ReportUserMessage     = UI_ReportUserMessage;
 	factory->ConsoleModule.ReportCompilerMessage = UI_ReportCompilerMessage;
 	factory->ConsoleModule.ReportCaughtException = UI_ReportCaughtException;

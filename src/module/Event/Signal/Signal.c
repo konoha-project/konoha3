@@ -28,7 +28,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <signal.h>
-#include <konoha3/konoha.h>
+#include "konoha3/konoha.h"
 #define EVENTAPI PLATAPI EventModule.
 // -------------------------------------------------------------------------
 /* EventModule, EventContext */

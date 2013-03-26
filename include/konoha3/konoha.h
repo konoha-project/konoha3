@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <konoha3/stardate.h>
+#include "konoha3/stardate.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -92,7 +92,7 @@ extern "C" {
 #ifdef HAVE_STDBOOL_H
 #include <stdbool.h>
 #else
-#include <konoha3/stdbool.h>
+#include "konoha3/stdbool.h"
 #endif
 #include <stdint.h>
 #endif
@@ -586,6 +586,9 @@ struct KonohaFactory {
 	volatile int safePointFlag;
 	int          verbose;
 	int          exitStatus;
+	int          verbose_debug;
+	int          verbose_sugar;
+	int          verbose_code;
 
 	/* LowLevel API */
 	/* memory allocation / deallocation */

@@ -36,8 +36,8 @@ extern "C" {
 #include <sys/ttydefaults.h>
 #endif
 #endif
-#include <konoha3/konoha.h>
-#include <konoha3/klib.h>
+#include "konoha3/konoha.h"
+#include "konoha3/klib.h"
 
 // -------------------------------------------------------------------------
 /* Console */

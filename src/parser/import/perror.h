@@ -116,11 +116,9 @@ static kNode *MessageNode(KonohaContext *kctx, kNode *node, kTokenNULL *tk, kNam
 	return node;
 }
 
-int verbose_debug;
-
 void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_t taglevel, const char *fmt, ...)
 {
-	if(taglevel == DebugTag && !verbose_debug) return;
+	if(taglevel == DebugTag && !(PLATAPI verbose_debug)) return;
 	va_list ap;
 	va_start(ap, fmt);
 	if(trace != NULL && IS_Node(trace->baseStack[1].asNode)) {  // Static Compiler Message

@@ -22,10 +22,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <konoha3/konoha.h>
-#include <konoha3/sugar.h>
-#include <konoha3/konoha_common.h>
-#include <konoha3/import/methoddecl.h>
+#include "konoha3/konoha.h"
+#include "konoha3/sugar.h"
+#include "konoha3/konoha_common.h"
+#include "konoha3/import/methoddecl.h"
 
 #define TRACE(POLICY, ...) OLDTRACE_SWITCH_TO_KTrace(POLICY, __VA_ARGS__);
 

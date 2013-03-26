@@ -22,9 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <konoha3/konoha.h>
-#include <konoha3/sugar.h>
-#include <konoha3/import/methoddecl.h>
+#include "konoha3/konoha.h"
+#include "konoha3/sugar.h"
+#include "konoha3/import/methoddecl.h"
 #include <stdio.h>
 
 #ifdef __cplusplus

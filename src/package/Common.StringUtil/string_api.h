@@ -25,7 +25,7 @@
 #ifndef STRING_API_H
 #define STRING_API_H
 
-#include <konoha3/konoha.h>
+#include "konoha3/konoha.h"
 
 #ifdef _MSC_VER
 #include <string.h>

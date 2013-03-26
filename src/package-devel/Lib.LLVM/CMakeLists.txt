@@ -53,6 +53,16 @@ if(LLVM_CONFIG)
 			OUTPUT_STRIP_TRAILING_WHITESPACE
 			)
 
+	string(REPLACE " " ";" FLAGS ${LLVM_CXXFLAGS})
+	set(LLVM_CXXFLAGS)
+	foreach(flag ${FLAGS})
+		string(REGEX MATCH "^-I" res "${flag}")
+		if(NOT "${res}" STREQUAL "-I")
+			set(LLVM_CXXFLAGS "${LLVM_CXXFLAGS} ${flag}")
+		endif()
+	endforeach(flag ${FLAGS})
+
+
 	set(ORIG_CXX_FLAGS ${CMAKE_CXX_FLAGS_${uppercase_CMAKE_BUILD_TYPE}})
 	set(PACKAGE_CXX_FLAGS "${LLVM_CXXFLAGS} -Wno-variadic-macros ${ORIG_CXX_FLAGS} -UNDEBUG")
 	string(REPLACE "-l" "" tmp ${LLVM_JIT_LIBS})

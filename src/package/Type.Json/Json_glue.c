@@ -22,10 +22,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <konoha3/konoha.h>
-#include <konoha3/klib.h>
-#include <konoha3/konoha_common.h>
-#include <konoha3/import/methoddecl.h>
+#include "konoha3/konoha.h"
+#include "konoha3/klib.h"
+#include "konoha3/konoha_common.h"
+#include "konoha3/import/methoddecl.h"
 
 #ifdef __cplusplus
 extern "C" {

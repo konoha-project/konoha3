@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 #include "kjson/kjson.c"
-#include <konoha3/konoha.h>
+#include "konoha3/konoha.h"
 #define JSONAPI PLATAPI JsonModule.
 
 static JSON JSONUString_new2(JSONMemoryPool *jm, const char *s, size_t len)

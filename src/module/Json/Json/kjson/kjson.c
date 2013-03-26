@@ -49,15 +49,6 @@ extern "C" {
     }\
 } while(0)
 
-#if defined(_MSC_VER)
-static uint32_t CLZ(uint32_t x)
-{
-    unsigned long r = 0;
-    _BitScanReverse(&r, x);
-    return 63 - r;
-}
-#endif
-
 static inline bool JSON_CanFree(JSON json)
 {
     JSONRC *rc = JSON_Reference(json);

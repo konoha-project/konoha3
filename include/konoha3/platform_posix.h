@@ -25,31 +25,36 @@
 #ifndef PLATFORM_POSIX_H_
 #define PLATFORM_POSIX_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef K_USE_PTHREAD
-#include <pthread.h>
-#endif
-
 #ifndef K_OSDLLEXT
 #if defined(__APPLE__)
 #define K_OSDLLEXT        ".dylib"
 #elif defined(__linux__)
 #define K_OSDLLEXT        ".so"
+#elif defined(__CYGWIN__)
+#define K_OSDLLEXT        ".dll"
 #endif
 #endif
 
-#if defined(__CYGWIN__)
-#undef K_OSDLLEXT
-#define K_OSDLLEXT        ".dll"
-#endif
+#ifndef kunused
+#define kunused __attribute__((unused))
+#endif /* kunused */
 
 #ifdef PATH_MAX
 #define K_PATHMAX PATH_MAX
 #else
 #define K_PATHMAX 256
+#endif
+
+#define kunused __attribute__((unused))
+
+#include "konoha3/klib.h"
+
+#ifndef K_PREFIX
+#define K_PREFIX  "/usr/local"
+#endif
+
+#ifdef K_USE_PTHREAD
+#include <pthread.h>
 #endif
 
 #include <stdio.h>
@@ -63,12 +68,19 @@ extern "C" {
 #include <errno.h>
 #include <fcntl.h>
 
-#define kunused __attribute__((unused))
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <konoha3/klib.h>
+#ifdef _WIN64
+#define FFS(n) __builtin_ffsll(n)
+#define CLZ(n) __builtin_clzll(n)
+#define CTZ(x) __builtin_ctzll(x)
+#else /* defined(_WIN64) */
 
-#ifndef K_PREFIX
-#define K_PREFIX  "/usr/local"
+#define FFS(n) __builtin_ffsl(n)
+#define CLZ(n) __builtin_clzl(n)
+#define CTZ(x) __builtin_ctzl(x)
 #endif
 
 // -------------------------------------------------------------------------
@@ -979,7 +991,7 @@ static kunused void PosixFactory(KonohaFactory *factory)
 	//factory->LoggerModule.TraceDataLog          = TraceDataLog;
 	//factory->DiagnosisErrorCode    = DEOS_DiagnosisErrorCode;
 
-	factory->ConsoleModule.ReportDebugMessage    = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
+	factory->ConsoleModule.ReportDebugMessage    = (!factory->verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
 	factory->ConsoleModule.ReportUserMessage     = UI_ReportUserMessage;
 	factory->ConsoleModule.ReportCompilerMessage = UI_ReportCompilerMessage;
 	factory->ConsoleModule.ReportCaughtException = UI_ReportCaughtException;
