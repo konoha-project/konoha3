@@ -1,9 +1,0 @@
-{
-	"package" : "Type.Regexp",
-	"version" : "1.0",
-	"status"  : "stable",
-	"platform"  : "osx/linux",
-	"dependency package" : [
-		{"package" : "JavaScript.Regexp", "version" : "1.0"},
-	]
-}
