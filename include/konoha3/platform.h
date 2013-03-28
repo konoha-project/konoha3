@@ -29,22 +29,12 @@
 #error Do not include platform.h without konoha.h.
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-KONOHA_EXPORT(int) verbose_debug;
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
-
 #if defined(_MSC_VER)
-#include <konoha3/platform_msvc.h>
+#include "konoha3/platform_msvc.h"
 #elif defined(__MINGW32__)
-#include <konoha3/platform_mingw.h>
+#include "konoha3/platform_mingw.h"
 #else
-#include <konoha3/platform_posix.h>
+#include "konoha3/platform_posix.h"
 #endif
 
 #endif /* PLATFORM_H_ */

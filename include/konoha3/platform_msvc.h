@@ -25,10 +25,6 @@
 #ifndef PLATFORM_MSVC_H_
 #define PLATFORM_MSVC_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifndef K_OSDLLEXT
 #define K_OSDLLEXT        ".dll"
 #endif
@@ -47,16 +43,44 @@ extern "C" {
 #include <errno.h>
 #include <fcntl.h>
 #include <windows.h>
+#include <stdint.h>
+#include <intrin.h>
 
+#ifndef kunused
 #define kunused
+#endif /* kunused */
 
 #define snprintf _snprintf
 
-#include <konoha3/klib.h>
+#include "konoha3/klib.h"
 
 #ifndef K_PREFIX
 #define K_PREFIX  "/usr/local"
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+static uint32_t CTZ(uint32_t x)
+{
+	unsigned long r = 0;
+	_BitScanForward(&r, x);
+	return r;
+}
+
+static uint32_t CLZ(uint32_t x)
+{
+	unsigned long r = 0;
+	_BitScanReverse(&r, x);
+	return 63 - r;
+}
+
+static uint32_t FFS(uint32_t x)
+{
+	if(x == 0) return 0;
+	return CTZ(x) + 1;
+}
 
 // -------------------------------------------------------------------------
 /* LoadPlatformModule */
@@ -208,7 +232,7 @@ static void loadI18N(KonohaFactory *plat, const char *defaultCharSet)
 
 // -------------------------------------------------------------------------
 
-static unsigned long long getTimeMilliSecond(void)
+static uint64_t getTimeMilliSecond(void)
 {
 	SYSTEMTIME st;
 	GetSystemTime(&st);
@@ -813,7 +837,7 @@ static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, k
 static void KBuffer_WriteValue(KonohaContext *kctx, KBuffer *wb, KClass *c, KonohaStack *sfp)
 {
 	if(KClass_Is(UnboxType, c)) {
-		c->p(kctx, sfp, 0, wb);
+		c->format(kctx, sfp, 0, wb);
 	}
 	else {
 		KLIB kObject_WriteToBuffer(kctx, sfp[0].asObject, false/*delim*/, wb, NULL, 0);
@@ -822,10 +846,16 @@ static void KBuffer_WriteValue(KonohaContext *kctx, KBuffer *wb, KClass *c, Kono
 
 static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaStack *bottomStack, KonohaStack *topStack)
 {
+	KonohaStack *sfp = topStack;
+	KBuffer wb;
+	const char *exceptionName;
+	const char *optionalMessage;
+	int fault;
+
 	DBG_ASSERT(IS_Exception(e));
-	const char *exceptionName = KSymbol_text(e->symbol);
-	const char *optionalMessage = kString_text(e->Message);
-	int fault = e->fault;
+	exceptionName = KSymbol_text(e->symbol);
+	optionalMessage = kString_text(e->Message);
+	fault = e->fault;
 	PLATAPI printf_i("%s", BeginTag(kctx, ErrTag));
 	if(optionalMessage != NULL && optionalMessage[0] != 0) {
 		PLATAPI printf_i("%s: SoftwareFault %s", exceptionName, optionalMessage);
@@ -847,16 +877,15 @@ static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaS
 	}
 	PLATAPI printf_i("%s\n", EndTag(kctx, ErrTag));
 	PLATAPI printf_i("%sStackTrace\n", BeginTag(kctx, InfoTag));
-
-	KonohaStack *sfp = topStack;
-	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	while(bottomStack < sfp) {
 		kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 		kfileline_t uline = sfp[K_RTNIDX].calledFileLine;
 		const char *file = PLATAPI shortFilePath(KFileLine_textFileName(uline));
+		unsigned i;
+		KClass *cThis;
 		PLATAPI printf_i(" [%ld] (%s:%d) %s.%s%s(", (sfp - kctx->stack->stack), file, (kushort_t)uline, kMethod_Fmt3(mtd));
-		KClass *cThis = KClass_(mtd->typeId);
+		cThis = KClass_(mtd->typeId);
 		if(!KClass_Is(UnboxType, cThis)) {
 			cThis = kObject_class(sfp[0].asObject);
 		}
@@ -865,13 +894,12 @@ static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaS
 			PLATAPI printf_i("this=(%s) %s, ", KClass_text(cThis), KLIB KBuffer_text(kctx, &wb, 1));
 			KLIB KBuffer_Free(&wb);
 		}
-		unsigned i;
 		kParam *param = kMethod_GetParam(mtd);
 		for(i = 0; i < param->psize; i++) {
+			KClass *c = KClass_(param->paramtypeItems[i].attrTypeId);
 			if(i > 0) {
 				PLATAPI printf_i(", ");
 			}
-			KClass *c = KClass_(param->paramtypeItems[i].attrTypeId);
 			c = c->realtype(kctx, c, cThis);
 			KBuffer_WriteValue(kctx, &wb, c, sfp + i + 1);
 			PLATAPI printf_i("%s=(%s) %s", KSymbol_text(KSymbol_Unmask(param->paramtypeItems[i].name)), KClass_text(c), KLIB KBuffer_text(kctx, &wb, 1));
@@ -967,7 +995,7 @@ static kunused void PosixFactory(KonohaFactory *factory)
 	//factory->LoggerModule.TraceDataLog          = TraceDataLog;
 	//factory->DiagnosisErrorCode    = DEOS_DiagnosisErrorCode;
 
-	factory->ConsoleModule.ReportDebugMessage    = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
+	factory->ConsoleModule.ReportDebugMessage    = (!factory->verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
 	factory->ConsoleModule.ReportUserMessage     = UI_ReportUserMessage;
 	factory->ConsoleModule.ReportCompilerMessage = UI_ReportCompilerMessage;
 	factory->ConsoleModule.ReportCaughtException = UI_ReportCaughtException;

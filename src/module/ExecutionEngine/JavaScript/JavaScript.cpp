@@ -23,17 +23,17 @@
  ***************************************************************************/
 
 #define USE_EXECUTIONENGINE
-#include <konoha3/konoha.h>
-#include <konoha3/sugar.h>
-#include <konoha3/klib.h>
-#include <konoha3/import/module.h>
+#include "konoha3/konoha.h"
+#include "konoha3/sugar.h"
+#include "konoha3/klib.h"
+#include "konoha3/import/module.h"
 
 #undef HAVE_LIBV8
 #ifdef HAVE_LIBV8
 #include <v8.h>
 #endif
 
-#define LOG_FUNCTION_NAME "p"
+#define LOG_FUNCTION_NAME "console.log"
 
 extern "C" {
 
@@ -114,7 +114,7 @@ enum kSymbolPrefix{
 	kSymbolPrefix_IS,
 	kSymbolPrefix_UNKNOWN,
 	kSymbolPrefix_TO,
-	kSymbolPrefix_DOLLAR,
+	kSymbolPrefix_DOLLAR
 };
 
 static enum kSymbolPrefix KSymbol_prefixText_ID(ksymbol_t sym)
@@ -457,7 +457,7 @@ static void JSBuilder_EmitConstValue(KonohaContext *kctx, KBuilder *builder, kOb
 	JSBuilder_EmitKonohaValue(kctx, builder, kObject_class(obj), sfp);
 }
 
-static void JSBuilder_EmitUnboxConstValue(KonohaContext *kctx, KBuilder *builder, KClass *ct, unsigned long long unboxVal)
+static void JSBuilder_EmitUnboxConstValue(KonohaContext *kctx, KBuilder *builder, KClass *ct, uint64_t unboxVal)
 {
 	KonohaStack sfp[1];
 	KStackSetUnboxValue(sfp[0].unboxValue, unboxVal);

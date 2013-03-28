@@ -24,9 +24,9 @@
 
 /* ************************************************************************ */
 
-#include <konoha3/konoha.h>
-#include <konoha3/sugar.h>
-#include <konoha3/import/methoddecl.h>
+#include "konoha3/konoha.h"
+#include "konoha3/sugar.h"
+#include "konoha3/import/methoddecl.h"
 #include <pthread.h>
 
 #ifdef __cplusplus

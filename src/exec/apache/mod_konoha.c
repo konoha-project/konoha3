@@ -33,11 +33,11 @@
 #ifndef K_USE_PTHREAD
 #define K_USE_PTHREAD 1
 #endif
-#include <konoha3/konoha.h>
-#include <konoha3/sugar.h>
-#include <konoha3/klib.h>
-#include <konoha3/platform.h>
-#include <konoha3/import/methoddecl.h>
+#include "konoha3/konoha.h"
+#include "konoha3/sugar.h"
+#include "konoha3/klib.h"
+#include "konoha3/platform.h"
+#include "konoha3/import/methoddecl.h"
 #include "../../package-devel/Lib.Apache/apache_glue.h"
 
 #ifndef K_PREFIX
@@ -223,9 +223,10 @@ void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformA
 KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);
 int Konoha_Destroy(KonohaContext *kctx);
 
-KonohaContext* konoha_create(KClass **cRequest)
+KonohaContext* konoha_create(KClass **cRequest, int verbose_debug)
 {
 	struct KonohaFactory factory = {};
+	factory.verbose_debug = verbose_debug;
 	int argc = 0;
 	char *argv[1] = {0};
 	KonohaFactory_SetDefaultFactory(&factory, PosixFactory, argc, argv);
@@ -278,8 +279,7 @@ static int konoha_handler(request_rec *r)
 	//	return HTTP_METHOD_NOT_ALLOWED;
 	//}
 	KClass *cRequest;
-	verbose_debug = 1;
-	KonohaContext* konoha = konoha_create(&cRequest);
+	KonohaContext* konoha = konoha_create(&cRequest, 1);
 	//assert(cRequest != NULL);
 	r->content_encoding = "utf-8";
 	ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "filename=%s", r->filename);

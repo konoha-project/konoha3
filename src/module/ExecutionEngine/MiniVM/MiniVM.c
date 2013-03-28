@@ -22,12 +22,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#ifndef _MSC_VER
 #define USE_DIRECT_THREADED_CODE
+#endif
 #define USE_EXECUTIONENGINE
 
-#include <konoha3/konoha.h>
-#include <konoha3/sugar.h>
-#include <konoha3/import/module.h>
+#include "konoha3/konoha.h"
+#include "konoha3/sugar.h"
+#include "konoha3/import/module.h"
 #include "minivm.h"
 
 #ifdef __cplusplus
@@ -180,7 +182,7 @@ static KVirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaSta
 	int jmpresult;
 	INIT_GCSTACK();
 	KRuntimeContextVar *base = kctx->stack;
-	jmpbuf_i lbuf = {};
+	jmpbuf_i lbuf = {0};
 	if(base->evaljmpbuf == NULL) {
 		base->evaljmpbuf = (jmpbuf_i *)KCalloc_UNTRACE(sizeof(jmpbuf_i), 1);
 	}
@@ -262,7 +264,7 @@ struct KBuilder { /* MiniVM Builder */
 	intptr_t   InstructionSize;
 };
 
-typedef struct BasicBlock {
+typedef struct tagBasicBlock {
 	long     incoming;
 	bblock_t newid;
 	bblock_t nextid;
@@ -295,9 +297,10 @@ static bblock_t BasicBlock_id(KonohaContext *kctx, BasicBlock *bb)
 
 static BasicBlock *new_BasicBlock(KonohaContext *kctx, size_t max, bblock_t oldId)
 {
+	BasicBlock *bb;
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
-	BasicBlock *bb = (BasicBlock *)KLIB KBuffer_Alloca(kctx, &wb, max);
+	bb = (BasicBlock *)KLIB KBuffer_Alloca(kctx, &wb, max);
 	if(oldId != -1) {
 		BasicBlock *oldbb = BasicBlock_FindById(kctx, oldId);
 		if(((char *)oldbb) + oldbb->max == (char *)bb) {
@@ -424,10 +427,11 @@ static bool Block_HasTerminatorInst(KonohaContext *kctx, bblock_t blockId)
 {
 	BasicBlock *bb = BasicBlock_FindById(kctx, blockId);
 	unsigned size = BasicBlock_size(bb);
+	KVirtualCode *code, *lastInst;
 	if(size == 0)
 		return false;
-	KVirtualCode *code = (KVirtualCode *)(((char *)bb) + sizeof(BasicBlock));
-	KVirtualCode *lastInst = code + (size - 1);
+	code = (KVirtualCode *)(((char *)bb) + sizeof(BasicBlock));
+	lastInst = code + (size - 1);
 	switch(lastInst->opcode) {
 #define CASE(OP) case OPCODE_##OP: return true;
 		CASE(EXIT);
@@ -554,8 +558,9 @@ static void MiniVMBuilder_JumpTo(KonohaContext *kctx, KBuilder *builder, bblock_
 	DBG_ASSERT(bb != NULL);
 	//DBG_ASSERT(bb->nextid == -1);
 	if(bb->branchid == -1) {
+		BasicBlock *labelNode;
 		ASM(JMP, NULL);
-		BasicBlock *labelNode = BasicBlock_FindById(kctx, labelId);
+		labelNode = BasicBlock_FindById(kctx, labelId);
 		bb = BasicBlock_FindById(kctx, builder->bbMainId);
 		bb->branchid = BasicBlock_id(kctx, labelNode);
 		labelNode->incoming += 1;
@@ -569,6 +574,7 @@ static void CreateUpdate(KonohaContext *kctx, KBuilder *builder, ktypeattr_t typ
 
 static void CreateBranch(KonohaContext *kctx, KBuilder *builder, intptr_t src, bblock_t ThenBB, bblock_t ElseBB, bool emitJumpToThenBlock)
 {
+	BasicBlock *ThenBlock, *ElseBlock;
 	BasicBlock *bb = BasicBlock_FindById(kctx, builder->bbMainId);
 	DBG_ASSERT(bb != NULL);
 	DBG_ASSERT(/*bb->nextid == -1 &&*/ bb->branchid == -1);
@@ -577,8 +583,8 @@ static void CreateBranch(KonohaContext *kctx, KBuilder *builder, intptr_t src, b
 		ASM(JMP, NULL);
 	}
 	bb = BasicBlock_FindById(kctx, builder->bbMainId);
-	BasicBlock *ThenBlock = BasicBlock_FindById(kctx, ThenBB);
-	BasicBlock *ElseBlock = BasicBlock_FindById(kctx, ElseBB);
+	ThenBlock = BasicBlock_FindById(kctx, ThenBB);
+	ElseBlock = BasicBlock_FindById(kctx, ElseBB);
 	bb->branchid = ElseBB;
 	bb->nextid   = ThenBB;
 	ThenBlock->incoming += 1;
@@ -587,9 +593,10 @@ static void CreateBranch(KonohaContext *kctx, KBuilder *builder, intptr_t src, b
 
 static void MiniVMBuilder_setBlock(KonohaContext *kctx, KBuilder *builder, bblock_t labelId)
 {
+	BasicBlock *labelNode;
 	BasicBlock *bb = BasicBlock_FindById(kctx, builder->bbMainId);
 	DBG_ASSERT(bb != NULL);
-	BasicBlock *labelNode = BasicBlock_FindById(kctx, labelId);
+	labelNode = BasicBlock_FindById(kctx, labelId);
 	labelNode->incoming += 1;
 	builder->bbMainId = BasicBlock_id(kctx, labelNode);
 }
@@ -601,17 +608,18 @@ typedef struct LocalVarInfo {
 } LocalVarInfo;
 
 #ifndef LOG2
-#define LOG2(N) ((unsigned)((sizeof(void *) * 8) - __builtin_clzl((N) - 1)))
+#define LOG2(N) ((unsigned)((sizeof(void *) * 8) - CLZ((N) - 1)))
 #endif
 
 static intptr_t AddLocal(KonohaContext *kctx, KBuilder *builder, intptr_t index, ksymbol_t sym, ktypeattr_t type)
 {
+	LocalVarInfo *newlocal;
 	int offset = builder->localVar.bytesize / sizeof(LocalVarInfo);
 	if(builder->localVar.bytesize == builder->localVar.bytemax) {
 		size_t newsize = sizeof(LocalVarInfo) * (1 << LOG2(offset * 2 + 1));
 		KLIB KArray_Expand(kctx, &builder->localVar, newsize);
 	}
-	LocalVarInfo *newlocal = &((LocalVarInfo *)builder->localVar.bytebuf)[offset];
+	newlocal = &((LocalVarInfo *)builder->localVar.bytebuf)[offset];
 	newlocal->index = index;
 	newlocal->sym   = sym;
 	newlocal->type  = type;
@@ -622,21 +630,22 @@ static intptr_t AddLocal(KonohaContext *kctx, KBuilder *builder, intptr_t index,
 
 static intptr_t MiniVMBuilder_FindLocalVar(KonohaContext *kctx, KBuilder *builder, ksymbol_t symbol, ktypeattr_t typeId, intptr_t index)
 {
+	unsigned i, localSize;
+	kParam *params;
 	kMethod *mtd = builder->currentMtd;
 	if(mtd->typeId != KType_void && mtd->typeId == typeId && index == 0) {
 		return 0;
 	}
 
-	kParam *params = kMethod_GetParam(mtd);
-	unsigned i, psize = params->psize;
-	for(i = 0; i < psize; ++i) {
+	params = kMethod_GetParam(mtd);
+	for(i = 0; i < params->psize; ++i) {
 		ktypeattr_t ptype = params->paramtypeItems[i].attrTypeId;
 		if(ptype == typeId && index == i ) {
 			return i;
 		}
 	}
 
-	unsigned localSize = builder->localVar.bytesize / sizeof(LocalVarInfo);
+	localSize = builder->localVar.bytesize / sizeof(LocalVarInfo);
 	for(i = 0; i < localSize; i++) {
 		LocalVarInfo *local = &((LocalVarInfo *)builder->localVar.bytebuf)[i];
 		if(local->index == index && local->type == typeId && local->sym == symbol) {
@@ -685,10 +694,10 @@ static kbool_t MiniVM_VisitThrowNode(KonohaContext *kctx, KBuilder *builder, kNo
 
 static kbool_t MiniVM_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, kNode *block, void *thunk)
 {
+	size_t i;
 	bblock_t NewBlock = new_BasicBlockLABEL(kctx);
 	MiniVMBuilder_JumpTo(kctx, builder, NewBlock);
 	MiniVMBuilder_setBlock(kctx, builder, NewBlock);
-	size_t i;
 	for(i = 0; i < kNode_GetNodeListSize(kctx, block); i++) {
 		kNode *stmt = block->NodeList->NodeItems[i];
 		builder->common.uline = kNode_uline(stmt);
@@ -742,6 +751,7 @@ enum LoopType {
 
 static kbool_t MiniVM_VisitLoopNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk, enum LoopType Loop)
 {
+	kNode *ItrBlock;
 	bblock_t HeadBB  = new_BasicBlockLABEL(kctx);
 	bblock_t BodyBB  = new_BasicBlockLABEL(kctx);
 	bblock_t ItrBB   = new_BasicBlockLABEL(kctx);
@@ -750,7 +760,7 @@ static kbool_t MiniVM_VisitLoopNode(KonohaContext *kctx, KBuilder *builder, kNod
 	kNode_SetLabelBlock(kctx, node, KSymbol_("continue"), ItrBB);
 	kNode_SetLabelBlock(kctx, node, KSymbol_("break"),    MergeBB);
 
-	kNode *ItrBlock = SUGAR kNode_GetNode(kctx, node, KSymbol_("Iterator"), NULL);
+	ItrBlock = SUGAR kNode_GetNode(kctx, node, KSymbol_("Iterator"), NULL);
 	if(ItrBlock != NULL) {
 		assert(Loop == ForLoop);
 		MiniVMBuilder_JumpTo(kctx, builder, HeadBB);
@@ -826,9 +836,10 @@ static kbool_t MiniVM_VisitForNode(KonohaContext *kctx, KBuilder *builder, kNode
 
 static kbool_t MiniVM_VisitJumpNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk, ksymbol_t label)
 {
+	bblock_t target;
 	kNode *jump = kNode_GetNode(kctx, node, label);
 	DBG_ASSERT(jump != NULL && IS_Node(jump));
-	bblock_t target = kNode_GetLabelNode(kctx, jump, label);
+	target = kNode_GetLabelNode(kctx, jump, label);
 	MiniVMBuilder_JumpTo(kctx, builder, target);
 	return true;
 }
@@ -860,8 +871,8 @@ static kbool_t MiniVM_VisitConstNode(KonohaContext *kctx, KBuilder *builder, kNo
 
 static kbool_t MiniVM_VisitUnboxConstNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
-	DBG_ASSERT(KType_Is(UnboxType, node->attrTypeId));
 	uintptr_t Val = node->unboxConstValue;
+	DBG_ASSERT(KType_Is(UnboxType, node->attrTypeId));
 	ASM(NSET, NC_(builder->stackbase), Val, KClass_(node->attrTypeId));
 	builder->Value = builder->stackbase;
 	return true;
@@ -888,8 +899,9 @@ static kbool_t MiniVM_VisitNullNode(KonohaContext *kctx, KBuilder *builder, kNod
 static kbool_t MiniVM_VisitLocalNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
 	intptr_t src;
+	ksymbol_t symbol;
 	assert(IS_Token(node->TermToken));
-	ksymbol_t symbol = node->TermToken->symbol;
+	symbol = node->TermToken->symbol;
 	if((src = MiniVMBuilder_FindLocalVar(kctx, builder, symbol, node->attrTypeId, node->index)) == -1) {
 		src = AddLocal(kctx, builder, node->index, symbol, node->attrTypeId);
 	}
@@ -899,15 +911,18 @@ static kbool_t MiniVM_VisitLocalNode(KonohaContext *kctx, KBuilder *builder, kNo
 
 static kbool_t MiniVM_VisitFieldNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
+	ksymbol_t symbol;
+	intptr_t src;
+	KClass *ty;
+
 	kshort_t index  = (kshort_t)(node->index);
 	kshort_t xindex = (kshort_t)(node->index >> (sizeof(kshort_t)*8));
 	assert(IS_Token(node->TermToken));
-	ksymbol_t symbol = node->TermToken->symbol;
-	intptr_t src;
+	symbol = node->TermToken->symbol;
 	if((src = MiniVMBuilder_FindLocalVar(kctx, builder, symbol, KType_Object, index)) == -1) {
 		src = AddLocal(kctx, builder, index, symbol, KType_Object);
 	}
-	KClass *ty = KClass_(node->attrTypeId);
+	ty = KClass_(node->attrTypeId);
 	ASM(NMOVx, TC_(builder->stackbase, ty), OC_(src), xindex, ty);
 	builder->Value = builder->stackbase;
 	return true;
@@ -916,23 +931,24 @@ static kbool_t MiniVM_VisitFieldNode(KonohaContext *kctx, KBuilder *builder, kNo
 static kbool_t MiniVM_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
 	kMethod *mtd = CallNode_getMethod(node);
-	DBG_ASSERT(IS_Method(mtd));
 
 	/*
 	 * [CallExpr] := this.method(arg1, arg2, ...)
 	 * node->NodeList = [method, this, arg1, arg2, ...]
 	 **/
-	int i, s = kMethod_Is(Static, mtd) ? 2 : 1;
-	int argc = CallNode_getArgCount(node);
+	intptr_t stackbase, thisidx;
+	int i, s, argc = CallNode_getArgCount(node);
+	DBG_ASSERT(IS_Method(mtd));
 
+	s = kMethod_Is(Static, mtd) ? 2 : 1;
 	if(kMethod_Is(Static, mtd)) {
 		KClass *selfTy = KClass_(mtd->typeId);
 		kObject *obj = KLIB Knull(kctx, selfTy);
 		ASM(NSET, OC_(builder->stackbase), (uintptr_t) obj, selfTy);
 	}
 
-	intptr_t stackbase = builder->stackbase;
-	intptr_t thisidx = stackbase + K_CALLDELTA;
+	stackbase = builder->stackbase;
+	thisidx = stackbase + K_CALLDELTA;
 	for (i = s; i < argc + 2; i++) {
 		kNode *exprN = kNode_At(node, i);
 		builder->stackbase = thisidx + i - 1;
@@ -955,8 +971,7 @@ static kbool_t MiniVM_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder
 		ASM(NSET, OC_(thisidx-2), (intptr_t)kNode_ns(node), KClass_NameSpace);
 		ASM(LOOKUP, SFP_(thisidx), kNode_ns(node), mtd);
 	}
-	int esp_ = SFP_(thisidx + argc + 1);
-	ASM(CALL, kNode_uline(node), SFP_(thisidx), esp_, KLIB Knull(kctx, KClass_(node->attrTypeId)));
+	ASM(CALL, kNode_uline(node), SFP_(thisidx), SFP_(thisidx + argc + 1), KLIB Knull(kctx, KClass_(node->attrTypeId)));
 
 	builder->stackbase = stackbase;
 	builder->Value = builder->stackbase;
@@ -969,6 +984,7 @@ enum ConditionalOp {
 
 static void CreateCond(KonohaContext *kctx, KBuilder *builder, kNode *expr, enum ConditionalOp Op, void *thunk)
 {
+	intptr_t cond;
 	kNode *LHS = kNode_At(expr, 1);
 	kNode *RHS = kNode_At(expr, 2);
 
@@ -987,7 +1003,7 @@ static void CreateCond(KonohaContext *kctx, KBuilder *builder, kNode *expr, enum
 	 */
 
 	MiniVMBuilder_JumpTo(kctx, builder, HeadBB);
-	intptr_t cond = builder->stackbase;
+	cond = builder->stackbase;
 	builder->stackbase += 1;
 	{ /* Head */
 		MiniVMBuilder_setBlock(kctx, builder, HeadBB);
@@ -1030,12 +1046,14 @@ static kbool_t MiniVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 	 * expr->NodeList = [NULL, lhs, rhs]
 	 **/
 
+	intptr_t dst = -1;
 	kNode *left = kNode_At(node, 1);
 	kNode *right = kNode_At(node, 2);
 	ktypeattr_t type = left->attrTypeId;
+	ksymbol_t symbol;
+
 	assert(IS_Token(left->TermToken));
-	ksymbol_t symbol = left->TermToken->symbol;
-	intptr_t dst = -1;
+	symbol = left->TermToken->symbol;
 	if(kNode_node(left) == KNode_Local) {
 		if((dst = MiniVMBuilder_FindLocalVar(kctx, builder, symbol, type, left->index)) == -1) {
 			dst = AddLocal(kctx, builder, left->index, symbol, type);
@@ -1044,12 +1062,12 @@ static kbool_t MiniVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 		CreateUpdate(kctx, builder, type, dst, MiniVM_getExpression(builder));
 		builder->Value = dst;
 	}
-	else{
-		assert(kNode_node(left) == KNode_Field);
+	else {
 		kshort_t index  = (kshort_t)left->index;
 		kshort_t xindex = (kshort_t)(left->index >> (sizeof(kshort_t)*8));
 		KClass *lhsClass = KClass_(left->attrTypeId);
 		KClass *rhsClass = KClass_(right->attrTypeId);
+		assert(kNode_node(left) == KNode_Field);
 		if((dst = MiniVMBuilder_FindLocalVar(kctx, builder, symbol, KType_Object, index)) == -1) {
 			dst = AddLocal(kctx, builder, index, symbol, KType_Object);
 		}
@@ -1130,9 +1148,10 @@ static kbool_t CollectLocalVar_VisitIfNode(KVISITOR_PARAM)
 
 static kbool_t CollectLocalVar_VisitWhileNode(KVISITOR_PARAM)
 {
+	kNode *ItrBlock;
 	SUGAR VisitNode(kctx, builder, kNode_getFirstNode(kctx, node), thunk);
 	SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, node), thunk);
-	kNode *ItrBlock = SUGAR kNode_GetNode(kctx, node, KSymbol_("Iterator"), NULL);
+	ItrBlock = SUGAR kNode_GetNode(kctx, node, KSymbol_("Iterator"), NULL);
 	if(ItrBlock != NULL) {
 		SUGAR VisitNode(kctx, builder, ItrBlock, thunk);
 	}
@@ -1232,20 +1251,22 @@ static struct KVirtualCodeAPI vapi = {
 
 static struct KVirtualCode *MakeThreadedCode(KonohaContext *kctx, KBuilder *builder, KVirtualCode *vcode, size_t codesize)
 {
+	struct KVirtualCodeAPI **p;
 	OPTHCODE *opTHCODE = (OPTHCODE *)vcode;
 	opTHCODE->codesize = codesize;
-	struct KVirtualCodeAPI **p = (struct KVirtualCodeAPI **)builder->common.api->ExecutionEngineModule->RunExecutionEngine(kctx, kctx->esp + 1, vcode);
+	p = (struct KVirtualCodeAPI **)builder->common.api->ExecutionEngineModule->RunExecutionEngine(kctx, kctx->esp + 1, vcode);
 	p[-1] = &vapi;
 	return (KVirtualCode *)p;
 }
 
 static struct KVirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *builder, bblock_t beginId, bblock_t returnId)
 {
+	KVirtualCode *vcode;
 	ByteCodeWriter writer = {NULL, 0, builder->InstructionSize * sizeof(KVirtualCode)};
 	BasicBlock_Optimize(kctx, beginId, &writer);
 	DBG_P(">>>>>> codesize=%d", writer.codesize);
 	DBG_ASSERT(writer.codesize != 0);
-	KVirtualCode *vcode = (KVirtualCode *)KCalloc_UNTRACE(writer.codesize, 1);
+	vcode = (KVirtualCode *)KCalloc_UNTRACE(writer.codesize, 1);
 	writer.current = vcode;
 	BasicBlock_WriteByteCode(kctx, beginId, &writer);
 	BasicBlock_WriteByteCode(kctx, returnId, &writer);
@@ -1268,12 +1289,13 @@ static void _THCODE(KonohaContext *kctx, KVirtualCode *pc, void **codeaddr, size
 
 static struct KVirtualCode *MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kNode *block, int option)
 {
+	KVirtualCode *vcode;
 	KBuffer wb;
-	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
+	KBuilder builderbuf = {{0}}, *builder = &builderbuf;
+	kNameSpace *ns = kNode_ns(block);
 
 	INIT_GCSTACK();
-	KBuilder builderbuf = {}, *builder = &builderbuf;
-	kNameSpace *ns = kNode_ns(block);
+	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 	builder->common.api = ns->builderApi;
 	builder->constPools = ns->NameSpaceConstList;
 	builder->bbBeginId  = new_BasicBlockLABEL(kctx);
@@ -1306,7 +1328,7 @@ static struct KVirtualCode *MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMet
 		ASM(NMOV, OC_(K_RTNIDX), OC_(0), KClass_(mtd->typeId));
 	}
 	ASM(RET);
-	KVirtualCode *vcode = CompileVirtualCode(kctx, builder, builder->bbBeginId, builder->bbReturnId);
+	vcode = CompileVirtualCode(kctx, builder, builder->bbBeginId, builder->bbReturnId);
 
 	KLIB KArray_Free(kctx, &builder->localVar);
 	RESET_GCSTACK();
@@ -1321,16 +1343,17 @@ static struct KVirtualCode *BOOTCODE_NCALL = NULL;
 static void SetUpBootCode(void)
 {
 	if(BOOTCODE_ENTER == NULL) {
-		static struct KVirtualCode InitCode[6] = {};
+		static struct KVirtualCode InitCode[6] = {{0}};
 		struct OPTHCODE thcode = {OP_(THCODE), 4 * sizeof(KVirtualCode), _THCODE};
 		struct OPNCALL ncall = {OP_(NCALL)};
 		struct OPENTER enter = {OP_(ENTER)};
 		struct OPEXIT  exit  = {OP_(EXIT)};
+		KVirtualCode *pc;
 		memcpy(InitCode+0, &thcode, sizeof(OPTHCODE));
 		memcpy(InitCode+1, &ncall,  sizeof(OPNCALL));
 		memcpy(InitCode+2, &enter,  sizeof(OPENTER));
 		memcpy(InitCode+3, &exit,   sizeof(OPEXIT));
-		KVirtualCode *pc = MiniVM_RunVirtualMachine(NULL, NULL, InitCode);
+		pc = MiniVM_RunVirtualMachine(NULL, NULL, InitCode);
 		BOOTCODE_NCALL = pc;
 		BOOTCODE_ENTER = pc+1;
 	}

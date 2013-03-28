@@ -22,12 +22,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+
+#include "konoha3/platform.h"
+
 #ifndef MODULE_H
 #define MODULE_H
-
-#ifndef kunused
-#define kunused __attribute__((unused))
-#endif /* kunused */
 
 #ifdef USE_EXECUTIONENGINE
 /*----------------------------------------------------------------------------*/

@@ -24,9 +24,9 @@
 
 /* ************************************************************************ */
 
-#include <konoha3/konoha.h>
-#include <konoha3/sugar.h>
-#include <konoha3/klib.h>
+#include "konoha3/konoha.h"
+#include "konoha3/sugar.h"
+#include "konoha3/klib.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -100,7 +100,7 @@ static kNode *ParseSource(KonohaContext *kctx, kNameSpace *ns, const char *scrip
 	KTokenSeq step2 = {ns, tokens.tokenList, kArray_size(tokens.tokenList)};
 	SUGAR Preprocess(kctx, ns, RangeTokenSeq(tokens), NULL, step2.tokenList);
 	KTokenSeq_End(kctx, step2);
-	kNode *newexpr = SUGAR ParseNewNode(kctx, ns, step2.tokenList, &step2.beginIdx, step2.endIdx, 0, NULL);
+	kNode *newexpr = SUGAR ParseNewNode(kctx, ns, step2.tokenList, &step2.beginIdx, step2.endIdx, ParseExpressionOption, NULL);
 	KTokenSeq_Pop(kctx, tokens);
 	KLIB KBuffer_Free(&wb);
 	return newexpr;

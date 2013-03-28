@@ -23,10 +23,10 @@
  ***************************************************************************/
 #define USE_EXECUTIONENGINE
 
-#include <konoha3/konoha.h>
-#include <konoha3/sugar.h>
-#include <konoha3/klib.h>
-#include <konoha3/import/module.h>
+#include "konoha3/konoha.h"
+#include "konoha3/sugar.h"
+#include "konoha3/klib.h"
+#include "konoha3/import/module.h"
 
 #define ARGLENGTH 8
 
@@ -424,7 +424,7 @@ static void BashBuilder_AddLocalVariable(KonohaContext *kctx, BashBuilder *bashB
 	ksymbol_t key = KLIB Ksymbol(kctx, kString_text(name), kString_size(name), 0, KSymbol_NewId);
 	KKeyValue *kv = KLIB KDict_GetNULL(kctx, dict, key);
 	if(kv == NULL) {
-		KKeyValue kv0 = {};
+		KKeyValue kv0 = {0};
 		kv0.key = key;
 		kv0.unboxValue = key;
 		kv0.attrTypeId = KType_Int;
@@ -708,8 +708,8 @@ static kbool_t BashBuilder_VisitOrNode(KonohaContext *kctx, KBuilder *builder, k
 static kbool_t BashBuilder_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
-	BashBuilder_VisitLocalAssignNode(kctx, builder, kNode_At(node, 1), thunk);
 	unsigned i, n = kArray_size(node->NodeList);
+	BashBuilder_VisitLocalAssignNode(kctx, builder, kNode_At(node, 1), thunk);
 	for(i = 2; i < n; i++) {
 		kNode *tmpNode = kNode_At(node, i);
 		switch(kNode_node(tmpNode)) {

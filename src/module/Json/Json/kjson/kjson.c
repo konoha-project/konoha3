@@ -49,15 +49,6 @@ extern "C" {
     }\
 } while(0)
 
-#if defined(_MSC_VER)
-static uint32_t CLZ(uint32_t x)
-{
-    unsigned long r = 0;
-    _BitScanReverse(&r, x);
-    return 63 - r;
-}
-#endif
-
 static inline bool JSON_CanFree(JSON json)
 {
     JSONRC *rc = JSON_Reference(json);
@@ -83,6 +74,7 @@ static inline JSON JSONError_new(JSONMemoryPool *jm, const char *emessage)
 static JSON JSONUString_new(JSONMemoryPool *jm, string_builder *builder)
 {
     size_t len;
+	JSON json;
     bool malloced;
     char *s = string_builder_tostring(builder, &len, 1);
     JSONString *o = (JSONString *) JSONMemoryPool_Alloc(jm, sizeof(*o), &malloced);
@@ -92,7 +84,7 @@ static JSON JSONUString_new(JSONMemoryPool *jm, string_builder *builder)
         s = o->text;
     }
     JSONString_init(o, s, len-1);
-    JSON json = toJSON(ValueU(o));
+    json = toJSON(ValueU(o));
     JSON_Init(json);
     return json;
 }

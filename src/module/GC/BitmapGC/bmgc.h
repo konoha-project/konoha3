@@ -25,6 +25,7 @@
 /* ************************************************************************ */
 
 #include <stdio.h>
+#include "konoha3/platform.h"
 
 //#define GCDEBUG 1
 
@@ -68,38 +69,6 @@ extern "C" {
 
 #ifdef USE_GENERATIONAL_GC
 #define MINOR_COUNT 16
-#endif
-
-#ifdef _MSC_VER
-#include <stdint.h>
-#include <intrin.h>
-static uint32_t CTZ(uint32_t x)
-{
-	unsigned long r = 0;
-	_BitScanForward(&r, x);
-	return r;
-}
-static uint32_t CLZ(uint32_t x)
-{
-	unsigned long r = 0;
-	_BitScanReverse(&r, x);
-	return 63 - r;
-}
-static uint32_t FFS(uint32_t x)
-{
-	if(x == 0) return 0;
-	return CTZ(x) + 1;
-}
-#else /* defined(_MSC_VER) */
-#ifdef _WIN64
-#define FFS(n) __builtin_ffsll(n)
-#define CLZ(n) __builtin_clzll(n)
-#define CTZ(x) __builtin_ctzll(x)
-#else /* defined(_WIN64) */
-#define FFS(n) __builtin_ffsl(n)
-#define CLZ(n) __builtin_clzl(n)
-#define CTZ(x) __builtin_ctzl(x)
-#endif
 #endif
 
 #define BITMAP_FULL ((uintptr_t)(-1))
@@ -458,7 +427,7 @@ static const unsigned int SegmentNodeCount_GC_MARGIN[] = {
 
 static bitmap_t bitmap_empty = BITMAP_FULL;
 static bitmap_t *bitmap_dummy = &bitmap_empty;
-static Segment segment_dummy = {};
+static Segment segment_dummy = {{0}};
 
 static const unsigned int BITMAP_LIMIT[][SEGMENT_LEVEL] = {
 	{0/* klass0 */}, {0/* klass1 */}, {0/* klass2 */}, {0/* klass3 */}, {0/* klass4 */},

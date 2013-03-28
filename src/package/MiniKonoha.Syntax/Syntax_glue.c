@@ -22,18 +22,18 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <konoha3/konoha.h>
 #define USE_AsciiToKonohaChar
-#include <konoha3/sugar.h>
-#include <konoha3/klib.h>
-#include <konoha3/konoha_common.h>
+#include "konoha3/konoha.h"
+#include "konoha3/sugar.h"
+#include "konoha3/klib.h"
+#include "konoha3/konoha_common.h"
+#include "konoha3/import/methoddecl.h"
+
 #include <stdio.h>
 
 #ifdef __cplusplus
 extern "C"{
 #endif
-
-#include <konoha3/import/methoddecl.h>
 
 #define TP_kw           KType_Symbol,     KFieldName_("keyword")
 #define TP_source       KType_String,     KFieldName_("source")
@@ -107,7 +107,7 @@ static KMETHOD Node_ParseNewNode(KonohaContext *kctx, KonohaStack *sfp)
 	kArray   *tokenList = sfp[1].asArray;
 	int beginIdx = (int)sfp[2].intValue;
 	int endIdx   = (int)sfp[3].intValue;
-	ParseOption opt = (sfp[4].boolValue == true) ? ParseMetaPatternOption : 0;
+	ParseOption opt = (sfp[4].boolValue == true) ? ParseMetaPatternOption : ParseExpressionOption;
 	KReturn(SUGAR ParseNewNode(kctx, kNode_ns(stmt), tokenList, &beginIdx, endIdx, opt, NULL));
 }
 

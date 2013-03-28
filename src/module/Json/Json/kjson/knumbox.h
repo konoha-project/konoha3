@@ -26,7 +26,7 @@
 #if !defined(_MSC_VER) || __STDC_VERSION__ >= 199901L
 #include <stdbool.h>
 #else
-#include <konoha3/stdbool.h>
+#include "konoha3/stdbool.h>
 #endif
 
 #ifndef KJSON_NUMBOX_H_
