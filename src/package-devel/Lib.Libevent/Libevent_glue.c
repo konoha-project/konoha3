@@ -61,7 +61,6 @@ typedef struct cevent {
 	KonohaContext *kctx;
 	struct event *event;
 	kFunc *kcb;		// konoha call back method
-	kObject *kcbArg;
 	kctimeval *kctimeval;
 } kcevent;
 
@@ -72,6 +71,8 @@ typedef struct cbufferevent {
 	kFunc *readcb;
 	kFunc *writecb;
 	kFunc *eventcb;
+	kFunc *input_filter;
+	kFunc *output_filter;
 	kObject *kcbArg;
 } kcbufferevent;
 
@@ -514,7 +515,7 @@ static void cevent_Init(KonohaContext *kctx, kObject *o, void *conf)
 	ev->kctx = NULL;
 	ev->event = NULL;
 	KFieldInit(ev, ev->kcb, KNULL(Func));
-	KFieldInit(ev, ev->kcbArg, K_NULL);
+	KFieldInit(ev, ev->kcb->env, K_NULL);
 	KFieldInit(ev, ev->kctimeval, K_NULL);
 }
 
@@ -533,7 +534,7 @@ static void cevent_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 {
 	kcevent *ev = (kcevent *) o;
 	KRefTrace(ev->kcb);
-	KRefTrace(ev->kcbArg);
+	KRefTrace(ev->kcb->env);
 	KRefTrace(ev->kctimeval);
 }
 
@@ -550,7 +551,7 @@ static void cevent_CB_method_invoke(evutil_socket_t evd, short event, void *arg)
 	KStackSetObjectValue(lsfp[0].asObject, K_NULL);
 	KStackSetUnboxValue(lsfp[1].intValue, evd);
 	KStackSetUnboxValue(lsfp[2].intValue, event);
-	KStackSetObjectValue(lsfp[3].asObject, ev->kcbArg);
+	KStackSetObjectValue(lsfp[3].asObject, ev->kcb->env);
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, ev->kcb, 3);
 	KStackCall(lsfp);
 	END_UnusedStack();
@@ -565,7 +566,7 @@ static KMETHOD cevent_event_new(KonohaContext *kctx, KonohaStack *sfp)
 	evutil_socket_t evd = (evutil_socket_t)sfp[2].intValue;
 	short event = (short)(sfp[3].intValue & 0xffff);
 	KFieldSet(ev, ev->kcb, sfp[4].asFunc);
-	KFieldSet(ev, ev->kcbArg, sfp[5].asObject);	//deliver to callback method
+	KFieldSet(ev, ev->kcb->env, sfp[5].asObject);	//deliver to callback method
 
 	ev->event = event_new(cEvent_base->event_base, evd, event, cevent_CB_method_invoke, ev);
 	KReturn(ev);
@@ -580,7 +581,7 @@ static KMETHOD cevent_signal_new(KonohaContext *kctx, KonohaStack *sfp)
 	kcevent_base *cEvent_base = (kcevent_base *)sfp[1].asObject;
 	evutil_socket_t evd = (evutil_socket_t)sfp[2].intValue;
 	KFieldSet(ev, ev->kcb, sfp[3].asFunc);
-	KFieldSet(ev, ev->kcbArg, sfp[4].asObject);	//deliver to callback method
+	KFieldSet(ev, ev->kcb->env, sfp[4].asObject);	//deliver to callback method
 
 	ev->event = evsignal_new(cEvent_base->event_base, evd, cevent_CB_method_invoke, ev);
 	KReturn(ev);
@@ -594,7 +595,7 @@ static KMETHOD cevent_timer_new(KonohaContext *kctx, KonohaStack *sfp)
 	ev->kctx = kctx;
 	kcevent_base *cEvent_base = (kcevent_base *)sfp[1].asObject;
 	KFieldSet(ev, ev->kcb, sfp[2].asFunc);
-	KFieldSet(ev, ev->kcbArg, sfp[3].asObject);	//deliver to callback method
+	KFieldSet(ev, ev->kcb->env, sfp[3].asObject);	//deliver to callback method
 
 	ev->event = evtimer_new(cEvent_base->event_base, cevent_CB_method_invoke, ev);
 	KReturn(ev);
@@ -616,7 +617,7 @@ static KMETHOD cevent_event_assign(KonohaContext *kctx, KonohaStack *sfp)
 	evutil_socket_t evd = (evutil_socket_t)sfp[2].intValue;
 	short event = (short)(sfp[3].intValue & 0xffff);
 	KFieldSet(ev, ev->kcb, sfp[4].asFunc);
-	KFieldSet(ev, ev->kcbArg, sfp[5].asObject);	//deliver to callback method
+	KFieldSet(ev, ev->kcb->env, sfp[5].asObject);	//deliver to callback method
 
 	int ret = event_assign(ev->event, cEvent_base->event_base, evd, event, cevent_CB_method_invoke, ev);
 	KReturnUnboxValue(ret);
@@ -629,7 +630,7 @@ static KMETHOD cevent_signal_assign(KonohaContext *kctx, KonohaStack *sfp)
 	kcevent_base *cEvent_base = (kcevent_base *)sfp[1].asObject;
 	evutil_socket_t evd = (evutil_socket_t)sfp[2].intValue;
 	KFieldSet(ev, ev->kcb, sfp[3].asFunc);
-	KFieldSet(ev, ev->kcbArg, sfp[4].asObject);	//deliver to callback method
+	KFieldSet(ev, ev->kcb->env, sfp[4].asObject);	//deliver to callback method
 
 	int ret = evsignal_assign(ev->event, cEvent_base->event_base, evd, cevent_CB_method_invoke, ev);
 	KReturnUnboxValue(ret);
@@ -641,7 +642,7 @@ static KMETHOD cevent_timer_assign(KonohaContext *kctx, KonohaStack *sfp)
 	kcevent *ev = (kcevent *) sfp[0].asObject;
 	kcevent_base *cEvent_base = (kcevent_base *)sfp[1].asObject;
 	KFieldSet(ev, ev->kcb, sfp[2].asFunc);
-	KFieldSet(ev, ev->kcbArg, sfp[3].asObject);	//deliver to callback method
+	KFieldSet(ev, ev->kcb->env, sfp[3].asObject);	//deliver to callback method
 
 	int ret = evtimer_assign(ev->event, cEvent_base->event_base, cevent_CB_method_invoke, ev);
 	KReturnUnboxValue(ret);
@@ -773,7 +774,7 @@ static KMETHOD cevent_get_callback_arg(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevent *ev = (kcevent *) sfp[0].asObject;
 	//privede same as void *event_get_callback_arg(const struct event *ev);
-	KReturn(ev->kcbArg);
+	KReturn(ev->kcb->env);
 }
 
 /*
@@ -802,6 +803,8 @@ static void cbufferevent_Init(KonohaContext *kctx, kObject *o, void *conf)
 	KFieldInit(bev, bev->readcb, KNULL(Func));
 	KFieldInit(bev, bev->writecb, KNULL(Func));
 	KFieldInit(bev, bev->eventcb, KNULL(Func));
+	KFieldInit(bev, bev->input_filter, KNULL(Func));
+	KFieldInit(bev, bev->output_filter, KNULL(Func));
 	KFieldInit(bev, bev->kcbArg, K_NULL);
 }
 
@@ -822,6 +825,8 @@ static void cbufferevent_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisito
 	KRefTrace(bev->readcb);
 	KRefTrace(bev->writecb);
 	KRefTrace(bev->eventcb);
+	KRefTrace(bev->input_filter);
+	KRefTrace(bev->output_filter);
 	KRefTrace(bev->kcbArg);
 }
 
@@ -965,6 +970,7 @@ static KMETHOD cbufferevent_setcb(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcbufferevent *kcbe = (kcbufferevent *)sfp[0].asObject;
 
+	kcbe->kctx = kctx;
 	KFieldSet(kcbe, kcbe->readcb, sfp[1].asFunc);
 	KFieldSet(kcbe, kcbe->writecb, sfp[2].asFunc);
 	KFieldSet(kcbe, kcbe->eventcb, sfp[3].asFunc);
@@ -1120,71 +1126,79 @@ static KMETHOD cbufferevent_flush(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(bufferevent_flush(bev->bev, iotype, mode));
 }
 
-
-
-
-#if 0
-/** A callback function to implement a filter for a bufferevent.
-
-    @param src An evbuffer to drain data from.
-    @param dst An evbuffer to add data to.
-    @param limit A suggested upper bound of bytes to write to dst.
-       The filter may ignore this value, but doing so means that
-       it will overflow the high-water mark associated with dst.
-       -1 means "no limit".
-    @param mode Whether we should write data as may be convenient
-       (BEV_NORMAL), or flush as much data as we can (BEV_FLUSH),
-       or flush as much as we can, possibly including an end-of-stream
-       marker (BEV_FINISH).
-    @param ctx A user-supplied pointer.
-
-    @return BEV_OK if we wrote some data; BEV_NEED_MORE if we can't
-       produce any more output until we get some input; and BEV_ERROR
-       on an error.
- */
 /*
  * bufferevent Class (*bufferevent_filter_cb)() 1st stage callback from event_base_dispatch(),
  * NEVER BE CALLED FROM OTHERS.
  */
-enum bufferevent_filter_result *cbev_filterCB_method_invoke(
+enum bufferevent_filter_result cbev_filterCB_method_invoke(
+	kFunc *invokeFunc,
     struct evbuffer *src, struct evbuffer *dst, ev_ssize_t dst_limit,
     enum bufferevent_flush_mode mode, void *ctx)
 {
-	struct kcallback *arg = ctx;
-	kcbufferevent *ksrc = (kcbufferevent *)(new_(cbufferevent, 0, OnField));
-	ksrc->bev = src;
-	kcbufferevent *kdst = (kcbufferevent *)(new_(cbufferevent, 0, OnField));
-	kdst->bev = dst;
+	enum bufferevent_filter_result ret;
+	kcbufferevent *kcbev = ctx;
+	KonohaContext *kctx = kcbev->kctx;
 
-
-
+	kcevbuffer *ksrc = (kcevbuffer *)(new_(cevbuffer, 0, OnField));
+	ksrc->buf = src;
+	kcevbuffer *kdst = (kcevbuffer *)(new_(cevbuffer, 0, OnField));
+	kdst->buf = dst;
 
 	BEGIN_UnusedStack(lsfp);
 	KClass *returnType = kMethod_GetReturnType(kcbev->eventcb->method);
 	KStackSetObjectValue(lsfp[0].asObject, K_NULL);
-	KStackSetObjectValue(lsfp[1].asObject, (kObject *)kcbev);
-	KStackSetUnboxValue(lsfp[2].intValue, what);
-	KStackSetObjectValue(lsfp[3].asObject, (kObject *)kcbev->kcbArg);
-	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, kcbev->eventcb, 3);
+	KStackSetObjectValue(lsfp[1].asObject, (kObject *)ksrc);
+	KStackSetObjectValue(lsfp[2].asObject, (kObject *)kdst);
+	KStackSetUnboxValue(lsfp[3].intValue, dst_limit);
+	KStackSetUnboxValue(lsfp[4].intValue, mode);
+	KStackSetObjectValue(lsfp[5].asObject, (kObject *)kcbev->kcbArg);
+	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, kcbev->eventcb, 5);
 	KStackCall(lsfp);
+
+	ret = lsfp[0].unboxValue;
 	END_UnusedStack();
-#endif
+	return ret;
+}
 
+enum bufferevent_filter_result cbev_inputfilterCB_method_invoke(
+    struct evbuffer *src, struct evbuffer *dst, ev_ssize_t dst_limit,
+    enum bufferevent_flush_mode mode, void *ctx)
+{
+	kcbufferevent *kcbe = ctx;
+	return cbev_filterCB_method_invoke(kcbe->input_filter, src, dst, dst_limit,
+			mode, ctx);
+}
 
+enum bufferevent_filter_result cbev_outputfilterCB_method_invoke(
+    struct evbuffer *src, struct evbuffer *dst, ev_ssize_t dst_limit,
+    enum bufferevent_flush_mode mode, void *ctx)
+{
+	kcbufferevent *kcbe = ctx;
+	return cbev_filterCB_method_invoke(kcbe->output_filter, src, dst, dst_limit,
+			mode, ctx);
+}
 
+//## bufferevent bufferevent.filter_new(
+//##	Func [int, evbuffer, evbuffer, int, int, Object] input_filter,
+//##	Func [int, evbuffer, evbuffer, int, int, Object] output_filter,
+//##	int option, Object ctx
+//## );
+static KMETHOD cbufferevent_filter_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *kcbe = (kcbufferevent *)sfp[0].asObject;
+	KFieldSet(kcbe, kcbe->input_filter, sfp[1].asFunc);
+	KFieldSet(kcbe, kcbe->output_filter, sfp[2].asFunc);
+	int option = sfp[3].intValue;
+	KFieldSet(kcbe, kcbe->kcbArg, sfp[4].asObject);
 
+	kcbufferevent *ret = (kcbufferevent *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+	ret->bev = bufferevent_filter_new(kcbe->bev,
+				cbev_inputfilterCB_method_invoke,
+				cbev_outputfilterCB_method_invoke,
+				option, NULL, kcbe);
+	KReturn(ret);
+}
 
-
-/*
-TODO
-struct bufferevent *
-bufferevent_filter_new(struct bufferevent *underlying,
-		       bufferevent_filter_cb input_filter,
-		       bufferevent_filter_cb output_filter,
-		       int options,
-		       void (*free_context)(void *),
-		       void *ctx);
-*/
 
 /*
 fuga
@@ -2435,6 +2449,7 @@ static KMETHOD Sockaddr_in_new(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("Type.Bytes", trace);
+	KRequirePackage("JavaStyle.Object", trace);
 	/* Class Definition */
 	/* If you want to create Generic class like Array<T>, see konoha.map package */
 	// event_base
@@ -2646,6 +2661,11 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	KClass *Cbev_eventCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_void, 3, bev_eventCB_p);
 	int KType_Cbev_eventCBfunc = Cbev_eventCBfunc->typeId;
 
+	//bev_filterCB_p
+	kparamtype_t bev_filterCB_p[] = {{KType_cevbuffer, 0}, {KType_cevbuffer, 0}, {KType_Int, 0}, {KType_Int, 0}, {KType_Object, 0}};
+	KClass *cbev_filterCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_cbufferevent, 5, bev_filterCB_p);
+	int KType_cbev_filterCBfunc = cbev_filterCBfunc->typeId;
+
 	//cevhttp_requestCB_p
 	kparamtype_t cevhttp_requestCB_p[] = {{KType_cevhttp_request, 0}, {KType_Object, 0}};
 	KClass *cevhttp_requestCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_void, 2, cevhttp_requestCB_p);
@@ -2747,6 +2767,7 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		_Public, _F(cbufferevent_lock), KType_void, KType_cbufferevent, KMethodName_("lock"), 0,
 		_Public, _F(cbufferevent_unlock), KType_void, KType_cbufferevent, KMethodName_("unlock"), 0,
 		_Public, _F(cbufferevent_flush), KType_Int, KType_cbufferevent, KMethodName_("flush"), 2, KType_Int, KFieldName_("iotype"), KType_Int, KFieldName_("mode"),
+		_Public, _F(cbufferevent_filter_new), KType_cbufferevent, KType_cbufferevent, KMethodName_("filter_new"), 4, KType_cbev_filterCBfunc, KFieldName_("input_filter"), KType_cbev_filterCBfunc, KFieldName_("output_filter"), KType_Int, KFieldName_("option"), KType_Object, KFieldName_("ctx"),
 
 
 
