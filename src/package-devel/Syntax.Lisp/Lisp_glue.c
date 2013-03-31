@@ -99,7 +99,7 @@ static kbool_t Lisp_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE *Lisp_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) Lisp_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "Lisp", "0.0");

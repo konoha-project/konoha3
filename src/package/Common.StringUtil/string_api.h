@@ -29,6 +29,10 @@
 extern "C" {
 #endif
 
+#ifdef _MSC_VER
+#define strncasecmp _strnicmp
+#endif
+
 /*
  * Get the bytesize from text and number of multibyte characters.
  * e.g.) MultibyteText_bytesize("あいうえお", 3) => 9

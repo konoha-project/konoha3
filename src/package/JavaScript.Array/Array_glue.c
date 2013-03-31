@@ -752,7 +752,7 @@ static kbool_t array_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 	return true;
 }
 
-KDEFINE_PACKAGE *Array_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) Array_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "JavaScript", "1.4");

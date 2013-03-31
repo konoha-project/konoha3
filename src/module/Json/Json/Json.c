@@ -25,9 +25,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "kjson/kjson.c"
 #include "konoha3/konoha.h"
+#include "konoha3/platform.h"
+#include "kjson/kjson.c"
+
 #define JSONAPI PLATAPI JsonModule.
 
 static JSON JSONUString_new2(JSONMemoryPool *jm, const char *s, size_t len)
@@ -273,7 +274,7 @@ static void DeleteJsonContext(KonohaContext *kctx)
 	free(mp);
 }
 
-kbool_t LoadJsonModule(KonohaFactory *factory, ModuleType type)
+KONOHA_EXPORT(kbool_t) LoadJsonModule(KonohaFactory *factory, ModuleType type)
 {
 	static KModuleInfo ModuleInfo = {
 		"Json", "0.1", 0, "json",

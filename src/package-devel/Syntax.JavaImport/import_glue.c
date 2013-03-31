@@ -126,7 +126,7 @@
 //	return true;
 //}
 //
-//KDEFINE_PACKAGE *JavaImport_Init(void)
+//KONOHA_EXPORT(KDEFINE_PACKAGE *) JavaImport_Init(void)
 //{
 //	static KDEFINE_PACKAGE d = {0};
 //	KSetPackageName(d, "import", "1.0");

@@ -194,7 +194,7 @@ static kbool_t iterator_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNa
 	return true;
 }
 
-KDEFINE_PACKAGE *iterator_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) iterator_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "iterator", "1.0");

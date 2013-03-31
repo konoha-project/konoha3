@@ -286,7 +286,7 @@ static char *InputUserPassword(KonohaContext *kctx, const char *message)
 
 // -------------------------------------------------------------------------
 
-kbool_t LoadConsoleModule(KonohaFactory *factory, ModuleType type)
+KONOHA_EXPORT(kbool_t) LoadConsoleModule(KonohaFactory *factory, ModuleType type)
 {
 	static KModuleInfo ModuleInfo = {
 		"Console", "0.1", 0, "term",

@@ -30,6 +30,7 @@ static char *readline(const char *prompt)
 	static int checkCTL = 0;
 	int ch, pos = 0;
 	static char linebuf[1024]; // THREAD-UNSAFE
+	char *p;
 	fputs(prompt, stdout);
 	while((ch = fgetc(stdin)) != EOF) {
 		if(ch == '\r') continue;
@@ -49,10 +50,14 @@ static char *readline(const char *prompt)
 		linebuf[pos] = ch;
 		pos++;
 	}
-	if(ch == EOF) return NULL;
-	char *p = (char *)malloc(pos+1);
-	memcpy(p, linebuf, pos+1);
-	return p;
+	if(ch == EOF) {
+		return NULL;
+	}
+	else {
+		char *p = (char *)malloc(pos+1);
+		memcpy(p, linebuf, pos+1);
+		return p;
+	}
 }
 
 static int add_history(const char *line)

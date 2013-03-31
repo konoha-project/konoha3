@@ -172,7 +172,7 @@ static kbool_t object_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE *Object_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) Object_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "JavaStyle", K_VERSION);
