@@ -887,7 +887,7 @@ static void KscheduleGC(KonohaContext *kctx, KTraceInfo *trace)
 }
 /* ------------------------------------------------------------------------ */
 
-kbool_t LoadMSGCModule(KonohaFactory *factory, ModuleType type)
+KONOHA_EXPORT(kbool_t) LoadMSGCModule(KonohaFactory *factory, ModuleType type)
 {
 	static KModuleInfo ModuleInfo = {
 		"MSGC", "0.1", 0, "msgc",

@@ -30,7 +30,7 @@
 extern "C" {
 #endif
 
-kbool_t LoadBitmapGenGCModule(KonohaFactory *factory, ModuleType type)
+KONOHA_EXPORT(kbool_t) LoadBitmapGenGCModule(KonohaFactory *factory, ModuleType type)
 {
 	static KModuleInfo ModuleInfo = {
 		"BitmapGenGC", "0.1", 0, "bmgengc",

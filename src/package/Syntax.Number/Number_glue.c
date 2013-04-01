@@ -214,7 +214,7 @@ static kbool_t Number_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE *Number_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) Number_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "Number", "0.0");

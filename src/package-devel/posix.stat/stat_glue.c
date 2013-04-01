@@ -354,7 +354,7 @@ static kbool_t stat_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE *stat_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) stat_Init(void)
 {
 	static KDEFINE_PACKAGE d = {};
 	KSetPackageName(d, "posix", "1.0");

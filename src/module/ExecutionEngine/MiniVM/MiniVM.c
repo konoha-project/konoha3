@@ -32,6 +32,10 @@
 #include "konoha3/import/module.h"
 #include "minivm.h"
 
+#ifdef _MSC_VER
+#undef ERROR
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -1421,7 +1425,7 @@ static const struct KBuilderAPI *GetDefaultBuilderAPI(void)
 
 // -------------------------------------------------------------------------
 
-kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
+KONOHA_EXPORT(kbool_t) LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
 {
 	if(BOOTCODE_ENTER == NULL) {
 		SetUpBootCode();

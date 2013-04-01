@@ -458,7 +458,7 @@ static kbool_t BashBuilder_VisitFieldNode(KonohaContext *kctx, KBuilder *builder
 	return true;
 }
 
-kbool_t LoadBashModule(KonohaFactory *factory, ModuleType type);
+KONOHA_EXPORT(kbool_t) LoadBashModule(KonohaFactory *factory, ModuleType type);
 static void compileAllDefinedMethodsInNameSpace(KonohaContext *kctx, kNameSpace *ns);
 static void SetUpBashShebang(KonohaContext *kctx);
 
@@ -1024,7 +1024,7 @@ static const struct KBuilderAPI *GetDefaultBuilderAPI(void)
 
 // -------------------------------------------------------------------------
 
-kbool_t LoadBashModule(KonohaFactory *factory, ModuleType type)
+KONOHA_EXPORT(kbool_t) LoadBashModule(KonohaFactory *factory, ModuleType type)
 {
 	memcpy(&factory->ExecutionEngineModule, &Bash_Module, sizeof(Bash_Module));
 	return true;

@@ -119,8 +119,9 @@ static kbool_t LoadPlatformModule(KonohaFactory *factory, const char *moduleName
 		HMODULE gluehdr = LoadLibrary(pathbuf);
 		if(gluehdr != NULL) {
 			char funcbuf[256];
+			ModuleLoadFunc load;
 			snprintf(funcbuf, sizeof(funcbuf), "Load%sModule", moduleName);
-			ModuleLoadFunc load = (ModuleLoadFunc)GetProcAddress(gluehdr, funcbuf);
+			load = (ModuleLoadFunc)GetProcAddress(gluehdr, funcbuf);
 			if(load != NULL) {
 				return load(factory, type);
 			}
@@ -158,12 +159,14 @@ static const char* FormatPackagePath(KonohaContext *kctx, char *buf, size_t bufs
 static KPackageHandler *LoadPackageHandler(KonohaContext *kctx, const char *packageName)
 {
 	char pathbuf[256];
+	HMODULE gluehdr;
 	FormatPackagePath(kctx, pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
-	HMODULE gluehdr = LoadLibrary(pathbuf);
+	gluehdr = LoadLibrary(pathbuf);
 	if(gluehdr != NULL) {
-		char funcbuf[80];
+		char funcbuf[128];
+		PackageLoadFunc f;
 		snprintf(funcbuf, sizeof(funcbuf), "%s_Init", ShortPackageName(packageName));
-		PackageLoadFunc f = (PackageLoadFunc)GetProcAddress(gluehdr, funcbuf);
+		f = (PackageLoadFunc)GetProcAddress(gluehdr, funcbuf);
 		if(f != NULL) {
 			return f();
 		}
@@ -483,10 +486,11 @@ static int isEmptyChunk(const char *t, size_t len)
 static int loadScript(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *))
 {
 	int isSuccessfullyLoading = false;
+	FILE *fp;
 	if(isDir(filePath)) {
 		return isSuccessfullyLoading;
 	}
-	FILE *fp = fopen(filePath, "r");
+	fp = fopen(filePath, "r");
 	if(fp != NULL) {
 		SimpleBuffer simpleBuffer;
 		simpleBuffer.buffer = (char *)malloc(K_PAGESIZE);
@@ -495,10 +499,11 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 		while(!feof(fp)) {
 			kfileline_t rangeheadline = uline;
 			kshort_t sline = (kshort_t)uline;
+			const char *script;
 			bzero(simpleBuffer.buffer, simpleBuffer.allocSize);
 			simpleBuffer.size = 0;
 			uline = readChunk(fp, uline, &simpleBuffer);
-			const char *script = (const char *)simpleBuffer.buffer;
+			script = (const char *)simpleBuffer.buffer;
 			if(sline == 1 && simpleBuffer.size > 2 && script[0] == '#' && script[1] == '!') {
 				// fall through this line
 				simpleBuffer.size = 0;
@@ -783,33 +788,33 @@ static kunused void diagnosis(void)
 
 static const char* BeginTag(KonohaContext *kctx, kinfotag_t t)
 {
-	DBG_ASSERT(t <= NoneTag);
-	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
 	static const char* tags[] = {
-		"\x1b[1m\x1b[31m", /*CritTag*/
-		"\x1b[1m\x1b[31m", /*ErrTag*/
-		"\x1b[1m\x1b[31m", /*WarnTag*/
-		"\x1b[1m", /*NoticeTag*/
-		"\x1b[1m", /*InfoTag*/
+		"", /*CritTag*/
+		"", /*ErrTag*/
+		"", /*WarnTag*/
+		"", /*NoticeTag*/
+		"", /*InfoTag*/
 		"", /*DebugTag*/
 		"", /* NoneTag*/
 	};
+	DBG_ASSERT(t <= NoneTag);
+	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
 	return tags[(int)t];
 }
 
 static const char* EndTag(KonohaContext *kctx, kinfotag_t t)
 {
-	DBG_ASSERT(t <= NoneTag);
-	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
 	static const char* tags[] = {
-			"\x1b[0m", /*CritTag*/
-			"\x1b[0m", /*ErrTag*/
-			"\x1b[0m", /*WarnTag*/
-			"\x1b[0m", /*NoticeTag*/
-			"\x1b[0m", /*InfoTag*/
+			"", /*CritTag*/
+			"", /*ErrTag*/
+			"", /*WarnTag*/
+			"", /*NoticeTag*/
+			"", /*InfoTag*/
 			"", /* Debug */
 			"", /* NoneTag*/
 	};
+	DBG_ASSERT(t <= NoneTag);
+	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
 	return tags[(int)t];
 }
 
@@ -884,6 +889,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaS
 		const char *file = PLATAPI shortFilePath(KFileLine_textFileName(uline));
 		unsigned i;
 		KClass *cThis;
+		kParam *param;
 		PLATAPI printf_i(" [%ld] (%s:%d) %s.%s%s(", (sfp - kctx->stack->stack), file, (kushort_t)uline, kMethod_Fmt3(mtd));
 		cThis = KClass_(mtd->typeId);
 		if(!KClass_Is(UnboxType, cThis)) {
@@ -894,7 +900,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaS
 			PLATAPI printf_i("this=(%s) %s, ", KClass_text(cThis), KLIB KBuffer_text(kctx, &wb, 1));
 			KLIB KBuffer_Free(&wb);
 		}
-		kParam *param = kMethod_GetParam(mtd);
+		param = kMethod_GetParam(mtd);
 		for(i = 0; i < param->psize; i++) {
 			KClass *c = KClass_(param->paramtypeItems[i].attrTypeId);
 			if(i > 0) {

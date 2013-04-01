@@ -326,7 +326,7 @@ static kbool_t DiagnosisCheckSoftwareTestIsPass(KonohaContext *kctx, const char 
 
 // -------------------------------------------------------------------------
 
-kbool_t LoadDiagnosisModule(KonohaFactory *factory, ModuleType type)
+KONOHA_EXPORT(kbool_t) LoadDiagnosisModule(KonohaFactory *factory, ModuleType type)
 {
 	static KModuleInfo ModuleInfo = {
 		"Diagnosis", "0.1", 0, "deos",

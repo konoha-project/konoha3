@@ -286,7 +286,7 @@ static kbool_t bytes_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 	return true;
 }
 
-KDEFINE_PACKAGE *Bytes_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) Bytes_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);
