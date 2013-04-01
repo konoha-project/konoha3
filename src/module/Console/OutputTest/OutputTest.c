@@ -181,7 +181,7 @@ static char* TEST_InputUserPassword(KonohaContext *kctx, const char *message)
 
 // -------------------------------------------------------------------------
 
-kbool_t LoadOutputTestModule(KonohaFactory *factory, ModuleType type)
+KONOHA_EXPORT(kbool_t) LoadOutputTestModule(KonohaFactory *factory, ModuleType type)
 {
 	static KModuleInfo ModuleInfo = {
 		"OutputTest", "0.1", 0, "test",

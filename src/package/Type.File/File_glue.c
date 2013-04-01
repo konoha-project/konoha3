@@ -553,7 +553,7 @@ static kbool_t file_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE *File_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) File_Init(void)
 {
 	static KDEFINE_PACKAGE d;
 	KSetPackageName(d, "file", "1.0");

@@ -246,7 +246,7 @@ static kbool_t Exception_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kN
 	return true;
 }
 
-KDEFINE_PACKAGE *Exception_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) Exception_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "Exception", "0.0");

@@ -319,7 +319,7 @@ static kbool_t ClosureModel_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns,
 	return true;
 }
 
-KDEFINE_PACKAGE *ClosureModel_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) ClosureModel_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "ClosureModel", "0.0");

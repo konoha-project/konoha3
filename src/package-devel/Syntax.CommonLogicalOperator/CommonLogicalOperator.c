@@ -98,7 +98,7 @@
 //	return true;
 //}
 //
-//KDEFINE_PACKAGE *CommonLogicalOperator_Init(void)
+//KONOHA_EXPORT(KDEFINE_PACKAGE *) CommonLogicalOperator_Init(void)
 //{
 //	static KDEFINE_PACKAGE d = {0};
 //	KSetPackageName(d, "CommonLogicalOperator", "0.0");

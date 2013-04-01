@@ -195,7 +195,7 @@ static kbool_t prototype_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kN
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE *Prototype_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) Prototype_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "JavaScript", "1.4");

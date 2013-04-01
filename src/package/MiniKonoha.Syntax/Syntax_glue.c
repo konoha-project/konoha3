@@ -833,7 +833,7 @@ static kbool_t Syntax_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE *Syntax_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) Syntax_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "MiniKonoha", K_VERSION);

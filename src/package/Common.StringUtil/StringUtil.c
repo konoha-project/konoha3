@@ -168,7 +168,7 @@ static kbool_t string_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE *StringUtil_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) StringUtil_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");
