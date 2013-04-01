@@ -30,7 +30,6 @@ static char *readline(const char *prompt)
 	static int checkCTL = 0;
 	int ch, pos = 0;
 	static char linebuf[1024]; // THREAD-UNSAFE
-	char *p;
 	fputs(prompt, stdout);
 	while((ch = fgetc(stdin)) != EOF) {
 		if(ch == '\r') continue;
