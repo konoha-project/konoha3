@@ -23,15 +23,16 @@
  ***************************************************************************/
 
 #define USE_EXECUTIONENGINE
-#include <string.h>
-#include <konoha3/konoha.h>
-#include <konoha3/sugar.h>
-#include <konoha3/klib.h>
-#include <konoha3/import/module.h>
 
+#include "konoha3/konoha.h"
+#include "konoha3/sugar.h"
+#include "konoha3/klib.h"
+#include "konoha3/import/module.h"
+
+#include <string.h>
 #include <string>
 
-#undef HAVE_LIBV8
+#undef HAVE_LIBV8/*FIXME*/
 #ifdef HAVE_LIBV8
 #include <v8.h>
 #endif
@@ -126,7 +127,7 @@ enum kSymbolPrefix{
 	kSymbolPrefix_IS,
 	kSymbolPrefix_UNKNOWN,
 	kSymbolPrefix_TO,
-	kSymbolPrefix_DOLLAR,
+	kSymbolPrefix_DOLLAR
 };
 
 static enum kSymbolPrefix KSymbol_prefixText_ID(ksymbol_t sym)
@@ -465,14 +466,14 @@ static void JSBuilder_EmitKonohaValue(KonohaContext *kctx, KBuilder *builder, KC
 static void JSBuilder_EmitConstValue(KonohaContext *kctx, KBuilder *builder, kObject *obj)
 {
 	KonohaStack sfp[1];
-	sfp[0].asObject = obj;
+	KStackSetObjectValue(sfp[0].asObject, obj);
 	JSBuilder_EmitKonohaValue(kctx, builder, kObject_class(obj), sfp);
 }
 
 static void JSBuilder_EmitUnboxConstValue(KonohaContext *kctx, KBuilder *builder, KClass *ct, unsigned long long unboxVal)
 {
 	KonohaStack sfp[1];
-	sfp[0].unboxValue = unboxVal;
+	KStackSetUnboxValue(sfp[0].unboxValue, unboxVal);
 	JSBuilder_EmitKonohaValue(kctx, builder, ct, sfp);
 }
 
