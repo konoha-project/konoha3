@@ -1,4 +1,4 @@
-import("MiniKonoha.ClosureModel");
+import("Konoha.ClosureModel");
 
 Func[int, int] f() {
 	return function (int x, int y) int {

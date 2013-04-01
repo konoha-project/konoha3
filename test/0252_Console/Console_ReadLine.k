@@ -1,6 +1,6 @@
 // written by kimio
 
-import("MiniKonoha.Console");
+import("Konoha.Console");
 
 void test() {
 	String line = Console.readLine(">>> ");  // OutputTest returns null;

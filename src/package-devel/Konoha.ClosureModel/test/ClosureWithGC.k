@@ -1,4 +1,4 @@
-import("MiniKonoha.ClosureModel");
+import("Konoha.ClosureModel");
 
 Func[String, String] f() {
 	String s = "hi";

@@ -4,7 +4,7 @@
  *
  */
 
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 import("Syntax.JavaStyleClass");
 import("Syntax.JavaNewArray");
 import("Syntax.CStyleFor");

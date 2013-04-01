@@ -1,6 +1,6 @@
 import("Syntax.CStyleWhile");
 import("posix.process");
-import("MiniKonoha.EventListener");
+import("Konoha.EventListener");
 
 void callback(Event e) {
 	System.p("handler property=" + e.getProperty("event"));

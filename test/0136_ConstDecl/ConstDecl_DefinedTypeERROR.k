@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 
 const String = 10;
 System.p(String);

@@ -24,7 +24,7 @@
 
 import("Java.String");
 import("konoha.foreach");
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 import("JavaScript.Array");
 import("Type.File");
 import("Syntax.JavaStyleClass");

@@ -11,7 +11,7 @@ import("Syntax.CStyleFor");
 import("Syntax.Null");
 import("Syntax.Number");
 import("Syntax.GlobalVariable");
-import("MiniKonoha.Map");
+import("Konoha.Map");
 
 boolean hasFile(String path) {
     int fd = System.open(path, 0);

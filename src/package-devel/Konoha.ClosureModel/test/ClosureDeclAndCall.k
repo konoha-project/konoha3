@@ -1,4 +1,4 @@
-import("MiniKonoha.ClosureModel");
+import("Konoha.ClosureModel");
 
 void test() {
 	int x = 1;

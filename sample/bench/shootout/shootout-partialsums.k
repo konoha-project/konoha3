@@ -6,7 +6,7 @@
 
 import("cstyle");
 import("Type.Float");
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 import("JavaScript.Math");
 const N=2500000;
 

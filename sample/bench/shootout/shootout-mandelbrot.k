@@ -6,7 +6,7 @@
 
 import("Syntax.JavaStyleClass");
 import("Type.File");
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 import("Type.Bytes");
 import("Type.Float");
 import("cstyle");

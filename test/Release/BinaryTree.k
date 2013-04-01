@@ -4,7 +4,7 @@ import("Syntax.JavaStyleClass");
 import("Syntax.GlobalVariable");
 import("Syntax.CStyleBitwiseOperator");
 import("JavaScript.Array");
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 
 AllowImplicitGlobalVariable(true);
 

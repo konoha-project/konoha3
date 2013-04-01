@@ -5,7 +5,7 @@
  * modified slightly by Chad Whipkey
  */
 
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 import("Type.Float");
 import("Syntax.JavaStyleClass");
 import("Syntax.JavaNewArray");

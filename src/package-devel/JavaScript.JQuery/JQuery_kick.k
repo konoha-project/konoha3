@@ -1,5 +1,5 @@
 import("JavaStyle.Object");
-import("MiniKonoha.Map");
+import("Konoha.Map");
 import("Syntax.GlobalVariable");
 import("Syntax.Null");
 

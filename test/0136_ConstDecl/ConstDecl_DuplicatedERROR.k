@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 
 const MAX = 10;
 const MAX = 100;

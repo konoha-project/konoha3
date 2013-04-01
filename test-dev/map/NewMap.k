@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("MiniKonoha.Map");
+import("Konoha.Map");
 import("JavaStyle.Object");
 
 void test() {

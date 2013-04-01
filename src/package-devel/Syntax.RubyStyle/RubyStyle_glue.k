@@ -1,5 +1,5 @@
-import("MiniKonoha.Syntax")
-import("MiniKonoha.NameSpace")
+import("Konoha.Syntax")
+import("Konoha.NameSpace")
 import("Syntax.Null")
 import("Syntax.CStyleWhile")
 import("JavaScript.Array")

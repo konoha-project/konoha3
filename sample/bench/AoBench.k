@@ -7,7 +7,7 @@ import("Type.Bytes");
 import("JavaScript.Math");
 import("JavaScript.Array");
 import("Java.String");
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 import("Syntax.CStyleWhile");
 import("Syntax.GlobalVariable");
 import("Syntax.JavaStyleClass");

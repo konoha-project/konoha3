@@ -1,6 +1,6 @@
 // written by kimio
 
-import("MiniKonoha.Syntax");
+import("Konoha.Syntax");
 
 void test() {
 	Symbol keyword = "$Symbol";

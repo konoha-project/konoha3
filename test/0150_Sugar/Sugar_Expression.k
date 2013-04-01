@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("MiniKonoha.Syntax");
+import("Konoha.Syntax");
 
 Node TypeCheckTest(Node node, NameSpace ns, Object type) {
 	System.p("do nothing");

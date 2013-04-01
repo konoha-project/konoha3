@@ -28,11 +28,11 @@ import("JavaStyle.Object");
 import("Syntax.JavaStyleClass");
 import("Type.StaticVar");
 import("Syntax.GlobalVariable");
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 import("JavaScript.String");
 import("JavaScript.Regexp");
 import("JavaScript.Array");
-import("MiniKonoha.Map");
+import("Konoha.Map");
 import("konoha.iterator");
 
 //	KImportPackage(ns, "konoha.const", trace);

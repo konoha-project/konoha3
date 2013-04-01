@@ -2,7 +2,7 @@ import("Type.Float");
 import("Syntax.JavaStyleClass");
 import("Syntax.GlobalVariable");
 import("Syntax.Null");
-import("MiniKonoha.Map");
+import("Konoha.Map");
 import("JavaStyle.Object");
 import("JavaScript.Array");
 import("JavaScript.Document");

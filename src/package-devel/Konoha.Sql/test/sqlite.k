@@ -1,4 +1,4 @@
-import("MiniKonoha.Sql");
+import("Konoha.Sql");
 import("Syntax.CStyleWhile");
 import("Type.File");
 

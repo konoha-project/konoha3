@@ -3,7 +3,7 @@ Import("JavaScript.String");
 Import("Type.File");
 Import("Type.Bytes");
 Import("Syntax.CStyleWhile");
-Import("MiniKonoha.NameSpace");
+Import("Konoha.NameSpace");
 
 String readFile(String path) {
     FILE file = new FILE(path, "rb");
@@ -57,13 +57,13 @@ void main() {
         "java2.string", "konoha.eval"];
     String[] after  = ["JavaScript.Array","JavaScript.String","Type.Float","JavaScript.Math", "JavaScript.Regexp", "JavaScript.Date", "Type.Bytes", "Type.File",
         "Type.Complex", "Lib.Curl", "Lib.Libvirt", "Lib.Gmp", "Lib.Openssl", "Lib.Mecab", "Lib.Llvm", "Lib.Apache", "Type.Json", "Java.String",
-        "Java.Object", "JavaScript.Prototype", "MiniKonoha.Console", "MiniKonoha.Syntax", "MiniKonoha.ObjectModel", "MiniKonoha.Man",
-        "MiniKonoha.NameSpace", "Syntax.GlobalVariable", "Syntax.JavaStyleClass", "Type.Dynamic", "Syntax.UntypedVariable", "Type.StaticVar", "Lib.Libxml2.Xmlreader",
-        "Lib.Mecab", "Lib.Mpi", "Lib.Openssl", "Lib.Python", "MiniKonoha.Sql", "MiniKonoha.NameSpace", "Syntax.JavaImport", "Java.String", "MiniKonoha.Eval"];
+        "Java.Object", "JavaScript.Prototype", "Konoha.Console", "Konoha.Syntax", "Konoha.ObjectModel", "Konoha.Man",
+        "Konoha.NameSpace", "Syntax.GlobalVariable", "Syntax.JavaStyleClass", "Type.Dynamic", "Syntax.UntypedVariable", "Type.StaticVar", "Lib.Libxml2.Xmlreader",
+        "Lib.Mecab", "Lib.Mpi", "Lib.Openssl", "Lib.Python", "Konoha.Sql", "Konoha.NameSpace", "Syntax.JavaImport", "Java.String", "Konoha.Eval"];
 
 
     before.add("konoha.map");
-    after.add( "MiniKonoha.Map");
+    after.add( "Konoha.Map");
 
     before.add("cstyle\", \"null");
     after.add( "Syntax.Null");

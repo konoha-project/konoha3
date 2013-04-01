@@ -5,7 +5,7 @@
  */
 
 import("cstyle");
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 import("Syntax.GlobalVariable");
 import("Syntax.JavaStyleClass");
 import("JavaScript.Array");

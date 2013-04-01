@@ -44,7 +44,7 @@ if(MYSQL_FOUND OR HAVE_LIBSQLITE OR PG_CONFIG)
 	set(PACKAGE_SOURCE_CODE ${PACKAGE_SOURCE_CODE}
 		sql_glue.c
 	)
-	add_konoha_package(MiniKonoha.Sql)
+	add_konoha_package(Konoha.Sql)
 else(MYSQL_FOUND OR HAVE_LIBSQLITE OR PG_CONFIG)
 	show_package_warning(konoha.sql)
 endif(MYSQL_FOUND OR HAVE_LIBSQLITE OR PG_CONFIG)

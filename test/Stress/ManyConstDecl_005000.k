@@ -1,5 +1,5 @@
 // written by kimio kuramitsu
-import("MiniKonoha.NameSpace");  // konoha.const is obsolete
+import("Konoha.NameSpace");  // konoha.const is obsolete
 
 const N0 = 0;
 const N1 = 1;
