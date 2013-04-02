@@ -105,7 +105,7 @@ static kbool_t SetParamType(KonohaContext *kctx, kNode *stmt, int n, kparamtype_
 	if(kNode_isSymbolTerm(expr)) {
 		kToken *tkN = expr->TermToken;
 		p[n].name = tkN->symbol;
-		p[n].attrTypeId = Token_typeLiteral(typeToken);
+		p[n].typeAttr = Token_typeLiteral(typeToken);
 		return true;
 	}
 	return false;
@@ -185,8 +185,8 @@ static KClass *CreateEnvClass(KonohaContext *kctx, kNameSpace *ns, kToken *typeT
 	assert(end < 256);
 	for(i = start; i <= end; i++) {
 		p[i-1].name       = oldenv[i].name;
-		p[i-1].attrTypeId = oldenv[i].attrTypeId;
-		*(text++) = (KType_text(p[i-1].attrTypeId))[0];
+		p[i-1].typeAttr = oldenv[i].typeAttr;
+		*(text++) = (KType_text(p[i-1].typeAttr))[0];
 	}
 
 	*EnvObjectClass = KLIB kNameSpace_GetClassByFullName(kctx, ns, buf, text - buf, NULL);
@@ -200,7 +200,7 @@ static KClass *CreateEnvClass(KonohaContext *kctx, kNameSpace *ns, kToken *typeT
 		for(i = start; i <= end; i++) {
 			int n = i - 1;
 			ksymbol_t sym    = p[n].name;
-			ktypeattr_t type = KTypeAttr_Unmask(p[n].attrTypeId);
+			ktypeattr_t type = KTypeAttr_Unmask(p[n].typeAttr);
 			kMethod *getter = new_FunctionGetter(kctx, _GcStack, ct->typeId, sym, type, n);
 			kMethod *setter = new_FunctionSetter(kctx, _GcStack, ct->typeId, sym, type, n);
 			KLIB kArray_Add(kctx, ct->classMethodList, getter);
@@ -214,12 +214,12 @@ static KClass *CreateEnvClass(KonohaContext *kctx, kNameSpace *ns, kToken *typeT
 static void kNameSpace_InitParam(KonohaContext *kctx, kNameSpace *ns, struct KGammaLocalData *env, kParam *pa, KClass *envCt)
 {
 	size_t i;
-	env->localScope.varItems[0].attrTypeId = envCt->typeId;
+	env->localScope.varItems[0].typeAttr = envCt->typeId;
 	env->localScope.varItems[0].name = KFieldName_("env");
 	for(i = 0; i < pa->psize; i++) {
 		const kparamtype_t *pn = (pa->paramtypeItems)+i;
 		env->localScope.varItems[i+1].name       = pn->name;
-		env->localScope.varItems[i+1].attrTypeId = pn->attrTypeId;
+		env->localScope.varItems[i+1].typeAttr = pn->typeAttr;
 	}
 	env->localScope.varsize += pa->psize + 1;
 }
@@ -286,7 +286,7 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 			i = 1;
 		}
 		for(; i < genv->localScope.varsize; i++) {
-			kNode *node = new_VariableNode(kctx, ns, KNode_Local, genv->localScope.varItems[i].attrTypeId, i);
+			kNode *node = new_VariableNode(kctx, ns, KNode_Local, genv->localScope.varItems[i].typeAttr, i);
 			KLIB kArray_Add(kctx, texpr->NodeList, node);
 		}
 	}

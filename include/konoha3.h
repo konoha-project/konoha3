@@ -243,8 +243,6 @@ typedef struct {
 #define KSymbolAttr_Annotation        (KFLAG_H1|KFLAG_H2)
 #define KSymbolAttr_Pattern           (KFLAG_H0|KFLAG_H1|KFLAG_H2)
 #define KSymbolAttr_SyntaxList        (KFLAG_H3)
-//#define KSymbolAttr_Annotation        (KFLAG_H0|KFLAG_H1)
-//#define KSymbolAttr_Pattern           (KFLAG_H0|KFLAG_H2)
 #define KSymbol_IsAnnotation(S)       ((S & KSymbolAttr_Pattern) == KSymbolAttr_Annotation)
 #define KSymbol_IsPattern(S)          ((S & KSymbolAttr_Pattern) == KSymbolAttr_Pattern)
 
@@ -800,7 +798,7 @@ struct KonohaFactory {
 
 typedef struct {
 	ksymbol_t key;
-	ktypeattr_t   attrTypeId;
+	ktypeattr_t   typeAttr;
 	union {
 		uintptr_t   unboxValue;
 		kObject    *ObjectValue;
@@ -1123,7 +1121,7 @@ struct KClassVar {
 };
 
 struct KClassField {
-	ktypeattr_t     attrTypeId;
+	ktypeattr_t     typeAttr;
 	ksymbol_t       name;
 };
 
@@ -1370,7 +1368,7 @@ struct kArrayVar {
 #define IS_Param(o)              (kObject_baseTypeId(o) == KType_Param)
 
 typedef struct kparamtype_t {
-	ktypeattr_t    attrTypeId;
+	ktypeattr_t    typeAttr;
 	ksymbol_t  name;
 } kparamtype_t;
 
@@ -2000,7 +1998,7 @@ typedef enum KNode_Type {
 
 struct kNodeVar {
 	kObjectHeader h;
-	kshort_t nodeType; ktypeattr_t attrTypeId;
+	kshort_t nodeType; ktypeattr_t typeAttr;
 	union {
 		kNode      *Parent;   /* if parent is a NameSpace, it is a root node */
 		kNameSpace *RootNodeNameSpace;
@@ -2048,11 +2046,11 @@ static inline kNameSpace *kNode_GetNameSpace(KonohaContext *kctx, kNode *node)
 #define kNode_SetParent(kctx, node, parent)   KFieldSet(node, node->Parent, parent)
 
 
-static inline kNode *kNode_Type(kNode *node, knode_t nodeType, ktypeattr_t attrTypeId)
+static inline kNode *kNode_Type(kNode *node, knode_t nodeType, ktypeattr_t typeAttr)
 {
 	if(kNode_node(node) != KNode_Error) {
 		kNode_setnode(node, nodeType);
-		node->attrTypeId = attrTypeId;
+		node->typeAttr = typeAttr;
 	}
 	return node;
 }
@@ -2088,7 +2086,7 @@ static inline size_t kNode_GetNodeListSize(KonohaContext *kctx, kNode *node)
 
 
 typedef struct {
-	ktypeattr_t    attrTypeId;    ksymbol_t  name;
+	ktypeattr_t    typeAttr;    ksymbol_t  name;
 } KGammaStackDecl;
 
 #define kNameSpace_TopLevel              (kshortflag_t)(1)

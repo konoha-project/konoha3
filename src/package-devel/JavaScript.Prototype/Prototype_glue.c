@@ -59,7 +59,7 @@ static KMETHOD Prototype_get(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t symbol = sfp[1].intValue;
 	KKeyValue *kvs = KLIB kObjectProto_GetKeyValue(kctx, sfp[0].asObject, symbol);
 	if(kvs != NULL) {
-		KClass *c = KClass_(kvs->attrTypeId);
+		KClass *c = KClass_(kvs->typeAttr);
 		if(targetClass == c) {
 			if(KClass_Is(UnboxType, targetClass)) {
 				KReturnUnboxValue(kvs->unboxValue);
@@ -116,7 +116,7 @@ static void KStackDynamicTypeCheck(KonohaContext *kctx, KonohaStack *sfp, kMetho
 	kParam *pa = kMethod_GetParam(mtd);
 	for(i = 0; i < pa->psize; i++) {
 		KClass *objectType = kObject_class(sfp[i+1].asObject);
-		KClass *paramType = KClass_(pa->paramtypeItems[i].attrTypeId);
+		KClass *paramType = KClass_(pa->paramtypeItems[i].typeAttr);
 		paramType = paramType->realtype(kctx, paramType, thisClass);
 		if(objectType == paramType || objectType->isSubType(kctx, objectType, paramType)) {
 			if(KClass_Is(UnboxType, paramType)) {
@@ -153,7 +153,7 @@ static KMETHOD Prototype_(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t symbol = KDynamicCallSymbol(sfp);
 	KKeyValue *kvs = KLIB kObjectProto_GetKeyValue(kctx, sfp[0].asObject, symbol);
 	if(kvs != NULL) {
-		KClass *c = KClass_(kvs->attrTypeId);
+		KClass *c = KClass_(kvs->typeAttr);
 		kParam *cparam = KClass_cparam(c);
 		if(KClass_isFunc(c) && cparam->psize <= KDynamicCallArgument(sfp)) {
 			KClass *thisClass = kObject_class(sfp[0].asObject), *returnType = KGetReturnType(sfp);

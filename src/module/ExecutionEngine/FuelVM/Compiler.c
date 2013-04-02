@@ -141,7 +141,7 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 			}
 		}
 		else if(params->psize == 1) { /* BinaryOperator */
-			ktypeattr_t ptype = params->paramtypeItems[0].attrTypeId;
+			ktypeattr_t ptype = params->paramtypeItems[0].typeAttr;
 			if(retTy == KType_Boolean && ptype == KType_Boolean) {
 				/* boolean boolean.(opEQ|opNE) (boolean x) */
 				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
@@ -162,7 +162,7 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 			}
 		}
 		else if(params->psize == 1) { /* BinaryOperator */
-			ktypeattr_t ptype = params->paramtypeItems[0].attrTypeId;
+			ktypeattr_t ptype = params->paramtypeItems[0].typeAttr;
 			if(retTy == KType_Boolean && ptype == KType_Int) {
 				/* boolean int.(opEQ|opNE|opGT|opGE|opLT|opLE) (int x) */
 				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
@@ -189,7 +189,7 @@ static INode *CreateSpecialInstruction(KonohaContext *kctx, KBuilder *builder, k
 			}
 		}
 		else if(params->psize == 1) { /* BinaryOperator */
-			ktypeattr_t ptype = params->paramtypeItems[0].attrTypeId;
+			ktypeattr_t ptype = params->paramtypeItems[0].typeAttr;
 			if(retTy == KType_Boolean && ptype == KType_float) {
 				/* boolean float.(opEQ|opNE|opGT|opGE|opLT|opLE) (float x) */
 				enum BinaryOp Op = KMethodName_toBinaryOperator(kctx, mn);
@@ -221,7 +221,7 @@ static kbool_t FuelVM_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode
 	/*
 	 * [box] := box(this)
 	 **/
-	enum TypeId Type = ConvertToTypeId(kctx, expr->attrTypeId);
+	enum TypeId Type = ConvertToTypeId(kctx, expr->typeAttr);
 	Type = ToBoxType(Type);
 	KLIB VisitNode(kctx, builder, expr->NodeToPush, thunk);
 	INode *Node = FuelVM_getExpression(builder);
@@ -275,11 +275,11 @@ static kbool_t FuelVM_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, kNo
 static kbool_t FuelVM_VisitReturnNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
 	kNode *expr = KLIB kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
-	if(expr != NULL && IS_Node(expr) && expr->attrTypeId != KType_void) {
+	if(expr != NULL && IS_Node(expr) && expr->typeAttr != KType_void) {
 		KLIB VisitNode(kctx, builder, expr, thunk);
 		INode *Ret  = FuelVM_getExpression(builder);
 		INode *Inst = CreateReturn(BLD(builder), Ret);
-		INode_setType(Inst, ConvertToTypeId(kctx, expr->attrTypeId));
+		INode_setType(Inst, ConvertToTypeId(kctx, expr->typeAttr));
 	} else {
 		CreateReturn(BLD(builder), 0);
 	}
@@ -434,24 +434,24 @@ static kbool_t FuelVM_VisitTryNode(KonohaContext *kctx, KBuilder *builder, kNode
 static kbool_t FuelVM_VisitConstNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
 	kObject *v = expr->ObjectConstValue;
-	DBG_ASSERT(!KType_Is(UnboxType, expr->attrTypeId));
-	builder->Value = CreateObject(BLD(builder), expr->attrTypeId, (void *)v);
+	DBG_ASSERT(!KType_Is(UnboxType, expr->typeAttr));
+	builder->Value = CreateObject(BLD(builder), expr->typeAttr, (void *)v);
 	return true;
 }
 
 static kbool_t FuelVM_VisitUnboxConstNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	DBG_ASSERT(KType_Is(UnboxType, expr->attrTypeId));
+	DBG_ASSERT(KType_Is(UnboxType, expr->typeAttr));
 
 	SValue Val = {};
 	Val.bits = expr->unboxConstValue;
-	builder->Value = CreateConstant(BLD(builder), ConvertToTypeId(kctx, expr->attrTypeId), Val);
+	builder->Value = CreateConstant(BLD(builder), ConvertToTypeId(kctx, expr->typeAttr), Val);
 	return true;
 }
 
 static kbool_t FuelVM_VisitNewNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	enum TypeId Type = ConvertToTypeId(kctx, expr->attrTypeId);
+	enum TypeId Type = ConvertToTypeId(kctx, expr->typeAttr);
 	INode *Expr = CreateNew(BLD(builder), expr->unboxConstValue, Type);
 	builder->Value = Expr;
 	return true;
@@ -460,21 +460,21 @@ static kbool_t FuelVM_VisitNewNode(KonohaContext *kctx, KBuilder *builder, kNode
 static kbool_t FuelVM_VisitNullNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
 	SValue Val = {};
-	ktypeattr_t type = expr->attrTypeId;
+	ktypeattr_t type = expr->typeAttr;
 	if(KType_Is(UnboxType, type)) {
 		Val.bits = 0;
 	} else {
 		Val.ptr = (void *) KLIB Knull(kctx, KClass_(type));
 	}
-	builder->Value = CreateConstant(BLD(builder), ConvertToTypeId(kctx, expr->attrTypeId), Val);
+	builder->Value = CreateConstant(BLD(builder), ConvertToTypeId(kctx, expr->typeAttr), Val);
 	return true;
 }
 
 static kbool_t FuelVM_VisitLocalNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
 	INode *Inst = NULL;
-	if((Inst = IRBuilder_FindLocalVarByHash(BLD(builder), ConvertToTypeId(kctx, expr->attrTypeId), expr->index)) == 0) {
-		Inst = CreateLocal(BLD(builder), ConvertToTypeId(kctx, expr->attrTypeId));
+	if((Inst = IRBuilder_FindLocalVarByHash(BLD(builder), ConvertToTypeId(kctx, expr->typeAttr), expr->index)) == 0) {
+		Inst = CreateLocal(BLD(builder), ConvertToTypeId(kctx, expr->typeAttr));
 		IField_setHash((IField *) Inst, expr->index);
 	}
 	builder->Value = Inst;
@@ -486,7 +486,7 @@ static kbool_t FuelVM_VisitFieldNode(KonohaContext *kctx, KBuilder *builder, kNo
 	INode *Node;
 	kshort_t index  = (kshort_t)expr->index;
 	kshort_t xindex = (kshort_t)(expr->index >> (sizeof(kshort_t)*8));
-	enum TypeId Type = ConvertToTypeId(kctx, expr->attrTypeId);
+	enum TypeId Type = ConvertToTypeId(kctx, expr->typeAttr);
 	if((Node = IRBuilder_FindLocalVarByHash(BLD(builder), TYPE_Object, index)) == 0) {
 		Node = CreateLocal(BLD(builder), TYPE_Object);
 		IField_setHash((IField *) Node, index);
@@ -500,7 +500,7 @@ static kbool_t FuelVM_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder
 {
 	kMethod *mtd = CallNode_getMethod(expr);
 	DBG_ASSERT(IS_Method(mtd));
-	enum TypeId Type = ConvertToTypeId(kctx, expr->attrTypeId);
+	enum TypeId Type = ConvertToTypeId(kctx, expr->typeAttr);
 	if(mtd->mn == KMethodName_("box")) {
 		Type = ToBoxType(Type);
 	}
@@ -611,7 +611,7 @@ static kbool_t FuelVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 	INode *Node;
 	FuelIRBuilder *flbuilder = BLD(builder);
 	if(kNode_node(left) == KNode_Local) {
-		enum TypeId type = ConvertToTypeId(kctx, left->attrTypeId);
+		enum TypeId type = ConvertToTypeId(kctx, left->typeAttr);
 		if((Node = IRBuilder_FindLocalVarByHash(flbuilder, type, left->index)) == 0) {
 			Node = CreateLocal(flbuilder, type);
 			IField_setHash((IField *) Node, left->index);
@@ -634,7 +634,7 @@ static kbool_t FuelVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 			Left = CreateLocal(BLD(builder), TYPE_Object);
 			IField_setHash((IField *) Left, index);
 		}
-		enum TypeId type = ConvertToTypeId(kctx, left->attrTypeId);
+		enum TypeId type = ConvertToTypeId(kctx, left->typeAttr);
 		Node = CreateField(BLD(builder), FieldScope, type, Left, xindex);
 		KLIB VisitNode(kctx, builder, right, thunk);
 		CreateUpdate(BLD(builder), Node, FuelVM_getExpression(builder));
@@ -660,13 +660,13 @@ static kbool_t FuelVM_VisitFunctionNode(KonohaContext *kctx, KBuilder *builder, 
 	size_t i, ParamSize = kArray_size(expr->NodeList)-2;
 	for(i = 0; i < ParamSize; i++) {
 		kNode *envN = kNode_At(expr, i+2);
-		enum TypeId FieldType = ConvertToTypeId(kctx, envN->attrTypeId);
+		enum TypeId FieldType = ConvertToTypeId(kctx, envN->typeAttr);
 		INode *Node = CreateField(BLD(builder), FieldScope, FieldType, NewEnv, i);
 		KLIB VisitNode(kctx, builder, envN, thunk);
 		CreateUpdate(BLD(builder), Node, FuelVM_getExpression(builder));
 	}
 
-	Type = ConvertToTypeId(kctx, expr->attrTypeId);
+	Type = ConvertToTypeId(kctx, expr->typeAttr);
 	INode *NewFunc = CreateNew(BLD(builder), 0, Type);
 
 	kNameSpace *ns = kNode_ns(expr);
@@ -702,7 +702,7 @@ static INode *SetUpArguments(KonohaContext *kctx, FuelIRBuilder *builder, kMetho
 		Arg0 = Val;
 	}
 	for(i = 0; i < params->psize; ++i) {
-		enum TypeId type = ConvertToTypeId(kctx, params->paramtypeItems[i].attrTypeId);
+		enum TypeId type = ConvertToTypeId(kctx, params->paramtypeItems[i].typeAttr);
 		Arg = CreateArgument(builder, i+1);
 		Val = CreateLocal(builder, type);
 		CreateUpdate(builder, Val, Arg);

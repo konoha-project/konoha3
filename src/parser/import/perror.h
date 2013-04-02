@@ -93,7 +93,7 @@ static void kNode_ToError(KonohaContext *kctx, kNode *node, kString *errmsg)
 		errmsg = TS_EMPTY;
 	}
 	kNode_setnode(node, KNode_Error);
-	node->attrTypeId = KType_void;
+	node->typeAttr = KType_void;
 	KFieldSet(node, node->ErrorMessage, errmsg);
 	kNode_Set(ObjectConst, node, false);
 	//node->stackbase = ns == NULL ? 0 : ns->genv->localScope.varsize;

@@ -47,7 +47,7 @@ static void kException_AddStackTrace(KonohaContext *kctx, KonohaStack *sfp, kExc
 //	kParam *pa = kMethod_GetParam(mtd);
 //	KClass *thisClass = O_cid(sfp[0]);
 //	for(i = 0; i < psize; i++) {
-//		pa->paramtypeItems[0].attrTypeId;
+//		pa->paramtypeItems[0].typeAttr;
 //		if(i > 0) {
 //			knh_putc(ctx, cwb->w, ',');
 //		}

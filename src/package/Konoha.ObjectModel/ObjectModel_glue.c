@@ -114,7 +114,7 @@ static KMETHOD KMethodFunc_UnboxPrototypeSetter(KonohaContext *kctx, KonohaStack
 	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
 	kParam *pa = kMethod_GetParam(mtd);
-	KLIB kObjectProto_SetUnboxValue(kctx, sfp[0].asObject, key, pa->paramtypeItems[0].attrTypeId, sfp[1].unboxValue);
+	KLIB kObjectProto_SetUnboxValue(kctx, sfp[0].asObject, key, pa->paramtypeItems[0].typeAttr, sfp[1].unboxValue);
 	KReturnUnboxValue(sfp[1].unboxValue);
 }
 
@@ -153,12 +153,12 @@ static kbool_t KClass_AddField(KonohaContext *kctx, KClass *ct, ktypeattr_t type
 		definedClass->fieldItems[pos].name = sym;
 		if(KType_Is(UnboxType, typeattr)) {
 			definedClass->defaultNullValueVar->fieldUnboxItems[pos] = 0;
-			definedClass->fieldItems[pos].attrTypeId = typeattr;
+			definedClass->fieldItems[pos].typeAttr = typeattr;
 		}
 		else {
 			kObjectVar *o = definedClass->defaultNullValueVar;
 			KFieldSet(o, o->fieldObjectItems[pos], KLIB Knull(kctx, KClass_(typeattr)));
-			definedClass->fieldItems[pos].attrTypeId = typeattr | KTypeAttr_Boxed;
+			definedClass->fieldItems[pos].typeAttr = typeattr | KTypeAttr_Boxed;
 		}
 		if(1/*FLAG_is(flag, kField_Getter)*/) {
 			kMethod *mtd = new_FieldGetter(kctx, _GcStack, definedClass->typeId, sym, KTypeAttr_Unmask(typeattr), pos);
@@ -192,7 +192,7 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t fn = fieldToken->symbol;
 	kNode *self = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_INFER, 0);
 	if(self != K_NULLNODE) {
-		kMethod *mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, KClass_(self->attrTypeId), fn);
+		kMethod *mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, KClass_(self->typeAttr), fn);
 		if(mtd != NULL) {
 			KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], mtd);
 			KReturn(KLIB TypeCheckMethodParam(kctx, mtd, expr, ns, reqc));
@@ -200,7 +200,7 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 		else {  // dynamic field    o.name => o.get(name)
 			kparamtype_t p[1] = {{KType_Symbol}};
 			kparamId_t paramdom = KLIB Kparamdom(kctx, 1, p);
-			mtd = KLIB kNameSpace_GetMethodBySignatureNULL(kctx, ns, KClass_(self->attrTypeId), KMethodNameAttr_Getter, paramdom, 1, p);
+			mtd = KLIB kNameSpace_GetMethodBySignatureNULL(kctx, ns, KClass_(self->typeAttr), KMethodNameAttr_Getter, paramdom, 1, p);
 			if(mtd != NULL) {
 				KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], mtd);
 				KLIB kArray_Add(kctx, expr->NodeList, new_UnboxConstNode(kctx, ns, KType_Symbol, KSymbol_Unmask(fn)));

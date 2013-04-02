@@ -895,7 +895,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaS
 			if(i > 0) {
 				PLATAPI printf_i(", ");
 			}
-			KClass *c = KClass_(param->paramtypeItems[i].attrTypeId);
+			KClass *c = KClass_(param->paramtypeItems[i].typeAttr);
 			c = c->realtype(kctx, c, cThis);
 			KBuffer_WriteValue(kctx, &wb, c, sfp + i + 1);
 			PLATAPI printf_i("%s=(%s) %s", KSymbol_text(KSymbol_Unmask(param->paramtypeItems[i].name)), KClass_text(c), KLIB KBuffer_text(kctx, &wb, 1));

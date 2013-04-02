@@ -148,7 +148,7 @@ static void kNode_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kNodeVar *node = (kNodeVar *)o;
 	kNode_setnode(node, KNode_Done);
-	node->attrTypeId       = KType_var;
+	node->typeAttr       = KType_var;
 	kNameSpace *ns = (conf == NULL) ? KNULL(NameSpace) : (kNameSpace *)conf;
 	KFieldInit(node, node->TermToken, K_NULLTOKEN);
 	KFieldInit(node, node->RootNodeNameSpace, ns);
@@ -205,7 +205,7 @@ static void kNode_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *
 	kNode *expr = v[pos].asNode;
 	KBuffer_WriteIndent(kctx, wb, pos);
 	KLIB KBuffer_Write(kctx, wb, "{", 1);
-	if(expr->attrTypeId == KType_var) {
+	if(expr->typeAttr == KType_var) {
 		if(expr->KeyOperatorToken == K_NULLTOKEN) {
 			KLIB KBuffer_printf(kctx, wb, "nulltoken");
 		}
@@ -214,7 +214,7 @@ static void kNode_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *
 		}
 	}
 	else {
-		KLIB KBuffer_printf(kctx, wb, "%s %s :%s ", KNode_text(kNode_node(expr)), KToken_t(expr->KeyOperatorToken), KType_text(expr->attrTypeId));
+		KLIB KBuffer_printf(kctx, wb, "%s %s :%s ", KNode_text(kNode_node(expr)), KToken_t(expr->KeyOperatorToken), KType_text(expr->typeAttr));
 	}
 	KLIB kObjectProto_format(kctx, v, pos, wb, 0);
 	if(kNode_node(expr) == KNode_Error) {
@@ -225,7 +225,7 @@ static void kNode_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *
 		kNodeTerm_format(kctx, (kObject *)expr->ObjectConstValue, v, pos+1, wb);
 	}
 	else if(kNode_node(expr) == KNode_New) {
-		KLIB KBuffer_printf(kctx, wb, "new %s", KType_text(expr->attrTypeId));
+		KLIB KBuffer_printf(kctx, wb, "new %s", KType_text(expr->typeAttr));
 	}
 	else if(kNode_node(expr) == KNode_Null) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("null"));
@@ -233,7 +233,7 @@ static void kNode_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *
 	else if(kNode_node(expr) == KNode_UnboxConst) {
 		KLIB KBuffer_Write(kctx, wb, TEXTSIZE("const "));
 		v[pos+1].unboxValue = expr->unboxConstValue;
-		KClass_(expr->attrTypeId)->format(kctx, v, pos+1, wb);
+		KClass_(expr->typeAttr)->format(kctx, v, pos+1, wb);
 	}
 	else if(kNode_node(expr) == KNode_Local) {
 		KLIB KBuffer_printf(kctx, wb, "local sfp[%d]", (int)expr->index);
@@ -403,7 +403,7 @@ static kNode *new_TypedNode(KonohaContext *kctx, kNameSpace *ns, int build, KCla
 	node = kNode_AddSeveral(kctx, node, n, ap);
 	va_end(ap);
 	kNode_setnode(node, build);
-	node->attrTypeId = ty->typeId;
+	node->typeAttr = ty->typeId;
 	return (kNode *)node;
 }
 
@@ -425,7 +425,7 @@ static kNode *new_MethodNode(KonohaContext *kctx, kNameSpace *ns, KClass *reqc, 
 static kNode *kNode_SetConst(KonohaContext *kctx, kNode *expr, KClass *typedClass, kObject *o)
 {
 	if(typedClass == NULL) typedClass = kObject_class(o);
-	expr->attrTypeId = typedClass->typeId;
+	expr->typeAttr = typedClass->typeId;
 	if(KClass_Is(UnboxType, typedClass)) {
 		kNode_setnode(expr, KNode_UnboxConst);
 		expr->unboxConstValue = kNumber_ToInt(o);
@@ -438,19 +438,19 @@ static kNode *kNode_SetConst(KonohaContext *kctx, kNode *expr, KClass *typedClas
 	return expr;
 }
 
-static kNode *kNode_SetUnboxConst(KonohaContext *kctx, kNode *expr, ktypeattr_t attrTypeId, uintptr_t unboxValue)
+static kNode *kNode_SetUnboxConst(KonohaContext *kctx, kNode *expr, ktypeattr_t typeAttr, uintptr_t unboxValue)
 {
 	kNode_setnode(expr, KNode_UnboxConst);
 	expr->unboxConstValue = unboxValue;
-	expr->attrTypeId = attrTypeId;
+	expr->typeAttr = typeAttr;
 	kNode_Set(ObjectConst, expr, false);
 	return expr;
 }
 
-static kNode *kNode_SetVariable(KonohaContext *kctx, kNode *expr, knode_t build, ktypeattr_t attrTypeId, intptr_t index)
+static kNode *kNode_SetVariable(KonohaContext *kctx, kNode *expr, knode_t build, ktypeattr_t typeAttr, intptr_t index)
 {
 	kNode_setnode(expr, build);
-	expr->attrTypeId = attrTypeId;
+	expr->typeAttr = typeAttr;
 	expr->index = index;
 	kNode_Set(ObjectConst, expr, false);
 	return expr;

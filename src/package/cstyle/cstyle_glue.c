@@ -154,7 +154,7 @@
 //			}
 ////			DBG_P("i=%d, paramType=%s, typedExpr->ty=%s", i, KType_text(paramType), KType_text(typedExpr->ty));
 //			if(paramType->typeId == KType_var) {
-//				paramType = KClass_(typedExpr->attrTypeId);
+//				paramType = KClass_(typedExpr->typeAttr);
 //			}
 //		}
 //		if(requestClass == NULL) {

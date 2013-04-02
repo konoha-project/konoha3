@@ -28,9 +28,9 @@
 static KKeyValue *kNameSpace_GetLocalConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t queryKey)
 {
 	KKeyValue *kvs = KLIB KDict_GetNULL(kctx, &(ns->constTable), queryKey);
-	if(kvs != NULL && kvs->attrTypeId == VirtualType_Text) {
+	if(kvs != NULL && kvs->typeAttr == VirtualType_Text) {
 		const char *textData = (const char *)kvs->unboxValue;
-		kvs->attrTypeId = KType_String | KTypeAttr_Boxed;
+		kvs->typeAttr = KType_String | KTypeAttr_Boxed;
 		kvs->StringValue = KLIB new_kString(kctx, ns->NameSpaceConstList, textData, strlen(textData), StringPolicy_TEXT);
 		KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs->StringValue);
 	}
@@ -42,10 +42,10 @@ static void SetKeyValue(KonohaContext *kctx, KKeyValue *kv, ksymbol_t key, ktype
 	kv->key = key;
 	kv->unboxValue = unboxValue;
 	if(KType_Is(UnboxType, ty) || ty == VirtualType_KClass || ty == VirtualType_StaticMethod || ty == VirtualType_Text) {
-		kv->attrTypeId = ty;
+		kv->typeAttr = ty;
 	}
 	else {
-		kv->attrTypeId = ty | KTypeAttr_Boxed;
+		kv->typeAttr = ty | KTypeAttr_Boxed;
 	}
 }
 
@@ -56,7 +56,7 @@ static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksym
 		KKeyValue kvs;
 		SetKeyValue(kctx, &kvs, key, ty, unboxValue);
 		KLIB KDict_Set(kctx, &(ns->constTable), &kvs);
-		if(KTypeAttr_Is(Boxed, kvs.attrTypeId)) {
+		if(KTypeAttr_Is(Boxed, kvs.typeAttr)) {
 			KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs.ObjectValue);
 		}
 		return true;
@@ -64,7 +64,7 @@ static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksym
 	else if(kNameSpace_Is(Override, ns)) {
 		uintptr_t origUnboxValue = foundKeyValue->unboxValue;
 		SetKeyValue(kctx, foundKeyValue, key, ty, unboxValue);
-		if(KTypeAttr_Is(Boxed, foundKeyValue->attrTypeId) && origUnboxValue != unboxValue) {
+		if(KTypeAttr_Is(Boxed, foundKeyValue->typeAttr) && origUnboxValue != unboxValue) {
 			KLIB kArray_Add(kctx, ns->NameSpaceConstList, foundKeyValue->ObjectValue);
 		}
 		return true;
@@ -96,7 +96,7 @@ static KKeyValue *kNameSpace_GetConstNULL(KonohaContext *kctx, kNameSpace *ns, k
 //{
 //	size_t i;
 //	for(i = 0; i < nitems; i++) {
-//		if(KTypeAttr_Is(Boxed, kvs[i].attrTypeId)) {
+//		if(KTypeAttr_Is(Boxed, kvs[i].typeAttr)) {
 //			KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs[i].ObjectValue);
 //		}
 //	}
@@ -113,7 +113,7 @@ static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, con
 		SetKeyValue(kctx, &kvs, ksymbolSPOL(d[0], strlen(d[0]), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID), (ktypeattr_t)(uintptr_t)d[1], (uintptr_t)d[2]);
 		KLIB KBuffer_Write(kctx, &wb, (const char *)(&kvs), sizeof(KKeyValue));
 		d += 3;
-		if(KTypeAttr_Is(Boxed, kvs.attrTypeId)) {
+		if(KTypeAttr_Is(Boxed, kvs.typeAttr)) {
 			KLIB kArray_Add(kctx, ns->NameSpaceConstList, kvs.ObjectValue);
 		}
 	}
@@ -141,7 +141,7 @@ static KMETHOD NameSpace_DefineConst(KonohaContext *kctx, KonohaStack *sfp)
 static kSyntax *kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword)
 {
 	KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, keyword, false/*isLocalOnly*/);
-	if(kvs != NULL && KTypeAttr_Unmask(kvs->attrTypeId) == KType_Syntax) {
+	if(kvs != NULL && KTypeAttr_Unmask(kvs->typeAttr) == KType_Syntax) {
 		//DBG_P(">>>>>>> ns=%p kvs=%p keyword=%s%s has defined syntax", ns, kvs, KSymbol_Fmt2(keyword));
 		return (kSyntax *)kvs->ObjectValue;
 	}
@@ -155,12 +155,12 @@ static void kNameSpace_ListSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t
 	while(ns != NULL) {
 		size_t i;
 		KKeyValue* foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns, keyword);
-		if(foundKeyValue != NULL && KTypeAttr_Unmask(foundKeyValue->attrTypeId) == tSyntax) {
+		if(foundKeyValue != NULL && KTypeAttr_Unmask(foundKeyValue->typeAttr) == tSyntax) {
 			KLIB kArray_Add(kctx, a, foundKeyValue->ObjectValue);
 		}
 		for(i = 0; i < kArray_size(ns->importedNameSpaceList); i++) {
 			foundKeyValue = kNameSpace_GetLocalConstNULL(kctx, ns->importedNameSpaceList->NameSpaceItems[i], keyword);
-			if(foundKeyValue != NULL && KTypeAttr_Unmask(foundKeyValue->attrTypeId) == tSyntax) {
+			if(foundKeyValue != NULL && KTypeAttr_Unmask(foundKeyValue->typeAttr) == tSyntax) {
 				KLIB kArray_Add(kctx, a, foundKeyValue->ObjectValue);
 			}
 		}
@@ -246,7 +246,7 @@ static void kNameSpace_ImportSyntax2(KonohaContext *kctx, kNameSpace *ns, kSynta
 static void kNameSpace_ImportSyntaxAsKeyValue(KonohaContext *kctx, void *arg, KKeyValue *kvs)
 {
 	kNameSpace *ns = (kNameSpace *) arg;
-	if(KTypeAttr_Unmask(kvs->attrTypeId) == KType_Syntax) {
+	if(KTypeAttr_Unmask(kvs->typeAttr) == KType_Syntax) {
 		kNameSpace_ImportSyntax2(kctx, ns, (kSyntax *)kvs->ObjectValue);
 	}
 }
@@ -333,7 +333,7 @@ static KClass *kNameSpace_GetClassByFullName(KonohaContext *kctx, kNameSpace *ns
 	}
 	if(packageId != KSymbol_Noname) {
 		KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, un, false/*isLocalOnly*/);
-		if(kvs != NULL && KTypeAttr_Unmask(kvs->attrTypeId) == VirtualType_KClass) {
+		if(kvs != NULL && KTypeAttr_Unmask(kvs->typeAttr) == VirtualType_KClass) {
 			return (KClass *)kvs->unboxValue;
 		}
 	}
@@ -503,14 +503,14 @@ static kbool_t KMethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, KMethod
 		if(param->psize == m->paramsize) {
 			kushort_t i;
 			for(i = 0; i < m->paramsize; i++) {
-				KClass *mtype = KClass_(m->param[i].attrTypeId);
-				KClass *ptype = KClass_(param->paramtypeItems[i].attrTypeId);
+				KClass *mtype = KClass_(m->param[i].typeAttr);
+				KClass *ptype = KClass_(param->paramtypeItems[i].typeAttr);
 				if(mtype != ptype) {
 					if(KClass_Isa(kctx, mtype, ptype)) {
 						continue;
 					}
 					kMethod *castMethod = kNameSpace_GetCoercionMethodNULL(kctx, m->ns, mtype, ptype);
-					if(castMethod != NULL && (kMethod_Is(Coercion, castMethod) || KTypeAttr_Is(Coercion, param->paramtypeItems[i].attrTypeId))) {
+					if(castMethod != NULL && (kMethod_Is(Coercion, castMethod) || KTypeAttr_Is(Coercion, param->paramtypeItems[i].typeAttr))) {
 						continue;
 					}
 					return false;
@@ -745,7 +745,7 @@ static void kNameSpace_LoadMethodData(KonohaContext *kctx, kNameSpace *ns, intpt
 		kparamtype_t *p = ALLOCA(kparamtype_t, psize+1);
 		d = d + 6;
 		for(i = 0; i < psize; i++) {
-			p[i].attrTypeId = (ktypeattr_t)d[0];
+			p[i].typeAttr = (ktypeattr_t)d[0];
 			p[i].name       = (ksymbol_t)d[1];
 			d += 2;
 		}

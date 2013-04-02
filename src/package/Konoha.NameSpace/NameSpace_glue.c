@@ -113,7 +113,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t unboxKey = symbolToken->symbol;
 	kNode *constNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_INFER, TypeCheckPolicy_CONST);
 	if(!kNode_IsError(constNode)) {
-		KClass *constClass = KClass_(constNode->attrTypeId);
+		KClass *constClass = KClass_(constNode->typeAttr);
 		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
 		kbool_t result = false;

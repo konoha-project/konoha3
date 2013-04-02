@@ -902,7 +902,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaS
 		}
 		param = kMethod_GetParam(mtd);
 		for(i = 0; i < param->psize; i++) {
-			KClass *c = KClass_(param->paramtypeItems[i].attrTypeId);
+			KClass *c = KClass_(param->paramtypeItems[i].typeAttr);
 			if(i > 0) {
 				PLATAPI printf_i(", ");
 			}

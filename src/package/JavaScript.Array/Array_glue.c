@@ -703,7 +703,7 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 			KReturn(typedNode);
 		}
 		if(paramType->typeId == KType_var) {
-			paramType = KClass_(typedNode->attrTypeId);
+			paramType = KClass_(typedNode->typeAttr);
 		}
 	}
 	if(reqc->baseTypeId != KType_Array) {

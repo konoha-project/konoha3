@@ -316,7 +316,7 @@ static void Preprocess(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, i
 				}
 				KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, tk->symbol, false/*isLocalOnly*/);
 				if(kvs != NULL) {
-					ktypeattr_t ty = KTypeAttr_Unmask(kvs->attrTypeId);
+					ktypeattr_t ty = KTypeAttr_Unmask(kvs->typeAttr);
 					if(ty == KType_Syntax) {
 						kSyntax *syntax = (kSyntax *)kvs->ObjectValue;
 						tk->resolvedSyntaxInfo = syntax;

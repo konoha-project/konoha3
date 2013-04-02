@@ -121,8 +121,8 @@
 //		kToken *VariableToken  = KLIB kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 //		DBG_P("typeToken=%p, varToken=%p", TypeToken, VariableToken);
 //		kNode *IteratorNode = KLIB kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
-//		if(!KType_IsIterator(IteratorNode->attrTypeId)) {
-//			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_(IteratorNode->attrTypeId), KMethodName_To(KType_Iterator), 0, KMethodMatch_NoOption);
+//		if(!KType_IsIterator(IteratorNode->typeAttr)) {
+//			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_(IteratorNode->typeAttr), KMethodName_To(KType_Iterator), 0, KMethodMatch_NoOption);
 //			if(mtd == NULL) {
 //				KLIB MessageNode(kctx, stmt, IteratorNode, ErrTag, "expected Iterator expression after in");
 //				KReturnUnboxValue(false);
@@ -130,7 +130,7 @@
 //			IteratorNode = KLIB new_MethodNode(kctx, stmt, ns, KClass_INFER, mtd, 1, IteratorNode);
 //			kNode_SetObject(kctx, stmt, KSymbol_NodePattern, IteratorNode);
 //		}
-//		kNode *block = new_MacroNode(kctx, stmt, new_TypeToken(kctx, ns, KClass_(IteratorNode->attrTypeId)), new_ParsedNodeToken(kctx, ns, IteratorNode), TypeToken, VariableToken);
+//		kNode *block = new_MacroNode(kctx, stmt, new_TypeToken(kctx, ns, KClass_(IteratorNode->typeAttr)), new_ParsedNodeToken(kctx, ns, IteratorNode), TypeToken, VariableToken);
 //		kNode *IfNode = block->NodeList->NodeItems[1]; // @see macro;
 //		kNode_appendNode(kctx, IfNode, KLIB kNode_GetNode(kctx, stmt, ns, KSymbol_NodePattern, NULL));
 //		kNode_Set(CatchBreak, IfNode, true);

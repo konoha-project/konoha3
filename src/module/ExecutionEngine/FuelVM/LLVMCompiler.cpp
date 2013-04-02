@@ -286,7 +286,7 @@ static bool EmitKonohaAPI(LLVMIRBuilder *writer, ICall *Inst, kMethod *mtd, std:
 		return false;
 	}
 	for(size_t i = 0; i < kclass->fieldsize; i++) {
-		if(type == kclass->fieldItems[i].attrTypeId && i == Node.FieldIndex) {
+		if(type == kclass->fieldItems[i].typeAttr && i == Node.FieldIndex) {
 			Ref = GetFieldRef(writer, &Node);
 			break;
 		}
@@ -1133,7 +1133,7 @@ static Function *EmitInternalFunction(KonohaContext *kctx, Module *M, kMethod *m
 		ParamTy.push_back(ToLLVMType(Type));
 	}
 	for(unsigned i = 0; i < params->psize; ++i) {
-		Type = ConvertToTypeId(kctx, params->paramtypeItems[i].attrTypeId);
+		Type = ConvertToTypeId(kctx, params->paramtypeItems[i].typeAttr);
 		ParamTy.push_back(ToLLVMType(Type));
 	}
 	const char *name = ConstructMethodName(kctx, mtd, &wb, "Impl");
@@ -1185,7 +1185,7 @@ static Function *EmitFunction(KonohaContext *kctx, Module *M, kMethod *mtd, Func
 		Params.push_back(LoadValueFromStack(builder, Type, ToLLVMType(Type), 0, Vsfp));
 	}
 	for(unsigned i = 0; i < params->psize; ++i) {
-		ktypeattr_t type = params->paramtypeItems[i].attrTypeId;
+		ktypeattr_t type = params->paramtypeItems[i].typeAttr;
 		Type = ConvertToTypeId(kctx, type);
 		Value *V = LoadValueFromStack(builder, Type, ToLLVMType(Type), i+1, Vsfp);
 		Params.push_back(V);

@@ -34,7 +34,7 @@ static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kNameSpa
 	RESET_GCSTACK();
 	if(kNode_IsError(expr)) return expr;
 	if(lsfp[K_RTNIDX].asNode == K_NULLNODE) {
-		DBG_ASSERT(expr->attrTypeId == KType_var); // untyped
+		DBG_ASSERT(expr->typeAttr == KType_var); // untyped
 	}
 	DBG_ASSERT(IS_Node(lsfp[K_RTNIDX].asObject));
 	return (kNode *)lsfp[K_RTNIDX].asObject;
@@ -46,7 +46,7 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn, kNode *expr, kNameSpac
 	int varsize = ns->genv->localScope.varsize;
 	if(syn->TypeFuncNULL != NULL) {
 		kNode *texpr = CallTypeFunc(kctx, syn->TypeFuncNULL, expr, ns, reqType);
-		if(kNode_IsError(texpr) || texpr->attrTypeId != KType_var) {
+		if(kNode_IsError(texpr) || texpr->typeAttr != KType_var) {
 			if(!kNode_Is(OpenBlock, expr)) {
 				ns->genv->localScope.varsize = varsize;
 			}
@@ -59,7 +59,7 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn, kNode *expr, kNameSpac
 		kSyntax *syn2 = syntaxList->SyntaxItems[i];
 		if(syn2->TypeFuncNULL != NULL) {
 			kNode *texpr = CallTypeFunc(kctx, syn2->TypeFuncNULL, expr, ns, reqType);
-			if(kNode_IsError(texpr) || texpr->attrTypeId != KType_var) {
+			if(kNode_IsError(texpr) || texpr->typeAttr != KType_var) {
 				if(!kNode_Is(OpenBlock, expr)) {
 					ns->genv->localScope.varsize = varsize;
 				}
@@ -85,16 +85,16 @@ static void PutConstNode(KonohaContext *kctx, kNode *expr, KonohaStack *sfp)
 	} else if(kNode_node(expr) == KNode_UnboxConst) {
 		KStackSetUnboxValue(sfp[0].unboxValue, expr->unboxConstValue);
 	} else if(kNode_node(expr) == KNode_New) {
-		KStackSetObjectValue(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->attrTypeId), 0));
+		KStackSetObjectValue(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->typeAttr), 0));
 //	} else if(kNode_node(expr) == KNode_MethodCall) {   /* case Object Object.boxing(UnboxType Val) */
 //		kMethod *mtd = expr->NodeList->MethodItems[0];
 //		kNode *texpr = expr->NodeList->NodeItems[1];
 //		assert(mtd->mn == MN_box && kArray_size(expr->NodeList) == 2);
-//		assert(KType_Is(UnboxType, expr->attrTypeId) == true);
-//		KStackSetObjectValue(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->attrTypeId), texpr->unboxConstValue));
+//		assert(KType_Is(UnboxType, expr->typeAttr) == true);
+//		KStackSetObjectValue(sfp[0].asObject, KLIB new_kObject(kctx, OnField, KClass_(expr->typeAttr), texpr->unboxConstValue));
 	} else {
 		assert(kNode_node(expr) == KNode_Null);
-		KStackSetObjectValue(sfp[0].asObject, KLIB Knull(kctx, KClass_(expr->attrTypeId)));
+		KStackSetObjectValue(sfp[0].asObject, KLIB Knull(kctx, KClass_(expr->typeAttr)));
 		KStackSetUnboxValue(sfp[0].unboxValue, 0);
 	}
 }
@@ -108,7 +108,7 @@ static kNode *MakeNodeConst(KonohaContext *kctx, kNode *expr, KClass *rtype)
 	for(i = 1; i < size; i++) {
 		PutConstNode(kctx, expr->NodeList->NodeItems[i], lsfp + i - 1);
 	}
-	KStackSetMethodAll(lsfp, KLIB Knull(kctx, KClass_(expr->attrTypeId)), kNode_uline(expr), mtd, psize);
+	KStackSetMethodAll(lsfp, KLIB Knull(kctx, KClass_(expr->typeAttr)), kNode_uline(expr), mtd, psize);
 	KStackCall(lsfp);
 	END_UnusedStack();
 	if(KClass_Is(UnboxType, rtype) /* || rtype->typeId == KType_void*/) {
@@ -121,20 +121,20 @@ static kNode *BoxNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KClass* 
 {
 	kNode *node = KNewNode(ns);
 	KFieldSet(node, node->NodeToPush, expr);
-	return kNode_Type(node, KNode_Box, expr->attrTypeId);
+	return kNode_Type(node, KNode_Box, expr->typeAttr);
 }
 
 static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KClass* reqClass, int pol)
 {
 	DBG_ASSERT(IS_Node(expr) && expr != K_NULLNODE);
 	if(kNode_IsError(expr)) return expr;
-	if(KTypeAttr_Unmask(expr->attrTypeId) == KType_var) {
+	if(KTypeAttr_Unmask(expr->typeAttr) == KType_var) {
 		expr = TypeNode(kctx, expr->syn, expr, ns, reqClass);
 		if(kNode_IsError(expr)) return expr;
 	}
-	KClass *typedClass = KClass_(expr->attrTypeId);
+	KClass *typedClass = KClass_(expr->typeAttr);
 	if(reqClass->typeId == KType_void) {
-		expr->attrTypeId = KType_void;
+		expr->typeAttr = KType_void;
 		return expr;
 	}
 	if(typedClass->typeId == KType_void) {
@@ -227,7 +227,7 @@ static kNode *TypeCheckNodeList(KonohaContext *kctx, kNode *block, size_t n, kNa
 	kArray *nodeList = block->NodeList;
 	kNode *stmt = nodeList->NodeItems[n];
 	kNode_SetParent(kctx, stmt, block);
-	if(stmt->attrTypeId != KType_var) return stmt;
+	if(stmt->typeAttr != KType_var) return stmt;
 	if(!kNode_IsError(stmt)) {
 		kNode *tstmt = TypeNode(kctx, stmt->syn, stmt, ns, reqc);
 		if(tstmt != stmt) {
@@ -257,12 +257,12 @@ static kNode *TypeCheckBlock(KonohaContext *kctx, kNode *block, kNameSpace *ns, 
 		if(kNode_IsError(stmt)) {
 			return hasValue ? stmt : kNode_Type(block, KNode_Block, KType_void);  // untyped
 		}
-		kNode_Type(block, KNode_Block, stmt->attrTypeId);
+		kNode_Type(block, KNode_Block, stmt->typeAttr);
 	}
 	else {
 		kNode_Type(block, KNode_Block, KType_void);
 	}
-	DBG_P(">>>>>>>> size=%d, typed=%s", size, KType_text(block->attrTypeId));
+	DBG_P(">>>>>>>> size=%d, typed=%s", size, KType_text(block->typeAttr));
 	return block;
 }
 
@@ -308,11 +308,11 @@ static void kNameSpace_InitParam(KonohaContext *kctx, struct KGammaLocalData *ge
 	int i, psize = (pa->psize + 1U < genv->localScope.capacity) ? pa->psize : genv->localScope.capacity - 1;
 	for(i = 0; i < psize; i++) {
 		genv->localScope.varItems[i+1].name = pa->paramtypeItems[i].name;
-		genv->localScope.varItems[i+1].attrTypeId = (callparam == NULL) ? pa->paramtypeItems[i].attrTypeId : callparam[i].attrTypeId;
+		genv->localScope.varItems[i+1].typeAttr = (callparam == NULL) ? pa->paramtypeItems[i].typeAttr : callparam[i].typeAttr;
 	}
 	if(!kMethod_Is(Static, genv->currentWorkingMethod)) {
 		genv->localScope.varItems[0].name = FN_this;
-		genv->localScope.varItems[0].attrTypeId = genv->thisClass->typeId;
+		genv->localScope.varItems[0].typeAttr = genv->thisClass->typeId;
 	}
 	genv->localScope.varsize = psize+1;
 }

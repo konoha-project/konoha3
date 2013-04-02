@@ -25,7 +25,7 @@
 
 static kNode* kNode_CheckReturnType(KonohaContext *kctx, kNode *node)
 {
-	if(node->attrTypeId != KType_void) {
+	if(node->typeAttr != KType_void) {
 		kNode *stmt = new_TypedNode(kctx, kNode_ns(node), KNode_Return, KClass_void, 0);
 		kNode_AddParsedObject(kctx, stmt, KSymbol_ExprPattern, UPCAST(node));
 		return stmt;
@@ -87,7 +87,7 @@ static kstatus_t kNode_Eval(KonohaContext *kctx, kNode *stmt, kMethod *mtd, KTra
 		}
 	}
 	if(isTryEval) {
-		ktypeattr_t rtype = KTypeAttr_Unmask(stmt->attrTypeId);
+		ktypeattr_t rtype = KTypeAttr_Unmask(stmt->typeAttr);
 		stmt = kNode_CheckReturnType(kctx, stmt);
 		KLIB kMethod_GenCode(kctx, mtd, stmt, DefaultCompileOption);
 		return kMethod_RunEval(kctx, mtd, rtype, kNode_uline(stmt), trace);

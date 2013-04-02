@@ -79,7 +79,7 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 	kNode *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
 	kNode *targetNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
 	if(selfNode != K_NULLNODE && targetNode != K_NULLNODE) {
-		KClass *selfClass = KClass_(selfNode->attrTypeId), *targetClass = KClass_(targetNode->attrTypeId);
+		KClass *selfClass = KClass_(selfNode->typeAttr), *targetClass = KClass_(targetNode->typeAttr);
 		if(KClass_Is(Final, selfClass)) {
 			kbool_t staticSubType = (selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
 			KReturn(KLIB kNode_SetUnboxConst(kctx, expr, KType_Boolean, staticSubType));
@@ -97,9 +97,9 @@ static KMETHOD TypeCheck_as(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	kNode *targetNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
-	kNode *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_(targetNode->attrTypeId), TypeCheckPolicy_NoCheck);
+	kNode *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_(targetNode->typeAttr), TypeCheckPolicy_NoCheck);
 	if(selfNode != K_NULLNODE && targetNode != K_NULLNODE) {
-		KClass *selfClass = KClass_(selfNode->attrTypeId), *targetClass = KClass_(targetNode->attrTypeId);
+		KClass *selfClass = KClass_(selfNode->typeAttr), *targetClass = KClass_(targetNode->typeAttr);
 		if(selfClass->typeId == targetClass->typeId || selfClass->isSubType(kctx, selfClass, targetClass)) {
 			KReturn(selfNode);
 		}
@@ -109,7 +109,7 @@ static KMETHOD TypeCheck_as(KonohaContext *kctx, KonohaStack *sfp)
 			DBG_ASSERT(mtd != NULL);
 			KReturn(KLIB TypeCheckMethodParam(kctx, mtd, expr, ns, targetClass));
 		}
-		KReturn(KLIB MessageNode(kctx, selfNode, NULL, ns, ErrTag, "unable to downcast: %s as %s", KType_text(selfNode->attrTypeId), KType_text(targetNode->attrTypeId)));
+		KReturn(KLIB MessageNode(kctx, selfNode, NULL, ns, ErrTag, "unable to downcast: %s as %s", KType_text(selfNode->typeAttr), KType_text(targetNode->typeAttr)));
 	}
 }
 
@@ -117,11 +117,11 @@ static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	kNode *targetNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
-	kNode *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_(targetNode->attrTypeId), TypeCheckPolicy_NoCheck);
+	kNode *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_(targetNode->typeAttr), TypeCheckPolicy_NoCheck);
 	if(selfNode != K_NULLNODE && targetNode != K_NULLNODE) {
-		KClass *selfClass = KClass_(selfNode->attrTypeId), *targetClass = KClass_(targetNode->attrTypeId);
-		if(selfNode->attrTypeId == targetNode->attrTypeId || selfClass->isSubType(kctx, selfClass, targetClass)) {
-			KLIB MessageNode(kctx, selfNode, NULL, ns, InfoTag, "no need: %s to %s", KType_text(selfNode->attrTypeId), KType_text(targetNode->attrTypeId));
+		KClass *selfClass = KClass_(selfNode->typeAttr), *targetClass = KClass_(targetNode->typeAttr);
+		if(selfNode->typeAttr == targetNode->typeAttr || selfClass->isSubType(kctx, selfClass, targetClass)) {
+			KLIB MessageNode(kctx, selfNode, NULL, ns, InfoTag, "no need: %s to %s", KType_text(selfNode->typeAttr), KType_text(targetNode->typeAttr));
 			KReturn(selfNode);
 		}
 		kNameSpace *ns = kNode_ns(stmt);

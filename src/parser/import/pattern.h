@@ -142,14 +142,14 @@ static KClass* ParseGenericsType(KonohaContext *kctx, kNameSpace *ns, KClass *ba
 		if(paramClass == NULL) {
 			return NULL;
 		}
-		p[psize].attrTypeId = paramClass->typeId;
+		p[psize].typeAttr = paramClass->typeId;
 		psize++;
 		if(currentIdx < endIdx && tokenList->TokenItems[currentIdx]->symbol == KSymbol_COMMA) {
 			currentIdx++;
 		}
 	}
 	if(baseClass->baseTypeId == KType_Func) {
-		return KLIB KClass_Generics(kctx, baseClass, p[0].attrTypeId, psize-1, p+1);
+		return KLIB KClass_Generics(kctx, baseClass, p[0].typeAttr, psize-1, p+1);
 	}
 	else {
 		return KLIB KClass_Generics(kctx, baseClass, KType_void, psize, p);

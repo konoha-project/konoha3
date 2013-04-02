@@ -59,7 +59,7 @@ static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kNameSpa
 	RESET_GCSTACK();
 	if(kNode_IsError(expr)) return expr;
 	if(lsfp[K_RTNIDX].asNode == K_NULLNODE) {
-		DBG_ASSERT(expr->attrTypeId == KType_var); // untyped
+		DBG_ASSERT(expr->typeAttr == KType_var); // untyped
 	}
 	DBG_ASSERT(IS_Node(lsfp[K_RTNIDX].asObject));
 	return (kNode *)lsfp[K_RTNIDX].asObject;
@@ -103,7 +103,7 @@ static kbool_t KClass_SetClassFieldUnboxValue(KonohaContext *kctx, KClassVar *de
 {
 	int i;
 	for(i = definedClass->fieldsize - 1; i >= 0; i--) {
-		if(definedClass->fieldItems[i].name == sym  && KType_Is(UnboxType, definedClass->fieldItems[i].attrTypeId)) {
+		if(definedClass->fieldItems[i].name == sym  && KType_Is(UnboxType, definedClass->fieldItems[i].typeAttr)) {
 			definedClass->defaultNullValueVar->fieldUnboxItems[i] = unboxValue;
 			return true;
 		}
@@ -140,7 +140,7 @@ static void ObjectField_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor
 	KClassField *fieldItems = c->fieldItems;
 	size_t i, fieldsize = c->fieldsize;
 	for (i = 0; i < fieldsize; i++) {
-		if(KTypeAttr_Is(Boxed, fieldItems[i].attrTypeId)) {
+		if(KTypeAttr_Is(Boxed, fieldItems[i].typeAttr)) {
 			KRefTraceNullable(o->fieldObjectItems[i]);   // FIXME:
 		}
 	}

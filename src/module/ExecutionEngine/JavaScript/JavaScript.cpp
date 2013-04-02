@@ -479,7 +479,7 @@ static void JSBuilder_EmitUnboxConstValue(KonohaContext *kctx, KBuilder *builder
 
 static kbool_t JSBuilder_VisitConstNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
-	if(node->attrTypeId == KType_Func) {
+	if(node->typeAttr == KType_Func) {
 		kFunc   *func = (kFunc *)node->ObjectConstValue;
 		JSBuilder_EmitString(kctx, builder, KMethodName_Fmt2(func->method->mn), "");
 	}
@@ -491,7 +491,7 @@ static kbool_t JSBuilder_VisitConstNode(KonohaContext *kctx, KBuilder *builder, 
 
 static kbool_t JSBuilder_VisitUnboxConstNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
-	JSBuilder_EmitUnboxConstValue(kctx, builder, KClass_(node->attrTypeId), node->unboxConstValue);
+	JSBuilder_EmitUnboxConstValue(kctx, builder, KClass_(node->typeAttr), node->unboxConstValue);
 	return true;
 }
 
@@ -580,19 +580,19 @@ static kbool_t JSBuilder_VisitMethodCallNodeWithoutOperator(KonohaContext *kctx,
 	const size_t nodeListSize = kArray_size(node->NodeList);
 
 	kNode *receiver = kNode_At(node, 1);
-	KClass *receiverClass = KClass_(receiver->attrTypeId);
+	KClass *receiverClass = KClass_(receiver->typeAttr);
 	const char *className = KSymbol_text(receiverClass->classNameSymbol);
 	const char *methodName = KSymbol_text(mtd->mn);
 
 	KClass *globalObjectClass = KLIB kNameSpace_GetClassByFullName(kctx, kNode_ns(node), "GlobalObject", 12, NULL);
 	const kbool_t isNewArray = (mtd->mn == KMethodName_("[]") || mtd->mn == KMethodName_("newArray"));
-	const kbool_t isGlobal = (receiverClass == globalObjectClass || receiver->attrTypeId == KType_NameSpace || strcmp(className, "GlobalObject") == 0);
+	const kbool_t isGlobal = (receiverClass == globalObjectClass || receiver->typeAttr == KType_NameSpace || strcmp(className, "GlobalObject") == 0);
 	int prefix = KSymbol_prefixText_ID(mtd->mn);
 	const kbool_t isGetter = prefix == kSymbolPrefix_GET;
 	const kbool_t isIndexer = nodeListSize > (isGetter ? 2 : 3);
 	const kbool_t isReceiverClosure = strcmp(className, "Func") == 0;
 
-	if(receiver->attrTypeId == KType_NameSpace) {
+	if(receiver->typeAttr == KType_NameSpace) {
 		if(mtd->mn == KMethodName_("import")) {
 			kString *packageNameString = (kString *)kNode_At(node, 2)->ObjectConstValue;
 			kNameSpace *ns = (kNameSpace *)receiver->ObjectConstValue;
@@ -608,7 +608,7 @@ static kbool_t JSBuilder_VisitMethodCallNodeWithoutOperator(KonohaContext *kctx,
 			goto defaultCallParams;
 		}
 	}
-	if(receiver->attrTypeId == KType_System && mtd->mn == KMethodName_("p")) {
+	if(receiver->typeAttr == KType_System && mtd->mn == KMethodName_("p")) {
 		// System.p
 		JSBuilder_EmitString(kctx, builder, LOG_FUNCTION_NAME, "", "");
 		goto defaultCallParams;
@@ -701,7 +701,7 @@ static kbool_t JSBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *buil
 		JSBuilder_EmitString(kctx, builder, ")", "", "");
 	}
 	else if(KMethodName_isBinaryOperator(kctx, mtd->mn)) {
-		if(mtd->mn == MN_opDIV && kNode_At(node, 1)->attrTypeId == KType_Int && kNode_At(node, 2)->attrTypeId == KType_Int) {
+		if(mtd->mn == MN_opDIV && kNode_At(node, 1)->typeAttr == KType_Int && kNode_At(node, 2)->typeAttr == KType_Int) {
 			JSBuilder_VisitNodeParams(kctx, builder, node, thunk, 1, KSymbol_text(mtd->mn),"((", ")|0)");
 		}
 		else {
@@ -790,8 +790,8 @@ static kbool_t JSBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder
 	kObject *constList = kclass->defaultNullValue;
 	for(i = 0; i < kclass->fieldsize; ++i) {
 		JSBuilder_EmitString(kctx, builder, "this.", KSymbol_text(field[i].name), " = ");
-		if(KType_Is(UnboxType, field[i].attrTypeId)) {
-			JSBuilder_EmitUnboxConstValue(kctx, builder, KClass_(field[i].attrTypeId), constList->fieldUnboxItems[i]);
+		if(KType_Is(UnboxType, field[i].typeAttr)) {
+			JSBuilder_EmitUnboxConstValue(kctx, builder, KClass_(field[i].typeAttr), constList->fieldUnboxItems[i]);
 		}else {
 			JSBuilder_EmitConstValue(kctx, builder, constList->fieldObjectItems[i]);
 		}

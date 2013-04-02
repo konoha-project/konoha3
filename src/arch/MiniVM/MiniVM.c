@@ -643,7 +643,7 @@ static intptr_t MiniVMBuilder_FindLocalVar(KonohaContext *kctx, KBuilder *builde
 
 	params = kMethod_GetParam(mtd);
 	for(i = 0; i < params->psize; ++i) {
-		ktypeattr_t ptype = params->paramtypeItems[i].attrTypeId;
+		ktypeattr_t ptype = params->paramtypeItems[i].typeAttr;
 		if(ptype == typeId && index == i ) {
 			return i;
 		}
@@ -672,7 +672,7 @@ static kbool_t MiniVM_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode
 	 * [box] := box(this)
 	 **/
 	KLIB VisitNode(kctx, builder, node->NodeToPush, thunk);
-	ASM(BOX, OC_(builder->stackbase), NC_(MiniVM_getExpression(builder)), KClass_(node->attrTypeId));
+	ASM(BOX, OC_(builder->stackbase), NC_(MiniVM_getExpression(builder)), KClass_(node->typeAttr));
 	builder->Value = builder->stackbase;
 	return true;
 }
@@ -714,9 +714,9 @@ static kbool_t MiniVM_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, kNo
 static kbool_t MiniVM_VisitReturnNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
 	kNode *expr = KLIB kNode_GetNode(kctx, node, KSymbol_ExprPattern, NULL);
-	if(expr != NULL && IS_Node(expr) && expr->attrTypeId != KType_void) {
+	if(expr != NULL && IS_Node(expr) && expr->typeAttr != KType_void) {
 		KLIB VisitNode(kctx, builder, expr, thunk);
-		ASM_NMOV(kctx, builder, KClass_(expr->attrTypeId), K_RTNIDX, MiniVM_getExpression(builder));
+		ASM_NMOV(kctx, builder, KClass_(expr->typeAttr), K_RTNIDX, MiniVM_getExpression(builder));
 	}
 	MiniVMBuilder_JumpTo(kctx, builder, builder->bbReturnId);
 	return false;
@@ -867,8 +867,8 @@ static kbool_t MiniVM_VisitTryNode(KonohaContext *kctx, KBuilder *builder, kNode
 static kbool_t MiniVM_VisitConstNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
 	kObject *v = MiniVM_AddConstPool(kctx, builder, node->ObjectConstValue);
-	DBG_ASSERT(!KType_Is(UnboxType, node->attrTypeId));
-	ASM(NSET, OC_(builder->stackbase), (uintptr_t) v, KClass_(node->attrTypeId));
+	DBG_ASSERT(!KType_Is(UnboxType, node->typeAttr));
+	ASM(NSET, OC_(builder->stackbase), (uintptr_t) v, KClass_(node->typeAttr));
 	builder->Value = builder->stackbase;
 	return true;
 }
@@ -876,25 +876,25 @@ static kbool_t MiniVM_VisitConstNode(KonohaContext *kctx, KBuilder *builder, kNo
 static kbool_t MiniVM_VisitUnboxConstNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
 	uintptr_t Val = node->unboxConstValue;
-	DBG_ASSERT(KType_Is(UnboxType, node->attrTypeId));
-	ASM(NSET, NC_(builder->stackbase), Val, KClass_(node->attrTypeId));
+	DBG_ASSERT(KType_Is(UnboxType, node->typeAttr));
+	ASM(NSET, NC_(builder->stackbase), Val, KClass_(node->typeAttr));
 	builder->Value = builder->stackbase;
 	return true;
 }
 
 static kbool_t MiniVM_VisitNewNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
-	ASM(NEW, OC_(builder->stackbase), 0, KClass_(node->attrTypeId));
+	ASM(NEW, OC_(builder->stackbase), 0, KClass_(node->typeAttr));
 	builder->Value = builder->stackbase;
 	return true;
 }
 
 static kbool_t MiniVM_VisitNullNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
-	if(KType_Is(UnboxType, node->attrTypeId)) {
-		ASM(NSET, NC_(builder->stackbase), 0, KClass_(node->attrTypeId));
+	if(KType_Is(UnboxType, node->typeAttr)) {
+		ASM(NSET, NC_(builder->stackbase), 0, KClass_(node->typeAttr));
 	} else {
-		ASM(NUL, OC_(builder->stackbase), KClass_(node->attrTypeId));
+		ASM(NUL, OC_(builder->stackbase), KClass_(node->typeAttr));
 	}
 	builder->Value = builder->stackbase;
 	return true;
@@ -906,8 +906,8 @@ static kbool_t MiniVM_VisitLocalNode(KonohaContext *kctx, KBuilder *builder, kNo
 	ksymbol_t symbol;
 	assert(IS_Token(node->TermToken));
 	symbol = node->TermToken->symbol;
-	if((src = MiniVMBuilder_FindLocalVar(kctx, builder, symbol, node->attrTypeId, node->index)) == -1) {
-		src = AddLocal(kctx, builder, node->index, symbol, node->attrTypeId);
+	if((src = MiniVMBuilder_FindLocalVar(kctx, builder, symbol, node->typeAttr, node->index)) == -1) {
+		src = AddLocal(kctx, builder, node->index, symbol, node->typeAttr);
 	}
 	builder->Value = src;
 	return true;
@@ -926,7 +926,7 @@ static kbool_t MiniVM_VisitFieldNode(KonohaContext *kctx, KBuilder *builder, kNo
 	if((src = MiniVMBuilder_FindLocalVar(kctx, builder, symbol, KType_Object, index)) == -1) {
 		src = AddLocal(kctx, builder, index, symbol, KType_Object);
 	}
-	ty = KClass_(node->attrTypeId);
+	ty = KClass_(node->typeAttr);
 	ASM(NMOVx, TC_(builder->stackbase, ty), OC_(src), xindex, ty);
 	builder->Value = builder->stackbase;
 	return true;
@@ -959,7 +959,7 @@ static kbool_t MiniVM_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder
 		DBG_ASSERT(IS_Node(exprN));
 		KLIB VisitNode(kctx, builder, exprN, thunk);
 		if(builder->Value != builder->stackbase) {
-			KClass *ty = KClass_(exprN->attrTypeId);
+			KClass *ty = KClass_(exprN->typeAttr);
 			ASM_NMOV(kctx, builder, ty, builder->stackbase, builder->Value);
 		}
 	}
@@ -975,7 +975,7 @@ static kbool_t MiniVM_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder
 		ASM(NSET, OC_(thisidx-2), (intptr_t)kNode_ns(node), KClass_NameSpace);
 		ASM(LOOKUP, SFP_(thisidx), kNode_ns(node), mtd);
 	}
-	ASM(CALL, kNode_uline(node), SFP_(thisidx), SFP_(thisidx + argc + 1), KLIB Knull(kctx, KClass_(node->attrTypeId)));
+	ASM(CALL, kNode_uline(node), SFP_(thisidx), SFP_(thisidx + argc + 1), KLIB Knull(kctx, KClass_(node->typeAttr)));
 
 	builder->stackbase = stackbase;
 	builder->Value = builder->stackbase;
@@ -1053,7 +1053,7 @@ static kbool_t MiniVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 	intptr_t dst = -1;
 	kNode *left = kNode_At(node, 1);
 	kNode *right = kNode_At(node, 2);
-	ktypeattr_t type = left->attrTypeId;
+	ktypeattr_t type = left->typeAttr;
 	ksymbol_t symbol;
 
 	assert(IS_Token(left->TermToken));
@@ -1069,15 +1069,15 @@ static kbool_t MiniVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 	else {
 		kshort_t index  = (kshort_t)left->index;
 		kshort_t xindex = (kshort_t)(left->index >> (sizeof(kshort_t)*8));
-		KClass *lhsClass = KClass_(left->attrTypeId);
-		KClass *rhsClass = KClass_(right->attrTypeId);
+		KClass *lhsClass = KClass_(left->typeAttr);
+		KClass *rhsClass = KClass_(right->typeAttr);
 		assert(kNode_node(left) == KNode_Field);
 		if((dst = MiniVMBuilder_FindLocalVar(kctx, builder, symbol, KType_Object, index)) == -1) {
 			dst = AddLocal(kctx, builder, index, symbol, KType_Object);
 		}
 		KLIB VisitNode(kctx, builder, right, thunk);
 		ASM(XNMOV, OC_(index), xindex, TC_(MiniVM_getExpression(builder), rhsClass), lhsClass);
-		if(node->attrTypeId != KType_void) {
+		if(node->typeAttr != KType_void) {
 			builder->Value = builder->stackbase;
 			ASM(NMOVx, TC_(builder->stackbase, rhsClass), OC_(index), xindex, lhsClass);
 		}
@@ -1136,7 +1136,7 @@ static kbool_t CollectLocalVar_VisitBlockNode(KVISITOR_PARAM)
 static kbool_t CollectLocalVar_VisitReturnNode(KVISITOR_PARAM)
 {
 	kNode *expr = KLIB kNode_GetNode(kctx, node, KSymbol_ExprPattern, NULL);
-	if(expr != NULL && IS_Node(expr) && expr->attrTypeId != KType_void) {
+	if(expr != NULL && IS_Node(expr) && expr->typeAttr != KType_void) {
 		KLIB VisitNode(kctx, builder, expr, thunk);
 	}
 	return false;
@@ -1184,7 +1184,7 @@ static kbool_t CollectLocalVar_VisitForNode(KVISITOR_PARAM)
 
 static kbool_t CollectLocalVar_VisitLocalNode(KVISITOR_PARAM)
 {
-	LOCAL(node->attrTypeId, (kshort_t)(node->index));
+	LOCAL(node->typeAttr, (kshort_t)(node->index));
 	return true;
 }
 
@@ -1220,7 +1220,7 @@ static kbool_t CollectLocalVar_VisitAssignNode(KVISITOR_PARAM)
 	kNode *left = kNode_At(node, 1);
 	kNode *right = kNode_At(node, 2);
 	if(kNode_node(left) == KNode_Local) {
-		LOCAL(left->attrTypeId, left->index);
+		LOCAL(left->typeAttr, left->index);
 		KLIB VisitNode(kctx, builder, right, thunk);
 	} else{
 		LOCAL(KType_Object, (kshort_t)left->index);

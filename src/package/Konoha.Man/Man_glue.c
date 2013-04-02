@@ -56,13 +56,13 @@ static void kMethod_WriteToBuffer(KonohaContext *kctx, kMethod *mtd, KBuffer *wb
 			if(i > 0) {
 				KLIB KBuffer_Write(kctx, wb, ", ", 2);
 			}
-			if(KTypeAttr_Is(ReadOnly, pa->paramtypeItems[i].attrTypeId)) {
+			if(KTypeAttr_Is(ReadOnly, pa->paramtypeItems[i].typeAttr)) {
 				KLIB KBuffer_printf(kctx, wb, "@ReadOnly ");
 			}
-			if(KTypeAttr_Is(Coercion, pa->paramtypeItems[i].attrTypeId)) {
+			if(KTypeAttr_Is(Coercion, pa->paramtypeItems[i].typeAttr)) {
 				KLIB KBuffer_printf(kctx, wb, "@Coercion ");
 			}
-			KLIB KBuffer_printf(kctx, wb, "%s %s", KType_text(pa->paramtypeItems[i].attrTypeId), KSymbol_text(pa->paramtypeItems[i].name));
+			KLIB KBuffer_printf(kctx, wb, "%s %s", KType_text(pa->paramtypeItems[i].typeAttr), KSymbol_text(pa->paramtypeItems[i].name));
 		}
 		KLIB KBuffer_Write(kctx, wb, ")", 1);
 	}

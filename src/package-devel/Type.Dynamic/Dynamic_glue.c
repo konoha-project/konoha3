@@ -52,7 +52,7 @@ static kbool_t kMethod_CheckMethodKStackCall(KonohaContext *kctx, KonohaStack *s
 	kParam *param = kMethod_GetParam(mtd);
 	for(i = 1; i <= argc; i++) {
 		KClass *paramClass = kObject_class(sfp[i].asObject);
-		ktypeattr_t ptype = param->paramtypeItems[i-1].attrTypeId;
+		ktypeattr_t ptype = param->paramtypeItems[i-1].typeAttr;
 		if(ptype != paramClass->typeId) {
 			return false;
 		}

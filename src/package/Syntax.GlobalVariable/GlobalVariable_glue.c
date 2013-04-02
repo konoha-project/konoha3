@@ -107,11 +107,11 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 		if(kNameSpace_InitGlobalObject(kctx, ns, trace)) {
 			kToken *tk  = KLIB kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
 			kNode  *expr = KLIB kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
-			ktypeattr_t attrTypeId = Token_typeLiteral(tk);
-			if(kNode_isSymbolTerm(expr) && attrTypeId == KType_void) {
+			ktypeattr_t typeAttr = Token_typeLiteral(tk);
+			if(kNode_isSymbolTerm(expr) && typeAttr == KType_void) {
 				KReturn(K_NULLNODE);
 			}
-			KLIB kNode_DeclType(kctx, stmt, ns, attrTypeId, expr, ns->globalObjectNULL, TypeDeclAndMakeSetter);
+			KLIB kNode_DeclType(kctx, stmt, ns, typeAttr, expr, ns->globalObjectNULL, TypeDeclAndMakeSetter);
 			KReturn(stmt);
 		}
 	}
