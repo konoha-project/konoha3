@@ -49,36 +49,6 @@ void emit(String path, String data) {
 }
 
 void main() {
-    String[] before = ["js4.array","js4.string","konoha.float","konoha.math", "js4.regexp", "js4.date", "konoha.bytes", "konoha.file",
-        "konoha.complex", "curl", "libvirt", "gmp", "openssl", "mecab", "llvm", "apache", "konoha.json", "konoha.string",
-        "java2.object", "konoha.prototype", "konoha.console", "konoha.desugar", "konoha.field", "konoha.i",
-        "konoha.ns", "konoha.global", "konoha.class", "konoha.dynamic", "konoha.untyped", "konoha.var", "libxml.xmlreader",
-        "mecab", "konoha.mpi", "openssl", "python", "konoha.sql", "konoha.defined", "konoha.import",
-        "java2.string", "konoha.eval"];
-    String[] after  = ["JavaScript.Array","JavaScript.String","Type.Float","JavaScript.Math", "JavaScript.Regexp", "JavaScript.Date", "Type.Bytes", "Type.File",
-        "Type.Complex", "Lib.Curl", "Lib.Libvirt", "Lib.Gmp", "Lib.Openssl", "Lib.Mecab", "Lib.Llvm", "Lib.Apache", "Type.Json", "Java.String",
-        "Java.Object", "JavaScript.Prototype", "Konoha.Console", "Konoha.Syntax", "Konoha.ObjectModel", "Konoha.Man",
-        "Konoha.NameSpace", "Syntax.GlobalVariable", "Syntax.JavaStyleClass", "Type.Dynamic", "Syntax.UntypedVariable", "Type.StaticVar", "Lib.Libxml2.Xmlreader",
-        "Lib.Mecab", "Lib.Mpi", "Lib.Openssl", "Lib.Python", "Konoha.Sql", "Konoha.NameSpace", "Syntax.JavaImport", "Java.String", "Konoha.Eval"];
-
-
-    before.add("konoha.map");
-    after.add( "Konoha.Map");
-
-    before.add("cstyle\", \"null");
-    after.add( "Syntax.Null");
-    before.add("cstyle\", \"while");
-    after.add( "Syntax.CStyleWhile");
-    before.add("cstyle\", \"break");
-    after.add( "Syntax.CStyleWhile");
-    before.add("cstyle\", \"continue");
-    after.add( "Syntax.CStyleWhile");
-    before.add("cstyle\", \"for");
-    after.add( "Syntax.CStyleFor");
-    before.add("cstyle\", \"$forStmt");
-    after.add( "Syntax.CStyleFor");
-    before.add("cstyle\", \"$Number");
-    after.add( "Syntax.Number");
 
     String[] args = SCRIPT_ARGV;
     int i = 1;
@@ -89,12 +59,8 @@ void main() {
         String data = readFile(args[i]);
         System.p("Fix " + args[i]);
         data = replace(args[i], data, "import \\(", "import (", "import(");
+        data = replace(args[i], data, "MiniKonoha\\.", "MiniKonoha.", "Konoha.");
         data = replace(args[i], data, "import\\( ", "import( ", "import(");
-        int j = 0;
-        while (j < before.getSize()) {
-            data = replace(args[i], data, "import\\(\"" + before[j] + "\"\\)", "import(\""  + before[j] + "\")", "import(\"" + after[j] + "\")");
-            j = j + 1;
-        }
         emit(args[i], data);
         i = i + 1;
     }
