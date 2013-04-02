@@ -39,7 +39,7 @@ extern "C" {
 #define K_CLASSTABLE_INITSIZE 64
 #define K_PAGESIZE        4096
 
-#define K_VERSION   "3.0"
+#define K_VERSION   "3.0 alpha"
 #define K_MAJOR_VERSION 3
 #define K_MINOR_VERSION 0
 #define K_PATCH_LEVEL   0
@@ -266,30 +266,26 @@ static const char *KEYWORD_LIST[] = {
 };
 #endif
 
-#define KSymbol_END              ((ksymbol_t)-1)
-#define KSymbol_IndentPattern    (((ksymbol_t)1)|KSymbolAttr_Pattern) /*$Indent*/
-#define KSymbol_SymbolPattern    (((ksymbol_t)2)|KSymbolAttr_Pattern) /*$Symbol*/
-#define KSymbol_TextPattern      (((ksymbol_t)3)|KSymbolAttr_Pattern) /*$Text*/
-#define KSymbol_NumberPattern    (((ksymbol_t)4)|KSymbolAttr_Pattern) /*$Number*/
-#define KSymbol_MemberPattern    (((ksymbol_t)5)|KSymbolAttr_Pattern) /*$Member*/
-#define KSymbol_TypePattern      (((ksymbol_t)6)|KSymbolAttr_Pattern) /*$Type*/
+#define KSymbol_END                ((ksymbol_t)-1)
+#define KSymbol_IndentPattern      (((ksymbol_t)1)|KSymbolAttr_Pattern) /*$Indent*/
+#define KSymbol_SymbolPattern      (((ksymbol_t)2)|KSymbolAttr_Pattern) /*$Symbol*/
+#define KSymbol_TextPattern        (((ksymbol_t)3)|KSymbolAttr_Pattern) /*$Text*/
+#define KSymbol_NumberPattern      (((ksymbol_t)4)|KSymbolAttr_Pattern) /*$Number*/
+#define KSymbol_MemberPattern      (((ksymbol_t)5)|KSymbolAttr_Pattern) /*$Member*/
+#define KSymbol_TypePattern        (((ksymbol_t)6)|KSymbolAttr_Pattern) /*$Type*/
 
-#define KSymbol_ParenthesisGroup (((ksymbol_t)7)) /*()*/
-#define KSymbol_BracketGroup     (((ksymbol_t)8)) /*[]*/
-#define KSymbol_BraceGroup       (((ksymbol_t)9)) /*{}*/
-#define KSymbol_TypeCastGroup    (((ksymbol_t)7)|KSymbolAttr_Pattern)    /*$()*/
-#define KSymbol_TypeParamGroup   (((ksymbol_t)8)|KSymbolAttr_Pattern)    /*$[]*/
-#define KSymbol_OptionalGroup    (((ksymbol_t)8)|KSymbol_ATMARK)         /*@[]*/
-#define KSymbol_ExprPattern      (((ksymbol_t)10)|KSymbolAttr_Pattern)    /*$Block*/
-#define KSymbol_BlockPattern     (((ksymbol_t)11)|KSymbolAttr_Pattern)    /*$Block*/
-#define KSymbol_ParamPattern     (((ksymbol_t)12)|KSymbolAttr_Pattern)   /*$Param*/
-#define KSymbol_TypeDeclPattern  (((ksymbol_t)13)|KSymbolAttr_Pattern)   /*$TypeDecl*/
+#define KSymbol_ParenthesisGroup   (((ksymbol_t)7)) /*()*/
+#define KSymbol_BracketGroup       (((ksymbol_t)8)) /*[]*/
+#define KSymbol_BraceGroup         (((ksymbol_t)9)) /*{}*/
+#define KSymbol_TypeCastGroup      (((ksymbol_t)7)|KSymbolAttr_Pattern)    /*$()*/
+#define KSymbol_TypeParamGroup     (((ksymbol_t)8)|KSymbolAttr_Pattern)    /*$[]*/
+#define KSymbol_OptionalGroup      (((ksymbol_t)8)|KSymbol_ATMARK)         /*@[]*/
+#define KSymbol_ExprPattern        (((ksymbol_t)10)|KSymbolAttr_Pattern)    /*$Block*/
+#define KSymbol_BlockPattern       (((ksymbol_t)11)|KSymbolAttr_Pattern)    /*$Block*/
+#define KSymbol_ParamPattern       (((ksymbol_t)12)|KSymbolAttr_Pattern)   /*$Param*/
+#define KSymbol_TypeDeclPattern    (((ksymbol_t)13)|KSymbolAttr_Pattern)   /*$TypeDecl*/
 #define KSymbol_MethodDeclPattern  (((ksymbol_t)14)|KSymbolAttr_Pattern) /*$MethodDecl*/
-#define KSymbol_TokenPattern     (((ksymbol_t)15)|KSymbolAttr_Pattern)   /*$Token*/
-
-//#define KSymbol_NodeOperator        KSymbol_ParamPattern
-//#define KSymbol_NodeTerm            KSymbol_SymbolPattern
-//#define KSymbol_ParamPattern/*MethodCall*/      KSymbol_ParamPattern
+#define KSymbol_TokenPattern       (((ksymbol_t)15)|KSymbolAttr_Pattern)   /*$Token*/
 
 #define KSymbol_DOT     16
 #define KSymbol_DIV     (1+KSymbol_DOT)
@@ -467,12 +463,6 @@ typedef struct logconf_t {
 	void *formatter; // for precompiled formattings
 } logconf_t;
 
-typedef struct KModuleInfo {
-	const char *name;
-	const char *version;
-	int patchlevel;
-	const char *desc;
-} KModuleInfo;
 
 typedef struct KTraceInfo {
 	struct KonohaValueVar *baseStack;
@@ -542,16 +532,16 @@ struct KObjectVisitor;
 
 #define TypeDefMacro(T)\
 	typedef /*const*/ struct k##T##Var      k##T;\
-	typedef struct k##T##Var      k##T##Var;\
+	typedef struct k##T##Var                k##T##Var;\
 
-#define TypeEnumMacro(T)         KType_##T,
+DefineBasicTypeList(TypeDefMacro)
+
+#define TypeEnumMacro(T)                    KType_##T,
 
 typedef enum {
 	DefineBasicTypeList(TypeEnumMacro)
 	KType_ERROR = -1 /*  sentinel */
 } KType_;
-
-DefineBasicTypeList(TypeDefMacro)
 
 #define kAbstractObject                 const void
 
@@ -568,15 +558,25 @@ typedef struct kNodeVar          kNodeVar;
 #define KMETHOD    void  /*CC_FASTCALL_*/
 typedef KMETHOD   (*KMethodFunc)(KonohaContext*, struct KonohaValueVar *);
 
+/* ------------ */
+/* Module       */
+
+typedef struct KModuleInfo {
+	const char *name;
+	const char *version;
+	int patchlevel;
+	const char *desc;
+} KModuleInfo;
+
 struct ExecutionEngineModule {
-	const KModuleInfo          *ExecutionEngineInfo;
-	void                      (*DeleteExecutionEngine)(KonohaContext *kctx);
-	const struct KBuilderAPI *(*GetDefaultBuilderAPI)(void);
-	struct KVirtualCode      *(*GetDefaultBootCode)(void);
-	struct KVirtualCode      *(*GenerateVirtualCode)(KonohaContext *, kMethod *mtd, kNode *block, int option);
-	KMethodFunc               (*GenerateMethodFunc)(KonohaContext *, struct KVirtualCode *);
-	void                      (*SetMethodCode)(KonohaContext *, kMethodVar *mtd, struct KVirtualCode *, KMethodFunc func);
-	struct KVirtualCode     *(*RunExecutionEngine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
+	const KModuleInfo            *ExecutionEngineInfo;
+	void                        (*DeleteExecutionEngine)(KonohaContext *kctx);
+	const struct KBuilderAPI   *(*GetDefaultBuilderAPI)(void);
+	struct KVirtualCode        *(*GetDefaultBootCode)(void);
+	struct KVirtualCode        *(*GenerateVirtualCode)(KonohaContext *, kMethod *mtd, kNode *block, int option);
+	KMethodFunc                 (*GenerateMethodFunc)(KonohaContext *, struct KVirtualCode *);
+	void                        (*SetMethodCode)(KonohaContext *, kMethodVar *mtd, struct KVirtualCode *, KMethodFunc func);
+	struct KVirtualCode        *(*RunExecutionEngine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
 };
 
 struct KonohaFactory {
@@ -585,10 +585,10 @@ struct KonohaFactory {
 	size_t       stacksize;
 	volatile int safePointFlag;
 	int          verbose;
-	int          exitStatus;
 	int          verbose_debug;
 	int          verbose_sugar;
 	int          verbose_code;
+	int          exitStatus;
 
 	/* LowLevel API */
 	/* memory allocation / deallocation */
@@ -643,7 +643,6 @@ struct KonohaFactory {
 	void (*BEFORE_LoadScript)(KonohaContext *, const char *filename);
 	int (*loadScript)(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *));
 	void (*AFTER_LoadScript)(KonohaContext *, const char *filename);
-
 	const char *(*shortFilePath)(const char *path);
 	const char *(*formatTransparentPath)(char *buf, size_t bufsiz, const char *parent, const char *path);
 
@@ -752,7 +751,6 @@ struct KonohaFactory {
 		kbool_t     (*SetJsonArrayAt)(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf);
 		kbool_t     (*AppendJsonArray)(KonohaContext *kctx, struct JsonBuf *jsonbuf, struct JsonBuf *otherbuf);
 	} JsonModule;
-
 };
 
 #define LOG_END   0
