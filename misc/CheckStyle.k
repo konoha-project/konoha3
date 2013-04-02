@@ -91,6 +91,9 @@ void main() {
         data = replace(args[i], data, "^static\tkbool_t", "static\tkbool_t", "static kbool_t");
         data = replace(args[i], data, "#include<", "#include<", "#include <");
         data = replace(args[i], data, "#include\"", "#include\"", "#include \"");
+        data = replace(args[i], data, "konoha3/konoha.h", "konoha3/konoha.h", "konoha3.h");
+        data = replace(args[i], data, "#include \"konoha3/sugar.h\"", "#include \"konoha3/sugar.h\"", "");
+        data = replace(args[i], data, "#include\"", "#include\"", "#include \"");
         data = replace(args[i], data, "while \\(", "while (", "while(");
         data = replace(args[i], data, "\n\t\n", "\n\t\n", "\n\n");
         data = replace(args[i], data, ";\t\n", ";\t\n", ";\n");

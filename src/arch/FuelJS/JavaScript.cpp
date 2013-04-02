@@ -268,7 +268,7 @@ static kbool_t JSBuilder_VisitNodeList(KonohaContext *kctx, KBuilder *builder, k
 		}
 
 		if(kNode_node(node) == KNode_Assign) {
-			JSBuilder_EmitAssignStmtPrefix(kctx, builder, node);	
+			JSBuilder_EmitAssignStmtPrefix(kctx, builder, node);
 		}
 
 		jsBuilder->isExprNode = kNode_isExpr(kctx, node);
@@ -298,7 +298,7 @@ static kbool_t JSBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, 
 		JSBuilder_EmitNewLineWith(kctx, builder, isExprBlock ? "(function() {" : "{");
 		jsBuilder->indent++;
 	}
-	kbool_t ret = JSBuilder_VisitNodeList(kctx, builder, block, thunk);	
+	kbool_t ret = JSBuilder_VisitNodeList(kctx, builder, block, thunk);
 	if(!kNode_IsRootNode(block)) {
 		jsBuilder->indent--;
 		JSBuilder_EmitString(kctx, builder, isExprBlock ? "})()" : "}", "", "");
@@ -578,14 +578,14 @@ static kbool_t JSBuilder_VisitMethodCallNodeWithoutOperator(KonohaContext *kctx,
 {
 	kMethod *mtd = CallNode_getMethod(node);
 	const size_t nodeListSize = kArray_size(node->NodeList);
-	
+
 	kNode *receiver = kNode_At(node, 1);
 	KClass *receiverClass = KClass_(receiver->attrTypeId);
 	const char *className = KSymbol_text(receiverClass->classNameSymbol);
 	const char *methodName = KSymbol_text(mtd->mn);
 
 	KClass *globalObjectClass = KLIB kNameSpace_GetClassByFullName(kctx, kNode_ns(node), "GlobalObject", 12, NULL);
-	const kbool_t isNewArray = (mtd->mn == KMethodName_("[]") || mtd->mn == KMethodName_("newArray"));	
+	const kbool_t isNewArray = (mtd->mn == KMethodName_("[]") || mtd->mn == KMethodName_("newArray"));
 	const kbool_t isGlobal = (receiverClass == globalObjectClass || receiver->attrTypeId == KType_NameSpace || strcmp(className, "GlobalObject") == 0);
 	int prefix = KSymbol_prefixText_ID(mtd->mn);
 	const kbool_t isGetter = prefix == kSymbolPrefix_GET;
@@ -1011,6 +1011,7 @@ static const KModuleInfo ModuleInfo = {
 
 static const struct ExecutionEngineModule V8_Module = {
 	&ModuleInfo,
+	"JS",
 	V8_DeleteVirtualMachine,
 	GetDefaultBuilderAPI,
 	GetDefaultBootCode,

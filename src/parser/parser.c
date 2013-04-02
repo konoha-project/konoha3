@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-#include"konoha3.h"
+#include "konoha3.h"
 
 // global variable
 KONOHA_EXPORT(int) verbose_sugar;

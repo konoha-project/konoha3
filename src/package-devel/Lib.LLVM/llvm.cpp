@@ -106,7 +106,7 @@
 #undef PACKAGE_NAME
 #undef PACKAGE_STRING
 #undef PACKAGE_VERSION
-#include "../../../include/konoha3/konoha.h"
+#include "../../../include/konoha3.h"
 #include "../../../include/konoha3/sugar.h"
 #include "../../../include/konoha3/konoha_common.h"
 #include "../../../include/konoha3/import/methoddecl.h"
