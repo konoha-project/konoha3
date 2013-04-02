@@ -238,6 +238,8 @@ endmacro(create_dir DIR_NAME)
 create_dir(module)
 create_dir(package)
 
+add_subdirectory(src/arch)
+add_subdirectory(src/ffi)
 add_subdirectory(src/module)
 add_subdirectory(src/module-devel)
 

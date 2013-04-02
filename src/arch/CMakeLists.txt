@@ -8,7 +8,6 @@ set(KONOHA_MODULE_DIR
 	"lib/konoha/${SO_VERSION}/module/${ModuleName}")
 
 macro(add_konoha_module ModuleName)
-	#MESSAGE(STATUS "Compiling ${ModuleName} Module")
 	ENABLE_COVERAGE_INFO_IF_ENABLE(MODULE_EXTRA_LIBRARY)
 	set(CMAKE_C_FLAGS_${uppercase_CMAKE_BUILD_TYPE}   "${CMAKE_C_FLAGS_${uppercase_CMAKE_BUILD_TYPE}}   ${MODULE_C_FLAGS}")
 	set(CMAKE_CXX_FLAGS_${uppercase_CMAKE_BUILD_TYPE} "${CMAKE_CXX_FLAGS_${uppercase_CMAKE_BUILD_TYPE}} ${MODULE_CXX_FLAGS}")
@@ -39,14 +38,6 @@ macro(ADD_MODULE dir)
 		add_subdirectory(${dir})
 	endif()
 endmacro(ADD_MODULE dir)
-
-set(MODULE_SUBDIRS Console Event GC Json I18N)
-foreach(sub ${MODULE_SUBDIRS})
-	file(GLOB dirs ${CMAKE_CURRENT_SOURCE_DIR}/${sub}/*)
-	foreach(dir ${dirs})
-		ADD_MODULE(${dir})
-	endforeach()
-endforeach()
 
 file(GLOB dirs ${CMAKE_CURRENT_SOURCE_DIR}/*)
 foreach(dir ${dirs})

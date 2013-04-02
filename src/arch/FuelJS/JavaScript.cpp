@@ -522,7 +522,7 @@ static kbool_t JSBuilder_VisitFieldNode(KonohaContext *kctx, KBuilder *builder, 
 	return true;
 }
 
-KONOHA_EXPORT(kbool_t) LoadJavaScriptModule(KonohaFactory *factory, ModuleType type);
+KONOHA_EXPORT(kbool_t) LoadFuelJSModule(KonohaFactory *factory, ModuleType type);
 static void compileAllDefinedMethodsInNameSpace(KonohaContext *kctx, kNameSpace *ns);
 
 static bool JSBuilder_importPackage(KonohaContext *kctx, kNameSpace *ns, kString *package, kfileline_t uline)
@@ -537,7 +537,7 @@ static bool JSBuilder_importPackage(KonohaContext *kctx, kNameSpace *ns, kString
 	compileAllDefinedMethodsInNameSpace(kctx, ns);
 
 	//factory->DeleteVirtualMachine(kctx);
-	LoadJavaScriptModule(factory, ReleaseModule);
+	LoadFuelJSModule(factory, ReleaseModule);
 	ns->builderApi = factory->ExecutionEngineModule.GetDefaultBuilderAPI();
 	return true;
 }
@@ -1035,7 +1035,7 @@ static const struct KBuilderAPI *GetDefaultBuilderAPI(void)
 
 // -------------------------------------------------------------------------
 
-KONOHA_EXPORT(kbool_t) LoadJavaScriptModule(KonohaFactory *factory, ModuleType type)
+KONOHA_EXPORT(kbool_t) LoadFuelJSModule(KonohaFactory *factory, ModuleType type)
 {
 #ifdef HAVE_LIBV8
 	globalJSContext = new JSContext();
