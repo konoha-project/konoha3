@@ -999,7 +999,7 @@ static const KModuleInfo ModuleInfo = {
 static const struct KBuilderAPI *GetDefaultBuilderAPI(void);
 
 static const struct ExecutionEngineModule Bash_Module = {
-	&ModuleInfo,
+	&ModuleInfo, NULL/*FIXME*/,
 	Bash_DeleteVirtualMachine,
 	GetDefaultBuilderAPI,
 	GetDefaultBootCode,

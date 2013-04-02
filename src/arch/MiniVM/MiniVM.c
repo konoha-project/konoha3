@@ -1400,7 +1400,7 @@ static const KModuleInfo ModuleInfo = {
 static const struct KBuilderAPI *GetDefaultBuilderAPI(void);
 
 static const struct ExecutionEngineModule MiniVM_Module = {
-	&ModuleInfo,
+	&ModuleInfo, "C",
 	MiniVM_DeleteVirtualMachine,
 	GetDefaultBuilderAPI,
 	GetDefaultBootCode,
