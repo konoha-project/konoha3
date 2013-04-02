@@ -524,7 +524,7 @@ static void path_defineDIR(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trac
 
 static kbool_t path_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	//	KRequireKonohaCommonModule(trace);
+	//	KRequireKonohaCommonModel(trace);
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static|_C, _F(System_getcwd),   KType_String,  KType_System, KMethodName_("getcwd"), 0,
 		_Public|_Static|_C, _F(System_realpath), KType_String,  KType_System, KMethodName_("realpath"),  1, KType_String, KFieldName_("path"),

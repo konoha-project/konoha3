@@ -509,16 +509,16 @@ static KMETHOD MPIData_Seti(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 
 typedef struct {
-	KRuntimeModule h;
+	KRuntimeModel h;
 	KClass *cValue;
 } KModuleMpi;
 
-static void MpiModule_Setup(KonohaContext *kctx, struct KRuntimeModule *def, int newctx)
+static void MpiModule_Setup(KonohaContext *kctx, struct KRuntimeModel *def, int newctx)
 {
 	(void)kctx;(void)def;(void)newctx;
 }
 
-static void MpiModule_Free(KonohaContext *kctx, struct KRuntimeModule *baseh)
+static void MpiModule_Free(KonohaContext *kctx, struct KRuntimeModel *baseh)
 {
 	MPI_Finalize();
 }
@@ -529,9 +529,9 @@ static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 	KRequirePackage("Type.Float", trace);
 	KModuleMpi *mod = (KModuleMpi *)KCalloc_UNTRACE(sizeof(KModuleMpi), 1);
 	mod->h.name     = "mpi";
-	mod->h.setupModuleContext    = MpiModule_Setup;
-	mod->h.freeModule     = MpiModule_Free;
-	KLIB KRuntime_SetModule(kctx, 19/*MOD_mpi*/, (KRuntimeModule *)mod, trace);
+	mod->h.setupModelContext    = MpiModule_Setup;
+	mod->h.freeModel     = MpiModule_Free;
+	KLIB KRuntime_SetModule(kctx, 19/*MOD_mpi*/, (KRuntimeModel *)mod, trace);
 
 	int argc = 0;
 	char *args[1] = {};

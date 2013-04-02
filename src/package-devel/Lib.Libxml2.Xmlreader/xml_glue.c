@@ -584,7 +584,7 @@ static KMETHOD XmlReader_normalization(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t xml_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequireKonohaCommonModule(trace);
+	KRequireKonohaCommonModel(trace);
 	KDEFINE_CLASS defXml = {
 		STRUCTNAME(XmlReader),
 		.cflag = KClassFlag_Final,

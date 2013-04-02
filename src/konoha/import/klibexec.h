@@ -841,7 +841,7 @@ static int DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 static void CheckSafePoint(KonohaContext *kctx, KonohaStack *sfp, kfileline_t uline)
 {
 	PLATAPI GCModule.ScheduleGC(kctx, NULL); // FIXME: NULL
-	if(kctx->modshare[MOD_EVENT] != NULL) {
+	if(kctx->runtimeModels[MOD_EVENT] != NULL) {
 		KLIB KscheduleEvent(kctx);
 	}
 //	if(PLATAPI ScheduleEvent != NULL) {

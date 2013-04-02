@@ -182,7 +182,7 @@ static void prototype_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 static kbool_t prototype_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequireKonohaCommonModule(trace);
+	KRequireKonohaCommonModel(trace);
 	prototype_defineClass(kctx, ns, option, trace);
 	prototype_defineMethod(kctx, ns, trace);
 	return true;

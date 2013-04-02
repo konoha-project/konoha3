@@ -163,7 +163,7 @@ static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t iterator_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequireKonohaCommonModule(trace);
+	KRequireKonohaCommonModel(trace);
 	if(KClass_Iterator == NULL) {
 		kparamtype_t IteratorParam = {KType_Object};
 		KDEFINE_CLASS defIterator = {0};

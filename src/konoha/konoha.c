@@ -90,13 +90,13 @@ static void KRuntimeContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KFree(ctx->stack, sizeof(KRuntimeContextVar));
 }
 
-static kbool_t KRuntime_SetModule(KonohaContext *kctx, int x, KRuntimeModule *d, KTraceInfo *trace)
+static kbool_t KRuntime_SetModule(KonohaContext *kctx, int x, KRuntimeModel *d, KTraceInfo *trace)
 {
-	if(kctx->modshare[x] != NULL) {
-		KLIB ReportScriptMessage(kctx, trace, ErrTag, "module %s already registered", kctx->modshare[x]->name);
+	if(kctx->runtimeModels[x] != NULL) {
+		KLIB ReportScriptMessage(kctx, trace, ErrTag, "module %s already registered", kctx->runtimeModels[x]->name);
 		return false;
 	}
-	kctx->modshare[x] = d;
+	kctx->runtimeModels[x] = d;
 	return true;
 }
 
@@ -126,8 +126,8 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, PlatformApi *pla
 		newctx->klib = (KonohaLib *)klib;
 		newctx->platApi = platApi;
 		kctx = (KonohaContext *)newctx;
-		newctx->modshare = (KRuntimeModule**)calloc(sizeof(KRuntimeModule *), KRuntimeModule_MAXSIZE);
-		newctx->modlocal = (KContextModule**)calloc(sizeof(KContextModule *), KRuntimeModule_MAXSIZE);
+		newctx->runtimeModels = (KRuntimeModel**)calloc(sizeof(KRuntimeModel *), KRuntimeModel_MAXSIZE);
+		newctx->localContexts = (KModelContext**)calloc(sizeof(KModelContext *), KRuntimeModel_MAXSIZE);
 		DBG_ASSERT(PLATAPI GCModule.InitGcContext != NULL);
 		PLATAPI GCModule.InitGcContext(newctx);
 		PLATAPI JsonModule.InitJsonContext(newctx);
@@ -138,8 +138,8 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, PlatformApi *pla
 		newctx->klib = kctx->klib;
 		newctx->platApi = kctx->platApi;
 		newctx->share = kctx->share;
-		newctx->modshare = kctx->modshare;
-		newctx->modlocal = (KContextModule**)KCalloc_UNTRACE(sizeof(KContextModule *), KRuntimeModule_MAXSIZE);
+		newctx->runtimeModels = kctx->runtimeModels;
+		newctx->localContexts = (KModelContext**)KCalloc_UNTRACE(sizeof(KModelContext *), KRuntimeModel_MAXSIZE);
 		PLATAPI GCModule.InitGcContext(kctx);
 		PLATAPI JsonModule.InitJsonContext(newctx);
 	}
@@ -151,11 +151,11 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, PlatformApi *pla
 	}
 	else {
 		int i;
-		for(i = 0; i < KRuntimeModule_MAXSIZE; i++) {
-			KRuntimeModule *mod = newctx->modshare[i];
+		for(i = 0; i < KRuntimeModel_MAXSIZE; i++) {
+			KRuntimeModel *mod = newctx->runtimeModels[i];
 			if(mod == NULL) continue;
-			if(mod->setupModuleContext != NULL) {
-				mod->setupModuleContext((KonohaContext *)newctx, mod, true);
+			if(mod->setupModelContext != NULL) {
+				mod->setupModelContext((KonohaContext *)newctx, mod, true);
 			}
 		}
 	}
@@ -169,8 +169,8 @@ static void KonohaContext_Reftrace(KonohaContext *kctx, KonohaContextVar *ctx, K
 		KRuntime_Reftrace(kctx, ctx, visitor);
 	}
 	KRuntimeContext_Reftrace(kctx, ctx, visitor);
-	for(i = 0; i < KRuntimeModule_MAXSIZE; i++) {
-		KContextModule *p = ctx->modlocal[i];
+	for(i = 0; i < KRuntimeModel_MAXSIZE; i++) {
+		KModelContext *p = ctx->localContexts[i];
 		if(p != NULL && p->reftrace != NULL) {
 			p->reftrace(kctx, p, visitor);
 		}
@@ -185,8 +185,8 @@ static void ReftraceAll(KonohaContext *kctx, KObjectVisitor *visitor)
 static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	size_t i;
-	for(i = 1; i < KRuntimeModule_MAXSIZE; i++) {   // 0 is LOGGER, free lately
-		KContextModule *p = ctx->modlocal[i];
+	for(i = 1; i < KRuntimeModel_MAXSIZE; i++) {   // 0 is LOGGER, free lately
+		KModelContext *p = ctx->localContexts[i];
 		if(p != NULL && p->free != NULL) {
 			p->free(ctx, p);
 		}
@@ -195,27 +195,27 @@ static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 	if(IS_RootKonohaContext(ctx)){  // share
 		PLATAPI ExecutionEngineModule.DeleteExecutionEngine(ctx);
 		KonohaLibVar *kklib = (KonohaLibVar *)ctx - 1;
-		for(i = 0; i < KRuntimeModule_MAXSIZE; i++) {
-			KRuntimeModule *p = ctx->modshare[i];
+		for(i = 0; i < KRuntimeModel_MAXSIZE; i++) {
+			KRuntimeModel *p = ctx->runtimeModels[i];
 			if(p == NULL) continue;
 			if(p->allocSize > 0) {
 				KFree(p, p->allocSize);
 			}
-			else if(p->freeModule != NULL) {
-				p->freeModule(kctx, p);
+			else if(p->freeModel != NULL) {
+				p->freeModel(kctx, p);
 			}
 		}
 		PLATAPI GCModule.DeleteGcContext(ctx);
 		PLATAPI JsonModule.DeleteJsonContext(ctx);
 		KRuntime_Free(kctx, ctx);
-		free(kctx->modlocal);
-		free(kctx->modshare);
+		free(kctx->localContexts);
+		free(kctx->runtimeModels);
 		free(kklib/*, sizeof(KonohaLib) + sizeof(KonohaContextVar)*/);
 	}
 	else {
 		PLATAPI GCModule.DeleteGcContext(ctx);
 		PLATAPI JsonModule.DeleteJsonContext(ctx);
-		KFree(ctx->modlocal, sizeof(KContextModule *) * KRuntimeModule_MAXSIZE);
+		KFree(ctx->localContexts, sizeof(KModelContext *) * KRuntimeModel_MAXSIZE);
 		KFree(ctx, sizeof(KonohaContextVar));
 	}
 }

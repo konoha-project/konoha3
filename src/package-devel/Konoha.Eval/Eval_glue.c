@@ -35,7 +35,7 @@ extern "C"{
 static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline, KTraceInfo *trace)
 {
 	kstatus_t result;
-	KPARSERM->h.setupModuleContext(kctx, (KRuntimeModule *)KPARSERM, 0/*lazy*/);
+	KPARSERM->h.setupModelContext(kctx, (KRuntimeModel *)KPARSERM, 0/*lazy*/);
 	INIT_GCSTACK();
 	{
 		KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList};

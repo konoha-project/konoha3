@@ -29,16 +29,16 @@
 extern "C" {
 #endif
 
-#define KGetKonohaCommonModule()    ((KonohaCommonModule *)kctx->modshare[MOD_konoha])
-#define KDefinedKonohaCommonModule() (kctx->modshare[MOD_konoha] != NULL)
+#define KGetCommonModel()    ((KonohaCommonModel *)kctx->runtimeModels[CommonModelIndex])
+#define KDefinedKonohaCommonModel() (kctx->runtimeModels[CommonModelIndex] != NULL)
 
-#define KRequireKonohaCommonModule(TRACE) \
-	if(KGetKonohaCommonModule() == NULL) {\
-		KonohaCommonModule_Init(kctx, TRACE);\
+#define KRequireKonohaCommonModel(TRACE) \
+	if(KGetCommonModel() == NULL) {\
+		KonohaCommonModel_Init(kctx, TRACE);\
 	}\
 
 typedef struct {
-	KRuntimeModule h;
+	KRuntimeModel h;
 	KClass *cPrototype;
 	KClass *cFloat;
 	KClass *cRegExp;
@@ -52,36 +52,35 @@ typedef struct {
 	struct kFileVar *fileStdIn_OnGlobalConstList;
 	struct kFileVar *fileStdOut_OnGlobalConstList;
 	struct kFileVar *fileStdErr_OnGlobalConstList;
-} KonohaCommonModule;
+} KonohaCommonModel;
 
 
-static inline void KonohaCommonModule_Init(KonohaContext *kctx, KTraceInfo *trace)
+static inline void KonohaCommonModel_Init(KonohaContext *kctx, KTraceInfo *trace)
 {
-	KonohaCommonModule *base = (KonohaCommonModule *)KCalloc(sizeof(KonohaCommonModule), 1, trace);
+	KonohaCommonModel *base = (KonohaCommonModel *)KCalloc(sizeof(KonohaCommonModel), 1, trace);
 	base->h.name      = "KonohaCommon";
-	base->h.allocSize = sizeof(KonohaCommonModule);
-	KLIB KRuntime_SetModule(kctx, MOD_konoha, &base->h, trace);
+	base->h.allocSize = sizeof(KonohaCommonModel);
+	KLIB KRuntime_SetModule(kctx, CommonModelIndex, &base->h, trace);
 }
 
 /* ------------------------------------------------------------------------ */
 /* Bytes */
 
-#define KClass_Bytes     (KGetKonohaCommonModule()->cBytes)
+#define KClass_Bytes     (KGetCommonModel()->cBytes)
 #define KType_Bytes      ((KClass_Bytes)->typeId)
 #define IS_Bytes(O)      (kObject_class(O) == KClass_Bytes)
 
 /* ------------------------------------------------------------------------ */
 /* RegExp */
 
-#define KClass_RegExp     (KGetKonohaCommonModule()->cRegExp)
+#define KClass_RegExp     (KGetCommonModel()->cRegExp)
 #define KType_RegExp      ((KClass_RegExp)->typeId)
 #define IS_RegExp(O)      (kObject_class(O) == KClass_RegExp)
-
 
 /* ------------------------------------------------------------------------ */
 /* Prototype */
 
-#define KClass_Prototype      (KGetKonohaCommonModule()->cPrototype)
+#define KClass_Prototype      (KGetCommonModel()->cPrototype)
 #define KType_Prototype       ((KClass_Prototype)->typeId)
 #define IS_Prototype(O)       (kObject_class(O)->baseTypeId == KType_Prototype)
 
@@ -93,7 +92,7 @@ struct kPrototypeVar {
 /* ------------------------------------------------------------------------ */
 /* Float */
 
-#define KClass_Float      (KGetKonohaCommonModule()->cFloat)
+#define KClass_Float      (KGetCommonModel()->cFloat)
 #define KType_float       ((KClass_Float)->typeId)
 #define IS_Float(O)       (kObject_class(O) == KClass_Float)
 #define KFLOAT_FMT        "%.4f"  // NEVER CHANGE THIS
@@ -108,12 +107,12 @@ struct kFloatVar {
 /* Iterator */
 
 #define KClassFlag_Iterator     KClassFlag_Final
-#define KClass_Iterator         KGetKonohaCommonModule()->cIterator
-#define KType_Iterator          KGetKonohaCommonModule()->cIterator->typeId
-#define KClass_StringIterator   KGetKonohaCommonModule()->cStringIterator
-#define KType_StringIterator    KGetKonohaCommonModule()->cStringIterator->typeId
-#define KClass_GenericIterator  KGetKonohaCommonModule()->cGenericIterator
-#define KType_GenericIterator   KGetKonohaCommonModule()->cGenericIterator->typeId
+#define KClass_Iterator         KGetCommonModel()->cIterator
+#define KType_Iterator          KGetCommonModel()->cIterator->typeId
+#define KClass_StringIterator   KGetCommonModel()->cStringIterator
+#define KType_StringIterator    KGetCommonModel()->cStringIterator->typeId
+#define KClass_GenericIterator  KGetCommonModel()->cGenericIterator
+#define KType_GenericIterator   KGetCommonModel()->cGenericIterator->typeId
 
 #define IS_Iterator(O)         (kObject_class(O)->baseTypeId == KType_Iterator)
 
@@ -133,14 +132,14 @@ struct kIteratorVar {
 
 /* .... */
 
-#define KClass_File     (KGetKonohaCommonModule()->cFile)
+#define KClass_File     (KGetCommonModel()->cFile)
 #define KType_File      ((KClass_File)->typeId)
 #define IS_File(O)      (kObject_class(O) == KClass_File)
-#define KClass_FILE     (KGetKonohaCommonModule()->cFile)
+#define KClass_FILE     (KGetCommonModel()->cFile)
 #define KType_FILE      ((KClass_File)->typeId)
-#define KFileStdIn      KGetKonohaCommonModule()->fileStdIn_OnGlobalConstList
-#define KFileStdOut     KGetKonohaCommonModule()->fileStdOut_OnGlobalConstList
-#define KFileStdErr     KGetKonohaCommonModule()->fileStdErr_OnGlobalConstList
+#define KFileStdIn      KGetCommonModel()->fileStdIn_OnGlobalConstList
+#define KFileStdOut     KGetCommonModel()->fileStdOut_OnGlobalConstList
+#define KFileStdErr     KGetCommonModel()->fileStdErr_OnGlobalConstList
 
 
 #define kFileFlag_ChangeLessStream    kObjectFlag_Local1

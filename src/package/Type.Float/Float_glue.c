@@ -245,7 +245,7 @@ static KMETHOD Float_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	KRequireKonohaCommonModule(trace);
+	KRequireKonohaCommonModel(trace);
 	if(KClass_Float == NULL) {
 		KDEFINE_CLASS defFloat = {0};
 		SETUNBOXNAME(defFloat, float);

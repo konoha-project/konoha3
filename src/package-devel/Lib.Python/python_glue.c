@@ -547,7 +547,7 @@ static kbool_t python_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
-	if(KDefinedKonohaCommonModule() == true && KClass_Float != NULL) {
+	if(KDefinedKonohaCommonModel() == true && KClass_Float != NULL) {
 		KDEFINE_METHOD MethodData[] = {
 			_Public|_Const|_Im|_Coercion, _F(PyObject_toFloat), KType_float, KType_PyObject, KMethodName_To(KType_float), 0,
 			_Public|_Const|_Im|_Coercion, _F(Float_toPyObject), KType_PyObject, KType_float, KMethodName_To(KType_PyObject), 0,

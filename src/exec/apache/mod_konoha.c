@@ -1,16 +1,16 @@
 /*
- * mod_konoha
+ * CommonModelIndex
  *
  * This is a konoha module for Apache HTTP Server.
  *
  * ## Settings
  * Add to /path/to/httpd.conf
  *
- * FIXME: Current version of mod_konoha are not able
+ * FIXME: Current version of CommonModelIndex are not able
  *        to set KPackageDir.
  * If you want to specify package dir for konoha,
  * use 'KPackageDir'.
- *   LoadModule konoha_module modules/mod_konoha.so
+ *   LoadModule konoha_module modules/CommonModelIndex.so
  *   AddHandler konoha-script .k
  *   KPackageDir /path/to/konoha/package
  *
@@ -311,14 +311,14 @@ static int konoha_handler(request_rec *r)
 	return ret;
 }
 
-static int mod_konoha_Init(apr_pool_t *p, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
+static int CommonModelIndex_Init(apr_pool_t *p, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
 {
 	/* TODO: Create Global Instance to share constants objects */
 	(void)p;(void)plog;(void)ptemp;(void)s;
 	return 0;
 }
 
-static void mod_konoha_child_Init(apr_pool_t *pool, server_rec *server)
+static void CommonModelIndex_child_Init(apr_pool_t *pool, server_rec *server)
 {
 	/* TODO: Create VM Instance per child process */
 	(void)pool;(void)server;
@@ -356,8 +356,8 @@ static const command_rec konoha_cmds[] = {
 static void konoha_register_hooks(apr_pool_t *p)
 {
 	(void)p;
-	ap_hook_post_config(mod_konoha_Init, NULL, NULL, APR_HOOK_MIDDLE);
-	ap_hook_child_init(mod_konoha_child_Init, NULL, NULL, APR_HOOK_MIDDLE);
+	ap_hook_post_config(CommonModelIndex_Init, NULL, NULL, APR_HOOK_MIDDLE);
+	ap_hook_child_init(CommonModelIndex_child_Init, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_handler(konoha_handler, NULL, NULL, APR_HOOK_FIRST);
 }
 

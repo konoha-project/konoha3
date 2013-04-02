@@ -410,7 +410,7 @@ static KMETHOD ResultSet_getInt(KonohaContext *kctx, KonohaStack *sfp)
 		ktypeattr_t type = rs->column[idx].type;
 		if(type == KType_Int) {
 			res = rs->column[idx].val.intValue;
-		} else if(KDefinedKonohaCommonModule() && type == KType_float) {
+		} else if(KDefinedKonohaCommonModel() && type == KType_float) {
 			res = (kint_t) rs->column[idx].val.floatValue;
 		}
 	}
@@ -444,7 +444,7 @@ static KMETHOD ResultSet_getFloat(KonohaContext *kctx, KonohaStack *sfp)
 		ktypeattr_t type = rs->column[idx].type;
 		if(type == KType_Int) {
 			res = (kfloat_t) rs->column[idx].val.intValue;
-		} else if(KDefinedKonohaCommonModule() && type == KType_float) {
+		} else if(KDefinedKonohaCommonModel() && type == KType_float) {
 			res = rs->column[idx].val.floatValue;
 		}
 	}
@@ -469,7 +469,7 @@ static KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 			const char *text = KLIB KBuffer_text(kctx, &wb, 0);
 			res = KLIB new_kString(kctx, OnStack, text, KBuffer_bytesize(&wb), 0);
 			KLIB KBuffer_Free(&wb);
-		} else if(KDefinedKonohaCommonModule() && type == KType_float) {
+		} else if(KDefinedKonohaCommonModel() && type == KType_float) {
 			KBuffer wb;
 			KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
 			KLIB KBuffer_printf(kctx, &wb, KFLOAT_FMT, val[0].floatValue);
@@ -490,7 +490,7 @@ static KMETHOD ResultSet_get(KonohaContext *kctx, KonohaStack *sfp)
 		ResultSet_getInt(kctx, sfp);
 	} else if(retClass->typeId == KType_String) {
 		ResultSet_getString(kctx, sfp);
-	} else if(KDefinedKonohaCommonModule() && retClass->typeId == KType_float) {
+	} else if(KDefinedKonohaCommonModel() && retClass->typeId == KType_float) {
 		ResultSet_getFloat(kctx, sfp);
 	} else {
 		kObject *returnValue = KLIB Knull(kctx, retClass);

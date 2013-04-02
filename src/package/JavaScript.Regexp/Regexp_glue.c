@@ -741,7 +741,7 @@ static kbool_t regexp_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 static kbool_t regexp_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequireKonohaCommonModule(trace);
+	KRequireKonohaCommonModel(trace);
 	regexp_defineMethod(kctx, ns, trace);
 	regexp_defineSyntax(kctx, ns, trace);
 	return true;

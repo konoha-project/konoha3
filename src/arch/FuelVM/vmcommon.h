@@ -73,7 +73,7 @@ static inline bool IsUnBoxedType(enum TypeId Type)
 	}
 }
 
-#define FloatIsDefined(kctx) (KDefinedKonohaCommonModule() && KClass_Float != NULL)
+#define FloatIsDefined(kctx) (KDefinedKonohaCommonModel() && KClass_Float != NULL)
 
 static inline enum TypeId ConvertToTypeId(KonohaContext *kctx, ktypeattr_t type)
 {

@@ -828,7 +828,7 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t curl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequireKonohaCommonModule(trace);
+	KRequireKonohaCommonModel(trace);
 	KRequirePackage("Type.File", trace);
 
 	KDEFINE_CLASS defCurl = {

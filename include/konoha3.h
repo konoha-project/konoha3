@@ -888,8 +888,9 @@ typedef struct KRuntimeContextVar            KRuntimeContextVar;
 typedef struct KonohaValueVar                KonohaStack;
 typedef struct KonohaValueVar                KonohaValue;
 
-typedef struct KRuntimeModule        KRuntimeModule;
-typedef struct KContextModule        KContextModule;
+typedef struct KRuntimeModel        KRuntimeModel;
+typedef struct KModelContext        KModelContext;
+
 struct KObjectVisitor;
 
 struct KonohaContextVar {
@@ -899,8 +900,8 @@ struct KonohaContextVar {
 	KonohaLib                 *klib;
 	KRuntime                  *share;
 	KRuntimeContextVar        *stack;
-	KRuntimeModule           **modshare;
-	KContextModule           **modlocal;
+	KRuntimeModel           **runtimeModels;
+	KModelContext           **localContexts;
 	void                      *gcContext; // defined in each module
 };
 
@@ -967,27 +968,27 @@ struct KRuntimeContextVar {
 };
 
 // module
-#define KRuntimeModule_MAXSIZE    32
-#define MOD_gc         1
-#define MOD_sugar      3
-#define MOD_konoha     6
+#define KRuntimeModel_MAXSIZE    16
+//#define MOD_gc         1
+#define ParserModelIndex     0
+#define CommonModelIndex     1
 
-#define MOD_APACHE     17
-#define MOD_EVENT      18
+#define MOD_APACHE     10
+#define MOD_EVENT      11
 
-struct KRuntimeModule {
-	const char *name;
-	int         mod_id;
-	void        (*setupModuleContext)(KonohaContext*, struct KRuntimeModule *, int newctx);
-	void        (*freeModule)(KonohaContext*, struct KRuntimeModule *);
-	size_t      allocSize;
-	kmutex_t   *moduleMutex;
+struct KRuntimeModel {
+	const char  *name;
+	int          modelIndex;
+	void        (*setupModelContext)(KonohaContext*, struct KRuntimeModel *, int newctx);
+	void        (*freeModel)(KonohaContext*, struct KRuntimeModel *);
+	size_t       allocSize;
+	kmutex_t    *modelMutex;
 };
 
-struct KContextModule {
+struct KModelContext {
 	uintptr_t unique;
-	void (*reftrace)(KonohaContext*, struct KContextModule *, struct KObjectVisitor *);
-	void (*free)(KonohaContext*, struct KContextModule *);
+	void (*reftrace)(KonohaContext*, struct KModelContext *, struct KObjectVisitor *);
+	void (*free)(KonohaContext*, struct KModelContext *);
 };
 
 #define K_FRAME_NCMEMBER \
@@ -2109,8 +2110,8 @@ struct KGammaLocalData {
 
 /* ------------------------------------------------------------------------ */
 
-#define KGetParserContext(kctx)    ((KParserContext *)kctx->modlocal[MOD_sugar])
-#define KPARSERM            ((KParserModule *)kctx->modshare[MOD_sugar])
+#define KGetParserContext(kctx)    ((KParserContext *)kctx->localContexts[ParserModelIndex])
+#define KPARSERM            ((KParserModel *)kctx->runtimeModels[ParserModelIndex])
 #define KClass_Symbol       KPARSERM->cSymbol
 #define KClass_SymbolVar    KPARSERM->cSymbol
 #define KClass_Syntax       KPARSERM->cSyntax
@@ -2152,8 +2153,8 @@ struct KBuilder;
 
 typedef kbool_t (*IsSeparatorFunc)(KonohaContext *kctx, kToken *tk);
 
-typedef struct KParserModule {
-	KRuntimeModule  h;
+typedef struct KParserModel {
+	KRuntimeModel  h;
 	KClass *cSymbol;
 	KClass *cSyntax;
 	KClass *cToken;
@@ -2165,10 +2166,10 @@ typedef struct KParserModule {
 	kFunc  *patternParseFunc;
 	kFunc  *methodTypeFunc;
 	//
-} KParserModule;
+} KParserModel;
 
 typedef struct {
-	KContextModule     h;
+	KModelContext     h;
 	kArray            *preparedTokenList;
 	KGrowingArray      errorMessageBuffer;
 	kArray            *errorMessageList;
@@ -2195,7 +2196,7 @@ typedef enum {
 #define new_UnboxConstNode(CTX, NS, T, D)         KLIB kNode_SetUnboxConst(CTX, KNewNode(NS), T, D)
 #define new_VariableNode(CTX, NS, BLD, TY, IDX)   KLIB kNode_SetVariable(CTX, KNewNode(NS), BLD, TY, IDX)
 
-#define SUGAR                                   ((const KParserModule *)KPARSERM)->
+#define SUGAR                                   ((const KParserModel *)KPARSERM)->
 #define KType_Syntax                            SUGAR cSyntax->typeId
 #define KType_Symbol                            SUGAR cSymbol->typeId
 #define KType_Token                             SUGAR cToken->typeId
@@ -2448,7 +2449,7 @@ struct KonohaLibVar {
 	kbool_t             (*kMethod_GenCode)(KonohaContext*, kMethod*, kNode *, int options);
 	intptr_t            (*kMethod_indexOfField)(kMethod *);
 
-	kbool_t             (*KRuntime_SetModule)(KonohaContext*, int, struct KRuntimeModule *, KTraceInfo *);
+	kbool_t             (*KRuntime_SetModule)(KonohaContext*, int, struct KRuntimeModel *, KTraceInfo *);
 
 	void                (*kNameSpace_FreeSugarExtension)(KonohaContext *, kNameSpaceVar *);
 

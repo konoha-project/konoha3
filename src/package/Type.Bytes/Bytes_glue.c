@@ -247,7 +247,7 @@ static KMETHOD String_new_fromBytes_withSpecifiedDecode(KonohaContext *kctx, Kon
 
 static kbool_t bytes_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequireKonohaCommonModule(trace);
+	KRequireKonohaCommonModel(trace);
 	//KImportPackageSymbol(ns, "cstyle", "$SingleQuotedChar", trace);
 	if(KClass_Bytes == NULL) {
 		KDEFINE_CLASS defBytes = {0};

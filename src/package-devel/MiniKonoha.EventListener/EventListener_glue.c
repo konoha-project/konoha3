@@ -38,8 +38,8 @@
 extern "C"{
 #endif
 
-#define KonohaContext_getEventContext(kctx)    ((EventContext *)kctx->modlocal[MOD_EVENT])
-#define kmodevent ((KModuleEvent *)kctx->modshare[MOD_EVENT])
+#define KonohaContext_getEventContext(kctx)    ((EventContext *)kctx->localContexts[MOD_EVENT])
+#define kmodevent ((KModuleEvent *)kctx->runtimeModels[MOD_EVENT])
 #define FLAG_EVENT (1 << 0)
 #define KClass_Event (kmodevent->cEvent)
 
@@ -57,14 +57,14 @@ typedef struct {
 #define EVENT_TYPE_MAX 2
 
 typedef struct {
-	KRuntimeModule h;
+	KRuntimeModel h;
 	int flag;
 	KClass *cEvent;
 	LocalQueue *localQueues[EVENT_TYPE_MAX];
 } KModuleEvent;
 
 typedef struct {
-	KContextModule h;
+	KModelContext h;
 	kFunc *invokeFuncNULL;
 	kFunc *enqFuncNULL;
 } EventContext;
@@ -474,7 +474,7 @@ static void KscheduleEvent(KonohaContext *kctx) {
 	}
 }
 
-static void EventContext_Reftrace(KonohaContext *kctx, struct KContextModule *baseh, KObjectVisitor *visitor)
+static void EventContext_Reftrace(KonohaContext *kctx, struct KModelContext *baseh, KObjectVisitor *visitor)
 {
 	EventContext *base = (EventContext *)baseh;
 //	BEGIN_REFTRACE(2);
@@ -483,25 +483,25 @@ static void EventContext_Reftrace(KonohaContext *kctx, struct KContextModule *ba
 //	END_REFTRACE();
 }
 
-static void EventContext_Free(KonohaContext *kctx, struct KContextModule *baseh)
+static void EventContext_Free(KonohaContext *kctx, struct KModelContext *baseh)
 {
 	EventContext *base = (EventContext *)baseh;
 	KFree(base, sizeof(EventContext));
 }
 
-static void EventModule_Setup(KonohaContext *kctx, struct KRuntimeModule *def, int newctx)
+static void EventModule_Setup(KonohaContext *kctx, struct KRuntimeModel *def, int newctx)
 {
-	if(!newctx && kctx->modlocal[MOD_EVENT] == NULL) {
+	if(!newctx && kctx->localContexts[MOD_EVENT] == NULL) {
 		EventContext *base = (EventContext *)KCalloc_UNTRACE(sizeof(EventContext), 1);
 		base->h.reftrace = EventContext_Reftrace;
 		base->h.free     = EventContext_Free;
 		KUnsafeFieldInit(base->invokeFuncNULL, K_NULL);
 		KUnsafeFieldInit(base->enqFuncNULL, K_NULL);
-		kctx->modlocal[MOD_EVENT] = (KContextModule *)base;
+		kctx->localContexts[MOD_EVENT] = (KModelContext *)base;
 	}
 }
 
-static void EventModule_Free(KonohaContext *kctx, struct KRuntimeModule *def)
+static void EventModule_Free(KonohaContext *kctx, struct KRuntimeModel *def)
 {
 	KModuleEvent *mod = (KModuleEvent *)def;
 	int i = 0;
@@ -518,9 +518,9 @@ static void MODEVENT_Init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace
 	KModuleEvent *mod = (KModuleEvent *)KCalloc_UNTRACE(sizeof(KModuleEvent), 1);
 	mod->h.name     = "event";
 	mod->h.allocSize = sizeof(KModuleEvent);
-	mod->h.setupModuleContext    = EventModule_Setup;
-	mod->h.freeModule = EventModule_Free;
-	KLIB KRuntime_SetModule(kctx, MOD_EVENT, (KRuntimeModule *)mod, 0);
+	mod->h.setupModelContext    = EventModule_Setup;
+	mod->h.freeModel = EventModule_Free;
+	KLIB KRuntime_SetModule(kctx, MOD_EVENT, (KRuntimeModel *)mod, 0);
 
 	KSetKLibFunc(ns->packageId, KscheduleEvent, KscheduleEvent, trace);
 

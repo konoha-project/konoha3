@@ -1824,7 +1824,7 @@ static void kSubproc_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *v
 
 static kbool_t subproc_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequireKonohaCommonModule(trace);
+	KRequireKonohaCommonModel(trace);
 	KRequirePackage("Type.File", trace);
 	subproc_InitSubProc(kctx, ns, trace);
 

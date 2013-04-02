@@ -522,7 +522,7 @@ static void file_defineConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *tr
 
 static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequireKonohaCommonModule(trace);
+	KRequireKonohaCommonModel(trace);
 	KRequirePackage("Type.Bytes", trace);
 	if(KClass_File == NULL) {
 		KDEFINE_CLASS defFile = {};
