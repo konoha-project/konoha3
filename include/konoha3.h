@@ -53,7 +53,7 @@
 /*2012/01/24 - */
 #define K_CODENAME "Rome"  // eternal city
 #else
-#define K_CODENAME "based on MiniKonoha-" K_VERSION
+#define K_CODENAME "based on Konoha-" K_VERSION
 #endif
 
 #define USE_UTF8 1
