@@ -212,7 +212,7 @@ static kbool_t Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **a
 		KonohaContext_Set(Interactive, kctx);
 	}
 	if(interactive_flag) {
-		CommandLine_Import(kctx, "MiniKonoha.Man", trace);
+		CommandLine_Import(kctx, "Konoha.Man", trace);
 		ret = konoha_shell(kctx);
 	}
 	return ret;

@@ -258,7 +258,7 @@ static KMETHOD cevent_base_get_supported_methods(KonohaContext *kctx, KonohaStac
 	INIT_GCSTACK();
 	const char **methods = event_get_supported_methods();
 
-	//TODO check array usage. refered src/package-devel/MiniKonoha.Map/Map_glue.c: Map_keys()
+	//TODO check array usage. refered src/package-devel/Konoha.Map/Map_glue.c: Map_keys()
 	KClass *cArray = KClass_p0(kctx, KClass_Array, KType_String);
 	kArray *ret = (kArray *)(KLIB new_kObject(kctx, _GcStack, cArray, 10));
 	int i;

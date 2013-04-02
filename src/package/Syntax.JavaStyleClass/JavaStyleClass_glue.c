@@ -418,7 +418,7 @@ static kbool_t class_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 
 static kbool_t class_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KImportPackage(ns, "MiniKonoha.ObjectModel", trace);
+	KImportPackage(ns, "Konoha.ObjectModel", trace);
 	class_defineSyntax(kctx, ns, trace);
 	class_defineMethod(kctx, ns, trace);
 	return true;

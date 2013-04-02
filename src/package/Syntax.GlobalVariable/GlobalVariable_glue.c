@@ -140,7 +140,7 @@ static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 static kbool_t global_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KImportPackage(ns, "MiniKonoha.ObjectModel", trace);
+	KImportPackage(ns, "Konoha.ObjectModel", trace);
 	global_defineMethod(kctx, ns, trace);
 	global_defineSyntax(kctx, ns, trace);
 	return true;
