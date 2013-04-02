@@ -6,8 +6,8 @@ TYPE(KonohaContextVar,
 			OP(PtrKonohaLibVar, klib),
 			OP(PtrKRuntimeVar, share),
 			OP(PtrKRuntimeContextVar, stack),
-			OP(PtrPtrKRuntimeModule, modshare),
-			OP(PtrPtrKContextModule, modlocal),
+			OP(PtrPtrKRuntimeModel, modshare),
+			OP(PtrPtrKModelContext, modlocal),
 			OP(Ptrvoid, gcContext)))
 
 TYPE(kObjectHeader,
