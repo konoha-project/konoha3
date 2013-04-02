@@ -834,6 +834,7 @@ static const struct KBuilderAPI *GetDefaultBuilderAPI(void);
 
 static const struct ExecutionEngineModule FuelVM_Module = {
 	&ModuleInfo,
+	"C",
 	FuelVM_DeleteVirtualMachine,
 	GetDefaultBuilderAPI,
 	GetDefaultBootCode,
