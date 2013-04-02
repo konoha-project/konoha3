@@ -48,8 +48,8 @@
 //			{0, NULL, 0, 0},
 //		};
 //		macro.TargetPolicy.RemovingIndent = true;
-//		SUGAR KTokenSeq_ApplyMacro(kctx, &macro, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam);
-//		kExpr *expr = SUGAR kStmt_ParseExpr(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, NULL);
+//		KLIB kTokenSeq_ApplyMacro(kctx, &macro, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam);
+//		kExpr *expr = KLIB kStmt_ParseExpr(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, NULL);
 //		KTokenSeq_Pop(kctx, macro);
 //		KReturn(expr);
 //	}
@@ -69,8 +69,8 @@
 //			{0, NULL, 0, 0},
 //		};
 //		macro.TargetPolicy.RemovingIndent = true;
-//		SUGAR KTokenSeq_ApplyMacro(kctx, &macro, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam);
-//		kExpr *expr = SUGAR kStmt_ParseExpr(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, NULL);
+//		KLIB kTokenSeq_ApplyMacro(kctx, &macro, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam);
+//		kExpr *expr = KLIB kStmt_ParseExpr(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, NULL);
 //		KTokenSeq_Pop(kctx, macro);
 //		KReturn(expr);
 //	}
@@ -86,10 +86,10 @@
 //		{ KSymbol_("not"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Expression_PreUnarySugar, },
 //		{ KSymbol_END, },
 //	};
-//	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-//	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("and"), 2, "X Y (X) && (Y)", false);
-//	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("or"), 2, "X Y (X) || (Y)", false);
-//	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("not"), 1, "X !(X)", false);
+//	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+//	KLIB kNameSpace_SetMacroData(kctx, ns, KSymbol_("and"), 2, "X Y (X) && (Y)", false);
+//	KLIB kNameSpace_SetMacroData(kctx, ns, KSymbol_("or"), 2, "X Y (X) || (Y)", false);
+//	KLIB kNameSpace_SetMacroData(kctx, ns, KSymbol_("not"), 1, "X !(X)", false);
 //	return true;
 //}
 //

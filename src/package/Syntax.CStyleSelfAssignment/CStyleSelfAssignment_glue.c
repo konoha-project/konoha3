@@ -48,9 +48,9 @@ static KMETHOD Expression_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
 			{0, NULL, 0, 0},
 	};
 	macro.TargetPolicy.RemovingIndent = true;
-	SUGAR ApplyMacroData(kctx, macro.ns, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam, macro.tokenList);
+	KLIB ApplyMacroData(kctx, macro.ns, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam, macro.tokenList);
 	KTokenSeq_End(kctx, macro);
-	SUGAR ParseNode(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, ParseExpressionOption, NULL);
+	KLIB ParseNode(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, ParseExpressionOption, NULL);
 	KTokenSeq_Pop(kctx, macro);
 	KReturnUnboxValue(endIdx);
 }
@@ -73,17 +73,17 @@ static kbool_t CStyleSelfAssignment_PackupNameSpace(KonohaContext *kctx, kNameSp
 			{ KSymbol_("^="), (SYNFLAG_NodeLeftJoinOp2), Precedence_CStyleAssign, 0, {binaryParseFunc}, {NULL}},
 			{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR SetMacroData(kctx, ns, KSymbol_("+="), 2,  "X Y X = (X) + (Y)", false);
-	SUGAR SetMacroData(kctx, ns, KSymbol_("-="), 2,  "X Y X = (X) - (Y)", false);
-	SUGAR SetMacroData(kctx, ns, KSymbol_("*="), 2,  "X Y X = (X) * (Y)", false);
-	SUGAR SetMacroData(kctx, ns, KSymbol_("/="), 2,  "X Y X = (X) / (Y)", false);
-	SUGAR SetMacroData(kctx, ns, KSymbol_("%="), 2,  "X Y X = (X) % (Y)", false);
-	SUGAR SetMacroData(kctx, ns, KSymbol_("|="), 2,  "X Y X = (X) | (Y)", false);
-	SUGAR SetMacroData(kctx, ns, KSymbol_("&="), 2,  "X Y X = (X) & (Y)", false);
-	SUGAR SetMacroData(kctx, ns, KSymbol_("<<="), 2, "X Y X = (X) << (Y)", false);
-	SUGAR SetMacroData(kctx, ns, KSymbol_(">>="), 2, "X Y X = (X) >> (Y)", false);
-	SUGAR SetMacroData(kctx, ns, KSymbol_("^="), 2,  "X Y X = (X) ^ (Y)", false);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB SetMacroData(kctx, ns, KSymbol_("+="), 2,  "X Y X = (X) + (Y)", false);
+	KLIB SetMacroData(kctx, ns, KSymbol_("-="), 2,  "X Y X = (X) - (Y)", false);
+	KLIB SetMacroData(kctx, ns, KSymbol_("*="), 2,  "X Y X = (X) * (Y)", false);
+	KLIB SetMacroData(kctx, ns, KSymbol_("/="), 2,  "X Y X = (X) / (Y)", false);
+	KLIB SetMacroData(kctx, ns, KSymbol_("%="), 2,  "X Y X = (X) % (Y)", false);
+	KLIB SetMacroData(kctx, ns, KSymbol_("|="), 2,  "X Y X = (X) | (Y)", false);
+	KLIB SetMacroData(kctx, ns, KSymbol_("&="), 2,  "X Y X = (X) & (Y)", false);
+	KLIB SetMacroData(kctx, ns, KSymbol_("<<="), 2, "X Y X = (X) << (Y)", false);
+	KLIB SetMacroData(kctx, ns, KSymbol_(">>="), 2, "X Y X = (X) >> (Y)", false);
+	KLIB SetMacroData(kctx, ns, KSymbol_("^="), 2,  "X Y X = (X) ^ (Y)", false);
 	return true;
 }
 

@@ -33,17 +33,17 @@
 /* Konoha AST API */
 static kunused kNode* kNode_getFirstBlock(KonohaContext *kctx, kNode *stmt)
 {
-	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_BlockPattern, K_NULLBLOCK);
+	return KLIB kNode_GetNode(kctx, stmt, KSymbol_BlockPattern, K_NULLBLOCK);
 }
 
 static kunused kNode* kNode_getElseBlock(KonohaContext *kctx, kNode *stmt)
 {
-	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_else, K_NULLBLOCK);
+	return KLIB kNode_GetNode(kctx, stmt, KSymbol_else, K_NULLBLOCK);
 }
 
 static kunused kNode* kNode_getFirstNode(KonohaContext *kctx, kNode *stmt)
 {
-	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
+	return KLIB kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
 }
 
 static kunused kMethod* CallNode_getMethod(kNode *expr)
@@ -53,7 +53,7 @@ static kunused kMethod* CallNode_getMethod(kNode *expr)
 
 static kunused kNode *kNode_GetNode(KonohaContext *kctx, kNode *stmt, ksymbol_t kw)
 {
-	return SUGAR kNode_GetNode(kctx, stmt, kw, NULL);
+	return KLIB kNode_GetNode(kctx, stmt, kw, NULL);
 }
 
 static kunused int CallNode_getArgCount(kNode *node)

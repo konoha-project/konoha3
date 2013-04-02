@@ -26,8 +26,8 @@ static int MatchSyntaxPattern(KonohaContext *kctx, kNode *node, KTokenSeq *token
 {
 	int patternIdx = patterns->beginIdx, tokenIdx = tokens->beginIdx;
 	kNameSpace *ns = kNode_ns(node);
-	//SUGAR dumpTokenArray(kctx, 0, patterns->tokenList, patterns->beginIdx, patterns->endIdx);
-	//SUGAR dumpTokenArray(kctx, 0, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
+	//KLIB dumpTokenArray(kctx, 0, patterns->tokenList, patterns->beginIdx, patterns->endIdx);
+	//KLIB dumpTokenArray(kctx, 0, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
 	for(; patternIdx < patterns->endIdx; patternIdx++) {
 		kToken *ruleToken = patterns->tokenList->TokenItems[patternIdx];
 		L_ReDo:;
@@ -278,6 +278,6 @@ static void kSyntax_AddPattern(KonohaContext *kctx, kSyntax *syntax0, const char
 		TraverseTokenList2(kctx, RangeTokenSeq(step1), PreprocessSyntaxPattern2, NULL);
 		Preprocess(kctx, ns, RangeTokenSeq(step1), NULL, syntax->syntaxPatternListNULL);
 		KTokenSeq_Pop(kctx, source);
-		SUGAR dumpTokenArray(kctx, 0, RangeArray(syntax->syntaxPatternListNULL));
+		KLIB dumpTokenArray(kctx, 0, RangeArray(syntax->syntaxPatternListNULL));
 	}
 }

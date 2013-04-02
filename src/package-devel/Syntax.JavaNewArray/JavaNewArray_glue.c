@@ -38,7 +38,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *newToken = tokenList->TokenVarItems[beginIdx];
 		KClass *foundClass = NULL;
 		kNameSpace *ns = kNode_ns(stmt);
-		int nextIdx = SUGAR ParseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
+		int nextIdx = KLIB ParseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
 		if((size_t)nextIdx < kArray_size(tokenList)) {
 			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
 			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup) { // new int [100]
@@ -47,8 +47,8 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 				KClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
 				newToken->symbol = KSymbol_("newArray");
 				kNode *arg0 = new_ConstNode(kctx, ns, NULL, KLIB Knull(kctx, arrayClass));
-				SUGAR kNode_Op(kctx, stmt, newToken, 1, arg0);
-				SUGAR AppendParsedNode(kctx, stmt, RangeGroup(GroupTokenList), NULL, ParseExpressionOption, NULL);
+				KLIB kNode_Op(kctx, stmt, newToken, 1, arg0);
+				KLIB AppendParsedNode(kctx, stmt, RangeGroup(GroupTokenList), NULL, ParseExpressionOption, NULL);
 				KReturnUnboxValue(nextIdx+1);
 			}
 		}
@@ -62,7 +62,7 @@ static kbool_t new_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		{ KSymbol_("new"), SYNFLAG_Suffix|SYNFLAG_CParseFunc, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_new}, {SUGAR methodTypeFunc}},
 		{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 

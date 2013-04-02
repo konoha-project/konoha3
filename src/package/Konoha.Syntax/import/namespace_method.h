@@ -45,7 +45,7 @@ static KMETHOD NameSpace_DefineSyntax(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = sfp[0].asNameSpace;
 	kSyntaxVar *syn = (kSyntaxVar *)sfp[1].asObject;
 	KFieldSet(syn, syn->packageNameSpace, ns);
-	SUGAR kNameSpace_AddSyntax(kctx, ns, (kSyntax *)syn, trace);
+	KLIB kNameSpace_AddSyntax(kctx, ns, (kSyntax *)syn, trace);
 	KReturnVoid();
 }
 
@@ -56,7 +56,7 @@ static KMETHOD NameSpace_AddSyntaxPattern(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = sfp[0].asNameSpace;
 	ksymbol_t symbol = (ksymbol_t)sfp[1].intValue;
 	const char *pattern = kString_text(sfp[2].asString);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, symbol), pattern, 0, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, symbol), pattern, 0, trace);
 	KReturnVoid();
 }
 
@@ -89,7 +89,7 @@ static KMETHOD NameSpace_Tokenize(KonohaContext *kctx, KonohaStack *sfp)
 	INIT_GCSTACK();
 	kArray *a = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	KTokenSeq source = {sfp[0].asNameSpace, a};
-	SUGAR Tokenize(kctx, source.ns, kString_text(sfp[1].asString), 0, 0, source.tokenList);
+	KLIB Tokenize(kctx, source.ns, kString_text(sfp[1].asString), 0, 0, source.tokenList);
 	KReturnWith(a, RESET_GCSTACK());
 }
 
@@ -100,11 +100,11 @@ static KMETHOD NameSpace_Preprocess(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *a = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	KTokenSeq source = {sfp[0].asNameSpace, KGetParserContext(kctx)->preparedTokenList};
 	KTokenSeq_Push(kctx, source);
-	SUGAR Tokenize(kctx, source.ns, kString_text(sfp[1].asString), 0, 0, source.tokenList);
+	KLIB Tokenize(kctx, source.ns, kString_text(sfp[1].asString), 0, 0, source.tokenList);
 	KTokenSeq_End(kctx, source);
 	KTokenSeq tokens = {source.ns, a, 0};
 	tokens.TargetPolicy.ExpandingBraceGroup = true;
-	SUGAR Preprocess(kctx, source.ns, RangeTokenSeq(source), NULL, tokens.tokenList);
+	KLIB Preprocess(kctx, source.ns, RangeTokenSeq(source), NULL, tokens.tokenList);
 	KTokenSeq_Pop(kctx, source);
 	KReturnWith(a, RESET_GCSTACK());
 }

@@ -116,7 +116,7 @@ static enum UnaryOp KMethodName_toUnaryOperator(KonohaContext *kctx, kmethodn_t 
 static INode *FetchINode(KonohaContext *kctx, KBuilder *builder, kNode *expr, unsigned idx, ktypeattr_t reqTy, void *thunk)
 {
 	kNode *exprN = kNode_At(expr, idx);
-	SUGAR VisitNode(kctx, builder, exprN, thunk);
+	KLIB VisitNode(kctx, builder, exprN, thunk);
 	INode *Node = FuelVM_getExpression(builder);
 	assert(Node->Type != TYPE_void);
 	return Node;
@@ -223,7 +223,7 @@ static kbool_t FuelVM_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode
 	 **/
 	enum TypeId Type = ConvertToTypeId(kctx, expr->attrTypeId);
 	Type = ToBoxType(Type);
-	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);
+	KLIB VisitNode(kctx, builder, expr->NodeToPush, thunk);
 	INode *Node = FuelVM_getExpression(builder);
 	INode *Inst = CreateUnaryInst(BLD(builder), Box, Node, kNode_uline(expr));
 	INode_setType(Inst, Type);
@@ -261,7 +261,7 @@ static kbool_t FuelVM_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, kNo
 	for(i = 0; i < kNode_GetNodeListSize(kctx, block); i++) {
 		kNode *stmt = block->NodeList->NodeItems[i];
 		builder->common.uline = kNode_uline(stmt);
-		if(!SUGAR VisitNode(kctx, builder, stmt, thunk))
+		if(!KLIB VisitNode(kctx, builder, stmt, thunk))
 			break;
 	}
 	ARRAY_size(BLD(builder)->Stack) = size;
@@ -274,9 +274,9 @@ static kbool_t FuelVM_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, kNo
 
 static kbool_t FuelVM_VisitReturnNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
-	kNode *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
+	kNode *expr = KLIB kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
 	if(expr != NULL && IS_Node(expr) && expr->attrTypeId != KType_void) {
-		SUGAR VisitNode(kctx, builder, expr, thunk);
+		KLIB VisitNode(kctx, builder, expr, thunk);
 		INode *Ret  = FuelVM_getExpression(builder);
 		INode *Inst = CreateReturn(BLD(builder), Ret);
 		INode_setType(Inst, ConvertToTypeId(kctx, expr->attrTypeId));
@@ -293,18 +293,18 @@ static kbool_t FuelVM_VisitIfNode(KonohaContext *kctx, KBuilder *builder, kNode 
 	Block *ElseBB  = CreateBlock(BLD(builder));
 	Block *MergeBB = CreateBlock(BLD(builder));
 	/* if */
-	SUGAR VisitNode(kctx, builder, expr, thunk);
+	KLIB VisitNode(kctx, builder, expr, thunk);
 	CreateBranch(BLD(builder), FuelVM_getExpression(builder), ThenBB, ElseBB);
 	{ /* then */
 		IRBuilder_setBlock(BLD(builder), ThenBB);
-		SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
+		KLIB VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
 		if(!Block_HasTerminatorInst(BLD(builder)->Current)) {
 			IRBuilder_JumpTo(BLD(builder), MergeBB);
 		}
 	}
 	{ /* else */
 		IRBuilder_setBlock(BLD(builder), ElseBB);
-		SUGAR VisitNode(kctx, builder, kNode_getElseBlock(kctx, stmt), thunk);
+		KLIB VisitNode(kctx, builder, kNode_getElseBlock(kctx, stmt), thunk);
 		if(!Block_HasTerminatorInst(BLD(builder)->Current)) {
 			IRBuilder_JumpTo(BLD(builder), MergeBB);
 		}
@@ -330,7 +330,7 @@ static kbool_t FuelVM_VisitLoopNode(KonohaContext *kctx, KBuilder *builder, kNod
 	kNode_SetLabelBlock(kctx, stmt, KSymbol_("continue"), ItrBB);
 	kNode_SetLabelBlock(kctx, stmt, KSymbol_("break"),    MergeBB);
 
-	kNode *itrBlock = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("Iterator"), NULL);
+	kNode *itrBlock = KLIB kNode_GetNode(kctx, stmt, KSymbol_("Iterator"), NULL);
 	if(itrBlock != NULL) {
 		assert(Loop == ForLoop);
 		IRBuilder_JumpTo(BLD(builder), HeadBB);
@@ -363,19 +363,19 @@ static kbool_t FuelVM_VisitLoopNode(KonohaContext *kctx, KBuilder *builder, kNod
 
 	{ /* Head */
 		IRBuilder_setBlock(BLD(builder), HeadBB);
-		SUGAR VisitNode(kctx, builder, kNode_getFirstNode(kctx, stmt), thunk);
+		KLIB VisitNode(kctx, builder, kNode_getFirstNode(kctx, stmt), thunk);
 		CreateBranch(BLD(builder), FuelVM_getExpression(builder), BodyBB, MergeBB);
 	}
 
 	{ /* Body */
 		IRBuilder_setBlock(BLD(builder), BodyBB);
-		SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
+		KLIB VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
 		IRBuilder_JumpTo(BLD(builder), ItrBB);
 
 		/* Itr */
 		IRBuilder_setBlock(BLD(builder), ItrBB);
 		if(itrBlock != NULL) {
-			SUGAR VisitNode(kctx, builder, itrBlock, thunk);
+			KLIB VisitNode(kctx, builder, itrBlock, thunk);
 		}
 		IRBuilder_JumpTo(BLD(builder), HeadBB);
 	}
@@ -398,7 +398,7 @@ static kbool_t FuelVM_VisitForNode(KonohaContext *kctx, KBuilder *builder, kNode
 {
 	kNode *initNode = kNode_GetNode(kctx, stmt, KSymbol_("init"));
 	if(initNode != NULL) {
-		SUGAR VisitNode(kctx, builder, initNode, thunk);
+		KLIB VisitNode(kctx, builder, initNode, thunk);
 	}
 	return FuelVM_VisitLoopNode(kctx, builder, stmt, thunk, ForLoop);
 }
@@ -527,7 +527,7 @@ static kbool_t FuelVM_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder
 	for (i = s; i < argc + 2; i++) {
 		kNode *exprN = kNode_At(expr, i);
 		DBG_ASSERT(IS_Node(exprN));
-		SUGAR VisitNode(kctx, builder, exprN, thunk);
+		KLIB VisitNode(kctx, builder, exprN, thunk);
 		INode *Node = FuelVM_getExpression(builder);
 		assert(Node->Type != TYPE_void);
 		Params[i] = Node;
@@ -565,7 +565,7 @@ static void CreateCond(KonohaContext *kctx, KBuilder *builder, kNode *expr, enum
 	{ /* Head */
 		IRBuilder_setBlock(BLD(builder), HeadBB);
 		Node = CreateLocal(BLD(builder), TYPE_boolean);
-		SUGAR VisitNode(kctx, builder, LHS, thunk);
+		KLIB VisitNode(kctx, builder, LHS, thunk);
 		INode *Left = FuelVM_getExpression(builder);
 		CreateUpdate(BLD(builder), Node, Left);
 
@@ -577,7 +577,7 @@ static void CreateCond(KonohaContext *kctx, KBuilder *builder, kNode *expr, enum
 	}
 	{ /* Then */
 		IRBuilder_setBlock(BLD(builder), ThenBB);
-		SUGAR VisitNode(kctx, builder, RHS, thunk);
+		KLIB VisitNode(kctx, builder, RHS, thunk);
 		INode *Right = FuelVM_getExpression(builder);
 		CreateUpdate(BLD(builder), Node, Right);
 		IRBuilder_JumpTo(BLD(builder), MergeBB);
@@ -616,7 +616,7 @@ static kbool_t FuelVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 			Node = CreateLocal(flbuilder, type);
 			IField_setHash((IField *) Node, left->index);
 		}
-		SUGAR VisitNode(kctx, builder, right, thunk);
+		KLIB VisitNode(kctx, builder, right, thunk);
 		INode *RHS = FuelVM_getExpression(builder);
 		//if(RHS->Type != Node->Type) {
 		//	INode_setType(Node, RHS->Type);
@@ -625,7 +625,7 @@ static kbool_t FuelVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 	}
 	else{
 		assert(kNode_node(left) == KNode_Field);
-		SUGAR VisitNode(kctx, builder, right, thunk);
+		KLIB VisitNode(kctx, builder, right, thunk);
 		kshort_t index  = (kshort_t)left->index;
 		kshort_t xindex = (kshort_t)(left->index >> (sizeof(kshort_t)*8));
 
@@ -636,7 +636,7 @@ static kbool_t FuelVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 		}
 		enum TypeId type = ConvertToTypeId(kctx, left->attrTypeId);
 		Node = CreateField(BLD(builder), FieldScope, type, Left, xindex);
-		SUGAR VisitNode(kctx, builder, right, thunk);
+		KLIB VisitNode(kctx, builder, right, thunk);
 		CreateUpdate(BLD(builder), Node, FuelVM_getExpression(builder));
 	}
 	builder->Value = Node;
@@ -662,7 +662,7 @@ static kbool_t FuelVM_VisitFunctionNode(KonohaContext *kctx, KBuilder *builder, 
 		kNode *envN = kNode_At(expr, i+2);
 		enum TypeId FieldType = ConvertToTypeId(kctx, envN->attrTypeId);
 		INode *Node = CreateField(BLD(builder), FieldScope, FieldType, NewEnv, i);
-		SUGAR VisitNode(kctx, builder, envN, thunk);
+		KLIB VisitNode(kctx, builder, envN, thunk);
 		CreateUpdate(BLD(builder), Node, FuelVM_getExpression(builder));
 	}
 
@@ -758,7 +758,7 @@ static struct KVirtualCode *FuelVM_GenerateVirtualCode(KonohaContext *kctx, kMet
 	IRBuilder_setBlock(BLD(builder), EntryBlock);
 	INode *Self = SetUpArguments(kctx, &Builder, mtd);
 
-	SUGAR VisitNode(kctx, builder, block, NULL);
+	KLIB VisitNode(kctx, builder, block, NULL);
 
 	if(!Block_HasTerminatorInst(BLD(builder)->Current)) {
 		if(mtd->mn == MN_new) {

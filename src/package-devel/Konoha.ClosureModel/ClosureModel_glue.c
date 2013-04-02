@@ -98,8 +98,8 @@ static KMETHOD Func_Create(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t SetParamType(KonohaContext *kctx, kNode *stmt, int n, kparamtype_t *p)
 {
-	kToken *typeToken  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
-	kNode  *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
+	kToken *typeToken  = KLIB kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
+	kNode  *expr = KLIB kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
 	DBG_ASSERT(typeToken != NULL);
 	DBG_ASSERT(expr != NULL);
 	if(kNode_isSymbolTerm(expr)) {
@@ -244,9 +244,9 @@ static kMethod *CompileClosure(KonohaContext *kctx, kNameSpace *ns, kNode *expr,
 	kNameSpace_InitParam(kctx, ns, &newgma, pa, envCt);
 
 	KPushGammaStack(ns, &newgma);
-	*texprRef = SUGAR TypeCheckNodeByName(kctx, expr, KSymbol_BlockPattern, ns, KClass_var, TypeCheckPolicy_AllowVoid);
+	*texprRef = KLIB TypeCheckNodeByName(kctx, expr, KSymbol_BlockPattern, ns, KClass_var, TypeCheckPolicy_AllowVoid);
 
-	kNode *block = SUGAR kNode_GetNode(kctx, expr, KSymbol_BlockPattern, NULL);
+	kNode *block = KLIB kNode_GetNode(kctx, expr, KSymbol_BlockPattern, NULL);
 	KLIB kMethod_GenCode(kctx, mtd, block, HatedLazyCompile);
 
 	KPopGammaStack(ns, &newgma);
@@ -261,7 +261,7 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(expr, ns, reqc);
 	kNode *texpr = K_NULLNODE;
 	INIT_GCSTACK();
-	kToken *typeTk   = SUGAR kNode_GetToken(kctx, expr, KSymbol_TypePattern, NULL);
+	kToken *typeTk   = KLIB kNode_GetToken(kctx, expr, KSymbol_TypePattern, NULL);
 	KClass *EnvObjectClass = NULL;
 	KClass *envCt = CreateEnvClass(kctx, ns, typeTk, &EnvObjectClass);
 
@@ -303,8 +303,8 @@ static kbool_t ClosureModel_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns,
 		{ KSymbol_("function"), SYNFLAG_CTypeFunc, 0, Precedence_CStyleAssign, {SUGAR patternParseFunc}, {SUGARFUNC TypeCheck_Closure}},
 		{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("function")), "\"function\" $Param [$Type] $Block", 0, NULL);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("function")), "\"function\" $Param [$Type] $Block", 0, NULL);
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Hidden, _F(Func_Create), KType_Func, KType_Func, KMethodName_("_Create"), 2, KType_Object, KFieldName_("env"), KType_Method, KFieldName_("mtd"),

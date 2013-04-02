@@ -63,7 +63,7 @@ static KMETHOD Token_SetError(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
 	if(IS_NOTNULL(tk)) {
-		SUGAR kToken_ToError(kctx, tk, ErrTag, "%s", kString_text(sfp[1].asString));
+		KLIB kToken_ToError(kctx, tk, ErrTag, "%s", kString_text(sfp[1].asString));
 	}
 	KReturnUnboxValue(sfp[4].intValue);
 }

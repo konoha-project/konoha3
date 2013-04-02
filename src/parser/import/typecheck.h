@@ -70,7 +70,7 @@ static kNode *TypeNode(KonohaContext *kctx, kSyntax *syn, kNode *expr, kNameSpac
 	if(!kNode_IsError(expr)) {
 		KDump(expr);
 		DBG_P("syn->TypeFuncNULL=%p", syn->TypeFuncNULL);
-		expr = SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "undefined typing: %s%s '%s'", KSymbol_Fmt2(syn->keyword), KToken_t(expr->KeyOperatorToken));
+		expr = KLIB MessageNode(kctx, expr, NULL, ns, ErrTag, "undefined typing: %s%s '%s'", KSymbol_Fmt2(syn->keyword), KToken_t(expr->KeyOperatorToken));
 		//DBG_ASSERT(kctx == NULL);
 	}
 	ns->genv->localScope.varsize = varsize;
@@ -112,9 +112,9 @@ static kNode *MakeNodeConst(KonohaContext *kctx, kNode *expr, KClass *rtype)
 	KStackCall(lsfp);
 	END_UnusedStack();
 	if(KClass_Is(UnboxType, rtype) /* || rtype->typeId == KType_void*/) {
-		return SUGAR kNode_SetUnboxConst(kctx, expr, rtype->typeId, lsfp[K_RTNIDX].unboxValue);
+		return KLIB kNode_SetUnboxConst(kctx, expr, rtype->typeId, lsfp[K_RTNIDX].unboxValue);
 	}
-	return SUGAR kNode_SetConst(kctx, expr, NULL, lsfp[K_RTNIDX].asObject);
+	return KLIB kNode_SetConst(kctx, expr, NULL, lsfp[K_RTNIDX].asObject);
 }
 
 static kNode *BoxNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KClass* reqClass)
@@ -139,12 +139,12 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KC
 	}
 	if(typedClass->typeId == KType_void) {
 		if(!FLAG_is(pol, TypeCheckPolicy_AllowVoid)) {
-			expr = SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "void is unacceptable");
+			expr = KLIB MessageNode(kctx, expr, NULL, ns, ErrTag, "void is unacceptable");
 		}
 		return expr;
 	}
 	if(KClass_Is(TypeVar, typedClass)) {
-		return SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "not type variable %s", KClass_text(typedClass));
+		return KLIB MessageNode(kctx, expr, NULL, ns, ErrTag, "not type variable %s", KClass_text(typedClass));
 	}
 	if(reqClass->typeId == KType_var || typedClass == reqClass || FLAG_is(pol, TypeCheckPolicy_NoCheck)) {
 		return expr;
@@ -161,12 +161,12 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KC
 			return new_MethodNode(kctx, ns, reqClass, mtd, 1, expr);
 		}
 		if(kNameSpace_Is(ImplicitCoercion, ns)) {
-			SUGAR MessageNode(kctx, expr, NULL, ns, InfoTag, "implicit type coercion: %s to %s", KClass_text(typedClass), KClass_text(reqClass));
+			KLIB MessageNode(kctx, expr, NULL, ns, InfoTag, "implicit type coercion: %s to %s", KClass_text(typedClass), KClass_text(reqClass));
 			return new_MethodNode(kctx, ns, reqClass, mtd, 1, expr);
 		}
 	}
 	DBG_P("%s(%d) is requested, but %s(%d) is given", KClass_text(reqClass), reqClass->typeId, KClass_text(typedClass), typedClass->typeId);
-	return SUGAR MessageNode(kctx, expr, NULL, ns, ErrTag, "%s is requested, but %s is given", KClass_text(reqClass), KClass_text(typedClass));
+	return KLIB MessageNode(kctx, expr, NULL, ns, ErrTag, "%s is requested, but %s is given", KClass_text(reqClass), KClass_text(typedClass));
 }
 
 static kNode *TypeCheckNodeAt(KonohaContext *kctx, kNode *node, size_t pos, kNameSpace *ns, KClass *reqClass, int pol)
@@ -217,7 +217,7 @@ static kNode *TypeCheckNodeByName(KonohaContext *kctx, kNode *stmt, ksymbol_t sy
 		}
 	}
 	if(!KFlag_Is(int, pol, TypeCheckPolicy_AllowEmpty)) {
-		return SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "%s%s clause is empty", KSymbol_Fmt2(symbol));
+		return KLIB MessageNode(kctx, stmt, NULL, ns, ErrTag, "%s%s clause is empty", KSymbol_Fmt2(symbol));
 	}
 	return NULL; //error
 }

@@ -194,7 +194,7 @@ static KMETHOD TypeCheck_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sf
 	VAR_TypeCheck(expr, gma, reqty);
 	kToken *tk = expr->TermToken;
 	long long n = kstrtoll(kString_text(tk->text));
-	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_Int, (uintptr_t)n));
+	KReturn(KLIB kNode_SetUnboxConst(kctx, expr, KType_Int, (uintptr_t)n));
 }
 
 // --------------------------------------------------------------------------
@@ -204,7 +204,7 @@ static kbool_t Number_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		{ KSymbol_NumberPattern, SYNFLAG_CTokenFunc|SYNFLAG_CTypeFunc, 0, 0, {SUGAR termParseFunc}, {SUGARFUNC TypeCheck_ExtendedIntLiteral}, KonohaChar_Digit, {SUGARFUNC TokenFunc_ExtendedIntLiteral}},
 		{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 
 	return true;
 }

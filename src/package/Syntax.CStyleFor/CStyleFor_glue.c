@@ -45,8 +45,8 @@ static KMETHOD PatternMatch_ForStmt(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *tk = tokenList->TokenVarItems[i];
 		if(tk->symbol == KSymbol_SEMICOLON) {
 			if(start < i) {
-				kNode *node = SUGAR ParseNewNode(kctx, ns, tokenList, &start, i, ParseMetaPatternOption, NULL);
-				SUGAR kNode_AddParsedObject(kctx, stmt, KSymbol_("init"), UPCAST(node));
+				kNode *node = KLIB ParseNewNode(kctx, ns, tokenList, &start, i, ParseMetaPatternOption, NULL);
+				KLIB kNode_AddParsedObject(kctx, stmt, KSymbol_("init"), UPCAST(node));
 			}
 			start = i + 1;
 			break;
@@ -60,9 +60,9 @@ static KMETHOD PatternMatch_ForStmt(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *tk = tokenList->TokenVarItems[i];
 		if(tk->symbol == KSymbol_SEMICOLON) {
 			if(start < i) {
-				kNode *node = SUGAR ParseNewNode(kctx, ns, tokenList, &start, i, ParseExpressionOption, NULL);
+				kNode *node = KLIB ParseNewNode(kctx, ns, tokenList, &start, i, ParseExpressionOption, NULL);
 				KDump(node);
-				SUGAR kNode_AddParsedObject(kctx, stmt, KSymbol_ExprPattern, UPCAST(node));
+				KLIB kNode_AddParsedObject(kctx, stmt, KSymbol_ExprPattern, UPCAST(node));
 			}
 			start = i + 1;
 			break;
@@ -73,8 +73,8 @@ static KMETHOD PatternMatch_ForStmt(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	/* IterExpression Part */
 	if(start < endIdx) {
-		kNode *node = SUGAR ParseNewNode(kctx, ns, tokenList, &start, endIdx, ParseMetaPatternOption, NULL);
-		SUGAR kNode_AddParsedObject(kctx, stmt, KSymbol_("Iterator"), UPCAST(node));
+		kNode *node = KLIB ParseNewNode(kctx, ns, tokenList, &start, endIdx, ParseMetaPatternOption, NULL);
+		KLIB kNode_AddParsedObject(kctx, stmt, KSymbol_("Iterator"), UPCAST(node));
 	}
 	KReturnUnboxValue(endIdx);
 }
@@ -84,16 +84,16 @@ static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, ns, reqc);
 	int KSymbol_InitNode = KSymbol_("init"), KSymbol_IteratorNode = KSymbol_("Iterator");
 	KDump(stmt);
-	kNode *initNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_InitNode, ns, KClass_void, TypeCheckPolicy_AllowEmpty);
+	kNode *initNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_InitNode, ns, KClass_void, TypeCheckPolicy_AllowEmpty);
 	if(initNode != NULL) {
 		kNode_Set(OpenBlock, initNode, true);
 	}
-	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_IteratorNode, ns, KClass_void, TypeCheckPolicy_AllowEmpty);
-	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
+	KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_IteratorNode, ns, KClass_void, TypeCheckPolicy_AllowEmpty);
+	KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
 	kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 	kNode_Set(CatchBreak, stmt, true);
 	//kNode_Set(RedoLoop, stmt, true);
-	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
+	KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
 	KReturn(kNode_Type(stmt, KNode_For, KType_void));
 }
 
@@ -109,7 +109,7 @@ static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		p = kNode_GetParentNULL(p);
 	}
-	KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "break statement not within a loop"));
+	KReturn(KLIB MessageNode(kctx, stmt, NULL, ns, ErrTag, "break statement not within a loop"));
 }
 
 static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
@@ -123,7 +123,7 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		p = kNode_GetParentNULL(p);
 	}
-	KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "continue statement not within a loop"));
+	KReturn(KLIB MessageNode(kctx, stmt, NULL, ns, ErrTag, "continue statement not within a loop"));
 }
 
 
@@ -140,10 +140,10 @@ static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		{ KSymbol_("continue"), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {SUGAR patternParseFunc}, {SUGARFUNC Statement_continue}},
 		{ KSymbol_END, }, /* sentinental */
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("for")), "\"for\" \"(\" $ForStmt \")\" $Block", 0, trace);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("break")), "\"break\"", 0, trace);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("continue")), "\"continue\"", 0, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("for")), "\"for\" \"(\" $ForStmt \")\" $Block", 0, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("break")), "\"break\"", 0, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("continue")), "\"continue\"", 0, trace);
 	return true;
 }
 

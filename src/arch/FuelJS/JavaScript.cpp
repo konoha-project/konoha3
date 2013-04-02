@@ -273,7 +273,7 @@ static kbool_t JSBuilder_VisitNodeList(KonohaContext *kctx, KBuilder *builder, k
 
 		jsBuilder->isExprNode = kNode_isExpr(kctx, node);
 		//JSBuilder_EmitString(kctx, builder, "/*", GetNodeTypeName(node), "*/");
-		kbool_t ret = SUGAR VisitNode(kctx, builder, node, thunk);
+		kbool_t ret = KLIB VisitNode(kctx, builder, node, thunk);
 
 		JSBuilder_EmitNewLineWithEndOfStatement(kctx, builder, node);
 
@@ -310,7 +310,7 @@ static kbool_t JSBuilder_VisitExprNode(KonohaContext *kctx, KBuilder *builder, k
 {
 	((JSBuilder *)builder)->isExprNode = true;
 	//JSBuilder_EmitString(kctx, builder, "/*", GetNodeTypeName(node), "*/");
-	return SUGAR VisitNode(kctx, builder, node, thunk);
+	return KLIB VisitNode(kctx, builder, node, thunk);
 }
 
 static kbool_t JSBuilder_VisitStmtNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
@@ -319,7 +319,7 @@ static kbool_t JSBuilder_VisitStmtNode(KonohaContext *kctx, KBuilder *builder, k
 	if(kNode_node(node) == KNode_Assign) {
 		JSBuilder_EmitAssignStmtPrefix(kctx, builder, node);
 	}
-	return SUGAR VisitNode(kctx, builder, node, thunk);
+	return KLIB VisitNode(kctx, builder, node, thunk);
 }
 
 static kbool_t JSBuilder_VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk, const char *prefix, const char *suffix)
@@ -362,7 +362,7 @@ static kbool_t JSBuilder_VisitReturnNode(KonohaContext *kctx, KBuilder *builder,
 		if(kNode_node(expr) == KNode_Block && kArray_size(expr->NodeList) == 1) {
 			kNode *firstNode = expr->NodeList->NodeItems[0];
 			jsBuilder->isExprNode = kNode_isExpr(kctx, firstNode);
-			SUGAR VisitNode(kctx, builder, firstNode, thunk);
+			KLIB VisitNode(kctx, builder, firstNode, thunk);
 		}
 		else {
 			JSBuilder_VisitExprNode(kctx, builder, expr, thunk);
@@ -401,8 +401,8 @@ static kbool_t JSBuilder_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder
 
 static kbool_t JSBuilder_VisitForNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
-	kNode *initNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("init"), NULL) ;
-	kNode *iterNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("Iterator"), NULL) ;
+	kNode *initNode = KLIB kNode_GetNode(kctx, stmt, KSymbol_("init"), NULL) ;
+	kNode *iterNode = KLIB kNode_GetNode(kctx, stmt, KSymbol_("Iterator"), NULL) ;
 	JSBuilder_EmitString(kctx, builder, "for(", "", "");
 	if(initNode != NULL) {
 		JSBuilder_VisitStmtNode(kctx, builder, initNode, thunk);
@@ -439,9 +439,9 @@ static kbool_t JSBuilder_VisitThrowNode(KonohaContext *kctx, KBuilder *builder, 
 static kbool_t JSBuilder_VisitTryNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void *thunk)
 {
 	JSBuilder_EmitNewLineWith(kctx, builder, "try ");
-	SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
-	kNode *catchNode   = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("catch"),   K_NULLBLOCK);
-	kNode *finallyNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("finally"), K_NULLBLOCK);
+	KLIB VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
+	kNode *catchNode   = KLIB kNode_GetNode(kctx, stmt, KSymbol_("catch"),   K_NULLBLOCK);
+	kNode *finallyNode = KLIB kNode_GetNode(kctx, stmt, KSymbol_("finally"), K_NULLBLOCK);
 	if(catchNode != K_NULLBLOCK) {
 		JSBuilder_EmitString(kctx, builder, "catch(e) ", "", "");
 		JSBuilder_VisitStmtNode(kctx, builder, catchNode, thunk);
@@ -531,7 +531,7 @@ static bool JSBuilder_importPackage(KonohaContext *kctx, kNameSpace *ns, kString
 	KonohaFactory *factory = (KonohaFactory *)kctx->platApi;
 
 	//factory->DeleteVirtualMachine(kctx);
-	SUGAR kNameSpace_UseDefaultVirtualMachine(kctx, ns);
+	KLIB kNameSpace_UseDefaultVirtualMachine(kctx, ns);
 
 	KImportPackage(ns, kString_text(package), trace);
 	compileAllDefinedMethodsInNameSpace(kctx, ns);
@@ -964,7 +964,7 @@ static struct KVirtualCode *V8_GenerateVirtualCode(KonohaContext *kctx, kMethod 
 
 	//PLATAPI printf_i("//=>=>=>=>=>=>=>=>\n");
 	JSBuilder_Init(kctx, (KBuilder *)builder, mtd);
-	SUGAR VisitNode(kctx, (KBuilder *)builder, block, NULL);
+	KLIB VisitNode(kctx, (KBuilder *)builder, block, NULL);
 	JSBuilder_Free(kctx, (KBuilder *)builder, mtd);
 	RESET_GCSTACK();
 

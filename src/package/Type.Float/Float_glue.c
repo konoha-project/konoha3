@@ -305,7 +305,7 @@ static KMETHOD TypeCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *tk = expr->TermToken;
 	// just using tramsformation float
 	KStackSetUnboxValue(sfp[4].floatValue, strtod(kString_text(tk->text), NULL));
-	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_float, sfp[4].unboxValue));
+	KReturn(KLIB kNode_SetUnboxConst(kctx, expr, KType_float, sfp[4].unboxValue));
 }
 
 static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
@@ -317,7 +317,7 @@ static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		{ KSymbol_("$Float"), SYNFLAG_CTypeFunc, 0, 0, {numberSyntax->ParseFuncNULL}, {SUGARFUNC TypeCheck_Float}, KonohaChar_Digit, {numberSyntax->TokenFuncNULL}},
 		{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 

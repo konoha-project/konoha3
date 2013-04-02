@@ -57,7 +57,7 @@ static KMETHOD NameSpace_DefineMacro2(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = KAsciiSymbol(kString_text(sfp[1].asString), kString_size(sfp[1].asString), _NEWID);
 	kString *source = sfp[2].asString;
-	KReturnUnboxValue(SUGAR SetMacroData(kctx, sfp[0].asNameSpace, keyword, 0, kString_text(source), true));
+	KReturnUnboxValue(KLIB SetMacroData(kctx, sfp[0].asNameSpace, keyword, 0, kString_text(source), true));
 }
 
 //## boolean NameSpace.DefineMacro(String symbol, int param, String source);
@@ -66,7 +66,7 @@ static KMETHOD NameSpace_DefineMacro(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t keyword = KAsciiSymbol(kString_text(sfp[1].asString), kString_size(sfp[1].asString), _NEWID);
 	int paramsize = (int)sfp[2].intValue;
 	kString *source = sfp[3].asString;
-	KReturnUnboxValue(SUGAR SetMacroData(kctx, sfp[0].asNameSpace, keyword, paramsize, kString_text(source), true));
+	KReturnUnboxValue(KLIB SetMacroData(kctx, sfp[0].asNameSpace, keyword, paramsize, kString_text(source), true));
 }
 
 static void namespace_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
@@ -88,15 +88,15 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
 	kstatus_t result = K_CONTINUE;
-	kToken *tk = SUGAR kNode_GetToken(kctx, stmt, KSymbol_BlockPattern, NULL);
+	kToken *tk = KLIB kNode_GetToken(kctx, stmt, KSymbol_BlockPattern, NULL);
 	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_LazyBlock) {
 		INIT_GCSTACK();
 		kNameSpace *ns = new_(NameSpace, kNode_ns(stmt), _GcStack);
 		KTokenSeq range = {ns, KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, range);
-		SUGAR Tokenize(kctx, ns, kString_text(tk->text), tk->uline, tk->indent, range.tokenList);
+		KLIB Tokenize(kctx, ns, kString_text(tk->text), tk->uline, tk->indent, range.tokenList);
 		KTokenSeq_End(kctx, range);
-		result = SUGAR EvalTokenList(kctx, &range, NULL/*trace*/);
+		result = KLIB EvalTokenList(kctx, &range, NULL/*trace*/);
 		KTokenSeq_Pop(kctx, range);
 		RESET_GCSTACK();
 		kNode_Type(stmt, KNode_Done, KType_void);
@@ -109,9 +109,9 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
-	kToken *symbolToken = SUGAR kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
+	kToken *symbolToken = KLIB kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 	ksymbol_t unboxKey = symbolToken->symbol;
-	kNode *constNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_INFER, TypeCheckPolicy_CONST);
+	kNode *constNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_INFER, TypeCheckPolicy_CONST);
 	if(!kNode_IsError(constNode)) {
 		KClass *constClass = KClass_(constNode->attrTypeId);
 		ktypeattr_t type = constClass->typeId;
@@ -175,9 +175,9 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *definedToken = tokenList->TokenVarItems[beginIdx];   // defined
 		kTokenVar *pToken = tokenList->TokenVarItems[beginIdx+1];
 		if(IS_Array(pToken->GroupTokenList)) {
-			SUGAR kNode_Op(kctx, expr, definedToken, 0);
+			KLIB kNode_Op(kctx, expr, definedToken, 0);
 			FilterDefinedParam(kctx, ns, RangeGroup(pToken->GroupTokenList));
-			KReturn(SUGAR AppendParsedNode(kctx, expr, RangeGroup(pToken->GroupTokenList), NULL, ParseExpressionOption, "("));
+			KReturn(KLIB AppendParsedNode(kctx, expr, RangeGroup(pToken->GroupTokenList), NULL, ParseExpressionOption, "("));
 		}
 	}
 }
@@ -191,14 +191,14 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	int popIsBlockingErrorMessage = sugarContext->isBlockedErrorMessage;
 	sugarContext->isBlockedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->NodeList); i++) {
-		kNode *typedNode = SUGAR TypeCheckNodeAt(kctx, expr, i, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
+		kNode *typedNode = KLIB TypeCheckNodeAt(kctx, expr, i, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
 		if(kNode_IsError(typedNode)) {
 			isDefined = false;
 			break;
 		}
 	}
 	sugarContext->isBlockedErrorMessage = popIsBlockingErrorMessage;
-	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_Boolean, isDefined));
+	KReturn(KLIB kNode_SetUnboxConst(kctx, expr, KType_Boolean, isDefined));
 }
 
 static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
@@ -209,9 +209,9 @@ static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTrac
 		{ KSymbol_("defined"), SYNFLAG_CFunc,0, Precedence_CStylePrefixOperator, {SUGARFUNC Expression_Defined}, {SUGARFUNC TypeCheck_Defined},},
 		{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("namespace")), "\"namespace\" $Expr", 0, trace);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("const")), "\"const\" $Symbol = $Expr", 0, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("namespace")), "\"namespace\" $Expr", 0, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("const")), "\"const\" $Symbol = $Expr", 0, trace);
 	return true;
 }
 

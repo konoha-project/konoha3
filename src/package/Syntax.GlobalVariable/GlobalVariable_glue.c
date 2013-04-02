@@ -61,12 +61,12 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kNode *stmt, kObj
 	kNameSpace *ns = kNode_ns(stmt);
 	kMethod *mtd = KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, kObject_class(o), symbol, KType_var);
 	if(mtd != NULL) {
-		SUGAR MessageNode(kctx, stmt, NULL, NULL, ErrTag, "already defined name: %s", KSymbol_text(symbol));
+		KLIB MessageNode(kctx, stmt, NULL, NULL, ErrTag, "already defined name: %s", KSymbol_text(symbol));
 		return NULL;
 	}
 	mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, kObject_class(o), symbol);
 	if(mtd != NULL && kMethod_GetReturnType(mtd)->typeId != ty) {
-		SUGAR MessageNode(kctx, stmt, NULL, NULL, ErrTag, "differently defined name: %s", KSymbol_text(symbol));
+		KLIB MessageNode(kctx, stmt, NULL, NULL, ErrTag, "differently defined name: %s", KSymbol_text(symbol));
 		return NULL;
 	}
 	KLIB KClass_AddField(kctx, kObject_class(o), ty, symbol);
@@ -78,7 +78,7 @@ static kNode* TypeDeclAndMakeSetter(KonohaContext *kctx, kNode *stmt, kNameSpace
 	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termNode->TermToken->symbol);
 	if(mtd != NULL) {
 		kNode *recvNode =  new_ConstNode(kctx, ns, NULL, scr);
-		return SUGAR new_MethodNode(kctx, ns, KClass_void, mtd, 2, recvNode, valueNode);
+		return KLIB new_MethodNode(kctx, ns, KClass_void, mtd, 2, recvNode, valueNode);
 	}
 	return NULL;
 }
@@ -105,13 +105,13 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 		KMakeTrace(trace, sfp);
 		trace->pline = kNode_uline(stmt);
 		if(kNameSpace_InitGlobalObject(kctx, ns, trace)) {
-			kToken *tk  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
-			kNode  *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
+			kToken *tk  = KLIB kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
+			kNode  *expr = KLIB kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
 			ktypeattr_t attrTypeId = Token_typeLiteral(tk);
 			if(kNode_isSymbolTerm(expr) && attrTypeId == KType_void) {
 				KReturn(K_NULLNODE);
 			}
-			SUGAR kNode_DeclType(kctx, stmt, ns, attrTypeId, expr, ns->globalObjectNULL, TypeDeclAndMakeSetter);
+			KLIB kNode_DeclType(kctx, stmt, ns, attrTypeId, expr, ns->globalObjectNULL, TypeDeclAndMakeSetter);
 			KReturn(stmt);
 		}
 	}
@@ -128,7 +128,7 @@ static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		{ KSymbol_END, }, /* sentinental */
 	};
 
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	kSyntaxVar *NewAssignSyntax     = (kSyntaxVar *) kSyntax_(ns, PATTERN(TypeDecl));
 	kSyntaxVar *NewMethodDeclSyntax = (kSyntaxVar *) kSyntax_(ns, PATTERN(MethodDecl));
 	KFieldInit(NewAssignSyntax, NewAssignSyntax->syntaxPatternListNULL, assignSyntax->syntaxPatternListNULL);
@@ -140,7 +140,7 @@ static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 static kbool_t global_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KImportPackage(ns, "MiniKonoha.ObjectModel", trace);
+	KImportPackage(ns, "Konoha.ObjectModel", trace);
 	global_defineMethod(kctx, ns, trace);
 	global_defineSyntax(kctx, ns, trace);
 	return true;

@@ -84,7 +84,7 @@
 //	 * "T _ = E; if(_.hasNext()) { N = _.next(); }"
 //	 *                           ^^^^^^^^^^^^^^^^^
 //	 */
-//	SUGAR KTokenSeq_Tokenize(kctx, &source, "T _ = E; if(_.hasNext()) N = _.next();", 0);
+//	KLIB kTokenSeq_Tokenize(kctx, &source, "T _ = E; if(_.hasNext()) N = _.next();", 0);
 //	KMacroSet macroSet[4] = {{0, NULL, 0, 0}};
 //	KMacroSet_SetTokenAt(kctx, macroSet, 0, source.tokenList, "T", IteratorTypeToken, NULL);
 //	KMacroSet_SetTokenAt(kctx, macroSet, 1, source.tokenList, "E", IteratorNodeToken, NULL);
@@ -94,7 +94,7 @@
 //	else {
 //		KMacroSet_SetTokenAt(kctx, macroSet, 2, source.tokenList, "N", TypeToken, VariableToken, NULL);
 //	}
-//	kNode *bk = SUGAR new_BlockNode(kctx, stmt, macroSet, &source);
+//	kNode *bk = KLIB new_BlockNode(kctx, stmt, macroSet, &source);
 //	KTokenSeq_Pop(kctx, source);
 //	return bk;
 //}
@@ -102,7 +102,7 @@
 //static void kNode_appendNode(KonohaContext *kctx, kNode *stmt, kNode *bk)
 //{
 //	if(bk != NULL) {
-//		kNode *block = SUGAR kNode_GetNode(kctx, stmt, kNode_ns(stmt), KSymbol_NodePattern, NULL);
+//		kNode *block = KLIB kNode_GetNode(kctx, stmt, kNode_ns(stmt), KSymbol_NodePattern, NULL);
 //		size_t i;
 //		for(i = 0; i < kArray_size(bk->NodeList); i++) {
 //			KLIB kArray_Add(kctx, block->NodeList, bk->NodeList->NodeItems[i]);
@@ -115,27 +115,27 @@
 //	VAR_TypeCheck(stmt, ns, reqc);
 //	DBG_P("for statement .. ");
 //	int isOkay = false;
-//	if(SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, ns, KClass_INFER, 0)) {
+//	if(KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, ns, KClass_INFER, 0)) {
 //		kNameSpace *ns = kNode_ns(stmt);
-//		kToken *TypeToken = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
-//		kToken *VariableToken  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
+//		kToken *TypeToken = KLIB kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
+//		kToken *VariableToken  = KLIB kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 //		DBG_P("typeToken=%p, varToken=%p", TypeToken, VariableToken);
-//		kNode *IteratorNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
+//		kNode *IteratorNode = KLIB kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
 //		if(!KType_IsIterator(IteratorNode->attrTypeId)) {
 //			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_(IteratorNode->attrTypeId), KMethodName_To(KType_Iterator), 0, KMethodMatch_NoOption);
 //			if(mtd == NULL) {
-//				SUGAR MessageNode(kctx, stmt, IteratorNode, ErrTag, "expected Iterator expression after in");
+//				KLIB MessageNode(kctx, stmt, IteratorNode, ErrTag, "expected Iterator expression after in");
 //				KReturnUnboxValue(false);
 //			}
-//			IteratorNode = SUGAR new_MethodNode(kctx, stmt, ns, KClass_INFER, mtd, 1, IteratorNode);
+//			IteratorNode = KLIB new_MethodNode(kctx, stmt, ns, KClass_INFER, mtd, 1, IteratorNode);
 //			kNode_SetObject(kctx, stmt, KSymbol_NodePattern, IteratorNode);
 //		}
 //		kNode *block = new_MacroNode(kctx, stmt, new_TypeToken(kctx, ns, KClass_(IteratorNode->attrTypeId)), new_ParsedNodeToken(kctx, ns, IteratorNode), TypeToken, VariableToken);
 //		kNode *IfNode = block->NodeList->NodeItems[1]; // @see macro;
-//		kNode_appendNode(kctx, IfNode, SUGAR kNode_GetNode(kctx, stmt, ns, KSymbol_NodePattern, NULL));
+//		kNode_appendNode(kctx, IfNode, KLIB kNode_GetNode(kctx, stmt, ns, KSymbol_NodePattern, NULL));
 //		kNode_Set(CatchBreak, IfNode, true);
 //		kNode_Set(CatchContinue, IfNode, true);
-//		isOkay = SUGAR TypeCheckBlock(kctx, block, gma);
+//		isOkay = KLIB TypeCheckBlock(kctx, block, gma);
 //		if(isOkay) {
 //			kNode_Type(IfNode, LOOP);
 //			kNode_SetObject(kctx, stmt, KSymbol_NodePattern, block);
@@ -151,7 +151,7 @@
 //		{ KSymbol_("for"), 0, "\"for\" \"(\" [$Type] $Symbol \"in\" $Node  \")\" [$Node] ", 0, 0, NULL, NULL, NULL, Statement_for, NULL, },
 //		{ KSymbol_END, },
 //	};
-//	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+//	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 //	return true;
 //}
 //

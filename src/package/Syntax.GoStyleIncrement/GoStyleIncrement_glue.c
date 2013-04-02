@@ -59,9 +59,9 @@ static KMETHOD PatternMatch_Inc(KonohaContext *kctx, KonohaStack *sfp)
 					{0, NULL, 0, 0},   /* sentinel */
 				};
 				macro.TargetPolicy.RemovingIndent = true;
-				SUGAR ApplyMacroData(kctx, macro.ns, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam, macro.tokenList);
+				KLIB ApplyMacroData(kctx, macro.ns, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam, macro.tokenList);
 				KTokenSeq_End(kctx, macro);
-				SUGAR ParseNode(kctx, stmt, RangeTokenSeq(macro), ParseExpressionOption, NULL);
+				KLIB ParseNode(kctx, stmt, RangeTokenSeq(macro), ParseExpressionOption, NULL);
 				KTokenSeq_Pop(kctx, macro);
 				KReturnUnboxValue(endIdx);
 			}
@@ -75,7 +75,7 @@ static KMETHOD Expression_Increment(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	kToken *tk = tokenList->TokenItems[operatorIdx];
-	KReturn(SUGAR MessageNode(kctx, stmt, tk, NULL, ErrTag, "%s is defined as a statement", kString_text(tk->text)));
+	KReturn(KLIB MessageNode(kctx, stmt, tk, NULL, ErrTag, "%s is defined as a statement", kString_text(tk->text)));
 }
 
 // --------------------------------------------------------------------------
@@ -90,10 +90,10 @@ static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 
 		{ KSymbol_END, }, /* sentinental */
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("$Inc")), "$IncStmt", 0, trace);
-	SUGAR SetMacroData(kctx, ns, KSymbol_("++"), 1,  "X X = (X) + 1", false);
-	SUGAR SetMacroData(kctx, ns, KSymbol_("--"), 1,  "X X = (X) - 1", false);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("$Inc")), "$IncStmt", 0, trace);
+	KLIB SetMacroData(kctx, ns, KSymbol_("++"), 1,  "X X = (X) + 1", false);
+	KLIB SetMacroData(kctx, ns, KSymbol_("--"), 1,  "X X = (X) - 1", false);
 
 	return true;
 }

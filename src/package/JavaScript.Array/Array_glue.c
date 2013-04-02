@@ -698,7 +698,7 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 	/* if the requested type is Array[T], then type the element of [x, y, z]. */
 	KClass *paramType = (reqc->baseTypeId == KType_Array) ? KClass_(reqc->p0) : KClass_INFER;
 	for(i = 2; i < kArray_size(expr->NodeList); i++) {
-		kNode *typedNode = SUGAR TypeCheckNodeAt(kctx, expr, i, ns, paramType, 0);
+		kNode *typedNode = KLIB TypeCheckNodeAt(kctx, expr, i, ns, paramType, 0);
 		if(kNode_IsError(typedNode)) {
 			KReturn(typedNode);
 		}
@@ -712,7 +712,7 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Array, KMethodName_("[]"), -1, KMethodMatch_NoOption);
 	DBG_ASSERT(mtd != NULL);
 	KFieldSet(expr, expr->NodeList->MethodItems[0], mtd);
-	KFieldSet(expr, expr->NodeList->NodeItems[1], SUGAR kNode_SetVariable(kctx, KNewNode(ns), KNode_New, reqc->typeId, kArray_size(expr->NodeList) - 2));
+	KFieldSet(expr, expr->NodeList->NodeItems[1], KLIB kNode_SetVariable(kctx, KNewNode(ns), KNode_New, reqc->typeId, kArray_size(expr->NodeList) - 2));
 	KReturn(kNode_Type(expr, KNode_MethodCall, reqc->typeId));
 }
 
@@ -723,8 +723,8 @@ static KMETHOD Expression_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 	if(beginIdx == opIdx) {
 		/* transform '[ Value1, Value2, ... ]' to '(Call Untyped new (Value1, Value2, ...))' */
 		DBG_ASSERT(groupToken->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup);
-		SUGAR kNode_Op(kctx, stmt, groupToken, 1, K_NULLNODE);
-		SUGAR AppendParsedNode(kctx, stmt, RangeGroup(groupToken->GroupTokenList), NULL, ParseExpressionOption, NULL);
+		KLIB kNode_Op(kctx, stmt, groupToken, 1, K_NULLNODE);
+		KLIB AppendParsedNode(kctx, stmt, RangeGroup(groupToken->GroupTokenList), NULL, ParseExpressionOption, NULL);
 		KReturnUnboxValue(opIdx+1);
 	}
 	KReturnUnboxValue(-1);
@@ -736,7 +736,7 @@ static kbool_t array_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		{ KSymbol_BracketGroup, SYNFLAG_Suffix|SYNFLAG_CFunc|SYNFLAG_TypeSuffix, Precedence_CStyleSuffixCall, 0, {SUGARFUNC Expression_ArrayLiteral}, {SUGARFUNC TypeCheck_ArrayLiteral}, },
 		{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 

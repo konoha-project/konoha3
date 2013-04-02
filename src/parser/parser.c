@@ -70,7 +70,7 @@ static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char
 		KTokenSeq_Push(kctx, tokens);
 		Tokenize(kctx, ns, script, uline, 0, tokens.tokenList);
 		KTokenSeq_End(kctx, tokens);
-		result = SUGAR EvalTokenList(kctx, &tokens, trace);
+		result = KLIB EvalTokenList(kctx, &tokens, trace);
 		KTokenSeq_Pop(kctx, tokens);
 	}
 	RESET_GCSTACK();
@@ -183,48 +183,48 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	};
 	kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(ClassData), 0);
 
-	mod->Tokenize              = Tokenize;
-	mod->ApplyMacroData        = ApplyMacroData;
-	mod->SetMacroData          = SetMacroData;
-	mod->Preprocess            = Preprocess;
-	mod->EvalTokenList         = EvalTokenList;
-	mod->ParseTypePattern      = ParseTypePattern;
-	mod->kToken_ToBraceGroup   = kToken_ToBraceGroup;
-	mod->kNode_AddParsedObject = kNode_AddParsedObject;
-	mod->FindEndOfStatement    = FindEndOfStatement;
-	mod->kNode_ParseFlag       = kNode_ParseFlag;
-	mod->kNode_GetToken        = kNode_GetToken;
-	mod->kNode_GetNode         = kNode_GetNode;
-	mod->kNode_SetConst        = kNode_SetConst;
-	mod->kNode_SetUnboxConst   = kNode_SetUnboxConst;
-	mod->kNode_SetVariable     = kNode_SetVariable;
-	mod->TypeCheckNodeAt       = TypeCheckNodeAt;
-	mod->TypeCheckNodeByName   = TypeCheckNodeByName;
-	mod->TypeCheckMethodParam  = TypeCheckMethodParam;
-	mod->new_MethodNode        = new_MethodNode;
-	mod->AddLocalVariable      = AddLocalVariable;
-	mod->kNode_DeclType        = kNode_DeclType;
-	mod->TypeVariableNULL      = TypeVariableNULL;
+	l->Tokenize              = Tokenize;
+	l->ApplyMacroData        = ApplyMacroData;
+	l->SetMacroData          = SetMacroData;
+	l->Preprocess            = Preprocess;
+	l->EvalTokenList         = EvalTokenList;
+	l->ParseTypePattern      = ParseTypePattern;
+	l->kToken_ToBraceGroup   = kToken_ToBraceGroup;
+	l->kNode_AddParsedObject = kNode_AddParsedObject;
+	l->FindEndOfStatement    = FindEndOfStatement;
+	l->kNode_ParseFlag       = kNode_ParseFlag;
+	l->kNode_GetToken        = kNode_GetToken;
+	l->kNode_GetNode         = kNode_GetNode;
+	l->kNode_SetConst        = kNode_SetConst;
+	l->kNode_SetUnboxConst   = kNode_SetUnboxConst;
+	l->kNode_SetVariable     = kNode_SetVariable;
+	l->TypeCheckNodeAt       = TypeCheckNodeAt;
+	l->TypeCheckNodeByName   = TypeCheckNodeByName;
+	l->TypeCheckMethodParam  = TypeCheckMethodParam;
+	l->new_MethodNode        = new_MethodNode;
+	l->AddLocalVariable      = AddLocalVariable;
+	l->kNode_DeclType        = kNode_DeclType;
+	l->TypeVariableNULL      = TypeVariableNULL;
 
-	mod->kNameSpace_DefineSyntax = kNameSpace_DefineSyntax;
-	mod->kNameSpace_GetSyntax    = kNameSpace_GetSyntax;
-	mod->kSyntax_AddPattern      = kSyntax_AddPattern;
-	mod->kNameSpace_AddSyntax    = kNameSpace_AddSyntax;
-	mod->kNameSpace_UseDefaultVirtualMachine = kNameSpace_UseDefaultVirtualMachine;
-	mod->kNode_InsertAfter       = kNode_InsertAfter;
-	mod->kNode_AddNode           = kNode_AddNode;
-	mod->kNode_Op                = kNode_Op;
-	mod->ParseSyntaxNode         = ParseSyntaxNode;
-	mod->ParseNode               = ParseNode;
-	mod->ParseNewNode            = ParseNewNode;
-	mod->AppendParsedNode        = AppendParsedNode;
-	mod->kToken_ToError          = kToken_ToError;
-	mod->MessageNode             = MessageNode;
-	mod->VisitNode               = VisitNode;
+	l->kNameSpace_DefineSyntax = kNameSpace_DefineSyntax;
+	l->kNameSpace_GetSyntax    = kNameSpace_GetSyntax;
+	l->kSyntax_AddPattern      = kSyntax_AddPattern;
+	l->kNameSpace_AddSyntax    = kNameSpace_AddSyntax;
+	l->kNameSpace_UseDefaultVirtualMachine = kNameSpace_UseDefaultVirtualMachine;
+	l->kNode_InsertAfter       = kNode_InsertAfter;
+	l->kNode_AddNode           = kNode_AddNode;
+	l->kNode_Op                = kNode_Op;
+	l->ParseSyntaxNode         = ParseSyntaxNode;
+	l->ParseNode               = ParseNode;
+	l->ParseNewNode            = ParseNewNode;
+	l->AppendParsedNode        = AppendParsedNode;
+	l->kToken_ToError          = kToken_ToError;
+	l->MessageNode             = MessageNode;
+	l->VisitNode               = VisitNode;
 
 #ifndef USE_SMALLBUILD
-	mod->dumpToken      = dumpToken;
-	mod->dumpTokenArray = dumpTokenArray;
+	l->dumpToken      = dumpToken;
+	l->dumpTokenArray = dumpTokenArray;
 #endif
 
 	DefineDefaultSyntax(kctx, KNULL(NameSpace));

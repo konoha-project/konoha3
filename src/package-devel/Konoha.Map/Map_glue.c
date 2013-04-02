@@ -254,7 +254,7 @@ static kbool_t Map_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 static kbool_t Map_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	//SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_NodePattern, KSugarTypeFunc, KSugarFunc(ns, TypeCheck_MapLiteral));
+	//KLIB kNameSpace_AddSugarFunc(kctx, ns, KSymbol_NodePattern, KSugarTypeFunc, KSugarFunc(ns, TypeCheck_MapLiteral));
 	return true;
 }
 

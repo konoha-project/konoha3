@@ -98,7 +98,7 @@ static KMETHOD Syntax_SetPattern(KonohaContext *kctx, KonohaStack *sfp)
 	KMakeTrace(trace, sfp);
 	kSyntaxVar *syn = (kSyntaxVar *)sfp[0].asObject;
 	const char *pattern = kString_text(sfp[1].asString);
-	SUGAR kSyntax_AddPattern(kctx, syn, pattern, 0, trace);
+	KLIB kSyntax_AddPattern(kctx, syn, pattern, 0, trace);
 	KReturnVoid();
 }
 

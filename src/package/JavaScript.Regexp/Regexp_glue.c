@@ -689,7 +689,7 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 		prev = ch;
 	}
 	if(IS_NOTNULL(tk)) {
-		SUGAR kToken_ToError(kctx, tk, ErrTag, "must close with %s", "/");
+		KLIB kToken_ToError(kctx, tk, ErrTag, "must close with %s", "/");
 	}
 	KReturnUnboxValue(pos-1);
 }
@@ -718,7 +718,7 @@ static KMETHOD Expression_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 			kNode *arg0 = new_ConstNode(kctx, ns, NULL, KLIB Knull(kctx, KClass_RegExp));
 			kNode *arg1 = new_ConstNode(kctx, ns, NULL, UPCAST(pattern));
 			kNode *arg2 = new_ConstNode(kctx, ns, NULL, UPCAST(option));
-			SUGAR kNode_Op(kctx, expr, tk, 3, arg0, arg1, arg2);
+			KLIB kNode_Op(kctx, expr, tk, 3, arg0, arg1, arg2);
 			returnIdx = beginIdx+1;
 			break;
 		}
@@ -735,7 +735,7 @@ static kbool_t regexp_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		{ KSymbol_("$RegExp"), SYNFLAG_CParseFunc|SYNFLAG_CTokenFunc, 0, 0, {SUGARFUNC Expression_RegExp}, {SUGAR methodTypeFunc }, KonohaChar_Slash, {SUGARFUNC TokenFunc_JavaScriptRegExp}},
 		{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 

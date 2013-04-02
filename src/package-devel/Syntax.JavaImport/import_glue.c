@@ -34,7 +34,7 @@
 //static kExpr *CreateImportCall(KonohaContext *kctx, KSyntaxVar *syn, kToken *tkImport, kNameSpace *ns, kString *pkgname)
 //{
 //	kExpr *ePKG = makeStringConstValue(kctx, pkgname);
-//	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3,
+//	kExpr *expr = KLIB new_UntypedCallStyleExpr(kctx, syn, 3,
 //			tkImport, new_ConstValueExpr(kctx, kObject_class(ns), UPCAST(ns)), ePKG);
 //	return expr;
 //}
@@ -62,14 +62,14 @@
 //		else if(kArray_size(list) == 1) {
 //			/* case : import("konoha.import"); */
 //			kExpr *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
-//			expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3,
+//			expr = KLIB new_UntypedCallStyleExpr(kctx, syn, 3,
 //					tkImport, new_ConstValueExpr(kctx, kObject_class(ns), UPCAST(ns)), param0);
 //		}
 //		else if(kArray_size(list) == 2) {
 //			/* case : import("konoha.import", "import"); */
 //			kExpr *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
 //			kExpr *param1 = makeStringConstValue(kctx, list->TokenItems[1]->text);
-//			expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 4,
+//			expr = KLIB new_UntypedCallStyleExpr(kctx, syn, 4,
 //					tkImport, new_ConstValueExpr(kctx, kObject_class(ns), UPCAST(ns)),
 //					param0, param1);
 //		} else {
@@ -102,7 +102,7 @@
 //		expr = CreateImportCall(kctx, syn, tkImport, ns, pkgname);
 //	}
 //	KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_ExprPattern, KType_Expr, expr);
-//	ret = SUGAR kStmt_TypeCheckByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_void, TypeCheckPolicy_ALLOWVOID);
+//	ret = KLIB kStmt_TypeCheckByName(kctx, stmt, KSymbol_ExprPattern, gma, KClass_void, TypeCheckPolicy_ALLOWVOID);
 //	if(ret) {
 //		kStmt_typed(stmt, EXPR);
 //	}
@@ -117,7 +117,7 @@
 //		{ KSymbol_("import"), 0, "\"import\" $Token $Token* [ \".*\"] ", 0, 0, NULL, NULL, Statement_import, NULL, NULL, },
 //		{ KSymbol_END, },
 //	};
-//	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+//	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 //	return true;
 //}
 //

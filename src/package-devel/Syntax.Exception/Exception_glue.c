@@ -149,21 +149,21 @@ static KMETHOD Statement_try(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_P("try statement .. \n");
 	int ret = false;
 	//kNode *tryNode, *catchNode, *finallyNode;
-	//tryNode = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
-	//ret = SUGAR TypeCheckBlock(kctx, tryNode,   gma);
+	//tryNode = KLIB kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
+	//ret = KLIB TypeCheckBlock(kctx, tryNode,   gma);
 	//if(ret == false) {
 	//	KReturnUnboxValue(ret);
 	//}
 
-	//catchNode   = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_("catch"),   K_NULLBLOCK);
-	//finallyNode = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_("finally"), K_NULLBLOCK);
-	//ret = SUGAR TypeCheckBlock(kctx, tryNode,   gma);
-	//ret = SUGAR TypeCheckBlock(kctx, catchNode, gma);
+	//catchNode   = KLIB kNode_GetNode(kctx, stmt, NULL, KSymbol_("catch"),   K_NULLBLOCK);
+	//finallyNode = KLIB kNode_GetNode(kctx, stmt, NULL, KSymbol_("finally"), K_NULLBLOCK);
+	//ret = KLIB TypeCheckBlock(kctx, tryNode,   gma);
+	//ret = KLIB TypeCheckBlock(kctx, catchNode, gma);
 	//if(ret == false) {
 	//	KReturnUnboxValue(ret);
 	//}
 	//if(finallyNode) {
-	//	ret = SUGAR TypeCheckBlock(kctx, finallyNode, gma);
+	//	ret = KLIB TypeCheckBlock(kctx, finallyNode, gma);
 	//}
 	//if(ret) {
 	//	kNode_Type(stmt, TRY);
@@ -178,14 +178,14 @@ static KMETHOD Statement_catch(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = false;
 
 	//// check "catch(...)"
-	////ret = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, ns, KClass_Exception, 0);
+	////ret = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, ns, KClass_Exception, 0);
 
-	//kNode *catchNode = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
+	//kNode *catchNode = KLIB kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
 	//kNode *parentNode = Node_LookupTryOrCatchNodeNULL(kctx, stmt);
 
 	//if(catchNode != K_NULLBLOCK && parentNode != NULL) {
-	//	ret = SUGAR TypeCheckBlock(kctx, catchNode, gma);
-	//	kNode *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_NodePattern, K_NULLNODE);
+	//	ret = KLIB TypeCheckBlock(kctx, catchNode, gma);
+	//	kNode *expr = KLIB kNode_GetNode(kctx, stmt, KSymbol_NodePattern, K_NULLNODE);
 	//	KLIB kObjectProto_SetObject(kctx, parentNode, KSymbol_NodePattern, KType_Exception, expr);
 	//	KLIB kObjectProto_SetObject(kctx, parentNode, KSymbol_("catch"), KType_Node, stmt);
 	//	kNode_Type(stmt, KNode_Done, KType_void);
@@ -201,12 +201,12 @@ static KMETHOD Statement_finally(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, ns, reqc);
 	DBG_P("finally statement .. \n");
 	int ret = false;
-	//kNode *finallyNode = SUGAR kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
+	//kNode *finallyNode = KLIB kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
 
 	//if(finallyNode != K_NULLBLOCK) {
 	//	kNode *tryNode = Node_LookupTryOrCatchNodeNULL(kctx, stmt);
 	//	if(tryNode != NULL) {
-	//		ret = SUGAR TypeCheckBlock(kctx, finallyNode, gma);
+	//		ret = KLIB TypeCheckBlock(kctx, finallyNode, gma);
 	//		KLIB kObjectProto_SetObject(kctx, tryNode, KSymbol_("finally"), KType_Node, finallyNode);
 	//		kNode_Type(stmt, KNode_Done, KType_void);
 	//	}
@@ -232,11 +232,11 @@ static kbool_t Exception_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, in
 		{ KSymbol_("finally"), SYNFLAG_CTypeFunc, 0, 0, {SUGAR patternParseFunc}, {SUGARFUNC Statement_finally}},
 		{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("try")), "\"try\" $Node [ \"catch\" \"(\" $Type $Symbol \")\" catch: $Node ] [ \"finally\" finally: $Node ]", 0, trace);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("catch")), "\"catch\" \"(\" $Type $Symbol \")\" $Node", 0, trace);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("finally")), "\"finally\" $Node", 0, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("try")), "\"try\" $Node [ \"catch\" \"(\" $Type $Symbol \")\" catch: $Node ] [ \"finally\" finally: $Node ]", 0, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("catch")), "\"catch\" \"(\" $Type $Symbol \")\" $Node", 0, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("finally")), "\"finally\" $Node", 0, trace);
 
 	return true;
 }

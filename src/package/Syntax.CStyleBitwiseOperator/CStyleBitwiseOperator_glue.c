@@ -107,8 +107,8 @@ static kbool_t int_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		{ KSymbol_("^"),  0, Precedence_CStyleBITXOR, 0, {SUGAR opParseFunc}, {SUGAR methodTypeFunc}},
 		{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-//	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_NumberPattern, KonohaChar_Digit, KSugarFunc(ns, TokenFunc_ExtendedIntLiteral));
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+//	KLIB kNameSpace_SetTokenFunc(kctx, ns, KSymbol_NumberPattern, KonohaChar_Digit, KSugarFunc(ns, TokenFunc_ExtendedIntLiteral));
 	return true;
 }
 

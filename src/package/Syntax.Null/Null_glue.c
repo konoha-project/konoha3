@@ -39,7 +39,7 @@ static KMETHOD TypeCheck_null(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	if(reqc->typeId == KType_var) reqc = KClass_Object;
-	KReturn(SUGAR kNode_SetVariable(kctx, expr, KNode_Null, reqc->typeId, 0));
+	KReturn(KLIB kNode_SetVariable(kctx, expr, KNode_Null, reqc->typeId, 0));
 }
 
 static KMETHOD Expression_isNull(KonohaContext *kctx, KonohaStack *sfp)
@@ -52,7 +52,7 @@ static KMETHOD Expression_isNull(KonohaContext *kctx, KonohaStack *sfp)
 			kNameSpace *ns = kNode_ns(stmt);
 			tk->symbol = KSymbol_("IsNull");
 			tk->resolvedSyntaxInfo = tokenList->TokenVarItems[opIdx]->resolvedSyntaxInfo;
-			SUGAR kNode_Op(kctx, stmt, tk, 1, SUGAR ParseNewNode(kctx, ns, tokenList, &beginIdx, opIdx, ParseExpressionOption, NULL));
+			KLIB kNode_Op(kctx, stmt, tk, 1, KLIB ParseNewNode(kctx, ns, tokenList, &beginIdx, opIdx, ParseExpressionOption, NULL));
 			KReturnUnboxValue(opIdx + 2);
 		}
 	}
@@ -70,7 +70,7 @@ static KMETHOD Expression_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 			kNameSpace *ns = kNode_ns(stmt);
 			tk->symbol = KSymbol_("IsNotNull");
 			tk->resolvedSyntaxInfo = tokenList->TokenVarItems[opIdx]->resolvedSyntaxInfo;
-			SUGAR kNode_Op(kctx, stmt, tk, 1, SUGAR ParseNewNode(kctx, ns, tokenList, &beginIdx, opIdx, ParseExpressionOption, NULL));
+			KLIB kNode_Op(kctx, stmt, tk, 1, KLIB ParseNewNode(kctx, ns, tokenList, &beginIdx, opIdx, ParseExpressionOption, NULL));
 			KReturnUnboxValue(opIdx + 2);
 		}
 	}
@@ -90,7 +90,7 @@ static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		{ KSymbol_("!="), 0, Precedence_CStyleEquals, 0, {KSugarFunc(ns, Expression_isNotNull)}, {SUGAR methodTypeFunc}},
 		{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 

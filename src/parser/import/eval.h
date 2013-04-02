@@ -110,7 +110,7 @@ static kbool_t PreprocessSingleStatement(KonohaContext *kctx, kNameSpace *ns, KT
 		}
 	}
 //	DBG_P("beginIdx=%d, endIdx=%d", beginIdx, endIdx);
-//	SUGAR dumpTokenArray(kctx, 0, source->tokenList, beginIdx, endIdx);
+//	KLIB dumpTokenArray(kctx, 0, source->tokenList, beginIdx, endIdx);
 	if(beginIdx < endIdx) {
 		Preprocess(kctx, ns, source->tokenList, beginIdx, endIdx, NULL, tokens->tokenList);
 		source->beginIdx = endIdx;
@@ -125,12 +125,12 @@ static kstatus_t EvalTokenList(KonohaContext *kctx, KTokenSeq *source, KTraceInf
 	kMethod *mtd = NULL;
 	int pushBeginIdx = source->beginIdx;
 	INIT_GCSTACK();
-//	SUGAR dumpTokenArray(kctx, 0, source->tokenList, source->beginIdx, source->endIdx);
+//	KLIB dumpTokenArray(kctx, 0, source->tokenList, source->beginIdx, source->endIdx);
 	KTokenSeq tokens = {source->ns, KGetParserContext(kctx)->preparedTokenList};
 	KTokenSeq_Push(kctx, tokens);
 	while(PreprocessSingleStatement(kctx,source->ns, &tokens, source)) {
 		KTokenSeq_End(kctx, tokens);
-		SUGAR dumpTokenArray(kctx, 0, RangeTokenSeq(tokens));
+		KLIB dumpTokenArray(kctx, 0, RangeTokenSeq(tokens));
 		int currentIdx = FindFirstStatementToken(kctx, tokens.tokenList, tokens.beginIdx, tokens.endIdx);
 		while(currentIdx < tokens.endIdx) {
 			kNode *node = ParseNewNode(kctx, source->ns, tokens.tokenList, &currentIdx, tokens.endIdx, ParseMetaPatternOption, NULL);

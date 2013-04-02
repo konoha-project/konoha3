@@ -94,13 +94,13 @@ static kNode *ParseSource(KonohaContext *kctx, kNameSpace *ns, const char *scrip
 	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList};
 	KTokenSeq_Push(kctx, tokens);
 	const char *buf = KLIB KBuffer_text(kctx, &wb, EnsureZero);
-	SUGAR Tokenize(kctx, ns, buf, 0, 0, tokens.tokenList);
+	KLIB Tokenize(kctx, ns, buf, 0, 0, tokens.tokenList);
 	KTokenSeq_End(kctx, tokens);
 
 	KTokenSeq step2 = {ns, tokens.tokenList, kArray_size(tokens.tokenList)};
-	SUGAR Preprocess(kctx, ns, RangeTokenSeq(tokens), NULL, step2.tokenList);
+	KLIB Preprocess(kctx, ns, RangeTokenSeq(tokens), NULL, step2.tokenList);
 	KTokenSeq_End(kctx, step2);
-	kNode *newexpr = SUGAR ParseNewNode(kctx, ns, step2.tokenList, &step2.beginIdx, step2.endIdx, ParseExpressionOption, NULL);
+	kNode *newexpr = KLIB ParseNewNode(kctx, ns, step2.tokenList, &step2.beginIdx, step2.endIdx, ParseExpressionOption, NULL);
 	KTokenSeq_Pop(kctx, tokens);
 	KLIB KBuffer_Free(&wb);
 	return newexpr;
@@ -138,12 +138,12 @@ static KMETHOD Expression_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *
 	opToken->symbol = KSymbol_("+");
 	opToken->text   = KLIB new_kString(kctx, OnGcStack, "+", 1, 0);
 	KFieldSet(opToken, opToken->resolvedSyntaxInfo, addSyntax);
-	SUGAR kNode_Op(kctx, expr, opToken, 0);
+	KLIB kNode_Op(kctx, expr, opToken, 0);
 
 	/* [before] "aaa${bbb}ccc"
 	 * [after]  "" + "aaa" + bbb + "ccc"
 	 */
-	SUGAR kNode_AddNode(kctx, expr, new_ConstNode(kctx, ns, NULL, UPCAST(TS_EMPTY)));
+	KLIB kNode_AddNode(kctx, expr, new_ConstNode(kctx, ns, NULL, UPCAST(TS_EMPTY)));
 	while(true) {
 		start = strstr(str, "${");
 		if(start == NULL)
@@ -159,16 +159,16 @@ static KMETHOD Expression_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *
 		if(start - str > 0) {
 			kNode *first = new_ConstNode(kctx, ns, NULL,
 					UPCAST(KLIB new_kString(kctx, OnGcStack, str, (start - str), 0)));
-			SUGAR kNode_AddNode(kctx, expr, first);
+			KLIB kNode_AddNode(kctx, expr, first);
 		}
-		SUGAR kNode_AddNode(kctx, expr, newexpr);
+		KLIB kNode_AddNode(kctx, expr, newexpr);
 		str = end + 1;
 	}
 
 	if((start == NULL) || (start != NULL && end == NULL)) {
 		kNode *rest = new_ConstNode(kctx, ns, KClass_String,
 				UPCAST(KLIB new_kString(kctx, OnGcStack, str, strlen(str), 0)));
-		SUGAR kNode_AddNode(kctx, expr, rest);
+		KLIB kNode_AddNode(kctx, expr, rest);
 	}
 
 	/* (+ 1 2 3 4) => (+ (+ (+ 1 2) 3 ) 4) */
@@ -178,7 +178,7 @@ static KMETHOD Expression_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *
 	for(i = 2; i < size-1; i++) {
 		kNode *node = KNewNode(ns);
 		rightNode = kNode_At(expr, i);
-		SUGAR kNode_Op(kctx, node, opToken, 2, leftNode, rightNode);
+		KLIB kNode_Op(kctx, node, opToken, 2, leftNode, rightNode);
 		leftNode = node;
 	}
 	rightNode = kNode_At(expr, i);
@@ -199,7 +199,7 @@ static kbool_t StringInterpolation_PackupNameSpace(KonohaContext *kctx, kNameSpa
 		{ KSymbol_TextPattern, SYNFLAG_CParseFunc, 0, 0, {SUGARFUNC Expression_ExtendedTextLiteral}, {textSyntax->TypeFuncNULL}, },
 		{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 
