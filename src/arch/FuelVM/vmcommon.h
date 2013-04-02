@@ -25,10 +25,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 #define USE_EXECUTIONENGINE
-#include "../../../../include/konoha3/konoha.h"
-#include "../../../../include/konoha3/konoha_common.h"
-#include "../../../../include/konoha3/sugar.h"
-#include "../../../../include/konoha3/import/module.h"
+#include "../../../include/konoha3/konoha.h"
+#include "../../../include/konoha3/konoha_common.h"
+#include "../../../include/konoha3/sugar.h"
+#include "../../../include/konoha3/import/module.h"
 
 #ifndef VMCOMMON_H
 #define VMCOMMON_H
