@@ -336,13 +336,6 @@ static const char *KEYWORD_LIST[] = {
 #define KMethodName_IsUpcast(mn)       ((KSymbol_Unmask(mn)) == KMethodNameAttr_Upcast)
 #define KMethodName_Fmt2(mn)           KSymbol_prefixText(mn), ((mn & KMethodNameAttr_Type) == KMethodNameAttr_Type ? KType_text(KSymbol_Unmask(mn)) : KSymbol_text(KSymbol_Unmask(mn)))
 
-
-
-
-
-
-
-
 /* ------------------------------------------------------------------------ */
 /* platform */
 

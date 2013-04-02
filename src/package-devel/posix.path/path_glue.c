@@ -30,7 +30,7 @@
 #include <sys/file.h>
 #include <dirent.h>
 
-#include <konoha3.h>
+#include "konoha3.h"
 
 #include "konoha3/import/methoddecl.h"
 #define _Iter  kMethod_Iterative

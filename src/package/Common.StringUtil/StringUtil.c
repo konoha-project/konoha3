@@ -26,7 +26,7 @@
 
 #define USE_STRINGLIB 1
 
-#include <konoha3.h>
+#include "konoha3.h"
 
 #include "konoha3/import/methoddecl.h"
 

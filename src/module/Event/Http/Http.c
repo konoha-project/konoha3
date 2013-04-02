@@ -30,7 +30,7 @@ extern "C" {
 #include <pthread.h>
 #include <event.h>
 #include <evhttp.h>
-#include <konoha3.h>
+#include "konoha3.h"
 
 #define EVENTAPI PLATAPI EventModule.
 // -------------------------------------------------------------------------

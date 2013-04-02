@@ -24,7 +24,7 @@
 
 /* ************************************************************************ */
 
-#include <konoha3.h>
+#include "konoha3.h"
 
 #include "konoha3/import/methoddecl.h"
 #include <pthread.h>

@@ -31,7 +31,7 @@
 #include <sys/wait.h>
 
 #define USE_FILE 1
-#include <konoha3.h>
+#include "konoha3.h"
 
 #include "konoha3/konoha_common.h"
 #include "konoha3/import/methoddecl.h"

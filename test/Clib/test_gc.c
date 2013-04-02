@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include <konoha3.h>
+#include "konoha3.h"
 #include "test_konoha.h"
 
 #ifdef __cplusplus

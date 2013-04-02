@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <konoha3.h>
+#include "konoha3.h"
 
 
 #ifdef __cplusplus

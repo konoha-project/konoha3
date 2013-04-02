@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 #include <jansson.h>
-#include <konoha3.h>
+#include "konoha3.h"
 
 // -------------------------------------------------------------------------
 

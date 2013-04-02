@@ -41,7 +41,7 @@ extern "C" {
 #include <event.h>
 #include <evhttp.h>
 
-#include <konoha3.h>
+#include "konoha3.h"
 
 
 // -------------------------------------------------------------------------

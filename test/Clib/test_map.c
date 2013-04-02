@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include <konoha3.h>
+#include "konoha3.h"
 #include "test_konoha.h"
 
 static int _sum_  = 0;

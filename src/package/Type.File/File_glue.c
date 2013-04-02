@@ -36,7 +36,7 @@
 #include <errno.h>
 #include <stdio.h>
 
-#include <konoha3.h>
+#include "konoha3.h"
 
 #include "konoha3/konoha_common.h"
 #include "konoha3/import/methoddecl.h"

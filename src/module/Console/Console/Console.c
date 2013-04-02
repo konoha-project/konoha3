@@ -36,7 +36,7 @@ extern "C" {
 #include <sys/ttydefaults.h>
 #endif
 #endif
-#include <konoha3.h>
+#include "konoha3.h"
 
 
 // -------------------------------------------------------------------------

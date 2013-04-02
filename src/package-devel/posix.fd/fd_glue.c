@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <dirent.h>
 
-#include <konoha3.h>
+#include "konoha3.h"
 
 #include "konoha3/import/methoddecl.h"
 

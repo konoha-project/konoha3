@@ -28,7 +28,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <errno.h>
-#include <konoha3.h>
+#include "konoha3.h"
 
 
 // -------------------------------------------------------------------------

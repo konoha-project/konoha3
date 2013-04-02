@@ -28,7 +28,7 @@
 extern "C" {
 #endif
 
-#include <konoha3.h>
+#include "konoha3.h"
 
 #include "konoha3/local.h"
 

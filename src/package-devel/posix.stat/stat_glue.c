@@ -34,7 +34,7 @@
 #include <dirent.h>
 #endif
 
-#include <konoha3.h>
+#include "konoha3.h"
 
 #include "konoha3/import/methoddecl.h"
 

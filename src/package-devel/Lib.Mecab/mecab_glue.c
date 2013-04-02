@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 #include <mecab.h>
-#include <konoha3.h>
+#include "konoha3.h"
 
 #include "konoha3/import/methoddecl.h"
 

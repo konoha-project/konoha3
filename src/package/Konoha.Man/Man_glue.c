@@ -24,7 +24,7 @@
 
 #include <stdio.h>
 #define  USE_MethodFlagData
-#include <konoha3.h>
+#include "konoha3.h"
 
 
 #include "konoha3/import/methoddecl.h"
