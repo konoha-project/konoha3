@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-#include"konoha3.h"
+#include "konoha3.h"
 
 #include "konoha3/platform.h"
 #include "konoha3/libcode/minishell.h"

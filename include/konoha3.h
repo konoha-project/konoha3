@@ -1582,10 +1582,6 @@ struct kSystemVar {
 /* ------------------------------------------------------------------------ */
 /* sugar.h */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // reserved
 //#define MN_new     (8+KSymbol_void)
 #define FN_this      KFieldName_("this")
