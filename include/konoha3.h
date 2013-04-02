@@ -36,7 +36,7 @@
 #define K_CLASSTABLE_INITSIZE 64
 #define K_PAGESIZE        4096
 
-#define K_VERSION   "3.0 alpha"
+#define K_VERSION   "3.0"
 #define K_MAJOR_VERSION 3
 #define K_MINOR_VERSION 0
 #define K_PATCH_LEVEL   0
@@ -49,7 +49,7 @@
 #endif
 
 #ifndef K_PROGNAME
-#define K_PROGNAME  "Konoha"
+#define K_PROGNAME  "Konoha alpha"
 /*2012/01/24 - */
 #define K_CODENAME "Rome"  // eternal city
 #else
