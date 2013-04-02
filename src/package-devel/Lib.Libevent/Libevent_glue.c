@@ -22,9 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "konoha3/konoha.h"
+#include <konoha3.h>
 #include "konoha3/konoha_common.h"
-#include "konoha3/sugar.h"
+
 #include "konoha3/import/methoddecl.h"
 #include <event2/event.h>
 #include <event2/event_struct.h>

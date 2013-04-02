@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include "konoha3/konoha.h"
+#include <konoha3.h>
 #include "test_konoha.h"
 
 int main(int argc, const char *argv[])

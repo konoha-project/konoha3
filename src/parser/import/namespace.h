@@ -769,9 +769,6 @@ typedef struct {
 static int evalHookFunc(const char *script, long uline, int *isBreak, void *thunk)
 {
 	SugarThunk *t = (SugarThunk *)thunk;
-//	if(verbose_sugar) {
-//		DUMP_P("\n>>>----\n'%s'\n------\n", script);
-//	}
 	kstatus_t result = kNameSpace_Eval(t->kctx, t->ns, script, uline, t->trace);
 	*isBreak = (result == K_BREAK);
 	return (result != K_FAILED);
@@ -811,6 +808,7 @@ static kbool_t kNameSpace_LoadScript(KonohaContext *kctx, kNameSpace *ns, const 
 // Package Management */
 
 #define KClass_NameSpaceVar KClass_NameSpace
+
 static kNameSpace *new_PackageNameSpace(KonohaContext *kctx, kpackageId_t packageId)
 {
 	kNameSpaceVar *ns = new_(NameSpaceVar, KNULL(NameSpace), OnGlobalConstList);
@@ -878,42 +876,6 @@ static KPackage *GetPackageNULL(KonohaContext *kctx, kpackageId_t packageId, int
 	return pack;
 }
 
-//static kbool_t kNameSpace_ImportSymbol(KonohaContext *kctx, kNameSpace *ns, kNameSpace *packageNS, ksymbol_t keyword, KTraceInfo *trace)
-//{
-//	kSyntax *syn = kSyntax_(packageNS, keyword);
-//	if(syn != NULL) {
-//		return kNameSpace_ImportSyntax(kctx, ns, syn, trace);
-//	}
-//	else {
-//		KKeyValue *kvs = kNameSpace_GetLocalConstNULL(kctx, packageNS, keyword);
-//		if(kvs != NULL) {
-//			if(kNameSpace_MergeConstData(kctx, (kNameSpaceVar *)ns, kvs, 1, trace)) {
-//				if(KTypeAttr_Unmask(kvs->attrTypeId) == VirtualType_KClass) {
-//					size_t i;
-//					ktypeattr_t typeId = ((KClass *)kvs->unboxValue)->typeId;
-//					for(i = 0; i < kArray_size(packageNS->methodList_OnList); i++) {
-//						kMethod *mtd = packageNS->methodList_OnList->MethodItems[i];
-//						if(mtd->typeId == typeId /*&& !kMethod_Is(Private, mtd)*/) {
-//							KLIB kArray_Add(kctx, ns->methodList_OnList, mtd);
-//						}
-//					}
-//				}
-//				return true;
-//			}
-//		}
-//	}
-//	return false;
-//}
-
-//static kbool_t kNameSpace_isImported(KonohaContext *kctx, kNameSpace *ns, kNameSpace *packageNS, KTraceInfo *trace)
-//{
-//	KKeyValue *value = kNameSpace_GetLocalConstNULL(kctx, ns, packageNS->packageId | KSymbolAttr_SyntaxList | KSymbolAttr_Pattern);
-//	if(value != NULL) {
-//		KLIB ReportScriptMessage(kctx, trace, DebugTag, "package %s has already imported in %s", KPackage_text(ns->packageId), KPackage_text(packageNS->packageId));
-//		return true;
-//	}
-//	return false;
-//}
 
 static kbool_t kNameSpace_ImportAll(KonohaContext *kctx, kNameSpace *ns, kNameSpace *packageNS, KTraceInfo *trace)
 {
@@ -961,28 +923,10 @@ static kbool_t kNameSpace_ImportPackage(KonohaContext *kctx, kNameSpace *ns, con
 	return false;
 }
 
-//static kbool_t kNameSpace_ImportPackageSymbol(KonohaContext *kctx, kNameSpace *ns, const char *name, ksymbol_t keyword, KTraceInfo *trace)
-//{
-//	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
-//	int option = 0;
-//	if(ns->packageId != packageId) {
-//		KPackage *pack = GetPackageNULL(kctx, packageId, option, trace);
-//		if(pack != NULL) {
-//			return kNameSpace_ImportSymbol(kctx, ns, pack->packageNS, keyword, trace);
-//		}
-//	}
-//	return false;
-//}
-
-// --------------------------------------------------------------------------
-
 static void kNameSpace_UseDefaultVirtualMachine(KonohaContext *kctx, kNameSpace *ns)
 {
 	KonohaFactory *factory = (KonohaFactory *)kctx->platApi;
 	factory->LoadPlatformModule(factory, "MiniVM", ReleaseModule);
 	ns->builderApi = factory->ExecutionEngineModule.GetDefaultBuilderAPI();
 }
-
-// --------------------------------------------------------------------------
-/* namespace method */
 

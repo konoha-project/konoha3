@@ -25,10 +25,6 @@
 #ifndef KONOHA_COMMON_H_
 #define KONOHA_COMMON_H_
 
-#ifndef MINIOKNOHA_H_
-#error Do not include float.h without konoha.h.
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

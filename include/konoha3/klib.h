@@ -25,14 +25,6 @@
 #ifndef KLIB_H_
 #define KLIB_H_
 
-#ifndef MINIOKNOHA_H_
-#error Do not include klib.h without konoha.h.
-#endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifdef __GNUC__
 #define kinline __attribute__((unused))
 #else
@@ -205,7 +197,4 @@ static const char _utf8len[] = {
 //	KFieldInit(mtd, ((kMethodVar *)mtd)->proceedNUL, mtd2);
 //}
 
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
 #endif /* KLIB_H_ */

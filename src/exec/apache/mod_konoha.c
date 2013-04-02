@@ -33,9 +33,9 @@
 #ifndef K_USE_PTHREAD
 #define K_USE_PTHREAD 1
 #endif
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
-#include "konoha3/klib.h"
+#include <konoha3.h>
+
+
 #include "konoha3/platform.h"
 #include "konoha3/import/methoddecl.h"
 #include "../../package-devel/Lib.Apache/apache_glue.h"

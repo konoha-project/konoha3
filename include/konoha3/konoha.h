@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef MINIOKNOHA_H_
-#define MINIOKNOHA_H_
+#ifndef KONOHA3_H_
+#define KONOHA3_H_
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -2096,10 +2096,6 @@ KONOHA_EXPORT(int) Konoha_Destroy(KonohaContext *kctx);
 KONOHA_EXPORT(kbool_t) KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *name, ModuleType option);
 KONOHA_EXPORT(void) KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv);
 
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
-
 #include "klib.h"
 
-#endif /* MINIOKNOHA_H_ */
+#endif /* KONOHA3_H_ */

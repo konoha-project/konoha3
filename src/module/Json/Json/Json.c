@@ -25,7 +25,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "konoha3/konoha.h"
+#include <konoha3.h>
 #include "konoha3/platform.h"
 #include "kjson/kjson.c"
 

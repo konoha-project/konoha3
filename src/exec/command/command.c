@@ -23,22 +23,21 @@
  ***************************************************************************/
 
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
-#include "konoha3/klib.h"
-
 #ifdef __GNUC__
 #include <getopt.h>
 #else
 #include "./getopt.c"
 #endif /*__GNUC__ */
 
-#include "konoha3/platform.h"
-#include "konoha3/libcode/minishell.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include<konoha3.h>
+
+#include "konoha3/platform.h"
+#include "konoha3/libcode/minishell.h"
 
 // -------------------------------------------------------------------------
 // getopt

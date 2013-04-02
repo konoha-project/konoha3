@@ -23,14 +23,15 @@
  ***************************************************************************/
 
 #define USE_KEYWORD_LIST 1
-#include "konoha3/konoha.h"
-#include "konoha3/klib.h"
-#include "konoha3/local.h"
-#include "konoha3/sugar.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <konoha3.h>
+
+#include "konoha3/local.h"
+
 
 #include "import/klibexec.h"
 #include "import/datatype.h"

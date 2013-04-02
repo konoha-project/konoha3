@@ -27,8 +27,8 @@
 #endif
 #define USE_EXECUTIONENGINE
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
+#include <konoha3.h>
+
 #include "konoha3/import/module.h"
 #include "minivm.h"
 

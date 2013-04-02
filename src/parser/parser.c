@@ -27,9 +27,9 @@
 //#define USING_SUGAR_AS_BUILTIN 1
 #define USE_AsciiToKonohaChar
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
-#include "konoha3/klib.h"
+//#include <konoha3.h>
+//
+//
 #include "konoha3/import/methoddecl.h"
 
 /* ************************************************************************ */
@@ -37,6 +37,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include<konoha3.h>
 
 // global variable
 KONOHA_EXPORT(int) verbose_sugar;
