@@ -1,10 +1,10 @@
-FFI Package
+LIBRARY Package
 ===========
 
 TopLevel Layout
 ---------------
 
-FFI         Description
+LIBRARY     Description
 Konoha/     Platform-Independent Libraries
 C/          C/C++ based Libraries
 JS/         General JS Libraries
@@ -12,7 +12,7 @@ JS/         General JS Libraries
 Directory Layout
 ----------------
 
-In ${FFI}/${Package.Name}:
+In ${LIBRARY}/${Package.Name}:
 	CMakeLists.txt
 	ReleaseTest/
 	DebugTest/
