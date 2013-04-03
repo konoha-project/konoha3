@@ -25,8 +25,6 @@
 /* ************************************************************************ */
 
 #include "konoha3.h"
-
-
 #include "konoha3/import/methoddecl.h"
 
 #ifdef __cplusplus
@@ -179,12 +177,12 @@ static KClass *CreateEnvClass(KonohaContext *kctx, kNameSpace *ns, kToken *typeT
 	kparamtype_t *p = ALLOCA(kparamtype_t, esize);
 	char buf[256] = {'_', '_', '_', 'E', 'N', 'V', 0}, *text = buf + 6;
 	if(ns->genv->thisClass == KClass_NameSpace) {
-		start = 1;
+		start += 1;
 		end = esize - 1;
 	}
 	assert(end < 256);
 	for(i = start; i <= end; i++) {
-		p[i-1].name       = oldenv[i].name;
+		p[i-1].name     = oldenv[i].name;
 		p[i-1].typeAttr = oldenv[i].typeAttr;
 		*(text++) = (KType_text(p[i-1].typeAttr))[0];
 	}
@@ -276,8 +274,11 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 		 * 3: ditto
 		 * 4: ...
 		 */
-		kNode_Type(texpr, KNode_Function, envCt->typeId);
+		kParam *pa = kMethod_GetParam(mtd);
+		KClass *ct = KLIB KClass_Generics(kctx, KClass_Func, pa->rtype, pa->psize, (kparamtype_t *) pa->paramtypeItems);
+		kNode_Type(texpr, KNode_Function, ct->typeId);
 		KFieldSet(expr, texpr->NodeList, new_(Array, 0, OnField));
+
 		KLIB kArray_Add(kctx, texpr->NodeList, mtd);
 		KLIB kArray_Add(kctx, texpr->NodeList, KLIB Knull(kctx, EnvObjectClass));
 		size_t i = 0;
@@ -293,8 +294,6 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 	RESET_GCSTACK();
 	KReturn(texpr);
 }
-
-
 
 // --------------------------------------------------------------------------
 static kbool_t ClosureModel_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)

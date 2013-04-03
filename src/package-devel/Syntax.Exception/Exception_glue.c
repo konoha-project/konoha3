@@ -149,8 +149,8 @@ static KMETHOD Statement_try(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_P("try statement .. \n");
 	int ret = false;
 	//kNode *tryNode, *catchNode, *finallyNode;
-	//tryNode = KLIB kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
-	//ret = KLIB TypeCheckBlock(kctx, tryNode,   gma);
+	//tryNode = KLIB kNode_GetNode(kctx, stmt, NULL, KSymbol_BlockPattern, K_NULLBLOCK);
+	//ret = KLIB TypeCheckBlock(kctx, tryNode, gma);
 	//if(ret == false) {
 	//	KReturnUnboxValue(ret);
 	//}

@@ -7,5 +7,7 @@ Func[int, int] f() {
 }
 
 void test() {
-	assert(test()(1, 2) == 3);
+	assert(f()(1, 2) == 3);
 }
+
+test();

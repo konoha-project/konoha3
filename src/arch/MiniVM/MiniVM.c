@@ -1229,7 +1229,15 @@ static kbool_t CollectLocalVar_VisitAssignNode(KVISITOR_PARAM)
 	return true;
 }
 
-#define CollectLocalVar_VisitFunctionNode        CollectLocalVar_Visit_NotImplemented
+static kbool_t CollectLocalVar_VisitFunctionNode(KVISITOR_PARAM)
+{
+	size_t i, ParamSize = kArray_size(node->NodeList)-2;
+	for(i = 0; i < ParamSize; i++) {
+		kNode *expr = kNode_At(node, i+2);
+		KLIB VisitNode(kctx, builder, expr, thunk);
+	}
+	return true;
+}
 
 #define DEFINE_LOCALVAR_COLLECTOR_API(NAME) CollectLocalVar_Visit##NAME##Node,
 static const struct KBuilderAPI CollectLocalVar_BuilderAPI = {
