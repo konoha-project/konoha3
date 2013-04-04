@@ -25,13 +25,9 @@
 #ifndef KONOHA3_H_
 #define KONOHA3_H_
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "konoha3/konoha_init.h"
 
-/* konoha3/konoha_config.h */
-
-#define NEWSYNTAX 1
+/* config */
 
 #define K_CLASSTABLE_INITSIZE 64
 #define K_PAGESIZE        4096
@@ -57,76 +53,6 @@
 #endif
 
 #define USE_UTF8 1
-
-/* platform */
-
-#ifdef K_USE_PTHREAD
-#if defined(__linux__) && !defined(__USE_UNIX98)
-#define __USE_UNIX98 1
-#endif
-#endif
-
-#if defined(HAVE_CONFIG_H) && !defined(HAVE_BZERO)
-#define bzero(s, n) memset(s, 0, n)
-#endif
-
-
-#ifndef PLATAPIFORM_KERNEL
-#include <stdlib.h>
-#include <ctype.h>
-#include <assert.h>
-#include <string.h>
-#else
-#include "platform_lkm.h"
-#endif /* PLATAPIFORM_KERNEL */
-
-#include <stddef.h>
-#include <stdarg.h>
-
-#ifndef __KERNEL__
-#include <limits.h>
-#include <float.h>
-#ifdef HAVE_STDBOOL_H
-#include <stdbool.h>
-#else
-#include "konoha3/stdbool.h"
-#endif
-#include <stdint.h>
-#endif
-
-#ifdef __GCC__
-#define __PRINTFMT(idx1, idx2) __attribute__((format(printf, idx1, idx2)))
-#else
-#define __PRINTFMT(idx1, idx2)
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(disable:4013)
-#pragma warning(disable:4018)
-#pragma warning(disable:4033)
-#pragma warning(disable:4100)
-#pragma warning(disable:4101)
-#pragma warning(disable:4114)
-#pragma warning(disable:4127)
-#pragma warning(disable:4201)
-#pragma warning(disable:4204)
-#pragma warning(disable:4431)
-#pragma warning(disable:4820)
-
-#define inline __inline
-typedef long long ssize_t;
-#define __func__ __FUNCTION__
-#endif
-
-/*
- * differ prototype definition in *BSD and linux.
- */
-
-#if defined(__NetBSD__)
-#define ICONV_INBUF_CONST const
-#else
-#define ICONV_INBUF_CONST
-#endif
 
 /* ------------------------------------------------------------------------ */
 /* datatype */
@@ -176,6 +102,7 @@ typedef bool             kbool_t;
 typedef enum {
 	K_FAILED, K_BREAK, K_CONTINUE
 } kstatus_t;
+
 
 typedef intptr_t         kint_t;
 typedef uintptr_t        kuint_t;
@@ -965,9 +892,8 @@ struct KRuntimeContextVar {
 	KonohaStack               *topStack;
 };
 
-// module
+// model
 #define KRuntimeModel_MAXSIZE    16
-//#define MOD_gc         1
 #define ParserModelIndex     0
 #define CommonModelIndex     1
 
@@ -1006,7 +932,7 @@ struct KModelContext {
 	kObjectVar  *asObjectVar; \
 	const struct kNumberVar     *asNumber;\
 	kBoolean    *asBoolean;\
-	kInt        *asInt; \
+	kInt        *asInt;\
 	kString     *asString;\
 	kArray      *asArray;\
 	kMethod     *asMethod;\
