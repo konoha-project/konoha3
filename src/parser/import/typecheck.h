@@ -138,7 +138,7 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KC
 		return expr;
 	}
 	if(typedClass->typeId == KType_void) {
-		if(!FLAG_is(pol, TypeCheckPolicy_AllowVoid)) {
+		if(!KHalfFlag_Is(pol, TypeCheckPolicy_AllowVoid)) {
 			expr = KLIB MessageNode(kctx, expr, NULL, ns, ErrTag, "void is unacceptable");
 		}
 		return expr;
@@ -146,7 +146,7 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KC
 	if(KClass_Is(TypeVar, typedClass)) {
 		return KLIB MessageNode(kctx, expr, NULL, ns, ErrTag, "not type variable %s", KClass_text(typedClass));
 	}
-	if(reqClass->typeId == KType_var || typedClass == reqClass || FLAG_is(pol, TypeCheckPolicy_NoCheck)) {
+	if(reqClass->typeId == KType_var || typedClass == reqClass || KHalfFlag_Is(pol, TypeCheckPolicy_NoCheck)) {
 		return expr;
 	}
 	if(KClass_Isa(kctx, typedClass, reqClass)) {
@@ -157,7 +157,7 @@ static kNode *TypeCheckNode(KonohaContext *kctx, kNode *expr, kNameSpace *ns, KC
 	}
 	kMethod *mtd = kNameSpace_GetCoercionMethodNULL(kctx, ns, typedClass, reqClass);
 	if(mtd != NULL) {
-		if(kMethod_Is(Coercion, mtd) || FLAG_is(pol, TypeCheckPolicy_Coercion)) {
+		if(kMethod_Is(Coercion, mtd) || KHalfFlag_Is(pol, TypeCheckPolicy_Coercion)) {
 			return new_MethodNode(kctx, ns, reqClass, mtd, 1, expr);
 		}
 		if(kNameSpace_Is(ImplicitCoercion, ns)) {

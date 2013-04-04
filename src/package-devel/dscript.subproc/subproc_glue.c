@@ -80,27 +80,27 @@ typedef struct {
 } subprocData_t;                           // subproc data structure
 */
 
-#define SUBPROC_CLOSEFDS         ((kshortflag_t)(1<<0))
-#define SUBPROC_BACKGROUND       ((kshortflag_t)(1<<1))
-#define SUBPROC_SHELL            ((kshortflag_t)(1<<2))
+#define SUBPROC_CLOSEFDS         ((khalfflag_t)(1<<0))
+#define SUBPROC_BACKGROUND       ((khalfflag_t)(1<<1))
+#define SUBPROC_SHELL            ((khalfflag_t)(1<<2))
 
-#define SUBPROC_IsCloseFds(P)    (FLAG_is((P)->flag, SUBPROC_CLOSEFDS))
-#define SUBPROC_IsBackground(P)  (FLAG_is((P)->flag, SUBPROC_BACKGROUND))
-#define SUBPROC_IsShell(P)       (FLAG_is((P)->flag, SUBPROC_SHELL))
+#define SUBPROC_IsCloseFds(P)    (KHalfFlag_Is((P)->flag, SUBPROC_CLOSEFDS))
+#define SUBPROC_IsBackground(P)  (KHalfFlag_Is((P)->flag, SUBPROC_BACKGROUND))
+#define SUBPROC_IsShell(P)       (KHalfFlag_Is((P)->flag, SUBPROC_SHELL))
 
-#define SUBPROC_SetCloseFds(P)   (FLAG_Set((P)->flag, SUBPROC_CLOSEFDS))
-#define SUBPROC_SetBackground(P) (FLAG_Set((P)->flag, SUBPROC_BACKGROUND))
-#define SUBPROC_SetShell(P)      (FLAG_Set((P)->flag, SUBPROC_SHELL))
+#define SUBPROC_SetCloseFds(P)   (KHalfFlag_Set((P)->flag, SUBPROC_CLOSEFDS))
+#define SUBPROC_SetBackground(P) (KHalfFlag_Set((P)->flag, SUBPROC_BACKGROUND))
+#define SUBPROC_SetShell(P)      (KHalfFlag_Set((P)->flag, SUBPROC_SHELL))
 
-//#define SUBPROC_unsetCloseFds(P) (FLAG_unset((P)->flag, SUBPROC_CLOSEFDS))
-#define SUBPROC_unsetBackground(P) (FLAG_unset((P)->flag, SUBPROC_BACKGROUND))
-//#define SUBPROC_unsetShell(P) (FLAG_unset((P)->flag, SUBPROC_SHELL))
+//#define SUBPROC_unsetCloseFds(P) (KHalfFlag_Unset((P)->flag, SUBPROC_CLOSEFDS))
+#define SUBPROC_unsetBackground(P) (KHalfFlag_Unset((P)->flag, SUBPROC_BACKGROUND))
+//#define SUBPROC_unsetShell(P) (KHalfFlag_Unset((P)->flag, SUBPROC_SHELL))
 
 typedef struct kSubprocVar kSubproc;
 
 struct kSubprocVar {
 	kObjectHeader h;
-	kshortflag_t   flag;
+	khalfflag_t   flag;
 	//	kbool_t shell;                     // shell mode [true/false]
 	//	kbool_t closefds;                  // closefds   [true/false]
 	//	kbool_t bg;                        // bg mode    [true/false]
@@ -133,15 +133,15 @@ struct kSubprocVar {
 //#define kSubProc_is(P, S)            (KFlag_Is(uintptr_t, (S)->h.magicflag, kSubProcFlag_##P))
 #define kSubProc_Set(P, S, T)         KFlag_Set(uintptr_t,(S)->h.magicflag, kSubProcFlag_##P, T)
 
-//#define kSubProcFlag_CLOSEFDS         ((kshortflag_t)(1<<0))
-#define kSubProcFlag_RunningBackground       ((kshortflag_t)(1<<1))
-//#define kSubProcFlag_SHELL            ((kshortflag_t)(1<<2))
+//#define kSubProcFlag_CLOSEFDS         ((khalfflag_t)(1<<0))
+#define kSubProcFlag_RunningBackground       ((khalfflag_t)(1<<1))
+//#define kSubProcFlag_SHELL            ((khalfflag_t)(1<<2))
 
 typedef struct kSubProcVar kSubProc;
 
 struct kSubProcVar {
 	kObjectHeader h;
-	kshortflag_t   flag;
+	khalfflag_t   flag;
 	kString *Command;
 	kArray  *ArgumentList;
 	kFile   *InNULL;
@@ -452,7 +452,7 @@ static kbool_t checkExecutablePath(KonohaContext *kctx, const char *path, const 
 //			return S_TIMEOUT;
 //		}
 //	}
-//	if(!FLAG_is(flag, SUBPROC_BACKGROUND)/*bg != 1*/) {
+//	if(!KHalfFlag_Is(flag, SUBPROC_BACKGROUND)/*bg != 1*/) {
 //		// SIGINT registration
 //		fgPid = pid;
 //		keyInt_oldset = signal(SIGINT, keyIntHandler);
@@ -484,7 +484,7 @@ static kbool_t checkExecutablePath(KonohaContext *kctx, const char *path, const 
 //			signal(SIGALRM, SIG_DFL);
 //		}
 //	}
-//	if(FLAG_is(flag, SUBPROC_BACKGROUND)/*bg != 1*/) {
+//	if(KHalfFlag_Is(flag, SUBPROC_BACKGROUND)/*bg != 1*/) {
 //		// SIGINT release
 //		if(keyInt_oldset != SIG_ERR) {
 //			ret = signal(SIGINT, keyInt_oldset);
@@ -1095,7 +1095,7 @@ static int subproc_Popen(KonohaContext *kctx, kString* command, kSubproc *p, int
  * @return termination status of a child process
  */
 
-static int subproc_wait(KonohaContext *kctx, int pid, kshortflag_t flag, int timeout, int *status ) {
+static int subproc_wait(KonohaContext *kctx, int pid, khalfflag_t flag, int timeout, int *status ) {
 
 #if defined(__linux__)
 	__sighandler_t alarm_oldset  = SIG_ERR;
@@ -1126,7 +1126,7 @@ static int subproc_wait(KonohaContext *kctx, int pid, kshortflag_t flag, int tim
 			return S_TIMEOUT;
 		}
 	}
-	if(!FLAG_is(flag, SUBPROC_BACKGROUND)/*bg != 1*/) {
+	if(!KHalfFlag_Is(flag, SUBPROC_BACKGROUND)/*bg != 1*/) {
 		// SIGINT registration
 		fgPid = pid;
 		keyInt_oldset = signal(SIGINT, keyIntHandler);
@@ -1158,7 +1158,7 @@ static int subproc_wait(KonohaContext *kctx, int pid, kshortflag_t flag, int tim
 			signal(SIGALRM, SIG_DFL);
 		}
 	}
-	if(FLAG_is(flag, SUBPROC_BACKGROUND)/*bg != 1*/) {
+	if(KHalfFlag_Is(flag, SUBPROC_BACKGROUND)/*bg != 1*/) {
 		// SIGINT release
 		if(keyInt_oldset != SIG_ERR) {
 			ret = signal(SIGINT, keyInt_oldset);

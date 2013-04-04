@@ -121,9 +121,9 @@ static uint32_t fnv1a(const char *p, uint32_t len)
 	return hash;
 }
 
-static kushort_t String_hashCode(KonohaContext *kctx, kString *self)
+static kuhalfword_t String_hashCode(KonohaContext *kctx, kString *self)
 {
-	kushort_t hash = kObject_HashCode(self);
+	kuhalfword_t hash = kObject_HashCode(self);
 	if(hash != 0)
 		return hash;
 	hash = fnv1a(kString_text(self), kString_size(self));

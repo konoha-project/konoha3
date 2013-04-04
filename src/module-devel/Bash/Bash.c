@@ -784,7 +784,7 @@ static void BashBuilder_EmitExtendFunctionCode(KonohaContext *kctx, KBuilder *bu
 
 static kbool_t BashBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder, KClass *kclass)
 {
-	kushort_t i;
+	kuhalfword_t i;
 	KClassField *field = kclass->fieldItems;
 	kObject *constList = kclass->defaultNullValue;
 	BashBuilder *bashBuilder = (BashBuilder *)builder;

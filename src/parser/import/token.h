@@ -279,8 +279,8 @@ static int TokenizeCStyleBlockComment(KonohaContext *kctx, kTokenVar *tk, Tokeni
 	int ch, prev = 0, level = 1, pos = tok_start + 2;
 	/* @#nnnn is a notation to reset its line number */
 	if(tokenizer->source[pos] == '@' && tokenizer->source[pos+1] == '#' && isdigit(tokenizer->source[pos+2])) {
-		tokenizer->currentLine >>= (sizeof(kshort_t)*8);
-		tokenizer->currentLine = (tokenizer->currentLine<<(sizeof(kshort_t)*8))  | (kshort_t)strtoll(tokenizer->source + pos + 2, NULL, 10);
+		tokenizer->currentLine >>= (sizeof(khalfword_t)*8);
+		tokenizer->currentLine = (tokenizer->currentLine<<(sizeof(khalfword_t)*8))  | (khalfword_t)strtoll(tokenizer->source + pos + 2, NULL, 10);
 	}
 	for(; (ch = tokenizer->source[pos]) != 0; pos++) {
 		if(ch == '\n') {

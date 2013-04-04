@@ -141,7 +141,7 @@ static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, ktypea
 
 static kbool_t KClass_AddField(KonohaContext *kctx, KClass *ct, ktypeattr_t typeattr, ksymbol_t sym)
 {
-	kushort_t pos = ct->fieldsize;
+	kuhalfword_t pos = ct->fieldsize;
 	if(unlikely(ct->classMethodList == K_EMPTYARRAY)) {
 		((KClassVar *)ct)->classMethodList = new_(MethodArray, 8, OnGlobalConstList);
 		/*FIXME WriteBarrier */
@@ -160,21 +160,21 @@ static kbool_t KClass_AddField(KonohaContext *kctx, KClass *ct, ktypeattr_t type
 			KFieldSet(o, o->fieldObjectItems[pos], KLIB Knull(kctx, KClass_(typeattr)));
 			definedClass->fieldItems[pos].typeAttr = typeattr | KTypeAttr_Boxed;
 		}
-		if(1/*FLAG_is(flag, kField_Getter)*/) {
+		if(1/*KHalfFlag_Is(flag, kField_Getter)*/) {
 			kMethod *mtd = new_FieldGetter(kctx, _GcStack, definedClass->typeId, sym, KTypeAttr_Unmask(typeattr), pos);
 			KLIB kArray_Add(kctx, ct->classMethodList, mtd);
 		}
-		if(!KTypeAttr_Is(ReadOnly, typeattr)/*FLAG_is(flag, kField_Setter)*/) {
+		if(!KTypeAttr_Is(ReadOnly, typeattr)/*KHalfFlag_Is(flag, kField_Setter)*/) {
 			kMethod *mtd = new_FieldSetter(kctx, _GcStack, definedClass->typeId, sym, KTypeAttr_Unmask(typeattr), pos);
 			KLIB kArray_Add(kctx, ct->classMethodList, mtd);
 		}
 	}
 	else {
-		if(1/*FLAG_is(flag, kField_Getter)*/) {
+		if(1/*KHalfFlag_Is(flag, kField_Getter)*/) {
 			kMethod *mtd = new_PrototypeGetter(kctx, _GcStack, ct->typeId, sym, KTypeAttr_Unmask(typeattr));
 			KLIB kArray_Add(kctx, ct->classMethodList, mtd);
 		}
-		if(!KTypeAttr_Is(ReadOnly, typeattr)/*FLAG_is(flag, kField_Setter)*/) {
+		if(!KTypeAttr_Is(ReadOnly, typeattr)/*KHalfFlag_Is(flag, kField_Setter)*/) {
 			kMethod *mtd = new_PrototypeSetter(kctx, _GcStack, ct->typeId, sym, KTypeAttr_Unmask(typeattr));
 			KLIB kArray_Add(kctx, ct->classMethodList, mtd);
 		}

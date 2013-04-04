@@ -383,9 +383,9 @@ static kParam *new_Param(KonohaContext *kctx, kArray *gcstack, ktypeattr_t rtype
 	return pa;
 }
 
-static uintptr_t hashparamdom(kushort_t psize, const kparamtype_t *p)
+static uintptr_t hashparamdom(kuhalfword_t psize, const kparamtype_t *p)
 {
-	kushort_t i;
+	kuhalfword_t i;
 	uintptr_t hcode = 0;
 	for(i = 0; i < psize; i++) {
 		hcode = p[i].typeAttr + (31 * hcode);
@@ -393,9 +393,9 @@ static uintptr_t hashparamdom(kushort_t psize, const kparamtype_t *p)
 	return hcode;
 }
 
-static uintptr_t hashparam(ktypeattr_t rtype, kushort_t psize, const kparamtype_t *p)
+static uintptr_t hashparam(ktypeattr_t rtype, kuhalfword_t psize, const kparamtype_t *p)
 {
-	kushort_t i;
+	kuhalfword_t i;
 	uintptr_t hcode = rtype;
 	for(i = 0; i < psize; i++) {
 		hcode = (p[i].typeAttr + p[i].name) + (31 * hcode);
@@ -403,10 +403,10 @@ static uintptr_t hashparam(ktypeattr_t rtype, kushort_t psize, const kparamtype_
 	return hcode;
 }
 
-static kbool_t equalsParamDom(ktypeattr_t rtype, kushort_t psize, const kparamtype_t *p, kParam *pa)
+static kbool_t equalsParamDom(ktypeattr_t rtype, kuhalfword_t psize, const kparamtype_t *p, kParam *pa)
 {
 	if(psize == pa->psize) {
-		kushort_t i;
+		kuhalfword_t i;
 		for(i = 0; i < psize; i++) {
 			if(p[i].typeAttr != pa->paramtypeItems[i].typeAttr) return false;
 		}
@@ -415,10 +415,10 @@ static kbool_t equalsParamDom(ktypeattr_t rtype, kushort_t psize, const kparamty
 	return false;
 }
 
-static kbool_t equalsParam(ktypeattr_t rtype, kushort_t psize, const kparamtype_t *p, kParam *pa)
+static kbool_t equalsParam(ktypeattr_t rtype, kuhalfword_t psize, const kparamtype_t *p, kParam *pa)
 {
 	if(rtype == pa->rtype && psize == pa->psize) {
-		kushort_t i;
+		kuhalfword_t i;
 		for(i = 0; i < psize; i++) {
 			if(p[i].typeAttr != pa->paramtypeItems[i].typeAttr || p[i].name != pa->paramtypeItems[i].name) return false;
 		}
@@ -427,9 +427,9 @@ static kbool_t equalsParam(ktypeattr_t rtype, kushort_t psize, const kparamtype_
 	return false;
 }
 
-typedef kbool_t (*equalsP)(ktypeattr_t rtype, kushort_t psize, const kparamtype_t *p, kParam *pa);
+typedef kbool_t (*equalsP)(ktypeattr_t rtype, kuhalfword_t psize, const kparamtype_t *p, kParam *pa);
 
-static kparamId_t KHashMap_getparamid(KonohaContext *kctx, KHashMap *kmp, kArray *list, uintptr_t hcode, equalsP f, ktypeattr_t rtype, kushort_t psize, const kparamtype_t *p)
+static kparamId_t KHashMap_getparamid(KonohaContext *kctx, KHashMap *kmp, kArray *list, uintptr_t hcode, equalsP f, ktypeattr_t rtype, kuhalfword_t psize, const kparamtype_t *p)
 {
 	KHashMapEntry *e = KLIB KHashMap_get(kctx, kmp, hcode);
 	while(e != NULL) {
@@ -446,7 +446,7 @@ static kparamId_t KHashMap_getparamid(KonohaContext *kctx, KHashMap *kmp, kArray
 	return (kparamId_t)paramid;
 }
 
-static kparamId_t Kparam(KonohaContext *kctx, ktypeattr_t rtype, kushort_t psize, const kparamtype_t *p)
+static kparamId_t Kparam(KonohaContext *kctx, ktypeattr_t rtype, kuhalfword_t psize, const kparamtype_t *p)
 {
 	uintptr_t hcode = hashparam(rtype, psize, p);
 	KLock(kctx->share->paramMutex);
@@ -455,7 +455,7 @@ static kparamId_t Kparam(KonohaContext *kctx, ktypeattr_t rtype, kushort_t psize
 	return param;
 }
 
-static kparamId_t Kparamdom(KonohaContext *kctx, kushort_t psize, const kparamtype_t *p)
+static kparamId_t Kparamdom(KonohaContext *kctx, kuhalfword_t psize, const kparamtype_t *p)
 {
 	uintptr_t hcode = hashparamdom(psize, p);
 	KLock(kctx->share->paramMutex);
@@ -511,7 +511,7 @@ static kMethodVar* new_kMethod(KonohaContext *kctx, kArray *gcstack, uintptr_t f
 	return mtd;
 }
 
-static kParam* kMethod_SetParam(KonohaContext *kctx, kMethod *mtd_, ktypeattr_t rtype, kushort_t psize, const kparamtype_t *p)
+static kParam* kMethod_SetParam(KonohaContext *kctx, kMethod *mtd_, ktypeattr_t rtype, kuhalfword_t psize, const kparamtype_t *p)
 {
 	kparamId_t paramId = Kparam(kctx, rtype, psize, p);
 	if(mtd_ != NULL) {
@@ -785,7 +785,7 @@ static KClass *Generics_realtype(KonohaContext *kctx, KClass *ct, KClass *self)
 {
 	//DBG_P("trying resolve generic type: %s %s", KClass_text(ct), KClass_text(self));
 	kParam *param = KClass_cparam(ct);
-	kushort_t i;
+	kuhalfword_t i;
 	kparamtype_t *p = ALLOCA(kparamtype_t, param->psize);
 	for(i = 0; i < param->psize; i++) {
 		KClass *cParam = KClass_(param->paramtypeItems[i].typeAttr);
@@ -800,7 +800,7 @@ static KClass *Func_realtype(KonohaContext *kctx, KClass *ct, KClass *self)
 	KClass *cReturn = KClass_(ct->p0);
 	ktypeattr_t rtype = cReturn->realtype(kctx, cReturn, self)->typeId;
 	kParam *param = KClass_cparam(ct);
-	kushort_t i;
+	kuhalfword_t i;
 	kparamtype_t *p = ALLOCA(kparamtype_t, param->psize);
 	for(i = 0; i < param->psize; i++) {
 		KClass *cParam = KClass_(param->paramtypeItems[i].typeAttr);
@@ -828,7 +828,7 @@ static void checkTypeVar(KonohaContext *kctx, KClassVar *newct, ktypeattr_t rtyp
 	}
 }
 
-static KClass *KClass_Generics(KonohaContext *kctx, KClass *ct, ktypeattr_t rtype, kushort_t psize, kparamtype_t *p)
+static KClass *KClass_Generics(KonohaContext *kctx, KClass *ct, ktypeattr_t rtype, kuhalfword_t psize, kparamtype_t *p)
 {
 	kparamId_t paramdom = Kparamdom(kctx, psize, p);
 	KClass *ct0 = KClass_(ct->baseTypeId);

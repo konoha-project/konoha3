@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (c) 2012-2013, the Konoha project authors. All rights reserved.
+ * Copyright (c) 2012, the Konoha project authors. All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -22,21 +22,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <stdio.h>
-#include "konoha3.h"
+#ifndef OBSOLETE_H_
+#define OBSOLETE_H_
 
-int main(int argc, const char *argv[])
-{
-    assert(sizeof(kObject) <= 64);
-    assert(sizeof(KMethodFunc) == sizeof(void *));
-    assert(sizeof(float) <= sizeof(void *));
-    assert(sizeof(kint_t) == sizeof(kfloat_t));
-    assert(sizeof(kint_t) == sizeof(void *));
-    assert(sizeof(KonohaStack) == sizeof(krbp_t) * 2);
-    assert(sizeof(krbp_t) == sizeof(void *));
-    assert(sizeof(intptr_t) == sizeof(kint_t));
-    assert(sizeof(khalfword_t) * 2 == sizeof(intptr_t));
-    fprintf(stderr, "%d\n", (int)sizeof(kObject));
-    fprintf(stderr, "%d\n", (int)sizeof(KClass));
-    return 0;
-}
+typedef enum {  /* Deplicated */
+	K_FAILED, K_BREAK, K_CONTINUE
+} kstatus_t;
+
+
+#endif /* OBSOLETE_H_ */

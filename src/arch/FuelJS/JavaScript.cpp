@@ -785,7 +785,7 @@ static void JSBuilder_EmitExtendFunctionCode(KonohaContext *kctx, KBuilder *buil
 
 static kbool_t JSBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder, KClass *kclass)
 {
-	kushort_t i;
+	kuhalfword_t i;
 	KClassField *field = kclass->fieldItems;
 	kObject *constList = kclass->defaultNullValue;
 	for(i = 0; i < kclass->fieldsize; ++i) {

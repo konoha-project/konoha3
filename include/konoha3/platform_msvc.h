@@ -498,7 +498,7 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 		isSuccessfullyLoading = true;
 		while(!feof(fp)) {
 			kfileline_t rangeheadline = uline;
-			kshort_t sline = (kshort_t)uline;
+			khalfword_t sline = (khalfword_t)uline;
 			const char *script;
 			bzero(simpleBuffer.buffer, simpleBuffer.allocSize);
 			simpleBuffer.size = 0;
@@ -825,7 +825,7 @@ static void UI_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfilelin
 	const char *kLF = isNewLine ? "\n" : "";
 	if(pline > 0) {
 		const char *file = KFileLine_textFileName(pline);
-		PLATAPI printf_i("%s - (%s:%d) %s%s%s" , beginTag, PLATAPI shortFilePath(file), (kushort_t)pline, msg, kLF, endTag);
+		PLATAPI printf_i("%s - (%s:%d) %s%s%s" , beginTag, PLATAPI shortFilePath(file), (kuhalfword_t)pline, msg, kLF, endTag);
 	}
 	else {
 		PLATAPI printf_i("%s%s%s%s", beginTag,  msg, kLF, endTag);
@@ -890,7 +890,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, kException *e, KonohaS
 		unsigned i;
 		KClass *cThis;
 		kParam *param;
-		PLATAPI printf_i(" [%ld] (%s:%d) %s.%s%s(", (sfp - kctx->stack->stack), file, (kushort_t)uline, kMethod_Fmt3(mtd));
+		PLATAPI printf_i(" [%ld] (%s:%d) %s.%s%s(", (sfp - kctx->stack->stack), file, (kuhalfword_t)uline, kMethod_Fmt3(mtd));
 		cThis = KClass_(mtd->typeId);
 		if(!KClass_Is(UnboxType, cThis)) {
 			cThis = kObject_class(sfp[0].asObject);

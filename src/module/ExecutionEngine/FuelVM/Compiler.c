@@ -484,8 +484,8 @@ static kbool_t FuelVM_VisitLocalNode(KonohaContext *kctx, KBuilder *builder, kNo
 static kbool_t FuelVM_VisitFieldNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
 	INode *Node;
-	kshort_t index  = (kshort_t)expr->index;
-	kshort_t xindex = (kshort_t)(expr->index >> (sizeof(kshort_t)*8));
+	khalfword_t index  = (khalfword_t)expr->index;
+	khalfword_t xindex = (khalfword_t)(expr->index >> (sizeof(khalfword_t)*8));
 	enum TypeId Type = ConvertToTypeId(kctx, expr->typeAttr);
 	if((Node = IRBuilder_FindLocalVarByHash(BLD(builder), TYPE_Object, index)) == 0) {
 		Node = CreateLocal(BLD(builder), TYPE_Object);
@@ -626,8 +626,8 @@ static kbool_t FuelVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 	else{
 		assert(kNode_node(left) == KNode_Field);
 		KLIB VisitNode(kctx, builder, right, thunk);
-		kshort_t index  = (kshort_t)left->index;
-		kshort_t xindex = (kshort_t)(left->index >> (sizeof(kshort_t)*8));
+		khalfword_t index  = (khalfword_t)left->index;
+		khalfword_t xindex = (khalfword_t)(left->index >> (sizeof(khalfword_t)*8));
 
 		INode *Left;
 		if((Left = IRBuilder_FindLocalVarByHash(BLD(builder), TYPE_Object, index)) == 0) {

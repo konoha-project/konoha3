@@ -146,7 +146,7 @@ static void ObjectField_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor
 	}
 }
 
-static kshortflag_t kNode_ParseClassFlag(KonohaContext *kctx, kNode *stmt, kshortflag_t cflag)
+static khalfflag_t kNode_ParseClassFlag(KonohaContext *kctx, kNode *stmt, khalfflag_t cflag)
 {
 	static KFlagSymbolData ClassDeclFlag[] = {
 		{KClassFlag_Private}, {KClassFlag_Singleton}, {KClassFlag_Immutable},
@@ -159,10 +159,10 @@ static kshortflag_t kNode_ParseClassFlag(KonohaContext *kctx, kNode *stmt, kshor
 		ClassDeclFlag[3].symbol = KSymbol_("@Prototype");
 		ClassDeclFlag[4].symbol = KSymbol_("@Interface");
 	}
-	return (kshortflag_t)KLIB kNode_ParseFlag(kctx, stmt, ClassDeclFlag, cflag);
+	return (khalfflag_t)KLIB kNode_ParseFlag(kctx, stmt, ClassDeclFlag, cflag);
 }
 
-static KClassVar* kNameSpace_DefineClassName(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, KTraceInfo *trace)
+static KClassVar* kNameSpace_DefineClassName(KonohaContext *kctx, kNameSpace *ns, khalfflag_t cflag, kString *name, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defNewClass = {0};
 	defNewClass.cflag         = cflag | KClassFlag_Nullable;
@@ -352,7 +352,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	KClassVar *definedClass = (KClassVar *)KLIB kNameSpace_GetClassByFullName(kctx, ns, kString_text(tokenClassName->text), kString_size(tokenClassName->text), NULL);
 	const int isNewlyDefinedClass = (definedClass == NULL);
 	if(isNewlyDefinedClass) {
-		kshortflag_t cflag = kNode_ParseClassFlag(kctx, stmt, KClassFlag_Virtual);
+		khalfflag_t cflag = kNode_ParseClassFlag(kctx, stmt, KClassFlag_Virtual);
 		KMakeTraceUL(trace, sfp, kNode_uline(stmt));
 		definedClass = kNameSpace_DefineClassName(kctx, ns, cflag, tokenClassName->text, trace);
 	}

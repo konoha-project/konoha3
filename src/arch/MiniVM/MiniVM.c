@@ -76,8 +76,8 @@ typedef enum MiniVMOpCode {
 
 typedef struct {
 	const char *name;
-	kshortflag_t   flag;
-	kushort_t argsize;
+	khalfflag_t   flag;
+	kuhalfword_t argsize;
 	KVirtualCodeType arg1;
 	KVirtualCodeType arg2;
 	KVirtualCodeType arg3;
@@ -98,7 +98,7 @@ static void DumpOpArgument(KonohaContext *kctx, KBuffer *wb, KVirtualCodeType ty
 		break;
 	case VMT_UL: {
 		kfileline_t uline = (kfileline_t)c->data[i];
-		KLIB KBuffer_printf(kctx, wb, " (%s:%d)", PLATAPI shortFilePath(KFileLine_textFileName(uline)), (kshort_t)uline);
+		KLIB KBuffer_printf(kctx, wb, " (%s:%d)", PLATAPI shortFilePath(KFileLine_textFileName(uline)), (khalfword_t)uline);
 		break;
 	}
 	case VMT_R: {
@@ -106,8 +106,8 @@ static void DumpOpArgument(KonohaContext *kctx, KBuffer *wb, KVirtualCodeType ty
 		break;
 	}
 	case VMT_FX: {
-		kshort_t index  = (kshort_t)c->data[i];
-		kshort_t xindex = (kshort_t)(c->data[i] >> (sizeof(kshort_t)*8));
+		khalfword_t index  = (khalfword_t)c->data[i];
+		khalfword_t xindex = (khalfword_t)(c->data[i] >> (sizeof(khalfword_t)*8));
 		KLIB KBuffer_printf(kctx, wb, " sfp[%d,r=%d][%d]", (int)index/2, (int)index, (int)xindex);
 		break;
 	}
@@ -919,8 +919,8 @@ static kbool_t MiniVM_VisitFieldNode(KonohaContext *kctx, KBuilder *builder, kNo
 	intptr_t src;
 	KClass *ty;
 
-	kshort_t index  = (kshort_t)(node->index);
-	kshort_t xindex = (kshort_t)(node->index >> (sizeof(kshort_t)*8));
+	khalfword_t index  = (khalfword_t)(node->index);
+	khalfword_t xindex = (khalfword_t)(node->index >> (sizeof(khalfword_t)*8));
 	assert(IS_Token(node->TermToken));
 	symbol = node->TermToken->symbol;
 	if((src = MiniVMBuilder_FindLocalVar(kctx, builder, symbol, KType_Object, index)) == -1) {
@@ -1067,8 +1067,8 @@ static kbool_t MiniVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 		builder->Value = dst;
 	}
 	else {
-		kshort_t index  = (kshort_t)left->index;
-		kshort_t xindex = (kshort_t)(left->index >> (sizeof(kshort_t)*8));
+		khalfword_t index  = (khalfword_t)left->index;
+		khalfword_t xindex = (khalfword_t)(left->index >> (sizeof(khalfword_t)*8));
 		KClass *lhsClass = KClass_(left->typeAttr);
 		KClass *rhsClass = KClass_(right->typeAttr);
 		assert(kNode_node(left) == KNode_Field);
@@ -1184,13 +1184,13 @@ static kbool_t CollectLocalVar_VisitForNode(KVISITOR_PARAM)
 
 static kbool_t CollectLocalVar_VisitLocalNode(KVISITOR_PARAM)
 {
-	LOCAL(node->typeAttr, (kshort_t)(node->index));
+	LOCAL(node->typeAttr, (khalfword_t)(node->index));
 	return true;
 }
 
 static kbool_t CollectLocalVar_VisitFieldNode(KVISITOR_PARAM)
 {
-	LOCAL(KType_Object, (kshort_t)(node->index));
+	LOCAL(KType_Object, (khalfword_t)(node->index));
 	return true;
 }
 
@@ -1223,7 +1223,7 @@ static kbool_t CollectLocalVar_VisitAssignNode(KVISITOR_PARAM)
 		LOCAL(left->typeAttr, left->index);
 		KLIB VisitNode(kctx, builder, right, thunk);
 	} else{
-		LOCAL(KType_Object, (kshort_t)left->index);
+		LOCAL(KType_Object, (khalfword_t)left->index);
 		KLIB VisitNode(kctx, builder, right, thunk);
 	}
 	return true;

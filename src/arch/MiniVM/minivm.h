@@ -41,15 +41,15 @@ typedef struct {
 #define OP_(T)  NULL, 0, OPCODE_##T, 0
 #define KCODE_HEAD\
 	void *codeaddr;\
-	kushort_t count;\
-	kushort_t opcode;\
+	kuhalfword_t count;\
+	kuhalfword_t opcode;\
 	kfileline_t line
 
 #else
 #define OP_(T)  OPCODE_##T, 0
 #define KCODE_HEAD\
-	kushort_t opcode;\
-	kushort_t line
+	kuhalfword_t opcode;\
+	kuhalfword_t line
 
 #endif/*USE_DIRECT_THREADED_CODE*/
 #endif

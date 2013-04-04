@@ -209,11 +209,11 @@ static int FindOperator(KonohaContext *kctx, kNode *node, kArray *tokenList, int
 				if(kSyntax_Is(TypeSuffix, syntax) && typeToken != NULL) {
 					continue;
 				}
-				if(precedence < syntax->precedence_op2 || (precedence == syntax->precedence_op2 && !(FLAG_is(syntax->flag, SYNFLAG_NodeLeftJoinOp2)) )) {
+				if(precedence < syntax->precedence_op2 || (precedence == syntax->precedence_op2 && !(KHalfFlag_Is(syntax->flag, SYNFLAG_NodeLeftJoinOp2)) )) {
 					precedence = syntax->precedence_op2;
 					opIdx = i;
 				}
-				if(!FLAG_is(syntax->flag, SYNFLAG_Suffix)) {
+				if(!KHalfFlag_Is(syntax->flag, SYNFLAG_Suffix)) {
 					isPrePosition = true;
 				}
 			}

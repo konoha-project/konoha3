@@ -239,8 +239,8 @@ static void kNode_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *
 		KLIB KBuffer_printf(kctx, wb, "local sfp[%d]", (int)expr->index);
 	}
 	else if(kNode_node(expr) == KNode_Field) {
-		kshort_t index  = (kshort_t)expr->index;
-		kshort_t xindex = (kshort_t)(expr->index >> (sizeof(kshort_t)*8));
+		khalfword_t index  = (khalfword_t)expr->index;
+		khalfword_t xindex = (khalfword_t)(expr->index >> (sizeof(khalfword_t)*8));
 		KLIB KBuffer_printf(kctx, wb, "field sfp[%d][%d]", (int)index, (int)xindex);
 	}
 	if(IS_Array(expr->NodeList)) {

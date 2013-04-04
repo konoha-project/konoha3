@@ -41,7 +41,7 @@ static void kException_AddStackTrace(KonohaContext *kctx, KonohaStack *sfp, kExc
 	kfileline_t uline = sfp[K_RTNIDX].calledFileLine;
 	if(uline > 0) {
 		const char *file = KFileLine_textFileName(uline);
-		KLIB KBuffer_printf(kctx, &wb, "(%s:%d) %s.%s%s" , PLATAPI shortFilePath(file), (kushort_t)uline, kMethod_Fmt3(mtd));
+		KLIB KBuffer_printf(kctx, &wb, "(%s:%d) %s.%s%s" , PLATAPI shortFilePath(file), (kuhalfword_t)uline, kMethod_Fmt3(mtd));
 	}
 //	int i = 0, psize = kMethod_ParamSize(mtd);
 //	kParam *pa = kMethod_GetParam(mtd);

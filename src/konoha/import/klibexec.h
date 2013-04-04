@@ -521,7 +521,7 @@ static kfileline_t KfileId(KonohaContext *kctx, const char *name, size_t len, in
 	KLock(kctx->share->filepackMutex);
 	kfileline_t uline = KHashMap_getcode(kctx, kctx->share->fileIdMap_KeyOnList, kctx->share->fileIdList, name, len, hcode, spol, def);
 	KUnlock(kctx->share->filepackMutex);
-	return uline << (sizeof(kshort_t) * 8);
+	return uline << (sizeof(khalfword_t) * 8);
 }
 
 static kpackageId_t KpackageId(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
@@ -830,7 +830,7 @@ static int DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 		fault ^= ExternalFault;
 	}
 	if(KFlag_Is(int, fault, SoftwareFault)) {
-		if(PLATAPI DiagnosisModule.DiagnosisCheckSoftwareTestIsPass(kctx, KFileLine_textFileName(trace->pline), (kushort_t)trace->pline)) {
+		if(PLATAPI DiagnosisModule.DiagnosisCheckSoftwareTestIsPass(kctx, KFileLine_textFileName(trace->pline), (kuhalfword_t)trace->pline)) {
 			KFlag_Set(int, fault, SoftwareFault, false);
 		}
 	}

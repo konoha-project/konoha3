@@ -549,7 +549,7 @@ static kNode *TypeVariableNULL(KonohaContext *kctx, kNode *expr, kNameSpace *ns,
 			if(ct->fieldsize > 0) {
 				for(i = ct->fieldsize; i >= 0; i--) {
 					if(ct->fieldItems[i].name == symbol && ct->fieldItems[i].typeAttr != KType_void) {
-						return KLIB kNode_SetVariable(kctx, expr, KNode_Field, ct->fieldItems[i].typeAttr, longid((kshort_t)i, 0));
+						return KLIB kNode_SetVariable(kctx, expr, KNode_Field, ct->fieldItems[i].typeAttr, longid((khalfword_t)i, 0));
 					}
 				}
 			}
@@ -825,7 +825,7 @@ static kMethod* TypeFirstNodeAndLookupMethod(KonohaContext *kctx, kNodeVar *expr
 		if(ct->fieldsize) {
 			for(i = ct->fieldsize; i >= 0; i--) {
 				if(ct->fieldItems[i].name == funcName && KType_IsFunc(ct->fieldItems[i].typeAttr)) {
-					KLIB kNode_SetVariable(kctx, firstNode, KNode_Field, ct->fieldItems[i].typeAttr, longid((kshort_t)i, 0));
+					KLIB kNode_SetVariable(kctx, firstNode, KNode_Field, ct->fieldItems[i].typeAttr, longid((khalfword_t)i, 0));
 					return NULL;
 				}
 			}

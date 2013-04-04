@@ -4631,13 +4631,13 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 
 #define DEFINE_CLASS_CPP(\
 	/*const char * */structname,\
-	/*ktypeattr_t      */typeId,         /*kshortflag_t    */cflag,\
+	/*ktypeattr_t      */typeId,         /*khalfflag_t    */cflag,\
 	/*ktypeattr_t      */baseTypeId,     /*ktypeattr_t         */superTypeId,\
-	/*ktypeattr_t      */rtype,          /*kushort_t       */cparamsize,\
+	/*ktypeattr_t      */rtype,          /*kuhalfword_t       */cparamsize,\
 	/*struct kparamtype_t   **/cparamItems,\
 	/*size_t     */cstruct_size,\
 	/*KClassField   **/fieldItems,\
-	/*kushort_t  */fieldsize,       /*kushort_t */fieldAllocSize,\
+	/*kuhalfword_t  */fieldsize,       /*kuhalfword_t */fieldAllocSize,\
 		init,\
 		reftrace,\
 		free,\
@@ -4650,13 +4650,13 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		isSubType,\
 		realtype) {\
 	/*const char * */structname,\
-	/*ktypeattr_t      */typeId,         /*kshortflag_t    */cflag,\
+	/*ktypeattr_t      */typeId,         /*khalfflag_t    */cflag,\
 	/*ktypeattr_t      */baseTypeId,     /*ktypeattr_t         */superTypeId,\
-	/*ktypeattr_t      */rtype,          /*kushort_t       */cparamsize,\
+	/*ktypeattr_t      */rtype,          /*kuhalfword_t       */cparamsize,\
 	/*struct kparamtype_t   * */cparamItems,\
 	/*size_t     */cstruct_size,\
 	/*KClassField   * */fieldItems,\
-	/*kushort_t  */fieldsize,       /*kushort_t */fieldAllocSize,\
+	/*kuhalfword_t  */fieldsize,       /*kuhalfword_t */fieldAllocSize,\
 		init,\
 		reftrace,\
 		free,\

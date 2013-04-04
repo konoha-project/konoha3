@@ -283,7 +283,7 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 		kSyntaxVar *syn = new_(SyntaxVar, ns, ns->NameSpaceConstList);
 		syn->keyword = syndef->keyword;
 		syn->packageNameSpace = ns;
-		syn->flag = ((kshortflag_t)syndef->flag);
+		syn->flag = ((khalfflag_t)syndef->flag);
 		if(syndef->precedence_op1 > 0) {
 			syn->precedence_op1 = syndef->precedence_op1;
 		}
@@ -291,19 +291,19 @@ static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 			syn->precedence_op2 = syndef->precedence_op2;
 		}
 		if(syndef->parseFunc != NULL) {
-			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CParseFunc)) ? KSugarFunc(ns, syndef->parseMethodFunc) : syndef->parseFunc;
+			kFunc *fo = (KFlag_Is(khalfflag_t, syndef->flag, SYNFLAG_CParseFunc)) ? KSugarFunc(ns, syndef->parseMethodFunc) : syndef->parseFunc;
 			DBG_ASSERT(IS_Func(fo));
 			KFieldInit(ns, syn->ParseFuncNULL, fo);
 		}
 		if(syndef->typeFunc != NULL) {
-			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CTypeFunc)) ? KSugarFunc(ns, syndef->typeMethodFunc) : syndef->typeFunc;
+			kFunc *fo = (KFlag_Is(khalfflag_t, syndef->flag, SYNFLAG_CTypeFunc)) ? KSugarFunc(ns, syndef->typeMethodFunc) : syndef->typeFunc;
 			DBG_ASSERT(IS_Func(fo));
 			KFieldInit(ns, syn->TypeFuncNULL, fo);
 		}
 		if(syndef->tokenChar != 0) {
 			syn->tokenKonohaChar = syndef->tokenChar;
 			DBG_ASSERT(syndef->tokenFunc != NULL);
-			kFunc *fo = (KFlag_Is(kshortflag_t, syndef->flag, SYNFLAG_CTokenFunc)) ? KSugarFunc(ns, syndef->tokenMethodFunc) : syndef->tokenFunc;
+			kFunc *fo = (KFlag_Is(khalfflag_t, syndef->flag, SYNFLAG_CTokenFunc)) ? KSugarFunc(ns, syndef->tokenMethodFunc) : syndef->tokenFunc;
 			DBG_ASSERT(IS_Func(fo));
 			KFieldInit(ns, syn->TokenFuncNULL, fo);
 		}
@@ -355,7 +355,7 @@ static KClass *kNameSpace_DefineClass(KonohaContext *kctx, kNameSpace *ns, kStri
 static inline intptr_t Method_id(kMethod *mtd)
 {
 	intptr_t id = mtd->typeId;
-	return (id << (sizeof(kshort_t)*8)) | mtd->mn;
+	return (id << (sizeof(khalfword_t)*8)) | mtd->mn;
 }
 
 static int comprMethod(const void *a, const void *b)
@@ -369,7 +369,7 @@ static int comprMethod(const void *a, const void *b)
 static void kMethodList_MatchMethod(KonohaContext *kctx, kArray *methodList, const intptr_t *sorted, ktypeattr_t typeId, KMethodMatchFunc MatchMethod, KMethodMatch *option)
 {
 	intptr_t i, min = 0, max = sorted[0];
-	intptr_t optkey = ((intptr_t)typeId << (sizeof(kshort_t)*8)) | option->mn;
+	intptr_t optkey = ((intptr_t)typeId << (sizeof(khalfword_t)*8)) | option->mn;
 	if(kArray_size(methodList) - max > 8) {
 		max = kArray_size(methodList);
 		PLATAPI qsort_i(methodList->MethodItems, max, sizeof(kMethod *), comprMethod);
@@ -501,7 +501,7 @@ static kbool_t KMethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, KMethod
 	if(m->param != NULL && m->foundMethodNULL == NULL) {
 		kParam *param = kMethod_GetParam(mtd);
 		if(param->psize == m->paramsize) {
-			kushort_t i;
+			kuhalfword_t i;
 			for(i = 0; i < m->paramsize; i++) {
 				KClass *mtype = KClass_(m->param[i].typeAttr);
 				KClass *ptype = KClass_(param->paramtypeItems[i].typeAttr);
