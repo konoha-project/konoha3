@@ -103,6 +103,30 @@ typedef float             kfloat_t;
 
 #endif
 
+typedef uint32_t              kid32_t;
+#define KID32_FLAGTOP(N)     ((kid32_t)1<<(32-(N)))
+
+/**
+ * MSB
+ * 10    Symbol
+ * 11    MethodName
+ * 00    TypeId
+ * 01    ToType(MethodName)
+ *
+ * 1110*  GetSymbol
+ * 1101*  SetSymbol
+ * 1010*  @Symbol
+ * 1001*  $Symbol
+ * 1011*  %Symbol
+ * 1***1    Canonical cannonical
+ *
+ * 00**** TypeId
+ * 001***    Boxed
+ * 00*1**    ReadOnly
+ * 00**1*    LocalOnly?
+ * 00***1    Coercion?
+ */
+
 typedef kuhalfword_t     khalfflag_t;    /* flag field */
 
 #define KFLAG_H(N)               ((sizeof(khalfflag_t)*8)-N)
@@ -124,18 +148,20 @@ typedef kuhalfword_t     khalfflag_t;    /* flag field */
 #define KHalfFlag_Unset(f,op)          KFlag_Set0(khalfflag_t,f,op)
 #define KHalfFlag_Is(f,op)             KFlag_Is(khalfflag_t,f,op)
 
+/* Konoha Interanal Ids */
+
+/* halfsize id */
+
+typedef kuhalfword_t       kpackageId_t;     /* package id e.g. Konoha.Math */
+typedef kuhalfword_t       ksymbol_t;        /* Package package PACKAGE */
+typedef kuhalfword_t       kmethodn_t;       /* Package package PACKAGE */
+typedef kuhalfword_t       ktypeattr_t;      /* TypeId + Attribute */
+typedef kuhalfword_t       kparamId_t;
 
 
 /* fullsize id */
-typedef uintptr_t                     kfileline_t;
-#define NOPLINE                       0
-
-/* halfsize id */
-typedef kuhalfword_t       kpackageId_t;     /* package id*/
-typedef kuhalfword_t       ktypeattr_t;      /* cid classid, ty type */
-typedef kuhalfword_t       ksymbol_t;
-typedef kuhalfword_t       kmethodn_t;
-typedef kuhalfword_t       kparamId_t;
+typedef uintptr_t          kfileline_t;     /* fileid (half) + linenum (half) */
+#define NOPLINE            0
 
 typedef struct {
 	uintptr_t flag;
@@ -154,6 +180,8 @@ typedef struct {
 #define KTypeAttr_Coercion   KFLAG_H2    /* Variable, Field */
 
 #define KTypeAttr_Is(P, t)   (((t) & KTypeAttr_##P) == KTypeAttr_##P)
+
+/* symbol_t 00010000000 */
 
 #define KSymbol_MAX            KFLAG_H3
 #define KSymbol_Attr(sym)      (sym  & (KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
@@ -987,7 +1015,7 @@ typedef enum kformat_t {
 		KClass*      (*realtype)(KonohaContext*, KClass*, KClass *)
 
 typedef struct KDEFINE_CLASS {
-	const char *structname;
+	const char     *structname;
 	ktypeattr_t     typeId;         khalfflag_t    cflag;
 	ktypeattr_t     baseTypeId;     ktypeattr_t     superTypeId;
 	ktypeattr_t     rtype;          kuhalfword_t       cparamsize;
@@ -1268,9 +1296,7 @@ struct kArrayVar {
 	union {
 		uintptr_t              *unboxItems;
 		kint_t                 *kintItems;
-#ifndef USE_NOFLOAT
 		kfloat_t               *kfloatItems;
-#endif
 		kObject        **ObjectItems;
 		kString        **stringItems;
 		kParam         **ParamItems;
@@ -1385,6 +1411,7 @@ struct kMethodVar {
 	};
 	uintptr_t         serialNumber;
 };
+
 
 typedef struct KMethodMatch {
 	kNameSpace   *ns;
@@ -2269,6 +2296,8 @@ struct KPackageVar {
 
 /* ----------------------------------------------------------------------- */
 // klib
+
+#include "konoha3/obsolete.h"
 
 struct klogconf_t;
 typedef struct GcContext GcContext;
