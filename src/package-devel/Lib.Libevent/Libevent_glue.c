@@ -24,7 +24,6 @@
 
 #include "konoha3.h"
 #include "konoha3/konoha_common.h"
-
 #include "konoha3/import/methoddecl.h"
 #include <event2/event.h>
 #include <event2/event_struct.h>
@@ -75,6 +74,22 @@ typedef struct cbufferevent {
 	kFunc *output_filter;
 	kObject *kcbArg;
 } kcbufferevent;
+
+typedef struct cev_token_bucket_cfg {
+	kObjectHeader h;
+	struct ev_token_bucket_cfg *token_bucket_cfg;
+} kcev_token_bucket_cfg;
+
+typedef struct cbufferevent_rate_limit_group {
+	kObjectHeader h;
+	struct bufferevent_rate_limit_group *rate_limit_group;
+} kcbufferevent_rate_limit_group;
+
+typedef struct cbufferevent_rate_limit_group_totals {
+	kObjectHeader h;
+	long read_out;
+	long written_out;
+} kcbufferevent_rate_limit_group_totals;
 
 typedef struct cevbuffer {
 	kObjectHeader h;
@@ -259,7 +274,7 @@ static KMETHOD cevent_base_get_supported_methods(KonohaContext *kctx, KonohaStac
 	INIT_GCSTACK();
 	const char **methods = event_get_supported_methods();
 
-	//TODO check array usage. refered src/package-devel/Konoha.Map/Map_glue.c: Map_keys()
+	//TODO check array usage. refered src/package-devel/MiniKonoha.Map/Map_glue.c: Map_keys()
 	KClass *cArray = KClass_p0(kctx, KClass_Array, KType_String);
 	kArray *ret = (kArray *)(KLIB new_kObject(kctx, _GcStack, cArray, 10));
 	int i;
@@ -1126,10 +1141,7 @@ static KMETHOD cbufferevent_flush(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(bufferevent_flush(bev->bev, iotype, mode));
 }
 
-/*
- * bufferevent Class (*bufferevent_filter_cb)() 1st stage callback from event_base_dispatch(),
- * NEVER BE CALLED FROM OTHERS.
- */
+//
 enum bufferevent_filter_result cbev_filterCB_method_invoke(
 	kFunc *invokeFunc,
     struct evbuffer *src, struct evbuffer *dst, ev_ssize_t dst_limit,
@@ -1160,6 +1172,10 @@ enum bufferevent_filter_result cbev_filterCB_method_invoke(
 	return ret;
 }
 
+/*
+ * bufferevent Class inputfilter (*bufferevent_filter_cb)() 1st stage callback from event_base_dispatch(),
+ * NEVER BE CALLED FROM OTHERS.
+ */
 enum bufferevent_filter_result cbev_inputfilterCB_method_invoke(
     struct evbuffer *src, struct evbuffer *dst, ev_ssize_t dst_limit,
     enum bufferevent_flush_mode mode, void *ctx)
@@ -1169,6 +1185,10 @@ enum bufferevent_filter_result cbev_inputfilterCB_method_invoke(
 			mode, ctx);
 }
 
+/*
+ * bufferevent Class output filter (*bufferevent_filter_cb)() 1st stage callback from event_base_dispatch(),
+ * NEVER BE CALLED FROM OTHERS.
+ */
 enum bufferevent_filter_result cbev_outputfilterCB_method_invoke(
     struct evbuffer *src, struct evbuffer *dst, ev_ssize_t dst_limit,
     enum bufferevent_flush_mode mode, void *ctx)
@@ -1199,45 +1219,235 @@ static KMETHOD cbufferevent_filter_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(ret);
 }
 
+//## @Static int bufferevent.pair_new(event_base base, int options, bufferevent[] pair);
+static KMETHOD cbufferevent_pair_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *kceb = (kcevent_base *)sfp[1].asObject;
+	int options = sfp[2].intValue;
+	kArray *bevArray = sfp[3].asArray;
 
-/*
-fuga
-int bufferevent_pair_new(struct event_base *base, int options, struct bufferevent *pair[2]);
-struct bufferevent *bufferevent_pair_get_partner(struct bufferevent *bev);
-int bufferevent_set_rate_limit(struct bufferevent *bev, struct ev_token_bucket_cfg *cfg);
-struct bufferevent_rate_limit_group *bufferevent_rate_limit_group_new(
-	struct event_base *base,
-	const struct ev_token_bucket_cfg *cfg);
-int bufferevent_rate_limit_group_set_cfg(struct bufferevent_rate_limit_group *, const struct ev_token_bucket_cfg *);
-int bufferevent_add_to_rate_limit_group(struct bufferevent *bev, struct bufferevent_rate_limit_group *g);
-int bufferevent_remove_from_rate_limit_group(struct bufferevent *bev);
-ev_ssize_t bufferevent_get_read_limit(struct bufferevent *bev);
-ev_ssize_t bufferevent_get_write_limit(struct bufferevent *bev);
-ev_ssize_t bufferevent_get_max_to_read(struct bufferevent *bev);
-ev_ssize_t bufferevent_get_max_to_write(struct bufferevent *bev);
-int bufferevent_decrement_read_limit(struct bufferevent *bev, ev_ssize_t decr);
-int bufferevent_decrement_write_limit(struct bufferevent *bev, ev_ssize_t decr);
+	struct bufferevent *pair[2];
+	int ret = bufferevent_pair_new(kceb->event_base, options, pair);
 
--- ev_token_bucket_cfg --
-struct ev_token_bucket_cfg *ev_token_bucket_cfg_new(
-	size_t read_rate, size_t read_burst,
-	size_t write_rate, size_t write_burst,
-	const struct timeval *tick_len);
-void ev_token_bucket_cfg_free(struct ev_token_bucket_cfg *cfg);
+	int i;
+	for (i = 0; i < 2; i++) {
+		kcbufferevent *kcbe = (kcbufferevent *)(new_(cbufferevent, 0, OnStack));
+		kcbe->bev = pair[i];
+		KLIB kArray_Add(kctx, bevArray, kcbe);
+	}
+	KReturnUnboxValue(ret);
+}
+
+//## bufferevent bufferevent.pair_get_partner();
+static KMETHOD cbufferevent_pair_get_partner(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	struct bufferevent *partner = bufferevent_pair_get_partner(bev->bev);
+	kcbufferevent *ret = (kcbufferevent *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+	ret->bev = partner;
+	KReturn(ret);
+}
+
+//## int bufferevent.set_rate_limit(ev_token_bucket_cfg cfg);
+static KMETHOD cbufferevent_set_rate_limit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	kcev_token_bucket_cfg *cfg = (kcev_token_bucket_cfg *)sfp[1].asObject;
+	KReturnUnboxValue(bufferevent_set_rate_limit(bev->bev, cfg->token_bucket_cfg));
+}
+
+//## int bufferevent.add_to_rate_limit_group(bufferevent_rate_limit_group grp);
+static KMETHOD cbufferevent_add_to_rate_limit_group(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[1].asObject;
+	KReturnUnboxValue(bufferevent_add_to_rate_limit_group(bev->bev, grp->rate_limit_group));
+}
+
+//## int bufferevent.remove_from_rate_limit_group();
+static KMETHOD cbufferevent_remove_from_rate_limit_group(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_remove_from_rate_limit_group(bev->bev));
+}
+
+//## int bufferevent.get_read_limit();
+static KMETHOD cbufferevent_get_read_limit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_get_read_limit(bev->bev));
+}
+
+//## int bufferevent.get_write_limit();
+static KMETHOD cbufferevent_get_write_limit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_get_write_limit(bev->bev));
+}
 
 
--- bufferevent_rate_limit_group --
-int bufferevent_rate_limit_group_set_min_share(struct bufferevent_rate_limit_group *, size_t);
-void bufferevent_rate_limit_group_free(struct bufferevent_rate_limit_group *);
-ev_ssize_t bufferevent_rate_limit_group_get_read_limit(struct bufferevent_rate_limit_group *);
-ev_ssize_t bufferevent_rate_limit_group_get_write_limit(struct bufferevent_rate_limit_group *);
-int bufferevent_rate_limit_group_decrement_read(struct bufferevent_rate_limit_group *, ev_ssize_t);
-int bufferevent_rate_limit_group_decrement_write(struct bufferevent_rate_limit_group *, ev_ssize_t);
-void bufferevent_rate_limit_group_get_totals(struct bufferevent_rate_limit_group *grp, ev_uint64_t *total_read_out, ev_uint64_t *total_written_out);
-void bufferevent_rate_limit_group_reset_totals(struct bufferevent_rate_limit_group *grp);
-*/
+//## int bufferevent.get_max_to_read();
+static KMETHOD cbufferevent_get_max_to_read(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_get_max_to_read(bev->bev));
+}
+
+//## int bufferevent.get_max_to_write();
+static KMETHOD cbufferevent_get_max_to_write(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_get_max_to_write(bev->bev));
+}
+
+//## int bufferevent.decrement_read_limit(int decr);
+static KMETHOD cbufferevent_decrement_read_limit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	int decr = sfp[1].intValue;
+	KReturnUnboxValue(bufferevent_decrement_read_limit(bev->bev, decr));
+}
+
+//## int bufferevent.decrement_write_limit(int decr);
+static KMETHOD cbufferevent_decrement_write_limit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	int decr = sfp[1].intValue;
+	KReturnUnboxValue(bufferevent_decrement_write_limit(bev->bev, decr));
+}
 
 
+/* ======================================================================== */
+// ev_token_bucket_cfg class
+static void cev_token_bucket_cfg_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kcev_token_bucket_cfg *cfg = (kcev_token_bucket_cfg *) o;
+	cfg->token_bucket_cfg = NULL;
+}
+
+static void cev_token_bucket_cfg_Free(KonohaContext *kctx, kObject *o)
+{
+	kcev_token_bucket_cfg *cfg = (kcev_token_bucket_cfg *) o;
+	ev_token_bucket_cfg_free(cfg->token_bucket_cfg);
+}
+
+//## ev_token_bucket_cfg ev_token_bucket_cfg.new(int read_rate, int read_burst, int write_rate, int write_burst, timeval tick_len);
+static KMETHOD cev_token_bucket_cfg_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcev_token_bucket_cfg *cfg = (kcev_token_bucket_cfg *)sfp[0].asObject;
+	size_t read_rate = (size_t)sfp[1].intValue;
+	size_t read_burst = (size_t)sfp[2].intValue;
+	size_t write_rate = (size_t)sfp[3].intValue;
+	size_t write_burst = (size_t)sfp[4].intValue;
+	kctimeval *tick_len = (kctimeval *)sfp[5].asObject;
+
+	cfg->token_bucket_cfg = ev_token_bucket_cfg_new(read_rate, read_burst,
+		write_rate, write_burst, &tick_len->timeval);
+	KReturn(cfg);
+}
+
+/* ======================================================================== */
+// bufferevent_rate_limit_group class
+static void cbufferevent_rate_limit_group_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *) o;
+	grp->rate_limit_group = NULL;
+}
+
+static void cbufferevent_rate_limit_group_Free(KonohaContext *kctx, kObject *o)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *) o;
+	bufferevent_rate_limit_group_free(grp->rate_limit_group);
+}
+
+//## bufferevent_rate_limit_group bufferevent_rate_limit_group.new(event_base base, ev_token_bucket_cfg cfg);
+static KMETHOD cbufferevent_rate_limit_group_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	kcevent_base *base = (kcevent_base *)sfp[1].asObject;
+	kcev_token_bucket_cfg *cfg = (kcev_token_bucket_cfg *)sfp[2].asObject;
+
+	grp->rate_limit_group = bufferevent_rate_limit_group_new(base->event_base, cfg->token_bucket_cfg);
+	KReturn(cfg);
+}
+
+
+//## int bufferevent_rate_limit_group.set_cfg(ev_token_bucket_cfg cfg);
+static KMETHOD cbufferevent_rate_limit_group_set_cfg(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	kcev_token_bucket_cfg *cfg = (kcev_token_bucket_cfg *)sfp[1].asObject;
+	KReturnUnboxValue(bufferevent_rate_limit_group_set_cfg(grp->rate_limit_group, cfg->token_bucket_cfg));
+}
+
+//## int bufferevent_rate_limit_group.set_min_share(int share);
+static KMETHOD cbufferevent_rate_limit_group_set_min_share(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	size_t share = (size_t)sfp[1].intValue;
+	KReturnUnboxValue(bufferevent_rate_limit_group_set_min_share(grp->rate_limit_group, share));
+}
+
+//## int bufferevent_rate_limit_group.get_read_limit();
+static KMETHOD cbufferevent_rate_limit_group_get_read_limit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_rate_limit_group_get_read_limit(grp->rate_limit_group));
+}
+
+//## int bufferevent_rate_limit_group.get_write_limit();
+static KMETHOD cbufferevent_rate_limit_group_get_write_limit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_rate_limit_group_get_write_limit(grp->rate_limit_group));
+}
+
+//## int bufferevent_rate_limit_group.decrement_read(int decr);
+static KMETHOD cbufferevent_rate_limit_group_decrement_read(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	ev_ssize_t decr = sfp[1].intValue;
+
+	KReturnUnboxValue(bufferevent_rate_limit_group_decrement_read(grp->rate_limit_group, decr));
+}
+
+//## int bufferevent_rate_limit_group.decrement_write(int decr);
+static KMETHOD cbufferevent_rate_limit_group_decrement_write(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	ev_ssize_t decr = sfp[1].intValue;
+	KReturnUnboxValue(bufferevent_rate_limit_group_decrement_write(grp->rate_limit_group, decr));
+}
+
+//## void bufferevent_rate_limit_group.get_totals(bufferevent_rate_limit_group_totals totals);
+static KMETHOD cbufferevent_rate_limit_group_get_totals(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	kcbufferevent_rate_limit_group_totals *totals = (kcbufferevent_rate_limit_group_totals *)sfp[1].asObject;	// TODO want to use unbox value array
+
+	ev_uint64_t total_read_out, total_written_out;
+	bufferevent_rate_limit_group_get_totals(grp->rate_limit_group, &total_read_out, &total_written_out);
+	totals->read_out = total_read_out;
+	totals->written_out = total_written_out;
+	KReturnVoid();
+}
+
+//## void bufferevent_rate_limit_group.reset_totals();
+static KMETHOD cbufferevent_rate_limit_group_reset_totals(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	bufferevent_rate_limit_group_reset_totals(grp->rate_limit_group);
+	KReturnVoid();
+}
+
+/* ======================================================================== */
+// bufferevent_rate_limit_group_totals class
+static void cbufferevent_rate_limit_group_totals_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kcbufferevent_rate_limit_group_totals *totals = (kcbufferevent_rate_limit_group_totals *) o;
+	totals->read_out = 0;
+	totals->written_out = 0;
+}
 
 /* ======================================================================== */
 // evbuffer class
@@ -2494,6 +2704,39 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	defcbufferevent.free		= cbufferevent_Free;
 	KClass_cbufferevent = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcbufferevent, trace);
 
+	// ev_token_bucket_cfg
+	KDEFINE_CLASS defcev_token_bucket_cfg = {0};
+	defcev_token_bucket_cfg.structname	= "ev_token_bucket_cfg";
+	defcev_token_bucket_cfg.typeId		= KTypeAttr_NewId;
+	defcev_token_bucket_cfg.cstruct_size = sizeof(kcev_token_bucket_cfg);
+	defcev_token_bucket_cfg.cflag		= KClassFlag_Final;
+	defcev_token_bucket_cfg.init		= cev_token_bucket_cfg_Init;
+	//defcev_token_bucket_cfg.reftrace	= cev_token_bucket_cfg_Reftrace;
+	defcev_token_bucket_cfg.free		= cev_token_bucket_cfg_Free;
+	KClass *cev_token_bucket_cfgClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcev_token_bucket_cfg, trace);
+
+	// bufferevent_rate_limit_group
+	KDEFINE_CLASS defcbufferevent_rate_limit_group = {0};
+	defcbufferevent_rate_limit_group.structname	= "bufferevent_rate_limit_group";
+	defcbufferevent_rate_limit_group.typeId		= KTypeAttr_NewId;
+	defcbufferevent_rate_limit_group.cstruct_size = sizeof(kcbufferevent_rate_limit_group);
+	defcbufferevent_rate_limit_group.cflag		= KClassFlag_Final;
+	defcbufferevent_rate_limit_group.init		= cbufferevent_rate_limit_group_Init;
+	//defcbufferevent_rate_limit_group.reftrace	= cbufferevent_rate_limit_group_Reftrace;
+	defcbufferevent_rate_limit_group.free		= cbufferevent_rate_limit_group_Free;
+	KClass *cbufferevent_rate_limit_groupClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcbufferevent_rate_limit_group, trace);
+
+	// bufferevent_rate_limit_group_totals
+	KDEFINE_CLASS defcbufferevent_rate_limit_group_totals = {0};
+	defcbufferevent_rate_limit_group_totals.structname	= "bufferevent_rate_limit_group_totals";
+	defcbufferevent_rate_limit_group_totals.typeId		= KTypeAttr_NewId;
+	defcbufferevent_rate_limit_group_totals.cstruct_size = sizeof(kcbufferevent_rate_limit_group_totals);
+	defcbufferevent_rate_limit_group_totals.cflag     = KClassFlag_Final;
+	defcbufferevent_rate_limit_group_totals.init      = cbufferevent_rate_limit_group_totals_Init;
+	//defcbufferevent_rate_limit_group_totals.reftrace	= cbufferevent_rate_limit_group_totals_Reftrace;
+	//defcbufferevent_rate_limit_group_totals.free      = cbufferevent_rate_limit_group_totals_Free;
+	KClass *cbufferevent_rate_limit_group_totalsClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcbufferevent_rate_limit_group_totals, trace);
+
 	// evbuffer
 	KDEFINE_CLASS defcevbuffer = {0};
 	defcevbuffer.structname	= "evbuffer";
@@ -2626,6 +2869,9 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	int KType_cevent = ceventClass->typeId;
 	int KType_cbufferevent = KClass_cbufferevent->typeId;
 	int KType_cevbuffer = KClass_cevbuffer->typeId;
+	int KType_cev_token_bucket_cfg = cev_token_bucket_cfgClass->typeId;
+	int KType_cbufferevent_rate_limit_group = cbufferevent_rate_limit_groupClass->typeId;
+	int KType_cbufferevent_rate_limit_group_totals = cbufferevent_rate_limit_group_totalsClass->typeId;
 	int KType_cevhttp = cevhttpClass->typeId;
 	int KType_cevhttp_bound_socket = KClass_cevhttp_bound_socket->typeId;
 //	int KType_evhttp_set_cb_arg = KClass_evhttp_set_cb_arg->typeId;
@@ -2675,6 +2921,10 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	kparamtype_t cevhttp_connectionCB_p[] = {{KType_cevhttp_connection, 0}, {KType_Object, 0}};
 	KClass *cevhttp_connectionCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_void, 2, cevhttp_connectionCB_p);
 	int KType_cevhttp_connectionCBfunc = cevhttp_connectionCBfunc->typeId;
+
+	// eventbuffer[]
+	KClass *eventbufferArray = KClass_p0(kctx, KClass_Array, KType_cbufferevent);
+	int KType_eventbufferArray = eventbufferArray->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
 
@@ -2768,11 +3018,31 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		_Public, _F(cbufferevent_unlock), KType_void, KType_cbufferevent, KMethodName_("unlock"), 0,
 		_Public, _F(cbufferevent_flush), KType_Int, KType_cbufferevent, KMethodName_("flush"), 2, KType_Int, KFieldName_("iotype"), KType_Int, KFieldName_("mode"),
 		_Public, _F(cbufferevent_filter_new), KType_cbufferevent, KType_cbufferevent, KMethodName_("filter_new"), 4, KType_cbev_filterCBfunc, KFieldName_("input_filter"), KType_cbev_filterCBfunc, KFieldName_("output_filter"), KType_Int, KFieldName_("option"), KType_Object, KFieldName_("ctx"),
+		_Public|_Static, _F(cbufferevent_pair_new), KType_Int, KType_cbufferevent, KMethodName_("pair_new"), 3, KType_cevent_base, KFieldName_("base"), KType_Int, KFieldName_("optons"), KType_eventbufferArray, KFieldName_("pair"),
+		_Public, _F(cbufferevent_pair_get_partner), KType_cbufferevent, KType_cbufferevent, KMethodName_("pair_get_partner"), 0,
+		_Public, _F(cbufferevent_set_rate_limit), KType_Int, KType_cbufferevent, KMethodName_("set_rate_limit"), 1, KType_cev_token_bucket_cfg, KFieldName_("cfg"),
+		_Public, _F(cbufferevent_add_to_rate_limit_group), KType_Int, KType_cbufferevent, KMethodName_("add_to_rate_limit_group"), 1, KType_cbufferevent_rate_limit_group, KFieldName_("grp"),
+		_Public, _F(cbufferevent_remove_from_rate_limit_group), KType_Int, KType_cbufferevent, KMethodName_("remove_from_rate_limit_group"), 0,
+		_Public, _F(cbufferevent_get_read_limit), KType_Int, KType_cbufferevent, KMethodName_("get_read_limit"), 0,
+		_Public, _F(cbufferevent_get_write_limit), KType_Int, KType_cbufferevent, KMethodName_("get_write_limit"), 0,
+		_Public, _F(cbufferevent_get_max_to_read), KType_Int, KType_cbufferevent, KMethodName_("get_max_to_read"), 0,
+		_Public, _F(cbufferevent_get_max_to_write), KType_Int, KType_cbufferevent, KMethodName_("get_max_to_write"), 0,
+		_Public, _F(cbufferevent_decrement_read_limit), KType_Int, KType_cbufferevent, KMethodName_("decrement_read_limit"), 1, KType_Int, KFieldName_("decr"),
+		_Public, _F(cbufferevent_decrement_write_limit), KType_Int, KType_cbufferevent, KMethodName_("decrement_write_limit"), 1, KType_Int, KFieldName_("decr"),
 
+		// ev_token_bucket_cfg
+		_Public, _F(cev_token_bucket_cfg_new), KType_cev_token_bucket_cfg, KType_cev_token_bucket_cfg, KMethodName_("new"), 5, KType_Int, KFieldName_("read_rate"), KType_Int, KFieldName_("read_burst"), KType_Int, KFieldName_("write_rate"), KType_Int, KFieldName_("write_burst"), KType_ctimeval, KFieldName_("tick_len"),
 
-
-
-		//fuga
+		// bufferevent_rate_limit_group
+		_Public, _F(cbufferevent_rate_limit_group_new), KType_cbufferevent_rate_limit_group, KType_cbufferevent_rate_limit_group, KMethodName_("new"), 2, KType_cevent_base, KFieldName_("base"), KType_cev_token_bucket_cfg, KFieldName_("cfg"),
+		_Public, _F(cbufferevent_rate_limit_group_set_cfg), KType_Int, KType_cbufferevent_rate_limit_group, KMethodName_("set_cfg"), 1, KType_cev_token_bucket_cfg, KFieldName_("cfg"),
+		_Public, _F(cbufferevent_rate_limit_group_set_min_share), KType_Int, KType_cbufferevent_rate_limit_group, KMethodName_("min_share"), 1, KType_Int, KFieldName_("share"),
+		_Public, _F(cbufferevent_rate_limit_group_get_read_limit), KType_Int, KType_cbufferevent_rate_limit_group, KMethodName_("get_read_limit"), 0,
+		_Public, _F(cbufferevent_rate_limit_group_get_write_limit), KType_Int, KType_cbufferevent_rate_limit_group, KMethodName_("get_write_limit"), 0,
+		_Public, _F(cbufferevent_rate_limit_group_decrement_read), KType_Int, KType_cbufferevent_rate_limit_group, KMethodName_("decrement_read"), 1, KType_Int, KFieldName_("decr"),
+		_Public, _F(cbufferevent_rate_limit_group_decrement_write), KType_Int, KType_cbufferevent_rate_limit_group, KMethodName_("decrement_write"), 1, KType_Int, KFieldName_("decr"),
+		_Public, _F(cbufferevent_rate_limit_group_get_totals), KType_void, KType_cbufferevent_rate_limit_group, KMethodName_("get_totals"), 1, KType_cbufferevent_rate_limit_group_totals, KFieldName_("totals"),
+		_Public, _F(cbufferevent_rate_limit_group_reset_totals), KType_void, KType_cbufferevent_rate_limit_group, KMethodName_("reset_totals"), 0,
 
 		// evhttp
 		_Public, _F(cevhttp_new), KType_cevhttp, KType_cevhttp, KMethodName_("new"), 1, KType_cevent_base, KFieldName_("cevent_base"),
