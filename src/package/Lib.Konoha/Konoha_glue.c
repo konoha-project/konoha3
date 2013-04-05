@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
+#include "konoha3.h"
+
 
 #ifdef __cplusplus
 extern "C"{
@@ -176,7 +176,7 @@ static kbool_t konoha_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE *Konoha_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) Konoha_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "Konoha", K_VERSION);

@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
+#include "konoha3.h"
+
 #include "konoha3/import/methoddecl.h"
 
 #ifdef __cplusplus
@@ -59,7 +59,7 @@ static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kNameSpa
 	RESET_GCSTACK();
 	if(kNode_IsError(expr)) return expr;
 	if(lsfp[K_RTNIDX].asNode == K_NULLNODE) {
-		DBG_ASSERT(expr->attrTypeId == KType_var); // untyped
+		DBG_ASSERT(expr->typeAttr == KType_var); // untyped
 	}
 	DBG_ASSERT(IS_Node(lsfp[K_RTNIDX].asObject));
 	return (kNode *)lsfp[K_RTNIDX].asObject;
@@ -69,7 +69,7 @@ static kNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kNode *expr, kNameSpa
 static KMETHOD NameSpace_AddMethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNameSpace *ns = sfp[0].asNameSpace;
-	kSyntax *syn = SUGAR kNameSpace_GetSyntax(kctx, ns, KSymbol_("$MethodDecl"));
+	kSyntax *syn = KLIB kNameSpace_GetSyntax(kctx, ns, KSymbol_("$MethodDecl"));
 	kFunc *fo = syn->TypeFuncNULL;
 	kNode *methodNode = (kNode *) sfp[1].asObject;
 	CallTypeFunc(kctx, fo, methodNode, ns, K_NULL);
@@ -103,7 +103,7 @@ static kbool_t KClass_SetClassFieldUnboxValue(KonohaContext *kctx, KClassVar *de
 {
 	int i;
 	for(i = definedClass->fieldsize - 1; i >= 0; i--) {
-		if(definedClass->fieldItems[i].name == sym  && KType_Is(UnboxType, definedClass->fieldItems[i].attrTypeId)) {
+		if(definedClass->fieldItems[i].name == sym  && KType_Is(UnboxType, definedClass->fieldItems[i].typeAttr)) {
 			definedClass->defaultNullValueVar->fieldUnboxItems[i] = unboxValue;
 			return true;
 		}
@@ -140,13 +140,13 @@ static void ObjectField_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor
 	KClassField *fieldItems = c->fieldItems;
 	size_t i, fieldsize = c->fieldsize;
 	for (i = 0; i < fieldsize; i++) {
-		if(KTypeAttr_Is(Boxed, fieldItems[i].attrTypeId)) {
+		if(KTypeAttr_Is(Boxed, fieldItems[i].typeAttr)) {
 			KRefTraceNullable(o->fieldObjectItems[i]);   // FIXME:
 		}
 	}
 }
 
-static kshortflag_t kNode_ParseClassFlag(KonohaContext *kctx, kNode *stmt, kshortflag_t cflag)
+static khalfflag_t kNode_ParseClassFlag(KonohaContext *kctx, kNode *stmt, khalfflag_t cflag)
 {
 	static KFlagSymbolData ClassDeclFlag[] = {
 		{KClassFlag_Private}, {KClassFlag_Singleton}, {KClassFlag_Immutable},
@@ -159,10 +159,10 @@ static kshortflag_t kNode_ParseClassFlag(KonohaContext *kctx, kNode *stmt, kshor
 		ClassDeclFlag[3].symbol = KSymbol_("@Prototype");
 		ClassDeclFlag[4].symbol = KSymbol_("@Interface");
 	}
-	return (kshortflag_t)SUGAR kNode_ParseFlag(kctx, stmt, ClassDeclFlag, cflag);
+	return (khalfflag_t)KLIB kNode_ParseFlag(kctx, stmt, ClassDeclFlag, cflag);
 }
 
-static KClassVar* kNameSpace_DefineClassName(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, KTraceInfo *trace)
+static KClassVar* kNameSpace_DefineClassName(KonohaContext *kctx, kNameSpace *ns, khalfflag_t cflag, kString *name, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defNewClass = {0};
 	defNewClass.cflag         = cflag | KClassFlag_Nullable;
@@ -215,9 +215,9 @@ static kNode* kNode_ParseClassNodeNULL(KonohaContext *kctx, kNode *stmt, kToken 
 	kTokenVar *blockToken = (kTokenVar *)kNode_GetObject(kctx, stmt, KSymbol_BlockPattern, NULL);
 	if(blockToken != NULL) {
 		kNameSpace *ns = kNode_ns(stmt);
-		SUGAR kToken_ToBraceGroup(kctx, blockToken, ns, NULL);
+		KLIB kToken_ToBraceGroup(kctx, blockToken, ns, NULL);
 		KTokenSeq source = {ns, RangeGroup(blockToken->GroupTokenList)};
-		block = SUGAR ParseNewNode(kctx, ns, source.tokenList, &source.beginIdx, source.endIdx, ParseMetaPatternOption, NULL);
+		block = KLIB ParseNewNode(kctx, ns, source.tokenList, &source.beginIdx, source.endIdx, ParseMetaPatternOption, NULL);
 		KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_BlockPattern, KType_Node, block);
 	}
 	return block;
@@ -231,7 +231,7 @@ static size_t kNode_countFieldSize(KonohaContext *kctx, kNode *bk)
 			kNode *stmt = bk->NodeList->NodeItems[i];
 			DBG_P("stmt->keyword=%s%s", KSymbol_Fmt2(stmt->syn->keyword));
 			if(stmt->syn->keyword == KSymbol_TypeDeclPattern) {
-				kNode *expr = SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
+				kNode *expr = KLIB kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
 				if(expr->syn->keyword == KSymbol_COMMA) {
 					c += (kNode_GetNodeListSize(kctx, expr) - 1);
 				}
@@ -251,7 +251,7 @@ static kbool_t kNode_AddClassField(KonohaContext *kctx, kNode *stmt, kNameSpace 
 		if(kNode_IsTerm(lexpr)) {
 			kString *name = lexpr->TermToken->text;
 			ksymbol_t symbol = KAsciiSymbol(kString_text(name), kString_size(name), KSymbol_NewId);
-			kNode *vexpr =  SUGAR TypeCheckNodeAt(kctx, expr, 2, ns, KClass_(ty), 0);
+			kNode *vexpr =  KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_(ty), 0);
 			if(vexpr == K_NULLNODE) return false;
 			if(kNode_node(vexpr) == KNode_Const) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
@@ -265,7 +265,7 @@ static kbool_t kNode_AddClassField(KonohaContext *kctx, kNode *stmt, kNameSpace 
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 			}
 			else {
-				SUGAR MessageNode(kctx, stmt, lexpr->TermToken, ns, ErrTag, "field initial value must be const: %s", kString_text(name));
+				KLIB MessageNode(kctx, stmt, lexpr->TermToken, ns, ErrTag, "field initial value must be const: %s", kString_text(name));
 				return false;
 			}
 			return true;
@@ -283,7 +283,7 @@ static kbool_t kNode_AddClassField(KonohaContext *kctx, kNode *stmt, kNameSpace 
 		KLIB KClass_AddField(kctx, definedClass, ty, symbol);
 		return true;
 	}
-	SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "field name is expected");
+	KLIB MessageNode(kctx, stmt, NULL, ns, ErrTag, "field name is expected");
 	return false;
 }
 
@@ -294,8 +294,8 @@ static kbool_t kNode_declClassField(KonohaContext *kctx, kNode *bk, kNameSpace *
 	for(i = 0; i < kNode_GetNodeListSize(kctx, bk); i++) {
 		kNode *stmt = bk->NodeList->NodeItems[i];
 		if(stmt->syn->keyword == KSymbol_TypeDeclPattern) {
-			kToken *tk  = SUGAR kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
-			kNode *expr = SUGAR kNode_GetNode(kctx, stmt,  KSymbol_ExprPattern, NULL);
+			kToken *tk  = KLIB kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
+			kNode *expr = KLIB kNode_GetNode(kctx, stmt,  KSymbol_ExprPattern, NULL);
 			if(!kNode_AddClassField(kctx, stmt, ns, ct, Token_typeLiteral(tk), expr)) {
 				failedOnce = true;
 			}
@@ -323,7 +323,7 @@ static void kNode_AddMethodDeclNode(KonohaContext *kctx, kNode *bk, kToken *toke
 			kNodeVar *classParentBlock = kNode_GetParentNULL(classNode);
 			if(classParentBlock == NULL) {
 				classParentBlock = KNewNode(ns);
-				SUGAR kNode_AddNode(kctx, classParentBlock, classNode);
+				KLIB kNode_AddNode(kctx, classParentBlock, classNode);
 				kNode_Type(classParentBlock, KNode_Block, KType_void);
 			}
 
@@ -331,11 +331,11 @@ static void kNode_AddMethodDeclNode(KonohaContext *kctx, kNode *bk, kToken *toke
 			kNode *arg0 = new_ConstNode(kctx, ns, NULL, UPCAST(ns));
 			kNode *arg1 = new_ConstNode(kctx, ns, NULL, UPCAST(stmt));
 
-			kNode *callNode = SUGAR new_MethodNode(kctx, ns, KClass_NameSpace, AddMethod, 2, arg0, arg1);
-			SUGAR kNode_AddNode(kctx, classParentBlock, callNode);
+			kNode *callNode = KLIB new_MethodNode(kctx, ns, KClass_NameSpace, AddMethod, 2, arg0, arg1);
+			KLIB kNode_AddNode(kctx, classParentBlock, callNode);
 		}
 		else {
-			SUGAR MessageNode(kctx, stmt, NULL, NULL, WarnTag, "%s is not available within the class clause", KSymbol_Fmt2(stmt->syn->keyword));
+			KLIB MessageNode(kctx, stmt, NULL, NULL, WarnTag, "%s is not available within the class clause", KSymbol_Fmt2(stmt->syn->keyword));
 		}
 	}
 }
@@ -348,11 +348,11 @@ static inline size_t initFieldSizeOfVirtualClass(KClass *superClass)
 static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
-	kToken *tokenClassName = SUGAR kNode_GetToken(kctx, stmt, KSymbol_("$ClassName"), NULL);
+	kToken *tokenClassName = KLIB kNode_GetToken(kctx, stmt, KSymbol_("$ClassName"), NULL);
 	KClassVar *definedClass = (KClassVar *)KLIB kNameSpace_GetClassByFullName(kctx, ns, kString_text(tokenClassName->text), kString_size(tokenClassName->text), NULL);
 	const int isNewlyDefinedClass = (definedClass == NULL);
 	if(isNewlyDefinedClass) {
-		kshortflag_t cflag = kNode_ParseClassFlag(kctx, stmt, KClassFlag_Virtual);
+		khalfflag_t cflag = kNode_ParseClassFlag(kctx, stmt, KClassFlag_Virtual);
 		KMakeTraceUL(trace, sfp, kNode_uline(stmt));
 		definedClass = kNameSpace_DefineClassName(kctx, ns, cflag, tokenClassName->text, trace);
 	}
@@ -360,15 +360,15 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	size_t declsize = kNode_countFieldSize(kctx, block);
 	if(isNewlyDefinedClass || (KClass_Is(Virtual, definedClass) && block != NULL)) {
 		KClass *superClass = KClass_Object;
-		kToken *tokenSuperClass= SUGAR kNode_GetToken(kctx, stmt, KSymbol_("extends"), NULL);
+		kToken *tokenSuperClass= KLIB kNode_GetToken(kctx, stmt, KSymbol_("extends"), NULL);
 		if(tokenSuperClass != NULL) {
 			DBG_ASSERT(Token_isVirtualTypeLiteral(tokenSuperClass));
 			superClass = KClass_(Token_typeLiteral(tokenSuperClass));
 			if(KClass_Is(Final, superClass)) {
-				KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "%s is final", KClass_text(superClass)));
+				KReturn(KLIB MessageNode(kctx, stmt, NULL, ns, ErrTag, "%s is final", KClass_text(superClass)));
 			}
 			if(KClass_Is(Virtual, superClass)) {
-				KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "%s is still virtual", KClass_text(superClass)));
+				KReturn(KLIB MessageNode(kctx, stmt, NULL, ns, ErrTag, "%s is still virtual", KClass_text(superClass)));
 			}
 		}
 		size_t initsize = (block != NULL) ? declsize : initFieldSizeOfVirtualClass(superClass);
@@ -376,7 +376,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else { // Already defined
 		if(declsize > 0 && !KClass_Is(Virtual, definedClass)) {
-			KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "%s has already defined", KClass_text(definedClass)));
+			KReturn(KLIB MessageNode(kctx, stmt, NULL, ns, ErrTag, "%s has already defined", KClass_text(definedClass)));
 		}
 	}
 	if(block != NULL) {
@@ -411,14 +411,14 @@ static kbool_t class_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		{ KSymbol_("class"), SYNFLAG_CTypeFunc, 0, Precedence_Statement, {SUGAR patternParseFunc}, {SUGARFUNC Statement_class}},
 		{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("class")), "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", 0, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("class")), "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", 0, trace);
 	return true;
 }
 
 static kbool_t class_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KImportPackage(ns, "MiniKonoha.ObjectModel", trace);
+	KImportPackage(ns, "Konoha.ObjectModel", trace);
 	class_defineSyntax(kctx, ns, trace);
 	class_defineMethod(kctx, ns, trace);
 	return true;
@@ -431,7 +431,7 @@ static kbool_t class_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE *JavaStyleClass_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) JavaStyleClass_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "JavaStyle", "1.2");

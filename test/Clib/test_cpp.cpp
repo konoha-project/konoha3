@@ -21,10 +21,11 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
+extern "C" {
+#include "konoha3.h"
+} /* extern "C" */
 
-#include "konoha3/konoha.h"
-#include "konoha3/klib.h"
-#include "konoha3/sugar.h"
+
 #include "konoha3/konoha_common.h"
 #include "konoha3/platform.h"
 #include "test_konoha.h"

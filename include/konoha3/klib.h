@@ -25,14 +25,6 @@
 #ifndef KLIB_H_
 #define KLIB_H_
 
-#ifndef MINIOKNOHA_H_
-#error Do not include klib.h without konoha.h.
-#endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifdef __GNUC__
 #define kinline __attribute__((unused))
 #else
@@ -60,7 +52,7 @@ static kinline uintptr_t strhash(const char *name, size_t len)
 #define KFileLine_textFileName(X)  kString_text(KFileLine_GetFileName(kctx, X))
 static kinline kString* KFileLine_GetFileName(KonohaContext *kctx, kfileline_t fileid)
 {
-	kfileline_t n = (fileid >> (sizeof(kshort_t) * 8));
+	kfileline_t n = (fileid >> (sizeof(khalfword_t) * 8));
 	DBG_ASSERT(n < kArray_size(kctx->share->fileIdList));
 	return kctx->share->fileIdList->stringItems[n];
 }
@@ -124,10 +116,10 @@ static kinline kbool_t sym_equals(KonohaContext *kctx, ksymbol_t s1, ksymbol_t s
 	return false;
 }
 
-static kinline uintptr_t longid(kushort_t packageDomain, kushort_t un)
+static kinline uintptr_t longid(kuhalfword_t packageDomain, kuhalfword_t un)
 {
 	uintptr_t hcode = packageDomain;
-	return (hcode << (sizeof(kshort_t)*8)) | un;
+	return (hcode << (sizeof(khalfword_t)*8)) | un;
 }
 
 static kinline KClass *KClass_p0(KonohaContext *kctx, KClass *ct, ktypeattr_t ty)
@@ -205,7 +197,4 @@ static const char _utf8len[] = {
 //	KFieldInit(mtd, ((kMethodVar *)mtd)->proceedNUL, mtd2);
 //}
 
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
 #endif /* KLIB_H_ */

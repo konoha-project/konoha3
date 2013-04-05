@@ -26,8 +26,8 @@
 
 #define USE_STRINGLIB 1
 
-#include "konoha3/konoha.h"
-#include "konoha3/klib.h"
+#include "konoha3.h"
+
 #include "konoha3/import/methoddecl.h"
 
 #include "string_api.h"
@@ -168,7 +168,7 @@ static kbool_t string_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE *StringUtil_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) StringUtil_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");

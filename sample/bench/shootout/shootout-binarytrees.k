@@ -6,7 +6,7 @@
 import("cstyle");
 import("Syntax.JavaStyleClass");
 import("Syntax.GlobalVariable");
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 
 const MINDEPTH = 4;
 const N=14;

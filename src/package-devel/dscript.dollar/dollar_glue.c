@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
+#include "konoha3.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,13 +45,13 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 
 	}
 //	KClass *foundClass = NULL;
-//	int nextIdx = SUGAR ParseTypePattern(kctx, stmt, kNode_ns(stmt), tokenList, beginIdx + 1, endIdx, &foundClass);
+//	int nextIdx = KLIB ParseTypePattern(kctx, stmt, kNode_ns(stmt), tokenList, beginIdx + 1, endIdx, &foundClass);
 //	if(nextIdx != -1 && nextIdx < kArray_size(tokenList)) {
 //		kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
 ////		if(ct->typeId == KType_void) {
-////			KReturn(SUGAR MessageNode(kctx, stmt, tk1, ErrTag, "undefined class: %s", kString_text(tk1->text)));
+////			KReturn(KLIB MessageNode(kctx, stmt, tk1, ErrTag, "undefined class: %s", kString_text(tk1->text)));
 ////		} else if(KClass_Is(Virtual, ct)) {
-////			SUGAR MessageNode(kctx, stmt, NULL, ErrTag, "invalid application of 'dollar' to incomplete class %s", KClass_text(ct));
+////			KLIB MessageNode(kctx, stmt, NULL, ErrTag, "invalid application of 'dollar' to incomplete class %s", KClass_text(ct));
 ////		}
 //		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // dollar C (...)
 //			kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/);
@@ -78,7 +78,7 @@ static kbool_t dollar_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		{ KSymbol_("$"), 0, NULL, 0, Precedence_CStyleSuffixCall, NULL, Expression_dollar, NULL, NULL, NULL, },
 		{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 

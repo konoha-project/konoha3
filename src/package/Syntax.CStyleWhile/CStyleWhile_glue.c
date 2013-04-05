@@ -24,9 +24,9 @@
 
 /* ************************************************************************ */
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
-#include "konoha3/klib.h"
+#include "konoha3.h"
+
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,13 +38,13 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
 	//DBG_P("while statement .. ");
-	kNode *exprNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
+	kNode *exprNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
 	if(kNode_IsError(exprNode)) {
 		KReturn(exprNode);
 	}
 	kNode_Set(CatchContinue, stmt, true);  // set before TypeCheck Block
 	kNode_Set(CatchBreak, stmt, true);
-	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
+	KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
 	KReturn(kNode_Type(stmt, KNode_While, KType_void));
 }
 
@@ -52,13 +52,13 @@ static KMETHOD Statement_do(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
 	//DBG_P("do statement .. ");
-	kNode *exprNode = SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
+	kNode *exprNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
 	if(kNode_IsError(exprNode)) {
 		KReturn(exprNode);
 	}
 	kNode_Set(CatchContinue, stmt, true);  // set before TypeCheck Block
 	kNode_Set(CatchBreak, stmt, true);
-	SUGAR TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
+	KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
 	KReturn(kNode_Type(stmt, KNode_DoWhile, KType_void));
 }
 
@@ -73,7 +73,7 @@ static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		p = kNode_GetParentNULL(p);
 	}
-	KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "break statement not within a loop"));
+	KReturn(KLIB MessageNode(kctx, stmt, NULL, ns, ErrTag, "break statement not within a loop"));
 }
 
 static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
@@ -87,7 +87,7 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		p = kNode_GetParentNULL(p);
 	}
-	KReturn(SUGAR MessageNode(kctx, stmt, NULL, ns, ErrTag, "continue statement not within a loop"));
+	KReturn(KLIB MessageNode(kctx, stmt, NULL, ns, ErrTag, "continue statement not within a loop"));
 }
 
 static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
@@ -99,11 +99,11 @@ static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		{ KSymbol_("do"),    SYNFLAG_CTypeFunc, 0, Precedence_Statement, {SUGAR patternParseFunc}, {SUGARFUNC Statement_do} },
 		{ KSymbol_END, }, /* sentinental */
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("while")), "\"while\" \"(\" $Expr \")\" $Block", 0, trace);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("do")), "\"do\" $Block \"while\" \"(\" $Expr \")\"", 0, trace);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("break")), "\"break\"", 0, trace);
-	SUGAR kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("continue")), "\"continue\"", 0, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("while")), "\"while\" \"(\" $Expr \")\" $Block", 0, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("do")), "\"do\" $Block \"while\" \"(\" $Expr \")\"", 0, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("break")), "\"break\"", 0, trace);
+	KLIB kSyntax_AddPattern(kctx, kSyntax_(ns, KSymbol_("continue")), "\"continue\"", 0, trace);
 	return true;
 }
 
@@ -114,7 +114,7 @@ static kbool_t cstyle_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE *CStyleWhile_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) CStyleWhile_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "CStyle", K_VERSION);

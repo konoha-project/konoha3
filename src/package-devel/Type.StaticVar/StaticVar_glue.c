@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
+#include "konoha3.h"
+
 
 #ifdef __cplusplus
 extern "C"{
@@ -45,7 +45,7 @@ static kbool_t var_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpa
 	return true;
 }
 
-KDEFINE_PACKAGE *StaticVar_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) StaticVar_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "var", "1.0");

@@ -24,7 +24,7 @@
 
 #ifndef MINIOKNOHA_LOCAL_H_
 #define MINIOKNOHA_LOCAL_H_
-#ifndef MINIOKNOHA_H_
+#ifndef KONOHA3_H_
 #error Do not include local.h without konoha.h.
 #endif
 

@@ -106,8 +106,7 @@
 #undef PACKAGE_NAME
 #undef PACKAGE_STRING
 #undef PACKAGE_VERSION
-#include "../../../include/konoha3/konoha.h"
-#include "../../../include/konoha3/sugar.h"
+#include "../../../include/konoha3.h"
 #include "../../../include/konoha3/konoha_common.h"
 #include "../../../include/konoha3/import/methoddecl.h"
 #include <stdio.h>
@@ -118,7 +117,7 @@ struct kRawPtr {
 };
 
 #define MOD_llvm 19/*TODO*/
-#define kmodllvm ((kmodllvm_t *)kctx->modshare[MOD_llvm])
+#define kmodllvm ((kmodllvm_t *)kctx->runtimeModels[MOD_llvm])
 #define KClass_Value (kmodllvm)->cValue
 #define KType_Value (KClass_Value)->typeId
 #if LLVM_VERSION <= 209
@@ -130,12 +129,12 @@ struct kRawPtr {
 #endif
 
 typedef struct {
-	KRuntimeModule h;
+	KRuntimeModel h;
 	KClass *cValue;
 } kmodllvm_t;
 
 typedef struct {
-	KContextModule h;
+	KModelContext h;
 } kllvmmod_t;
 
 namespace konoha {
@@ -4610,35 +4609,35 @@ static KDEFINE_INT_CONST IntAttributes[] = {
 //	kapi->loadClassIntConst(kctx, cid, IntAttributes);
 //}
 
-static void kmodllvm_Setup(KonohaContext *kctx, struct KRuntimeModule *def, int newctx)
+static void kmodllvm_Setup(KonohaContext *kctx, struct KRuntimeModel *def, int newctx)
 {
 	(void)kctx;(void)def;(void)newctx;
 }
 
-static void kmodllvm_free(KonohaContext *kctx, struct KRuntimeModule *baseh)
+static void kmodllvm_free(KonohaContext *kctx, struct KRuntimeModel *baseh)
 {
 	KFree(baseh, sizeof(kmodllvm_t));
 }
 
 static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int argc, KTraceInfo *trace)
 {
-	KRequireKonohaCommonModule(trace)
+	KRequireKonohaCommonModel(trace)
 	(void)argc;
 	kmodllvm_t *base = (kmodllvm_t *)KCalloc_UNTRACE(sizeof(kmodllvm_t), 1);
 	base->h.name     = "llvm";
-	base->h.setupModuleContext = kmodllvm_Setup;
-	base->h.freeModule         = kmodllvm_free;
+	base->h.setupModelContext = kmodllvm_Setup;
+	base->h.freeModel         = kmodllvm_free;
 	KLIB KRuntime_SetModule(kctx, MOD_llvm, &base->h, trace);
 
 #define DEFINE_CLASS_CPP(\
 	/*const char * */structname,\
-	/*ktypeattr_t      */typeId,         /*kshortflag_t    */cflag,\
+	/*ktypeattr_t      */typeId,         /*khalfflag_t    */cflag,\
 	/*ktypeattr_t      */baseTypeId,     /*ktypeattr_t         */superTypeId,\
-	/*ktypeattr_t      */rtype,          /*kushort_t       */cparamsize,\
+	/*ktypeattr_t      */rtype,          /*kuhalfword_t       */cparamsize,\
 	/*struct kparamtype_t   **/cparamItems,\
 	/*size_t     */cstruct_size,\
 	/*KClassField   **/fieldItems,\
-	/*kushort_t  */fieldsize,       /*kushort_t */fieldAllocSize,\
+	/*kuhalfword_t  */fieldsize,       /*kuhalfword_t */fieldAllocSize,\
 		init,\
 		reftrace,\
 		free,\
@@ -4651,13 +4650,13 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		isSubType,\
 		realtype) {\
 	/*const char * */structname,\
-	/*ktypeattr_t      */typeId,         /*kshortflag_t    */cflag,\
+	/*ktypeattr_t      */typeId,         /*khalfflag_t    */cflag,\
 	/*ktypeattr_t      */baseTypeId,     /*ktypeattr_t         */superTypeId,\
-	/*ktypeattr_t      */rtype,          /*kushort_t       */cparamsize,\
+	/*ktypeattr_t      */rtype,          /*kuhalfword_t       */cparamsize,\
 	/*struct kparamtype_t   * */cparamItems,\
 	/*size_t     */cstruct_size,\
 	/*KClassField   * */fieldItems,\
-	/*kushort_t  */fieldsize,       /*kushort_t */fieldAllocSize,\
+	/*kuhalfword_t  */fieldsize,       /*kuhalfword_t */fieldAllocSize,\
 		init,\
 		reftrace,\
 		free,\

@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
+#include "konoha3.h"
+
 
 #ifdef __cplusplus
 extern "C"{
@@ -46,7 +46,7 @@ static void DeclVariable(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ktype
 	}
 	else {
 		kNodeToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", KSymbol_Fmt2(termToken->symbol), KType_text(ty));
-		SUGAR AddLocalVariable(kctx, ns, ty, termToken->symbol);
+		KLIB AddLocalVariable(kctx, ns, ty, termToken->symbol);
 	}
 }
 
@@ -55,11 +55,11 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	kNodeVar *leftHandNode = (kNodeVar *)kNode_At(expr, 1);
 	if(kNode_isSymbolTerm(leftHandNode)) {
-		kNode *texpr = SUGAR TypeVariableNULL(kctx, leftHandNode, ns, KClass_INFER);
+		kNode *texpr = KLIB TypeVariableNULL(kctx, leftHandNode, ns, KClass_INFER);
 		if(texpr == NULL) {
-			kNode *rightHandNode = SUGAR TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
+			kNode *rightHandNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
 			if(rightHandNode != K_NULLNODE) {
-				DeclVariable(kctx, stmt, ns, rightHandNode->attrTypeId, leftHandNode);
+				DeclVariable(kctx, stmt, ns, rightHandNode->typeAttr, leftHandNode);
 			}
 		}
 		else {
@@ -77,7 +77,7 @@ static kbool_t untyped_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 			{assignSyntax->ParseFuncNULL}, {KSugarFunc(ns, TypeCheck_UntypedAssign)}},
 		{ KSymbol_END, }, /* sentinental */
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 
@@ -86,7 +86,7 @@ static kbool_t untyped_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 	return true;
 }
 
-KDEFINE_PACKAGE *UntypedVariable_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) UntypedVariable_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "DynamicLanguages", "1.0");

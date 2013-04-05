@@ -1,7 +1,7 @@
 import("Syntax.JavaStyleClass");
 import("JavaScript.Array");
-import("MiniKonoha.Map");
-import("MiniKonoha.NameSpace");  // konoha.const is obsolete
+import("Konoha.Map");
+import("Konoha.NameSpace");  // konoha.const is obsolete
 import("Syntax.GlobalVariable");
 import("JavaStyle.Object");
 import("posix.thread");

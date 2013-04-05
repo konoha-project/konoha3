@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include "konoha3/konoha.h"
+#include "konoha3.h"
 
 int main(int argc, const char *argv[])
 {
@@ -35,7 +35,7 @@ int main(int argc, const char *argv[])
     assert(sizeof(KonohaStack) == sizeof(krbp_t) * 2);
     assert(sizeof(krbp_t) == sizeof(void *));
     assert(sizeof(intptr_t) == sizeof(kint_t));
-    assert(sizeof(kshort_t) * 2 == sizeof(intptr_t));
+    assert(sizeof(khalfword_t) * 2 == sizeof(intptr_t));
     fprintf(stderr, "%d\n", (int)sizeof(kObject));
     fprintf(stderr, "%d\n", (int)sizeof(KClass));
     return 0;

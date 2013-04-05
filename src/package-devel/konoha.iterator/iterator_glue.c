@@ -25,9 +25,9 @@
 /* ************************************************************************ */
 
 #define USE_STRINGLIB 1
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
-#include "konoha3/klib.h"
+#include "konoha3.h"
+
+
 #include "konoha3/konoha_common.h"
 
 
@@ -163,7 +163,7 @@ static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t iterator_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequireKonohaCommonModule(trace);
+	KRequireKonohaCommonModel(trace);
 	if(KClass_Iterator == NULL) {
 		kparamtype_t IteratorParam = {KType_Object};
 		KDEFINE_CLASS defIterator = {0};
@@ -194,7 +194,7 @@ static kbool_t iterator_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNa
 	return true;
 }
 
-KDEFINE_PACKAGE *iterator_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) iterator_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "iterator", "1.0");

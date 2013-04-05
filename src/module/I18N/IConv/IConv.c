@@ -28,7 +28,7 @@ extern "C" {
 
 #include <iconv.h>
 #include <errno.h>
-#include "konoha3/konoha.h"
+#include "konoha3.h"
 #define I18NAPI PLATAPI I18NModule.
 // -------------------------------------------------------------------------
 /* I18N */

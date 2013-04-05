@@ -24,9 +24,9 @@
 
 /* ************************************************************************ */
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
-#include "konoha3/klib.h"
+#include "konoha3.h"
+
+
 #include "konoha3/import/methoddecl.h"
 
 #ifdef __cplusplus
@@ -194,7 +194,7 @@ static KMETHOD TypeCheck_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sf
 	VAR_TypeCheck(expr, gma, reqty);
 	kToken *tk = expr->TermToken;
 	long long n = kstrtoll(kString_text(tk->text));
-	KReturn(SUGAR kNode_SetUnboxConst(kctx, expr, KType_Int, (uintptr_t)n));
+	KReturn(KLIB kNode_SetUnboxConst(kctx, expr, KType_Int, (uintptr_t)n));
 }
 
 // --------------------------------------------------------------------------
@@ -204,7 +204,7 @@ static kbool_t Number_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		{ KSymbol_NumberPattern, SYNFLAG_CTokenFunc|SYNFLAG_CTypeFunc, 0, 0, {SUGAR termParseFunc}, {SUGARFUNC TypeCheck_ExtendedIntLiteral}, KonohaChar_Digit, {SUGARFUNC TokenFunc_ExtendedIntLiteral}},
 		{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 
 	return true;
 }
@@ -214,7 +214,7 @@ static kbool_t Number_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE *Number_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) Number_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "Number", "0.0");

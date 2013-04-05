@@ -28,8 +28,8 @@ extern "C" {
 
 #include <stdio.h>
 #include <errno.h>
-#include "konoha3/konoha.h"
-#include "konoha3/klib.h"
+#include "konoha3.h"
+
 
 // -------------------------------------------------------------------------
 // JenkinsTest
@@ -143,21 +143,21 @@ static int TEST_printf(const char *fmt, ...)
 static void TEST_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, const char *msg, int isNewLine)
 {
 	const char *kLF = isNewLine ? "\n" : "";
-	PLATAPI printf_i("LINE%d: '%s'%s" ,(int)(kushort_t)pline, msg, kLF);
-	fprintf(stdout, "LINE %d: '%s'%s", (int)(kushort_t)pline, msg, kLF);
+	PLATAPI printf_i("LINE%d: '%s'%s" ,(int)(kuhalfword_t)pline, msg, kLF);
+	fprintf(stdout, "LINE %d: '%s'%s", (int)(kuhalfword_t)pline, msg, kLF);
 }
 
 static void TEST_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t pline, const char *msg)
 {
 	if(taglevel < DebugTag) {
-		PLATAPI printf_i("LINE%d: %s\n", (int)(kushort_t)pline, TAG_t(taglevel));
-		fprintf(stdout, "LINE %d: %s\n", (int)(kushort_t)pline, msg);
+		PLATAPI printf_i("LINE%d: %s\n", (int)(kuhalfword_t)pline, TAG_t(taglevel));
+		fprintf(stdout, "LINE %d: %s\n", (int)(kuhalfword_t)pline, msg);
 	}
 }
 
 static void TEST_reportCaughtException(KonohaContext *kctx, kException *e, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack)
 {
-	int line = (topStack != NULL) ? (kushort_t)topStack[K_RTNIDX].calledFileLine : 0;
+	int line = (topStack != NULL) ? (kuhalfword_t)topStack[K_RTNIDX].calledFileLine : 0;
 	const char *exceptionName = KSymbol_text(e->symbol);
 	PLATAPI printf_i("LINE%d: %s\n", line, exceptionName);
 	fprintf(stdout, "LINE %d: %s %s\n", line, exceptionName, kString_text(e->Message));
@@ -181,7 +181,7 @@ static char* TEST_InputUserPassword(KonohaContext *kctx, const char *message)
 
 // -------------------------------------------------------------------------
 
-kbool_t LoadOutputTestModule(KonohaFactory *factory, ModuleType type)
+KONOHA_EXPORT(kbool_t) LoadOutputTestModule(KonohaFactory *factory, ModuleType type)
 {
 	static KModuleInfo ModuleInfo = {
 		"OutputTest", "0.1", 0, "test",

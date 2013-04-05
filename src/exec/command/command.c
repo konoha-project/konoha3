@@ -22,9 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
-#include "konoha3/klib.h"
 
 #ifdef __GNUC__
 #include <getopt.h>
@@ -32,12 +29,15 @@
 #include "./getopt.c"
 #endif /*__GNUC__ */
 
-#include "konoha3/platform.h"
-#include "konoha3/libcode/minishell.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "konoha3.h"
+
+#include "konoha3/platform.h"
+#include "konoha3/libcode/minishell.h"
 
 // -------------------------------------------------------------------------
 // getopt
@@ -212,7 +212,7 @@ static kbool_t Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **a
 		KonohaContext_Set(Interactive, kctx);
 	}
 	if(interactive_flag) {
-		CommandLine_Import(kctx, "MiniKonoha.Man", trace);
+		CommandLine_Import(kctx, "Konoha.Man", trace);
 		ret = konoha_shell(kctx);
 	}
 	return ret;

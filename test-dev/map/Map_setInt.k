@@ -1,6 +1,6 @@
 // written by masahiro ide
 
-import("MiniKonoha.Map");
+import("Konoha.Map");
 import("JavaScript.Array");
 
 void test() {

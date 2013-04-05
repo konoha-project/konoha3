@@ -28,7 +28,7 @@
 
 //#define GCDEBUG 1
 
-#include "konoha3/konoha.h"
+#include "konoha3.h"
 #include "konoha3/local.h"
 
 #ifdef __cplusplus
@@ -887,7 +887,7 @@ static void KscheduleGC(KonohaContext *kctx, KTraceInfo *trace)
 }
 /* ------------------------------------------------------------------------ */
 
-kbool_t LoadMSGCModule(KonohaFactory *factory, ModuleType type)
+KONOHA_EXPORT(kbool_t) LoadMSGCModule(KonohaFactory *factory, ModuleType type)
 {
 	static KModuleInfo ModuleInfo = {
 		"MSGC", "0.1", 0, "msgc",

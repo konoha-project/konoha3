@@ -25,10 +25,6 @@
 #ifndef PLATFORM_H_
 #define PLATFORM_H_
 
-#ifndef MINIOKNOHA_H_
-#error Do not include platform.h without konoha.h.
-#endif
-
 #if defined(_MSC_VER)
 #include "konoha3/platform_msvc.h"
 #elif defined(__MINGW32__)

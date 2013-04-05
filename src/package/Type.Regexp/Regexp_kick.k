@@ -1,1 +1,0 @@
-Import("JavaScript.Regexp");

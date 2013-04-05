@@ -258,9 +258,9 @@ KLIBDECL void KDict_Set(KonohaContext *kctx, KDict *dict, KKeyValue *kvs0)
 {
 	KKeyValue *kvs = KDict_GetNULL(kctx, dict, kvs0->key);
 	if(kvs != NULL) {
-		//KObjectRefDec(KType_Is(Boxed, kvs->attrTypeId), kvs->ObjectValue);
+		//KObjectRefDec(KType_Is(Boxed, kvs->typeAttr), kvs->ObjectValue);
 		kvs->unboxValue = kvs0->unboxValue;
-		kvs->attrTypeId = kvs0->attrTypeId;
+		kvs->typeAttr = kvs0->typeAttr;
 		return;
 	}
 	KDict_Add(kctx, dict, kvs0);
@@ -270,9 +270,9 @@ KLIBDECL void KDict_Remove(KonohaContext *kctx, KDict *dict, ksymbol_t queryKey)
 {
 	KKeyValue *kvs = KDict_GetNULL(kctx, dict, queryKey);
 	if(kvs != NULL) {
-		//KObjectRefDec(KType_Is(Boxed, kvs->attrTypeId), kvs->ObjectValue);
+		//KObjectRefDec(KType_Is(Boxed, kvs->typeAttr), kvs->ObjectValue);
 		kvs->unboxValue = 0;
-		kvs->attrTypeId = 0;
+		kvs->typeAttr = 0;
 	}
 }
 
@@ -310,7 +310,7 @@ KLIBDECL void KDict_DoEach(KonohaContext *kctx, KDict *dict, void *thunk, void (
 	size_t i, size = KDict_size(dict);
 	for(i = 0; i < size; i++) {
 		KKeyValue *kvs = dict->data.keyValueItems + i;
-		if(kvs->attrTypeId == 0 && kvs->unboxValue == 0) continue;
+		if(kvs->typeAttr == 0 && kvs->unboxValue == 0) continue;
 		f(kctx, thunk, kvs);
 	}
 }
@@ -319,7 +319,7 @@ KLIBDECL void KDict_Reftrace(KonohaContext *kctx, KDict *dict, KObjectVisitor *v
 {
 	size_t i, size = KDict_size(dict);
 	for(i = 0; i < size; i++) {
-		if(KTypeAttr_Is(Boxed, dict->data.keyValueItems[i].attrTypeId)) {
+		if(KTypeAttr_Is(Boxed, dict->data.keyValueItems[i].typeAttr)) {
 			KRefTrace(dict->data.keyValueItems[i].ObjectValue);
 		}
 	}
@@ -521,7 +521,7 @@ static kfileline_t KfileId(KonohaContext *kctx, const char *name, size_t len, in
 	KLock(kctx->share->filepackMutex);
 	kfileline_t uline = KHashMap_getcode(kctx, kctx->share->fileIdMap_KeyOnList, kctx->share->fileIdList, name, len, hcode, spol, def);
 	KUnlock(kctx->share->filepackMutex);
-	return uline << (sizeof(kshort_t) * 8);
+	return uline << (sizeof(khalfword_t) * 8);
 }
 
 static kpackageId_t KpackageId(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
@@ -614,7 +614,7 @@ static KKeyValue* kObjectProto_GetKeyValue(KonohaContext *kctx, kAbstractObject 
 	while(pm != NULL) {
 		KDict *dict = &(pm->dict);
 		KKeyValue *kvs = KDict_GetNULL(kctx, dict, key);
-		if(kvs != NULL && kvs->attrTypeId != 0) return kvs;
+		if(kvs != NULL && kvs->typeAttr != 0) return kvs;
 		pm = pm->parent;
 	}
 	return NULL;
@@ -680,8 +680,8 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 	if(w->count > 0) {
 		KLIB KBuffer_Write(kctx, w->wb, ", ", 2);
 	}
-	KLIB KBuffer_printf(kctx, w->wb, "%s%s: (%s)", KSymbol_Fmt2(key), KType_text(d->attrTypeId));
-	if(KTypeAttr_Is(Boxed, d->attrTypeId)) {
+	KLIB KBuffer_printf(kctx, w->wb, "%s%s: (%s)", KSymbol_Fmt2(key), KType_text(d->typeAttr));
+	if(KTypeAttr_Is(Boxed, d->typeAttr)) {
 		KUnsafeFieldSet(w->values[w->pos].asObject, d->ObjectValue);
 	}
 	else {
@@ -695,7 +695,7 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 			return;
 		}
 	}
-	KClass_(KTypeAttr_Unmask(d->attrTypeId))->format(kctx, w->values, w->pos, w->wb);
+	KClass_(KTypeAttr_Unmask(d->typeAttr))->format(kctx, w->values, w->pos, w->wb);
 }
 
 static int kObjectProto_format(KonohaContext *kctx, KonohaValue *values, int pos, KBuffer *wb, int count)
@@ -830,7 +830,7 @@ static int DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 		fault ^= ExternalFault;
 	}
 	if(KFlag_Is(int, fault, SoftwareFault)) {
-		if(PLATAPI DiagnosisModule.DiagnosisCheckSoftwareTestIsPass(kctx, KFileLine_textFileName(trace->pline), (kushort_t)trace->pline)) {
+		if(PLATAPI DiagnosisModule.DiagnosisCheckSoftwareTestIsPass(kctx, KFileLine_textFileName(trace->pline), (kuhalfword_t)trace->pline)) {
 			KFlag_Set(int, fault, SoftwareFault, false);
 		}
 	}
@@ -841,7 +841,7 @@ static int DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 static void CheckSafePoint(KonohaContext *kctx, KonohaStack *sfp, kfileline_t uline)
 {
 	PLATAPI GCModule.ScheduleGC(kctx, NULL); // FIXME: NULL
-	if(kctx->modshare[MOD_EVENT] != NULL) {
+	if(kctx->runtimeModels[MOD_EVENT] != NULL) {
 		KLIB KscheduleEvent(kctx);
 	}
 //	if(PLATAPI ScheduleEvent != NULL) {

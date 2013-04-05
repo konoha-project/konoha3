@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
+#include "konoha3.h"
+
 
 #ifdef __cplusplus
 extern "C"{
@@ -52,7 +52,7 @@ static kbool_t kMethod_CheckMethodKStackCall(KonohaContext *kctx, KonohaStack *s
 	kParam *param = kMethod_GetParam(mtd);
 	for(i = 1; i <= argc; i++) {
 		KClass *paramClass = kObject_class(sfp[i].asObject);
-		ktypeattr_t ptype = param->paramtypeItems[i-1].attrTypeId;
+		ktypeattr_t ptype = param->paramtypeItems[i-1].typeAttr;
 		if(ptype != paramClass->typeId) {
 			return false;
 		}
@@ -112,7 +112,7 @@ static kbool_t dynamic_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 	return true;
 }
 
-KDEFINE_PACKAGE *Dynamic_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) Dynamic_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");

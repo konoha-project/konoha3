@@ -24,8 +24,8 @@
 
 #define USE_STRINGLIB 1
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
+#include "konoha3.h"
+
 #include "konoha3/konoha_common.h"
 #include "konoha3/import/methoddecl.h"
 
@@ -584,7 +584,7 @@ static KMETHOD XmlReader_normalization(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t xml_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequireKonohaCommonModule(trace);
+	KRequireKonohaCommonModel(trace);
 	KDEFINE_CLASS defXml = {
 		STRUCTNAME(XmlReader),
 		.cflag = KClassFlag_Final,

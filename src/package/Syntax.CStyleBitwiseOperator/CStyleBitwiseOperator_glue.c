@@ -24,8 +24,8 @@
 
 /* ************************************************************************ */
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
+#include "konoha3.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -107,8 +107,8 @@ static kbool_t int_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		{ KSymbol_("^"),  0, Precedence_CStyleBITXOR, 0, {SUGAR opParseFunc}, {SUGAR methodTypeFunc}},
 		{ KSymbol_END, },
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-//	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_NumberPattern, KonohaChar_Digit, KSugarFunc(ns, TokenFunc_ExtendedIntLiteral));
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+//	KLIB kNameSpace_SetTokenFunc(kctx, ns, KSymbol_NumberPattern, KonohaChar_Digit, KSugarFunc(ns, TokenFunc_ExtendedIntLiteral));
 	return true;
 }
 
@@ -133,7 +133,7 @@ static kbool_t CStyleBitwiseOperator_ExportNameSpace(KonohaContext *kctx, kNameS
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE *CStyleBitwiseOperator_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) CStyleBitwiseOperator_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "CStyle", K_VERSION);

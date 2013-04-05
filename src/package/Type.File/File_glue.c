@@ -36,8 +36,8 @@
 #include <errno.h>
 #include <stdio.h>
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
+#include "konoha3.h"
+
 #include "konoha3/konoha_common.h"
 #include "konoha3/import/methoddecl.h"
 
@@ -522,7 +522,7 @@ static void file_defineConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *tr
 
 static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequireKonohaCommonModule(trace);
+	KRequireKonohaCommonModel(trace);
 	KRequirePackage("Type.Bytes", trace);
 	if(KClass_File == NULL) {
 		KDEFINE_CLASS defFile = {};
@@ -553,7 +553,7 @@ static kbool_t file_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE *File_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) File_Init(void)
 {
 	static KDEFINE_PACKAGE d;
 	KSetPackageName(d, "file", "1.0");

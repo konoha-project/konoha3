@@ -25,7 +25,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #define USE_EXECUTIONENGINE
-#include "../../../../include/konoha3/konoha.h"
+#include "../../../../include/konoha3.h"
 #include "../../../../include/konoha3/konoha_common.h"
 #include "../../../../include/konoha3/sugar.h"
 #include "../../../../include/konoha3/import/module.h"
@@ -74,7 +74,7 @@ static inline bool IsUnBoxedType(enum TypeId Type)
 	}
 }
 
-#define FloatIsDefined(kctx) (KDefinedKonohaCommonModule() && KClass_Float != NULL)
+#define FloatIsDefined(kctx) (KDefinedKonohaCommonModel() && KClass_Float != NULL)
 
 static inline enum TypeId ConvertToTypeId(KonohaContext *kctx, ktypeattr_t type)
 {

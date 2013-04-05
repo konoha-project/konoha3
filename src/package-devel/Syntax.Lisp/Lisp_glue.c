@@ -24,9 +24,9 @@
 
 /* ************************************************************************ */
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
-#include "konoha3/klib.h"
+#include "konoha3.h"
+
+
 #include "konoha3/import/methoddecl.h"
 #include <stdio.h>
 
@@ -45,11 +45,11 @@ static KMETHOD Expression_LispOperator(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *opToken = tokenList->TokenVarItems[beginIdx];
 		kNode_Type(expr, KNode_Block, KType_var);
 		int i = beginIdx + 1;
-		SUGAR kNode_Op(kctx, expr, opToken, 0);
+		KLIB kNode_Op(kctx, expr, opToken, 0);
 		while(i < endIdx) {
 			int orig = i;
-			kNode *node = SUGAR ParseNewNode(kctx, ns, tokenList, &i, i+1, ParseExpressionOption, "(");
-			SUGAR kNode_AddNode(kctx, expr, node);
+			kNode *node = KLIB ParseNewNode(kctx, ns, tokenList, &i, i+1, ParseExpressionOption, "(");
+			KLIB kNode_AddNode(kctx, expr, node);
 			assert(i != orig);
 		}
 		int size = kNode_GetNodeListSize(kctx, expr);
@@ -64,7 +64,7 @@ static KMETHOD Expression_LispOperator(KonohaContext *kctx, KonohaStack *sfp)
 		for(i = 2; i < size-1; i++) {
 			kNode *node = KNewNode(ns);
 			rightNode = kNode_At(expr, i);
-			SUGAR kNode_Op(kctx, node, opToken, 2, leftNode, rightNode);
+			KLIB kNode_Op(kctx, node, opToken, 2, leftNode, rightNode);
 			leftNode = node;
 		}
 		rightNode = kNode_At(expr, i);
@@ -89,7 +89,7 @@ static kbool_t Lisp_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		{ TOKEN(MOD), SYNFLAG_CParseFunc,0, Precedence_CStylePrefixOperator, {SUGARFUNC Expression_LispOperator}, {SUGAR methodTypeFunc},},
 		{ KSymbol_END, }, /* sentinental */
 	};
-	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 
 	return true;
 }
@@ -99,7 +99,7 @@ static kbool_t Lisp_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE *Lisp_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) Lisp_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "Lisp", "0.0");

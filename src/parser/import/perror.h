@@ -49,7 +49,7 @@ static kString *new_StringMessage(KonohaContext *kctx, kArray *gcstack, KBuffer 
 	const char *msg = TAG_t(taglevel);
 	if(uline > 0) {
 		const char *file = KFileLine_textFileName(uline);
-		KLIB KBuffer_printf(kctx, wb, "%s(%s:%d) " , msg, PLATAPI shortFilePath(file), (kushort_t)uline);
+		KLIB KBuffer_printf(kctx, wb, "%s(%s:%d) " , msg, PLATAPI shortFilePath(file), (kuhalfword_t)uline);
 	}
 	else {
 		KLIB KBuffer_printf(kctx, wb, "%s " , msg);
@@ -93,7 +93,7 @@ static void kNode_ToError(KonohaContext *kctx, kNode *node, kString *errmsg)
 		errmsg = TS_EMPTY;
 	}
 	kNode_setnode(node, KNode_Error);
-	node->attrTypeId = KType_void;
+	node->typeAttr = KType_void;
 	KFieldSet(node, node->ErrorMessage, errmsg);
 	kNode_Set(ObjectConst, node, false);
 	//node->stackbase = ns == NULL ? 0 : ns->genv->localScope.varsize;

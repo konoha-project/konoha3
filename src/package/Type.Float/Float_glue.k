@@ -1,4 +1,4 @@
-// import("MiniKonoha.Syntax");
+// import("Konoha.Syntax");
 // import("cstyle"); // use cstyle
 // import("Java.String");
 

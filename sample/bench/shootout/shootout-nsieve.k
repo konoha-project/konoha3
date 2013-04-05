@@ -8,7 +8,7 @@ import("cstyle");
 import("JavaScript.Array");
 import("Syntax.JavaStyleClass");
 import("Syntax.JavaNewArray");
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 import("Java.String");
 
 const N=8;

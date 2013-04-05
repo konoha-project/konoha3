@@ -24,9 +24,9 @@
 //
 ///* ************************************************************************ */
 //
-//#include "konoha3/konoha.h"
-//#include "konoha3/sugar.h"
-//#include "konoha3/klib.h"
+//#include "konoha3.h"
+//
+//
 //#include "konoha3/import/methoddecl.h"
 //
 //#ifdef __cplusplus
@@ -66,7 +66,7 @@
 //	}
 //	if(beginIdx == i) {
 //		start = beginIdx + 1;
-//		end = SUGAR kNameSpace_FindEndOfStatement(kctx, kStmt_ns(stmt), tokenList, i, endIdx);
+//		end = KLIB kNameSpace_FindEndOfStatement(kctx, kStmt_ns(stmt), tokenList, i, endIdx);
 //	}
 //	else {
 //		start = beginIdx;
@@ -82,14 +82,14 @@
 //			{0, NULL, 0, 0},   /* sentinel */
 //		};
 //		macro.TargetPolicy.RemovingIndent = true;
-//		SUGAR KTokenSeq_ApplyMacro(kctx, &macro, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam);
-//		kExpr *expr = SUGAR kStmt_ParseExpr(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, NULL);
+//		KLIB kTokenSeq_ApplyMacro(kctx, &macro, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam);
+//		kExpr *expr = KLIB kStmt_ParseExpr(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, NULL);
 //		if(expr != K_NULLEXPR) {
-//			SUGAR kStmt_AddParsedObject(kctx, stmt, KSymbol_ExprPattern, UPCAST(expr));
+//			KLIB kStmt_AddParsedObject(kctx, stmt, KSymbol_ExprPattern, UPCAST(expr));
 //			((kStmtVar *)stmt)->syn = KSyntax_(Stmt_ns(stmt), KSymbol_ExprPattern);
 //		}
 //		KTokenSeq_Pop(kctx, macro);
-//		end = SUGAR kNameSpace_FindEndOfStatement(kctx, kStmt_ns(stmt), tokenList, end+1, endIdx);
+//		end = KLIB kNameSpace_FindEndOfStatement(kctx, kStmt_ns(stmt), tokenList, end+1, endIdx);
 //		KReturnUnboxValue(end);
 //	}
 //	KReturnUnboxValue(-1);
@@ -102,7 +102,7 @@
 //		{ KSymbol_("$IncExpr"), 0, NULL, 0, 0, PatternMatch_IncExpr, NULL, NULL, NULL, NULL, },
 //		{ KSymbol_END, }, /* sentinental */
 //	};
-//	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+//	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 //}
 //
 ///* ArrayLiteral */
@@ -133,11 +133,11 @@
 //	kToken *termToken = expr->TermToken;
 //	DBG_ASSERT(kExpr_IsTerm(expr) && IS_Token(termToken));
 //	if(termToken->unresolvedTokenType == TokenType_CODE) {
-//		SUGAR kToken_ToBraceGroup(kctx, (kTokenVar *)termToken, Stmt_ns(stmt), NULL);
+//		KLIB kToken_ToBraceGroup(kctx, (kTokenVar *)termToken, Stmt_ns(stmt), NULL);
 //	}
 //	if(termToken->resolvedSyntaxInfo->keyword == KSymbol_BraceGroup) {
-//		kExprVar *arrayExpr = SUGAR new_UntypedCallStyleExpr(kctx, stmt->syn/*DUMMY*/, 2, K_NULL, K_NULL);
-//		SUGAR kStmt_AddExprParam(kctx, stmt, arrayExpr, termToken->subTokenList, 0, kArray_size(termToken->subTokenList), NULL);
+//		kExprVar *arrayExpr = KLIB new_UntypedCallStyleExpr(kctx, stmt->syn/*DUMMY*/, 2, K_NULL, K_NULL);
+//		KLIB kStmt_AddExprParam(kctx, stmt, arrayExpr, termToken->subTokenList, 0, kArray_size(termToken->subTokenList), NULL);
 //		size_t i;
 //		KClass *requestClass = KClass_(reqty);
 //		KClass *paramType = KClass_INFER;
@@ -148,13 +148,13 @@
 //			requestClass = NULL; // undefined
 //		}
 //		for(i = 2; i < kArray_size(arrayExpr->NodeList); i++) {
-//			kExpr *typedExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, arrayExpr, i, gma, paramType, 0);
+//			kExpr *typedExpr = KLIB kStmt_TypeCheckExprAt(kctx, stmt, arrayExpr, i, gma, paramType, 0);
 //			if(typedExpr == K_NULLEXPR) {
 //				KReturn(typedExpr);
 //			}
 ////			DBG_P("i=%d, paramType=%s, typedExpr->ty=%s", i, KType_text(paramType), KType_text(typedExpr->ty));
 //			if(paramType->typeId == KType_var) {
-//				paramType = KClass_(typedExpr->attrTypeId);
+//				paramType = KClass_(typedExpr->typeAttr);
 //			}
 //		}
 //		if(requestClass == NULL) {
@@ -163,14 +163,14 @@
 //		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), KClass_Array, KMethodName_("{}"), -1, KMethodMatch_NoOption);
 //		DBG_ASSERT(mtd != NULL);
 //		KFieldSet(arrayExpr, arrayExpr->NodeList->MethodItems[0], mtd);
-//		KFieldSet(arrayExpr, arrayExpr->NodeList->ExprItems[1], SUGAR kExpr_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, kArray_size(arrayExpr->NodeList) - 2));
+//		KFieldSet(arrayExpr, arrayExpr->NodeList->ExprItems[1], KLIB kExpr_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, kArray_size(arrayExpr->NodeList) - 2));
 //		KReturn(Expr_typed(arrayExpr, TEXPR_CALL, requestClass->typeId));
 //	}
 //}
 //
 //static kbool_t cstyle_defineArrayLiteral(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 //{
-//	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KSymbol_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_ArrayLiteral));
+//	KLIB kNameSpace_AddSugarFunc(kctx, ns, KSymbol_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_ArrayLiteral));
 //	KDEFINE_METHOD MethodData[] = {
 //		_Public|kMethod_Hidden, _F(Array_newList), KType_Array, KType_Array, KMethodName_("{}"), 0,
 //		DEND,
@@ -202,7 +202,7 @@
 //		prev = ch;
 //	}
 //	if(IS_NOTNULL(tk)) {
-//		SUGAR kToken_ToError(kctx, tk, ErrTag, "must close with %s", "'");
+//		KLIB kToken_ToError(kctx, tk, ErrTag, "must close with %s", "'");
 //	}
 //	KReturnUnboxValue(0);
 //}
@@ -213,7 +213,7 @@
 //	kToken *tk = expr->TermToken;
 //	if(kString_size(tk->text) == 1) {
 //		int ch = kString_text(tk->text)[0];
-//		KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_Int, ch));
+//		KReturn(KLIB kExpr_SetUnboxConstValue(kctx, expr, KType_Int, ch));
 //	}
 //	else if(kString_size(tk->text) == 2) {
 //		int ch = kString_text(tk->text)[0];
@@ -230,7 +230,7 @@
 //			default:
 //				KReturn(K_NULLEXPR);
 //			}
-//			KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_Int, ch));
+//			KReturn(KLIB kExpr_SetUnboxConstValue(kctx, expr, KType_Int, ch));
 //		}
 //	}
 //	KReturn(K_NULLEXPR);
@@ -245,12 +245,12 @@
 //	kNameSpace *ns = Stmt_ns(stmt);
 //	int nextIdx = SUGAR TokenUtils_ParseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, &genericsClass);
 //	if(nextIdx != -1) {  // to avoid Func[T]
-//		KReturn(SUGAR kStmt_ParseOperatorExpr(kctx, stmt, tokenList->TokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
+//		KReturn(KLIB kStmt_ParseOperatorExpr(kctx, stmt, tokenList->TokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
 //	}
 //	DBG_P("beginIdx=%d, endIdx=%d", beginIdx, endIdx);
 //	kToken *currentToken = tokenList->TokenItems[operatorIdx];
 //	if(beginIdx < operatorIdx) {
-//		kExpr *leftExpr = SUGAR kStmt_ParseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
+//		kExpr *leftExpr = KLIB kStmt_ParseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
 //		if(leftExpr == K_NULLEXPR) {
 //			KReturn(leftExpr);
 //		}
@@ -259,9 +259,9 @@
 //		tkN->resolvedSymbol= KMethodName_ToGetter(0);
 //		tkN->uline = currentToken->uline;
 //		KSyntax *syn = KSyntax_(Stmt_ns(stmt), KSymbol_ExprMethodCall);
-//		leftExpr  = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, tkN, leftExpr);
-//		leftExpr = SUGAR kStmt_AddExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), "[");
-//		KReturn(SUGAR kStmt_RightJoinExpr(kctx, stmt, leftExpr, tokenList, operatorIdx + 1, endIdx));
+//		leftExpr  = KLIB new_UntypedCallStyleExpr(kctx, syn, 2, tkN, leftExpr);
+//		leftExpr = KLIB kStmt_AddExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), "[");
+//		KReturn(KLIB kStmt_RightJoinExpr(kctx, stmt, leftExpr, tokenList, operatorIdx + 1, endIdx));
 //	}
 //	DBG_P("nothing");
 //}
@@ -281,9 +281,9 @@
 //		{ KSymbol_("--"), SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, Precedence_CStylePREUNARY, NULL, Expression_Increment,},
 //		{ KSymbol_END, }, /* sentinental */
 //	};
-//	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-//	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("++"), 1,  "X X = (X) + 1", false);
-//	SUGAR kNameSpace_SetMacroData(kctx, ns, KSymbol_("--"), 1,  "X X = (X) - 1", false);
+//	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+//	KLIB kNameSpace_SetMacroData(kctx, ns, KSymbol_("++"), 1,  "X X = (X) + 1", false);
+//	KLIB kNameSpace_SetMacroData(kctx, ns, KSymbol_("--"), 1,  "X X = (X) - 1", false);
 //}
 //
 ///* ------------------------------------------------------------------------ */
@@ -460,7 +460,7 @@
 //	VAR_TypeCheck(stmt, expr, gma, reqty);
 //	kToken *tk = expr->TermToken;
 //	long long n = kstrtoll(kString_text(tk->text));
-//	KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, KType_Int, (uintptr_t)n));
+//	KReturn(KLIB kExpr_SetUnboxConstValue(kctx, expr, KType_Int, (uintptr_t)n));
 //}
 //
 //static kbool_t int_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
@@ -470,9 +470,9 @@
 //		{ KSymbol_NumberPattern, 0,  NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_ExtendedIntLiteral, },
 //		{ KSymbol_END, },
 //	};
-//	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
+//	KLIB kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 //
-//	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_NumberPattern, KonohaChar_Digit, new_SugarFunc(ns, TokenFunc_ExtendedIntLiteral));
+//	KLIB kNameSpace_SetTokenFunc(kctx, ns, KSymbol_NumberPattern, KonohaChar_Digit, new_SugarFunc(ns, TokenFunc_ExtendedIntLiteral));
 //	return true;
 //}
 //
@@ -485,8 +485,8 @@
 //		{ KSymbol_("$SingleQuotedChar"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_SingleQuotedChar, },
 //		{ KSymbol_END, }, /* sentinental */
 //	};
-//	SUGAR kNameSpace_DefineSyntax(kctx, ns, defLiteral, trace);
-//	SUGAR kNameSpace_SetTokenFunc(kctx, ns, KSymbol_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(ns, TokenFunc_SingleQuotedChar));
+//	KLIB kNameSpace_DefineSyntax(kctx, ns, defLiteral, trace);
+//	KLIB kNameSpace_SetTokenFunc(kctx, ns, KSymbol_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(ns, TokenFunc_SingleQuotedChar));
 //
 //	cstyle_defineExpression(kctx, ns, option, trace);
 //	cstyle_defineArrayLiteral(kctx, ns, trace);

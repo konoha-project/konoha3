@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "konoha3/konoha.h"
-#include "konoha3/klib.h"
+#include "konoha3.h"
+
 #include "konoha3/konoha_common.h"
 #include "konoha3/import/methoddecl.h"
 
@@ -451,7 +451,7 @@ static kbool_t json_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE *Json_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) Json_Init(void)
 {
 	static KDEFINE_PACKAGE d = {};
 	KSetPackageName(d, "json", "1.0");

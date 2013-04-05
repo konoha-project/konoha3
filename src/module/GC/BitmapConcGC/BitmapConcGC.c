@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "konoha3/konoha.h"
+#include "konoha3.h"
 #include "konoha3/local.h"
 
 #ifdef __cplusplus
@@ -38,7 +38,7 @@ extern "C" {
 
 /* ------------------------------------------------------------------------ */
 
-kbool_t LoadBitmapConcGCModule(KonohaFactory *factory, ModuleType type)
+KONOHA_EXPORT(kbool_t) LoadBitmapConcGCModule(KonohaFactory *factory, ModuleType type)
 {
 	static KModuleInfo ModuleInfo = {
 		"BitmapConGC", "0.1", 0, "bmgc congc",

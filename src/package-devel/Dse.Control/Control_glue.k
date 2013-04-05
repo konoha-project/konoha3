@@ -10,9 +10,9 @@ import("JavaScript.String");
 import("JavaScript.Array");
 import("JavaScript.Date");
 import("Lib.Curl");
-import("MiniKonoha.NameSpace");
-import("MiniKonoha.Map");
-import("MiniKonoha.EventListener");
+import("Konoha.NameSpace");
+import("Konoha.Map");
+import("Konoha.EventListener");
 import("posix.process");
 
 load("/etc/dse/config.k");

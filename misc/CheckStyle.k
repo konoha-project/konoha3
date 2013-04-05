@@ -4,7 +4,7 @@ import("JavaScript.String");
 import("Type.File");
 import("Type.Bytes");
 import("Syntax.CStyleWhile");
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 
 String readFile(String path) {
     FILE file = new FILE(path, "rb");
@@ -59,9 +59,9 @@ void main() {
         "java2.string", "konoha.eval"];
     String[] after  = ["JavaScript.Array","JavaScript.String","Type.Float","JavaScript.Math", "JavaScript.Regexp", "JavaScript.Date", "Type.Bytes", "Type.File",
         "Type.Complex", "Lib.Curl", "Lib.Libvirt", "Lib.Gmp", "Lib.Openssl", "Lib.Mecab", "Lib.Llvm", "Lib.Apache", "Type.Json", "Java.String",
-        "Java.Object", "JavaScript.Prototype", "MiniKonoha.Console", "MiniKonoha.Syntax", "MiniKonoha.Field", "MiniKonoha.Man",
-        "MiniKonoha.NameSpace", "Syntax.GlobalVariable", "Syntax.JavaStyleClass", "Type.Dynamic", "Syntax.UntypedVariable", "Type.StaticVar", "Lib.Libxml2.Xmlreader",
-        "Lib.Mecab", "Lib.Mpi", "Lib.Openssl", "Lib.Python", "MiniKonoha.Sql", "MiniKonoha.NameSpace", "Syntax.JavaImport", "Java.String", "MiniKonoha.Eval"];
+        "Java.Object", "JavaScript.Prototype", "Konoha.Console", "Konoha.Syntax", "Konoha.Field", "Konoha.Man",
+        "Konoha.NameSpace", "Syntax.GlobalVariable", "Syntax.JavaStyleClass", "Type.Dynamic", "Syntax.UntypedVariable", "Type.StaticVar", "Lib.Libxml2.Xmlreader",
+        "Lib.Mecab", "Lib.Mpi", "Lib.Openssl", "Lib.Python", "Konoha.Sql", "Konoha.NameSpace", "Syntax.JavaImport", "Java.String", "Konoha.Eval"];
 
 
     while (true) {
@@ -91,6 +91,9 @@ void main() {
         data = replace(args[i], data, "^static\tkbool_t", "static\tkbool_t", "static kbool_t");
         data = replace(args[i], data, "#include<", "#include<", "#include <");
         data = replace(args[i], data, "#include\"", "#include\"", "#include \"");
+        data = replace(args[i], data, "konoha3/konoha.h", "konoha3/konoha.h", "konoha3.h");
+        data = replace(args[i], data, "#include \"konoha3/sugar.h\"", "#include \"konoha3/sugar.h\"", "");
+        data = replace(args[i], data, "MiniKonoha\\.", "MiniKonoha.", "Konoha.");
         data = replace(args[i], data, "while \\(", "while (", "while(");
         data = replace(args[i], data, "\n\t\n", "\n\t\n", "\n\n");
         data = replace(args[i], data, ";\t\n", ";\t\n", ";\n");

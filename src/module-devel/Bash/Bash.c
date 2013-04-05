@@ -23,9 +23,9 @@
  ***************************************************************************/
 #define USE_EXECUTIONENGINE
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
-#include "konoha3/klib.h"
+#include "konoha3.h"
+
+
 #include "konoha3/import/module.h"
 
 #define ARGLENGTH 8
@@ -191,7 +191,7 @@ static kbool_t BashBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder
 			}
 		}
 
-		if(!SUGAR VisitNode(kctx, builder, node, thunk)) {
+		if(!KLIB VisitNode(kctx, builder, node, thunk)) {
 			ret = false;
 			break;
 		}
@@ -199,7 +199,7 @@ static kbool_t BashBuilder_VisitBlockNode(KonohaContext *kctx, KBuilder *builder
 			BashBuilder_EmitNewLineWith(kctx, bashBuilder, "");
 			goto L_RETURN;
 		}
-		if(kNode_At(node, 1)->attrTypeId <= KType_0) {
+		if(kNode_At(node, 1)->typeAttr <= KType_0) {
 			BashBuilder_EmitNewLineWith(kctx, bashBuilder, "");
 		}
 	}
@@ -216,20 +216,20 @@ static kbool_t BashBuilder_VisitNode(KonohaContext *kctx, KBuilder *builder, kNo
 	kbool_t ret;
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
 	BashBuilder_EmitString(kctx, bashBuilder, prefix, "", "");
-	ret = SUGAR VisitNode(kctx, builder, expr, thunk);
+	ret = KLIB VisitNode(kctx, builder, expr, thunk);
 	BashBuilder_EmitString(kctx, bashBuilder, suffix, "", "");
 	return ret;
 }
 
 static kbool_t BashBuilder_VisitPushNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);
+	KLIB VisitNode(kctx, builder, expr->NodeToPush, thunk);
 	return true;
 }
 
 static kbool_t BashBuilder_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk)
 {
-	SUGAR VisitNode(kctx, builder, expr->NodeToPush, thunk);
+	KLIB VisitNode(kctx, builder, expr->NodeToPush, thunk);
 	return true;
 }
 
@@ -246,7 +246,7 @@ static kbool_t BashBuilder_VisitReturnNode(KonohaContext *kctx, KBuilder *builde
 		BashBuilder_EmitString(kctx, bashBuilder, "return ", "", "");
 	}
 	if(expr != NULL && IS_Node(expr)) {
-		SUGAR VisitNode(kctx, builder, expr, thunk);
+		KLIB VisitNode(kctx, builder, expr, thunk);
 	}
 	BashBuilder_EmitString(kctx, bashBuilder, "", "", "");
 	return true;
@@ -258,10 +258,10 @@ static kbool_t BashBuilder_VisitIfNode(KonohaContext *kctx, KBuilder *builder, k
 	kNode *elseNode = kNode_getElseBlock(kctx, stmt);
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
 	BashBuilder_VisitNode(kctx, builder, thenNode, thunk, "if [ ", " ]; then ");
-	SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
+	KLIB VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
 	if(elseNode != K_NULLBLOCK) {
 		BashBuilder_EmitString(kctx, bashBuilder, "else", "", "");
-		SUGAR VisitNode(kctx, builder, elseNode, thunk);
+		KLIB VisitNode(kctx, builder, elseNode, thunk);
 	}
 	BashBuilder_EmitString(kctx, bashBuilder, "fi", "", "");
 	return true;
@@ -273,7 +273,7 @@ static kbool_t BashBuilder_VisitWhileNode(KonohaContext *kctx, KBuilder *builder
 	BashBuilder_VisitNode(kctx, builder, kNode_getFirstNode(kctx, stmt), thunk, "while [ ", " ]\n");
 	bashBuilder->isIndentEmitted = false;
 	BashBuilder_EmitString(kctx, bashBuilder, "do", "", "");
-	SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
+	KLIB VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
 	BashBuilder_EmitString(kctx, bashBuilder, "done", "", "");
 	return true;
 }
@@ -282,7 +282,7 @@ static kbool_t BashBuilder_VisitDoWhileNode(KonohaContext *kctx, KBuilder *build
 {
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
 	BashBuilder_EmitString(kctx, bashBuilder, "do", "", "");
-	SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
+	KLIB VisitNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
 	BashBuilder_VisitNode(kctx, builder, kNode_getFirstNode(kctx, stmt), thunk, "while(", ");");
 	return true;
 }
@@ -316,18 +316,18 @@ static kbool_t BashBuilder_VisitThrowNode(KonohaContext *kctx, KBuilder *builder
 static kbool_t BashBuilder_VisitTryNode(KonohaContext *kctx, KBuilder *builder, kNode *stmt, void* thunk)
 {
 	kNode *tryNode     = kNode_getFirstBlock(kctx, stmt);
-	kNode *catchNode   = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("catch"),   K_NULLBLOCK);
-	kNode *finallyNode = SUGAR kNode_GetNode(kctx, stmt, KSymbol_("finally"), K_NULLBLOCK);
+	kNode *catchNode   = KLIB kNode_GetNode(kctx, stmt, KSymbol_("catch"),   K_NULLBLOCK);
+	kNode *finallyNode = KLIB kNode_GetNode(kctx, stmt, KSymbol_("finally"), K_NULLBLOCK);
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
 	BashBuilder_EmitNewLineWith(kctx, bashBuilder, "try ");
-	SUGAR VisitNode(kctx, builder, tryNode, thunk);
+	KLIB VisitNode(kctx, builder, tryNode, thunk);
 	if(catchNode != K_NULLBLOCK) {
 		BashBuilder_EmitString(kctx, bashBuilder, "catch(e) ", "", "");
-		SUGAR VisitNode(kctx, builder, catchNode, thunk);
+		KLIB VisitNode(kctx, builder, catchNode, thunk);
 	}
 	if(finallyNode != K_NULLBLOCK) {
 		BashBuilder_EmitString(kctx, bashBuilder, "finally", "", "");
-		SUGAR VisitNode(kctx, builder, finallyNode, thunk);
+		KLIB VisitNode(kctx, builder, finallyNode, thunk);
 	}
 	return true;
 }
@@ -367,7 +367,7 @@ static kbool_t BashBuilder_VisitConstNode(KonohaContext *kctx, KBuilder *builder
 
 static kbool_t BashBuilder_VisitUnboxConstNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
-	BashBuilder_EmitUnboxConstValue(kctx, builder, KClass_(node->attrTypeId), node->unboxConstValue);
+	BashBuilder_EmitUnboxConstValue(kctx, builder, KClass_(node->typeAttr), node->unboxConstValue);
 	return true;
 }
 
@@ -391,7 +391,7 @@ static kbool_t BashBuilder_VisitLocalNode(KonohaContext *kctx, KBuilder *builder
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
 	kToken *tk = (kToken *)node->TermToken;
 
-	if(node->attrTypeId > KType_System) {
+	if(node->typeAttr > KType_System) {
 		BashBuilder_EmitString(kctx, bashBuilder, kString_text(tk->text), "", "");
 		bashBuilder->indent--;
 		BashBuilder_EmitNewLineWith(kctx, bashBuilder, "");
@@ -427,7 +427,7 @@ static void BashBuilder_AddLocalVariable(KonohaContext *kctx, BashBuilder *bashB
 		KKeyValue kv0 = {0};
 		kv0.key = key;
 		kv0.unboxValue = key;
-		kv0.attrTypeId = KType_Int;
+		kv0.typeAttr = KType_Int;
 
 		KLIB KDict_Add(kctx, dict, &kv0);
 		BashBuilder_EmitString(kctx, bashBuilder, "local ", "", "");
@@ -440,8 +440,8 @@ static kbool_t BashBuilder_VisitLocalAssignNode(KonohaContext *kctx, KBuilder *b
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
 	kToken *tk = node->TermToken;
 
-	if(node->attrTypeId > KType_System) {
-		BashBuilder_EmitString(kctx, bashBuilder, KClass_text(KClass_(node->attrTypeId)), " \'", "");
+	if(node->typeAttr > KType_System) {
+		BashBuilder_EmitString(kctx, bashBuilder, KClass_text(KClass_(node->typeAttr)), " \'", "");
 		BashBuilder_EmitString(kctx, bashBuilder, kString_text(tk->text), "\'", "");
 	}
 	else {
@@ -458,7 +458,7 @@ static kbool_t BashBuilder_VisitFieldNode(KonohaContext *kctx, KBuilder *builder
 	return true;
 }
 
-kbool_t LoadBashModule(KonohaFactory *factory, ModuleType type);
+KONOHA_EXPORT(kbool_t) LoadBashModule(KonohaFactory *factory, ModuleType type);
 static void compileAllDefinedMethodsInNameSpace(KonohaContext *kctx, kNameSpace *ns);
 static void SetUpBashShebang(KonohaContext *kctx);
 
@@ -468,7 +468,7 @@ static bool BashBuilder_importPackage(KonohaContext *kctx, kNameSpace *ns, kStri
 	KBaseTrace(trace);
 	factory = (KonohaFactory *)kctx->platApi;
 
-	SUGAR kNameSpace_UseDefaultVirtualMachine(kctx, ns);
+	KLIB kNameSpace_UseDefaultVirtualMachine(kctx, ns);
 
 	KImportPackage(ns, kString_text(package), trace);
 	compileAllDefinedMethodsInNameSpace(kctx, ns);
@@ -488,10 +488,10 @@ static kbool_t BashBuilder_VisitNodeParams(KonohaContext *kctx, KBuilder *builde
 		BashBuilder_EmitString(kctx, bashBuilder, leftBracket, "", "");
 	}
 	for(i = beginIndex; i < n;) {
-		if(strcmp(KClass_text(KClass_(expr->attrTypeId)), "SubProc") == 0 || strcmp(KClass_text(KClass_(expr->attrTypeId)), "Array[String]") == 0) {
+		if(strcmp(KClass_text(KClass_(expr->typeAttr)), "SubProc") == 0 || strcmp(KClass_text(KClass_(expr->typeAttr)), "Array[String]") == 0) {
 		}
 		else {
-			SUGAR VisitNode(kctx, builder, kNode_At(expr, i), thunk);
+			KLIB VisitNode(kctx, builder, kNode_At(expr, i), thunk);
 		}
 		if(++i < n) {
 			BashBuilder_EmitString(kctx, bashBuilder, delimiter, " ", "");
@@ -507,11 +507,11 @@ static void BashBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *
 {
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
 	KClass *globalObjectClass = KLIB kNameSpace_GetClassByFullName(kctx, kNode_ns(expr), "GlobalObject", 12, NULL);
-	kbool_t isGlobal = (KClass_(receiver->attrTypeId) == globalObjectClass || receiver->attrTypeId == KType_NameSpace);
+	kbool_t isGlobal = (KClass_(receiver->typeAttr) == globalObjectClass || receiver->typeAttr == KType_NameSpace);
 	const char *methodName = KSymbol_text(mtd->mn);
-	const char *receiverClassName = KClass_text(KClass_(receiver->attrTypeId));
+	const char *receiverClassName = KClass_text(KClass_(receiver->typeAttr));
 
-	if(receiver->attrTypeId == KType_NameSpace) {
+	if(receiver->typeAttr == KType_NameSpace) {
 		if(mtd->mn == KMethodName_("import")) {
 			kString *packageNameString = (kString *)kNode_At(expr, 2)->ObjectConstValue;
 			kNameSpace *ns = (kNameSpace *)receiver->ObjectConstValue;
@@ -520,7 +520,7 @@ static void BashBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *
 			return;
 		}
 	}
-	if(receiver->attrTypeId == KType_System && methodName[0] == 'p') {
+	if(receiver->typeAttr == KType_System && methodName[0] == 'p') {
 		// System.p
 		BashBuilder_EmitString(kctx, bashBuilder, "echo", "", "");
 	}
@@ -540,12 +540,12 @@ static void BashBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *
 		if(!isGlobal) {
 			if(kNode_node(receiver) == KNode_Null) {
 				// Static methods
-				BashBuilder_EmitString(kctx, bashBuilder, KClass_text(KClass_(receiver->attrTypeId)), "", "");
+				BashBuilder_EmitString(kctx, bashBuilder, KClass_text(KClass_(receiver->typeAttr)), "", "");
 			}
 			else {
 				// Instance methods
-				if(receiver->attrTypeId <= KType_System) {
-					SUGAR VisitNode(kctx, builder, receiver, thunk);
+				if(receiver->typeAttr <= KType_System) {
+					KLIB VisitNode(kctx, builder, receiver, thunk);
 				}
 			}
 		}
@@ -571,7 +571,7 @@ static void BashBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *
 			if(kArray_size(expr->NodeList) > 3) {
 				BashBuilder_VisitNode(kctx, builder, kNode_At(expr, 2), thunk, "[", "]");
 			}
-			if(receiver->attrTypeId <= KType_System) {
+			if(receiver->typeAttr <= KType_System) {
 				BashBuilder_EmitString(kctx, bashBuilder, methodName, " = ", "");
 			}
 			break;
@@ -600,11 +600,11 @@ static kbool_t BashBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *bu
 	kMethod *mtd = CallNode_getMethod(node);
 	kbool_t isArray = false;
 
-	if(strcmp(KClass_text(KClass_(node->attrTypeId)), "SubProc") == 0 && strcmp(KSymbol_text(mtd->mn), "new") == 0 && !bashBuilder->isInitCommand) {
+	if(strcmp(KClass_text(KClass_(node->typeAttr)), "SubProc") == 0 && strcmp(KSymbol_text(mtd->mn), "new") == 0 && !bashBuilder->isInitCommand) {
 		KLIB KBuffer_Init(&(kctx->stack->cwb), &(bashBuilder->wb));
 		bashBuilder->isInitCommand = true;
 	}
-	if(strcmp(KClass_text(KClass_(node->attrTypeId)), "SubProc") == 0 && strcmp(KSymbol_text(mtd->mn), "new") == 0) {
+	if(strcmp(KClass_text(KClass_(node->typeAttr)), "SubProc") == 0 && strcmp(KSymbol_text(mtd->mn), "new") == 0) {
 		bashBuilder->Command++;
 	}
 
@@ -622,7 +622,7 @@ static kbool_t BashBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *bu
 		return true;
 	}
 
-	if(strcmp(KClass_text(KClass_(node->attrTypeId)), "File") == 0 && strcmp(KSymbol_text(mtd->mn), "new") == 0) {
+	if(strcmp(KClass_text(KClass_(node->typeAttr)), "File") == 0 && strcmp(KSymbol_text(mtd->mn), "new") == 0) {
 		KLIB KBuffer_printf(kctx, &(bashBuilder->wb), "> ");
 		KLIB KBuffer_printf(kctx, &(bashBuilder->wb), "%s", ((kString *)kNode_At(node, 2)->ObjectConstValue)->text);
 		return true;
@@ -630,7 +630,7 @@ static kbool_t BashBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *bu
 
 	if(kArray_size(node->NodeList) == 2 && KMethodName_isUnaryOperator(kctx, mtd->mn)) {
 		BashBuilder_EmitString(kctx, bashBuilder, KMethodName_Fmt2(mtd->mn), "(");
-		SUGAR VisitNode(kctx, builder, kNode_At(node, 1), thunk);
+		KLIB VisitNode(kctx, builder, kNode_At(node, 1), thunk);
 		BashBuilder_EmitString(kctx, bashBuilder, ")", "", "");
 	}
 	else if(KMethodName_isBinaryOperator(kctx, mtd->mn)) {
@@ -638,7 +638,7 @@ static kbool_t BashBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *bu
 	}
 	else {
 		kNode *receiver = kNode_At(node, 1);
-		const char *classname = KClass_text(KClass_(receiver->attrTypeId));
+		const char *classname = KClass_text(KClass_(receiver->typeAttr));
 		if((mtd->mn) == KSymbol_("newList")) {
 			isArray = true;
 		}
@@ -654,11 +654,11 @@ static kbool_t BashBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *bu
 			break;
 		case kSymbolPrefix_SET:
 			if(kArray_size(node->NodeList) > 3) {
-				SUGAR VisitNode(kctx, builder, kNode_At(node, 3), thunk);
+				KLIB VisitNode(kctx, builder, kNode_At(node, 3), thunk);
 			}
 			else {
-				if(receiver->attrTypeId <= KType_System || strcmp(classname, "GlobalObject") == 0) {
-					SUGAR VisitNode(kctx, builder, kNode_At(node, 2), thunk);
+				if(receiver->typeAttr <= KType_System || strcmp(classname, "GlobalObject") == 0) {
+					KLIB VisitNode(kctx, builder, kNode_At(node, 2), thunk);
 				}
 			}
 			if(strcmp(KSymbol_text(mtd->mn), "ArgumentList") == 0) {
@@ -681,7 +681,7 @@ static kbool_t BashBuilder_VisitMethodCallNode(KonohaContext *kctx, KBuilder *bu
 				}
 			}
 				BashBuilder_VisitNodeParams(kctx, builder, node, thunk, 2, " ", isArray ? "[" : "(", isArray ? "]" : ")");
-			if(node->attrTypeId > KType_System && strcmp(classname, "SubProc") != 0) {
+			if(node->typeAttr > KType_System && strcmp(classname, "SubProc") != 0) {
 				BashBuilder_EmitNewLineWith(kctx, bashBuilder, "");
 			}
 			break;
@@ -717,16 +717,16 @@ static kbool_t BashBuilder_VisitAssignNode(KonohaContext *kctx, KBuilder *builde
 		case KNode_UnboxConst :
 			BashBuilder_EmitString(kctx, bashBuilder, "=", "", "");
 		case KNode_Null :
-			SUGAR VisitNode(kctx, builder, kNode_At(node, i), thunk);
+			KLIB VisitNode(kctx, builder, kNode_At(node, i), thunk);
 			break;
 		default:
-			if(tmpNode->attrTypeId > KType_System) {
-				SUGAR VisitNode(kctx, builder, kNode_At(node, i), thunk);
+			if(tmpNode->typeAttr > KType_System) {
+				KLIB VisitNode(kctx, builder, kNode_At(node, i), thunk);
 			}
 			else {
 				BashBuilder_EmitString(kctx, bashBuilder, "=", "", "");
 				BashBuilder_EmitString(kctx, bashBuilder, "$((", "", "");
-				SUGAR VisitNode(kctx, builder, kNode_At(node, i), thunk);
+				KLIB VisitNode(kctx, builder, kNode_At(node, i), thunk);
 				PLATAPI printf_i("))");
 			}
 			break;
@@ -784,7 +784,7 @@ static void BashBuilder_EmitExtendFunctionCode(KonohaContext *kctx, KBuilder *bu
 
 static kbool_t BashBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *builder, KClass *kclass)
 {
-	kushort_t i;
+	kuhalfword_t i;
 	KClassField *field = kclass->fieldItems;
 	kObject *constList = kclass->defaultNullValue;
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
@@ -795,7 +795,7 @@ static kbool_t BashBuilder_VisitClassFields(KonohaContext *kctx, KBuilder *build
 
 	for(i = 0; i < kclass->fieldsize; ++i) {
 		BashBuilder_EmitString(kctx, bashBuilder, "export ${this}_", KSymbol_text(field[i].name), "=");
-		if(KType_Is(UnboxType, field[i].attrTypeId)) {
+		if(KType_Is(UnboxType, field[i].typeAttr)) {
 			BashBuilder_EmitString(kctx, bashBuilder, "$", "", "");
 			PLATAPI printf_i("%d", i+2);
 		}else {
@@ -949,7 +949,7 @@ static struct KVirtualCode* Bash_GenerateVirtualCode(KonohaContext *kctx, kMetho
 	builder->common.api = ns->builderApi;
 	builder->visitingMethod = mtd;
 	BashBuilder_Init(kctx, (KBuilder *)builder, mtd);
-	SUGAR VisitNode(kctx, (KBuilder *)builder, block, NULL);
+	KLIB VisitNode(kctx, (KBuilder *)builder, block, NULL);
 	BashBuilder_Free(kctx, (KBuilder *)builder, mtd);
 	RESET_GCSTACK();
 	return NULL;
@@ -999,7 +999,7 @@ static const KModuleInfo ModuleInfo = {
 static const struct KBuilderAPI *GetDefaultBuilderAPI(void);
 
 static const struct ExecutionEngineModule Bash_Module = {
-	&ModuleInfo,
+	&ModuleInfo, NULL/*FIXME*/,
 	Bash_DeleteVirtualMachine,
 	GetDefaultBuilderAPI,
 	GetDefaultBootCode,
@@ -1024,7 +1024,7 @@ static const struct KBuilderAPI *GetDefaultBuilderAPI(void)
 
 // -------------------------------------------------------------------------
 
-kbool_t LoadBashModule(KonohaFactory *factory, ModuleType type)
+KONOHA_EXPORT(kbool_t) LoadBashModule(KonohaFactory *factory, ModuleType type)
 {
 	memcpy(&factory->ExecutionEngineModule, &Bash_Module, sizeof(Bash_Module));
 	return true;

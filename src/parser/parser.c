@@ -27,9 +27,9 @@
 //#define USING_SUGAR_AS_BUILTIN 1
 #define USE_AsciiToKonohaChar
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
-#include "konoha3/klib.h"
+//#include "konoha3.h"
+//
+//
 #include "konoha3/import/methoddecl.h"
 
 /* ************************************************************************ */
@@ -37,6 +37,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "konoha3.h"
 
 // global variable
 KONOHA_EXPORT(int) verbose_sugar;
@@ -61,14 +63,14 @@ int verbose_sugar = 0;
 static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline, KTraceInfo *trace)
 {
 	kstatus_t result;
-	KPARSERM->h.setupModuleContext(kctx, (KRuntimeModule *)KPARSERM, 0/*lazy*/);
+	KPARSERM->h.setupModelContext(kctx, (KRuntimeModel *)KPARSERM, 0/*lazy*/);
 	INIT_GCSTACK();
 	{
 		KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, tokens);
 		Tokenize(kctx, ns, script, uline, 0, tokens.tokenList);
 		KTokenSeq_End(kctx, tokens);
-		result = SUGAR EvalTokenList(kctx, &tokens, trace);
+		result = KLIB EvalTokenList(kctx, &tokens, trace);
 		KTokenSeq_Pop(kctx, tokens);
 	}
 	RESET_GCSTACK();
@@ -78,20 +80,20 @@ static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char
 /* ------------------------------------------------------------------------ */
 /* [KGetParserContext(kctx)] */
 
-static void KParserContext_Reftrace(KonohaContext *kctx, struct KContextModule *baseh, KObjectVisitor *visitor)
+static void KParserContext_Reftrace(KonohaContext *kctx, struct KModelContext *baseh, KObjectVisitor *visitor)
 {
 }
 
-static void KParserContext_Free(KonohaContext *kctx, struct KContextModule *baseh)
+static void KParserContext_Free(KonohaContext *kctx, struct KModelContext *baseh)
 {
 	KParserContext *base = (KParserContext *)baseh;
 	KLIB KArray_Free(kctx, &base->errorMessageBuffer);
 	KFree(base, sizeof(KParserContext));
 }
 
-static void SugarModule_Setup(KonohaContext *kctx, struct KRuntimeModule *def, int newctx)
+static void SugarModule_Setup(KonohaContext *kctx, struct KRuntimeModel *def, int newctx)
 {
-	if(!newctx && kctx->modlocal[MOD_sugar] == NULL) {
+	if(!newctx && kctx->localContexts[ParserModelIndex] == NULL) {
 		KParserContext *base = (KParserContext *)KCalloc_UNTRACE(sizeof(KParserContext), 1);
 		base->h.reftrace = KParserContext_Reftrace;
 		base->h.free     = KParserContext_Free;
@@ -102,7 +104,7 @@ static void SugarModule_Setup(KonohaContext *kctx, struct KRuntimeModule *def, i
 		base->definedMethodList = new_(MethodArray, 8, OnContextConstList);
 
 		KLIB KArray_Init(kctx, &base->errorMessageBuffer, K_PAGESIZE);
-		kctx->modlocal[MOD_sugar] = (KContextModule *)base;
+		kctx->localContexts[ParserModelIndex] = (KModelContext *)base;
 	}
 }
 
@@ -111,11 +113,11 @@ KONOHA_EXPORT(kbool_t) Konoha_Eval(KonohaContext* kctx, const char *script, kfil
 
 void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	KParserModule *mod = (KParserModule *)KCalloc_UNTRACE(sizeof(KParserModule), 1);
+	KParserModel *mod = (KParserModel *)KCalloc_UNTRACE(sizeof(KParserModel), 1);
 	mod->h.name     = "sugar";
-	mod->h.allocSize = sizeof(KParserModule);
-	mod->h.setupModuleContext    = SugarModule_Setup;
-	KLIB KRuntime_SetModule(kctx, MOD_sugar, (KRuntimeModule *)mod, 0);
+	mod->h.allocSize = sizeof(KParserModel);
+	mod->h.setupModelContext    = SugarModule_Setup;
+	KLIB KRuntime_SetModule(kctx, ParserModelIndex, (KRuntimeModel *)mod, 0);
 
 	KonohaLibVar *l = (KonohaLibVar *)ctx->klib;
 	l->kNameSpace_GetClassByFullName  = kNameSpace_GetClassByFullName;
@@ -181,48 +183,48 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	};
 	kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KConst_(ClassData), 0);
 
-	mod->Tokenize              = Tokenize;
-	mod->ApplyMacroData        = ApplyMacroData;
-	mod->SetMacroData          = SetMacroData;
-	mod->Preprocess            = Preprocess;
-	mod->EvalTokenList         = EvalTokenList;
-	mod->ParseTypePattern      = ParseTypePattern;
-	mod->kToken_ToBraceGroup   = kToken_ToBraceGroup;
-	mod->kNode_AddParsedObject = kNode_AddParsedObject;
-	mod->FindEndOfStatement    = FindEndOfStatement;
-	mod->kNode_ParseFlag       = kNode_ParseFlag;
-	mod->kNode_GetToken        = kNode_GetToken;
-	mod->kNode_GetNode         = kNode_GetNode;
-	mod->kNode_SetConst        = kNode_SetConst;
-	mod->kNode_SetUnboxConst   = kNode_SetUnboxConst;
-	mod->kNode_SetVariable     = kNode_SetVariable;
-	mod->TypeCheckNodeAt       = TypeCheckNodeAt;
-	mod->TypeCheckNodeByName   = TypeCheckNodeByName;
-	mod->TypeCheckMethodParam  = TypeCheckMethodParam;
-	mod->new_MethodNode        = new_MethodNode;
-	mod->AddLocalVariable      = AddLocalVariable;
-	mod->kNode_DeclType        = kNode_DeclType;
-	mod->TypeVariableNULL      = TypeVariableNULL;
+	l->Tokenize              = Tokenize;
+	l->ApplyMacroData        = ApplyMacroData;
+	l->SetMacroData          = SetMacroData;
+	l->Preprocess            = Preprocess;
+	l->EvalTokenList         = EvalTokenList;
+	l->ParseTypePattern      = ParseTypePattern;
+	l->kToken_ToBraceGroup   = kToken_ToBraceGroup;
+	l->kNode_AddParsedObject = kNode_AddParsedObject;
+	l->FindEndOfStatement    = FindEndOfStatement;
+	l->kNode_ParseFlag       = kNode_ParseFlag;
+	l->kNode_GetToken        = kNode_GetToken;
+	l->kNode_GetNode         = kNode_GetNode;
+	l->kNode_SetConst        = kNode_SetConst;
+	l->kNode_SetUnboxConst   = kNode_SetUnboxConst;
+	l->kNode_SetVariable     = kNode_SetVariable;
+	l->TypeCheckNodeAt       = TypeCheckNodeAt;
+	l->TypeCheckNodeByName   = TypeCheckNodeByName;
+	l->TypeCheckMethodParam  = TypeCheckMethodParam;
+	l->new_MethodNode        = new_MethodNode;
+	l->AddLocalVariable      = AddLocalVariable;
+	l->kNode_DeclType        = kNode_DeclType;
+	l->TypeVariableNULL      = TypeVariableNULL;
 
-	mod->kNameSpace_DefineSyntax = kNameSpace_DefineSyntax;
-	mod->kNameSpace_GetSyntax    = kNameSpace_GetSyntax;
-	mod->kSyntax_AddPattern      = kSyntax_AddPattern;
-	mod->kNameSpace_AddSyntax    = kNameSpace_AddSyntax;
-	mod->kNameSpace_UseDefaultVirtualMachine = kNameSpace_UseDefaultVirtualMachine;
-	mod->kNode_InsertAfter       = kNode_InsertAfter;
-	mod->kNode_AddNode           = kNode_AddNode;
-	mod->kNode_Op                = kNode_Op;
-	mod->ParseSyntaxNode         = ParseSyntaxNode;
-	mod->ParseNode               = ParseNode;
-	mod->ParseNewNode            = ParseNewNode;
-	mod->AppendParsedNode        = AppendParsedNode;
-	mod->kToken_ToError          = kToken_ToError;
-	mod->MessageNode             = MessageNode;
-	mod->VisitNode               = VisitNode;
+	l->kNameSpace_DefineSyntax = kNameSpace_DefineSyntax;
+	l->kNameSpace_GetSyntax    = kNameSpace_GetSyntax;
+	l->kSyntax_AddPattern      = kSyntax_AddPattern;
+	l->kNameSpace_AddSyntax    = kNameSpace_AddSyntax;
+	l->kNameSpace_UseDefaultVirtualMachine = kNameSpace_UseDefaultVirtualMachine;
+	l->kNode_InsertAfter       = kNode_InsertAfter;
+	l->kNode_AddNode           = kNode_AddNode;
+	l->kNode_Op                = kNode_Op;
+	l->ParseSyntaxNode         = ParseSyntaxNode;
+	l->ParseNode               = ParseNode;
+	l->ParseNewNode            = ParseNewNode;
+	l->AppendParsedNode        = AppendParsedNode;
+	l->kToken_ToError          = kToken_ToError;
+	l->MessageNode             = MessageNode;
+	l->VisitNode               = VisitNode;
 
 #ifndef USE_SMALLBUILD
-	mod->dumpToken      = dumpToken;
-	mod->dumpTokenArray = dumpTokenArray;
+	l->dumpToken      = dumpToken;
+	l->dumpTokenArray = dumpTokenArray;
 #endif
 
 	DefineDefaultSyntax(kctx, KNULL(NameSpace));
@@ -344,7 +346,7 @@ static void KonohaContext_ExitCStack(KonohaContext *kctx)
 static kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, KTraceInfo *trace)
 {
 	if(KGetParserContext(kctx) == NULL) {
-		KPARSERM->h.setupModuleContext(kctx, (KRuntimeModule *)KPARSERM, 0/*lazy*/);
+		KPARSERM->h.setupModelContext(kctx, (KRuntimeModel *)KPARSERM, 0/*lazy*/);
 	}
 	INIT_GCSTACK();
 	kpackageId_t packageId = KLIB KpackageId(kctx, "main", sizeof("main")-1, 0, _NEWID);
@@ -370,7 +372,7 @@ KONOHA_EXPORT(kbool_t) Konoha_Eval(KonohaContext* kctx, const char *script, kfil
 	if(verbose_sugar) {
 		DUMP_P("\n>>>----\n'%s'\n------\n", script);
 	}
-	KPARSERM->h.setupModuleContext(kctx, (KRuntimeModule *)KPARSERM, 0/*lazy*/);
+	KPARSERM->h.setupModelContext(kctx, (KRuntimeModel *)KPARSERM, 0/*lazy*/);
 	kbool_t res = (kNameSpace_Eval(kctx, KNULL(NameSpace), script, uline, NULL/*trace*/) == K_CONTINUE);    // FIXME
 	KEndKonohaContext();
 	return res;

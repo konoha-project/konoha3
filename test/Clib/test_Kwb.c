@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "konoha3/konoha.h"
+#include "konoha3.h"
 #include "test_konoha.h"
 
 void test_Kwb(KonohaContext *kctx)

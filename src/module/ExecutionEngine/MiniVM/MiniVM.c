@@ -27,10 +27,14 @@
 #endif
 #define USE_EXECUTIONENGINE
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
+#include "konoha3.h"
+
 #include "konoha3/import/module.h"
 #include "minivm.h"
+
+#ifdef _MSC_VER
+#undef ERROR
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,8 +76,8 @@ typedef enum MiniVMOpCode {
 
 typedef struct {
 	const char *name;
-	kshortflag_t   flag;
-	kushort_t argsize;
+	khalfflag_t   flag;
+	kuhalfword_t argsize;
 	KVirtualCodeType arg1;
 	KVirtualCodeType arg2;
 	KVirtualCodeType arg3;
@@ -94,7 +98,7 @@ static void DumpOpArgument(KonohaContext *kctx, KBuffer *wb, KVirtualCodeType ty
 		break;
 	case VMT_UL: {
 		kfileline_t uline = (kfileline_t)c->data[i];
-		KLIB KBuffer_printf(kctx, wb, " (%s:%d)", PLATAPI shortFilePath(KFileLine_textFileName(uline)), (kshort_t)uline);
+		KLIB KBuffer_printf(kctx, wb, " (%s:%d)", PLATAPI shortFilePath(KFileLine_textFileName(uline)), (khalfword_t)uline);
 		break;
 	}
 	case VMT_R: {
@@ -102,8 +106,8 @@ static void DumpOpArgument(KonohaContext *kctx, KBuffer *wb, KVirtualCodeType ty
 		break;
 	}
 	case VMT_FX: {
-		kshort_t index  = (kshort_t)c->data[i];
-		kshort_t xindex = (kshort_t)(c->data[i] >> (sizeof(kshort_t)*8));
+		khalfword_t index  = (khalfword_t)c->data[i];
+		khalfword_t xindex = (khalfword_t)(c->data[i] >> (sizeof(khalfword_t)*8));
 		KLIB KBuffer_printf(kctx, wb, " sfp[%d,r=%d][%d]", (int)index/2, (int)index, (int)xindex);
 		break;
 	}
@@ -639,7 +643,7 @@ static intptr_t MiniVMBuilder_FindLocalVar(KonohaContext *kctx, KBuilder *builde
 
 	params = kMethod_GetParam(mtd);
 	for(i = 0; i < params->psize; ++i) {
-		ktypeattr_t ptype = params->paramtypeItems[i].attrTypeId;
+		ktypeattr_t ptype = params->paramtypeItems[i].typeAttr;
 		if(ptype == typeId && index == i ) {
 			return i;
 		}
@@ -667,15 +671,15 @@ static kbool_t MiniVM_VisitBoxNode(KonohaContext *kctx, KBuilder *builder, kNode
 	/*
 	 * [box] := box(this)
 	 **/
-	SUGAR VisitNode(kctx, builder, node->NodeToPush, thunk);
-	ASM(BOX, OC_(builder->stackbase), NC_(MiniVM_getExpression(builder)), KClass_(node->attrTypeId));
+	KLIB VisitNode(kctx, builder, node->NodeToPush, thunk);
+	ASM(BOX, OC_(builder->stackbase), NC_(MiniVM_getExpression(builder)), KClass_(node->typeAttr));
 	builder->Value = builder->stackbase;
 	return true;
 }
 
 static kbool_t MiniVM_VisitPushNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
-	SUGAR VisitNode(kctx, builder, node->NodeToPush, thunk);
+	KLIB VisitNode(kctx, builder, node->NodeToPush, thunk);
 	return true;
 }
 
@@ -701,7 +705,7 @@ static kbool_t MiniVM_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, kNo
 	for(i = 0; i < kNode_GetNodeListSize(kctx, block); i++) {
 		kNode *stmt = block->NodeList->NodeItems[i];
 		builder->common.uline = kNode_uline(stmt);
-		if(!SUGAR VisitNode(kctx, builder, stmt, thunk))
+		if(!KLIB VisitNode(kctx, builder, stmt, thunk))
 			break;
 	}
 	return true;
@@ -709,10 +713,10 @@ static kbool_t MiniVM_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, kNo
 
 static kbool_t MiniVM_VisitReturnNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
-	kNode *expr = SUGAR kNode_GetNode(kctx, node, KSymbol_ExprPattern, NULL);
-	if(expr != NULL && IS_Node(expr) && expr->attrTypeId != KType_void) {
-		SUGAR VisitNode(kctx, builder, expr, thunk);
-		ASM_NMOV(kctx, builder, KClass_(expr->attrTypeId), K_RTNIDX, MiniVM_getExpression(builder));
+	kNode *expr = KLIB kNode_GetNode(kctx, node, KSymbol_ExprPattern, NULL);
+	if(expr != NULL && IS_Node(expr) && expr->typeAttr != KType_void) {
+		KLIB VisitNode(kctx, builder, expr, thunk);
+		ASM_NMOV(kctx, builder, KClass_(expr->typeAttr), K_RTNIDX, MiniVM_getExpression(builder));
 	}
 	MiniVMBuilder_JumpTo(kctx, builder, builder->bbReturnId);
 	return false;
@@ -724,17 +728,17 @@ static kbool_t MiniVM_VisitIfNode(KonohaContext *kctx, KBuilder *builder, kNode 
 	bblock_t ElseBB  = new_BasicBlockLABEL(kctx);
 	bblock_t MergeBB = new_BasicBlockLABEL(kctx);
 	/* if */
-	SUGAR VisitNode(kctx, builder, kNode_getFirstNode(kctx, node), thunk);
+	KLIB VisitNode(kctx, builder, kNode_getFirstNode(kctx, node), thunk);
 	CreateBranch(kctx, builder, MiniVM_getExpression(builder), ThenBB, ElseBB, false);
 	{ /* then */
 		MiniVMBuilder_setBlock(kctx, builder, ThenBB);
-		SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, node), thunk);
+		KLIB VisitNode(kctx, builder, kNode_getFirstBlock(kctx, node), thunk);
 		if(!Block_HasTerminatorInst(kctx, builder->bbMainId))
 			MiniVMBuilder_JumpTo(kctx, builder, MergeBB);
 	}
 	{ /* else */
 		MiniVMBuilder_setBlock(kctx, builder, ElseBB);
-		SUGAR VisitNode(kctx, builder, kNode_getElseBlock(kctx, node), thunk);
+		KLIB VisitNode(kctx, builder, kNode_getElseBlock(kctx, node), thunk);
 		if(!Block_HasTerminatorInst(kctx, builder->bbMainId))
 			MiniVMBuilder_JumpTo(kctx, builder, MergeBB);
 	}
@@ -760,7 +764,7 @@ static kbool_t MiniVM_VisitLoopNode(KonohaContext *kctx, KBuilder *builder, kNod
 	kNode_SetLabelBlock(kctx, node, KSymbol_("continue"), ItrBB);
 	kNode_SetLabelBlock(kctx, node, KSymbol_("break"),    MergeBB);
 
-	ItrBlock = SUGAR kNode_GetNode(kctx, node, KSymbol_("Iterator"), NULL);
+	ItrBlock = KLIB kNode_GetNode(kctx, node, KSymbol_("Iterator"), NULL);
 	if(ItrBlock != NULL) {
 		assert(Loop == ForLoop);
 		MiniVMBuilder_JumpTo(kctx, builder, HeadBB);
@@ -773,19 +777,19 @@ static kbool_t MiniVM_VisitLoopNode(KonohaContext *kctx, KBuilder *builder, kNod
 
 	{ /* Head */
 		MiniVMBuilder_setBlock(kctx, builder, HeadBB);
-		SUGAR VisitNode(kctx, builder, kNode_getFirstNode(kctx, node), thunk);
+		KLIB VisitNode(kctx, builder, kNode_getFirstNode(kctx, node), thunk);
 		CreateBranch(kctx, builder, MiniVM_getExpression(builder), BodyBB, MergeBB, false);
 	}
 
 	{ /* Body */
 		MiniVMBuilder_setBlock(kctx, builder, BodyBB);
-		SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, node), thunk);
+		KLIB VisitNode(kctx, builder, kNode_getFirstBlock(kctx, node), thunk);
 		MiniVMBuilder_JumpTo(kctx, builder, ItrBB);
 
 		/* Itr */
 		MiniVMBuilder_setBlock(kctx, builder, ItrBB);
 		if(ItrBlock != NULL) {
-			SUGAR VisitNode(kctx, builder, ItrBlock, thunk);
+			KLIB VisitNode(kctx, builder, ItrBlock, thunk);
 		}
 		MiniVMBuilder_JumpTo(kctx, builder, HeadBB);
 	}
@@ -811,13 +815,13 @@ static kbool_t MiniVM_VisitDoWhileNode(KonohaContext *kctx, KBuilder *builder, k
 	MiniVMBuilder_JumpTo(kctx, builder, BodyBB);
 	{ /* Head */
 		MiniVMBuilder_setBlock(kctx, builder, HeadBB);
-		SUGAR VisitNode(kctx, builder, kNode_getFirstNode(kctx, node), thunk);
+		KLIB VisitNode(kctx, builder, kNode_getFirstNode(kctx, node), thunk);
 		CreateBranch(kctx, builder, MiniVM_getExpression(builder), MergeBB, BodyBB, true);
 	}
 
 	{ /* Body */
 		MiniVMBuilder_setBlock(kctx, builder, BodyBB);
-		SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, node), thunk);
+		KLIB VisitNode(kctx, builder, kNode_getFirstBlock(kctx, node), thunk);
 		MiniVMBuilder_JumpTo(kctx, builder, HeadBB);
 	}
 
@@ -829,7 +833,7 @@ static kbool_t MiniVM_VisitForNode(KonohaContext *kctx, KBuilder *builder, kNode
 {
 	kNode *initNode = kNode_GetNode(kctx, node, KSymbol_("init"));
 	if(initNode != NULL) {
-		SUGAR VisitNode(kctx, builder, initNode, thunk);
+		KLIB VisitNode(kctx, builder, initNode, thunk);
 	}
 	return MiniVM_VisitLoopNode(kctx, builder, node, thunk, ForLoop);
 }
@@ -863,8 +867,8 @@ static kbool_t MiniVM_VisitTryNode(KonohaContext *kctx, KBuilder *builder, kNode
 static kbool_t MiniVM_VisitConstNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
 	kObject *v = MiniVM_AddConstPool(kctx, builder, node->ObjectConstValue);
-	DBG_ASSERT(!KType_Is(UnboxType, node->attrTypeId));
-	ASM(NSET, OC_(builder->stackbase), (uintptr_t) v, KClass_(node->attrTypeId));
+	DBG_ASSERT(!KType_Is(UnboxType, node->typeAttr));
+	ASM(NSET, OC_(builder->stackbase), (uintptr_t) v, KClass_(node->typeAttr));
 	builder->Value = builder->stackbase;
 	return true;
 }
@@ -872,25 +876,25 @@ static kbool_t MiniVM_VisitConstNode(KonohaContext *kctx, KBuilder *builder, kNo
 static kbool_t MiniVM_VisitUnboxConstNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
 	uintptr_t Val = node->unboxConstValue;
-	DBG_ASSERT(KType_Is(UnboxType, node->attrTypeId));
-	ASM(NSET, NC_(builder->stackbase), Val, KClass_(node->attrTypeId));
+	DBG_ASSERT(KType_Is(UnboxType, node->typeAttr));
+	ASM(NSET, NC_(builder->stackbase), Val, KClass_(node->typeAttr));
 	builder->Value = builder->stackbase;
 	return true;
 }
 
 static kbool_t MiniVM_VisitNewNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
-	ASM(NEW, OC_(builder->stackbase), 0, KClass_(node->attrTypeId));
+	ASM(NEW, OC_(builder->stackbase), 0, KClass_(node->typeAttr));
 	builder->Value = builder->stackbase;
 	return true;
 }
 
 static kbool_t MiniVM_VisitNullNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
-	if(KType_Is(UnboxType, node->attrTypeId)) {
-		ASM(NSET, NC_(builder->stackbase), 0, KClass_(node->attrTypeId));
+	if(KType_Is(UnboxType, node->typeAttr)) {
+		ASM(NSET, NC_(builder->stackbase), 0, KClass_(node->typeAttr));
 	} else {
-		ASM(NUL, OC_(builder->stackbase), KClass_(node->attrTypeId));
+		ASM(NUL, OC_(builder->stackbase), KClass_(node->typeAttr));
 	}
 	builder->Value = builder->stackbase;
 	return true;
@@ -902,8 +906,8 @@ static kbool_t MiniVM_VisitLocalNode(KonohaContext *kctx, KBuilder *builder, kNo
 	ksymbol_t symbol;
 	assert(IS_Token(node->TermToken));
 	symbol = node->TermToken->symbol;
-	if((src = MiniVMBuilder_FindLocalVar(kctx, builder, symbol, node->attrTypeId, node->index)) == -1) {
-		src = AddLocal(kctx, builder, node->index, symbol, node->attrTypeId);
+	if((src = MiniVMBuilder_FindLocalVar(kctx, builder, symbol, node->typeAttr, node->index)) == -1) {
+		src = AddLocal(kctx, builder, node->index, symbol, node->typeAttr);
 	}
 	builder->Value = src;
 	return true;
@@ -915,14 +919,14 @@ static kbool_t MiniVM_VisitFieldNode(KonohaContext *kctx, KBuilder *builder, kNo
 	intptr_t src;
 	KClass *ty;
 
-	kshort_t index  = (kshort_t)(node->index);
-	kshort_t xindex = (kshort_t)(node->index >> (sizeof(kshort_t)*8));
+	khalfword_t index  = (khalfword_t)(node->index);
+	khalfword_t xindex = (khalfword_t)(node->index >> (sizeof(khalfword_t)*8));
 	assert(IS_Token(node->TermToken));
 	symbol = node->TermToken->symbol;
 	if((src = MiniVMBuilder_FindLocalVar(kctx, builder, symbol, KType_Object, index)) == -1) {
 		src = AddLocal(kctx, builder, index, symbol, KType_Object);
 	}
-	ty = KClass_(node->attrTypeId);
+	ty = KClass_(node->typeAttr);
 	ASM(NMOVx, TC_(builder->stackbase, ty), OC_(src), xindex, ty);
 	builder->Value = builder->stackbase;
 	return true;
@@ -953,9 +957,9 @@ static kbool_t MiniVM_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder
 		kNode *exprN = kNode_At(node, i);
 		builder->stackbase = thisidx + i - 1;
 		DBG_ASSERT(IS_Node(exprN));
-		SUGAR VisitNode(kctx, builder, exprN, thunk);
+		KLIB VisitNode(kctx, builder, exprN, thunk);
 		if(builder->Value != builder->stackbase) {
-			KClass *ty = KClass_(exprN->attrTypeId);
+			KClass *ty = KClass_(exprN->typeAttr);
 			ASM_NMOV(kctx, builder, ty, builder->stackbase, builder->Value);
 		}
 	}
@@ -971,7 +975,7 @@ static kbool_t MiniVM_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder
 		ASM(NSET, OC_(thisidx-2), (intptr_t)kNode_ns(node), KClass_NameSpace);
 		ASM(LOOKUP, SFP_(thisidx), kNode_ns(node), mtd);
 	}
-	ASM(CALL, kNode_uline(node), SFP_(thisidx), SFP_(thisidx + argc + 1), KLIB Knull(kctx, KClass_(node->attrTypeId)));
+	ASM(CALL, kNode_uline(node), SFP_(thisidx), SFP_(thisidx + argc + 1), KLIB Knull(kctx, KClass_(node->typeAttr)));
 
 	builder->stackbase = stackbase;
 	builder->Value = builder->stackbase;
@@ -1007,7 +1011,7 @@ static void CreateCond(KonohaContext *kctx, KBuilder *builder, kNode *expr, enum
 	builder->stackbase += 1;
 	{ /* Head */
 		MiniVMBuilder_setBlock(kctx, builder, HeadBB);
-		SUGAR VisitNode(kctx, builder, LHS, thunk);
+		KLIB VisitNode(kctx, builder, LHS, thunk);
 		CreateUpdate(kctx, builder, KType_Boolean, cond, MiniVM_getExpression(builder));
 		if(Op == LogicalAnd)
 			CreateBranch(kctx, builder, cond, ThenBB, MergeBB, false);
@@ -1017,7 +1021,7 @@ static void CreateCond(KonohaContext *kctx, KBuilder *builder, kNode *expr, enum
 	}
 	{ /* Then */
 		MiniVMBuilder_setBlock(kctx, builder, ThenBB);
-		SUGAR VisitNode(kctx, builder, RHS, thunk);
+		KLIB VisitNode(kctx, builder, RHS, thunk);
 		CreateUpdate(kctx, builder, KType_Boolean, cond, MiniVM_getExpression(builder));
 		MiniVMBuilder_JumpTo(kctx, builder, MergeBB);
 	}
@@ -1049,7 +1053,7 @@ static kbool_t MiniVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 	intptr_t dst = -1;
 	kNode *left = kNode_At(node, 1);
 	kNode *right = kNode_At(node, 2);
-	ktypeattr_t type = left->attrTypeId;
+	ktypeattr_t type = left->typeAttr;
 	ksymbol_t symbol;
 
 	assert(IS_Token(left->TermToken));
@@ -1058,22 +1062,22 @@ static kbool_t MiniVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kN
 		if((dst = MiniVMBuilder_FindLocalVar(kctx, builder, symbol, type, left->index)) == -1) {
 			dst = AddLocal(kctx, builder, left->index, symbol, type);
 		}
-		SUGAR VisitNode(kctx, builder, right, thunk);
+		KLIB VisitNode(kctx, builder, right, thunk);
 		CreateUpdate(kctx, builder, type, dst, MiniVM_getExpression(builder));
 		builder->Value = dst;
 	}
 	else {
-		kshort_t index  = (kshort_t)left->index;
-		kshort_t xindex = (kshort_t)(left->index >> (sizeof(kshort_t)*8));
-		KClass *lhsClass = KClass_(left->attrTypeId);
-		KClass *rhsClass = KClass_(right->attrTypeId);
+		khalfword_t index  = (khalfword_t)left->index;
+		khalfword_t xindex = (khalfword_t)(left->index >> (sizeof(khalfword_t)*8));
+		KClass *lhsClass = KClass_(left->typeAttr);
+		KClass *rhsClass = KClass_(right->typeAttr);
 		assert(kNode_node(left) == KNode_Field);
 		if((dst = MiniVMBuilder_FindLocalVar(kctx, builder, symbol, KType_Object, index)) == -1) {
 			dst = AddLocal(kctx, builder, index, symbol, KType_Object);
 		}
-		SUGAR VisitNode(kctx, builder, right, thunk);
+		KLIB VisitNode(kctx, builder, right, thunk);
 		ASM(XNMOV, OC_(index), xindex, TC_(MiniVM_getExpression(builder), rhsClass), lhsClass);
-		if(node->attrTypeId != KType_void) {
+		if(node->typeAttr != KType_void) {
 			builder->Value = builder->stackbase;
 			ASM(NMOVx, TC_(builder->stackbase, rhsClass), OC_(index), xindex, lhsClass);
 		}
@@ -1109,7 +1113,7 @@ static kbool_t CollectLocalVar_VisitDoneNode(KVISITOR_PARAM)
 }
 static kbool_t CollectLocalVar_VisitPushNode(KVISITOR_PARAM)
 {
-	SUGAR VisitNode(kctx, builder, node->NodeToPush, thunk);
+	KLIB VisitNode(kctx, builder, node->NodeToPush, thunk);
 	return true;
 }
 
@@ -1123,7 +1127,7 @@ static kbool_t CollectLocalVar_VisitBlockNode(KVISITOR_PARAM)
 	unsigned i;
 	for(i = 0; i < kNode_GetNodeListSize(kctx, node); i++) {
 		kNode *stmt = node->NodeList->NodeItems[i];
-		if(!SUGAR VisitNode(kctx, builder, stmt, thunk))
+		if(!KLIB VisitNode(kctx, builder, stmt, thunk))
 			break;
 	}
 	return true;
@@ -1131,29 +1135,29 @@ static kbool_t CollectLocalVar_VisitBlockNode(KVISITOR_PARAM)
 
 static kbool_t CollectLocalVar_VisitReturnNode(KVISITOR_PARAM)
 {
-	kNode *expr = SUGAR kNode_GetNode(kctx, node, KSymbol_ExprPattern, NULL);
-	if(expr != NULL && IS_Node(expr) && expr->attrTypeId != KType_void) {
-		SUGAR VisitNode(kctx, builder, expr, thunk);
+	kNode *expr = KLIB kNode_GetNode(kctx, node, KSymbol_ExprPattern, NULL);
+	if(expr != NULL && IS_Node(expr) && expr->typeAttr != KType_void) {
+		KLIB VisitNode(kctx, builder, expr, thunk);
 	}
 	return false;
 }
 
 static kbool_t CollectLocalVar_VisitIfNode(KVISITOR_PARAM)
 {
-	SUGAR VisitNode(kctx, builder, kNode_getFirstNode(kctx, node), thunk);
-	SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, node), thunk);
-	SUGAR VisitNode(kctx, builder, kNode_getElseBlock(kctx, node), thunk);
+	KLIB VisitNode(kctx, builder, kNode_getFirstNode(kctx, node), thunk);
+	KLIB VisitNode(kctx, builder, kNode_getFirstBlock(kctx, node), thunk);
+	KLIB VisitNode(kctx, builder, kNode_getElseBlock(kctx, node), thunk);
 	return true;
 }
 
 static kbool_t CollectLocalVar_VisitWhileNode(KVISITOR_PARAM)
 {
 	kNode *ItrBlock;
-	SUGAR VisitNode(kctx, builder, kNode_getFirstNode(kctx, node), thunk);
-	SUGAR VisitNode(kctx, builder, kNode_getFirstBlock(kctx, node), thunk);
-	ItrBlock = SUGAR kNode_GetNode(kctx, node, KSymbol_("Iterator"), NULL);
+	KLIB VisitNode(kctx, builder, kNode_getFirstNode(kctx, node), thunk);
+	KLIB VisitNode(kctx, builder, kNode_getFirstBlock(kctx, node), thunk);
+	ItrBlock = KLIB kNode_GetNode(kctx, node, KSymbol_("Iterator"), NULL);
 	if(ItrBlock != NULL) {
-		SUGAR VisitNode(kctx, builder, ItrBlock, thunk);
+		KLIB VisitNode(kctx, builder, ItrBlock, thunk);
 	}
 	return true;
 }
@@ -1164,7 +1168,7 @@ static kbool_t CollectLocalVar_VisitForNode(KVISITOR_PARAM)
 {
 	kNode *initNode = kNode_GetNode(kctx, node, KSymbol_("init"));
 	if(initNode != NULL) {
-		SUGAR VisitNode(kctx, builder, initNode, thunk);
+		KLIB VisitNode(kctx, builder, initNode, thunk);
 	}
 	CollectLocalVar_VisitWhileNode(kctx, builder, node, thunk);
 	return true;
@@ -1180,13 +1184,13 @@ static kbool_t CollectLocalVar_VisitForNode(KVISITOR_PARAM)
 
 static kbool_t CollectLocalVar_VisitLocalNode(KVISITOR_PARAM)
 {
-	LOCAL(node->attrTypeId, (kshort_t)(node->index));
+	LOCAL(node->typeAttr, (khalfword_t)(node->index));
 	return true;
 }
 
 static kbool_t CollectLocalVar_VisitFieldNode(KVISITOR_PARAM)
 {
-	LOCAL(KType_Object, (kshort_t)(node->index));
+	LOCAL(KType_Object, (khalfword_t)(node->index));
 	return true;
 }
 
@@ -1197,15 +1201,15 @@ static kbool_t CollectLocalVar_VisitMethodCallNode(KVISITOR_PARAM)
 	int argc = CallNode_getArgCount(node);
 	for (i = s; i < argc + 2; i++) {
 		kNode *exprN = kNode_At(node, i);
-		SUGAR VisitNode(kctx, builder, exprN, thunk);
+		KLIB VisitNode(kctx, builder, exprN, thunk);
 	}
 	return true;
 }
 
 static kbool_t CollectLocalVar_VisitAndNode(KVISITOR_PARAM)
 {
-	SUGAR VisitNode(kctx, builder, kNode_At(node, 1), thunk);
-	SUGAR VisitNode(kctx, builder, kNode_At(node, 2), thunk);
+	KLIB VisitNode(kctx, builder, kNode_At(node, 1), thunk);
+	KLIB VisitNode(kctx, builder, kNode_At(node, 2), thunk);
 	return true;
 }
 
@@ -1216,11 +1220,11 @@ static kbool_t CollectLocalVar_VisitAssignNode(KVISITOR_PARAM)
 	kNode *left = kNode_At(node, 1);
 	kNode *right = kNode_At(node, 2);
 	if(kNode_node(left) == KNode_Local) {
-		LOCAL(left->attrTypeId, left->index);
-		SUGAR VisitNode(kctx, builder, right, thunk);
+		LOCAL(left->typeAttr, left->index);
+		KLIB VisitNode(kctx, builder, right, thunk);
 	} else{
-		LOCAL(KType_Object, (kshort_t)left->index);
-		SUGAR VisitNode(kctx, builder, right, thunk);
+		LOCAL(KType_Object, (khalfword_t)left->index);
+		KLIB VisitNode(kctx, builder, right, thunk);
 	}
 	return true;
 }
@@ -1307,7 +1311,7 @@ static struct KVirtualCode *MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMet
 	builder->InstructionSize = 0;
 
 	builder->common.api = &CollectLocalVar_BuilderAPI;
-	SUGAR VisitNode(kctx, builder, block, NULL);
+	KLIB VisitNode(kctx, builder, block, NULL);
 	builder->stackbase += builder->localVarSize + 1/* == this object */;
 	builder->common.api = ns->builderApi;
 
@@ -1316,7 +1320,7 @@ static struct KVirtualCode *MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMet
 	ASM(THCODE, 0, _THCODE);
 	ASM(CHKSTACK, 0);
 
-	SUGAR VisitNode(kctx, builder, block, NULL);
+	KLIB VisitNode(kctx, builder, block, NULL);
 
 	if(!Block_HasTerminatorInst(kctx, builder->bbMainId)) {
 		MiniVMBuilder_JumpTo(kctx, builder, builder->bbReturnId);
@@ -1421,7 +1425,7 @@ static const struct KBuilderAPI *GetDefaultBuilderAPI(void)
 
 // -------------------------------------------------------------------------
 
-kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
+KONOHA_EXPORT(kbool_t) LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
 {
 	if(BOOTCODE_ENTER == NULL) {
 		SetUpBootCode();

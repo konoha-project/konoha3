@@ -1,6 +1,6 @@
 // written by kimio
 
-import("MiniKonoha.Console");
+import("Konoha.Console");
 
 void test() {
 	boolean isOkay = Console.inputUserApproval("Is it okay?", "OK", "NOP", true);  // OutputTest returns true;

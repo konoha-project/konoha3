@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
+#include "konoha3.h"
+
 #include "konoha3/konoha_common.h"
 #include "konoha3/import/methoddecl.h"
 
@@ -247,7 +247,7 @@ static KMETHOD String_new_fromBytes_withSpecifiedDecode(KonohaContext *kctx, Kon
 
 static kbool_t bytes_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KRequireKonohaCommonModule(trace);
+	KRequireKonohaCommonModel(trace);
 	//KImportPackageSymbol(ns, "cstyle", "$SingleQuotedChar", trace);
 	if(KClass_Bytes == NULL) {
 		KDEFINE_CLASS defBytes = {0};
@@ -286,7 +286,7 @@ static kbool_t bytes_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 	return true;
 }
 
-KDEFINE_PACKAGE *Bytes_Init(void)
+KONOHA_EXPORT(KDEFINE_PACKAGE *) Bytes_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);

@@ -1,6 +1,6 @@
 // written by kimio
 
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 DefineMacro("public", 0, "@Public");
 public
 

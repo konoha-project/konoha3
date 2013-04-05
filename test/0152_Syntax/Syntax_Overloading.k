@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("MiniKonoha.Syntax");
+import("Konoha.Syntax");
 
 void main(){
 	Syntax syntax = new Syntax("for");

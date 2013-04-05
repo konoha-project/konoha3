@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("MiniKonoha.Map");
+import("Konoha.Map");
 
 void test() {
 	Map[String] m = new Map[String]();

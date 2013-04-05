@@ -71,7 +71,7 @@ static int ParseSyntaxNode(KonohaContext *kctx, kSyntax *syn, kNode *node, ksymb
 	if(opIdx != PatternNoMatch/* && !kNode_IsError(node)*/) {
 		const char *emesg = (callCount > 0) ? "syntax error: %s%s" : "undefined: %s%s";
 		kToken *tk = tokenList->TokenItems[opIdx];
-		SUGAR MessageNode(kctx, node, tk, NULL, ErrTag, emesg, KSymbol_Fmt2(syn->keyword)/*KToken_t(tk)*/);
+		KLIB MessageNode(kctx, node, tk, NULL, ErrTag, emesg, KSymbol_Fmt2(syn->keyword)/*KToken_t(tk)*/);
 		return endIdx;
 	}
 	return PatternNoMatch;
@@ -130,7 +130,7 @@ static void kNode_AddAnnotation(KonohaContext *kctx, kNode *stmt, kArray *tokenL
 				kToken *nextToken = tokenList->TokenItems[currentIdx+1];
 				if(nextToken->resolvedSyntaxInfo != NULL && nextToken->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {
 					int start = 0;
-					value = (kObject *)SUGAR ParseNewNode(kctx, kNode_ns(stmt), nextToken->GroupTokenList, &start, kArray_size(nextToken->GroupTokenList), ParseExpressionOption, "(");
+					value = (kObject *)KLIB ParseNewNode(kctx, kNode_ns(stmt), nextToken->GroupTokenList, &start, kArray_size(nextToken->GroupTokenList), ParseExpressionOption, "(");
 					currentIdx++;
 				}
 			}
@@ -144,7 +144,7 @@ static void kNode_AddAnnotation(KonohaContext *kctx, kNode *stmt, kArray *tokenL
 static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kArray *tokenList, int beginIdx, int endIdx)
 {
 	int i;
-	//SUGAR dumpTokenArray(kctx, 0, tokenList, beginIdx, endIdx);
+	//KLIB dumpTokenArray(kctx, 0, tokenList, beginIdx, endIdx);
 	for(i = beginIdx; i < endIdx; i++) {
 		kToken *tk = tokenList->TokenItems[i];
 		if(kToken_IsStatementSeparator(tk)) {
@@ -209,11 +209,11 @@ static int FindOperator(KonohaContext *kctx, kNode *node, kArray *tokenList, int
 				if(kSyntax_Is(TypeSuffix, syntax) && typeToken != NULL) {
 					continue;
 				}
-				if(precedence < syntax->precedence_op2 || (precedence == syntax->precedence_op2 && !(FLAG_is(syntax->flag, SYNFLAG_NodeLeftJoinOp2)) )) {
+				if(precedence < syntax->precedence_op2 || (precedence == syntax->precedence_op2 && !(KHalfFlag_Is(syntax->flag, SYNFLAG_NodeLeftJoinOp2)) )) {
 					precedence = syntax->precedence_op2;
 					opIdx = i;
 				}
-				if(!FLAG_is(syntax->flag, SYNFLAG_Suffix)) {
+				if(!KHalfFlag_Is(syntax->flag, SYNFLAG_Suffix)) {
 					isPrePosition = true;
 				}
 			}

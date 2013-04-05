@@ -7,7 +7,7 @@ import("Type.Bytes");
 import("Syntax.CStyleWhile");
 import("Syntax.CStyleFor");
 import("Syntax.StringInterpolation");
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 
 String readFile(String path) {
     FILE file = new FILE(path, "rb");

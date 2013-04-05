@@ -82,7 +82,7 @@
 //static kbool_t ApplyMacroData(KonohaContext *kctx, KTokenSeq *tokens, kArray *macroTokenList, int beginIdx, int endIdx, size_t paramsize, KMacroSet *macroParam)
 //{
 //	KTokenSeq macro = {tokens->ns, macroTokenList, beginIdx + paramsize, endIdx};
-//	//SUGAR dumpTokenArray(kctx, 0, macroTokenList, 0, kArray_size(macroTokenList));
+//	//KLIB dumpTokenArray(kctx, 0, macroTokenList, 0, kArray_size(macroTokenList));
 //	//DBG_P("macroTokenList=%p", macroTokenList);
 //	int dstart = kArray_size(tokens->tokenList);
 //	Preprocess(kctx, tokens, macroParam, &macro, beginIdx + paramsize);
@@ -316,7 +316,7 @@ static void Preprocess(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, i
 				}
 				KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, tk->symbol, false/*isLocalOnly*/);
 				if(kvs != NULL) {
-					ktypeattr_t ty = KTypeAttr_Unmask(kvs->attrTypeId);
+					ktypeattr_t ty = KTypeAttr_Unmask(kvs->typeAttr);
 					if(ty == KType_Syntax) {
 						kSyntax *syntax = (kSyntax *)kvs->ObjectValue;
 						tk->resolvedSyntaxInfo = syntax;
@@ -403,14 +403,14 @@ static kbool_t ExpandMacroParam(KonohaContext *kctx, kNameSpace *ns, ksymbol_t s
 static void ApplyMacroData(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, size_t paramsize, KMacroSet *macroParam, kArray *bufferList)
 {
 	TraverseTokenList(kctx, tokenList, beginIdx + paramsize, endIdx, ResetPreprocess, NULL);
-	//SUGAR dumpTokenArray(kctx, 0, tokenList, beginIdx + paramsize, endIdx);
+	//KLIB dumpTokenArray(kctx, 0, tokenList, beginIdx + paramsize, endIdx);
 	Preprocess(kctx, ns, tokenList, beginIdx + paramsize, endIdx, macroParam, bufferList);
-	//SUGAR dumpTokenArray(kctx, 0, RangeArray(bufferList));
+	//KLIB dumpTokenArray(kctx, 0, RangeArray(bufferList));
 }
 
 static kbool_t SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data, int optionMacro)
 {
-	kSyntaxVar *syn = (kSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, keyword);
+	kSyntaxVar *syn = (kSyntaxVar *)KLIB kNameSpace_GetSyntax(kctx, ns, keyword);
 	if(IS_NOTNULL(syn) && syn->macroDataNULL == NULL) {
 		KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, source);

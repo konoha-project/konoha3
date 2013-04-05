@@ -28,8 +28,8 @@ extern "C" {
 
 #include <syslog.h>
 #include <errno.h>
-#include "konoha3/konoha.h"
-#include "konoha3/klib.h"
+#include "konoha3.h"
+
 
 // -------------------------------------------------------------------------
 /* Logging */
@@ -193,7 +193,7 @@ static char* writePolicyToBuffer(KonohaContext *kctx, logconf_t *logconf, char *
 		buftop = writeTextToBuffer(KFileLine_textFileName(trace->pline), buftop, bufend);
 		buftop[0] = ','; buftop[1] = ' '; buftop += 2;
 		buftop = writeKeyToBuffer(TEXTSIZE("ScriptLine"), buftop, bufend);
-		buftop = writeUnsingedIntToBuffer((uintptr_t)(kushort_t)trace->pline, buftop, bufend);
+		buftop = writeUnsingedIntToBuffer((uintptr_t)(kuhalfword_t)trace->pline, buftop, bufend);
 		buftop[0] = ','; buftop[1] = ' '; buftop += 2;
 	}
 	return buftop;

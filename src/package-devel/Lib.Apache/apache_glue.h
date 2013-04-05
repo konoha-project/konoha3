@@ -1,9 +1,8 @@
-#include "konoha3/konoha.h"
-#include "konoha3/sugar.h"
+#include "konoha3.h"
 
 #ifndef APACHE_GLUE_H
 #define APACHE_GLUE_H
-#define kmodapache        ((KModuleApache *)kctx->modshare[MOD_APACHE])
+#define kmodapache        ((KModuleApache *)kctx->runtimeModels[MOD_APACHE])
 #define KClass_Request        kmodapache->cRequest
 #define KClass_AprTable       kmodapache->cAprTable
 #define KClass_AprTableEntry  kmodapache->cAprTableEntry
@@ -29,7 +28,7 @@ typedef struct kApache {
 } kApache;
 
 typedef struct {
-	KRuntimeModule h;
+	KRuntimeModel h;
 	KClass *cRequest;
 	KClass *cAprTable;
 	KClass *cAprTableEntry;
@@ -37,7 +36,7 @@ typedef struct {
 } KModuleApache;
 
 typedef struct {
-	KContextModule h;
+	KModelContext h;
 	//kRequest *req;
 } ctxapache_t;
 

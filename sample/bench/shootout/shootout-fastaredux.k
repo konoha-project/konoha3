@@ -5,7 +5,7 @@
  */
 
 import("cstyle");
-import("MiniKonoha.NameSpace");
+import("Konoha.NameSpace");
 import("Type.Float");
 import("Syntax.GlobalVariable");
 import("Syntax.JavaStyleClass");
