@@ -91,6 +91,16 @@ typedef struct cbufferevent_rate_limit_group_totals {
 	long written_out;
 } kcbufferevent_rate_limit_group_totals;
 
+typedef struct cevbuffer_iovec {
+	kObjectHeader h;
+	struct evbuffer_iovec iovec;	//NOT pointer
+} kcevbuffer_iovec;
+
+typedef struct cevbuffer_ptr {
+	kObjectHeader h;
+	struct evbuffer_ptr ptr;	// NOT pointer
+} kcevbuffer_ptr;
+
 typedef struct cevbuffer {
 	kObjectHeader h;
 	struct evbuffer *buf;
@@ -530,7 +540,7 @@ static void cevent_Init(KonohaContext *kctx, kObject *o, void *conf)
 	ev->kctx = NULL;
 	ev->event = NULL;
 	KFieldInit(ev, ev->kcb, KNULL(Func));
-	KFieldInit(ev, ev->kcb->env, K_NULL);
+	KFieldInit(ev, ev->kcb->env, K_NULL);	//TODO should place in Func_Init()?
 	KFieldInit(ev, ev->kctimeval, K_NULL);
 }
 
@@ -549,7 +559,7 @@ static void cevent_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 {
 	kcevent *ev = (kcevent *) o;
 	KRefTrace(ev->kcb);
-	KRefTrace(ev->kcb->env);
+	KRefTrace(ev->kcb->env);	//TODO shoule place in Func_Reftrace()?
 	KRefTrace(ev->kctimeval);
 }
 
@@ -1450,6 +1460,33 @@ static void cbufferevent_rate_limit_group_totals_Init(KonohaContext *kctx, kObje
 }
 
 /* ======================================================================== */
+// evbuffer_iovec class
+static void cevbuffer_iovec_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kcevbuffer_iovec *vec = (kcevbuffer_iovec *) o;
+	vec->iovec.iov_base = NULL;
+	vec->iovec.iov_len = 0;
+}
+
+/*
+evbuffer_iovec class would NOT "new()" by konoha user.
+*/
+
+/* ======================================================================== */
+// evbuffer_ptr class
+static void cevbuffer_ptr_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kcevbuffer_ptr *evptr = (kcevbuffer_ptr *) o;
+	evptr->ptr.pos = 0;
+	evptr->ptr._internal.chain = NULL;
+	evptr->ptr._internal.pos_in_chain = 0;
+}
+
+/*
+evbuffer_ptr class would NOT "new()" by konoha user.
+*/
+
+/* ======================================================================== */
 // evbuffer class
 static void cevbuffer_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
@@ -1467,51 +1504,294 @@ static void cevbuffer_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
+//## evbuffer evbuffer.new();
+static KMETHOD cevbuffer_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	evbuf->buf = evbuffer_new();
+	KReturn(evbuf);
+}
 
-/* ======================================================================== */
-// evbuffer class
+//## int evbuffer.eneble_locking(Object lock);
+static KMETHOD cevbuffer_enable_locking(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kObject *lock = sfp[1].asObject;
+	KReturnUnboxValue(evbuffer_enable_locking(evbuf->buf, lock));
+}
+
+//## void evbuffer.lock();
+static KMETHOD cevbuffer_lock(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	evbuffer_lock(evbuf->buf);
+	KReturnVoid();
+}
+
+//## void evbuffer.unlock();
+static KMETHOD cevbuffer_unlock(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	evbuffer_unlock(evbuf->buf);
+	KReturnVoid();
+}
+
+//## int evbuffer.set_flags(int flags);
+static KMETHOD cevbuffer_set_flags(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	ev_uint64_t flags = sfp[1].intValue;
+	KReturnUnboxValue(evbuffer_set_flags(evbuf->buf, flags));
+}
+
+//## int evbuffer.clear_flags(int flags);
+static KMETHOD cevbuffer_clear_flags(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	ev_uint64_t flags = sfp[1].intValue;
+	KReturnUnboxValue(evbuffer_clear_flags(evbuf->buf, flags));
+}
+
+//## int evbuffer.get_length();
+static KMETHOD cevbuffer_get_length(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	KReturnUnboxValue(evbuffer_get_length(evbuf->buf));
+}
+
+//## int evbuffer.get_contiguous_space();
+static KMETHOD cevbuffer_get_contiguous_space(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	KReturnUnboxValue(evbuffer_get_contiguous_space(evbuf->buf));
+}
+
+//## int evbuffer.expand(int datlen);
+static KMETHOD cevbuffer_expand(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	int datlen = sfp[1].intValue;
+	KReturnUnboxValue(evbuffer_expand(evbuf->buf, datlen));
+}
+
+//## int evbuffer.reserve_space(int size, evbuffer_iovec[] iovec);
+static KMETHOD cevbuffer_reserve_space(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	ev_ssize_t size = sfp[1].intValue;
+	kArray *a = sfp[2].asArray;
+	int n_vec = kArray_size(a);
+	struct evbuffer_iovec **vec = alloca(sizeof(struct evbuffer_iovec *) * n_vec);
+
+	ssize_t i;
+	for(i = 0; i < n_vec; i++) {
+		vec[i] = &((kcevbuffer_iovec *)a->ObjectItems[i])->iovec;
+	}
+
+	/*
+	TODO
+	Should use Bytes[]?
+	Bytes constructor doesn't support to create with assigned buffer
+	(in this case "vec->iov_base" - assigned in libevent) now.
+	*/
+	KReturnUnboxValue(evbuffer_reserve_space(evbuf->buf, size, *vec, n_vec));
+}
+
+//## int evbuffer.commit_space(evbuffer_iovec[] iovec);
+static KMETHOD cevbuffer_commit_space(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kArray *a = sfp[1].asArray;
+	int n_vec = kArray_size(a);
+	struct evbuffer_iovec **vec = alloca(sizeof(struct evbuffer_iovec *) * n_vec);
+
+	ssize_t i;
+	for(i = 0; i < n_vec; i++) {
+		vec[i] = &((kcevbuffer_iovec *)a->ObjectItems[i])->iovec;
+	}
+	KReturnUnboxValue(evbuffer_commit_space(evbuf->buf, *vec, n_vec));
+	//TODO should use Bytes[]? Same as cevbuffer_reserve_space().
+}
+
+//## int evbuffer.add(Bytes data);
+static KMETHOD cevbuffer_add(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kBytes *data = sfp[1].asBytes;
+	KReturnUnboxValue(evbuffer_add(evbuf->buf, data->byteptr, data->bytesize));
+}
+
+//## int evbuffer.remove(Bytes data);
+static KMETHOD cevbuffer_remove(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kBytes *data = sfp[1].asBytes;
+	KReturnUnboxValue(evbuffer_remove(evbuf->buf, data->buf, data->bytesize));
+}
+
+//## int evbuffer.copyout(Bytes data_out);
+static KMETHOD cevbuffer_copyout(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kBytes *data_out = sfp[1].asBytes;
+	KReturnUnboxValue(evbuffer_copyout(evbuf->buf, data_out->buf, data_out->bytesize));
+}
+
+//## int evbuffer.remove_buffer(evbuffer dst, int datlen);
+static KMETHOD cevbuffer_remove_buffer(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kcevbuffer *dst = (kcevbuffer *)sfp[1].asObject;
+	int datlen = sfp[2].intValue;
+	KReturnUnboxValue(evbuffer_remove_buffer(evbuf->buf, dst->buf, datlen));
+}
+
+//## evbuffer_iovec evbuffer.readln(int eol_style);
+//## eol_style := [ EVBUFFER_EOL_ANY | EVBUFFER_EOL_CRLF | EVBUFFER_EOL_CRLF_STRICT | EVBUFFER_EOL_LF ]
+static KMETHOD cevbuffer_readln(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	int eol_style = sfp[1].intValue;
+	kcevbuffer_iovec *ret = (kcevbuffer_iovec *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+	ret->iovec.iov_base = evbuffer_readln(evbuf->buf, &ret->iovec.iov_len, eol_style);
+	KReturn(ret);
+	/*
+	It should copy to Bytes class buffer in upper layer(e.g. utility method),
+	shouldn't copy in this function because copyed in evbuffer_readln().
+	*/
+}
+
+//## int evbuffer.add_buffer(evbuffer inbuf);
+static KMETHOD cevbuffer_add_buffer(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kcevbuffer *inbuf = (kcevbuffer *)sfp[1].asObject;
+	KReturnUnboxValue(evbuffer_add_buffer(evbuf->buf, inbuf->buf));
+}
+
+/*
+int evbuffer_add_reference(struct evbuffer *outbuf, const void *data, size_t datlen, evbuffer_ref_cleanup_cb cleanupfn, void *cleanupfn_arg);	//TODO need this API?
+*/
+
+//## int evbuffer.add_file(int fd, int offset, int length);
+static KMETHOD cevbuffer_add_file(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	KReturnUnboxValue(evbuffer_add_file(evbuf->buf, sfp[1].intValue, sfp[2].intValue, sfp[3].intValue));
+}
+
+/*
+USE evbuffer.add(Bytes data);
+e.g.	evbuffer.add("write data".toBytes());
+
+int evbuffer_add_printf(struct evbuffer *buf, const char *fmt, ...);
+int evbuffer_add_vprintf(struct evbuffer *buf, const char *fmt, va_list ap);
+*/
+
+
+//## int evbuffer.drain(int len);
+static KMETHOD cevbuffer_drain(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	KReturnUnboxValue(evbuffer_drain(evbuf->buf, sfp[1].intValue));
+}
+
+//## int evbuffer.write(int fd);
+static KMETHOD cevbuffer_write(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	KReturnUnboxValue(evbuffer_write(evbuf->buf, sfp[1].intValue));
+}
+
+//## int evbuffer.write_atmost(int fd, int howmuch);
+static KMETHOD cevbuffer_write_atmost(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	KReturnUnboxValue(evbuffer_write_atmost(evbuf->buf, sfp[1].intValue, sfp[2].intValue));
+}
+
+//## int evbuffer.read(int fd, int howmuch);
+static KMETHOD cevbuffer_read(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	KReturnUnboxValue(evbuffer_read(evbuf->buf, sfp[1].intValue, sfp[2].intValue));
+}
+
+//## evbuffer_ptr evbuffer.search(String what, evbuffer_ptr start);
+static KMETHOD cevbuffer_search(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kString *what = sfp[1].asString;
+	kcevbuffer_ptr *start = (kcevbuffer_ptr *)sfp[2].asObject;
+	kcevbuffer_ptr *ret = (kcevbuffer_ptr *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+
+	ret->ptr = evbuffer_search(evbuf->buf, kString_text(what), kString_size(what), (start == (kcevbuffer_ptr *)K_NULL) ? NULL : &start->ptr);
+	KReturn(ret);
+}
+
+//## evbuffer_ptr evbuffer.search_range(String what, evbuffer_ptr start, evbuffer_ptr end);
+static KMETHOD cevbuffer_search_range(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kString *what = sfp[1].asString;
+	kcevbuffer_ptr *start = (kcevbuffer_ptr *)sfp[2].asObject;
+	kcevbuffer_ptr *end = (kcevbuffer_ptr *)sfp[3].asObject;
+	kcevbuffer_ptr *ret = (kcevbuffer_ptr *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+
+	ret->ptr = evbuffer_search_range(evbuf->buf, kString_text(what), kString_size(what), (start == (kcevbuffer_ptr *)K_NULL) ? NULL : &start->ptr, (end == (kcevbuffer_ptr *)K_NULL) ? NULL : &end->ptr);
+	KReturn(ret);
+}
+
+//## int evbuffer.ptr_set(evbuffer_ptr ptr, int position, int how);
+//## how := [ EVBUFFER_PTR_SET | EVBUFFER_PTR_ADD ]
+static KMETHOD cevbuffer_set_ptr(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kcevbuffer_ptr *ptr = (kcevbuffer_ptr *)sfp[1].asObject;
+	int position = sfp[2].intValue;
+	int how = sfp[3].intValue;
+	KReturnUnboxValue(evbuffer_ptr_set(evbuf->buf, &ptr->ptr, position, how));
+}
+
+//## evbuffer_ptr evbuffer.search_eol(evbuffer_ptr start, int eol_style);
+//## eol_style := [ EVBUFFER_EOL_ANY | EVBUFFER_EOL_CRLF | EVBUFFER_EOL_CRLF_STRICT | EVBUFFER_EOL_LF ]
+static KMETHOD cevbuffer_search_eol(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kcevbuffer_ptr *start = (kcevbuffer_ptr *)sfp[1].asObject;
+	size_t eol_style = sfp[2].intValue;
+	kcevbuffer_ptr *ret = (kcevbuffer_ptr *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+
+	ret->ptr = evbuffer_search_eol(evbuf->buf, &start->ptr, NULL, eol_style);
+	KReturn(ret);
+}
+
+
+//## int evbuffer.peek(int len, evbuffer_ptr start_at, evbuffer_iovec[] vec_out);
+static KMETHOD cevbuffer_peek(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	ev_ssize_t len = sfp[1].intValue;
+	kcevbuffer_ptr *start_at = (kcevbuffer_ptr *)sfp[2].asObject;
+	kArray *a = sfp[3].asArray;
+	int n_vec = kArray_size(a);
+	struct evbuffer_iovec **vec_out = alloca(sizeof(struct evbuffer_iovec *) * n_vec);
+
+	int ret = evbuffer_peek(evbuf->buf, len, &start_at->ptr, *vec_out, n_vec);
+
+	//copy to vec_out
+	ssize_t i;
+	for(i = 0; i < n_vec; i++) {
+		((kcevbuffer_iovec *)a->ObjectItems[i])->iovec = *vec_out[i];
+	}
+
+	KReturnUnboxValue(ret);
+}
+
 /*
 TODO
-int evbuffer_enable_locking(struct evbuffer *buf, void *lock);
-void evbuffer_lock(struct evbuffer *buf);
-void evbuffer_unlock(struct evbuffer *buf);
-int evbuffer_set_flags(struct evbuffer *buf, ev_uint64_t flags);
-int evbuffer_clear_flags(struct evbuffer *buf, ev_uint64_t flags);
-size_t evbuffer_get_length(const struct evbuffer *buf);
-size_t evbuffer_get_contiguous_space(const struct evbuffer *buf);
-int evbuffer_expand(struct evbuffer *buf, size_t datlen);
-int evbuffer_reserve_space(struct evbuffer *buf, ev_ssize_t size,
-	struct evbuffer_iovec *vec, int n_vec);
-int evbuffer_commit_space(struct evbuffer *buf,
-	struct evbuffer_iovec *vec, int n_vecs);
-int evbuffer_add(struct evbuffer *buf, const void *data, size_t datlen);
-int evbuffer_remove(struct evbuffer *buf, void *data, size_t datlen);
-ev_ssize_t evbuffer_copyout(struct evbuffer *buf, void *data_out, size_t datlen);
-int evbuffer_remove_buffer(struct evbuffer *src, struct evbuffer *dst,
-	size_t datlen);
-char *evbuffer_readln(struct evbuffer *buffer, size_t *n_read_out,
-	enum evbuffer_eol_style eol_style);
-int evbuffer_add_buffer(struct evbuffer *outbuf, struct evbuffer *inbuf);
-int evbuffer_add_reference(struct evbuffer *outbuf,
-	const void *data, size_t datlen,
-	evbuffer_ref_cleanup_cb cleanupfn, void *cleanupfn_arg);
-int evbuffer_add_file(struct evbuffer *outbuf, int fd, ev_off_t offset,
-	ev_off_t length);
-int evbuffer_add_printf(struct evbuffer *buf, const char *fmt, ...);	//TODO use String?
-int evbuffer_add_vprintf(struct evbuffer *buf, const char *fmt, va_list ap);
-int evbuffer_drain(struct evbuffer *buf, size_t len);
-int evbuffer_write(struct evbuffer *buffer, evutil_socket_t fd);
-int evbuffer_write_atmost(struct evbuffer *buffer, evutil_socket_t fd,
-	ev_ssize_t howmuch);
-int evbuffer_read(struct evbuffer *buffer, evutil_socket_t fd, int howmuch);
-struct evbuffer_ptr evbuffer_search(struct evbuffer *buffer, const char *what, size_t len, const struct evbuffer_ptr *start);
-struct evbuffer_ptr evbuffer_search_range(struct evbuffer *buffer, const char *what, size_t len, const struct evbuffer_ptr *start, const struct evbuffer_ptr *end);
-int evbuffer_ptr_set(struct evbuffer *buffer, struct evbuffer_ptr *ptr,
-	size_t position, enum evbuffer_ptr_how how);
-struct evbuffer_ptr evbuffer_search_eol(struct evbuffer *buffer,
-	struct evbuffer_ptr *start, size_t *eol_len_out,
-	enum evbuffer_eol_style eol_style);
-int evbuffer_peek(struct evbuffer *buffer, ev_ssize_t len, struct evbuffer_ptr *start_at, struct evbuffer_iovec *vec_out, int n_vec);
+It seems low-layer implements of evbuffer. need for konoha user?
+
 struct evbuffer_cb_entry *evbuffer_add_cb(struct evbuffer *buffer, evbuffer_cb_func cb, void *cbarg);
 int evbuffer_remove_cb_entry(struct evbuffer *buffer, struct evbuffer_cb_entry *ent);
 int evbuffer_remove_cb(struct evbuffer *buffer, evbuffer_cb_func cb, void *cbarg);
@@ -1524,14 +1804,6 @@ int evbuffer_freeze(struct evbuffer *buf, int at_front);
 int evbuffer_unfreeze(struct evbuffer *buf, int at_front);
 int evbuffer_defer_callbacks(struct evbuffer *buffer, struct event_base *base);
 */
-
-
-
-
-
-
-
-
 
 /* ======================================================================== */
 // evhttp class
@@ -1833,6 +2105,7 @@ static void cevhttp_request_Init(KonohaContext *kctx, kObject *o, void *conf)
 	req->kctx = NULL;
 	req->req = NULL;
 	KFieldInit(req, req->kcb, KNULL(Func));
+	KFieldInit(req, req->kcb->env, K_NULL);	//TODO should place in Func_Init()?
 	KFieldInit(req, req->chunked_kcb, KNULL(Func));
 }
 
@@ -1849,6 +2122,7 @@ static void cevhttp_request_Reftrace(KonohaContext *kctx, kObject *o, KObjectVis
 {
 	kcevhttp_request *req = (kcevhttp_request *) o;
 	KRefTrace(req->kcb);
+	KRefTrace(req->kcb->env);	//TODO shoule place in Func_Reftrace()?
 	KRefTrace(req->chunked_kcb);
 }
 
@@ -2094,6 +2368,7 @@ static void cevhttp_connection_Init(KonohaContext *kctx, kObject *o, void *conf)
 	con->kctx = NULL;
 	con->evcon = NULL;
 	KFieldInit(con, con->close_kcb, KNULL(Func));
+	KFieldInit(con, con->close_kcb->env, K_NULL);	//TODO should place in Func_Init()?
 }
 
 static void cevhttp_connection_Free(KonohaContext *kctx, kObject *o)
@@ -2109,6 +2384,7 @@ static void cevhttp_connection_Reftrace(KonohaContext *kctx, kObject *o, KObject
 {
 	kcevhttp_connection *con = (kcevhttp_connection *) o;
 	KRefTrace(con->close_kcb);
+	KRefTrace(con->close_kcb->env);	//TODO shoule place in Func_Reftrace()?
 }
 
 //## evhttp evhttp_connection.new(event_base base, evdns_base dnsbase, String address, int port);
@@ -2586,6 +2862,7 @@ static void evhttp_set_cb_arg_Init(KonohaContext *kctx, kObject *o, void *conf)
 
 	cbarg->kctx = NULL;
 	KFieldInit(cbarg, cbarg->kcb, KNULL(Func));
+	KFieldInit(cbarg, cbarg->kcb->env, K_NULL); //TODO should place in Func_Init()?
 	KFieldInit(cbarg, cbarg->uri, KNULL(String));
 }
 
@@ -2593,6 +2870,7 @@ static void evhttp_set_cb_arg_Reftrace(KonohaContext *kctx, kObject *o, KObjectV
 {
 	kevhttp_set_cb_arg *arg = (kevhttp_set_cb_arg *) o;
 	KRefTrace(arg->kcb);
+	KRefTrace(arg->kcb->env);	//TODO shoule place in Func_Reftrace()?
 	KRefTrace(arg->uri);
 }
 
@@ -2737,6 +3015,28 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	//defcbufferevent_rate_limit_group_totals.free      = cbufferevent_rate_limit_group_totals_Free;
 	KClass *cbufferevent_rate_limit_group_totalsClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcbufferevent_rate_limit_group_totals, trace);
 
+	// evbuffer_iovec
+	KDEFINE_CLASS defcevbuffer_iovec = {0};
+	defcevbuffer_iovec.structname	= "evbuffer_iovec";
+	defcevbuffer_iovec.typeId		= KTypeAttr_NewId;
+	defcevbuffer_iovec.cstruct_size = sizeof(kcevbuffer_iovec);
+	defcevbuffer_iovec.cflag     = KClassFlag_Final;
+	defcevbuffer_iovec.init      = cevbuffer_iovec_Init;
+	//defcevbuffer_iovec.reftrace	= cevbuffer_iovec_Reftrace;
+	//defcevbuffer_iovec.free		= cevbuffer_iovec_Free;
+	KClass *cevbuffer_iovecClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevbuffer_iovec, trace);
+
+	// evbuffer_ptr
+	KDEFINE_CLASS defcevbuffer_ptr = {0};
+	defcevbuffer_ptr.structname	= "evbuffer_ptr";
+	defcevbuffer_ptr.typeId		= KTypeAttr_NewId;
+	defcevbuffer_ptr.cstruct_size = sizeof(kcevbuffer_ptr);
+	defcevbuffer_ptr.cflag     = KClassFlag_Final;
+	defcevbuffer_ptr.init      = cevbuffer_ptr_Init;
+	//defcevbuffer_ptr.reftrace	= cevbuffer_ptr_Reftrace;
+	//defcevbuffer_ptr.free		= cevbuffer_ptr_Free;
+	KClass *cevbuffer_ptrClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevbuffer_ptr, trace);
+
 	// evbuffer
 	KDEFINE_CLASS defcevbuffer = {0};
 	defcevbuffer.structname	= "evbuffer";
@@ -2863,12 +3163,13 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	KClass *Sockaddr_inClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSockaddr_in, trace);
 
 
-	/* You can define methods with the following procedures. */
 	int KType_cevent_base = KClass_cevent_base->typeId;
 	int KType_cevent_config = KClass_cevent_config->typeId;
 	int KType_cevent = ceventClass->typeId;
 	int KType_cbufferevent = KClass_cbufferevent->typeId;
 	int KType_cevbuffer = KClass_cevbuffer->typeId;
+	int KType_cevbuffer_iovec = cevbuffer_iovecClass->typeId;
+	int KType_cevbuffer_ptr = cevbuffer_ptrClass->typeId;
 	int KType_cev_token_bucket_cfg = cev_token_bucket_cfgClass->typeId;
 	int KType_cbufferevent_rate_limit_group = cbufferevent_rate_limit_groupClass->typeId;
 	int KType_cbufferevent_rate_limit_group_totals = cbufferevent_rate_limit_group_totalsClass->typeId;
@@ -2926,6 +3227,11 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	KClass *eventbufferArray = KClass_p0(kctx, KClass_Array, KType_cbufferevent);
 	int KType_eventbufferArray = eventbufferArray->typeId;
 
+	// evbuffer_iovec[]
+	KClass *evbuffer_iovecArray = KClass_p0(kctx, KClass_Array, KType_cevbuffer_iovec);
+	int KType_evbuffer_iovecArray = evbuffer_iovecArray->typeId;
+
+	/* You can define methods with the following procedures. */
 	KDEFINE_METHOD MethodData[] = {
 
 		// event_base
@@ -3043,6 +3349,39 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		_Public, _F(cbufferevent_rate_limit_group_decrement_write), KType_Int, KType_cbufferevent_rate_limit_group, KMethodName_("decrement_write"), 1, KType_Int, KFieldName_("decr"),
 		_Public, _F(cbufferevent_rate_limit_group_get_totals), KType_void, KType_cbufferevent_rate_limit_group, KMethodName_("get_totals"), 1, KType_cbufferevent_rate_limit_group_totals, KFieldName_("totals"),
 		_Public, _F(cbufferevent_rate_limit_group_reset_totals), KType_void, KType_cbufferevent_rate_limit_group, KMethodName_("reset_totals"), 0,
+
+		//evbuffer_iovec
+
+		//evbuffer_ptr
+
+		//evbuffer
+		_Public, _F(cevbuffer_new), KType_cevbuffer, KType_cevbuffer, KMethodName_("new"), 0,
+		_Public, _F(cevbuffer_enable_locking), KType_Int, KType_cevbuffer, KMethodName_("enable_locking"), 1, KType_Object, KFieldName_("lock"),
+		_Public, _F(cevbuffer_lock), KType_void, KType_cevbuffer, KMethodName_("lock"), 0,
+		_Public, _F(cevbuffer_unlock), KType_void, KType_cevbuffer, KMethodName_("unlock"), 0,
+		_Public, _F(cevbuffer_set_flags), KType_Int, KType_cevbuffer, KMethodName_("set_flags"), 1, KType_Int, KFieldName_("flags"),
+		_Public, _F(cevbuffer_clear_flags), KType_Int, KType_cevbuffer, KMethodName_("clear_flags"), 1, KType_Int, KFieldName_("flags"),
+		_Public, _F(cevbuffer_get_length), KType_Int, KType_cevbuffer, KMethodName_("get_length"), 0,
+		_Public, _F(cevbuffer_get_contiguous_space), KType_Int, KType_cevbuffer, KMethodName_("get_contiguous_space"), 0,
+		_Public, _F(cevbuffer_expand), KType_Int, KType_cevbuffer, KMethodName_("expand"), 1, KType_Int, KFieldName_("datlen"),
+		_Public, _F(cevbuffer_reserve_space), KType_Int, KType_cevbuffer, KMethodName_("reserve_space"), 2, KType_Int, KFieldName_("size"), KType_evbuffer_iovecArray, KFieldName_("iovec"),
+		_Public, _F(cevbuffer_commit_space), KType_Int, KType_cevbuffer, KMethodName_("commit_space"), 1, KType_evbuffer_iovecArray, KFieldName_("iovec"),
+		_Public, _F(cevbuffer_add), KType_Int, KType_cevbuffer, KMethodName_("add"), 1, KType_Bytes, KFieldName_("data"),
+		_Public, _F(cevbuffer_remove), KType_Int, KType_cevbuffer, KMethodName_("remove"), 1, KType_Bytes, KFieldName_("data"),
+		_Public, _F(cevbuffer_copyout), KType_Int, KType_cevbuffer, KMethodName_("copyout"), 1, KType_Bytes, KFieldName_("data_out"),
+		_Public, _F(cevbuffer_remove_buffer), KType_Int, KType_cevbuffer, KMethodName_("remove_buffer"), 2, KType_cevbuffer, KFieldName_("dst"), KType_Int, KFieldName_("datlen"),
+		_Public, _F(cevbuffer_readln), KType_cevbuffer_iovec, KType_cevbuffer, KMethodName_("readln"), 1, KType_Int, KFieldName_("eol_style"),
+		_Public, _F(cevbuffer_add_buffer), KType_Int, KType_cevbuffer, KMethodName_("add_buffer"), 1, KType_cevbuffer, KFieldName_("inbuf"),
+		_Public, _F(cevbuffer_add_file), KType_Int, KType_cevbuffer, KMethodName_("add_file"), 3, KType_Int, KFieldName_("fd"), KType_Int, KFieldName_("offset"), KType_Int, KFieldName_("length"),
+		_Public, _F(cevbuffer_drain), KType_Int, KType_cevbuffer, KMethodName_("drain"), 1, KType_Int, KFieldName_("drain"),
+		_Public, _F(cevbuffer_write), KType_Int, KType_cevbuffer, KMethodName_("write"), 1, KType_Int, KFieldName_("fd"),
+		_Public, _F(cevbuffer_write_atmost), KType_Int, KType_cevbuffer, KMethodName_("write_atmost"), 2, KType_Int, KFieldName_("fd"), KType_Int, KFieldName_("howmuch"),
+		_Public, _F(cevbuffer_read), KType_Int, KType_cevbuffer, KMethodName_("read"), 2, KType_Int, KFieldName_("fd"), KType_Int, KFieldName_("howmuch"),
+		_Public, _F(cevbuffer_search), KType_cevbuffer_ptr, KType_cevbuffer, KMethodName_("search"), 2, KType_String, KFieldName_("what"), KType_cevbuffer_ptr, KFieldName_("start"),
+		_Public, _F(cevbuffer_search_range), KType_cevbuffer_ptr, KType_cevbuffer, KMethodName_("search_range"), 3, KType_String, KFieldName_("what"), KType_cevbuffer_ptr, KFieldName_("start"), KType_cevbuffer_ptr, KFieldName_("end"),
+		_Public, _F(cevbuffer_set_ptr), KType_Int, KType_cevbuffer, KMethodName_("set_ptr"), 3, KType_cevbuffer_ptr, KFieldName_("ptr"), KType_Int, KFieldName_("position"), KType_Int, KFieldName_("how"),
+		_Public, _F(cevbuffer_search_eol), KType_cevbuffer_ptr, KType_cevbuffer, KMethodName_("search_eol"), 2, KType_cevbuffer_ptr, KFieldName_("start"), KType_Int, KFieldName_("eol_style"),
+		_Public, _F(cevbuffer_peek), KType_Int, KType_cevbuffer, KMethodName_("peek"), 3, KType_Int, KFieldName_("len"), KType_cevbuffer_ptr, KFieldName_("start_at"), KType_evbuffer_iovecArray, KFieldName_("vec_out"),
 
 		// evhttp
 		_Public, _F(cevhttp_new), KType_cevhttp, KType_cevhttp, KMethodName_("new"), 1, KType_cevent_base, KFieldName_("cevent_base"),
@@ -3188,6 +3527,16 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		{KDefineConstInt(BEV_OK)},
 		{KDefineConstInt(BEV_NEED_MORE)},
 		{KDefineConstInt(BEV_ERROR)},
+
+		// buffer.h: enum evbuffer_eol_style
+		{KDefineConstInt(EVBUFFER_EOL_ANY)},
+		{KDefineConstInt(EVBUFFER_EOL_CRLF)},
+		{KDefineConstInt(EVBUFFER_EOL_CRLF_STRICT)},
+		{KDefineConstInt(EVBUFFER_EOL_LF)},
+
+		// buffer.h: enum evbuffer_ptr_how
+		{KDefineConstInt(EVBUFFER_PTR_SET)},
+		{KDefineConstInt(EVBUFFER_PTR_ADD)},
 
 		// http.h: enum evhttp_cmd_type
 		{KDefineConstInt(EVHTTP_REQ_GET)},
