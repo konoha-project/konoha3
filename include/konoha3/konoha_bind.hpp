@@ -423,41 +423,41 @@ private:
 
 } /* namespace konoha */
 
-/*------------------ [SampleCode] ------------------*/
-#include "konoha_bind.hpp"
-#include <iostream>
-
-class A {
-public:
-    A(int   a) : a(a)      { std::cout << "new0 a:" << a << std::endl; }
-    A(float a) : a(int(a)) { std::cout << "new1 a:" << a << std::endl; }
-    int f(int x) { std::cout << "a.f(x):" << a << std::endl; return a + x; }
-    int g(int x) { std::cout << "a.g(x):" << a << std::endl; return a + x; }
-    int g()      { std::cout << "a.g():"  << a << std::endl; return a; }
-    ~A() { std::cout << "delete a:" << a << std::endl; }
-private:
-    int a;
-};
-
-using namespace konoha;
-
-template<typename T>
-struct Constructor {
-public:
-    static T *New() { return new T(0); }
-    static T *New2(int x) { return new T(x); }
-};
-
-static kbool_t DefineClassAndMethods(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
-{
-    ClassBinder<A> ClassA;
-    ClassA.DefineClass(kctx,  ns, "A");
-
-    ClassA.DefineMethod(kctx, ns, "f", MethodWrapper<int (A::*)(int)>::Get<&A::f>());  /* define A.f(int) */
-    ClassA.DefineMethod(kctx, ns, "g", MethodWrapper<int (A::*)()>::Get<&A::g>());     /* define A.g() */
-    ClassA.DefineMethod(kctx, ns, "g", MethodWrapper<int (A::*)(int)>::Get<&A::g>());  /* define A.f(int) */
-
-    ClassA.DefineConstructor(kctx, ns, MethodWrapper<A *(*)()>::Get<&Constructor<A>::New>());     /* define A.new() */
-    ClassA.DefineConstructor(kctx, ns, MethodWrapper<A *(*)(int)>::Get<&Constructor<A>::New2>()); /* define A.new(int) */
-    return true;
-}
+///*------------------ [SampleCode] ------------------*/
+//#include "konoha_bind.hpp"
+//#include <iostream>
+//
+//class A {
+//public:
+//    A(int   a) : a(a)      { std::cout << "new0 a:" << a << std::endl; }
+//    A(float a) : a(int(a)) { std::cout << "new1 a:" << a << std::endl; }
+//    int f(int x) { std::cout << "a.f(x):" << a << std::endl; return a + x; }
+//    int g(int x) { std::cout << "a.g(x):" << a << std::endl; return a + x; }
+//    int g()      { std::cout << "a.g():"  << a << std::endl; return a; }
+//    ~A() { std::cout << "delete a:" << a << std::endl; }
+//private:
+//    int a;
+//};
+//
+//using namespace konoha;
+//
+//template<typename T>
+//struct Constructor {
+//public:
+//    static T *New() { return new T(0); }
+//    static T *New2(int x) { return new T(x); }
+//};
+//
+//static kbool_t DefineClassAndMethods(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+//{
+//    ClassBinder<A> ClassA;
+//    ClassA.DefineClass(kctx,  ns, "A");
+//
+//    ClassA.DefineMethod(kctx, ns, "f", MethodWrapper<int (A::*)(int)>::Get<&A::f>());  /* define A.f(int) */
+//    ClassA.DefineMethod(kctx, ns, "g", MethodWrapper<int (A::*)()>::Get<&A::g>());     /* define A.g() */
+//    ClassA.DefineMethod(kctx, ns, "g", MethodWrapper<int (A::*)(int)>::Get<&A::g>());  /* define A.f(int) */
+//
+//    ClassA.DefineConstructor(kctx, ns, MethodWrapper<A *(*)()>::Get<&Constructor<A>::New>());     /* define A.new() */
+//    ClassA.DefineConstructor(kctx, ns, MethodWrapper<A *(*)(int)>::Get<&Constructor<A>::New2>()); /* define A.new(int) */
+//    return true;
+//}

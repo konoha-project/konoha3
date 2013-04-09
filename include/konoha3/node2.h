@@ -147,6 +147,7 @@ typedef struct kOrNode {
 typedef struct kAssignNode {
 	KNODE_BASE_STRUCT;
 	/* frame[Index] = Right */
+	kToken    *TermToken;
 	uintptr_t Index;
 	kNodeBase *Right;
 } kAssignNode;
@@ -154,9 +155,10 @@ typedef struct kAssignNode {
 typedef struct kLetNode {
 	KNODE_BASE_STRUCT;
 	/* let frame[Index] = Right in Block end*/
+	kToken    *TermToken;
 	uintptr_t Index;
 	kNodeBase *Right;
-	kNodeBase *ExprList;
+	kNodeBase *Block;
 } kLetNode;
 
 typedef struct kBlockNode {
