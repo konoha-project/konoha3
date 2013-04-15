@@ -24,13 +24,9 @@
 
 #define USE_EXECUTIONENGINE
 
-#include "konoha3.h"
-
-
-#include "konoha3/import/module.h"
-
-#include <string.h>
 #include <string>
+#include "konoha3.h"
+#include "konoha3/import/module.h"
 
 #undef HAVE_LIBV8/*FIXME*/
 #ifdef HAVE_LIBV8
@@ -510,8 +506,7 @@ static kbool_t JSBuilder_VisitNullNode(KonohaContext *kctx, KBuilder *builder, k
 static kbool_t JSBuilder_VisitLocalNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
 {
 	kToken *tk = node->TermToken;
-	JSBuilder_EmitString(kctx, builder, kString_text(tk->text), "_", "");
-	JSBuilder_EmitInt(kctx, builder, node->index);
+	JSBuilder_EmitString(kctx, builder, kString_text(tk->text), "", "");
 	return true;
 }
 
@@ -522,7 +517,7 @@ static kbool_t JSBuilder_VisitFieldNode(KonohaContext *kctx, KBuilder *builder, 
 	return true;
 }
 
-KONOHA_EXPORT(kbool_t) LoadFuelJSModule(KonohaFactory *factory, ModuleType type);
+KONOHA_EXPORT(kbool_t) LoadLeafJSModule(KonohaFactory *factory, ModuleType type);
 static void compileAllDefinedMethodsInNameSpace(KonohaContext *kctx, kNameSpace *ns);
 
 static bool JSBuilder_importPackage(KonohaContext *kctx, kNameSpace *ns, kString *package, kfileline_t uline)
@@ -537,7 +532,7 @@ static bool JSBuilder_importPackage(KonohaContext *kctx, kNameSpace *ns, kString
 	compileAllDefinedMethodsInNameSpace(kctx, ns);
 
 	//factory->DeleteVirtualMachine(kctx);
-	LoadFuelJSModule(factory, ReleaseModule);
+	LoadLeafJSModule(factory, ReleaseModule);
 	ns->builderApi = factory->ExecutionEngineModule.GetDefaultBuilderAPI();
 	return true;
 }
@@ -1006,7 +1001,7 @@ static void V8_DeleteVirtualMachine(KonohaContext *kctx)
 static const struct KBuilderAPI *GetDefaultBuilderAPI(void);
 
 static const KModuleInfo ModuleInfo = {
-	"JavaScript", K_VERSION, 0, "JavaScript",
+	"LeafJS", K_VERSION, 0, "LeafJS",
 };
 
 static const struct ExecutionEngineModule V8_Module = {
@@ -1022,7 +1017,7 @@ static const struct ExecutionEngineModule V8_Module = {
 };
 
 static const struct KBuilderAPI V8_BuilderAPI = {
-	"JavaScript",
+	"LeafJS",
 	&V8_Module,
 #define DEFINE_BUILDER_API(NAME) JSBuilder_Visit##NAME##Node,
 	KNodeList(DEFINE_BUILDER_API)
@@ -1036,7 +1031,7 @@ static const struct KBuilderAPI *GetDefaultBuilderAPI(void)
 
 // -------------------------------------------------------------------------
 
-KONOHA_EXPORT(kbool_t) LoadFuelJSModule(KonohaFactory *factory, ModuleType type)
+KONOHA_EXPORT(kbool_t) LoadLeafJSModule(KonohaFactory *factory, ModuleType type)
 {
 #ifdef HAVE_LIBV8
 	globalJSContext = new JSContext();
