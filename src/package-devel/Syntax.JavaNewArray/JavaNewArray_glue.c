@@ -37,7 +37,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 	if(beginIdx + 1 < endIdx) {
 		kTokenVar *newToken = tokenList->TokenVarItems[beginIdx];
 		KClass *foundClass = NULL;
-		kNameSpace *ns = kNode_ns(stmt);
+		kNameSpace *ns = kUntypedNode_ns(stmt);
 		int nextIdx = KLIB ParseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
 		if((size_t)nextIdx < kArray_size(tokenList)) {
 			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
@@ -46,8 +46,8 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 				/* new Type1[] => Array<Type1>.newList */
 				KClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
 				newToken->symbol = KSymbol_("newArray");
-				kNode *arg0 = new_ConstNode(kctx, ns, NULL, KLIB Knull(kctx, arrayClass));
-				KLIB kNode_Op(kctx, stmt, newToken, 1, arg0);
+				kUntypedNode *arg0 = new_ConstNode(kctx, ns, NULL, KLIB Knull(kctx, arrayClass));
+				KLIB kUntypedNode_Op(kctx, stmt, newToken, 1, arg0);
 				KLIB AppendParsedNode(kctx, stmt, RangeGroup(GroupTokenList), NULL, ParseExpressionOption, NULL);
 				KReturnUnboxValue(nextIdx+1);
 			}

@@ -25,7 +25,7 @@
 #ifndef NODE2_H_
 #define NODE2_H_
 
-typedef struct kUntypedNode {
+struct kUntypedNode {
 	kObjectHeader h;
 	khalfword_t nodeType; ktypeattr_t typeAttr;
 	union {
@@ -47,14 +47,14 @@ typedef struct kUntypedNode {
 		intptr_t       index;
 		kObject*       ObjectConstValue;
 	};
-} kUntypedNode;
+};
 
-typedef struct kNodeBase {
+typedef struct kUntypedNodeBase {
 #define KNODE_BASE_STRUCT \
 	kObjectHeader h;\
 	khalfword_t nodeType; ktypeattr_t typeAttr
 	KNODE_BASE_STRUCT;
-} kNodeBase;
+} kUntypedNodeBase;
 
 #define NODE_LIST_OP(OP)\
 	OP(Done)\
@@ -120,7 +120,7 @@ typedef struct kFieldNode {
 typedef struct kBoxNode {
 	KNODE_BASE_STRUCT;
 	/* Object(Expr) */
-	kNodeBase *Expr;
+	kUntypedNodeBase *Expr;
 } kBoxNode;
 
 typedef struct kMethodCallNode {
@@ -133,15 +133,15 @@ typedef struct kMethodCallNode {
 typedef struct kAndNode {
 	KNODE_BASE_STRUCT;
 	/* (Left && Right) */
-	kNodeBase *Left;
-	kNodeBase *Right;
+	kUntypedNodeBase *Left;
+	kUntypedNodeBase *Right;
 } kAndNode;
 
 typedef struct kOrNode {
 	KNODE_BASE_STRUCT;
 	/* (Left || Right) */
-	kNodeBase *Left;
-	kNodeBase *Right;
+	kUntypedNodeBase *Left;
+	kUntypedNodeBase *Right;
 } kOrNode;
 
 typedef struct kAssignNode {
@@ -149,7 +149,7 @@ typedef struct kAssignNode {
 	/* frame[Index] = Right */
 	kToken    *TermToken;
 	uintptr_t Index;
-	kNodeBase *Right;
+	kUntypedNodeBase *Right;
 } kAssignNode;
 
 typedef struct kLetNode {
@@ -157,8 +157,8 @@ typedef struct kLetNode {
 	/* let frame[Index] = Right in Block end*/
 	kToken    *TermToken;
 	uintptr_t Index;
-	kNodeBase *Right;
-	kNodeBase *Block;
+	kUntypedNodeBase *Right;
+	kUntypedNodeBase *Block;
 } kLetNode;
 
 typedef struct kBlockNode {
@@ -170,9 +170,9 @@ typedef struct kBlockNode {
 typedef struct kIfNode {
 	KNODE_BASE_STRUCT;
 	/* If CondExpr then ThenBlock else ElseBlock */
-	kNodeBase *CondExpr;
-	kNodeBase *ThenBlock;
-	kNodeBase *ElseBlock;
+	kUntypedNodeBase *CondExpr;
+	kUntypedNodeBase *ThenBlock;
+	kUntypedNodeBase *ElseBlock;
 } kIfNode;
 
 typedef struct kSwitchNode {
@@ -185,7 +185,7 @@ typedef struct kSwitchNode {
 	 *  ...
 	 * }
 	 */
-	kNodeBase *CondExpr;
+	kUntypedNodeBase *CondExpr;
 	kArray *Labels;
 	kArray *Blocks;
 } kSwitchNode;
@@ -193,15 +193,15 @@ typedef struct kSwitchNode {
 typedef struct kLoopNode {
 	KNODE_BASE_STRUCT;
 	/* while CondExpr then { LoopBlock; IterationExpr } */
-	kNodeBase *CondExpr;
-	kNodeBase *LoopBody;
-	kNodeBase *IterationExpr;
+	kUntypedNodeBase *CondExpr;
+	kUntypedNodeBase *LoopBody;
+	kUntypedNodeBase *IterationExpr;
 } kLoopNode;
 
 typedef struct kReturnNode {
 	KNODE_BASE_STRUCT;
 	/* return Expr */
-	kNodeBase *Expr;
+	kUntypedNodeBase *Expr;
 } kReturnNode;
 
 typedef struct kLabelNode {
@@ -227,15 +227,15 @@ typedef struct kTryNode {
 	 *   FinallyBlock
 	 * end
 	 * */
-	kNodeBase *TryBlock;
-	kArray *CatcheExceptionPairs; /* (ExceptionType, CatchBlock) */
-	kNodeBase *FinallyBlock;
+	kUntypedNodeBase *TryBlock;
+	kArray *CatchedExceptionPairs; /* (ExceptionType, CatchBlock) */
+	kUntypedNodeBase *FinallyBlock;
 } kTryNode;
 
 typedef struct kThrowNode {
 	KNODE_BASE_STRUCT;
 	/* THROW ExceptionExpr */
-	kNodeBase *ExceptionExpr;
+	kUntypedNodeBase *ExceptionExpr;
 } kThrowNode;
 
 typedef struct kFunctionNode {
@@ -258,11 +258,69 @@ typedef struct kErrorNode {
 	kString *ErrorMessage;
 } kErrorNode;
 
-typedef union kNode2 {
+typedef union kUntypedNode2 {
 	kUntypedNode asUntypedNode;
 #define DEFINE_UNION_FIELD(T) struct k##T##Node as##T;
 	NODE_LIST_OP(DEFINE_UNION_FIELD);
 #undef DEFINE_UNION_FIELD
-} kNode2;
+} kUntypedNode2;
+
+typedef enum KNodeType {
+	KNode_UntypedNode,
+#define DEFINE_NODE_TYPE(T) KNode_##T,
+	NODE_LIST_OP(DEFINE_NODE_TYPE)
+#undef DEFINE_NODE_TYPE
+	KNode_MAX
+} KNodeType;
+
+#define KClass_DoneNode       SUGAR cDoneNode
+#define KClass_ConstNode      SUGAR cConstNode
+#define KClass_NewNode        SUGAR cNewNode
+#define KClass_NullNode       SUGAR cNullNode
+#define KClass_LocalNode      SUGAR cLocalNode
+#define KClass_FieldNode      SUGAR cFieldNode
+#define KClass_BoxNode        SUGAR cBoxNode
+#define KClass_MethodCallNode SUGAR cMethodCallNode
+#define KClass_AndNode        SUGAR cAndNode
+#define KClass_OrNode         SUGAR cOrNode
+#define KClass_AssignNode     SUGAR cAssignNode
+#define KClass_LetNode        SUGAR cLetNode
+#define KClass_BlockNode      SUGAR cBlockNode
+#define KClass_IfNode         SUGAR cIfNode
+#define KClass_SwitchNode     SUGAR cSwitchNode
+#define KClass_LoopNode       SUGAR cLoopNode
+#define KClass_ReturnNode     SUGAR cReturnNode
+#define KClass_LabelNode      SUGAR cLabelNode
+#define KClass_JumpNode       SUGAR cJumpNode
+#define KClass_TryNode        SUGAR cTryNode
+#define KClass_ThrowNode      SUGAR cThrowNode
+#define KClass_FunctionNode   SUGAR cFunctionNode
+#define KClass_ErrorNode      SUGAR cErrorNode
+#define KClass_UntypedNode    SUGAR cUntypedNode
+
+#define KType_DoneNode       KClass_DoneNode      ->typeId
+#define KType_ConstNode      KClass_ConstNode     ->typeId
+#define KType_NewNode        KClass_NewNode       ->typeId
+#define KType_NullNode       KClass_NullNode      ->typeId
+#define KType_LocalNode      KClass_LocalNode     ->typeId
+#define KType_FieldNode      KClass_FieldNode     ->typeId
+#define KType_BoxNode        KClass_BoxNode       ->typeId
+#define KType_MethodCallNode KClass_MethodCallNode->typeId
+#define KType_AndNode        KClass_AndNode       ->typeId
+#define KType_OrNode         KClass_OrNode        ->typeId
+#define KType_AssignNode     KClass_AssignNode    ->typeId
+#define KType_LetNode        KClass_LetNode       ->typeId
+#define KType_BlockNode      KClass_BlockNode     ->typeId
+#define KType_IfNode         KClass_IfNode        ->typeId
+#define KType_SwitchNode     KClass_SwitchNode    ->typeId
+#define KType_LoopNode       KClass_LoopNode      ->typeId
+#define KType_ReturnNode     KClass_ReturnNode    ->typeId
+#define KType_LabelNode      KClass_LabelNode     ->typeId
+#define KType_JumpNode       KClass_JumpNode      ->typeId
+#define KType_TryNode        KClass_TryNode       ->typeId
+#define KType_ThrowNode      KClass_ThrowNode     ->typeId
+#define KType_FunctionNode   KClass_FunctionNode  ->typeId
+#define KType_ErrorNode      KClass_ErrorNode     ->typeId
+#define KType_UntypedNode    KClass_UntypedNode   ->typeId
 
 #endif /* NODE2_H_ */

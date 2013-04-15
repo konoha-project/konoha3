@@ -11,5 +11,6 @@ done
 
 for F in ${SOURCE}
 do
+	echo ${F}
 	konoha -MFuelVM ./misc/CheckStyle.k ${F}
 done

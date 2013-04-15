@@ -22,10 +22,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-static int MatchSyntaxPattern(KonohaContext *kctx, kNode *node, KTokenSeq *tokens, KTokenSeq *patterns, kToken **errRuleRef)
+static int MatchSyntaxPattern(KonohaContext *kctx, kUntypedNode *node, KTokenSeq *tokens, KTokenSeq *patterns, kToken **errRuleRef)
 {
 	int patternIdx = patterns->beginIdx, tokenIdx = tokens->beginIdx;
-	kNameSpace *ns = kNode_ns(node);
+	kNameSpace *ns = kUntypedNode_ns(node);
 	//KLIB dumpTokenArray(kctx, 0, patterns->tokenList, patterns->beginIdx, patterns->endIdx);
 	//KLIB dumpTokenArray(kctx, 0, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
 	for(; patternIdx < patterns->endIdx; patternIdx++) {
@@ -54,7 +54,7 @@ static int MatchSyntaxPattern(KonohaContext *kctx, kNode *node, KTokenSeq *token
 				tokens->beginIdx = tokenIdx;
 				int nextIdx = MatchSyntaxPattern(kctx, node, tokens, &nrule, errRuleRef);
 				errRuleRef[0] = NULL;
-				if(kNode_IsError(node)) return tokens->endIdx;
+				if(kUntypedNode_IsError(node)) return tokens->endIdx;
 				if(nextIdx != PatternNoMatch) {
 					tokenIdx = nextIdx;
 				}
@@ -94,7 +94,7 @@ static int MatchSyntaxPattern(KonohaContext *kctx, kNode *node, KTokenSeq *token
 	return tokenIdx;
 }
 
-static int ParseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kSyntax *stmtSyntax, kArray *tokenList, int beginIdx, int endIdx)
+static int ParseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, kUntypedNode *node, kSyntax *stmtSyntax, kArray *tokenList, int beginIdx, int endIdx)
 {
 	kToken *errRule[2] = {NULL, NULL};
 	DBG_ASSERT(stmtSyntax->syntaxPatternListNULL != NULL);
@@ -102,15 +102,15 @@ static int ParseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, 
 	KTokenSeq nrule  = {ns, stmtSyntax->syntaxPatternListNULL, 0, kArray_size(stmtSyntax->syntaxPatternListNULL)};
 	int nextIdx = MatchSyntaxPattern(kctx, node, &tokens, &nrule, errRule);
 	if(nextIdx != PatternNoMatch) return nextIdx;
-	if(kNode_IsError(node)) return endIdx;
-	if(!kNode_IsError(node)) {
+	if(kUntypedNode_IsError(node)) return endIdx;
+	if(!kUntypedNode_IsError(node)) {
 		DBG_ASSERT(errRule[0] != NULL);
 //		KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
 //		KdumpTokenArray(kctx, stmtSyntax->syntaxPatternListNULL, 0, kArray_size(stmtSyntax->syntaxPatternListNULL));
 		if(errRule[1] != NULL) {
-			kNode_Message(kctx, node, ErrTag, "%s%s: %s%s is expected before %s", KSymbol_Fmt2(node->syn->keyword), KSymbol_Fmt2(errRule[0]->symbol), KToken_t(errRule[1]));
+			kUntypedNode_Message(kctx, node, ErrTag, "%s%s: %s%s is expected before %s", KSymbol_Fmt2(node->syn->keyword), KSymbol_Fmt2(errRule[0]->symbol), KToken_t(errRule[1]));
 		} else {
-			kNode_Message(kctx, node, ErrTag, "%s%s: %s%s is expected", KSymbol_Fmt2(node->syn->keyword), KSymbol_Fmt2(errRule[0]->symbol));
+			kUntypedNode_Message(kctx, node, ErrTag, "%s%s: %s%s is expected", KSymbol_Fmt2(node->syn->keyword), KSymbol_Fmt2(errRule[0]->symbol));
 		}
 		return endIdx;
 	}

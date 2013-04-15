@@ -94,13 +94,13 @@ static KMETHOD Func_Create(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-static kbool_t SetParamType(KonohaContext *kctx, kNode *stmt, int n, kparamtype_t *p)
+static kbool_t SetParamType(KonohaContext *kctx, kUntypedNode *stmt, int n, kparamtype_t *p)
 {
-	kToken *typeToken  = KLIB kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
-	kNode  *expr = KLIB kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
+	kToken *typeToken  = KLIB kUntypedNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
+	kUntypedNode  *expr = KLIB kUntypedNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
 	DBG_ASSERT(typeToken != NULL);
 	DBG_ASSERT(expr != NULL);
-	if(kNode_isSymbolTerm(expr)) {
+	if(kUntypedNode_isSymbolTerm(expr)) {
 		kToken *tkN = expr->TermToken;
 		p[n].name = tkN->symbol;
 		p[n].typeAttr = Token_typeLiteral(typeToken);
@@ -110,14 +110,14 @@ static kbool_t SetParamType(KonohaContext *kctx, kNode *stmt, int n, kparamtype_
 }
 
 /* copied from src/parser/import/syntax.h */
-static kParam *kNode_GetParamNULL(KonohaContext *kctx, kNode *stmt, kToken *typeTk, kNameSpace* ns)
+static kParam *kUntypedNode_GetParamNULL(KonohaContext *kctx, kUntypedNode *stmt, kToken *typeTk, kNameSpace* ns)
 {
-	kNode *params = (kNode *) kNode_GetObjectNULL(kctx, stmt, KSymbol_ParamPattern);
+	kUntypedNode *params = (kUntypedNode *) kUntypedNode_GetObjectNULL(kctx, stmt, KSymbol_ParamPattern);
 	/* parsing parameter of closure function */
-	size_t i, psize = kNode_GetNodeListSize(kctx, params);
+	size_t i, psize = kUntypedNode_GetNodeListSize(kctx, params);
 	kparamtype_t *p = ALLOCA(kparamtype_t, psize);
 	for(i = 0; i < psize; i++) {
-		kNode *node = params->NodeList->NodeItems[i];
+		kUntypedNode *node = params->NodeList->NodeItems[i];
 		if(node->syn->keyword != KSymbol_TypeDeclPattern || !SetParamType(kctx, node, i, p)) {
 			/*"invalid parameter"*/
 			break;
@@ -222,10 +222,10 @@ static void kNameSpace_InitParam(KonohaContext *kctx, kNameSpace *ns, struct KGa
 	env->localScope.varsize += pa->psize + 1;
 }
 
-static kMethod *CompileClosure(KonohaContext *kctx, kNameSpace *ns, kNode *expr, KClass *envCt, kToken *typeTk, kNode **texprRef)
+static kMethod *CompileClosure(KonohaContext *kctx, kNameSpace *ns, kUntypedNode *expr, KClass *envCt, kToken *typeTk, kUntypedNode **texprRef)
 {
 	INIT_GCSTACK();
-	kParam *pa = kNode_GetParamNULL(kctx, expr, typeTk, ns);
+	kParam *pa = kUntypedNode_GetParamNULL(kctx, expr, typeTk, ns);
 	kMethodVar *mtd = (kMethodVar *) KLIB new_kMethod(kctx, _GcStack, 0, envCt->typeId, 0/*mn*/, NULL);
 	KLIB kMethod_SetParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t *)pa->paramtypeItems);
 
@@ -244,7 +244,7 @@ static kMethod *CompileClosure(KonohaContext *kctx, kNameSpace *ns, kNode *expr,
 	KPushGammaStack(ns, &newgma);
 	*texprRef = KLIB TypeCheckNodeByName(kctx, expr, KSymbol_BlockPattern, ns, KClass_var, TypeCheckPolicy_AllowVoid);
 
-	kNode *block = KLIB kNode_GetNode(kctx, expr, KSymbol_BlockPattern, NULL);
+	kUntypedNode *block = KLIB kUntypedNode_GetNode(kctx, expr, KSymbol_BlockPattern, NULL);
 	KLIB kMethod_GenCode(kctx, mtd, block, HatedLazyCompile);
 
 	KPopGammaStack(ns, &newgma);
@@ -257,9 +257,9 @@ static kMethod *CompileClosure(KonohaContext *kctx, kNameSpace *ns, kNode *expr,
 static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(expr, ns, reqc);
-	kNode *texpr = K_NULLNODE;
+	kUntypedNode *texpr = K_NULLNODE;
 	INIT_GCSTACK();
-	kToken *typeTk   = KLIB kNode_GetToken(kctx, expr, KSymbol_TypePattern, NULL);
+	kToken *typeTk   = KLIB kUntypedNode_GetToken(kctx, expr, KSymbol_TypePattern, NULL);
 	KClass *EnvObjectClass = NULL;
 	KClass *envCt = CreateEnvClass(kctx, ns, typeTk, &EnvObjectClass);
 
@@ -276,7 +276,7 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 		 */
 		kParam *pa = kMethod_GetParam(mtd);
 		KClass *ct = KLIB KClass_Generics(kctx, KClass_Func, pa->rtype, pa->psize, (kparamtype_t *) pa->paramtypeItems);
-		kNode_Type(texpr, KNode_Function, ct->typeId);
+		kUntypedNode_Type(texpr, KNode_Function, ct->typeId);
 		KFieldSet(expr, texpr->NodeList, new_(Array, 0, OnField));
 
 		KLIB kArray_Add(kctx, texpr->NodeList, mtd);
@@ -287,7 +287,7 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 			i = 1;
 		}
 		for(; i < genv->localScope.varsize; i++) {
-			kNode *node = new_VariableNode(kctx, ns, KNode_Local, genv->localScope.varItems[i].typeAttr, i);
+			kUntypedNode *node = new_VariableNode(kctx, ns, KNode_Local, genv->localScope.varItems[i].typeAttr, i);
 			KLIB kArray_Add(kctx, texpr->NodeList, node);
 		}
 	}

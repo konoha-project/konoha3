@@ -40,7 +40,7 @@ static KMETHOD Expression_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
 	kToken  *opToken = tokenList->TokenItems[opIdx];
 	kSyntax *opSyntax = opToken->resolvedSyntaxInfo;
 	DBG_ASSERT(opSyntax->macroParamSize == 2);
-	KTokenSeq macro = {kNode_ns(stmt), tokenList};
+	KTokenSeq macro = {kUntypedNode_ns(stmt), tokenList};
 	KTokenSeq_Push(kctx, macro);
 	KMacroSet macroParam[] = {
 			{KSymbol_("X"), tokenList, beginIdx, opIdx},

@@ -32,20 +32,20 @@ extern "C"{
 // --------------------------------------------------------------------------
 /* Decl */
 
-static void DeclVariable(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ktypeattr_t ty, kNode *termNode)
+static void DeclVariable(KonohaContext *kctx, kUntypedNode *stmt, kNameSpace *ns, ktypeattr_t ty, kUntypedNode *termNode)
 {
-	DBG_ASSERT(kNode_isSymbolTerm(termNode));
+	DBG_ASSERT(kUntypedNode_isSymbolTerm(termNode));
 	kToken *termToken = termNode->TermToken;
 	if(kNameSpace_IsTopLevel(ns)) {
 		if(ns->globalObjectNULL == NULL) {
-			kNodeToken_Message(kctx, stmt, termToken, ErrTag, "unavailable global variable");
+			kUntypedNodeToken_Message(kctx, stmt, termToken, ErrTag, "unavailable global variable");
 			return;
 		}
-		kNodeToken_Message(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", KSymbol_Fmt2(termToken->symbol), KType_text(ty));
+		kUntypedNodeToken_Message(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", KSymbol_Fmt2(termToken->symbol), KType_text(ty));
 		KLIB KClass_AddField(kctx, kObject_class(ns->globalObjectNULL), ty, termToken->symbol);
 	}
 	else {
-		kNodeToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", KSymbol_Fmt2(termToken->symbol), KType_text(ty));
+		kUntypedNodeToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", KSymbol_Fmt2(termToken->symbol), KType_text(ty));
 		KLIB AddLocalVariable(kctx, ns, ty, termToken->symbol);
 	}
 }
@@ -53,11 +53,11 @@ static void DeclVariable(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ktype
 static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
-	kNodeVar *leftHandNode = (kNodeVar *)kNode_At(expr, 1);
-	if(kNode_isSymbolTerm(leftHandNode)) {
-		kNode *texpr = KLIB TypeVariableNULL(kctx, leftHandNode, ns, KClass_INFER);
+	kUntypedNode *leftHandNode = (kUntypedNode *)kUntypedNode_At(expr, 1);
+	if(kUntypedNode_isSymbolTerm(leftHandNode)) {
+		kUntypedNode *texpr = KLIB TypeVariableNULL(kctx, leftHandNode, ns, KClass_INFER);
 		if(texpr == NULL) {
-			kNode *rightHandNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
+			kUntypedNode *rightHandNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
 			if(rightHandNode != K_NULLNODE) {
 				DeclVariable(kctx, stmt, ns, rightHandNode->typeAttr, leftHandNode);
 			}

@@ -713,12 +713,12 @@ static KMETHOD Expression_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 			kString *pattern = KLIB new_kString(kctx, 0, source, (pos0-1), 0);
 			kString *option  = KLIB new_kString(kctx, 0, source+pos0, pos-pos0, 0);
 
-			kNameSpace *ns = kNode_ns(expr);
+			kNameSpace *ns = kUntypedNode_ns(expr);
 			tk->symbol = KSymbol_("create");
-			kNode *arg0 = new_ConstNode(kctx, ns, NULL, KLIB Knull(kctx, KClass_RegExp));
-			kNode *arg1 = new_ConstNode(kctx, ns, NULL, UPCAST(pattern));
-			kNode *arg2 = new_ConstNode(kctx, ns, NULL, UPCAST(option));
-			KLIB kNode_Op(kctx, expr, tk, 3, arg0, arg1, arg2);
+			kUntypedNode *arg0 = new_ConstNode(kctx, ns, NULL, KLIB Knull(kctx, KClass_RegExp));
+			kUntypedNode *arg1 = new_ConstNode(kctx, ns, NULL, UPCAST(pattern));
+			kUntypedNode *arg2 = new_ConstNode(kctx, ns, NULL, UPCAST(option));
+			KLIB kUntypedNode_Op(kctx, expr, tk, 3, arg0, arg1, arg2);
 			returnIdx = beginIdx+1;
 			break;
 		}

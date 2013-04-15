@@ -23,11 +23,11 @@
  ***************************************************************************/
 
 
-static kNode* kNode_CheckReturnType(KonohaContext *kctx, kNode *node)
+static kUntypedNode* kUntypedNode_CheckReturnType(KonohaContext *kctx, kUntypedNode *node)
 {
 	if(node->typeAttr != KType_void) {
-		kNode *stmt = new_TypedNode(kctx, kNode_ns(node), KNode_Return, KClass_void, 0);
-		kNode_AddParsedObject(kctx, stmt, KSymbol_ExprPattern, UPCAST(node));
+		kUntypedNode *stmt = new_TypedNode(kctx, kUntypedNode_ns(node), KNode_Return, KClass_void, 0);
+		kUntypedNode_AddParsedObject(kctx, stmt, KSymbol_ExprPattern, UPCAST(node));
 		return stmt;
 	}
 	return node;
@@ -55,9 +55,9 @@ static kstatus_t kMethod_RunEval(KonohaContext *kctx, kMethod *mtd, ktypeattr_t 
 	return result;
 }
 
-static kstatus_t kNode_Eval(KonohaContext *kctx, kNode *stmt, kMethod *mtd, KTraceInfo *trace)
+static kstatus_t kUntypedNode_Eval(KonohaContext *kctx, kUntypedNode *stmt, kMethod *mtd, KTraceInfo *trace)
 {
-	kNameSpace *ns = kNode_ns(stmt);
+	kNameSpace *ns = kUntypedNode_ns(stmt);
 	KGammaStackDecl lvarItems[32] = {};
 	struct KGammaLocalData newgma = {0};
 	newgma.flag = kNameSpace_TopLevel;
@@ -78,7 +78,7 @@ static kstatus_t kNode_Eval(KonohaContext *kctx, kNode *stmt, kMethod *mtd, KTra
 	kbool_t isTryEval = true;
 	if(0/*KonohaContext_Is(CompileOnly, kctx)*/) {
 		isTryEval = false;
-		if(kNode_node(stmt) == KNode_MethodCall) {
+		if(kUntypedNode_node(stmt) == KNode_MethodCall) {
 			kMethod *callMethod = stmt->NodeList->MethodItems[0];
 			DBG_ASSERT(IS_Method(callMethod));
 			if(kMethod_Is(Compilation, callMethod)) {
@@ -88,9 +88,9 @@ static kstatus_t kNode_Eval(KonohaContext *kctx, kNode *stmt, kMethod *mtd, KTra
 	}
 	if(isTryEval) {
 		ktypeattr_t rtype = KTypeAttr_Unmask(stmt->typeAttr);
-		stmt = kNode_CheckReturnType(kctx, stmt);
+		stmt = kUntypedNode_CheckReturnType(kctx, stmt);
 		KLIB kMethod_GenCode(kctx, mtd, stmt, DefaultCompileOption);
-		return kMethod_RunEval(kctx, mtd, rtype, kNode_uline(stmt), trace);
+		return kMethod_RunEval(kctx, mtd, rtype, kUntypedNode_uline(stmt), trace);
 	}
 	return K_CONTINUE;
 }
@@ -133,12 +133,12 @@ static kstatus_t EvalTokenList(KonohaContext *kctx, KTokenSeq *source, KTraceInf
 		KLIB dumpTokenArray(kctx, 0, RangeTokenSeq(tokens));
 		int currentIdx = FindFirstStatementToken(kctx, tokens.tokenList, tokens.beginIdx, tokens.endIdx);
 		while(currentIdx < tokens.endIdx) {
-			kNode *node = ParseNewNode(kctx, source->ns, tokens.tokenList, &currentIdx, tokens.endIdx, ParseMetaPatternOption, NULL);
+			kUntypedNode *node = ParseNewNode(kctx, source->ns, tokens.tokenList, &currentIdx, tokens.endIdx, ParseMetaPatternOption, NULL);
 			if(mtd == NULL) {
 				mtd = KLIB new_kMethod(kctx, _GcStack, kMethod_Static, 0, 0, NULL);
 				KLIB kMethod_SetParam(kctx, mtd, KType_Object, 0, NULL);
 			}
-			status = kNode_Eval(kctx, node, mtd, trace);
+			status = kUntypedNode_Eval(kctx, node, mtd, trace);
 			if(status != K_CONTINUE) break;
 			currentIdx = FindFirstStatementToken(kctx, tokens.tokenList, currentIdx, tokens.endIdx);
 		}

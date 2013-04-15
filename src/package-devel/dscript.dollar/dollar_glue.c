@@ -45,7 +45,7 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 
 	}
 //	KClass *foundClass = NULL;
-//	int nextIdx = KLIB ParseTypePattern(kctx, stmt, kNode_ns(stmt), tokenList, beginIdx + 1, endIdx, &foundClass);
+//	int nextIdx = KLIB ParseTypePattern(kctx, stmt, kUntypedNode_ns(stmt), tokenList, beginIdx + 1, endIdx, &foundClass);
 //	if(nextIdx != -1 && nextIdx < kArray_size(tokenList)) {
 //		kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
 ////		if(ct->typeId == KType_void) {
@@ -54,16 +54,16 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 ////			KLIB MessageNode(kctx, stmt, NULL, ErrTag, "invalid application of 'dollar' to incomplete class %s", KClass_text(ct));
 ////		}
 //		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {  // dollar C (...)
-//			kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/);
-//			kNode *expr = SUGAR dollar_UntypedCallStyleNode(kctx, syn, 2, dollarToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
+//			kSyntax *syn = kSyntax_(kUntypedNode_ns(stmt), KSymbol_ParamPattern/*MethodCall*/);
+//			kUntypedNode *expr = SUGAR dollar_UntypedCallStyleNode(kctx, syn, 2, dollarToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
 //			dollarToken->symbol = MN_dollar;
 //			KReturn(expr);
 //		}
 //		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KSymbol_BracketGroup) {     // dollar int [100]
-//			kSyntax *syn = kSyntax_(kNode_ns(stmt), KSymbol_("dollar"));
+//			kSyntax *syn = kSyntax_(kUntypedNode_ns(stmt), KSymbol_("dollar"));
 //			KClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
 //			dollarToken->symbol = KMethodName_("dollarArray");
-//			kNode *expr = SUGAR dollar_UntypedCallStyleNode(kctx, syn, 2, dollarToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));
+//			kUntypedNode *expr = SUGAR dollar_UntypedCallStyleNode(kctx, syn, 2, dollarToken, NewNode(kctx, syn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));
 //			KReturn(expr);
 //		}
 //	}

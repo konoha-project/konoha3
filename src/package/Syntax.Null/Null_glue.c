@@ -39,7 +39,7 @@ static KMETHOD TypeCheck_null(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	if(reqc->typeId == KType_var) reqc = KClass_Object;
-	KReturn(KLIB kNode_SetVariable(kctx, expr, KNode_Null, reqc->typeId, 0));
+	KReturn(KLIB kUntypedNode_SetVariable(kctx, expr, KNode_Null, reqc->typeId, 0));
 }
 
 static KMETHOD Expression_isNull(KonohaContext *kctx, KonohaStack *sfp)
@@ -49,10 +49,10 @@ static KMETHOD Expression_isNull(KonohaContext *kctx, KonohaStack *sfp)
 		DBG_P("checking .. x == null");
 		kTokenVar *tk = tokenList->TokenVarItems[opIdx+1];
 		if(tk->symbol == KSymbol_("null") || tk->symbol == KSymbol_("NULL")) {
-			kNameSpace *ns = kNode_ns(stmt);
+			kNameSpace *ns = kUntypedNode_ns(stmt);
 			tk->symbol = KSymbol_("IsNull");
 			tk->resolvedSyntaxInfo = tokenList->TokenVarItems[opIdx]->resolvedSyntaxInfo;
-			KLIB kNode_Op(kctx, stmt, tk, 1, KLIB ParseNewNode(kctx, ns, tokenList, &beginIdx, opIdx, ParseExpressionOption, NULL));
+			KLIB kUntypedNode_Op(kctx, stmt, tk, 1, KLIB ParseNewNode(kctx, ns, tokenList, &beginIdx, opIdx, ParseExpressionOption, NULL));
 			KReturnUnboxValue(opIdx + 2);
 		}
 	}
@@ -67,10 +67,10 @@ static KMETHOD Expression_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 		DBG_P("checking .. x != null");
 		kTokenVar *tk = tokenList->TokenVarItems[opIdx+1];
 		if(tk->symbol == KSymbol_("null") || tk->symbol == KSymbol_("NULL")) {
-			kNameSpace *ns = kNode_ns(stmt);
+			kNameSpace *ns = kUntypedNode_ns(stmt);
 			tk->symbol = KSymbol_("IsNotNull");
 			tk->resolvedSyntaxInfo = tokenList->TokenVarItems[opIdx]->resolvedSyntaxInfo;
-			KLIB kNode_Op(kctx, stmt, tk, 1, KLIB ParseNewNode(kctx, ns, tokenList, &beginIdx, opIdx, ParseExpressionOption, NULL));
+			KLIB kUntypedNode_Op(kctx, stmt, tk, 1, KLIB ParseNewNode(kctx, ns, tokenList, &beginIdx, opIdx, ParseExpressionOption, NULL));
 			KReturnUnboxValue(opIdx + 2);
 		}
 	}

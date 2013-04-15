@@ -44,7 +44,7 @@
 //	return TypeToken;
 //}
 //
-//static kToken* new_ParsedNodeToken(KonohaContext *kctx, kNameSpace *ns, kNode *expr)
+//static kToken* new_ParsedNodeToken(KonohaContext *kctx, kNameSpace *ns, kUntypedNode *expr)
 //{
 //	kTokenVar *ParsedNodeToken = new_(TokenVar, 0, OnGcStack);
 //	ParsedNodeToken->resolvedSyntaxInfo = kSyntax_(ns, KSymbol_NodePattern);
@@ -74,9 +74,9 @@
 // * Typechecking is overloaded as while statement (@see while_glue);
 // */
 //
-//static kNode *new_MacroNode(KonohaContext *kctx, kNode *stmt, kToken *IteratorTypeToken, kToken *IteratorNodeToken, kToken *TypeToken, kToken *VariableToken)
+//static kUntypedNode *new_MacroNode(KonohaContext *kctx, kUntypedNode *stmt, kToken *IteratorTypeToken, kToken *IteratorNodeToken, kToken *TypeToken, kToken *VariableToken)
 //{
-//	kNameSpace *ns = kNode_ns(stmt);
+//	kNameSpace *ns = kUntypedNode_ns(stmt);
 //	KTokenSeq source = {ns, KGetParserContext(kctx)->preparedTokenList};
 //	KTokenSeq_Push(kctx, source);
 //	/* FIXME(imasahiro)
@@ -94,15 +94,15 @@
 //	else {
 //		KMacroSet_SetTokenAt(kctx, macroSet, 2, source.tokenList, "N", TypeToken, VariableToken, NULL);
 //	}
-//	kNode *bk = KLIB new_BlockNode(kctx, stmt, macroSet, &source);
+//	kUntypedNode *bk = KLIB new_BlockNode(kctx, stmt, macroSet, &source);
 //	KTokenSeq_Pop(kctx, source);
 //	return bk;
 //}
 //
-//static void kNode_appendNode(KonohaContext *kctx, kNode *stmt, kNode *bk)
+//static void kUntypedNode_appendNode(KonohaContext *kctx, kUntypedNode *stmt, kUntypedNode *bk)
 //{
 //	if(bk != NULL) {
-//		kNode *block = KLIB kNode_GetNode(kctx, stmt, kNode_ns(stmt), KSymbol_NodePattern, NULL);
+//		kUntypedNode *block = KLIB kUntypedNode_GetNode(kctx, stmt, kUntypedNode_ns(stmt), KSymbol_NodePattern, NULL);
 //		size_t i;
 //		for(i = 0; i < kArray_size(bk->NodeList); i++) {
 //			KLIB kArray_Add(kctx, block->NodeList, bk->NodeList->NodeItems[i]);
@@ -116,11 +116,11 @@
 //	DBG_P("for statement .. ");
 //	int isOkay = false;
 //	if(KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, ns, KClass_INFER, 0)) {
-//		kNameSpace *ns = kNode_ns(stmt);
-//		kToken *TypeToken = KLIB kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
-//		kToken *VariableToken  = KLIB kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
+//		kNameSpace *ns = kUntypedNode_ns(stmt);
+//		kToken *TypeToken = KLIB kUntypedNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
+//		kToken *VariableToken  = KLIB kUntypedNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 //		DBG_P("typeToken=%p, varToken=%p", TypeToken, VariableToken);
-//		kNode *IteratorNode = KLIB kNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
+//		kUntypedNode *IteratorNode = KLIB kUntypedNode_GetNode(kctx, stmt, KSymbol_NodePattern, NULL);
 //		if(!KType_IsIterator(IteratorNode->typeAttr)) {
 //			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_(IteratorNode->typeAttr), KMethodName_To(KType_Iterator), 0, KMethodMatch_NoOption);
 //			if(mtd == NULL) {
@@ -128,18 +128,18 @@
 //				KReturnUnboxValue(false);
 //			}
 //			IteratorNode = KLIB new_MethodNode(kctx, stmt, ns, KClass_INFER, mtd, 1, IteratorNode);
-//			kNode_SetObject(kctx, stmt, KSymbol_NodePattern, IteratorNode);
+//			kUntypedNode_SetObject(kctx, stmt, KSymbol_NodePattern, IteratorNode);
 //		}
-//		kNode *block = new_MacroNode(kctx, stmt, new_TypeToken(kctx, ns, KClass_(IteratorNode->typeAttr)), new_ParsedNodeToken(kctx, ns, IteratorNode), TypeToken, VariableToken);
-//		kNode *IfNode = block->NodeList->NodeItems[1]; // @see macro;
-//		kNode_appendNode(kctx, IfNode, KLIB kNode_GetNode(kctx, stmt, ns, KSymbol_NodePattern, NULL));
-//		kNode_Set(CatchBreak, IfNode, true);
-//		kNode_Set(CatchContinue, IfNode, true);
+//		kUntypedNode *block = new_MacroNode(kctx, stmt, new_TypeToken(kctx, ns, KClass_(IteratorNode->typeAttr)), new_ParsedNodeToken(kctx, ns, IteratorNode), TypeToken, VariableToken);
+//		kUntypedNode *IfNode = block->NodeList->NodeItems[1]; // @see macro;
+//		kUntypedNode_appendNode(kctx, IfNode, KLIB kUntypedNode_GetNode(kctx, stmt, ns, KSymbol_NodePattern, NULL));
+//		kUntypedNode_Set(CatchBreak, IfNode, true);
+//		kUntypedNode_Set(CatchContinue, IfNode, true);
 //		isOkay = KLIB TypeCheckBlock(kctx, block, gma);
 //		if(isOkay) {
-//			kNode_Type(IfNode, LOOP);
-//			kNode_SetObject(kctx, stmt, KSymbol_NodePattern, block);
-//			kNode_Type(stmt, BLOCK);
+//			kUntypedNode_Type(IfNode, LOOP);
+//			kUntypedNode_SetObject(kctx, stmt, KSymbol_NodePattern, block);
+//			kUntypedNode_Type(stmt, BLOCK);
 //		}
 //	}
 //	KReturnUnboxValue(isOkay);

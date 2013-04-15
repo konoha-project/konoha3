@@ -87,30 +87,30 @@ static void kToken_ToError(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglev
 	}
 }
 
-static void kNode_ToError(KonohaContext *kctx, kNode *node, kString *errmsg)
+static void kUntypedNode_ToError(KonohaContext *kctx, kUntypedNode *node, kString *errmsg)
 {
 	if(errmsg == NULL) { // not in case of isBlockedErrorMessage
 		errmsg = TS_EMPTY;
 	}
-	kNode_setnode(node, KNode_Error);
+	kUntypedNode_setnode(node, KNode_Error);
 	node->typeAttr = KType_void;
 	KFieldSet(node, node->ErrorMessage, errmsg);
-	kNode_Set(ObjectConst, node, false);
+	kUntypedNode_Set(ObjectConst, node, false);
 	//node->stackbase = ns == NULL ? 0 : ns->genv->localScope.varsize;
 }
 
-static kNode *MessageNode(KonohaContext *kctx, kNode *node, kTokenNULL *tk, kNameSpaceNULL *ns, kinfotag_t taglevel, const char *fmt, ...)
+static kUntypedNode *MessageNode(KonohaContext *kctx, kUntypedNode *node, kTokenNULL *tk, kNameSpaceNULL *ns, kinfotag_t taglevel, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	kfileline_t uline = kNode_uline(node);
+	kfileline_t uline = kUntypedNode_uline(node);
 	if(tk != NULL) {
 		assert(IS_Token(tk));
 		uline = tk->uline;
 	}
 	kString *errmsg = KParserContext_PrintMessage(kctx, taglevel, uline, fmt, ap);
-	if(taglevel <= ErrTag && !kNode_IsError(node)) {
-		kNode_ToError(kctx, node, errmsg);
+	if(taglevel <= ErrTag && !kUntypedNode_IsError(node)) {
+		kUntypedNode_ToError(kctx, node, errmsg);
 	}
 	va_end(ap);
 	return node;
@@ -122,12 +122,12 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 	va_list ap;
 	va_start(ap, fmt);
 	if(trace != NULL && IS_Node(trace->baseStack[1].asNode)) {  // Static Compiler Message
-		kNode *stmt = trace->baseStack[1].asNode;
-		kfileline_t uline = kNode_uline(stmt);
+		kUntypedNode *stmt = trace->baseStack[1].asNode;
+		kfileline_t uline = kUntypedNode_uline(stmt);
 		kString *emsg = KParserContext_PrintMessage(kctx, taglevel, uline, fmt, ap);
 		va_end(ap);
-		if(taglevel <= ErrTag && !kNode_IsError(stmt)) {
-			kNode_ToError(kctx, stmt, emsg);
+		if(taglevel <= ErrTag && !kUntypedNode_IsError(stmt)) {
+			kUntypedNode_ToError(kctx, stmt, emsg);
 		}
 	}
 	else {
@@ -155,18 +155,18 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 
 #ifdef USE_SMALLBUILD
 
-static kNode *ERROR_SyntaxErrorToken(KonohaContext *kctx, kNode *stmt, kToken *tk)
+static kUntypedNode *ERROR_SyntaxErrorToken(KonohaContext *kctx, kUntypedNode *stmt, kToken *tk)
 {
-	return kNodeToken_Message(kctx, stmt, tk, ErrTag, "syntax error at %s", KToken_t(tk));
+	return kUntypedNodeToken_Message(kctx, stmt, tk, ErrTag, "syntax error at %s", KToken_t(tk));
 }
 
 #define ERROR_UndefinedEscapeSequence(kctx, stmt, tk) ERROR_SyntaxErrorToken(kctx, stmt, tk)
 
 #else
 
-static kNode *ERROR_UndefinedEscapeSequence(KonohaContext *kctx, kNode *stmt, kToken *tk)
+static kUntypedNode *ERROR_UndefinedEscapeSequence(KonohaContext *kctx, kUntypedNode *stmt, kToken *tk)
 {
-	return kNodeToken_Message(kctx, stmt, tk, ErrTag, "undefined escape sequence: \"%s\"", kString_text(tk->text));
+	return kUntypedNodeToken_Message(kctx, stmt, tk, ErrTag, "undefined escape sequence: \"%s\"", kString_text(tk->text));
 }
 
 #endif

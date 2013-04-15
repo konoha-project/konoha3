@@ -40,19 +40,19 @@ extern "C" {
 static KMETHOD Expression_LispOperator(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(expr, tokenList, beginIdx, currentIdx, endIdx);
-	kNameSpace *ns = kNode_ns(expr);
+	kNameSpace *ns = kUntypedNode_ns(expr);
 	if(beginIdx == currentIdx && beginIdx + 1 < endIdx) {
 		kTokenVar *opToken = tokenList->TokenVarItems[beginIdx];
-		kNode_Type(expr, KNode_Block, KType_var);
+		kUntypedNode_Type(expr, KNode_Block, KType_var);
 		int i = beginIdx + 1;
-		KLIB kNode_Op(kctx, expr, opToken, 0);
+		KLIB kUntypedNode_Op(kctx, expr, opToken, 0);
 		while(i < endIdx) {
 			int orig = i;
-			kNode *node = KLIB ParseNewNode(kctx, ns, tokenList, &i, i+1, ParseExpressionOption, "(");
-			KLIB kNode_AddNode(kctx, expr, node);
+			kUntypedNode *node = KLIB ParseNewNode(kctx, ns, tokenList, &i, i+1, ParseExpressionOption, "(");
+			KLIB kUntypedNode_AddNode(kctx, expr, node);
 			assert(i != orig);
 		}
-		int size = kNode_GetNodeListSize(kctx, expr);
+		int size = kUntypedNode_GetNodeListSize(kctx, expr);
 		if(size == 1) { /* case (+) */
 			assert(0 && "(+) is not supported");
 		}
@@ -60,14 +60,14 @@ static KMETHOD Expression_LispOperator(KonohaContext *kctx, KonohaStack *sfp)
 			KReturnUnboxValue(endIdx);
 		}
 		/* (+ 1 2 3 4) => (+ (+ (+ 1 2) 3 ) 4) */
-		kNode *leftNode = kNode_At(expr, 1), *rightNode;
+		kUntypedNode *leftNode = kUntypedNode_At(expr, 1), *rightNode;
 		for(i = 2; i < size-1; i++) {
-			kNode *node = KNewNode(ns);
-			rightNode = kNode_At(expr, i);
-			KLIB kNode_Op(kctx, node, opToken, 2, leftNode, rightNode);
+			kUntypedNode *node = KNewNode(ns);
+			rightNode = kUntypedNode_At(expr, i);
+			KLIB kUntypedNode_Op(kctx, node, opToken, 2, leftNode, rightNode);
 			leftNode = node;
 		}
-		rightNode = kNode_At(expr, i);
+		rightNode = kUntypedNode_At(expr, i);
 		KLIB kArray_Clear(kctx, expr->NodeList, 1);
 		KLIB kArray_Add(kctx, expr->NodeList, leftNode);
 		KLIB kArray_Add(kctx, expr->NodeList, rightNode);

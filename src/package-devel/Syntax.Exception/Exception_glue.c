@@ -121,21 +121,21 @@ static KMETHOD Exception_new(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 ///* ------------------------------------------------------------------------ */
-//static kNode *Node_LookupTryOrCatchNodeNULL(KonohaContext *kctx, kNode *stmt)
+//static kUntypedNode *Node_LookupTryOrCatchNodeNULL(KonohaContext *kctx, kUntypedNode *stmt)
 //{
 //	int i;
 //	kArray *bka = stmt->parentNodeNULL->NodeList;
 //	ksymbol_t trySym = KSymbol_("try");
 //	ksymbol_t catchSym = KSymbol_("catch");
 //	for(i = 0; kArray_size(bka); i++) {
-//		kNode *s = bka->NodeItems[i];
+//		kUntypedNode *s = bka->NodeItems[i];
 //		if(s == stmt) {
 //			break;
 //		}
 //	}
 //
 //	for(i = i-1; i >= 0; i--) {
-//		kNode *s = bka->NodeItems[i];
+//		kUntypedNode *s = bka->NodeItems[i];
 //		if(s->syn && (s->syn->keyword == trySym || s->syn->keyword == catchSym)) {
 //			return s;
 //		}
@@ -148,15 +148,15 @@ static KMETHOD Statement_try(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, ns, reqc);
 	DBG_P("try statement .. \n");
 	int ret = false;
-	//kNode *tryNode, *catchNode, *finallyNode;
-	//tryNode = KLIB kNode_GetNode(kctx, stmt, NULL, KSymbol_BlockPattern, K_NULLBLOCK);
+	//kUntypedNode *tryNode, *catchNode, *finallyNode;
+	//tryNode = KLIB kUntypedNode_GetNode(kctx, stmt, NULL, KSymbol_BlockPattern, K_NULLBLOCK);
 	//ret = KLIB TypeCheckBlock(kctx, tryNode, gma);
 	//if(ret == false) {
 	//	KReturnUnboxValue(ret);
 	//}
 
-	//catchNode   = KLIB kNode_GetNode(kctx, stmt, NULL, KSymbol_("catch"),   K_NULLBLOCK);
-	//finallyNode = KLIB kNode_GetNode(kctx, stmt, NULL, KSymbol_("finally"), K_NULLBLOCK);
+	//catchNode   = KLIB kUntypedNode_GetNode(kctx, stmt, NULL, KSymbol_("catch"),   K_NULLBLOCK);
+	//finallyNode = KLIB kUntypedNode_GetNode(kctx, stmt, NULL, KSymbol_("finally"), K_NULLBLOCK);
 	//ret = KLIB TypeCheckBlock(kctx, tryNode,   gma);
 	//ret = KLIB TypeCheckBlock(kctx, catchNode, gma);
 	//if(ret == false) {
@@ -166,7 +166,7 @@ static KMETHOD Statement_try(KonohaContext *kctx, KonohaStack *sfp)
 	//	ret = KLIB TypeCheckBlock(kctx, finallyNode, gma);
 	//}
 	//if(ret) {
-	//	kNode_Type(stmt, TRY);
+	//	kUntypedNode_Type(stmt, TRY);
 	//}
 	KReturnUnboxValue(ret);
 }
@@ -180,17 +180,17 @@ static KMETHOD Statement_catch(KonohaContext *kctx, KonohaStack *sfp)
 	//// check "catch(...)"
 	////ret = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_NodePattern, ns, KClass_Exception, 0);
 
-	//kNode *catchNode = KLIB kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
-	//kNode *parentNode = Node_LookupTryOrCatchNodeNULL(kctx, stmt);
+	//kUntypedNode *catchNode = KLIB kUntypedNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
+	//kUntypedNode *parentNode = Node_LookupTryOrCatchNodeNULL(kctx, stmt);
 
 	//if(catchNode != K_NULLBLOCK && parentNode != NULL) {
 	//	ret = KLIB TypeCheckBlock(kctx, catchNode, gma);
-	//	kNode *expr = KLIB kNode_GetNode(kctx, stmt, KSymbol_NodePattern, K_NULLNODE);
+	//	kUntypedNode *expr = KLIB kUntypedNode_GetNode(kctx, stmt, KSymbol_NodePattern, K_NULLNODE);
 	//	KLIB kObjectProto_SetObject(kctx, parentNode, KSymbol_NodePattern, KType_Exception, expr);
 	//	KLIB kObjectProto_SetObject(kctx, parentNode, KSymbol_("catch"), KType_Node, stmt);
-	//	kNode_Type(stmt, KNode_Done, KType_void);
+	//	kUntypedNode_Type(stmt, KNode_Done, KType_void);
 	//} else {
-	//	kNode_Message(kctx, stmt, ErrTag, "upper stmt is not try/catch");
+	//	kUntypedNode_Message(kctx, stmt, ErrTag, "upper stmt is not try/catch");
 	//	KReturnUnboxValue(false);
 	//}
 	KReturnUnboxValue(ret);
@@ -201,14 +201,14 @@ static KMETHOD Statement_finally(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, ns, reqc);
 	DBG_P("finally statement .. \n");
 	int ret = false;
-	//kNode *finallyNode = KLIB kNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
+	//kUntypedNode *finallyNode = KLIB kUntypedNode_GetNode(kctx, stmt, NULL, KSymbol_NodePattern, K_NULLBLOCK);
 
 	//if(finallyNode != K_NULLBLOCK) {
-	//	kNode *tryNode = Node_LookupTryOrCatchNodeNULL(kctx, stmt);
+	//	kUntypedNode *tryNode = Node_LookupTryOrCatchNodeNULL(kctx, stmt);
 	//	if(tryNode != NULL) {
 	//		ret = KLIB TypeCheckBlock(kctx, finallyNode, gma);
 	//		KLIB kObjectProto_SetObject(kctx, tryNode, KSymbol_("finally"), KType_Node, finallyNode);
-	//		kNode_Type(stmt, KNode_Done, KType_void);
+	//		kUntypedNode_Type(stmt, KNode_Done, KType_void);
 	//	}
 	//}
 

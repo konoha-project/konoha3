@@ -83,7 +83,7 @@ static kString *remove_escapes(KonohaContext *kctx, kToken *tk)
 	return text;
 }
 
-static kNode *ParseSource(KonohaContext *kctx, kNameSpace *ns, const char *script, size_t len)
+static kUntypedNode *ParseSource(KonohaContext *kctx, kNameSpace *ns, const char *script, size_t len)
 {
 	KBuffer wb;
 	KLIB KBuffer_Init(&(kctx->stack->cwb), &wb);
@@ -100,7 +100,7 @@ static kNode *ParseSource(KonohaContext *kctx, kNameSpace *ns, const char *scrip
 	KTokenSeq step2 = {ns, tokens.tokenList, kArray_size(tokens.tokenList)};
 	KLIB Preprocess(kctx, ns, RangeTokenSeq(tokens), NULL, step2.tokenList);
 	KTokenSeq_End(kctx, step2);
-	kNode *newexpr = KLIB ParseNewNode(kctx, ns, step2.tokenList, &step2.beginIdx, step2.endIdx, ParseExpressionOption, NULL);
+	kUntypedNode *newexpr = KLIB ParseNewNode(kctx, ns, step2.tokenList, &step2.beginIdx, step2.endIdx, ParseExpressionOption, NULL);
 	KTokenSeq_Pop(kctx, tokens);
 	KLIB KBuffer_Free(&wb);
 	return newexpr;
@@ -109,7 +109,7 @@ static kNode *ParseSource(KonohaContext *kctx, kNameSpace *ns, const char *scrip
 static KMETHOD Expression_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(expr, tokenList, beginIdx, opIdx, endIdx);
-	kNameSpace *ns = kNode_ns(expr);
+	kNameSpace *ns = kUntypedNode_ns(expr);
 	kToken *tk = tokenList->TokenItems[opIdx];
 	INIT_GCSTACK();
 	kString *text = remove_escapes(kctx, tk);
@@ -138,12 +138,12 @@ static KMETHOD Expression_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *
 	opToken->symbol = KSymbol_("+");
 	opToken->text   = KLIB new_kString(kctx, OnGcStack, "+", 1, 0);
 	KFieldSet(opToken, opToken->resolvedSyntaxInfo, addSyntax);
-	KLIB kNode_Op(kctx, expr, opToken, 0);
+	KLIB kUntypedNode_Op(kctx, expr, opToken, 0);
 
 	/* [before] "aaa${bbb}ccc"
 	 * [after]  "" + "aaa" + bbb + "ccc"
 	 */
-	KLIB kNode_AddNode(kctx, expr, new_ConstNode(kctx, ns, NULL, UPCAST(TS_EMPTY)));
+	KLIB kUntypedNode_AddNode(kctx, expr, new_ConstNode(kctx, ns, NULL, UPCAST(TS_EMPTY)));
 	while(true) {
 		start = strstr(str, "${");
 		if(start == NULL)
@@ -155,33 +155,33 @@ static KMETHOD Expression_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *
 		end = strchr(start, '}');
 		if(end == NULL)
 			break;
-		kNode *newexpr = ParseSource(kctx, ns, start+2, end-(start+2));
+		kUntypedNode *newexpr = ParseSource(kctx, ns, start+2, end-(start+2));
 		if(start - str > 0) {
-			kNode *first = new_ConstNode(kctx, ns, NULL,
+			kUntypedNode *first = new_ConstNode(kctx, ns, NULL,
 					UPCAST(KLIB new_kString(kctx, OnGcStack, str, (start - str), 0)));
-			KLIB kNode_AddNode(kctx, expr, first);
+			KLIB kUntypedNode_AddNode(kctx, expr, first);
 		}
-		KLIB kNode_AddNode(kctx, expr, newexpr);
+		KLIB kUntypedNode_AddNode(kctx, expr, newexpr);
 		str = end + 1;
 	}
 
 	if((start == NULL) || (start != NULL && end == NULL)) {
-		kNode *rest = new_ConstNode(kctx, ns, KClass_String,
+		kUntypedNode *rest = new_ConstNode(kctx, ns, KClass_String,
 				UPCAST(KLIB new_kString(kctx, OnGcStack, str, strlen(str), 0)));
-		KLIB kNode_AddNode(kctx, expr, rest);
+		KLIB kUntypedNode_AddNode(kctx, expr, rest);
 	}
 
 	/* (+ 1 2 3 4) => (+ (+ (+ 1 2) 3 ) 4) */
-	int i, size = kNode_GetNodeListSize(kctx, expr);
+	int i, size = kUntypedNode_GetNodeListSize(kctx, expr);
 	assert(size > 2);
-	kNode *leftNode = kNode_At(expr, 1), *rightNode;
+	kUntypedNode *leftNode = kUntypedNode_At(expr, 1), *rightNode;
 	for(i = 2; i < size-1; i++) {
-		kNode *node = KNewNode(ns);
-		rightNode = kNode_At(expr, i);
-		KLIB kNode_Op(kctx, node, opToken, 2, leftNode, rightNode);
+		kUntypedNode *node = KNewNode(ns);
+		rightNode = kUntypedNode_At(expr, i);
+		KLIB kUntypedNode_Op(kctx, node, opToken, 2, leftNode, rightNode);
 		leftNode = node;
 	}
-	rightNode = kNode_At(expr, i);
+	rightNode = kUntypedNode_At(expr, i);
 	KLIB kArray_Clear(kctx, expr->NodeList, 1);
 	KLIB kArray_Add(kctx, expr->NodeList, leftNode);
 	KLIB kArray_Add(kctx, expr->NodeList, rightNode);

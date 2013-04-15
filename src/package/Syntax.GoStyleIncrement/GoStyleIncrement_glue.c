@@ -52,7 +52,7 @@ static KMETHOD PatternMatch_Inc(KonohaContext *kctx, KonohaStack *sfp)
 			if(start < end) {
 				kToken *opToken = tokenList->TokenItems[i];
 				kSyntax *opSyntax = opToken->resolvedSyntaxInfo;
-				KTokenSeq macro = {kNode_ns(stmt), tokenList};
+				KTokenSeq macro = {kUntypedNode_ns(stmt), tokenList};
 				KTokenSeq_Push(kctx, macro);
 				KMacroSet macroParam[] = {
 					{KSymbol_("X"), tokenList, start, end},

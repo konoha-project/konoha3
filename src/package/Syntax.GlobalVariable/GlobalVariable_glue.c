@@ -56,9 +56,9 @@ static	kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 // ---------------------------------------------------------------------------
 
-static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kNode *stmt, kObject *o, ktypeattr_t ty, ksymbol_t symbol)
+static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kUntypedNode *stmt, kObject *o, ktypeattr_t ty, ksymbol_t symbol)
 {
-	kNameSpace *ns = kNode_ns(stmt);
+	kNameSpace *ns = kUntypedNode_ns(stmt);
 	kMethod *mtd = KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, kObject_class(o), symbol, KType_var);
 	if(mtd != NULL) {
 		KLIB MessageNode(kctx, stmt, NULL, NULL, ErrTag, "already defined name: %s", KSymbol_text(symbol));
@@ -73,11 +73,11 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kNode *stmt, kObj
 	return KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, kObject_class(o), symbol, ty);
 }
 
-static kNode* TypeDeclAndMakeSetter(KonohaContext *kctx, kNode *stmt, kNameSpace *ns, ktypeattr_t ty, kNode *termNode, kNode *valueNode, kObject *scr)
+static kUntypedNode* TypeDeclAndMakeSetter(KonohaContext *kctx, kUntypedNode *stmt, kNameSpace *ns, ktypeattr_t ty, kUntypedNode *termNode, kUntypedNode *valueNode, kObject *scr)
 {
 	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termNode->TermToken->symbol);
 	if(mtd != NULL) {
-		kNode *recvNode =  new_ConstNode(kctx, ns, NULL, scr);
+		kUntypedNode *recvNode =  new_ConstNode(kctx, ns, NULL, scr);
 		return KLIB new_MethodNode(kctx, ns, KClass_void, mtd, 2, recvNode, valueNode);
 	}
 	return NULL;
@@ -103,15 +103,15 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, ns, reqc);
 	if(kNameSpace_IsTopLevel(ns)) {
 		KMakeTrace(trace, sfp);
-		trace->pline = kNode_uline(stmt);
+		trace->pline = kUntypedNode_uline(stmt);
 		if(kNameSpace_InitGlobalObject(kctx, ns, trace)) {
-			kToken *tk  = KLIB kNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
-			kNode  *expr = KLIB kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
+			kToken *tk  = KLIB kUntypedNode_GetToken(kctx, stmt, KSymbol_TypePattern, NULL);
+			kUntypedNode  *expr = KLIB kUntypedNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
 			ktypeattr_t typeAttr = Token_typeLiteral(tk);
-			if(kNode_isSymbolTerm(expr) && typeAttr == KType_void) {
+			if(kUntypedNode_isSymbolTerm(expr) && typeAttr == KType_void) {
 				KReturn(K_NULLNODE);
 			}
-			KLIB kNode_DeclType(kctx, stmt, ns, typeAttr, expr, ns->globalObjectNULL, TypeDeclAndMakeSetter);
+			KLIB kUntypedNode_DeclType(kctx, stmt, ns, typeAttr, expr, ns->globalObjectNULL, TypeDeclAndMakeSetter);
 			KReturn(stmt);
 		}
 	}

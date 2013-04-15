@@ -158,9 +158,11 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 
 	KDEFINE_CLASS defNode = {0};
 	SETSTRUCTNAME(defNode, Node);
-	defNode.init = kNode_Init;
-	defNode.reftrace = kNode_Reftrace;
-	defNode.format        = kNode_format;
+	defNode.init = kUntypedNode_Init;
+	defNode.reftrace = kUntypedNode_Reftrace;
+	defNode.format        = kUntypedNode_format;
+
+	InitNodeClass(kctx, mod);
 
 	mod->cSymbol =    KLIB KClass_define(kctx, PackageId_sugar, NULL, &defSymbol, 0);
 	mod->cSyntax =    KLIB KClass_define(kctx, PackageId_sugar, NULL, &defSyntax, 0);
@@ -190,20 +192,20 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	l->EvalTokenList         = EvalTokenList;
 	l->ParseTypePattern      = ParseTypePattern;
 	l->kToken_ToBraceGroup   = kToken_ToBraceGroup;
-	l->kNode_AddParsedObject = kNode_AddParsedObject;
+	l->kUntypedNode_AddParsedObject = kUntypedNode_AddParsedObject;
 	l->FindEndOfStatement    = FindEndOfStatement;
-	l->kNode_ParseFlag       = kNode_ParseFlag;
-	l->kNode_GetToken        = kNode_GetToken;
-	l->kNode_GetNode         = kNode_GetNode;
-	l->kNode_SetConst        = kNode_SetConst;
-	l->kNode_SetUnboxConst   = kNode_SetUnboxConst;
-	l->kNode_SetVariable     = kNode_SetVariable;
+	l->kUntypedNode_ParseFlag       = kUntypedNode_ParseFlag;
+	l->kUntypedNode_GetToken        = kUntypedNode_GetToken;
+	l->kUntypedNode_GetNode         = kUntypedNode_GetNode;
+	l->kUntypedNode_SetConst        = kUntypedNode_SetConst;
+	l->kUntypedNode_SetUnboxConst   = kUntypedNode_SetUnboxConst;
+	l->kUntypedNode_SetVariable     = kUntypedNode_SetVariable;
 	l->TypeCheckNodeAt       = TypeCheckNodeAt;
 	l->TypeCheckNodeByName   = TypeCheckNodeByName;
 	l->TypeCheckMethodParam  = TypeCheckMethodParam;
 	l->new_MethodNode        = new_MethodNode;
 	l->AddLocalVariable      = AddLocalVariable;
-	l->kNode_DeclType        = kNode_DeclType;
+	l->kUntypedNode_DeclType        = kUntypedNode_DeclType;
 	l->TypeVariableNULL      = TypeVariableNULL;
 
 	l->kNameSpace_DefineSyntax = kNameSpace_DefineSyntax;
@@ -211,9 +213,9 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	l->kSyntax_AddPattern      = kSyntax_AddPattern;
 	l->kNameSpace_AddSyntax    = kNameSpace_AddSyntax;
 	l->kNameSpace_UseDefaultVirtualMachine = kNameSpace_UseDefaultVirtualMachine;
-	l->kNode_InsertAfter       = kNode_InsertAfter;
-	l->kNode_AddNode           = kNode_AddNode;
-	l->kNode_Op                = kNode_Op;
+	l->kUntypedNode_InsertAfter       = kUntypedNode_InsertAfter;
+	l->kUntypedNode_AddNode           = kUntypedNode_AddNode;
+	l->kUntypedNode_Op                = kUntypedNode_Op;
 	l->ParseSyntaxNode         = ParseSyntaxNode;
 	l->ParseNode               = ParseNode;
 	l->ParseNewNode            = ParseNewNode;

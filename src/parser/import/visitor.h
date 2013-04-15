@@ -24,20 +24,20 @@
 
 #define DefineVisitCase(NAME)  case KNode_##NAME:   ret = cbuilder->api->visit##NAME##Node(kctx, builder, node, thunk); break;
 
-static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
+static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kUntypedNode *node, void *thunk)
 {
 	kbool_t ret = false;
 	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
-	switch(kNode_node(node)) {
+	switch(kUntypedNode_node(node)) {
 		KNodeList(DefineVisitCase)
 	}
 	return ret;
 }
 
-static kbool_t kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kNode *block, int option)
+static kbool_t kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kUntypedNode *block, int option)
 {
 	DBG_P("START CODE GENERATION..");
-	kNameSpace *ns = kNode_ns(block);
+	kNameSpace *ns = kUntypedNode_ns(block);
 	struct KVirtualCode *vcode = ns->builderApi->ExecutionEngineModule->GenerateVirtualCode(kctx, mtd, block, option);
 	KMethodFunc func = ns->builderApi->ExecutionEngineModule->GenerateMethodFunc(kctx, vcode);
 	ns->builderApi->ExecutionEngineModule->SetMethodCode(kctx, (kMethodVar *)mtd, vcode, func);

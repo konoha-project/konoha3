@@ -76,18 +76,18 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	/* selfNode and targetNode allow void type
 	 * e.g. "'a' instanceof void" */
-	kNode *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
-	kNode *targetNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
+	kUntypedNode *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
+	kUntypedNode *targetNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
 	if(selfNode != K_NULLNODE && targetNode != K_NULLNODE) {
 		KClass *selfClass = KClass_(selfNode->typeAttr), *targetClass = KClass_(targetNode->typeAttr);
 		if(KClass_Is(Final, selfClass)) {
 			kbool_t staticSubType = (selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
-			KReturn(KLIB kNode_SetUnboxConst(kctx, expr, KType_Boolean, staticSubType));
+			KReturn(KLIB kUntypedNode_SetUnboxConst(kctx, expr, KType_Boolean, staticSubType));
 		}
-		kNameSpace *ns = kNode_ns(stmt);
+		kNameSpace *ns = kUntypedNode_ns(stmt);
 		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, KMethodName_("instanceof"), 1, KMethodMatch_NoOption);
 		DBG_ASSERT(mtd != NULL);
-		kNode *classValue = KLIB kNode_SetConst(kctx, expr->NodeList->NodeVarItems[2], NULL, KLIB Knull(kctx, targetClass));
+		kUntypedNode *classValue = KLIB kUntypedNode_SetConst(kctx, expr->NodeList->NodeVarItems[2], NULL, KLIB Knull(kctx, targetClass));
 		KFieldSet(expr->NodeList, expr->NodeList->NodeItems[2], classValue);
 		KReturn(KLIB TypeCheckMethodParam(kctx, mtd, expr, ns, KClass_Boolean));
 	}
@@ -96,15 +96,15 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD TypeCheck_as(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
-	kNode *targetNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
-	kNode *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_(targetNode->typeAttr), TypeCheckPolicy_NoCheck);
+	kUntypedNode *targetNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
+	kUntypedNode *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_(targetNode->typeAttr), TypeCheckPolicy_NoCheck);
 	if(selfNode != K_NULLNODE && targetNode != K_NULLNODE) {
 		KClass *selfClass = KClass_(selfNode->typeAttr), *targetClass = KClass_(targetNode->typeAttr);
 		if(selfClass->typeId == targetClass->typeId || selfClass->isSubType(kctx, selfClass, targetClass)) {
 			KReturn(selfNode);
 		}
 		if(selfClass->isSubType(kctx, targetClass, selfClass)) {
-			kNameSpace *ns = kNode_ns(stmt);
+			kNameSpace *ns = kUntypedNode_ns(stmt);
 			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, KMethodName_("as"), 0, KMethodMatch_CamelStyle);
 			DBG_ASSERT(mtd != NULL);
 			KReturn(KLIB TypeCheckMethodParam(kctx, mtd, expr, ns, targetClass));
@@ -116,15 +116,15 @@ static KMETHOD TypeCheck_as(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
-	kNode *targetNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
-	kNode *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_(targetNode->typeAttr), TypeCheckPolicy_NoCheck);
+	kUntypedNode *targetNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
+	kUntypedNode *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_(targetNode->typeAttr), TypeCheckPolicy_NoCheck);
 	if(selfNode != K_NULLNODE && targetNode != K_NULLNODE) {
 		KClass *selfClass = KClass_(selfNode->typeAttr), *targetClass = KClass_(targetNode->typeAttr);
 		if(selfNode->typeAttr == targetNode->typeAttr || selfClass->isSubType(kctx, selfClass, targetClass)) {
 			KLIB MessageNode(kctx, selfNode, NULL, ns, InfoTag, "no need: %s to %s", KType_text(selfNode->typeAttr), KType_text(targetNode->typeAttr));
 			KReturn(selfNode);
 		}
-		kNameSpace *ns = kNode_ns(stmt);
+		kNameSpace *ns = kUntypedNode_ns(stmt);
 		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, selfClass, targetClass);
 		if(mtd == NULL) {
 			mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, selfClass, KMethodName_("to"), 0, KMethodMatch_CamelStyle);

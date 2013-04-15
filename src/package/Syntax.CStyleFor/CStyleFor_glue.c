@@ -38,15 +38,15 @@ static KMETHOD PatternMatch_ForStmt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
 	/* for(IniitExpr; CondExpr; IterateExpr) $Block */
-	kNameSpace *ns = kNode_ns(stmt);
+	kNameSpace *ns = kUntypedNode_ns(stmt);
 	int i, start = beginIdx;
 	/* InitExpression Part */
 	for(i = beginIdx; i < endIdx; i++) {
 		kTokenVar *tk = tokenList->TokenVarItems[i];
 		if(tk->symbol == KSymbol_SEMICOLON) {
 			if(start < i) {
-				kNode *node = KLIB ParseNewNode(kctx, ns, tokenList, &start, i, ParseMetaPatternOption, NULL);
-				KLIB kNode_AddParsedObject(kctx, stmt, KSymbol_("init"), UPCAST(node));
+				kUntypedNode *node = KLIB ParseNewNode(kctx, ns, tokenList, &start, i, ParseMetaPatternOption, NULL);
+				KLIB kUntypedNode_AddParsedObject(kctx, stmt, KSymbol_("init"), UPCAST(node));
 			}
 			start = i + 1;
 			break;
@@ -60,9 +60,9 @@ static KMETHOD PatternMatch_ForStmt(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *tk = tokenList->TokenVarItems[i];
 		if(tk->symbol == KSymbol_SEMICOLON) {
 			if(start < i) {
-				kNode *node = KLIB ParseNewNode(kctx, ns, tokenList, &start, i, ParseExpressionOption, NULL);
+				kUntypedNode *node = KLIB ParseNewNode(kctx, ns, tokenList, &start, i, ParseExpressionOption, NULL);
 				KDump(node);
-				KLIB kNode_AddParsedObject(kctx, stmt, KSymbol_ExprPattern, UPCAST(node));
+				KLIB kUntypedNode_AddParsedObject(kctx, stmt, KSymbol_ExprPattern, UPCAST(node));
 			}
 			start = i + 1;
 			break;
@@ -73,8 +73,8 @@ static KMETHOD PatternMatch_ForStmt(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	/* IterExpression Part */
 	if(start < endIdx) {
-		kNode *node = KLIB ParseNewNode(kctx, ns, tokenList, &start, endIdx, ParseMetaPatternOption, NULL);
-		KLIB kNode_AddParsedObject(kctx, stmt, KSymbol_("Iterator"), UPCAST(node));
+		kUntypedNode *node = KLIB ParseNewNode(kctx, ns, tokenList, &start, endIdx, ParseMetaPatternOption, NULL);
+		KLIB kUntypedNode_AddParsedObject(kctx, stmt, KSymbol_("Iterator"), UPCAST(node));
 	}
 	KReturnUnboxValue(endIdx);
 }
@@ -84,30 +84,30 @@ static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, ns, reqc);
 	int KSymbol_InitNode = KSymbol_("init"), KSymbol_IteratorNode = KSymbol_("Iterator");
 	KDump(stmt);
-	kNode *initNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_InitNode, ns, KClass_void, TypeCheckPolicy_AllowEmpty);
+	kUntypedNode *initNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_InitNode, ns, KClass_void, TypeCheckPolicy_AllowEmpty);
 	if(initNode != NULL) {
-		kNode_Set(OpenBlock, initNode, true);
+		kUntypedNode_Set(OpenBlock, initNode, true);
 	}
 	KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_IteratorNode, ns, KClass_void, TypeCheckPolicy_AllowEmpty);
 	KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
-	kNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
-	kNode_Set(CatchBreak, stmt, true);
-	//kNode_Set(RedoLoop, stmt, true);
+	kUntypedNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
+	kUntypedNode_Set(CatchBreak, stmt, true);
+	//kUntypedNode_Set(RedoLoop, stmt, true);
 	KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
-	KReturn(kNode_Type(stmt, KNode_For, KType_void));
+	KReturn(kUntypedNode_Type(stmt, KNode_For, KType_void));
 }
 
 /* copied from Syntax.CStyleWhile */
 static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
-	kNode *p = stmt;
+	kUntypedNode *p = stmt;
 	while(p != NULL) {
-		if(kNode_Is(CatchBreak, p)) {
+		if(kUntypedNode_Is(CatchBreak, p)) {
 			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_("break"), KType_Node, p);
-			KReturn(kNode_Type(stmt, KNode_Break, KType_void));
+			KReturn(kUntypedNode_Type(stmt, KNode_Break, KType_void));
 		}
-		p = kNode_GetParentNULL(p);
+		p = kUntypedNode_GetParentNULL(p);
 	}
 	KReturn(KLIB MessageNode(kctx, stmt, NULL, ns, ErrTag, "break statement not within a loop"));
 }
@@ -115,13 +115,13 @@ static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
-	kNode *p = stmt;
+	kUntypedNode *p = stmt;
 	while(p != NULL) {
-		if(kNode_Is(CatchContinue, p)) {
+		if(kUntypedNode_Is(CatchContinue, p)) {
 			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_("continue"), KType_Node, p);
-			KReturn(kNode_Type(stmt, KNode_Continue, KType_void));
+			KReturn(kUntypedNode_Type(stmt, KNode_Continue, KType_void));
 		}
-		p = kNode_GetParentNULL(p);
+		p = kUntypedNode_GetParentNULL(p);
 	}
 	KReturn(KLIB MessageNode(kctx, stmt, NULL, ns, ErrTag, "continue statement not within a loop"));
 }

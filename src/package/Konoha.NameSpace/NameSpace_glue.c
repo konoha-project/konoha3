@@ -88,10 +88,10 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
 	kstatus_t result = K_CONTINUE;
-	kToken *tk = KLIB kNode_GetToken(kctx, stmt, KSymbol_BlockPattern, NULL);
+	kToken *tk = KLIB kUntypedNode_GetToken(kctx, stmt, KSymbol_BlockPattern, NULL);
 	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_LazyBlock) {
 		INIT_GCSTACK();
-		kNameSpace *ns = new_(NameSpace, kNode_ns(stmt), _GcStack);
+		kNameSpace *ns = new_(NameSpace, kUntypedNode_ns(stmt), _GcStack);
 		KTokenSeq range = {ns, KGetParserContext(kctx)->preparedTokenList};
 		KTokenSeq_Push(kctx, range);
 		KLIB Tokenize(kctx, ns, kString_text(tk->text), tk->uline, tk->indent, range.tokenList);
@@ -99,7 +99,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 		result = KLIB EvalTokenList(kctx, &range, NULL/*trace*/);
 		KTokenSeq_Pop(kctx, range);
 		RESET_GCSTACK();
-		kNode_Type(stmt, KNode_Done, KType_void);
+		kUntypedNode_Type(stmt, KNode_Done, KType_void);
 	}
 	KReturnUnboxValue(result == K_CONTINUE);
 }
@@ -109,38 +109,38 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, ns, reqc);
-	kToken *symbolToken = KLIB kNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
+	kToken *symbolToken = KLIB kUntypedNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 	ksymbol_t unboxKey = symbolToken->symbol;
-	kNode *constNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_INFER, TypeCheckPolicy_CONST);
-	if(!kNode_IsError(constNode)) {
+	kUntypedNode *constNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_INFER, TypeCheckPolicy_CONST);
+	if(!kUntypedNode_IsError(constNode)) {
 		KClass *constClass = KClass_(constNode->typeAttr);
 		ktypeattr_t type = constClass->typeId;
 		uintptr_t unboxValue;
 		kbool_t result = false;
-		if(kNode_node(constNode) == KNode_Null) {   // const C = String
+		if(kUntypedNode_node(constNode) == KNode_Null) {   // const C = String
 			type = VirtualType_KClass;
 			unboxValue = (uintptr_t)constClass;
 			result = true;
 		}
-		else if(kNode_node(constNode) == KNode_Const) {   // const C = "1"
+		else if(kUntypedNode_node(constNode) == KNode_Const) {   // const C = "1"
 			unboxValue = (uintptr_t)constNode->ObjectConstValue;
 			result = true;
 		}
-		else if(kNode_node(constNode) == KNode_UnboxConst) {  // const c = 1
+		else if(kUntypedNode_node(constNode) == KNode_UnboxConst) {  // const c = 1
 			unboxValue = constNode->unboxConstValue;
 			result = true;
 		}
 		if(result) {
-			KMakeTraceUL(trace, sfp, kNode_uline(stmt));
+			KMakeTraceUL(trace, sfp, kUntypedNode_uline(stmt));
 			result = KLIB kNameSpace_SetConstData(kctx, ns, unboxKey, type, unboxValue, trace);
 			if(!result) {
-				kNode_Message(kctx, stmt, ErrTag, "constant value is already defined: %s%s", KSymbol_Fmt2(unboxKey));
+				kUntypedNode_Message(kctx, stmt, ErrTag, "constant value is already defined: %s%s", KSymbol_Fmt2(unboxKey));
 			}
 		}
 		else {
-			kNode_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", KSymbol_Fmt2(unboxKey));
+			kUntypedNode_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", KSymbol_Fmt2(unboxKey));
 		}
-		constNode = kNode_Type(stmt, KNode_Done, KType_void);
+		constNode = kUntypedNode_Type(stmt, KNode_Done, KType_void);
 	}
 	KReturn(constNode);
 }
@@ -170,12 +170,12 @@ static void FilterDefinedParam(KonohaContext *kctx, kNameSpace *ns, kArray *toke
 static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(expr, tokenList, beginIdx, currentIdx, endIdx);
-	kNameSpace *ns = kNode_ns(expr);
+	kNameSpace *ns = kUntypedNode_ns(expr);
 	if(beginIdx == currentIdx && beginIdx + 1 < endIdx) {
 		kTokenVar *definedToken = tokenList->TokenVarItems[beginIdx];   // defined
 		kTokenVar *pToken = tokenList->TokenVarItems[beginIdx+1];
 		if(IS_Array(pToken->GroupTokenList)) {
-			KLIB kNode_Op(kctx, expr, definedToken, 0);
+			KLIB kUntypedNode_Op(kctx, expr, definedToken, 0);
 			FilterDefinedParam(kctx, ns, RangeGroup(pToken->GroupTokenList));
 			KReturn(KLIB AppendParsedNode(kctx, expr, RangeGroup(pToken->GroupTokenList), NULL, ParseExpressionOption, "("));
 		}
@@ -191,14 +191,14 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	int popIsBlockingErrorMessage = sugarContext->isBlockedErrorMessage;
 	sugarContext->isBlockedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->NodeList); i++) {
-		kNode *typedNode = KLIB TypeCheckNodeAt(kctx, expr, i, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
-		if(kNode_IsError(typedNode)) {
+		kUntypedNode *typedNode = KLIB TypeCheckNodeAt(kctx, expr, i, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
+		if(kUntypedNode_IsError(typedNode)) {
 			isDefined = false;
 			break;
 		}
 	}
 	sugarContext->isBlockedErrorMessage = popIsBlockingErrorMessage;
-	KReturn(KLIB kNode_SetUnboxConst(kctx, expr, KType_Boolean, isDefined));
+	KReturn(KLIB kUntypedNode_SetUnboxConst(kctx, expr, KType_Boolean, isDefined));
 }
 
 static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)

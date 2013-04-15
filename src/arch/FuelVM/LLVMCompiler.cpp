@@ -730,6 +730,10 @@ static void EmitNewInst(LLVMIRBuilder *writer, INew *Node)
 	KonohaContext *kctx = writer->kctx;
 	IRBuilder<> *builder = writer->builder;
 
+	if(conf >= 100) {
+		fprintf(stderr, "%s", KType_text(type));
+		asm volatile("int3");
+	}
 	GlobalVariable *G = GetNewKObject();
 	/* kObject *new_kObject(KonohaContext *, uint64_t, void *, uint64_t); */
 	Value *Vctx = GetContext(writer);

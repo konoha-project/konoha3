@@ -26,7 +26,7 @@ typedef enum {
 	PatternNoMatch = -1,
 } ParsePattern_;
 
-static int CallParseFunc(KonohaContext *kctx, kFunc *fo, kNode *node, ksymbol_t symbol, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx)
+static int CallParseFunc(KonohaContext *kctx, kFunc *fo, kUntypedNode *node, ksymbol_t symbol, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx)
 {
 	BEGIN_UnusedStack(lsfp);
 	KStackSetObjectValue(lsfp[1].asNode, node);
@@ -37,11 +37,11 @@ static int CallParseFunc(KonohaContext *kctx, kFunc *fo, kNode *node, ksymbol_t 
 	KStackSetUnboxValue(lsfp[6].intValue, endIdx);
 	CallSugarMethod(kctx, lsfp, fo, 6, (kObject *)KNULL(Int));
 	END_UnusedStack();
-	if(kNode_IsError(node)) return endIdx;
+	if(kUntypedNode_IsError(node)) return endIdx;
 	return (int)lsfp[K_RTNIDX].intValue;
 }
 
-static int ParseSyntaxNode(KonohaContext *kctx, kSyntax *syn, kNode *node, ksymbol_t symbol, kArray *tokenList, int beginIdx, int opIdx, int endIdx)
+static int ParseSyntaxNode(KonohaContext *kctx, kSyntax *syn, kUntypedNode *node, ksymbol_t symbol, kArray *tokenList, int beginIdx, int opIdx, int endIdx)
 {
 	int callCount = 0;
 	if(opIdx != PatternNoMatch) {
@@ -55,7 +55,7 @@ static int ParseSyntaxNode(KonohaContext *kctx, kSyntax *syn, kNode *node, ksymb
 		callCount++;
 	}
 	size_t i;
-	kArray *syntaxList = kNameSpace_GetSyntaxList(kctx, kNode_ns(node), syn->keyword);
+	kArray *syntaxList = kNameSpace_GetSyntaxList(kctx, kUntypedNode_ns(node), syn->keyword);
 	for(i = 1; i < kArray_size(syntaxList); i++) { /* ObjectItems[0] == syn */
 		kSyntax *syn2 = syntaxList->SyntaxItems[i];
 		if(syn2->ParseFuncNULL != NULL) {
@@ -68,7 +68,7 @@ static int ParseSyntaxNode(KonohaContext *kctx, kSyntax *syn, kNode *node, ksymb
 			callCount++;
 		}
 	}
-	if(opIdx != PatternNoMatch/* && !kNode_IsError(node)*/) {
+	if(opIdx != PatternNoMatch/* && !kUntypedNode_IsError(node)*/) {
 		const char *emesg = (callCount > 0) ? "syntax error: %s%s" : "undefined: %s%s";
 		kToken *tk = tokenList->TokenItems[opIdx];
 		KLIB MessageNode(kctx, node, tk, NULL, ErrTag, emesg, KSymbol_Fmt2(syn->keyword)/*KToken_t(tk)*/);
@@ -116,7 +116,7 @@ static int SkipAnnotation(KonohaContext *kctx, kArray *tokenList, int currentIdx
 	return currentIdx;
 }
 
-static void kNode_AddAnnotation(KonohaContext *kctx, kNode *stmt, kArray *tokenList, int beginIdx, int endIdx)
+static void kUntypedNode_AddAnnotation(KonohaContext *kctx, kUntypedNode *stmt, kArray *tokenList, int beginIdx, int endIdx)
 {
 	int currentIdx;
 	for(currentIdx = beginIdx; currentIdx < endIdx; currentIdx++) {
@@ -130,7 +130,7 @@ static void kNode_AddAnnotation(KonohaContext *kctx, kNode *stmt, kArray *tokenL
 				kToken *nextToken = tokenList->TokenItems[currentIdx+1];
 				if(nextToken->resolvedSyntaxInfo != NULL && nextToken->resolvedSyntaxInfo->keyword == KSymbol_ParenthesisGroup) {
 					int start = 0;
-					value = (kObject *)KLIB ParseNewNode(kctx, kNode_ns(stmt), nextToken->GroupTokenList, &start, kArray_size(nextToken->GroupTokenList), ParseExpressionOption, "(");
+					value = (kObject *)KLIB ParseNewNode(kctx, kUntypedNode_ns(stmt), nextToken->GroupTokenList, &start, kArray_size(nextToken->GroupTokenList), ParseExpressionOption, "(");
 					currentIdx++;
 				}
 			}
@@ -141,7 +141,7 @@ static void kNode_AddAnnotation(KonohaContext *kctx, kNode *stmt, kArray *tokenL
 	}
 }
 
-static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kArray *tokenList, int beginIdx, int endIdx)
+static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kUntypedNode *node, kArray *tokenList, int beginIdx, int endIdx)
 {
 	int i;
 	//KLIB dumpTokenArray(kctx, 0, tokenList, beginIdx, endIdx);
@@ -171,13 +171,13 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 				//DBG_P(">>>>>>>>>> searching meta pattern = %s%s index=%d,%d,%d", KSymbol_Fmt2(patternToken->symbol), beginIdx, nextIdx, endIdx);
 				if(nextIdx != PatternNoMatch) {
 					if(beginIdx < currentIdx) {
-						kNode_AddAnnotation(kctx, node, tokenList, beginIdx, currentIdx);
+						kUntypedNode_AddAnnotation(kctx, node, tokenList, beginIdx, currentIdx);
 					}
 					return nextIdx;
 				}
-				if(kNode_IsError(node)) return endIdx;
+				if(kUntypedNode_IsError(node)) return endIdx;
 				node->syn = NULL;
-				kNode_Reset(kctx, node);
+				kUntypedNode_Reset(kctx, node);
 			}
 			currentNameSpace = currentNameSpace->parentNULL;
 		}
@@ -186,7 +186,7 @@ static int ParseMetaPattern(KonohaContext *kctx, kNameSpace *ns, kNode *node, kA
 	return PatternNoMatch;
 }
 
-static int FindOperator(KonohaContext *kctx, kNode *node, kArray *tokenList, int beginIdx, int endIdx)
+static int FindOperator(KonohaContext *kctx, kUntypedNode *node, kArray *tokenList, int beginIdx, int endIdx)
 {
 	kbool_t isPrePosition = true;
 	int opIdx = beginIdx, i, precedence = 0;
@@ -223,10 +223,10 @@ static int FindOperator(KonohaContext *kctx, kNode *node, kArray *tokenList, int
 	return opIdx;
 }
 
-static int ParseNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int beginIdx, int endIdx, ParseOption option, const char *requiredTokenText)
+static int ParseNode(KonohaContext *kctx, kUntypedNode *node, kArray *tokenList, int beginIdx, int endIdx, ParseOption option, const char *requiredTokenText)
 {
 	if(beginIdx < endIdx) {
-		kNameSpace *ns =kNode_ns(node);
+		kNameSpace *ns =kUntypedNode_ns(node);
 		int nextIdx = PatternNoMatch;
 		if(KFlag_Is(int, option, ParseMetaPatternOption)) {
 			nextIdx = ParseMetaPattern(kctx, ns, node, tokenList, beginIdx, endIdx);
@@ -241,7 +241,7 @@ static int ParseNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int be
 	}
 	else {
 		if(requiredTokenText != NULL) {
-			kNode_Message(kctx, node, ErrTag, "expected expression after %s", requiredTokenText);
+			kUntypedNode_Message(kctx, node, ErrTag, "expected expression after %s", requiredTokenText);
 		}
 		else {
 			//DBG_ABORT("set null in future");
@@ -250,9 +250,9 @@ static int ParseNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int be
 	return endIdx;
 }
 
-static kNode *ParseNewNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int *beginIdx, int endIdx, ParseOption option, const char *requiredTokenText)
+static kUntypedNode *ParseNewNode(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int *beginIdx, int endIdx, ParseOption option, const char *requiredTokenText)
 {
-	kNode *node = new_UntypedNode(kctx, OnGcStack, ns);
+	kUntypedNode *node = new_UntypedNode(kctx, OnGcStack, ns);
 	int nextIdx = ParseNode(kctx, node, tokenList, beginIdx[0], endIdx, option, requiredTokenText);
 	beginIdx[0] = nextIdx;
 	return node;
@@ -264,10 +264,10 @@ static kbool_t IsCommaSeparator(KonohaContext *kctx, kToken *tk)
 	return (tk->symbol == KSymbol_COMMA);
 }
 
-static kNode *AppendParsedNode(KonohaContext *kctx, kNode *node, kArray *tokenList, int beginIdx, int endIdx, IsSeparatorFunc isSeparator, ParseOption option, const char *requiredTokenText)
+static kUntypedNode *AppendParsedNode(KonohaContext *kctx, kUntypedNode *node, kArray *tokenList, int beginIdx, int endIdx, IsSeparatorFunc isSeparator, ParseOption option, const char *requiredTokenText)
 {
 	int i, start = beginIdx;
-	kNameSpace *ns = kNode_ns(node);
+	kNameSpace *ns = kUntypedNode_ns(node);
 	if(isSeparator == NULL) {
 		isSeparator = IsCommaSeparator;
 	}
@@ -276,21 +276,21 @@ static kNode *AppendParsedNode(KonohaContext *kctx, kNode *node, kArray *tokenLi
 		kToken *tk = tokenList->TokenItems[i];
 		if(isSeparator(kctx, tk)) {
 			if(start < i || requiredTokenText != NULL) {
-				kNode_AddNode(kctx, node, ParseNewNode(kctx, ns, tokenList, &start, i, option, requiredTokenText));
+				kUntypedNode_AddNode(kctx, node, ParseNewNode(kctx, ns, tokenList, &start, i, option, requiredTokenText));
 				if(requiredTokenText != NULL) requiredTokenText = ",";
 			}
 			start = i + 1;
 		}
 	}
 	if(start < i || requiredTokenText != NULL) {
-		kNode_AddNode(kctx, node, ParseNewNode(kctx, ns, tokenList, &start, i, option, requiredTokenText));
+		kUntypedNode_AddNode(kctx, node, ParseNewNode(kctx, ns, tokenList, &start, i, option, requiredTokenText));
 	}
 	return node;
 }
 
-static kNode *ParseSource(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline, int baseIndent)
+static kUntypedNode *ParseSource(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline, int baseIndent)
 {
-	kNode *node;
+	kUntypedNode *node;
 	KTokenSeq tokens = {ns, KGetParserContext(kctx)->preparedTokenList, 0};
 	KTokenSeq_Push(kctx, tokens);
 	Tokenize(kctx, ns, script, uline, baseIndent, tokens.tokenList);

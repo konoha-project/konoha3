@@ -194,7 +194,7 @@ static KMETHOD TypeCheck_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sf
 	VAR_TypeCheck(expr, gma, reqty);
 	kToken *tk = expr->TermToken;
 	long long n = kstrtoll(kString_text(tk->text));
-	KReturn(KLIB kNode_SetUnboxConst(kctx, expr, KType_Int, (uintptr_t)n));
+	KReturn(KLIB kUntypedNode_SetUnboxConst(kctx, expr, KType_Int, (uintptr_t)n));
 }
 
 // --------------------------------------------------------------------------
