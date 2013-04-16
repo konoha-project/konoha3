@@ -24,7 +24,6 @@
 
 #include "konoha3.h"
 #include "konoha3/konoha_common.h"
-
 #include "konoha3/import/methoddecl.h"
 #include <event2/event.h>
 #include <event2/event_struct.h>
@@ -61,7 +60,6 @@ typedef struct cevent {
 	KonohaContext *kctx;
 	struct event *event;
 	kFunc *kcb;		// konoha call back method
-	kObject *kcbArg;
 	kctimeval *kctimeval;
 } kcevent;
 
@@ -72,8 +70,36 @@ typedef struct cbufferevent {
 	kFunc *readcb;
 	kFunc *writecb;
 	kFunc *eventcb;
+	kFunc *input_filter;
+	kFunc *output_filter;
 	kObject *kcbArg;
 } kcbufferevent;
+
+typedef struct cev_token_bucket_cfg {
+	kObjectHeader h;
+	struct ev_token_bucket_cfg *token_bucket_cfg;
+} kcev_token_bucket_cfg;
+
+typedef struct cbufferevent_rate_limit_group {
+	kObjectHeader h;
+	struct bufferevent_rate_limit_group *rate_limit_group;
+} kcbufferevent_rate_limit_group;
+
+typedef struct cbufferevent_rate_limit_group_totals {
+	kObjectHeader h;
+	long read_out;
+	long written_out;
+} kcbufferevent_rate_limit_group_totals;
+
+typedef struct cevbuffer_iovec {
+	kObjectHeader h;
+	struct evbuffer_iovec iovec;	//NOT pointer
+} kcevbuffer_iovec;
+
+typedef struct cevbuffer_ptr {
+	kObjectHeader h;
+	struct evbuffer_ptr ptr;	// NOT pointer
+} kcevbuffer_ptr;
 
 typedef struct cevbuffer {
 	kObjectHeader h;
@@ -139,7 +165,7 @@ typedef struct cevdns_base {
 	struct evdns_base *base;
 } kcevdns_base;
 
-static struct {
+static struct kcallback {
 	KonohaContext *kctx;
 	kFunc *kcb;
 } Log_callback = {NULL, NULL}, Fatal_callback = {NULL, NULL};
@@ -258,7 +284,7 @@ static KMETHOD cevent_base_get_supported_methods(KonohaContext *kctx, KonohaStac
 	INIT_GCSTACK();
 	const char **methods = event_get_supported_methods();
 
-	//TODO check array usage. refered src/package-devel/Konoha.Map/Map_glue.c: Map_keys()
+	//TODO check array usage. refered src/package-devel/MiniKonoha.Map/Map_glue.c: Map_keys()
 	KClass *cArray = KClass_p0(kctx, KClass_Array, KType_String);
 	kArray *ret = (kArray *)(KLIB new_kObject(kctx, _GcStack, cArray, 10));
 	int i;
@@ -368,7 +394,7 @@ static KMETHOD cevent_base_gettimeofday_cached(KonohaContext *kctx, KonohaStack 
  */
 static void cevent_base_log_CB_invoke(int severity, const char *msg)
 {
-	if(Log_callback.kcb != NULL) {
+	if(Log_callback.kctx != NULL && Log_callback.kcb != NULL) {
 		KonohaContext *kctx = Log_callback.kctx;
 		BEGIN_UnusedStack(lsfp);
 		KClass *returnType = kMethod_GetReturnType(Log_callback.kcb->method);
@@ -398,7 +424,7 @@ static KMETHOD cevent_base_set_log_callback(KonohaContext *kctx, KonohaStack *sf
  */
 static void cevent_base_fatal_CB_invoke(int err)
 {
-	if(Fatal_callback.kcb != NULL) {
+	if(Fatal_callback.kctx != NULL && Fatal_callback.kcb != NULL) {
 		KonohaContext *kctx = Fatal_callback.kctx;
 		BEGIN_UnusedStack(lsfp);
 		KClass *returnType = kMethod_GetReturnType(Fatal_callback.kcb->method);
@@ -514,7 +540,7 @@ static void cevent_Init(KonohaContext *kctx, kObject *o, void *conf)
 	ev->kctx = NULL;
 	ev->event = NULL;
 	KFieldInit(ev, ev->kcb, KNULL(Func));
-	KFieldInit(ev, ev->kcbArg, K_NULL);
+	KFieldInit(ev, ev->kcb->env, K_NULL);	//TODO should place in Func_Init()?
 	KFieldInit(ev, ev->kctimeval, K_NULL);
 }
 
@@ -533,7 +559,7 @@ static void cevent_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 {
 	kcevent *ev = (kcevent *) o;
 	KRefTrace(ev->kcb);
-	KRefTrace(ev->kcbArg);
+	KRefTrace(ev->kcb->env);	//TODO shoule place in Func_Reftrace()?
 	KRefTrace(ev->kctimeval);
 }
 
@@ -550,7 +576,7 @@ static void cevent_CB_method_invoke(evutil_socket_t evd, short event, void *arg)
 	KStackSetObjectValue(lsfp[0].asObject, K_NULL);
 	KStackSetUnboxValue(lsfp[1].intValue, evd);
 	KStackSetUnboxValue(lsfp[2].intValue, event);
-	KStackSetObjectValue(lsfp[3].asObject, ev->kcbArg);
+	KStackSetObjectValue(lsfp[3].asObject, ev->kcb->env);
 	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, ev->kcb, 3);
 	KStackCall(lsfp);
 	END_UnusedStack();
@@ -565,7 +591,7 @@ static KMETHOD cevent_event_new(KonohaContext *kctx, KonohaStack *sfp)
 	evutil_socket_t evd = (evutil_socket_t)sfp[2].intValue;
 	short event = (short)(sfp[3].intValue & 0xffff);
 	KFieldSet(ev, ev->kcb, sfp[4].asFunc);
-	KFieldSet(ev, ev->kcbArg, sfp[5].asObject);	//deliver to callback method
+	KFieldSet(ev, ev->kcb->env, sfp[5].asObject);	//deliver to callback method
 
 	ev->event = event_new(cEvent_base->event_base, evd, event, cevent_CB_method_invoke, ev);
 	KReturn(ev);
@@ -580,7 +606,7 @@ static KMETHOD cevent_signal_new(KonohaContext *kctx, KonohaStack *sfp)
 	kcevent_base *cEvent_base = (kcevent_base *)sfp[1].asObject;
 	evutil_socket_t evd = (evutil_socket_t)sfp[2].intValue;
 	KFieldSet(ev, ev->kcb, sfp[3].asFunc);
-	KFieldSet(ev, ev->kcbArg, sfp[4].asObject);	//deliver to callback method
+	KFieldSet(ev, ev->kcb->env, sfp[4].asObject);	//deliver to callback method
 
 	ev->event = evsignal_new(cEvent_base->event_base, evd, cevent_CB_method_invoke, ev);
 	KReturn(ev);
@@ -594,7 +620,7 @@ static KMETHOD cevent_timer_new(KonohaContext *kctx, KonohaStack *sfp)
 	ev->kctx = kctx;
 	kcevent_base *cEvent_base = (kcevent_base *)sfp[1].asObject;
 	KFieldSet(ev, ev->kcb, sfp[2].asFunc);
-	KFieldSet(ev, ev->kcbArg, sfp[3].asObject);	//deliver to callback method
+	KFieldSet(ev, ev->kcb->env, sfp[3].asObject);	//deliver to callback method
 
 	ev->event = evtimer_new(cEvent_base->event_base, cevent_CB_method_invoke, ev);
 	KReturn(ev);
@@ -616,7 +642,7 @@ static KMETHOD cevent_event_assign(KonohaContext *kctx, KonohaStack *sfp)
 	evutil_socket_t evd = (evutil_socket_t)sfp[2].intValue;
 	short event = (short)(sfp[3].intValue & 0xffff);
 	KFieldSet(ev, ev->kcb, sfp[4].asFunc);
-	KFieldSet(ev, ev->kcbArg, sfp[5].asObject);	//deliver to callback method
+	KFieldSet(ev, ev->kcb->env, sfp[5].asObject);	//deliver to callback method
 
 	int ret = event_assign(ev->event, cEvent_base->event_base, evd, event, cevent_CB_method_invoke, ev);
 	KReturnUnboxValue(ret);
@@ -629,7 +655,7 @@ static KMETHOD cevent_signal_assign(KonohaContext *kctx, KonohaStack *sfp)
 	kcevent_base *cEvent_base = (kcevent_base *)sfp[1].asObject;
 	evutil_socket_t evd = (evutil_socket_t)sfp[2].intValue;
 	KFieldSet(ev, ev->kcb, sfp[3].asFunc);
-	KFieldSet(ev, ev->kcbArg, sfp[4].asObject);	//deliver to callback method
+	KFieldSet(ev, ev->kcb->env, sfp[4].asObject);	//deliver to callback method
 
 	int ret = evsignal_assign(ev->event, cEvent_base->event_base, evd, cevent_CB_method_invoke, ev);
 	KReturnUnboxValue(ret);
@@ -641,13 +667,13 @@ static KMETHOD cevent_timer_assign(KonohaContext *kctx, KonohaStack *sfp)
 	kcevent *ev = (kcevent *) sfp[0].asObject;
 	kcevent_base *cEvent_base = (kcevent_base *)sfp[1].asObject;
 	KFieldSet(ev, ev->kcb, sfp[2].asFunc);
-	KFieldSet(ev, ev->kcbArg, sfp[3].asObject);	//deliver to callback method
+	KFieldSet(ev, ev->kcb->env, sfp[3].asObject);	//deliver to callback method
 
 	int ret = evtimer_assign(ev->event, cEvent_base->event_base, cevent_CB_method_invoke, ev);
 	KReturnUnboxValue(ret);
 }
 
-//## int event.event_add(event_base event, timeval tv);
+//## int event.event_add(timeval tv);
 static KMETHOD cevent_event_add(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
@@ -657,7 +683,7 @@ static KMETHOD cevent_event_add(KonohaContext *kctx, KonohaStack* sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## int event.event_del(event event);
+//## int event.event_del();
 static KMETHOD cevent_event_del(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kcevent *kcev = (kcevent *)sfp[0].asObject;
@@ -773,7 +799,7 @@ static KMETHOD cevent_get_callback_arg(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcevent *ev = (kcevent *) sfp[0].asObject;
 	//privede same as void *event_get_callback_arg(const struct event *ev);
-	KReturn(ev->kcbArg);
+	KReturn(ev->kcb->env);
 }
 
 /*
@@ -802,6 +828,8 @@ static void cbufferevent_Init(KonohaContext *kctx, kObject *o, void *conf)
 	KFieldInit(bev, bev->readcb, KNULL(Func));
 	KFieldInit(bev, bev->writecb, KNULL(Func));
 	KFieldInit(bev, bev->eventcb, KNULL(Func));
+	KFieldInit(bev, bev->input_filter, KNULL(Func));
+	KFieldInit(bev, bev->output_filter, KNULL(Func));
 	KFieldInit(bev, bev->kcbArg, K_NULL);
 }
 
@@ -822,6 +850,8 @@ static void cbufferevent_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisito
 	KRefTrace(bev->readcb);
 	KRefTrace(bev->writecb);
 	KRefTrace(bev->eventcb);
+	KRefTrace(bev->input_filter);
+	KRefTrace(bev->output_filter);
 	KRefTrace(bev->kcbArg);
 }
 
@@ -903,6 +933,58 @@ static void cbev_eventCB_method_invoke(struct bufferevent *bev, short what, void
 	END_UnusedStack();
 }
 
+//## int bufferevent.socket_connect(Sockaddr_in sa);
+static KMETHOD cbufferevent_socket_connect(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	kSockaddr_in *sa = (kSockaddr_in *)sfp[1].asObject;
+	int ret = bufferevent_socket_connect(bev->bev, (struct sockaddr *)&sa->sockaddr, sizeof sa->sockaddr);
+	KReturnUnboxValue(ret);
+}
+
+//## int bufferevent.socket_connect_hostname(evdns_base dnsbase, int family, String hostname, int port);
+static KMETHOD cbufferevent_socket_connect_hostname(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	kcevdns_base *dnsbase = (kcevdns_base *)sfp[1].asObject;
+	int family = sfp[2].intValue;
+	kString *hostname = sfp[3].asString;
+	int port = sfp[4].intValue;
+	KReturnUnboxValue(bufferevent_socket_connect_hostname(bev->bev, dnsbase->base, family, kString_text(hostname), port));
+}
+
+//## int bufferevent.socket_get_dns_error();
+static KMETHOD cbufferevent_socket_get_dns_error(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_socket_get_dns_error(bev->bev));
+}
+
+//## int bufferevent.base_set(event_base base);
+static KMETHOD cbufferevent_base_set(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	kcevent_base *base = (kcevent_base *)sfp[1].asObject;
+	KReturnUnboxValue(bufferevent_base_set(base->event_base , bev->bev));
+}
+
+//## event_base bufferevent.get_base();
+static KMETHOD cbufferevent_get_base(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	kcevent_base *ret = (kcevent_base *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+	ret->event_base =  bufferevent_get_base(bev->bev);
+	KReturn(ret);
+}
+
+//## int bufferevent.priority_set(int priority);
+static KMETHOD cbufferevent_priority_set(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	int pri = sfp[1].intValue;
+	KReturnUnboxValue(bufferevent_priority_set(bev->bev, pri));
+}
+
 //## void bufferevent.setcb(
 //##	Func[void, bufferevent, Object] readcb,
 //##	Func[void, bufferevent, Object] writecb,
@@ -913,6 +995,7 @@ static KMETHOD cbufferevent_setcb(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcbufferevent *kcbe = (kcbufferevent *)sfp[0].asObject;
 
+	kcbe->kctx = kctx;
 	KFieldSet(kcbe, kcbe->readcb, sfp[1].asFunc);
 	KFieldSet(kcbe, kcbe->writecb, sfp[2].asFunc);
 	KFieldSet(kcbe, kcbe->eventcb, sfp[3].asFunc);
@@ -921,23 +1004,29 @@ static KMETHOD cbufferevent_setcb(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
-//## int bufferevent.socket_connect(Sockaddr_in sa);
-static KMETHOD cbufferevent_socket_connect(KonohaContext *kctx, KonohaStack *sfp)
+//## int bufferevent.setfd(int fd);
+static KMETHOD cbufferevent_setfd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
-	kSockaddr_in *sa = (kSockaddr_in *)sfp[1].asObject;
-	int ret = bufferevent_socket_connect(bev->bev, (struct sockaddr *)&sa->sockaddr, sizeof sa->sockaddr);
-	KReturnUnboxValue(ret);
+	int fd = sfp[1].intValue;
+	KReturnUnboxValue(bufferevent_setfd(bev->bev, fd));
 }
 
-//## int bufferevent.enable(int event);
-static KMETHOD cbufferevent_enable(KonohaContext *kctx, KonohaStack *sfp)
+//## int bufferevent.getfd();
+static KMETHOD cbufferevent_getfd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
-	short event = (short)sfp[1].intValue;
+	KReturnUnboxValue(bufferevent_getfd(bev->bev));
+}
 
-	int ret = bufferevent_enable(bev->bev, event);
-	KReturnUnboxValue(ret);
+//## bufferevent bufferevent.get_underlying();
+static KMETHOD cbufferevent_get_underlying(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	kcbufferevent *ret = (kcbufferevent *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+	ret->bev = bufferevent_get_underlying(bev->bev);
+	//TODO others member is NULL
+	KReturn(ret);
 }
 
 //## int bufferevent.write(Bytes buf);
@@ -950,6 +1039,14 @@ static KMETHOD cbufferevent_write(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
+//## int bufferevent.write_buffer(evbuffer buf);
+static KMETHOD cbufferevent_write_buffer(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	kcevbuffer *evb = (kcevbuffer *)sfp[1].asObject;
+	KReturnUnboxValue(bufferevent_write_buffer(bev->bev, evb->buf));
+}
+
 //## int bufferevent.bufferevent_read(Bytes buf);
 static KMETHOD cbufferevent_read(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -960,88 +1057,434 @@ static KMETHOD cbufferevent_read(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
+//## int bufferevent.read_buffer(evbuffer buf);
+static KMETHOD cbufferevent_read_buffer(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	kcevbuffer *evb = (kcevbuffer *)sfp[1].asObject;
+	KReturnUnboxValue(bufferevent_read_buffer(bev->bev, evb->buf));
+}
+
+//## evbuffer bufferevent.get_input();
+static KMETHOD cbufferevent_get_input(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	kcevbuffer *ret = (kcevbuffer *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+	ret->buf = bufferevent_get_input(bev->bev);
+	KReturn(ret);
+}
+
+//## evbuffer bufferevent.get_output();
+static KMETHOD cbufferevent_get_output(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	kcevbuffer *ret = (kcevbuffer *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+	ret->buf = bufferevent_get_output(bev->bev);
+	KReturn(ret);
+}
+
+//## int bufferevent.enable(int event);
+static KMETHOD cbufferevent_enable(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	short event = (short)sfp[1].intValue;
+	KReturnUnboxValue(bufferevent_enable(bev->bev, event));
+}
+
+//## int bufferevent.disable(int event);
+static KMETHOD cbufferevent_disable(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	short event = (short)sfp[1].intValue;
+	KReturnUnboxValue(bufferevent_disable(bev->bev, event));
+}
+
+//## int bufferevent.get_enabled();
+static KMETHOD cbufferevent_get_enabled(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_get_enabled(bev->bev));
+}
+
+//## int bufferevent.set_timeouts(timeval timeout_read, timeval timeout_write);
+static KMETHOD cbufferevent_set_timeouts(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	kctimeval *to_read = (kctimeval *)sfp[1].asObject;
+	kctimeval *to_write = (kctimeval *)sfp[2].asObject;
+	KReturnUnboxValue(bufferevent_set_timeouts(bev->bev, tvIsNull(to_read) ? NULL : &to_read->timeval, tvIsNull(to_write) ? NULL : &to_write->timeval));
+}
+
+//## void bufferevent.setwatermark(int events, int lowmark, int highmark);
+static KMETHOD cbufferevent_setwatermark(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	short events = (short)sfp[1].intValue;
+	int lowmark = sfp[2].intValue;
+	int highmark = sfp[3].intValue;
+	bufferevent_setwatermark(bev->bev, events, lowmark, highmark);
+	KReturnVoid();
+}
+
+//## void bufferevent.lock();
+static KMETHOD cbufferevent_lock(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	bufferevent_lock(bev->bev);
+	KReturnVoid();
+}
+
+//## void bufferevent.unlock();
+static KMETHOD cbufferevent_unlock(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	bufferevent_unlock(bev->bev);
+	KReturnVoid();
+}
+
+//## int bufferevent.flush(int iotype, int mode);
+static KMETHOD cbufferevent_flush(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	short iotype = (short)sfp[1].intValue;
+	enum bufferevent_flush_mode mode = (enum bufferevent_flush_mode)sfp[2].intValue;
+	KReturnUnboxValue(bufferevent_flush(bev->bev, iotype, mode));
+}
+
+//
+enum bufferevent_filter_result cbev_filterCB_method_invoke(
+	kFunc *invokeFunc,
+    struct evbuffer *src, struct evbuffer *dst, ev_ssize_t dst_limit,
+    enum bufferevent_flush_mode mode, void *ctx)
+{
+	enum bufferevent_filter_result ret;
+	kcbufferevent *kcbev = ctx;
+	KonohaContext *kctx = kcbev->kctx;
+
+	kcevbuffer *ksrc = (kcevbuffer *)(new_(cevbuffer, 0, OnField));
+	ksrc->buf = src;
+	kcevbuffer *kdst = (kcevbuffer *)(new_(cevbuffer, 0, OnField));
+	kdst->buf = dst;
+
+	BEGIN_UnusedStack(lsfp);
+	KClass *returnType = kMethod_GetReturnType(kcbev->eventcb->method);
+	KStackSetObjectValue(lsfp[0].asObject, K_NULL);
+	KStackSetObjectValue(lsfp[1].asObject, (kObject *)ksrc);
+	KStackSetObjectValue(lsfp[2].asObject, (kObject *)kdst);
+	KStackSetUnboxValue(lsfp[3].intValue, dst_limit);
+	KStackSetUnboxValue(lsfp[4].intValue, mode);
+	KStackSetObjectValue(lsfp[5].asObject, (kObject *)kcbev->kcbArg);
+	KStackSetFuncAll(lsfp, KLIB Knull(kctx, returnType), 0/*UL*/, kcbev->eventcb, 5);
+	KStackCall(lsfp);
+
+	ret = lsfp[0].unboxValue;
+	END_UnusedStack();
+	return ret;
+}
 
 /*
-TODO
-int bufferevent_socket_connect_hostname(struct bufferevent *,
-	struct evdns_base *, int, const char *, int);
-int bufferevent_socket_get_dns_error(struct bufferevent *bev);
-int bufferevent_base_set(struct event_base *base, struct bufferevent *bufev);
-struct event_base *bufferevent_get_base(struct bufferevent *bev);
-int bufferevent_priority_set(struct bufferevent *bufev, int pri);
-int bufferevent_setfd(struct bufferevent *bufev, evutil_socket_t fd);
-evutil_socket_t bufferevent_getfd(struct bufferevent *bufev);
-struct bufferevent *bufferevent_get_underlying(struct bufferevent *bufev);
-int bufferevent_write_buffer(struct bufferevent *bufev, struct evbuffer *buf);
-int bufferevent_read_buffer(struct bufferevent *bufev, struct evbuffer *buf);
-struct evbuffer *bufferevent_get_input(struct bufferevent *bufev);
-struct evbuffer *bufferevent_get_output(struct bufferevent *bufev);
-int bufferevent_disable(struct bufferevent *bufev, short event);
-short bufferevent_get_enabled(struct bufferevent *bufev);
-int bufferevent_set_timeouts(struct bufferevent *bufev,
-	const struct timeval *timeout_read, const struct timeval *timeout_write);
-void bufferevent_setwatermark(struct bufferevent *bufev, short events,
-	size_t lowmark, size_t highmark);
-void bufferevent_lock(struct bufferevent *bufev);
-void bufferevent_unlock(struct bufferevent *bufev);
-int bufferevent_flush(struct bufferevent *bufev, short iotype,
-	enum bufferevent_flush_mode mode);
-struct bufferevent *
-bufferevent_filter_new(struct bufferevent *underlying,
-		       bufferevent_filter_cb input_filter,
-		       bufferevent_filter_cb output_filter,
-		       int options,
-		       void (*free_context)(void *),
-		       void *ctx);
-int bufferevent_pair_new(struct event_base *base, int options,
-	struct bufferevent *pair[2]);
-struct bufferevent *bufferevent_pair_get_partner(struct bufferevent *bev);
-int bufferevent_set_rate_limit(struct bufferevent *bev,
-    struct ev_token_bucket_cfg *cfg);
-struct bufferevent_rate_limit_group *bufferevent_rate_limit_group_new(
-	struct event_base *base,
-	const struct ev_token_bucket_cfg *cfg);
-int bufferevent_rate_limit_group_set_cfg(
-	struct bufferevent_rate_limit_group *,
-	const struct ev_token_bucket_cfg *);
-int bufferevent_add_to_rate_limit_group(struct bufferevent *bev,
-	struct bufferevent_rate_limit_group *g);
-int bufferevent_remove_from_rate_limit_group(struct bufferevent *bev);
-ev_ssize_t bufferevent_get_read_limit(struct bufferevent *bev);
-ev_ssize_t bufferevent_get_write_limit(struct bufferevent *bev);
-ev_ssize_t bufferevent_get_max_to_read(struct bufferevent *bev);
-ev_ssize_t bufferevent_get_max_to_write(struct bufferevent *bev);
-int bufferevent_decrement_read_limit(struct bufferevent *bev, ev_ssize_t decr);
-int bufferevent_decrement_write_limit(struct bufferevent *bev, ev_ssize_t decr);
+ * bufferevent Class inputfilter (*bufferevent_filter_cb)() 1st stage callback from event_base_dispatch(),
+ * NEVER BE CALLED FROM OTHERS.
+ */
+enum bufferevent_filter_result cbev_inputfilterCB_method_invoke(
+    struct evbuffer *src, struct evbuffer *dst, ev_ssize_t dst_limit,
+    enum bufferevent_flush_mode mode, void *ctx)
+{
+	kcbufferevent *kcbe = ctx;
+	return cbev_filterCB_method_invoke(kcbe->input_filter, src, dst, dst_limit,
+			mode, ctx);
+}
 
--- ev_token_bucket_cfg --
-struct ev_token_bucket_cfg *ev_token_bucket_cfg_new(
-	size_t read_rate, size_t read_burst,
-	size_t write_rate, size_t write_burst,
-	const struct timeval *tick_len);
-void ev_token_bucket_cfg_free(struct ev_token_bucket_cfg *cfg);
+/*
+ * bufferevent Class output filter (*bufferevent_filter_cb)() 1st stage callback from event_base_dispatch(),
+ * NEVER BE CALLED FROM OTHERS.
+ */
+enum bufferevent_filter_result cbev_outputfilterCB_method_invoke(
+    struct evbuffer *src, struct evbuffer *dst, ev_ssize_t dst_limit,
+    enum bufferevent_flush_mode mode, void *ctx)
+{
+	kcbufferevent *kcbe = ctx;
+	return cbev_filterCB_method_invoke(kcbe->output_filter, src, dst, dst_limit,
+			mode, ctx);
+}
+
+//## bufferevent bufferevent.filter_new(
+//##	Func [int, evbuffer, evbuffer, int, int, Object] input_filter,
+//##	Func [int, evbuffer, evbuffer, int, int, Object] output_filter,
+//##	int option, Object ctx
+//## );
+static KMETHOD cbufferevent_filter_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *kcbe = (kcbufferevent *)sfp[0].asObject;
+	KFieldSet(kcbe, kcbe->input_filter, sfp[1].asFunc);
+	KFieldSet(kcbe, kcbe->output_filter, sfp[2].asFunc);
+	int option = sfp[3].intValue;
+	KFieldSet(kcbe, kcbe->kcbArg, sfp[4].asObject);
+
+	kcbufferevent *ret = (kcbufferevent *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+	ret->bev = bufferevent_filter_new(kcbe->bev,
+				cbev_inputfilterCB_method_invoke,
+				cbev_outputfilterCB_method_invoke,
+				option, NULL, kcbe);
+	KReturn(ret);
+}
+
+//## @Static int bufferevent.pair_new(event_base base, int options, bufferevent[] pair);
+static KMETHOD cbufferevent_pair_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevent_base *kceb = (kcevent_base *)sfp[1].asObject;
+	int options = sfp[2].intValue;
+	kArray *bevArray = sfp[3].asArray;
+
+	struct bufferevent *pair[2];
+	int ret = bufferevent_pair_new(kceb->event_base, options, pair);
+
+	int i;
+	for (i = 0; i < 2; i++) {
+		kcbufferevent *kcbe = (kcbufferevent *)(new_(cbufferevent, 0, OnStack));
+		kcbe->bev = pair[i];
+		KLIB kArray_Add(kctx, bevArray, kcbe);
+	}
+	KReturnUnboxValue(ret);
+}
+
+//## bufferevent bufferevent.pair_get_partner();
+static KMETHOD cbufferevent_pair_get_partner(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	struct bufferevent *partner = bufferevent_pair_get_partner(bev->bev);
+	kcbufferevent *ret = (kcbufferevent *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+	ret->bev = partner;
+	KReturn(ret);
+}
+
+//## int bufferevent.set_rate_limit(ev_token_bucket_cfg cfg);
+static KMETHOD cbufferevent_set_rate_limit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	kcev_token_bucket_cfg *cfg = (kcev_token_bucket_cfg *)sfp[1].asObject;
+	KReturnUnboxValue(bufferevent_set_rate_limit(bev->bev, cfg->token_bucket_cfg));
+}
+
+//## int bufferevent.add_to_rate_limit_group(bufferevent_rate_limit_group grp);
+static KMETHOD cbufferevent_add_to_rate_limit_group(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[1].asObject;
+	KReturnUnboxValue(bufferevent_add_to_rate_limit_group(bev->bev, grp->rate_limit_group));
+}
+
+//## int bufferevent.remove_from_rate_limit_group();
+static KMETHOD cbufferevent_remove_from_rate_limit_group(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_remove_from_rate_limit_group(bev->bev));
+}
+
+//## int bufferevent.get_read_limit();
+static KMETHOD cbufferevent_get_read_limit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_get_read_limit(bev->bev));
+}
+
+//## int bufferevent.get_write_limit();
+static KMETHOD cbufferevent_get_write_limit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_get_write_limit(bev->bev));
+}
 
 
--- bufferevent_rate_limit_group --
-int bufferevent_rate_limit_group_set_min_share(
-	struct bufferevent_rate_limit_group *, size_t);
-void bufferevent_rate_limit_group_free(struct bufferevent_rate_limit_group *);
-ev_ssize_t bufferevent_rate_limit_group_get_read_limit(
-	struct bufferevent_rate_limit_group *);
-ev_ssize_t bufferevent_rate_limit_group_get_write_limit(
-	struct bufferevent_rate_limit_group *);
-int bufferevent_rate_limit_group_decrement_read(
-	struct bufferevent_rate_limit_group *, ev_ssize_t);
-int bufferevent_rate_limit_group_decrement_write(
-	struct bufferevent_rate_limit_group *, ev_ssize_t);
-void bufferevent_rate_limit_group_get_totals(
-	struct bufferevent_rate_limit_group *grp,
-	ev_uint64_t *total_read_out, ev_uint64_t *total_written_out);
-void bufferevent_rate_limit_group_reset_totals(
-	struct bufferevent_rate_limit_group *grp);
+//## int bufferevent.get_max_to_read();
+static KMETHOD cbufferevent_get_max_to_read(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_get_max_to_read(bev->bev));
+}
+
+//## int bufferevent.get_max_to_write();
+static KMETHOD cbufferevent_get_max_to_write(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_get_max_to_write(bev->bev));
+}
+
+//## int bufferevent.decrement_read_limit(int decr);
+static KMETHOD cbufferevent_decrement_read_limit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	int decr = sfp[1].intValue;
+	KReturnUnboxValue(bufferevent_decrement_read_limit(bev->bev, decr));
+}
+
+//## int bufferevent.decrement_write_limit(int decr);
+static KMETHOD cbufferevent_decrement_write_limit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent *bev = (kcbufferevent *)sfp[0].asObject;
+	int decr = sfp[1].intValue;
+	KReturnUnboxValue(bufferevent_decrement_write_limit(bev->bev, decr));
+}
+
+
+/* ======================================================================== */
+// ev_token_bucket_cfg class
+static void cev_token_bucket_cfg_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kcev_token_bucket_cfg *cfg = (kcev_token_bucket_cfg *) o;
+	cfg->token_bucket_cfg = NULL;
+}
+
+static void cev_token_bucket_cfg_Free(KonohaContext *kctx, kObject *o)
+{
+	kcev_token_bucket_cfg *cfg = (kcev_token_bucket_cfg *) o;
+	ev_token_bucket_cfg_free(cfg->token_bucket_cfg);
+}
+
+//## ev_token_bucket_cfg ev_token_bucket_cfg.new(int read_rate, int read_burst, int write_rate, int write_burst, timeval tick_len);
+static KMETHOD cev_token_bucket_cfg_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcev_token_bucket_cfg *cfg = (kcev_token_bucket_cfg *)sfp[0].asObject;
+	size_t read_rate = (size_t)sfp[1].intValue;
+	size_t read_burst = (size_t)sfp[2].intValue;
+	size_t write_rate = (size_t)sfp[3].intValue;
+	size_t write_burst = (size_t)sfp[4].intValue;
+	kctimeval *tick_len = (kctimeval *)sfp[5].asObject;
+
+	cfg->token_bucket_cfg = ev_token_bucket_cfg_new(read_rate, read_burst,
+		write_rate, write_burst, &tick_len->timeval);
+	KReturn(cfg);
+}
+
+/* ======================================================================== */
+// bufferevent_rate_limit_group class
+static void cbufferevent_rate_limit_group_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *) o;
+	grp->rate_limit_group = NULL;
+}
+
+static void cbufferevent_rate_limit_group_Free(KonohaContext *kctx, kObject *o)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *) o;
+	bufferevent_rate_limit_group_free(grp->rate_limit_group);
+}
+
+//## bufferevent_rate_limit_group bufferevent_rate_limit_group.new(event_base base, ev_token_bucket_cfg cfg);
+static KMETHOD cbufferevent_rate_limit_group_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	kcevent_base *base = (kcevent_base *)sfp[1].asObject;
+	kcev_token_bucket_cfg *cfg = (kcev_token_bucket_cfg *)sfp[2].asObject;
+
+	grp->rate_limit_group = bufferevent_rate_limit_group_new(base->event_base, cfg->token_bucket_cfg);
+	KReturn(cfg);
+}
+
+
+//## int bufferevent_rate_limit_group.set_cfg(ev_token_bucket_cfg cfg);
+static KMETHOD cbufferevent_rate_limit_group_set_cfg(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	kcev_token_bucket_cfg *cfg = (kcev_token_bucket_cfg *)sfp[1].asObject;
+	KReturnUnboxValue(bufferevent_rate_limit_group_set_cfg(grp->rate_limit_group, cfg->token_bucket_cfg));
+}
+
+//## int bufferevent_rate_limit_group.set_min_share(int share);
+static KMETHOD cbufferevent_rate_limit_group_set_min_share(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	size_t share = (size_t)sfp[1].intValue;
+	KReturnUnboxValue(bufferevent_rate_limit_group_set_min_share(grp->rate_limit_group, share));
+}
+
+//## int bufferevent_rate_limit_group.get_read_limit();
+static KMETHOD cbufferevent_rate_limit_group_get_read_limit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_rate_limit_group_get_read_limit(grp->rate_limit_group));
+}
+
+//## int bufferevent_rate_limit_group.get_write_limit();
+static KMETHOD cbufferevent_rate_limit_group_get_write_limit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	KReturnUnboxValue(bufferevent_rate_limit_group_get_write_limit(grp->rate_limit_group));
+}
+
+//## int bufferevent_rate_limit_group.decrement_read(int decr);
+static KMETHOD cbufferevent_rate_limit_group_decrement_read(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	ev_ssize_t decr = sfp[1].intValue;
+
+	KReturnUnboxValue(bufferevent_rate_limit_group_decrement_read(grp->rate_limit_group, decr));
+}
+
+//## int bufferevent_rate_limit_group.decrement_write(int decr);
+static KMETHOD cbufferevent_rate_limit_group_decrement_write(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	ev_ssize_t decr = sfp[1].intValue;
+	KReturnUnboxValue(bufferevent_rate_limit_group_decrement_write(grp->rate_limit_group, decr));
+}
+
+//## void bufferevent_rate_limit_group.get_totals(bufferevent_rate_limit_group_totals totals);
+static KMETHOD cbufferevent_rate_limit_group_get_totals(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	kcbufferevent_rate_limit_group_totals *totals = (kcbufferevent_rate_limit_group_totals *)sfp[1].asObject;	// TODO want to use unbox value array
+
+	ev_uint64_t total_read_out, total_written_out;
+	bufferevent_rate_limit_group_get_totals(grp->rate_limit_group, &total_read_out, &total_written_out);
+	totals->read_out = total_read_out;
+	totals->written_out = total_written_out;
+	KReturnVoid();
+}
+
+//## void bufferevent_rate_limit_group.reset_totals();
+static KMETHOD cbufferevent_rate_limit_group_reset_totals(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcbufferevent_rate_limit_group *grp = (kcbufferevent_rate_limit_group *)sfp[0].asObject;
+	bufferevent_rate_limit_group_reset_totals(grp->rate_limit_group);
+	KReturnVoid();
+}
+
+/* ======================================================================== */
+// bufferevent_rate_limit_group_totals class
+static void cbufferevent_rate_limit_group_totals_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kcbufferevent_rate_limit_group_totals *totals = (kcbufferevent_rate_limit_group_totals *) o;
+	totals->read_out = 0;
+	totals->written_out = 0;
+}
+
+/* ======================================================================== */
+// evbuffer_iovec class
+static void cevbuffer_iovec_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kcevbuffer_iovec *vec = (kcevbuffer_iovec *) o;
+	vec->iovec.iov_base = NULL;
+	vec->iovec.iov_len = 0;
+}
+
+/*
+evbuffer_iovec class would NOT "new()" by konoha user.
 */
 
+/* ======================================================================== */
+// evbuffer_ptr class
+static void cevbuffer_ptr_Init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kcevbuffer_ptr *evptr = (kcevbuffer_ptr *) o;
+	evptr->ptr.pos = 0;
+	evptr->ptr._internal.chain = NULL;
+	evptr->ptr._internal.pos_in_chain = 0;
+}
 
+/*
+evbuffer_ptr class would NOT "new()" by konoha user.
+*/
 
 /* ======================================================================== */
 // evbuffer class
@@ -1061,51 +1504,294 @@ static void cevbuffer_Free(KonohaContext *kctx, kObject *o)
 	}
 }
 
+//## evbuffer evbuffer.new();
+static KMETHOD cevbuffer_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	evbuf->buf = evbuffer_new();
+	KReturn(evbuf);
+}
 
-/* ======================================================================== */
-// evbuffer class
+//## int evbuffer.eneble_locking(Object lock);
+static KMETHOD cevbuffer_enable_locking(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kObject *lock = sfp[1].asObject;
+	KReturnUnboxValue(evbuffer_enable_locking(evbuf->buf, lock));
+}
+
+//## void evbuffer.lock();
+static KMETHOD cevbuffer_lock(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	evbuffer_lock(evbuf->buf);
+	KReturnVoid();
+}
+
+//## void evbuffer.unlock();
+static KMETHOD cevbuffer_unlock(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	evbuffer_unlock(evbuf->buf);
+	KReturnVoid();
+}
+
+//## int evbuffer.set_flags(int flags);
+static KMETHOD cevbuffer_set_flags(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	ev_uint64_t flags = sfp[1].intValue;
+	KReturnUnboxValue(evbuffer_set_flags(evbuf->buf, flags));
+}
+
+//## int evbuffer.clear_flags(int flags);
+static KMETHOD cevbuffer_clear_flags(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	ev_uint64_t flags = sfp[1].intValue;
+	KReturnUnboxValue(evbuffer_clear_flags(evbuf->buf, flags));
+}
+
+//## int evbuffer.get_length();
+static KMETHOD cevbuffer_get_length(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	KReturnUnboxValue(evbuffer_get_length(evbuf->buf));
+}
+
+//## int evbuffer.get_contiguous_space();
+static KMETHOD cevbuffer_get_contiguous_space(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	KReturnUnboxValue(evbuffer_get_contiguous_space(evbuf->buf));
+}
+
+//## int evbuffer.expand(int datlen);
+static KMETHOD cevbuffer_expand(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	int datlen = sfp[1].intValue;
+	KReturnUnboxValue(evbuffer_expand(evbuf->buf, datlen));
+}
+
+//## int evbuffer.reserve_space(int size, evbuffer_iovec[] iovec);
+static KMETHOD cevbuffer_reserve_space(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	ev_ssize_t size = sfp[1].intValue;
+	kArray *a = sfp[2].asArray;
+	int n_vec = kArray_size(a);
+	struct evbuffer_iovec **vec = alloca(sizeof(struct evbuffer_iovec *) * n_vec);
+
+	ssize_t i;
+	for(i = 0; i < n_vec; i++) {
+		vec[i] = &((kcevbuffer_iovec *)a->ObjectItems[i])->iovec;
+	}
+
+	/*
+	TODO
+	Should use Bytes[]?
+	Bytes constructor doesn't support to create with assigned buffer
+	(in this case "vec->iov_base" - assigned in libevent) now.
+	*/
+	KReturnUnboxValue(evbuffer_reserve_space(evbuf->buf, size, *vec, n_vec));
+}
+
+//## int evbuffer.commit_space(evbuffer_iovec[] iovec);
+static KMETHOD cevbuffer_commit_space(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kArray *a = sfp[1].asArray;
+	int n_vec = kArray_size(a);
+	struct evbuffer_iovec **vec = alloca(sizeof(struct evbuffer_iovec *) * n_vec);
+
+	ssize_t i;
+	for(i = 0; i < n_vec; i++) {
+		vec[i] = &((kcevbuffer_iovec *)a->ObjectItems[i])->iovec;
+	}
+	KReturnUnboxValue(evbuffer_commit_space(evbuf->buf, *vec, n_vec));
+	//TODO should use Bytes[]? Same as cevbuffer_reserve_space().
+}
+
+//## int evbuffer.add(Bytes data);
+static KMETHOD cevbuffer_add(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kBytes *data = sfp[1].asBytes;
+	KReturnUnboxValue(evbuffer_add(evbuf->buf, data->byteptr, data->bytesize));
+}
+
+//## int evbuffer.remove(Bytes data);
+static KMETHOD cevbuffer_remove(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kBytes *data = sfp[1].asBytes;
+	KReturnUnboxValue(evbuffer_remove(evbuf->buf, data->buf, data->bytesize));
+}
+
+//## int evbuffer.copyout(Bytes data_out);
+static KMETHOD cevbuffer_copyout(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kBytes *data_out = sfp[1].asBytes;
+	KReturnUnboxValue(evbuffer_copyout(evbuf->buf, data_out->buf, data_out->bytesize));
+}
+
+//## int evbuffer.remove_buffer(evbuffer dst, int datlen);
+static KMETHOD cevbuffer_remove_buffer(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kcevbuffer *dst = (kcevbuffer *)sfp[1].asObject;
+	int datlen = sfp[2].intValue;
+	KReturnUnboxValue(evbuffer_remove_buffer(evbuf->buf, dst->buf, datlen));
+}
+
+//## evbuffer_iovec evbuffer.readln(int eol_style);
+//## eol_style := [ EVBUFFER_EOL_ANY | EVBUFFER_EOL_CRLF | EVBUFFER_EOL_CRLF_STRICT | EVBUFFER_EOL_LF ]
+static KMETHOD cevbuffer_readln(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	int eol_style = sfp[1].intValue;
+	kcevbuffer_iovec *ret = (kcevbuffer_iovec *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+	ret->iovec.iov_base = evbuffer_readln(evbuf->buf, &ret->iovec.iov_len, eol_style);
+	KReturn(ret);
+	/*
+	It should copy to Bytes class buffer in upper layer(e.g. utility method),
+	shouldn't copy in this function because copyed in evbuffer_readln().
+	*/
+}
+
+//## int evbuffer.add_buffer(evbuffer inbuf);
+static KMETHOD cevbuffer_add_buffer(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kcevbuffer *inbuf = (kcevbuffer *)sfp[1].asObject;
+	KReturnUnboxValue(evbuffer_add_buffer(evbuf->buf, inbuf->buf));
+}
+
+/*
+int evbuffer_add_reference(struct evbuffer *outbuf, const void *data, size_t datlen, evbuffer_ref_cleanup_cb cleanupfn, void *cleanupfn_arg);	//TODO need this API?
+*/
+
+//## int evbuffer.add_file(int fd, int offset, int length);
+static KMETHOD cevbuffer_add_file(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	KReturnUnboxValue(evbuffer_add_file(evbuf->buf, sfp[1].intValue, sfp[2].intValue, sfp[3].intValue));
+}
+
+/*
+USE evbuffer.add(Bytes data);
+e.g.	evbuffer.add("write data".toBytes());
+
+int evbuffer_add_printf(struct evbuffer *buf, const char *fmt, ...);
+int evbuffer_add_vprintf(struct evbuffer *buf, const char *fmt, va_list ap);
+*/
+
+
+//## int evbuffer.drain(int len);
+static KMETHOD cevbuffer_drain(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	KReturnUnboxValue(evbuffer_drain(evbuf->buf, sfp[1].intValue));
+}
+
+//## int evbuffer.write(int fd);
+static KMETHOD cevbuffer_write(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	KReturnUnboxValue(evbuffer_write(evbuf->buf, sfp[1].intValue));
+}
+
+//## int evbuffer.write_atmost(int fd, int howmuch);
+static KMETHOD cevbuffer_write_atmost(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	KReturnUnboxValue(evbuffer_write_atmost(evbuf->buf, sfp[1].intValue, sfp[2].intValue));
+}
+
+//## int evbuffer.read(int fd, int howmuch);
+static KMETHOD cevbuffer_read(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	KReturnUnboxValue(evbuffer_read(evbuf->buf, sfp[1].intValue, sfp[2].intValue));
+}
+
+//## evbuffer_ptr evbuffer.search(String what, evbuffer_ptr start);
+static KMETHOD cevbuffer_search(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kString *what = sfp[1].asString;
+	kcevbuffer_ptr *start = (kcevbuffer_ptr *)sfp[2].asObject;
+	kcevbuffer_ptr *ret = (kcevbuffer_ptr *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+
+	ret->ptr = evbuffer_search(evbuf->buf, kString_text(what), kString_size(what), (start == (kcevbuffer_ptr *)K_NULL) ? NULL : &start->ptr);
+	KReturn(ret);
+}
+
+//## evbuffer_ptr evbuffer.search_range(String what, evbuffer_ptr start, evbuffer_ptr end);
+static KMETHOD cevbuffer_search_range(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kString *what = sfp[1].asString;
+	kcevbuffer_ptr *start = (kcevbuffer_ptr *)sfp[2].asObject;
+	kcevbuffer_ptr *end = (kcevbuffer_ptr *)sfp[3].asObject;
+	kcevbuffer_ptr *ret = (kcevbuffer_ptr *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+
+	ret->ptr = evbuffer_search_range(evbuf->buf, kString_text(what), kString_size(what), (start == (kcevbuffer_ptr *)K_NULL) ? NULL : &start->ptr, (end == (kcevbuffer_ptr *)K_NULL) ? NULL : &end->ptr);
+	KReturn(ret);
+}
+
+//## int evbuffer.ptr_set(evbuffer_ptr ptr, int position, int how);
+//## how := [ EVBUFFER_PTR_SET | EVBUFFER_PTR_ADD ]
+static KMETHOD cevbuffer_set_ptr(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kcevbuffer_ptr *ptr = (kcevbuffer_ptr *)sfp[1].asObject;
+	int position = sfp[2].intValue;
+	int how = sfp[3].intValue;
+	KReturnUnboxValue(evbuffer_ptr_set(evbuf->buf, &ptr->ptr, position, how));
+}
+
+//## evbuffer_ptr evbuffer.search_eol(evbuffer_ptr start, int eol_style);
+//## eol_style := [ EVBUFFER_EOL_ANY | EVBUFFER_EOL_CRLF | EVBUFFER_EOL_CRLF_STRICT | EVBUFFER_EOL_LF ]
+static KMETHOD cevbuffer_search_eol(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	kcevbuffer_ptr *start = (kcevbuffer_ptr *)sfp[1].asObject;
+	size_t eol_style = sfp[2].intValue;
+	kcevbuffer_ptr *ret = (kcevbuffer_ptr *)KLIB new_kObject(kctx, OnStack, kObject_class(sfp[-K_CALLDELTA].asObject), 0);
+
+	ret->ptr = evbuffer_search_eol(evbuf->buf, &start->ptr, NULL, eol_style);
+	KReturn(ret);
+}
+
+
+//## int evbuffer.peek(int len, evbuffer_ptr start_at, evbuffer_iovec[] vec_out);
+static KMETHOD cevbuffer_peek(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kcevbuffer *evbuf = (kcevbuffer *)sfp[0].asObject;
+	ev_ssize_t len = sfp[1].intValue;
+	kcevbuffer_ptr *start_at = (kcevbuffer_ptr *)sfp[2].asObject;
+	kArray *a = sfp[3].asArray;
+	int n_vec = kArray_size(a);
+	struct evbuffer_iovec **vec_out = alloca(sizeof(struct evbuffer_iovec *) * n_vec);
+
+	int ret = evbuffer_peek(evbuf->buf, len, &start_at->ptr, *vec_out, n_vec);
+
+	//copy to vec_out
+	ssize_t i;
+	for(i = 0; i < n_vec; i++) {
+		((kcevbuffer_iovec *)a->ObjectItems[i])->iovec = *vec_out[i];
+	}
+
+	KReturnUnboxValue(ret);
+}
+
 /*
 TODO
-int evbuffer_enable_locking(struct evbuffer *buf, void *lock);
-void evbuffer_lock(struct evbuffer *buf);
-void evbuffer_unlock(struct evbuffer *buf);
-int evbuffer_set_flags(struct evbuffer *buf, ev_uint64_t flags);
-int evbuffer_clear_flags(struct evbuffer *buf, ev_uint64_t flags);
-size_t evbuffer_get_length(const struct evbuffer *buf);
-size_t evbuffer_get_contiguous_space(const struct evbuffer *buf);
-int evbuffer_expand(struct evbuffer *buf, size_t datlen);
-int evbuffer_reserve_space(struct evbuffer *buf, ev_ssize_t size,
-	struct evbuffer_iovec *vec, int n_vec);
-int evbuffer_commit_space(struct evbuffer *buf,
-	struct evbuffer_iovec *vec, int n_vecs);
-int evbuffer_add(struct evbuffer *buf, const void *data, size_t datlen);
-int evbuffer_remove(struct evbuffer *buf, void *data, size_t datlen);
-ev_ssize_t evbuffer_copyout(struct evbuffer *buf, void *data_out, size_t datlen);
-int evbuffer_remove_buffer(struct evbuffer *src, struct evbuffer *dst,
-	size_t datlen);
-char *evbuffer_readln(struct evbuffer *buffer, size_t *n_read_out,
-	enum evbuffer_eol_style eol_style);
-int evbuffer_add_buffer(struct evbuffer *outbuf, struct evbuffer *inbuf);
-int evbuffer_add_reference(struct evbuffer *outbuf,
-	const void *data, size_t datlen,
-	evbuffer_ref_cleanup_cb cleanupfn, void *cleanupfn_arg);
-int evbuffer_add_file(struct evbuffer *outbuf, int fd, ev_off_t offset,
-	ev_off_t length);
-int evbuffer_add_printf(struct evbuffer *buf, const char *fmt, ...);	//TODO use String?
-int evbuffer_add_vprintf(struct evbuffer *buf, const char *fmt, va_list ap);
-int evbuffer_drain(struct evbuffer *buf, size_t len);
-int evbuffer_write(struct evbuffer *buffer, evutil_socket_t fd);
-int evbuffer_write_atmost(struct evbuffer *buffer, evutil_socket_t fd,
-	ev_ssize_t howmuch);
-int evbuffer_read(struct evbuffer *buffer, evutil_socket_t fd, int howmuch);
-struct evbuffer_ptr evbuffer_search(struct evbuffer *buffer, const char *what, size_t len, const struct evbuffer_ptr *start);
-struct evbuffer_ptr evbuffer_search_range(struct evbuffer *buffer, const char *what, size_t len, const struct evbuffer_ptr *start, const struct evbuffer_ptr *end);
-int evbuffer_ptr_set(struct evbuffer *buffer, struct evbuffer_ptr *ptr,
-	size_t position, enum evbuffer_ptr_how how);
-struct evbuffer_ptr evbuffer_search_eol(struct evbuffer *buffer,
-	struct evbuffer_ptr *start, size_t *eol_len_out,
-	enum evbuffer_eol_style eol_style);
-int evbuffer_peek(struct evbuffer *buffer, ev_ssize_t len, struct evbuffer_ptr *start_at, struct evbuffer_iovec *vec_out, int n_vec);
+It seems low-layer implements of evbuffer. need for konoha user?
+
 struct evbuffer_cb_entry *evbuffer_add_cb(struct evbuffer *buffer, evbuffer_cb_func cb, void *cbarg);
 int evbuffer_remove_cb_entry(struct evbuffer *buffer, struct evbuffer_cb_entry *ent);
 int evbuffer_remove_cb(struct evbuffer *buffer, evbuffer_cb_func cb, void *cbarg);
@@ -1118,146 +1804,6 @@ int evbuffer_freeze(struct evbuffer *buf, int at_front);
 int evbuffer_unfreeze(struct evbuffer *buf, int at_front);
 int evbuffer_defer_callbacks(struct evbuffer *buffer, struct event_base *base);
 */
-
-
-
-/*
-TODO
--- evhttp --
-struct evhttp *evhttp_new(struct event_base *base);
-int evhttp_bind_socket(struct evhttp *http, const char *address, ev_uint16_t port);
-struct evhttp_bound_socket *evhttp_bind_socket_with_handle(struct evhttp *http, const char *address, ev_uint16_t port);
-int evhttp_accept_socket(struct evhttp *http, evutil_socket_t fd);
-struct evhttp_bound_socket *evhttp_accept_socket_with_handle(struct evhttp *http, evutil_socket_t fd);
-struct evhttp_bound_socket *evhttp_bind_listener(struct evhttp *http, struct evconnlistener *listener);
-void evhttp_del_accept_socket(struct evhttp *http, struct evhttp_bound_socket *bound_socket);
-void evhttp_free(struct evhttp* http);
-void evhttp_set_max_headers_size(struct evhttp* http, ev_ssize_t max_headers_size);
-void evhttp_set_max_body_size(struct evhttp* http, ev_ssize_t max_body_size);
-void evhttp_set_allowed_methods(struct evhttp* http, ev_uint16_t methods);
-int evhttp_set_cb(struct evhttp *http, const char *path,
-	void (*cb)(struct evhttp_request *, void *), void *cb_arg);
-int evhttp_del_cb(struct evhttp *, const char *);
-void evhttp_set_gencb(struct evhttp *http,
-	void (*cb)(struct evhttp_request *, void *), void *arg);
-int evhttp_add_virtual_host(struct evhttp* http, const char *pattern,
-	struct evhttp* vhost);
-int evhttp_remove_virtual_host(struct evhttp* http, struct evhttp* vhost);
-int evhttp_add_server_alias(struct evhttp *http, const char *alias);
-int evhttp_remove_server_alias(struct evhttp *http, const char *alias);
-void evhttp_set_timeout(struct evhttp *http, int timeout_in_secs);
-
-
--- evhttp_bound_socket --
-struct evconnlistener *evhttp_bound_socket_get_listener(struct evhttp_bound_socket *bound);
-evutil_socket_t evhttp_bound_socket_get_fd(struct evhttp_bound_socket *bound_socket);
-
-
--- evhttp_request --
-void evhttp_send_error(struct evhttp_request *req, int error,
-	const char *reason);
-void evhttp_send_reply(struct evhttp_request *req, int code,
-	const char *reason, struct evbuffer *databuf);
-void evhttp_send_reply_start(struct evhttp_request *req, int code,
-	const char *reason);
-void evhttp_send_reply_chunk(struct evhttp_request *req,
-	struct evbuffer *databuf);
-void evhttp_send_reply_end(struct evhttp_request *req);
-struct evhttp_request *evhttp_request_new(
-	void (*cb)(struct evhttp_request *, void *), void *arg);
-void evhttp_request_set_chunked_cb(struct evhttp_request *,
-	void (*cb)(struct evhttp_request *, void *));
-void evhttp_request_free(struct evhttp_request *req);
-void evhttp_request_own(struct evhttp_request *req);
-int evhttp_request_is_owned(struct evhttp_request *req);
-struct evhttp_connection *evhttp_request_get_connection(struct evhttp_request *req);
-void evhttp_cancel_request(struct evhttp_request *req);
-const char *evhttp_request_get_uri(const struct evhttp_request *req);
-const struct evhttp_uri *evhttp_request_get_evhttp_uri(const struct evhttp_request *req);
-enum evhttp_cmd_type evhttp_request_get_command(const struct evhttp_request *req);
-int evhttp_request_get_response_code(const struct evhttp_request *req);
-struct evkeyvalq *evhttp_request_get_input_headers(struct evhttp_request *req);
-struct evkeyvalq *evhttp_request_get_output_headers(struct evhttp_request *req);
-struct evbuffer *evhttp_request_get_input_buffer(struct evhttp_request *req);
-struct evbuffer *evhttp_request_get_output_buffer(struct evhttp_request *req);
-const char *evhttp_request_get_host(struct evhttp_request *req);
-
-
--- evhttp_connection --
-struct evhttp_connection *evhttp_connection_base_new(
-	struct event_base *base, struct evdns_base *dnsbase,
-	const char *address, unsigned short port);
-struct bufferevent *evhttp_connection_get_bufferevent(
-	struct evhttp_connection *evcon);
-struct event_base *evhttp_connection_get_base(struct evhttp_connection *req);
-void evhttp_connection_set_max_headers_size(struct evhttp_connection *evcon,
-	ev_ssize_t new_max_headers_size);
-void evhttp_connection_set_max_body_size(struct evhttp_connection* evcon,
-	ev_ssize_t new_max_body_size);
-void evhttp_connection_free(struct evhttp_connection *evcon);
-void evhttp_connection_set_local_address(struct evhttp_connection *evcon,
-	const char *address);
-void evhttp_connection_set_local_port(struct evhttp_connection *evcon,
-	ev_uint16_t port);
-void evhttp_connection_set_timeout(struct evhttp_connection *evcon,
-	int timeout_in_secs);
-void evhttp_connection_set_retries(struct evhttp_connection *evcon,
-	int retry_max);
-void evhttp_connection_set_closecb(struct evhttp_connection *evcon,
-	void (*)(struct evhttp_connection *, void *), void *);
-void evhttp_connection_get_peer(struct evhttp_connection *evcon,
-	char **address, ev_uint16_t *port);
-int evhttp_make_request(struct evhttp_connection *evcon,
-	struct evhttp_request *req,
-	enum evhttp_cmd_type type, const char *uri);
-
-
--- evkeyvalq --
-const char *evhttp_find_header(const struct evkeyvalq *headers,
-    const char *key);
-int evhttp_remove_header(struct evkeyvalq *headers, const char *key);
-int evhttp_add_header(struct evkeyvalq *headers, const char *key, const char *value);
-void evhttp_clear_headers(struct evkeyvalq *headers);
-
-
--- uri --
-struct evhttp_uri *evhttp_uri_new(void);
-void evhttp_uri_set_flags(struct evhttp_uri *uri, unsigned flags);
-const char *evhttp_uri_get_scheme(const struct evhttp_uri *uri);
-const char *evhttp_uri_get_userinfo(const struct evhttp_uri *uri);
-const char *evhttp_uri_get_host(const struct evhttp_uri *uri);
-int evhttp_uri_get_port(const struct evhttp_uri *uri);
-const char *evhttp_uri_get_path(const struct evhttp_uri *uri);
-const char *evhttp_uri_get_query(const struct evhttp_uri *uri);
-const char *evhttp_uri_get_fragment(const struct evhttp_uri *uri);
-int evhttp_uri_set_scheme(struct evhttp_uri *uri, const char *scheme);
-int evhttp_uri_set_userinfo(struct evhttp_uri *uri, const char *userinfo);
-int evhttp_uri_set_host(struct evhttp_uri *uri, const char *host);
-int evhttp_uri_set_port(struct evhttp_uri *uri, int port);
-int evhttp_uri_set_path(struct evhttp_uri *uri, const char *path);
-int evhttp_uri_set_query(struct evhttp_uri *uri, const char *query);
-int evhttp_uri_set_fragment(struct evhttp_uri *uri, const char *fragment);
-struct evhttp_uri *evhttp_uri_parse_with_flags(const char *source_uri,
-	unsigned flags);
-struct evhttp_uri *evhttp_uri_parse(const char *source_uri);
-void evhttp_uri_free(struct evhttp_uri *uri);
-char *evhttp_uri_join(struct evhttp_uri *uri, char *buf, size_t limit);
-
-
--- util --
-char *evhttp_encode_uri(const char *str);
-char *evhttp_uriencode(const char *str, ev_ssize_t size, int space_to_plus);
-char *evhttp_decode_uri(const char *uri);
-char *evhttp_uridecode(const char *uri, int decode_plus, size_t *size_out);
-int evhttp_parse_query(const char *uri, struct evkeyvalq *headers);
-int evhttp_parse_query_str(const char *uri, struct evkeyvalq *headers);
-char *evhttp_htmlescape(const char *html);
-*/
-
-
-
-
-
 
 /* ======================================================================== */
 // evhttp class
@@ -1559,6 +2105,7 @@ static void cevhttp_request_Init(KonohaContext *kctx, kObject *o, void *conf)
 	req->kctx = NULL;
 	req->req = NULL;
 	KFieldInit(req, req->kcb, KNULL(Func));
+	KFieldInit(req, req->kcb->env, K_NULL);	//TODO should place in Func_Init()?
 	KFieldInit(req, req->chunked_kcb, KNULL(Func));
 }
 
@@ -1575,6 +2122,7 @@ static void cevhttp_request_Reftrace(KonohaContext *kctx, kObject *o, KObjectVis
 {
 	kcevhttp_request *req = (kcevhttp_request *) o;
 	KRefTrace(req->kcb);
+	KRefTrace(req->kcb->env);	//TODO shoule place in Func_Reftrace()?
 	KRefTrace(req->chunked_kcb);
 }
 
@@ -1820,6 +2368,7 @@ static void cevhttp_connection_Init(KonohaContext *kctx, kObject *o, void *conf)
 	con->kctx = NULL;
 	con->evcon = NULL;
 	KFieldInit(con, con->close_kcb, KNULL(Func));
+	KFieldInit(con, con->close_kcb->env, K_NULL);	//TODO should place in Func_Init()?
 }
 
 static void cevhttp_connection_Free(KonohaContext *kctx, kObject *o)
@@ -1835,6 +2384,7 @@ static void cevhttp_connection_Reftrace(KonohaContext *kctx, kObject *o, KObject
 {
 	kcevhttp_connection *con = (kcevhttp_connection *) o;
 	KRefTrace(con->close_kcb);
+	KRefTrace(con->close_kcb->env);	//TODO shoule place in Func_Reftrace()?
 }
 
 //## evhttp evhttp_connection.new(event_base base, evdns_base dnsbase, String address, int port);
@@ -2312,6 +2862,7 @@ static void evhttp_set_cb_arg_Init(KonohaContext *kctx, kObject *o, void *conf)
 
 	cbarg->kctx = NULL;
 	KFieldInit(cbarg, cbarg->kcb, KNULL(Func));
+	KFieldInit(cbarg, cbarg->kcb->env, K_NULL); //TODO should place in Func_Init()?
 	KFieldInit(cbarg, cbarg->uri, KNULL(String));
 }
 
@@ -2319,6 +2870,7 @@ static void evhttp_set_cb_arg_Reftrace(KonohaContext *kctx, kObject *o, KObjectV
 {
 	kevhttp_set_cb_arg *arg = (kevhttp_set_cb_arg *) o;
 	KRefTrace(arg->kcb);
+	KRefTrace(arg->kcb->env);	//TODO shoule place in Func_Reftrace()?
 	KRefTrace(arg->uri);
 }
 
@@ -2385,6 +2937,7 @@ static KMETHOD Sockaddr_in_new(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("Type.Bytes", trace);
+	KRequirePackage("JavaStyle.Object", trace);
 	/* Class Definition */
 	/* If you want to create Generic class like Array<T>, see konoha.map package */
 	// event_base
@@ -2428,6 +2981,61 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	defcbufferevent.reftrace	= cbufferevent_Reftrace;
 	defcbufferevent.free		= cbufferevent_Free;
 	KClass_cbufferevent = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcbufferevent, trace);
+
+	// ev_token_bucket_cfg
+	KDEFINE_CLASS defcev_token_bucket_cfg = {0};
+	defcev_token_bucket_cfg.structname	= "ev_token_bucket_cfg";
+	defcev_token_bucket_cfg.typeId		= KTypeAttr_NewId;
+	defcev_token_bucket_cfg.cstruct_size = sizeof(kcev_token_bucket_cfg);
+	defcev_token_bucket_cfg.cflag		= KClassFlag_Final;
+	defcev_token_bucket_cfg.init		= cev_token_bucket_cfg_Init;
+	//defcev_token_bucket_cfg.reftrace	= cev_token_bucket_cfg_Reftrace;
+	defcev_token_bucket_cfg.free		= cev_token_bucket_cfg_Free;
+	KClass *cev_token_bucket_cfgClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcev_token_bucket_cfg, trace);
+
+	// bufferevent_rate_limit_group
+	KDEFINE_CLASS defcbufferevent_rate_limit_group = {0};
+	defcbufferevent_rate_limit_group.structname	= "bufferevent_rate_limit_group";
+	defcbufferevent_rate_limit_group.typeId		= KTypeAttr_NewId;
+	defcbufferevent_rate_limit_group.cstruct_size = sizeof(kcbufferevent_rate_limit_group);
+	defcbufferevent_rate_limit_group.cflag		= KClassFlag_Final;
+	defcbufferevent_rate_limit_group.init		= cbufferevent_rate_limit_group_Init;
+	//defcbufferevent_rate_limit_group.reftrace	= cbufferevent_rate_limit_group_Reftrace;
+	defcbufferevent_rate_limit_group.free		= cbufferevent_rate_limit_group_Free;
+	KClass *cbufferevent_rate_limit_groupClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcbufferevent_rate_limit_group, trace);
+
+	// bufferevent_rate_limit_group_totals
+	KDEFINE_CLASS defcbufferevent_rate_limit_group_totals = {0};
+	defcbufferevent_rate_limit_group_totals.structname	= "bufferevent_rate_limit_group_totals";
+	defcbufferevent_rate_limit_group_totals.typeId		= KTypeAttr_NewId;
+	defcbufferevent_rate_limit_group_totals.cstruct_size = sizeof(kcbufferevent_rate_limit_group_totals);
+	defcbufferevent_rate_limit_group_totals.cflag     = KClassFlag_Final;
+	defcbufferevent_rate_limit_group_totals.init      = cbufferevent_rate_limit_group_totals_Init;
+	//defcbufferevent_rate_limit_group_totals.reftrace	= cbufferevent_rate_limit_group_totals_Reftrace;
+	//defcbufferevent_rate_limit_group_totals.free      = cbufferevent_rate_limit_group_totals_Free;
+	KClass *cbufferevent_rate_limit_group_totalsClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcbufferevent_rate_limit_group_totals, trace);
+
+	// evbuffer_iovec
+	KDEFINE_CLASS defcevbuffer_iovec = {0};
+	defcevbuffer_iovec.structname	= "evbuffer_iovec";
+	defcevbuffer_iovec.typeId		= KTypeAttr_NewId;
+	defcevbuffer_iovec.cstruct_size = sizeof(kcevbuffer_iovec);
+	defcevbuffer_iovec.cflag     = KClassFlag_Final;
+	defcevbuffer_iovec.init      = cevbuffer_iovec_Init;
+	//defcevbuffer_iovec.reftrace	= cevbuffer_iovec_Reftrace;
+	//defcevbuffer_iovec.free		= cevbuffer_iovec_Free;
+	KClass *cevbuffer_iovecClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevbuffer_iovec, trace);
+
+	// evbuffer_ptr
+	KDEFINE_CLASS defcevbuffer_ptr = {0};
+	defcevbuffer_ptr.structname	= "evbuffer_ptr";
+	defcevbuffer_ptr.typeId		= KTypeAttr_NewId;
+	defcevbuffer_ptr.cstruct_size = sizeof(kcevbuffer_ptr);
+	defcevbuffer_ptr.cflag     = KClassFlag_Final;
+	defcevbuffer_ptr.init      = cevbuffer_ptr_Init;
+	//defcevbuffer_ptr.reftrace	= cevbuffer_ptr_Reftrace;
+	//defcevbuffer_ptr.free		= cevbuffer_ptr_Free;
+	KClass *cevbuffer_ptrClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcevbuffer_ptr, trace);
 
 	// evbuffer
 	KDEFINE_CLASS defcevbuffer = {0};
@@ -2555,12 +3163,16 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	KClass *Sockaddr_inClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSockaddr_in, trace);
 
 
-	/* You can define methods with the following procedures. */
 	int KType_cevent_base = KClass_cevent_base->typeId;
 	int KType_cevent_config = KClass_cevent_config->typeId;
 	int KType_cevent = ceventClass->typeId;
 	int KType_cbufferevent = KClass_cbufferevent->typeId;
 	int KType_cevbuffer = KClass_cevbuffer->typeId;
+	int KType_cevbuffer_iovec = cevbuffer_iovecClass->typeId;
+	int KType_cevbuffer_ptr = cevbuffer_ptrClass->typeId;
+	int KType_cev_token_bucket_cfg = cev_token_bucket_cfgClass->typeId;
+	int KType_cbufferevent_rate_limit_group = cbufferevent_rate_limit_groupClass->typeId;
+	int KType_cbufferevent_rate_limit_group_totals = cbufferevent_rate_limit_group_totalsClass->typeId;
 	int KType_cevhttp = cevhttpClass->typeId;
 	int KType_cevhttp_bound_socket = KClass_cevhttp_bound_socket->typeId;
 //	int KType_evhttp_set_cb_arg = KClass_evhttp_set_cb_arg->typeId;
@@ -2596,6 +3208,11 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	KClass *Cbev_eventCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_void, 3, bev_eventCB_p);
 	int KType_Cbev_eventCBfunc = Cbev_eventCBfunc->typeId;
 
+	//bev_filterCB_p
+	kparamtype_t bev_filterCB_p[] = {{KType_cevbuffer, 0}, {KType_cevbuffer, 0}, {KType_Int, 0}, {KType_Int, 0}, {KType_Object, 0}};
+	KClass *cbev_filterCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_cbufferevent, 5, bev_filterCB_p);
+	int KType_cbev_filterCBfunc = cbev_filterCBfunc->typeId;
+
 	//cevhttp_requestCB_p
 	kparamtype_t cevhttp_requestCB_p[] = {{KType_cevhttp_request, 0}, {KType_Object, 0}};
 	KClass *cevhttp_requestCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_void, 2, cevhttp_requestCB_p);
@@ -2606,6 +3223,15 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 	KClass *cevhttp_connectionCBfunc = KLIB KClass_Generics(kctx, KClass_Func, KType_void, 2, cevhttp_connectionCB_p);
 	int KType_cevhttp_connectionCBfunc = cevhttp_connectionCBfunc->typeId;
 
+	// eventbuffer[]
+	KClass *eventbufferArray = KClass_p0(kctx, KClass_Array, KType_cbufferevent);
+	int KType_eventbufferArray = eventbufferArray->typeId;
+
+	// evbuffer_iovec[]
+	KClass *evbuffer_iovecArray = KClass_p0(kctx, KClass_Array, KType_cevbuffer_iovec);
+	int KType_evbuffer_iovecArray = evbuffer_iovecArray->typeId;
+
+	/* You can define methods with the following procedures. */
 	KDEFINE_METHOD MethodData[] = {
 
 		// event_base
@@ -2673,11 +3299,89 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 
 		// bufferevent
 		_Public, _F(cbufferevent_new), KType_cbufferevent, KType_cbufferevent, KMethodName_("new"), 3, KType_cevent_base, KFieldName_("cevent_base"), KType_Int, KFieldName_("evd"), KType_Int, KFieldName_("options"),
-		_Public, _F(cbufferevent_setcb), KType_void, KType_cbufferevent, KMethodName_("setcb"), 4, KType_Cbev_dataCBfunc, KFieldName_("readCB"), KType_Cbev_dataCBfunc, KFieldName_("writeCB"), KType_Cbev_eventCBfunc, KFieldName_("eventCB"), KType_Object, KFieldName_("CBarg"),
 		_Public, _F(cbufferevent_socket_connect), KType_Int, KType_cbufferevent, KMethodName_("socket_connect"), 1, KType_Sockaddr_in, KFieldName_("sockaddr"),
-		_Public, _F(cbufferevent_enable), KType_Int, KType_cbufferevent, KMethodName_("enable"), 1, KType_Int, KFieldName_("event"),
+		_Public, _F(cbufferevent_socket_connect_hostname), KType_Int, KType_cbufferevent, KMethodName_("socket_connect_hostname"), 4, KType_cevdns_base, KFieldName_("dnsbase"), KType_Int, KFieldName_("family"), KType_String, KFieldName_("hostname"), KType_Int, KFieldName_("port"),
+		_Public, _F(cbufferevent_socket_get_dns_error), KType_Int, KType_cbufferevent, KMethodName_("socket_get_dns_error"), 0,
+		_Public, _F(cbufferevent_base_set), KType_Int, KType_cbufferevent, KMethodName_("base_set"), 1, KType_cevent_base, KFieldName_("base"),
+		_Public, _F(cbufferevent_get_base), KType_cevent_base, KType_cbufferevent, KMethodName_("get_base"), 0,
+		_Public, _F(cbufferevent_priority_set), KType_Int, KType_cbufferevent, KMethodName_("priority_set"), 1, KType_Int, KFieldName_("priority"),
+		_Public, _F(cbufferevent_setcb), KType_void, KType_cbufferevent, KMethodName_("setcb"), 4, KType_Cbev_dataCBfunc, KFieldName_("readCB"), KType_Cbev_dataCBfunc, KFieldName_("writeCB"), KType_Cbev_eventCBfunc, KFieldName_("eventCB"), KType_Object, KFieldName_("CBarg"),
+		_Public, _F(cbufferevent_setfd), KType_Int, KType_cbufferevent, KMethodName_("setfd"), 1, KType_Int, KFieldName_("fd"),
+		_Public, _F(cbufferevent_getfd), KType_Int, KType_cbufferevent, KMethodName_("getfd"), 0,
+		_Public, _F(cbufferevent_get_underlying), KType_cbufferevent, KType_cbufferevent, KMethodName_("get_underlying"), 0,
 		_Public, _F(cbufferevent_write), KType_Int, KType_cbufferevent, KMethodName_("write"), 1, KType_Bytes, KFieldName_("writebuffer"),
+		_Public, _F(cbufferevent_write_buffer), KType_Int, KType_cbufferevent, KMethodName_("write_buffer"), 1, KType_cevbuffer, KFieldName_("buf"),
 		_Public, _F(cbufferevent_read), KType_Int, KType_cbufferevent, KMethodName_("read"), 1, KType_Bytes, KFieldName_("readbuffer"),
+		_Public, _F(cbufferevent_read_buffer), KType_Int, KType_cbufferevent, KMethodName_("read_buffer"), 1, KType_cevbuffer, KFieldName_("buf"),
+		_Public, _F(cbufferevent_get_input), KType_cevbuffer, KType_cbufferevent, KMethodName_("get_input"), 0,
+		_Public, _F(cbufferevent_get_output), KType_cevbuffer, KType_cbufferevent, KMethodName_("get_output"), 0,
+		_Public, _F(cbufferevent_enable), KType_Int, KType_cbufferevent, KMethodName_("enable"), 1, KType_Int, KFieldName_("event"),
+		_Public, _F(cbufferevent_disable), KType_Int, KType_cbufferevent, KMethodName_("disable"), 1, KType_Int, KFieldName_("event"),
+		_Public, _F(cbufferevent_get_enabled), KType_Int, KType_cbufferevent, KMethodName_("get_enabled"), 0,
+		_Public, _F(cbufferevent_set_timeouts), KType_Int, KType_cbufferevent, KMethodName_("set_timeouts"), 2, KType_ctimeval, KFieldName_("timeout_read"), KType_ctimeval, KFieldName_("timeout_write"),
+		_Public, _F(cbufferevent_setwatermark), KType_void, KType_cbufferevent, KMethodName_("setwatermark"), 3, KType_Int, KFieldName_("event"), KType_Int, KFieldName_("lowmark"), KType_Int, KFieldName_("highmark"),
+		_Public, _F(cbufferevent_lock), KType_void, KType_cbufferevent, KMethodName_("lock"), 0,
+		_Public, _F(cbufferevent_unlock), KType_void, KType_cbufferevent, KMethodName_("unlock"), 0,
+		_Public, _F(cbufferevent_flush), KType_Int, KType_cbufferevent, KMethodName_("flush"), 2, KType_Int, KFieldName_("iotype"), KType_Int, KFieldName_("mode"),
+		_Public, _F(cbufferevent_filter_new), KType_cbufferevent, KType_cbufferevent, KMethodName_("filter_new"), 4, KType_cbev_filterCBfunc, KFieldName_("input_filter"), KType_cbev_filterCBfunc, KFieldName_("output_filter"), KType_Int, KFieldName_("option"), KType_Object, KFieldName_("ctx"),
+		_Public|_Static, _F(cbufferevent_pair_new), KType_Int, KType_cbufferevent, KMethodName_("pair_new"), 3, KType_cevent_base, KFieldName_("base"), KType_Int, KFieldName_("optons"), KType_eventbufferArray, KFieldName_("pair"),
+		_Public, _F(cbufferevent_pair_get_partner), KType_cbufferevent, KType_cbufferevent, KMethodName_("pair_get_partner"), 0,
+		_Public, _F(cbufferevent_set_rate_limit), KType_Int, KType_cbufferevent, KMethodName_("set_rate_limit"), 1, KType_cev_token_bucket_cfg, KFieldName_("cfg"),
+		_Public, _F(cbufferevent_add_to_rate_limit_group), KType_Int, KType_cbufferevent, KMethodName_("add_to_rate_limit_group"), 1, KType_cbufferevent_rate_limit_group, KFieldName_("grp"),
+		_Public, _F(cbufferevent_remove_from_rate_limit_group), KType_Int, KType_cbufferevent, KMethodName_("remove_from_rate_limit_group"), 0,
+		_Public, _F(cbufferevent_get_read_limit), KType_Int, KType_cbufferevent, KMethodName_("get_read_limit"), 0,
+		_Public, _F(cbufferevent_get_write_limit), KType_Int, KType_cbufferevent, KMethodName_("get_write_limit"), 0,
+		_Public, _F(cbufferevent_get_max_to_read), KType_Int, KType_cbufferevent, KMethodName_("get_max_to_read"), 0,
+		_Public, _F(cbufferevent_get_max_to_write), KType_Int, KType_cbufferevent, KMethodName_("get_max_to_write"), 0,
+		_Public, _F(cbufferevent_decrement_read_limit), KType_Int, KType_cbufferevent, KMethodName_("decrement_read_limit"), 1, KType_Int, KFieldName_("decr"),
+		_Public, _F(cbufferevent_decrement_write_limit), KType_Int, KType_cbufferevent, KMethodName_("decrement_write_limit"), 1, KType_Int, KFieldName_("decr"),
+
+		// ev_token_bucket_cfg
+		_Public, _F(cev_token_bucket_cfg_new), KType_cev_token_bucket_cfg, KType_cev_token_bucket_cfg, KMethodName_("new"), 5, KType_Int, KFieldName_("read_rate"), KType_Int, KFieldName_("read_burst"), KType_Int, KFieldName_("write_rate"), KType_Int, KFieldName_("write_burst"), KType_ctimeval, KFieldName_("tick_len"),
+
+		// bufferevent_rate_limit_group
+		_Public, _F(cbufferevent_rate_limit_group_new), KType_cbufferevent_rate_limit_group, KType_cbufferevent_rate_limit_group, KMethodName_("new"), 2, KType_cevent_base, KFieldName_("base"), KType_cev_token_bucket_cfg, KFieldName_("cfg"),
+		_Public, _F(cbufferevent_rate_limit_group_set_cfg), KType_Int, KType_cbufferevent_rate_limit_group, KMethodName_("set_cfg"), 1, KType_cev_token_bucket_cfg, KFieldName_("cfg"),
+		_Public, _F(cbufferevent_rate_limit_group_set_min_share), KType_Int, KType_cbufferevent_rate_limit_group, KMethodName_("min_share"), 1, KType_Int, KFieldName_("share"),
+		_Public, _F(cbufferevent_rate_limit_group_get_read_limit), KType_Int, KType_cbufferevent_rate_limit_group, KMethodName_("get_read_limit"), 0,
+		_Public, _F(cbufferevent_rate_limit_group_get_write_limit), KType_Int, KType_cbufferevent_rate_limit_group, KMethodName_("get_write_limit"), 0,
+		_Public, _F(cbufferevent_rate_limit_group_decrement_read), KType_Int, KType_cbufferevent_rate_limit_group, KMethodName_("decrement_read"), 1, KType_Int, KFieldName_("decr"),
+		_Public, _F(cbufferevent_rate_limit_group_decrement_write), KType_Int, KType_cbufferevent_rate_limit_group, KMethodName_("decrement_write"), 1, KType_Int, KFieldName_("decr"),
+		_Public, _F(cbufferevent_rate_limit_group_get_totals), KType_void, KType_cbufferevent_rate_limit_group, KMethodName_("get_totals"), 1, KType_cbufferevent_rate_limit_group_totals, KFieldName_("totals"),
+		_Public, _F(cbufferevent_rate_limit_group_reset_totals), KType_void, KType_cbufferevent_rate_limit_group, KMethodName_("reset_totals"), 0,
+
+		//evbuffer_iovec
+
+		//evbuffer_ptr
+
+		//evbuffer
+		_Public, _F(cevbuffer_new), KType_cevbuffer, KType_cevbuffer, KMethodName_("new"), 0,
+		_Public, _F(cevbuffer_enable_locking), KType_Int, KType_cevbuffer, KMethodName_("enable_locking"), 1, KType_Object, KFieldName_("lock"),
+		_Public, _F(cevbuffer_lock), KType_void, KType_cevbuffer, KMethodName_("lock"), 0,
+		_Public, _F(cevbuffer_unlock), KType_void, KType_cevbuffer, KMethodName_("unlock"), 0,
+		_Public, _F(cevbuffer_set_flags), KType_Int, KType_cevbuffer, KMethodName_("set_flags"), 1, KType_Int, KFieldName_("flags"),
+		_Public, _F(cevbuffer_clear_flags), KType_Int, KType_cevbuffer, KMethodName_("clear_flags"), 1, KType_Int, KFieldName_("flags"),
+		_Public, _F(cevbuffer_get_length), KType_Int, KType_cevbuffer, KMethodName_("get_length"), 0,
+		_Public, _F(cevbuffer_get_contiguous_space), KType_Int, KType_cevbuffer, KMethodName_("get_contiguous_space"), 0,
+		_Public, _F(cevbuffer_expand), KType_Int, KType_cevbuffer, KMethodName_("expand"), 1, KType_Int, KFieldName_("datlen"),
+		_Public, _F(cevbuffer_reserve_space), KType_Int, KType_cevbuffer, KMethodName_("reserve_space"), 2, KType_Int, KFieldName_("size"), KType_evbuffer_iovecArray, KFieldName_("iovec"),
+		_Public, _F(cevbuffer_commit_space), KType_Int, KType_cevbuffer, KMethodName_("commit_space"), 1, KType_evbuffer_iovecArray, KFieldName_("iovec"),
+		_Public, _F(cevbuffer_add), KType_Int, KType_cevbuffer, KMethodName_("add"), 1, KType_Bytes, KFieldName_("data"),
+		_Public, _F(cevbuffer_remove), KType_Int, KType_cevbuffer, KMethodName_("remove"), 1, KType_Bytes, KFieldName_("data"),
+		_Public, _F(cevbuffer_copyout), KType_Int, KType_cevbuffer, KMethodName_("copyout"), 1, KType_Bytes, KFieldName_("data_out"),
+		_Public, _F(cevbuffer_remove_buffer), KType_Int, KType_cevbuffer, KMethodName_("remove_buffer"), 2, KType_cevbuffer, KFieldName_("dst"), KType_Int, KFieldName_("datlen"),
+		_Public, _F(cevbuffer_readln), KType_cevbuffer_iovec, KType_cevbuffer, KMethodName_("readln"), 1, KType_Int, KFieldName_("eol_style"),
+		_Public, _F(cevbuffer_add_buffer), KType_Int, KType_cevbuffer, KMethodName_("add_buffer"), 1, KType_cevbuffer, KFieldName_("inbuf"),
+		_Public, _F(cevbuffer_add_file), KType_Int, KType_cevbuffer, KMethodName_("add_file"), 3, KType_Int, KFieldName_("fd"), KType_Int, KFieldName_("offset"), KType_Int, KFieldName_("length"),
+		_Public, _F(cevbuffer_drain), KType_Int, KType_cevbuffer, KMethodName_("drain"), 1, KType_Int, KFieldName_("drain"),
+		_Public, _F(cevbuffer_write), KType_Int, KType_cevbuffer, KMethodName_("write"), 1, KType_Int, KFieldName_("fd"),
+		_Public, _F(cevbuffer_write_atmost), KType_Int, KType_cevbuffer, KMethodName_("write_atmost"), 2, KType_Int, KFieldName_("fd"), KType_Int, KFieldName_("howmuch"),
+		_Public, _F(cevbuffer_read), KType_Int, KType_cevbuffer, KMethodName_("read"), 2, KType_Int, KFieldName_("fd"), KType_Int, KFieldName_("howmuch"),
+		_Public, _F(cevbuffer_search), KType_cevbuffer_ptr, KType_cevbuffer, KMethodName_("search"), 2, KType_String, KFieldName_("what"), KType_cevbuffer_ptr, KFieldName_("start"),
+		_Public, _F(cevbuffer_search_range), KType_cevbuffer_ptr, KType_cevbuffer, KMethodName_("search_range"), 3, KType_String, KFieldName_("what"), KType_cevbuffer_ptr, KFieldName_("start"), KType_cevbuffer_ptr, KFieldName_("end"),
+		_Public, _F(cevbuffer_set_ptr), KType_Int, KType_cevbuffer, KMethodName_("set_ptr"), 3, KType_cevbuffer_ptr, KFieldName_("ptr"), KType_Int, KFieldName_("position"), KType_Int, KFieldName_("how"),
+		_Public, _F(cevbuffer_search_eol), KType_cevbuffer_ptr, KType_cevbuffer, KMethodName_("search_eol"), 2, KType_cevbuffer_ptr, KFieldName_("start"), KType_Int, KFieldName_("eol_style"),
+		_Public, _F(cevbuffer_peek), KType_Int, KType_cevbuffer, KMethodName_("peek"), 3, KType_Int, KFieldName_("len"), KType_cevbuffer_ptr, KFieldName_("start_at"), KType_evbuffer_iovecArray, KFieldName_("vec_out"),
 
 		// evhttp
 		_Public, _F(cevhttp_new), KType_cevhttp, KType_cevhttp, KMethodName_("new"), 1, KType_cevent_base, KFieldName_("cevent_base"),
@@ -2813,6 +3517,26 @@ static kbool_t Libevent_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		{KDefineConstInt(BEV_OPT_THREADSAFE)},
 		{KDefineConstInt(BEV_OPT_DEFER_CALLBACKS)},
 		{KDefineConstInt(BEV_OPT_UNLOCK_CALLBACKS)},
+
+		// bufferevent.h: enum bufferevent_flush_mode
+		{KDefineConstInt(BEV_NORMAL)},
+		{KDefineConstInt(BEV_FLUSH)},
+		{KDefineConstInt(BEV_FINISHED)},
+
+		// bufferevent.h: enum bufferevent_filter_result
+		{KDefineConstInt(BEV_OK)},
+		{KDefineConstInt(BEV_NEED_MORE)},
+		{KDefineConstInt(BEV_ERROR)},
+
+		// buffer.h: enum evbuffer_eol_style
+		{KDefineConstInt(EVBUFFER_EOL_ANY)},
+		{KDefineConstInt(EVBUFFER_EOL_CRLF)},
+		{KDefineConstInt(EVBUFFER_EOL_CRLF_STRICT)},
+		{KDefineConstInt(EVBUFFER_EOL_LF)},
+
+		// buffer.h: enum evbuffer_ptr_how
+		{KDefineConstInt(EVBUFFER_PTR_SET)},
+		{KDefineConstInt(EVBUFFER_PTR_ADD)},
 
 		// http.h: enum evhttp_cmd_type
 		{KDefineConstInt(EVHTTP_REQ_GET)},

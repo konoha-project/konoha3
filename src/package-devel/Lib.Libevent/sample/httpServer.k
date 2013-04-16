@@ -22,7 +22,7 @@ class CmdFlg {
 
 void dump_request_cb(evhttp_request req, Object arg) {
 	System.p("dump_request_cb() executed!!");
-	System.p("req = \n" + req);
+	System.p("req = " + req);
 	System.p("arg = " + arg);
 
 	String cmdtype = "unknown";
@@ -52,7 +52,7 @@ void dump_request_cb(evhttp_request req, Object arg) {
 
 void send_document_cb(evhttp_request req, Object arg) {
 	System.p("send_document_cb() executed!!");
-	System.p("req = \n" + req);
+	System.p("req = " + req);
 	System.p("arg = " + arg);
 
 	req.send_reply(200, "OK", NULL);
@@ -64,11 +64,10 @@ void main() {
 
 	int ret = http.set_cb("/dump", dump_request_cb, NULL);
 	System.p("http.set_cb() return: " + ret);
+	ret = http.set_cb("/dump2", dump_request_cb, NULL);
 	http.set_gencb(send_document_cb, "/tmp");
 	System.p("http.set_gencb() returned");
 	evhttp_bound_socket handle = http.bind_socket_with_handle("0.0.0.0", 10000);
-
-
 	base.event_dispatch();
 }
 
