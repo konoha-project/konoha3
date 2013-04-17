@@ -191,8 +191,8 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	l->kUntypedNode_ParseFlag       = kUntypedNode_ParseFlag;
 	l->kUntypedNode_GetToken        = kUntypedNode_GetToken;
 	l->kUntypedNode_GetNode         = kUntypedNode_GetNode;
-	l->kUntypedNode_SetConst        = kUntypedNode_SetConst;
-	l->kUntypedNode_SetUnboxConst   = kUntypedNode_SetUnboxConst;
+	l->new_kObjectConstNode        = new_kObjectConstNode;
+	l->new_kUnboxConstNode   = new_kUnboxConstNode;
 	l->kUntypedNode_SetVariable     = kUntypedNode_SetVariable;
 	l->TypeCheckNodeAt       = TypeCheckNodeAt;
 	l->TypeCheckNodeByName   = TypeCheckNodeByName;

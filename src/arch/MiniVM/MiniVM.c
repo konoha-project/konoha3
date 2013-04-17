@@ -714,7 +714,7 @@ static kbool_t MiniVM_VisitBlockNode(KonohaContext *kctx, KBuilder *builder, kUn
 static kbool_t MiniVM_VisitReturnNode(KonohaContext *kctx, KBuilder *builder, kUntypedNode *node, void *thunk)
 {
 	kUntypedNode *expr = KLIB kUntypedNode_GetNode(kctx, node, KSymbol_ExprPattern, NULL);
-	if(expr != NULL && IS_Node(expr) && expr->typeAttr != KType_void) {
+	if(expr != NULL && IS_UntypedNode(expr) && expr->typeAttr != KType_void) {
 		KLIB VisitNode(kctx, builder, expr, thunk);
 		ASM_NMOV(kctx, builder, KClass_(expr->typeAttr), K_RTNIDX, MiniVM_getExpression(builder));
 	}
@@ -842,7 +842,7 @@ static kbool_t MiniVM_VisitJumpNode(KonohaContext *kctx, KBuilder *builder, kUnt
 {
 	bblock_t target;
 	kUntypedNode *jump = kUntypedNode_GetNode(kctx, node, label);
-	DBG_ASSERT(jump != NULL && IS_Node(jump));
+	DBG_ASSERT(jump != NULL && IS_UntypedNode(jump));
 	target = kUntypedNode_GetLabelNode(kctx, jump, label);
 	MiniVMBuilder_JumpTo(kctx, builder, target);
 	return true;
@@ -956,7 +956,7 @@ static kbool_t MiniVM_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder
 	for (i = s; i < argc + 2; i++) {
 		kUntypedNode *exprN = kUntypedNode_At(node, i);
 		builder->stackbase = thisidx + i - 1;
-		DBG_ASSERT(IS_Node(exprN));
+		DBG_ASSERT(IS_UntypedNode(exprN));
 		KLIB VisitNode(kctx, builder, exprN, thunk);
 		if(builder->Value != builder->stackbase) {
 			KClass *ty = KClass_(exprN->typeAttr);
@@ -1136,7 +1136,7 @@ static kbool_t CollectLocalVar_VisitBlockNode(KVISITOR_PARAM)
 static kbool_t CollectLocalVar_VisitReturnNode(KVISITOR_PARAM)
 {
 	kUntypedNode *expr = KLIB kUntypedNode_GetNode(kctx, node, KSymbol_ExprPattern, NULL);
-	if(expr != NULL && IS_Node(expr) && expr->typeAttr != KType_void) {
+	if(expr != NULL && IS_UntypedNode(expr) && expr->typeAttr != KType_void) {
 		KLIB VisitNode(kctx, builder, expr, thunk);
 	}
 	return false;
@@ -1299,7 +1299,7 @@ static void _THCODE(KonohaContext *kctx, KVirtualCode *pc, void **codeaddr, size
 #endif
 }
 
-static struct KVirtualCode *MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kUntypedNode *block, int option)
+static struct KVirtualCode *MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kNodeBase *block, int option)
 {
 	KVirtualCode *vcode;
 	KBuffer wb;

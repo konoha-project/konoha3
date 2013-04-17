@@ -270,7 +270,7 @@ static kbool_t FuelVM_VisitReturnNode(KonohaContext *kctx, KBuilder *builder, kN
 {
 	kReturnNode *Expr = (kReturnNode *) stmt;
 	kNodeBase *expr = Expr->Expr;
-	if(expr != NULL && IS_Node(expr) && expr->typeAttr != KType_void) {
+	if(expr != NULL && IS_UntypedNode(expr) && expr->typeAttr != KType_void) {
 		KLIB VisitNode(kctx, builder, expr, thunk);
 		INode *Ret  = FuelVM_getExpression(builder);
 		INode *Inst = CreateReturn(BLD(builder), Ret);
@@ -396,7 +396,7 @@ static kbool_t FuelVM_VisitJumpNode(KonohaContext *kctx, KBuilder *builder, kNod
 {
 	assert(0 && "Not Implemented");
 	//kNodeBase *jump = kUntypedNode_GetNode(kctx, stmt, label);
-	//DBG_ASSERT(jump != NULL && IS_Node(jump));
+	//DBG_ASSERT(jump != NULL && IS_UntypedNode(jump));
 	//Block *target = kUntypedNode_GetTargetBlock(kctx, jump, label);
 	//IRBuilder_JumpTo(BLD(builder), target);
 	return true;
@@ -515,7 +515,7 @@ static kbool_t FuelVM_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder
 	}
 	for (i = s; i < argc + 2; i++) {
 		kNodeBase *exprN = (kNodeBase *) Expr->Params->NodeItems[i];
-		DBG_ASSERT(IS_Node(exprN));
+		DBG_ASSERT(IS_UntypedNode(exprN));
 		KLIB VisitNode(kctx, builder, exprN, thunk);
 		INode *Node = FuelVM_getExpression(builder);
 		assert(Node->Type != TYPE_void);
@@ -591,7 +591,7 @@ static kbool_t FuelVM_VisitOrNode(KonohaContext *kctx, KBuilder *builder, kNodeB
 static kbool_t FuelVM_VisitAssignNode(KonohaContext *kctx, KBuilder *builder, kNodeBase *expr, void *thunk)
 {
 	/*
-	 * [AssignExpr] := lhs = rhs
+	 * [AssignExpr] := frame[Index] = rhs
 	 * expr->NodeList = [NULL, lhs, rhs]
 	 **/
 	kAssignNode *Expr = (kAssignNode *) expr;

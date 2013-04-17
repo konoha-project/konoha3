@@ -294,7 +294,7 @@ static void kUntypedNode_AddParsedObject(KonohaContext *kctx, kUntypedNode *stmt
 		}
 		KLIB kArray_Add(kctx, valueList, o);
 	}
-	if(IS_Node(o)) {
+	if(IS_UntypedNode(o)) {
 		kUntypedNode *node = (kUntypedNode *)o;
 		KFieldSet(node, node->Parent, stmt);
 	}
@@ -348,7 +348,7 @@ static kUntypedNode *kUntypedNode_AddSeveral(KonohaContext *kctx, kUntypedNode *
 	for(i = 0; i < n; i++) {
 		kUntypedNode *node =  va_arg(ap, kUntypedNode *);
 		DBG_ASSERT(node != NULL);
-		if(IS_Node(node)) {
+		if(IS_UntypedNode(node)) {
 			if(kUntypedNode_IsError(node)) {
 				kUntypedNode_ToError(kctx, self, node->ErrorMessage);
 				return node;
@@ -394,22 +394,22 @@ static kUntypedNode *kUntypedNode_Op(KonohaContext *kctx, kUntypedNode *node, kT
 //	va_end(ap);
 //	return expr;
 //}
+//
+//static kNodeBase *new_TypedNode(KonohaContext *kctx, kNameSpace *ns, int build, KClass *ty, int n, ...)
+//{
+//	kUntypedNode *node = new_(UntypedNode, ns, OnGcStack);
+//	va_list ap;
+//	va_start(ap, n);
+//	node = kUntypedNode_AddSeveral(kctx, node, n, ap);
+//	va_end(ap);
+//	kUntypedNode_setnode(node, build);
+//	node->typeAttr = ty->typeId;
+//	return node;
+//}
 
-static kUntypedNode *new_TypedNode(KonohaContext *kctx, kNameSpace *ns, int build, KClass *ty, int n, ...)
-{
-	kUntypedNode *node = new_(UntypedNode, ns, OnGcStack);
-	va_list ap;
-	va_start(ap, n);
-	node = kUntypedNode_AddSeveral(kctx, node, n, ap);
-	va_end(ap);
-	kUntypedNode_setnode(node, build);
-	node->typeAttr = ty->typeId;
-	return (kUntypedNode *)node;
-}
+static kNodeBase *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kUntypedNode *self, kNameSpace *ns, KClass* reqc);
 
-static kUntypedNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kUntypedNode *self, kNameSpace *ns, KClass* reqc);
-
-static kUntypedNode *new_MethodNode(KonohaContext *kctx, kNameSpace *ns, KClass *reqc, kMethod *mtd, int n, ...)
+static kNodeBase *new_MethodNode(KonohaContext *kctx, kNameSpace *ns, KClass *reqc, kMethod *mtd, int n, ...)
 {
 	kUntypedNode *expr = new_(UntypedNode, ns, OnGcStack);
 	KFieldSet(expr, expr->NodeList, new_(Array, 0, OnField));
@@ -422,37 +422,31 @@ static kUntypedNode *new_MethodNode(KonohaContext *kctx, kNameSpace *ns, KClass 
 	return TypeCheckMethodParam(kctx, mtd, expr, ns, reqc);
 }
 
-static kUntypedNode *kUntypedNode_SetConst(KonohaContext *kctx, kUntypedNode *expr, KClass *typedClass, kObject *o)
+static kNodeBase *new_kObjectConstNode(KonohaContext *kctx, KClass *typedClass, kObject *o)
 {
-	if(typedClass == NULL) typedClass = kObject_class(o);
-	expr->typeAttr = typedClass->typeId;
-	kUntypedNode_setnode(expr, KNode_Const);
+	if(typedClass == NULL)
+		typedClass = kObject_class(o);
+	uintptr_t Val = 0;
 	if(KClass_Is(UnboxType, typedClass)) {
-		expr->unboxConstValue = kNumber_ToInt(o);
+		Val = kNumber_ToInt(o);
 	}
-	else {
-		KFieldInit(expr, expr->ObjectConstValue, o);
-		kUntypedNode_Set(ObjectConst, expr, true);
-	}
-	return expr;
+	return SUGAR Factory.CreateConstNode(kctx, typedClass->typeId, o, Val);
 }
 
-static kUntypedNode *kUntypedNode_SetUnboxConst(KonohaContext *kctx, kUntypedNode *expr, ktypeattr_t typeAttr, uintptr_t unboxValue)
+static kNodeBase *new_kUnboxConstNode(KonohaContext *kctx, ktypeattr_t typeAttr, uintptr_t unboxValue)
 {
-	kUntypedNode_setnode(expr, KNode_Const);
-	expr->unboxConstValue = unboxValue;
-	expr->typeAttr = typeAttr;
-	kUntypedNode_Set(ObjectConst, expr, false);
-	return expr;
+	return SUGAR Factory.CreateConstNode(kctx, typeAttr, NULL, unboxValue);
 }
 
-static kUntypedNode *kUntypedNode_SetVariable(KonohaContext *kctx, kUntypedNode *expr, knode_t build, ktypeattr_t typeAttr, intptr_t index)
+static kNodeBase *kUntypedNode_SetVariable(KonohaContext *kctx, kUntypedNode *expr, knode_t build, ktypeattr_t typeAttr, intptr_t index)
 {
-	kUntypedNode_setnode(expr, build);
-	expr->typeAttr = typeAttr;
-	expr->index = index;
-	kUntypedNode_Set(ObjectConst, expr, false);
-	return expr;
+	abort();
+	return NULL;
+	//kUntypedNode_setnode(expr, build);
+	//expr->typeAttr = typeAttr;
+	//expr->index = index;
+	//kUntypedNode_Set(ObjectConst, expr, false);
+	//return expr;
 }
 
 static uintptr_t kUntypedNode_ParseFlag(KonohaContext *kctx, kUntypedNode *stmt, KFlagSymbolData *flagData, uintptr_t flag)
@@ -479,7 +473,7 @@ static kToken* kUntypedNode_GetToken(KonohaContext *kctx, kUntypedNode *stmt, ks
 static kUntypedNode *kUntypedNode_GetNode(KonohaContext *kctx, kUntypedNode *stmt, ksymbol_t kw, kUntypedNode *def)
 {
 	kUntypedNode *expr = (kUntypedNode *)kUntypedNode_GetObjectNULL(kctx, stmt, kw);
-	if(expr != NULL && IS_Node(expr)) {
+	if(expr != NULL && IS_UntypedNode(expr)) {
 		return expr;
 	}
 	return def;

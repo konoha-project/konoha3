@@ -245,7 +245,7 @@ static kbool_t BashBuilder_VisitReturnNode(KonohaContext *kctx, KBuilder *builde
 	if(bashBuilder->visitingMethod->mn != 0) {
 		BashBuilder_EmitString(kctx, bashBuilder, "return ", "", "");
 	}
-	if(expr != NULL && IS_Node(expr)) {
+	if(expr != NULL && IS_UntypedNode(expr)) {
 		KLIB VisitNode(kctx, builder, expr, thunk);
 	}
 	BashBuilder_EmitString(kctx, bashBuilder, "", "", "");
@@ -451,7 +451,7 @@ static kbool_t BashBuilder_VisitLocalAssignNode(KonohaContext *kctx, KBuilder *b
 }
 
 static kbool_t BashBuilder_VisitFieldNode(KonohaContext *kctx, KBuilder *builder, kUntypedNode *node, void *thunk)
-{ 
+{
 	kToken *tk = (kToken *)node->TermToken;
 	BashBuilder *bashBuilder = (BashBuilder *)builder;
 	BashBuilder_EmitString(kctx, bashBuilder, kString_text(tk->text), "", "");
@@ -939,7 +939,7 @@ static void BashBuilder_Free(KonohaContext *kctx, KBuilder *builder, kMethod *mt
 	KLIB KDict_Free(kctx, &bashBuilder->localValList);
 }
 
-static struct KVirtualCode* Bash_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kUntypedNode *block, int option)
+static struct KVirtualCode* Bash_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kNodeBase *block, int option)
 {
 	BashBuilder builderbuf = {{0}}, *builder;
 	kNameSpace *ns;

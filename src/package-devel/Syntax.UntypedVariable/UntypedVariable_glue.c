@@ -57,7 +57,7 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 	if(kUntypedNode_isSymbolTerm(leftHandNode)) {
 		kUntypedNode *texpr = KLIB TypeVariableNULL(kctx, leftHandNode, ns, KClass_INFER);
 		if(texpr == NULL) {
-			kUntypedNode *rightHandNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
+			kNodeBase *rightHandNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
 			if(rightHandNode != K_NULLNODE) {
 				DeclVariable(kctx, stmt, ns, rightHandNode->typeAttr, leftHandNode);
 			}

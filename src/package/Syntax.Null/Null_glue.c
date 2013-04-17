@@ -39,7 +39,7 @@ static KMETHOD TypeCheck_null(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	if(reqc->typeId == KType_var) reqc = KClass_Object;
-	KReturn(KLIB kUntypedNode_SetVariable(kctx, expr, KNode_Null, reqc->typeId, 0));
+	KReturn(SUGAR Factory.CreateNullNode(kctx, reqc->typeId));
 }
 
 static KMETHOD Expression_isNull(KonohaContext *kctx, KonohaStack *sfp)

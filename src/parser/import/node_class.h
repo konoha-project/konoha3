@@ -602,6 +602,9 @@ static void InitNodeClass(KonohaContext *kctx, KParserModel *mod)
 	defError.reftrace = kErrorNode_reftrace;
 	defError.format   = kErrorNode_format;
 	mod->cErrorNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defError, 0);
+
+	/* offset check */
+	DBG_ASSERT(&((kLocalNode *) 0)->TermToken == &((kFieldNode *) 0)->TermToken);
 }
 
 /*-------------------------------------------------------------------------*/
@@ -616,36 +619,36 @@ static inline kNodeBase *SetNodeType(kNodeBase *Node, ktypeattr_t Type)
 
 static kNodeBase *CreateDoneNode(KonohaContext *kctx, ktypeattr_t Type)
 {
-	kDoneNode *Node = new_(DoneNode, 0, GcUnsafe);
+	kDoneNode *Node = new_(DoneNode, 0, OnGcStack);
 	return TypedNode(Node, Type);
 }
 
-static kNodeBase *CreateConstNode(KonohaContext *kctx, ktypeattr_t Type, KonohaValue *Value)
+static kNodeBase *CreateConstNode(KonohaContext *kctx, ktypeattr_t Type, kObject *Obj, uintptr_t Val)
 {
-	kConstNode *Node = new_(ConstNode, 0, GcUnsafe);
-	if (KType_Is(UnboxType, Type)) {
-		KFieldSet(Node, Node->ConstObject, Value[0].asObject);
+	kConstNode *Node = new_(ConstNode, 0, OnGcStack);
+	if(KType_Is(UnboxType, Type)) {
+		KFieldSet(Node, Node->ConstObject, Obj);
 	} else {
-		Node->ConstValue = Value[0].unboxValue;
+		Node->ConstValue = Val;
 	}
 	return TypedNode(Node, Type);
 }
 
 static kNodeBase *CreateNewNode(KonohaContext *kctx, ktypeattr_t Type)
 {
-	kNewNode *Node = new_(NewNode, 0, GcUnsafe);
+	kNewNode *Node = new_(NewNode, 0, OnGcStack);
 	return TypedNode(Node, Type);
 }
 
 static kNodeBase *CreateNullNode(KonohaContext *kctx, ktypeattr_t Type)
 {
-	kNullNode *Node = new_(NullNode, 0, GcUnsafe);
+	kNullNode *Node = new_(NullNode, 0, OnGcStack);
 	return TypedNode(Node, Type);
 }
 
 static kNodeBase *CreateLocalNode(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, uintptr_t Index)
 {
-	kLocalNode *Node = new_(LocalNode, 0, GcUnsafe);
+	kLocalNode *Node = new_(LocalNode, 0, OnGcStack);
 	KFieldSet(Node, Node->TermToken, Term);
 	Node->Index  = Index;
 	return TypedNode(Node, Type);
@@ -653,7 +656,7 @@ static kNodeBase *CreateLocalNode(KonohaContext *kctx, ktypeattr_t Type, kToken 
 
 static kNodeBase *CreateFieldNode(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, kuhalfword_t Index, kuhalfword_t Xindex)
 {
-	kFieldNode *Node = new_(FieldNode, 0, GcUnsafe);
+	kFieldNode *Node = new_(FieldNode, 0, OnGcStack);
 	KFieldSet(Node, Node->TermToken, Term);
 	Node->Index  = Index;
 	Node->Xindex = Xindex;
@@ -662,14 +665,14 @@ static kNodeBase *CreateFieldNode(KonohaContext *kctx, ktypeattr_t Type, kToken 
 
 static kNodeBase *CreateBoxNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Expr)
 {
-	kBoxNode *Node = new_(BoxNode, 0, GcUnsafe);
+	kBoxNode *Node = new_(BoxNode, 0, OnGcStack);
 	KFieldSet(Node, Node->Expr, Expr);
 	return TypedNode(Node, Type);
 }
 
-static kNodeBase *CreateMethodCallNode(KonohaContext *kctx, ktypeattr_t Type, kMethod *Method, kArray *Param)
+static kNodeBase *CreateMethodCallNode(KonohaContext *kctx, ktypeattr_t Type, kMethod *Method)
 {
-	kMethodCallNode *Node = new_(MethodCallNode, 0, GcUnsafe);
+	kMethodCallNode *Node = new_(MethodCallNode, 0, OnGcStack);
 	KFieldSet(Node, Node->Method, Method);
 	KFieldSet(Node, Node->Params, K_EMPTYARRAY);
 	return TypedNode(Node, Type);
@@ -677,7 +680,7 @@ static kNodeBase *CreateMethodCallNode(KonohaContext *kctx, ktypeattr_t Type, kM
 
 static kNodeBase *CreateAndNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Left, kNodeBase *Right)
 {
-	kAndNode *Node = new_(AndNode, 0, GcUnsafe);
+	kAndNode *Node = new_(AndNode, 0, OnGcStack);
 	KFieldSet(Node, Node->Left, Left);
 	KFieldSet(Node, Node->Right, Right);
 	return TypedNode(Node, Type);
@@ -685,7 +688,7 @@ static kNodeBase *CreateAndNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase
 
 static kNodeBase *CreateOrNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Left, kNodeBase *Right)
 {
-	kOrNode *Node = new_(OrNode, 0, GcUnsafe);
+	kOrNode *Node = new_(OrNode, 0, OnGcStack);
 	KFieldSet(Node, Node->Left, Left);
 	KFieldSet(Node, Node->Right, Right);
 	return TypedNode(Node, Type);
@@ -693,7 +696,7 @@ static kNodeBase *CreateOrNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase 
 
 static kNodeBase *CreateAssignNode(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, uintptr_t Index, kNodeBase *Left, kNodeBase *Right)
 {
-	kAssignNode *Node = new_(AssignNode, 0, GcUnsafe);
+	kAssignNode *Node = new_(AssignNode, 0, OnGcStack);
 	KFieldSet(Node, Node->TermToken, Term);
 	KFieldSet(Node, Node->Left, Left);
 	KFieldSet(Node, Node->Right, Right);
@@ -703,7 +706,7 @@ static kNodeBase *CreateAssignNode(KonohaContext *kctx, ktypeattr_t Type, kToken
 
 static kNodeBase *CreateLetNode(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, uintptr_t Index, kNodeBase *Right, kNodeBase *Block)
 {
-	kLetNode *Node = new_(LetNode, 0, GcUnsafe);
+	kLetNode *Node = new_(LetNode, 0, OnGcStack);
 	KFieldSet(Node, Node->TermToken, Term);
 	KFieldSet(Node, Node->Right, Right);
 	KFieldSet(Node, Node->Block, Block);
@@ -711,16 +714,22 @@ static kNodeBase *CreateLetNode(KonohaContext *kctx, ktypeattr_t Type, kToken *T
 	return TypedNode(Node, Type);
 }
 
-static kNodeBase *CreateBlockNode(KonohaContext *kctx, ktypeattr_t Type, kArray *ExprList)
+static kNodeBase *CreateBlockNode(KonohaContext *kctx, ktypeattr_t Type, kArray *ExprList, unsigned begin, unsigned end)
 {
-	kBlockNode *Node = new_(BlockNode, 0, GcUnsafe);
-	KFieldSet(Node, Node->ExprList, K_EMPTYARRAY);
+	unsigned i;
+	kBlockNode *Node = new_(BlockNode, 0, OnGcStack);
+	assert(end > begin);
+	KFieldSet(Node, Node->ExprList, new_(Array, end - begin, OnField));
+
+	for (i = begin; i < end; i++) {
+		KLIB kArray_Add(kctx, Node->ExprList, UPCAST(ExprList->NodeItems[i]));
+	}
 	return TypedNode(Node, Type);
 }
 
 static kNodeBase *CreateIfNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Cond, kNodeBase *Then, kNodeBase *Else)
 {
-	kIfNode *Node = new_(IfNode, 0, GcUnsafe);
+	kIfNode *Node = new_(IfNode, 0, OnGcStack);
 	KFieldSet(Node, Node->CondExpr, Cond);
 	KFieldSet(Node, Node->ThenBlock, Then);
 	KFieldSet(Node, Node->ElseBlock, Else);
@@ -729,7 +738,7 @@ static kNodeBase *CreateIfNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase 
 
 static kNodeBase *CreateSwitchNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Cond)
 {
-	kSwitchNode *Node = new_(SwitchNode, 0, GcUnsafe);
+	kSwitchNode *Node = new_(SwitchNode, 0, OnGcStack);
 	KFieldSet(Node, Node->CondExpr, Cond);
 	KFieldSet(Node, Node->Labels, K_EMPTYARRAY);
 	KFieldSet(Node, Node->Blocks, K_EMPTYARRAY);
@@ -738,7 +747,7 @@ static kNodeBase *CreateSwitchNode(KonohaContext *kctx, ktypeattr_t Type, kNodeB
 
 static kNodeBase *CreateLoopNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Init, kNodeBase *Cond, kNodeBase *Loop, kNodeBase *Iter)
 {
-	kLoopNode *Node = new_(LoopNode, 0, GcUnsafe);
+	kLoopNode *Node = new_(LoopNode, 0, OnGcStack);
 	KFieldSet(Node, Node->CondExpr, Cond);
 	KFieldSet(Node, Node->LoopBody, Loop);
 	KFieldSet(Node, Node->IterationExpr, Iter);
@@ -747,28 +756,28 @@ static kNodeBase *CreateLoopNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBas
 
 static kNodeBase *CreateReturnNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Expr)
 {
-	kReturnNode *Node = new_(ReturnNode, 0, GcUnsafe);
+	kReturnNode *Node = new_(ReturnNode, 0, OnGcStack);
 	KFieldSet(Node, Node->Expr, Expr);
 	return TypedNode(Node, Type);
 }
 
 static kNodeBase *CreateLabelNode(KonohaContext *kctx, ktypeattr_t Type, ksymbol_t Label)
 {
-	kLabelNode *Node = new_(LabelNode, 0, GcUnsafe);
+	kLabelNode *Node = new_(LabelNode, 0, OnGcStack);
 	Node->Label = Label;
 	return TypedNode(Node, Type);
 }
 
 static kNodeBase *CreateJumpNode(KonohaContext *kctx, ktypeattr_t Type, ksymbol_t Label)
 {
-	kJumpNode *Node = new_(JumpNode, 0, GcUnsafe);
+	kJumpNode *Node = new_(JumpNode, 0, OnGcStack);
 	Node->Label = Label;
 	return TypedNode(Node, Type);
 }
 
 static kNodeBase *CreateTryNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *TryBlock, kNodeBase *FinallyBlock)
 {
-	kTryNode *Node = new_(TryNode, 0, GcUnsafe);
+	kTryNode *Node = new_(TryNode, 0, OnGcStack);
 	KFieldSet(Node, Node->TryBlock,     TryBlock);
 	KFieldSet(Node, Node->FinallyBlock, FinallyBlock);
 	return TypedNode(Node, Type);
@@ -776,14 +785,14 @@ static kNodeBase *CreateTryNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase
 
 static kNodeBase *CreateThrowNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *ExceptionExpr)
 {
-	kThrowNode *Node = new_(ThrowNode, 0, GcUnsafe);
+	kThrowNode *Node = new_(ThrowNode, 0, OnGcStack);
 	KFieldSet(Node, Node->ExceptionExpr, ExceptionExpr);
 	return TypedNode(Node, Type);
 }
 
 static kNodeBase *CreateFunctionNode(KonohaContext *kctx, ktypeattr_t Type, kMethod *Method, kNameSpace *NS)
 {
-	kFunctionNode *Node = new_(FunctionNode, 0, GcUnsafe);
+	kFunctionNode *Node = new_(FunctionNode, 0, OnGcStack);
 	KFieldSet(Node, Node->Method, Method);
 	KFieldSet(Node, Node->NS, NS);
 	return TypedNode(Node, Type);
@@ -791,7 +800,7 @@ static kNodeBase *CreateFunctionNode(KonohaContext *kctx, ktypeattr_t Type, kMet
 
 static kNodeBase *CreateErrorNode(KonohaContext *kctx, ktypeattr_t Type, kString *ErrorMessage)
 {
-	kErrorNode *Node = new_(ErrorNode, 0, GcUnsafe);
+	kErrorNode *Node = new_(ErrorNode, 0, OnGcStack);
 	KFieldSet(Node, Node->ErrorMessage, ErrorMessage);
 	return TypedNode(Node, Type);
 }

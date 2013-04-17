@@ -34,10 +34,10 @@ static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNodeBase *node
 	return ret;
 }
 
-static kbool_t kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kUntypedNode *block, int option)
+static kbool_t kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kNodeBase *block, int option)
 {
 	DBG_P("START CODE GENERATION..");
-	kNameSpace *ns = kUntypedNode_ns(block);
+	kNameSpace *ns = KNULL(NameSpace); /* FIXME kUntypedNode_ns(block); */
 	struct KVirtualCode *vcode = ns->builderApi->ExecutionEngineModule->GenerateVirtualCode(kctx, mtd, block, option);
 	KMethodFunc func = ns->builderApi->ExecutionEngineModule->GenerateMethodFunc(kctx, vcode);
 	ns->builderApi->ExecutionEngineModule->SetMethodCode(kctx, (kMethodVar *)mtd, vcode, func);

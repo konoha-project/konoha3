@@ -76,18 +76,18 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	/* selfNode and targetNode allow void type
 	 * e.g. "'a' instanceof void" */
-	kUntypedNode *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
-	kUntypedNode *targetNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
+	kNodeBase *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
+	kNodeBase *targetNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
 	if(selfNode != K_NULLNODE && targetNode != K_NULLNODE) {
 		KClass *selfClass = KClass_(selfNode->typeAttr), *targetClass = KClass_(targetNode->typeAttr);
 		if(KClass_Is(Final, selfClass)) {
 			kbool_t staticSubType = (selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
-			KReturn(KLIB kUntypedNode_SetUnboxConst(kctx, expr, KType_Boolean, staticSubType));
+			KReturn(KLIB new_kUnboxConstNode(kctx, KType_Boolean, staticSubType));
 		}
 		kNameSpace *ns = kUntypedNode_ns(stmt);
 		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Object, KMethodName_("instanceof"), 1, KMethodMatch_NoOption);
 		DBG_ASSERT(mtd != NULL);
-		kUntypedNode *classValue = KLIB kUntypedNode_SetConst(kctx, expr->NodeList->NodeVarItems[2], NULL, KLIB Knull(kctx, targetClass));
+		kNodeBase *classValue = KLIB new_kObjectConstNode(kctx, NULL, KLIB Knull(kctx, targetClass));
 		KFieldSet(expr->NodeList, expr->NodeList->NodeItems[2], classValue);
 		KReturn(KLIB TypeCheckMethodParam(kctx, mtd, expr, ns, KClass_Boolean));
 	}
@@ -96,8 +96,8 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD TypeCheck_as(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
-	kUntypedNode *targetNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
-	kUntypedNode *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_(targetNode->typeAttr), TypeCheckPolicy_NoCheck);
+	kNodeBase *targetNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
+	kNodeBase *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_(targetNode->typeAttr), TypeCheckPolicy_NoCheck);
 	if(selfNode != K_NULLNODE && targetNode != K_NULLNODE) {
 		KClass *selfClass = KClass_(selfNode->typeAttr), *targetClass = KClass_(targetNode->typeAttr);
 		if(selfClass->typeId == targetClass->typeId || selfClass->isSubType(kctx, selfClass, targetClass)) {
@@ -116,8 +116,8 @@ static KMETHOD TypeCheck_as(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
-	kUntypedNode *targetNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
-	kUntypedNode *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_(targetNode->typeAttr), TypeCheckPolicy_NoCheck);
+	kNodeBase *targetNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
+	kNodeBase *selfNode   = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_(targetNode->typeAttr), TypeCheckPolicy_NoCheck);
 	if(selfNode != K_NULLNODE && targetNode != K_NULLNODE) {
 		KClass *selfClass = KClass_(selfNode->typeAttr), *targetClass = KClass_(targetNode->typeAttr);
 		if(selfNode->typeAttr == targetNode->typeAttr || selfClass->isSubType(kctx, selfClass, targetClass)) {

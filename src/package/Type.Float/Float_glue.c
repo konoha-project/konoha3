@@ -305,7 +305,7 @@ static KMETHOD TypeCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *tk = expr->TermToken;
 	// just using tramsformation float
 	KStackSetUnboxValue(sfp[4].floatValue, strtod(kString_text(tk->text), NULL));
-	KReturn(KLIB kUntypedNode_SetUnboxConst(kctx, expr, KType_float, sfp[4].unboxValue));
+	KReturn(KLIB new_kUnboxConstNode(kctx, KType_float, sfp[4].unboxValue));
 }
 
 static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)

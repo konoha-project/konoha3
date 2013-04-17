@@ -369,9 +369,9 @@ static KMETHOD Node_setConstValue(KonohaContext *kctx, KonohaStack *sfp)
 	kUntypedNode *expr = (kUntypedNode *)sfp[0].asNode;
 	KClass *ct = kObject_class(sfp[1].asObject);
 	if(KClass_Is(UnboxType, (ct))) {
-		KReturn(KLIB kUntypedNode_SetUnboxConst(kctx, expr, ct->typeId, sfp[1].unboxValue));
+		KReturn(KLIB new_kUnboxConstNode(kctx, ct->typeId, sfp[1].unboxValue));
 	}
-	KReturn(KLIB kUntypedNode_SetConst(kctx, expr, ct, sfp[1].asObject));
+	KReturn(KLIB new_kObjectConstNode(kctx, ct, sfp[1].asObject));
 }
 
 //## Object Node.getConstValue();
@@ -530,9 +530,9 @@ static void Syntax_defineNodeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceI
 //	kUntypedNode *expr = sfp[0].asNode;
 //	KClass *ct = kObject_class(sfp[1].asObject);
 //	if(KClass_Is(UnboxType, (ct)) {
-//		KReturn(KLIB kUntypedNode_SetUnboxConst(kctx, expr, ct->typeId, sfp[1].unboxValue));
+//		KReturn(KLIB new_kUnboxConstNode(kctx, ct->typeId, sfp[1].unboxValue));
 //	}
-//	KReturn(KLIB kUntypedNode_SetConst(kctx, expr, ct->typeId, sfp[1].asObject));
+//	KReturn(KLIB new_kObjectConstNode(kctx, ct->typeId, sfp[1].asObject));
 //}
 //
 ////## Node Node.setVariable(Gamma ns, int build, cid typeid, int index);

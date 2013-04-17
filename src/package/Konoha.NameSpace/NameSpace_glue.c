@@ -99,7 +99,8 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 		result = KLIB EvalTokenList(kctx, &range, NULL/*trace*/);
 		KTokenSeq_Pop(kctx, range);
 		RESET_GCSTACK();
-		kUntypedNode_Type(stmt, KNode_Done, KType_void);
+		//kUntypedNode_Type(stmt, KNode_Done, KType_void);
+		KTODO("");KReturn(kUntypedNode_Type(stmt, KNode_Done, KType_void));
 	}
 	KReturnUnboxValue(result == K_CONTINUE);
 }
@@ -123,7 +124,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 			result = true;
 		}
 		else if(kUntypedNode_node(constNode) == KNode_Const) {   // const C = "1"
-			if (KType_Is(UnboxType, type)) {
+			if(KType_Is(UnboxType, type)) {
 				unboxValue = (uintptr_t)constNode->ObjectConstValue;
 			} else {
 			unboxValue = constNode->unboxConstValue;
@@ -191,14 +192,14 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	int popIsBlockingErrorMessage = sugarContext->isBlockedErrorMessage;
 	sugarContext->isBlockedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->NodeList); i++) {
-		kUntypedNode *typedNode = KLIB TypeCheckNodeAt(kctx, expr, i, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
+		kNodeBase *typedNode = KLIB TypeCheckNodeAt(kctx, expr, i, ns, KClass_INFER, TypeCheckPolicy_AllowVoid);
 		if(kUntypedNode_IsError(typedNode)) {
 			isDefined = false;
 			break;
 		}
 	}
 	sugarContext->isBlockedErrorMessage = popIsBlockingErrorMessage;
-	KReturn(KLIB kUntypedNode_SetUnboxConst(kctx, expr, KType_Boolean, isDefined));
+	KReturn(KLIB new_kUnboxConstNode(kctx, KType_Boolean, isDefined));
 }
 
 static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)

@@ -96,10 +96,9 @@ static void kUntypedNode_ToError(KonohaContext *kctx, kUntypedNode *node, kStrin
 	node->typeAttr = KType_void;
 	KFieldSet(node, node->ErrorMessage, errmsg);
 	kUntypedNode_Set(ObjectConst, node, false);
-	//node->stackbase = ns == NULL ? 0 : ns->genv->localScope.varsize;
 }
 
-static kUntypedNode *MessageNode(KonohaContext *kctx, kUntypedNode *node, kTokenNULL *tk, kNameSpaceNULL *ns, kinfotag_t taglevel, const char *fmt, ...)
+static kNodeBase *MessageNode(KonohaContext *kctx, kUntypedNode *node, kTokenNULL *tk, kNameSpaceNULL *ns, kinfotag_t taglevel, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -113,7 +112,7 @@ static kUntypedNode *MessageNode(KonohaContext *kctx, kUntypedNode *node, kToken
 		kUntypedNode_ToError(kctx, node, errmsg);
 	}
 	va_end(ap);
-	return node;
+	return /*FIXME*/ (kNodeBase *) node;
 }
 
 void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_t taglevel, const char *fmt, ...)
@@ -121,7 +120,7 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 	if(taglevel == DebugTag && !(PLATAPI verbose_debug)) return;
 	va_list ap;
 	va_start(ap, fmt);
-	if(trace != NULL && IS_Node(trace->baseStack[1].asNode)) {  // Static Compiler Message
+	if(trace != NULL && IS_UntypedNode(trace->baseStack[1].asNode)) {  // Static Compiler Message
 		kUntypedNode *stmt = trace->baseStack[1].asNode;
 		kfileline_t uline = kUntypedNode_uline(stmt);
 		kString *emsg = KParserContext_PrintMessage(kctx, taglevel, uline, fmt, ap);
@@ -155,7 +154,7 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 
 #ifdef USE_SMALLBUILD
 
-static kUntypedNode *ERROR_SyntaxErrorToken(KonohaContext *kctx, kUntypedNode *stmt, kToken *tk)
+static kNodeBase *ERROR_SyntaxErrorToken(KonohaContext *kctx, kUntypedNode *stmt, kToken *tk)
 {
 	return kUntypedNodeToken_Message(kctx, stmt, tk, ErrTag, "syntax error at %s", KToken_t(tk));
 }
@@ -164,7 +163,7 @@ static kUntypedNode *ERROR_SyntaxErrorToken(KonohaContext *kctx, kUntypedNode *s
 
 #else
 
-static kUntypedNode *ERROR_UndefinedEscapeSequence(KonohaContext *kctx, kUntypedNode *stmt, kToken *tk)
+static kNodeBase *ERROR_UndefinedEscapeSequence(KonohaContext *kctx, kUntypedNode *stmt, kToken *tk)
 {
 	return kUntypedNodeToken_Message(kctx, stmt, tk, ErrTag, "undefined escape sequence: \"%s\"", kString_text(tk->text));
 }

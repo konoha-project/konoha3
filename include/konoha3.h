@@ -493,6 +493,7 @@ typedef enum {
 typedef const struct kTokenVar   kToken;
 typedef struct kTokenVar         kTokenVar;
 typedef struct kUntypedNode      kUntypedNode;
+struct kNodeBase;
 
 #define kTokenNULL kToken
 #define kUntypedNodeNULL  kUntypedNode
@@ -517,7 +518,7 @@ struct ExecutionEngineModule {
 	void                        (*DeleteExecutionEngine)(KonohaContext *kctx);
 	const struct KBuilderAPI   *(*GetDefaultBuilderAPI)(void);
 	struct KVirtualCode        *(*GetDefaultBootCode)(void);
-	struct KVirtualCode        *(*GenerateVirtualCode)(KonohaContext *, kMethod *mtd, kUntypedNode *block, int option);
+	struct KVirtualCode        *(*GenerateVirtualCode)(KonohaContext *, kMethod *mtd, struct kNodeBase *block, int option);
 	KMethodFunc                 (*GenerateMethodFunc)(KonohaContext *, struct KVirtualCode *);
 	void                        (*SetMethodCode)(KonohaContext *, kMethodVar *mtd, struct KVirtualCode *, KMethodFunc func);
 	struct KVirtualCode        *(*RunExecutionEngine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct KVirtualCode *pc);
@@ -1933,8 +1934,8 @@ static inline kNameSpace *kUntypedNode_GetNameSpace(KonohaContext *kctx, kUntype
 	return ns;
 }
 
-#define kUntypedNode_GetParent(kctx, node)  ((IS_Node(node->Parent)) ? node->Parent : K_NULLNODE)
-#define kUntypedNode_GetParentNULL(stmt)    ((IS_Node(stmt->Parent)) ? stmt->Parent : NULL)
+#define kUntypedNode_GetParent(kctx, node)  ((IS_UntypedNode(node->Parent)) ? node->Parent : K_NULLNODE)
+#define kUntypedNode_GetParentNULL(stmt)    ((IS_UntypedNode(stmt->Parent)) ? stmt->Parent : NULL)
 #define kUntypedNode_SetParent(kctx, node, parent)   KFieldSet(node, node->Parent, parent)
 
 // Deplicated!!
@@ -2021,14 +2022,14 @@ struct KGammaLocalData {
 
 #define IS_Syntax(O) (kObject_class(O) == KClass_Syntax)
 #define IS_Token(O)  (kObject_class(O) == KClass_Token)
-#define IS_Node(O)   (kObject_class(O) == KClass_UntypedNode)
+#define IS_UntypedNode(O)   (kObject_class(O) == KClass_UntypedNode)
 #define IS_Gamma(O)  (kObject_class(O) == KClass_Gamma)
 
 #define K_NULLTOKEN  ((kToken *)(KClass_Token)->defaultNullValue)
 #define K_NULLNODE   (kUntypedNode *)((KClass_UntypedNode)->defaultNullValue)
 #define K_NULLBLOCK  (kUntypedNode *)((KClass_UntypedNode)->defaultNullValue)
 
-typedef kUntypedNode* (*KTypeDeclFunc)(KonohaContext *kctx, kUntypedNode *stmt, kNameSpace *ns, ktypeattr_t ty, kUntypedNode *termNode, kUntypedNode *vexpr, kObject *thunk);
+typedef kNodeBase* (*KTypeDeclFunc)(KonohaContext *kctx, kUntypedNode *stmt, kNameSpace *ns, ktypeattr_t ty, kUntypedNode *termNode, kNodeBase *vexpr, kObject *thunk);
 
 typedef enum {
 	ParseExpressionOption = 0,
@@ -2085,8 +2086,8 @@ typedef enum {
 
 #define KPushMethodCall(gma)   KLIB AddLocalVariable(kctx, ns, KType_var, 0)
 
-#define new_ConstNode(CTX, NS, T, O)              KLIB kUntypedNode_SetConst(CTX, KNewNode(NS), T, O)
-#define new_UnboxConstNode(CTX, NS, T, D)         KLIB kUntypedNode_SetUnboxConst(CTX, KNewNode(NS), T, D)
+#define new_ConstNode(CTX, NS, T, O)              KLIB new_kObjectConstNode(CTX, T, O)
+#define new_UnboxConstNode(CTX, NS, T, D)         KLIB new_kUnboxConstNode(CTX, T, D)
 #define new_VariableNode(CTX, NS, BLD, TY, IDX)   KLIB kUntypedNode_SetVariable(CTX, KNewNode(NS), BLD, TY, IDX)
 
 #define SUGAR                                   ((const KParserModel *)KPARSERM)->
@@ -2341,7 +2342,7 @@ struct KonohaLibVar {
 	kMethodVar*         (*new_kMethod)(KonohaContext*, kArray *gcstack, uintptr_t, ktypeattr_t, kmethodn_t, KMethodFunc);
 	kParam*             (*kMethod_SetParam)(KonohaContext*, kMethod *, ktypeattr_t, kuhalfword_t, const kparamtype_t *);
 	void                (*kMethod_SetFunc)(KonohaContext*, kMethod*, KMethodFunc);
-	kbool_t             (*kMethod_GenCode)(KonohaContext*, kMethod*, kUntypedNode *, int options);
+	kbool_t             (*kMethod_GenCode)(KonohaContext*, kMethod*, kNodeBase *, int options);
 	intptr_t            (*kMethod_indexOfField)(kMethod *);
 
 	kbool_t             (*KRuntime_SetModule)(KonohaContext*, int, struct KRuntimeModel *, KTraceInfo *);
@@ -2412,21 +2413,21 @@ struct KonohaLibVar {
 	kUntypedNode*       (*ParseNewNode)(KonohaContext *, kNameSpace *, kArray *tokenList, int* s, int e, ParseOption, const char *requiredTokenText);
 	kUntypedNode*       (*AppendParsedNode)(KonohaContext *, kUntypedNode *, kArray *tokenList, int, int, IsSeparatorFunc, ParseOption, const char *requiredTokenText);
 
-	kUntypedNode*       (*kUntypedNode_SetConst)(KonohaContext *, kUntypedNode *, KClass *, kObject *);
-	kUntypedNode*       (*kUntypedNode_SetUnboxConst)(KonohaContext *, kUntypedNode *, ktypeattr_t, uintptr_t);
-	kUntypedNode*       (*kUntypedNode_SetVariable)(KonohaContext *, kUntypedNode *, knode_t build, ktypeattr_t, intptr_t index);
+	kNodeBase*       (*new_kObjectConstNode)(KonohaContext *, KClass *, kObject *);
+	kNodeBase*       (*new_kUnboxConstNode)(KonohaContext *, ktypeattr_t, uintptr_t);
+	kNodeBase*       (*kUntypedNode_SetVariable)(KonohaContext *, kUntypedNode *, knode_t build, ktypeattr_t, intptr_t index);
 
-	kUntypedNode*       (*new_MethodNode)(KonohaContext *, kNameSpace *, KClass *, kMethod *mtd, int n, ...);
+	kNodeBase*       (*new_MethodNode)(KonohaContext *, kNameSpace *, KClass *, kMethod *mtd, int n, ...);
 
-	kUntypedNode*      (*TypeCheckNodeByName)(KonohaContext *, kUntypedNode*, ksymbol_t, kNameSpace *, KClass *, int);
-	kUntypedNode*      (*TypeCheckNodeAt)(KonohaContext *, kUntypedNode *, size_t, kNameSpace *, KClass *, int);
-	kUntypedNode *     (*TypeCheckMethodParam)(KonohaContext *, kMethod *mtd, kUntypedNode *, kNameSpace *, KClass *);
+	kNodeBase*      (*TypeCheckNodeByName)(KonohaContext *, kUntypedNode*, ksymbol_t, kNameSpace *, KClass *, int);
+	kNodeBase*      (*TypeCheckNodeAt)(KonohaContext *, kUntypedNode *, size_t, kNameSpace *, KClass *, int);
+	kNodeBase*      (*TypeCheckMethodParam)(KonohaContext *, kMethod *mtd, kUntypedNode *, kNameSpace *, KClass *);
 	int         (*AddLocalVariable)(KonohaContext *, kNameSpace *, ktypeattr_t, ksymbol_t);
 	void        (*kUntypedNode_DeclType)(KonohaContext *, kUntypedNode *, kNameSpace *, ktypeattr_t, kUntypedNode *, kObject *, KTypeDeclFunc);
 	kUntypedNode*      (*TypeVariableNULL)(KonohaContext *, kUntypedNode *, kNameSpace *, KClass *);
 
 	void       (*kToken_ToError)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
-	kUntypedNode *    (*MessageNode)(KonohaContext *, kUntypedNode *, kToken *, kNameSpace *, kinfotag_t, const char *fmt, ...);
+	kNodeBase *(*MessageNode)(KonohaContext *, kUntypedNode *, kToken *, kNameSpace *, kinfotag_t, const char *fmt, ...);
 
 	kbool_t    (*VisitNode)(KonohaContext *, struct KBuilder *, kNodeBase *node, void *thunk);
 

@@ -351,7 +351,7 @@ static kbool_t JSBuilder_VisitReturnNode(KonohaContext *kctx, KBuilder *builder,
 	if(isInFunction) {
 		JSBuilder_EmitString(kctx, builder, "return", "", "");
 	}
-	if(expr != NULL && IS_Node(expr)) {
+	if(expr != NULL && IS_UntypedNode(expr)) {
 		if(isInFunction) {
 			JSBuilder_EmitString(kctx, builder, " ", "", "");
 		}
@@ -626,7 +626,7 @@ static kbool_t JSBuilder_VisitMethodCallNodeWithoutOperator(KonohaContext *kctx,
 	else if(isNewArray) {
 		goto defaultCallParams;
 	}
-		
+
 	if(!isGlobal) {
 		if(kUntypedNode_node(receiver) == KNode_Null) {
 			// Static methods
@@ -949,7 +949,7 @@ static void JSBuilder_Free(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 	KLIB KBuffer_Free(&jsBuilder->jsCodeBuffer);
 }
 
-static struct KVirtualCode *V8_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kUntypedNode *block, int option)
+static struct KVirtualCode *V8_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kNodeBase *block, int option)
 {
 	INIT_GCSTACK();
 	JSBuilder builderbuf = {}, *builder = &builderbuf;

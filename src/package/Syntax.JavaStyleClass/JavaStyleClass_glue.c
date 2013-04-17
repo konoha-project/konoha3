@@ -47,7 +47,7 @@ static void CallSugarMethod(KonohaContext *kctx, KonohaStack *sfp, kFunc *fo, in
 }
 
 /* copied from src/parser/import/typecheck.h */
-static kUntypedNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kUntypedNode *expr, kNameSpace *ns, kObject *reqType)
+static kNodeBase *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kUntypedNode *expr, kNameSpace *ns, kObject *reqType)
 {
 	INIT_GCSTACK();
 	BEGIN_UnusedStack(lsfp);
@@ -61,8 +61,8 @@ static kUntypedNode *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kUntypedNode *
 	if(lsfp[K_RTNIDX].asNode == K_NULLNODE) {
 		DBG_ASSERT(expr->typeAttr == KType_var); // untyped
 	}
-	DBG_ASSERT(IS_Node(lsfp[K_RTNIDX].asObject));
-	return (kUntypedNode *)lsfp[K_RTNIDX].asObject;
+	DBG_ASSERT(IS_UntypedNode(lsfp[K_RTNIDX].asObject));
+	return (kNodeBase *)lsfp[K_RTNIDX].asObject;
 }
 
 //## @Public void NameSpace.AddMethodDecl(Node methodNode);
@@ -251,7 +251,7 @@ static kbool_t kUntypedNode_AddClassField(KonohaContext *kctx, kUntypedNode *stm
 		if(kUntypedNode_IsTerm(lexpr)) {
 			kString *name = lexpr->TermToken->text;
 			ksymbol_t symbol = KAsciiSymbol(kString_text(name), kString_size(name), KSymbol_NewId);
-			kUntypedNode *vexpr =  KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_(ty), 0);
+			kNodeBase *vexpr =  KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_(ty), 0);
 			if(vexpr == K_NULLNODE) return false;
 			if(kUntypedNode_node(vexpr) == KNode_Const) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
@@ -331,7 +331,7 @@ static void kUntypedNode_AddMethodDeclNode(KonohaContext *kctx, kUntypedNode *bk
 			kUntypedNode *arg0 = new_ConstNode(kctx, ns, NULL, UPCAST(ns));
 			kUntypedNode *arg1 = new_ConstNode(kctx, ns, NULL, UPCAST(stmt));
 
-			kUntypedNode *callNode = KLIB new_MethodNode(kctx, ns, KClass_NameSpace, AddMethod, 2, arg0, arg1);
+			kNodeBase *callNode = KLIB new_MethodNode(kctx, ns, KClass_NameSpace, AddMethod, 2, arg0, arg1);
 			KLIB kUntypedNode_AddNode(kctx, classParentBlock, callNode);
 		}
 		else {

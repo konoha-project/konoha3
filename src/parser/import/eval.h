@@ -23,11 +23,10 @@
  ***************************************************************************/
 
 
-static kUntypedNode* kUntypedNode_CheckReturnType(KonohaContext *kctx, kUntypedNode *node)
+static kNodeBase* kNodeBase_CheckReturnType(KonohaContext *kctx, kNodeBase *node)
 {
 	if(node->typeAttr != KType_void) {
-		kUntypedNode *stmt = new_TypedNode(kctx, kUntypedNode_ns(node), KNode_Return, KClass_void, 0);
-		kUntypedNode_AddParsedObject(kctx, stmt, KSymbol_ExprPattern, UPCAST(node));
+		kNodeBase *stmt = SUGAR Factory.CreateReturnNode(kctx, KType_void, node);
 		return stmt;
 	}
 	return node;
@@ -70,7 +69,7 @@ static kstatus_t kUntypedNode_Eval(KonohaContext *kctx, kUntypedNode *stmt, kMet
 
 	int errorCount = KGetParserContext(kctx)->errorMessageCount;
 	KPushGammaStack(ns, &newgma);
-	stmt = TypeCheckNode(kctx, stmt, ns, KClass_var, TypeCheckPolicy_AllowVoid);
+	kNodeBase *tNode = TypeCheckNode(kctx, stmt, ns, KClass_var, TypeCheckPolicy_AllowVoid);
 	KPopGammaStack(ns, &newgma);
 	if(errorCount < KGetParserContext(kctx)->errorMessageCount) {
 		return K_BREAK;  // to avoid duplicated error message
@@ -78,8 +77,8 @@ static kstatus_t kUntypedNode_Eval(KonohaContext *kctx, kUntypedNode *stmt, kMet
 	kbool_t isTryEval = true;
 	if(0/*KonohaContext_Is(CompileOnly, kctx)*/) {
 		isTryEval = false;
-		if(kUntypedNode_node(stmt) == KNode_MethodCall) {
-			kMethod *callMethod = stmt->NodeList->MethodItems[0];
+		if(kUntypedNode_node(tNode) == KNode_MethodCall) {
+			kMethod *callMethod = ((kMethodCallNode *) tNode)->Params->MethodItems[0];
 			DBG_ASSERT(IS_Method(callMethod));
 			if(kMethod_Is(Compilation, callMethod)) {
 				isTryEval = true;
@@ -87,10 +86,10 @@ static kstatus_t kUntypedNode_Eval(KonohaContext *kctx, kUntypedNode *stmt, kMet
 		}
 	}
 	if(isTryEval) {
-		ktypeattr_t rtype = KTypeAttr_Unmask(stmt->typeAttr);
-		stmt = kUntypedNode_CheckReturnType(kctx, stmt);
-		KLIB kMethod_GenCode(kctx, mtd, stmt, DefaultCompileOption);
-		return kMethod_RunEval(kctx, mtd, rtype, kUntypedNode_uline(stmt), trace);
+		ktypeattr_t rtype = KTypeAttr_Unmask(tNode->typeAttr);
+		tNode = kNodeBase_CheckReturnType(kctx, tNode);
+		KLIB kMethod_GenCode(kctx, mtd, tNode, DefaultCompileOption);
+		return kMethod_RunEval(kctx, mtd, rtype, /*FIXME*/kUntypedNode_uline(stmt), trace);
 	}
 	return K_CONTINUE;
 }

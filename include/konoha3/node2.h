@@ -107,7 +107,7 @@ typedef struct kLocalNode {
 	KNODE_BASE_STRUCT;
 	/* frame[$Index] (or TermToken->text) */
 	kToken *TermToken;
-	uintptr_t Index;
+	kuhalfword_t Index; kuhalfword_t _unused;
 } kLocalNode;
 
 typedef struct kFieldNode {
@@ -328,18 +328,18 @@ typedef enum KNodeType {
 
 typedef struct KNodeFactory {
 	kNodeBase *(*CreateDoneNode)(KonohaContext *kctx, ktypeattr_t Type);
-	kNodeBase *(*CreateConstNode)(KonohaContext *kctx, ktypeattr_t Type, KonohaValue *Value);
+	kNodeBase *(*CreateConstNode)(KonohaContext *kctx, ktypeattr_t Type, kObject *Obj, uintptr_t Val);
 	kNodeBase *(*CreateNewNode)(KonohaContext *kctx, ktypeattr_t Type);
 	kNodeBase *(*CreateNullNode)(KonohaContext *kctx, ktypeattr_t Type);
 	kNodeBase *(*CreateLocalNode)(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, uintptr_t Index);
 	kNodeBase *(*CreateFieldNode)(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, kuhalfword_t Index, kuhalfword_t Xindex);
 	kNodeBase *(*CreateBoxNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Expr);
-	kNodeBase *(*CreateMethodCallNode)(KonohaContext *kctx, ktypeattr_t Type, kMethod *Method, kArray *Param);
+	kNodeBase *(*CreateMethodCallNode)(KonohaContext *kctx, ktypeattr_t Type, kMethod *Method);
 	kNodeBase *(*CreateAndNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Left, kNodeBase *Right);
 	kNodeBase *(*CreateOrNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Left, kNodeBase *Right);
 	kNodeBase *(*CreateAssignNode)(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, uintptr_t Index, kNodeBase *Left, kNodeBase *Right);
 	kNodeBase *(*CreateLetNode)(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, uintptr_t Index, kNodeBase *Right, kNodeBase *Block);
-	kNodeBase *(*CreateBlockNode)(KonohaContext *kctx, ktypeattr_t Type, kArray *ExprList);
+	kNodeBase *(*CreateBlockNode)(KonohaContext *kctx, ktypeattr_t Type, kArray *ExprList, unsigned begin, unsigned end);
 	kNodeBase *(*CreateIfNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Cond, kNodeBase *Then, kNodeBase *Else);
 	kNodeBase *(*CreateSwitchNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Cond);
 	kNodeBase *(*CreateLoopNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Init, kNodeBase *Cond, kNodeBase *Loop, kNodeBase *Iter);

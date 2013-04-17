@@ -73,7 +73,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kUntypedNode *stm
 	return KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, kObject_class(o), symbol, ty);
 }
 
-static kUntypedNode* TypeDeclAndMakeSetter(KonohaContext *kctx, kUntypedNode *stmt, kNameSpace *ns, ktypeattr_t ty, kUntypedNode *termNode, kUntypedNode *valueNode, kObject *scr)
+static kNodeBase *TypeDeclAndMakeSetter(KonohaContext *kctx, kUntypedNode *stmt, kNameSpace *ns, ktypeattr_t ty, kUntypedNode *termNode, kUntypedNode *valueNode, kObject *scr)
 {
 	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termNode->TermToken->symbol);
 	if(mtd != NULL) {
