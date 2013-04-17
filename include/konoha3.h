@@ -1405,7 +1405,7 @@ struct kMethodVar {
 	kToken         *SourceToken;
 	union {
 		kNameSpace   *LazyCompileNameSpace;       // lazy compilation
-		kUntypedNode        *CompiledNode;
+		struct kNodeBase *CompiledNode;
 	};
 	uintptr_t         serialNumber;
 };
@@ -1908,7 +1908,7 @@ typedef khalfword_t       knode_t;
 
 #define kUntypedNode_node(o)             ((o)->nodeType)
 #define kUntypedNode_setnode(o, node)    ((kUntypedNode *)(o))->nodeType = (node)
-#define kUntypedNode_IsConstValue(o)     (KNode_Const <= kUntypedNode_node(o) && kUntypedNode_node(o) <= KNode_UnboxConst)
+#define kUntypedNode_IsConstValue(o)     (kUntypedNode_node(o) == KNode_Const)
 #define kUntypedNode_IsValue(o)          (KNode_Const <= kUntypedNode_node(o) && kUntypedNode_node(o) <= KNode_Field)
 
 #include "konoha3/node2.h"
@@ -1937,15 +1937,15 @@ static inline kNameSpace *kUntypedNode_GetNameSpace(KonohaContext *kctx, kUntype
 #define kUntypedNode_GetParentNULL(stmt)    ((IS_Node(stmt->Parent)) ? stmt->Parent : NULL)
 #define kUntypedNode_SetParent(kctx, node, parent)   KFieldSet(node, node->Parent, parent)
 
-
-static inline kUntypedNode *kUntypedNode_Type(kUntypedNode *node, knode_t nodeType, ktypeattr_t typeAttr)
-{
-	if(kUntypedNode_node(node) != KNode_Error) {
-		kUntypedNode_setnode(node, nodeType);
-		node->typeAttr = typeAttr;
-	}
-	return node;
-}
+// Deplicated!!
+//static inline kUntypedNode *kUntypedNode_Type(kUntypedNode *node, knode_t nodeType, ktypeattr_t typeAttr)
+//{
+//	if(kUntypedNode_node(node) != KNode_Error) {
+//		kUntypedNode_setnode(node, nodeType);
+//		node->typeAttr = typeAttr;
+//	}
+//	return node;
+//}
 
 static inline size_t kUntypedNode_GetNodeListSize(KonohaContext *kctx, kUntypedNode *node)
 {
@@ -2050,8 +2050,9 @@ typedef struct KParserModel {
 	KClass *cTokenArray;
 	KClass *cUntypedNode;
 #define DEFINE_NODE_CLASS(T)  KClass *c##T##Node;
-	NODE_LIST_OP(DEFINE_NODE_CLASS);
+	NODE_LIST_OP(DEFINE_NODE_CLASS)
 #undef DEFINE_NODE_CLASS
+	KNodeFactory Factory;
 	//
 	kFunc  *termParseFunc;
 	kFunc  *opParseFunc;
@@ -2119,7 +2120,7 @@ typedef enum {
 struct KBuilder;
 typedef struct KBuilder KBuilder;
 
-typedef kbool_t (*KNodeVisitFunc)(KonohaContext *kctx, KBuilder *builder, kUntypedNode *stmt, void *thunk);
+typedef kbool_t (*KNodeVisitFunc)(KonohaContext *kctx, KBuilder *builder, kNodeBase *Node, void *thunk);
 
 struct KBuilderCommon {
 	const struct KBuilderAPI *api;
@@ -2427,16 +2428,11 @@ struct KonohaLibVar {
 	void       (*kToken_ToError)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
 	kUntypedNode *    (*MessageNode)(KonohaContext *, kUntypedNode *, kToken *, kNameSpace *, kinfotag_t, const char *fmt, ...);
 
-	kbool_t    (*VisitNode)(KonohaContext *, struct KBuilder *, kUntypedNode *node, void *thunk);
+	kbool_t    (*VisitNode)(KonohaContext *, struct KBuilder *, kNodeBase *node, void *thunk);
 
 	void (*dumpToken)(KonohaContext *kctx, kToken *tk, int n);
 	void (*dumpTokenArray)(KonohaContext *kctx, int nest, kArray *a, int s, int e);
 	void (*dumpNode)(KonohaContext *kctx, kUntypedNode *stmt);
-
-
-
-
-
 };
 
 #define K_NULL            (kctx->share->constNull)

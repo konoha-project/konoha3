@@ -45,7 +45,7 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 	kUntypedNode_Set(CatchContinue, stmt, true);  // set before TypeCheck Block
 	kUntypedNode_Set(CatchBreak, stmt, true);
 	KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
-	KReturn(kUntypedNode_Type(stmt, KNode_While, KType_void));
+	KReturn(kUntypedNode_Type(stmt, KNode_Loop, KType_void));
 }
 
 static KMETHOD Statement_do(KonohaContext *kctx, KonohaStack *sfp)

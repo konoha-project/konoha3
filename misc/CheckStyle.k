@@ -96,6 +96,7 @@ void main() {
         data = replace(args[i], data, "MiniKonoha\\.", "MiniKonoha.", "Konoha.");
         data = replace(args[i], data, "while \\(", "while (", "while(");
         data = replace(args[i], data, "kUntypedNodeVar", "kUntypedNodeVar", "kUntypedNode");
+        data = replace(args[i], data, "KNodeList\\(", "KNodeList", "NODE_LIST_OP");
         data = replace(args[i], data, "[^a-zA-Z]kNode", "kNode", "kUntypedNode");
         data = replace(args[i], data, "new_\\(Node", "new_(Node", "new_(UntypedNode");
         data = replace(args[i], data, "\n\t\n", "\n\t\n", "\n\n");

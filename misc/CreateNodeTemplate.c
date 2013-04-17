@@ -33,15 +33,28 @@
 
 int main(int argc, char const* argv[])
 {
-    fprintf(stderr, "#include \"konoha3.h\"\n");
-    fprintf(stderr, "#include \"konoha3/node2.h\"\n");
-    fprintf(stderr, "\n");
-    NODE_LIST_OP(PRINT);
-    fprintf(stderr, "\n");
-    fprintf(stderr, "static void InitNodeClass(KonohaContext *kctx, KParserModel *mod)\n");
-    fprintf(stderr, "{\n");
-    NODE_LIST_OP(PRINT2);
-    fprintf(stderr, "}\n");
-    fprintf(stderr, "\n");
-    return 0;
+#if 0
+	fprintf(stderr, "#include \"konoha3.h\"\n");
+	fprintf(stderr, "#include \"konoha3/node2.h\"\n");
+	fprintf(stderr, "\n");
+	NODE_LIST_OP(PRINT);
+	fprintf(stderr, "\n");
+	fprintf(stderr, "static void InitNodeClass(KonohaContext *kctx, KParserModel *mod)\n");
+	fprintf(stderr, "{\n");
+	NODE_LIST_OP(PRINT2);
+	fprintf(stderr, "}\n");
+	fprintf(stderr, "\n");
+#else
+//#define P(T) fprintf(stderr, "%s %d\n", #T, sizeof(k##T##Node));
+//	NODE_LIST_OP(P);
+
+	fprintf(stderr, "static void InitNodeFactory(KonohaContext *kctx, KNodeFactory *Facotry)\n");
+	fprintf(stderr, "{\n");
+#define P(T) \
+    fprintf(stderr, "\tFactory->Create" #T "Node = Create" #T "Node;\n");\
+
+	NODE_LIST_OP(P);
+	fprintf(stderr, "}\n");
+#endif
+	return 0;
 }

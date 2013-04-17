@@ -24,21 +24,14 @@
 
 /* ************************************************************************ */
 
-//#define USING_SUGAR_AS_BUILTIN 1
-#define USE_AsciiToKonohaChar
-
-//#include "konoha3.h"
-//
-//
-#include "konoha3/import/methoddecl.h"
-
-/* ************************************************************************ */
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#define USE_AsciiToKonohaChar
+
 #include "konoha3.h"
+#include "konoha3/import/methoddecl.h"
 
 // global variable
 KONOHA_EXPORT(int) verbose_sugar;
@@ -56,6 +49,7 @@ int verbose_sugar = 0;
 #include "import/eval.h"
 #include "import/parser_dump.h"
 #include "import/visitor.h"
+#include "import/node_class.h"
 
 /* ------------------------------------------------------------------------ */
 /* Sugar Global Functions */
@@ -156,19 +150,19 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	defToken.reftrace = kToken_Reftrace;
 	defToken.format = kToken_format;
 
-	KDEFINE_CLASS defNode = {0};
-	SETSTRUCTNAME(defNode, Node);
-	defNode.init = kUntypedNode_Init;
-	defNode.reftrace = kUntypedNode_Reftrace;
-	defNode.format        = kUntypedNode_format;
+	KDEFINE_CLASS defUntypedNode = {0};
+	SETSTRUCTNAME(defUntypedNode, UntypedNode);
+	defUntypedNode.init     = kUntypedNode_Init;
+	defUntypedNode.reftrace = kUntypedNode_Reftrace;
+	defUntypedNode.format   = kUntypedNode_format;
 
 	InitNodeClass(kctx, mod);
-
+	InitNodeFactory(kctx, &mod->Factory);
 	mod->cSymbol =    KLIB KClass_define(kctx, PackageId_sugar, NULL, &defSymbol, 0);
 	mod->cSyntax =    KLIB KClass_define(kctx, PackageId_sugar, NULL, &defSyntax, 0);
 	mod->cToken =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defToken, 0);
-	mod->cNode  =     KLIB KClass_define(kctx, PackageId_sugar, NULL, &defNode, 0);
-	mod->cTokenArray = KClass_p0(kctx, KClass_Array, mod->cToken->typeId);
+	mod->cTokenArray  = KClass_p0(kctx, KClass_Array, mod->cToken->typeId);
+	mod->cUntypedNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defUntypedNode, 0);
 
 	KLIB Knull(kctx, mod->cToken);
 	KLIB Knull(kctx, mod->cNode);

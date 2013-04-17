@@ -31,39 +31,39 @@
 #ifdef USE_EXECUTIONENGINE
 /*----------------------------------------------------------------------------*/
 /* Konoha AST API */
-static kunused kUntypedNode* kUntypedNode_getFirstBlock(KonohaContext *kctx, kUntypedNode *stmt)
+//static kunused kUntypedNode* kUntypedNode_getFirstBlock(KonohaContext *kctx, kUntypedNode *stmt)
+//{
+//	return KLIB kUntypedNode_GetNode(kctx, stmt, KSymbol_BlockPattern, K_NULLBLOCK);
+//}
+//
+//static kunused kUntypedNode* kUntypedNode_getElseBlock(KonohaContext *kctx, kUntypedNode *stmt)
+//{
+//	return KLIB kUntypedNode_GetNode(kctx, stmt, KSymbol_else, K_NULLBLOCK);
+//}
+//
+//static kunused kUntypedNode* kUntypedNode_getFirstNode(KonohaContext *kctx, kUntypedNode *stmt)
+//{
+//	return KLIB kUntypedNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
+//}
+//
+//static kunused kMethod* CallNode_getMethod(kUntypedNode *expr)
+//{
+//	return expr->NodeList->MethodItems[0];
+//}
+//
+//static kunused kUntypedNode *kUntypedNode_GetNode(KonohaContext *kctx, kUntypedNode *stmt, ksymbol_t kw)
+//{
+//	return KLIB kUntypedNode_GetNode(kctx, stmt, kw, NULL);
+//}
+//
+static kunused int kMethodCallNode_getArgCount(kMethodCallNode *node)
 {
-	return KLIB kUntypedNode_GetNode(kctx, stmt, KSymbol_BlockPattern, K_NULLBLOCK);
+	return kArray_size(node->Params) - 2;
 }
 
-static kunused kUntypedNode* kUntypedNode_getElseBlock(KonohaContext *kctx, kUntypedNode *stmt)
+static kunused kString *kErrorNode_getErrorMessage(KonohaContext *kctx, kErrorNode *Node)
 {
-	return KLIB kUntypedNode_GetNode(kctx, stmt, KSymbol_else, K_NULLBLOCK);
-}
-
-static kunused kUntypedNode* kUntypedNode_getFirstNode(KonohaContext *kctx, kUntypedNode *stmt)
-{
-	return KLIB kUntypedNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
-}
-
-static kunused kMethod* CallNode_getMethod(kUntypedNode *expr)
-{
-	return expr->NodeList->MethodItems[0];
-}
-
-static kunused kUntypedNode *kUntypedNode_GetNode(KonohaContext *kctx, kUntypedNode *stmt, ksymbol_t kw)
-{
-	return KLIB kUntypedNode_GetNode(kctx, stmt, kw, NULL);
-}
-
-static kunused int CallNode_getArgCount(kUntypedNode *node)
-{
-	return kArray_size(node->NodeList) - 2;
-}
-
-static kunused kString *kUntypedNode_getErrorMessage(KonohaContext *kctx, kUntypedNode *stmt)
-{
-	kString* msg = stmt->ErrorMessage;
+	kString* msg = Node->ErrorMessage;
 	DBG_ASSERT(IS_String(msg));
 	return msg;
 }

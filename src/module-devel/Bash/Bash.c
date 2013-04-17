@@ -1013,7 +1013,7 @@ static const struct KBuilderAPI Bash_BuilderAPI = {
 	"Bash",
 	&Bash_Module,
 #define DEFINE_BUILDER_API(NAME) BashBuilder_Visit##NAME##Node,
-	KNodeList(DEFINE_BUILDER_API)
+	NODE_LIST_OP(DEFINE_BUILDER_API)
 #undef DEFINE_BUILDER_API
 };
 

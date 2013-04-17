@@ -24,12 +24,12 @@
 
 #define DefineVisitCase(NAME)  case KNode_##NAME:   ret = cbuilder->api->visit##NAME##Node(kctx, builder, node, thunk); break;
 
-static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kUntypedNode *node, void *thunk)
+static kbool_t VisitNode(KonohaContext *kctx, KBuilder *builder, kNodeBase *node, void *thunk)
 {
 	kbool_t ret = false;
 	struct KBuilderCommon *cbuilder = (struct KBuilderCommon *)builder;
 	switch(kUntypedNode_node(node)) {
-		KNodeList(DefineVisitCase)
+		NODE_LIST_OP(DefineVisitCase)
 	}
 	return ret;
 }

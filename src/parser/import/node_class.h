@@ -193,6 +193,7 @@ static void kAssignNode_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kAssignNode *Node = (kAssignNode *) o;
 	KFieldInit(Node, Node->TermToken, K_NULL);
+	KFieldInit(Node, Node->Left, K_NULL);
 	KFieldInit(Node, Node->Right, K_NULL);
 }
 
@@ -200,6 +201,7 @@ static void kAssignNode_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor
 {
 	kAssignNode *Node = (kAssignNode *) o;
 	KRefTrace(Node->TermToken);
+	KRefTrace(Node->Left);
 	KRefTrace(Node->Right);
 }
 
@@ -409,15 +411,17 @@ static void kThrowNode_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuf
 static void kFunctionNode_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kFunctionNode *Node = (kFunctionNode *) o;
-	KFieldInit(Node, Node->EnvExprList, K_NULL);
-	KFieldInit(Node, Node->ParamList, K_NULL);
+	KFieldInit(Node, Node->Method, K_NULL);
+	KFieldInit(Node, Node->NS, K_NULL);
+	KFieldInit(Node, Node->EnvList, K_NULL);
 }
 
 static void kFunctionNode_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kFunctionNode *Node = (kFunctionNode *) o;
-	KRefTrace(Node->EnvExprList);
-	KRefTrace(Node->ParamList);
+	KRefTrace(Node->Method);
+	KRefTrace(Node->NS);
+	KRefTrace(Node->EnvList);
 }
 
 static void kFunctionNode_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
@@ -598,5 +602,223 @@ static void InitNodeClass(KonohaContext *kctx, KParserModel *mod)
 	defError.reftrace = kErrorNode_reftrace;
 	defError.format   = kErrorNode_format;
 	mod->cErrorNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defError, 0);
+}
 
+/*-------------------------------------------------------------------------*/
+/* NodeFactory */
+static inline kNodeBase *SetNodeType(kNodeBase *Node, ktypeattr_t Type)
+{
+	Node->typeAttr = Type;
+	return Node;
+}
+
+#define TypedNode(NODE, TYPE) SetNodeType((kNodeBase *) NODE, TYPE)
+
+static kNodeBase *CreateDoneNode(KonohaContext *kctx, ktypeattr_t Type)
+{
+	kDoneNode *Node = new_(DoneNode, 0, GcUnsafe);
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateConstNode(KonohaContext *kctx, ktypeattr_t Type, KonohaValue *Value)
+{
+	kConstNode *Node = new_(ConstNode, 0, GcUnsafe);
+	if (KType_Is(UnboxType, Type)) {
+		KFieldSet(Node, Node->ConstObject, Value[0].asObject);
+	} else {
+		Node->ConstValue = Value[0].unboxValue;
+	}
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateNewNode(KonohaContext *kctx, ktypeattr_t Type)
+{
+	kNewNode *Node = new_(NewNode, 0, GcUnsafe);
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateNullNode(KonohaContext *kctx, ktypeattr_t Type)
+{
+	kNullNode *Node = new_(NullNode, 0, GcUnsafe);
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateLocalNode(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, uintptr_t Index)
+{
+	kLocalNode *Node = new_(LocalNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->TermToken, Term);
+	Node->Index  = Index;
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateFieldNode(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, kuhalfword_t Index, kuhalfword_t Xindex)
+{
+	kFieldNode *Node = new_(FieldNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->TermToken, Term);
+	Node->Index  = Index;
+	Node->Xindex = Xindex;
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateBoxNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Expr)
+{
+	kBoxNode *Node = new_(BoxNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->Expr, Expr);
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateMethodCallNode(KonohaContext *kctx, ktypeattr_t Type, kMethod *Method, kArray *Param)
+{
+	kMethodCallNode *Node = new_(MethodCallNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->Method, Method);
+	KFieldSet(Node, Node->Params, K_EMPTYARRAY);
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateAndNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Left, kNodeBase *Right)
+{
+	kAndNode *Node = new_(AndNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->Left, Left);
+	KFieldSet(Node, Node->Right, Right);
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateOrNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Left, kNodeBase *Right)
+{
+	kOrNode *Node = new_(OrNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->Left, Left);
+	KFieldSet(Node, Node->Right, Right);
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateAssignNode(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, uintptr_t Index, kNodeBase *Left, kNodeBase *Right)
+{
+	kAssignNode *Node = new_(AssignNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->TermToken, Term);
+	KFieldSet(Node, Node->Left, Left);
+	KFieldSet(Node, Node->Right, Right);
+	Node->Index  = Index;
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateLetNode(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, uintptr_t Index, kNodeBase *Right, kNodeBase *Block)
+{
+	kLetNode *Node = new_(LetNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->TermToken, Term);
+	KFieldSet(Node, Node->Right, Right);
+	KFieldSet(Node, Node->Block, Block);
+	Node->Index  = Index;
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateBlockNode(KonohaContext *kctx, ktypeattr_t Type, kArray *ExprList)
+{
+	kBlockNode *Node = new_(BlockNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->ExprList, K_EMPTYARRAY);
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateIfNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Cond, kNodeBase *Then, kNodeBase *Else)
+{
+	kIfNode *Node = new_(IfNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->CondExpr, Cond);
+	KFieldSet(Node, Node->ThenBlock, Then);
+	KFieldSet(Node, Node->ElseBlock, Else);
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateSwitchNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Cond)
+{
+	kSwitchNode *Node = new_(SwitchNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->CondExpr, Cond);
+	KFieldSet(Node, Node->Labels, K_EMPTYARRAY);
+	KFieldSet(Node, Node->Blocks, K_EMPTYARRAY);
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateLoopNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Init, kNodeBase *Cond, kNodeBase *Loop, kNodeBase *Iter)
+{
+	kLoopNode *Node = new_(LoopNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->CondExpr, Cond);
+	KFieldSet(Node, Node->LoopBody, Loop);
+	KFieldSet(Node, Node->IterationExpr, Iter);
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateReturnNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Expr)
+{
+	kReturnNode *Node = new_(ReturnNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->Expr, Expr);
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateLabelNode(KonohaContext *kctx, ktypeattr_t Type, ksymbol_t Label)
+{
+	kLabelNode *Node = new_(LabelNode, 0, GcUnsafe);
+	Node->Label = Label;
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateJumpNode(KonohaContext *kctx, ktypeattr_t Type, ksymbol_t Label)
+{
+	kJumpNode *Node = new_(JumpNode, 0, GcUnsafe);
+	Node->Label = Label;
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateTryNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *TryBlock, kNodeBase *FinallyBlock)
+{
+	kTryNode *Node = new_(TryNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->TryBlock,     TryBlock);
+	KFieldSet(Node, Node->FinallyBlock, FinallyBlock);
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateThrowNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *ExceptionExpr)
+{
+	kThrowNode *Node = new_(ThrowNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->ExceptionExpr, ExceptionExpr);
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateFunctionNode(KonohaContext *kctx, ktypeattr_t Type, kMethod *Method, kNameSpace *NS)
+{
+	kFunctionNode *Node = new_(FunctionNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->Method, Method);
+	KFieldSet(Node, Node->NS, NS);
+	return TypedNode(Node, Type);
+}
+
+static kNodeBase *CreateErrorNode(KonohaContext *kctx, ktypeattr_t Type, kString *ErrorMessage)
+{
+	kErrorNode *Node = new_(ErrorNode, 0, GcUnsafe);
+	KFieldSet(Node, Node->ErrorMessage, ErrorMessage);
+	return TypedNode(Node, Type);
+}
+
+static void InitNodeFactory(KonohaContext *kctx, KNodeFactory *Factory)
+{
+	Factory->CreateDoneNode = CreateDoneNode;
+	Factory->CreateConstNode = CreateConstNode;
+	Factory->CreateNewNode = CreateNewNode;
+	Factory->CreateNullNode = CreateNullNode;
+	Factory->CreateLocalNode = CreateLocalNode;
+	Factory->CreateFieldNode = CreateFieldNode;
+	Factory->CreateBoxNode = CreateBoxNode;
+	Factory->CreateMethodCallNode = CreateMethodCallNode;
+	Factory->CreateAndNode = CreateAndNode;
+	Factory->CreateOrNode = CreateOrNode;
+	Factory->CreateAssignNode = CreateAssignNode;
+	Factory->CreateLetNode = CreateLetNode;
+	Factory->CreateBlockNode = CreateBlockNode;
+	Factory->CreateIfNode = CreateIfNode;
+	Factory->CreateSwitchNode = CreateSwitchNode;
+	Factory->CreateLoopNode = CreateLoopNode;
+	Factory->CreateReturnNode = CreateReturnNode;
+	Factory->CreateLabelNode = CreateLabelNode;
+	Factory->CreateJumpNode = CreateJumpNode;
+	Factory->CreateTryNode = CreateTryNode;
+	Factory->CreateThrowNode = CreateThrowNode;
+	Factory->CreateFunctionNode = CreateFunctionNode;
+	Factory->CreateErrorNode = CreateErrorNode;
 }

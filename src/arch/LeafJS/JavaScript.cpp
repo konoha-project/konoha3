@@ -188,7 +188,7 @@ static const char *GetNodeTypeName(kUntypedNode *node)
 {
 	switch(kUntypedNode_node(node)){
 #define RETURN_NODE_TYPE(NAME) case KNode_##NAME: return #NAME;
-		KNodeList(RETURN_NODE_TYPE);
+		NODE_LIST_OP(RETURN_NODE_TYPE);
 #undef RETURN_NODE_TYPE
 	}
 	return "";
@@ -1020,7 +1020,7 @@ static const struct KBuilderAPI V8_BuilderAPI = {
 	"LeafJS",
 	&V8_Module,
 #define DEFINE_BUILDER_API(NAME) JSBuilder_Visit##NAME##Node,
-	KNodeList(DEFINE_BUILDER_API)
+	NODE_LIST_OP(DEFINE_BUILDER_API)
 #undef DEFINE_BUILDER_API
 };
 

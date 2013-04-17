@@ -123,11 +123,11 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 			result = true;
 		}
 		else if(kUntypedNode_node(constNode) == KNode_Const) {   // const C = "1"
-			unboxValue = (uintptr_t)constNode->ObjectConstValue;
-			result = true;
-		}
-		else if(kUntypedNode_node(constNode) == KNode_UnboxConst) {  // const c = 1
+			if (KType_Is(UnboxType, type)) {
+				unboxValue = (uintptr_t)constNode->ObjectConstValue;
+			} else {
 			unboxValue = constNode->unboxConstValue;
+			}
 			result = true;
 		}
 		if(result) {

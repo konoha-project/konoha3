@@ -1243,7 +1243,7 @@ static kbool_t CollectLocalVar_VisitFunctionNode(KVISITOR_PARAM)
 static const struct KBuilderAPI CollectLocalVar_BuilderAPI = {
 	"CollectLocalVar",
 	NULL,
-	KNodeList(DEFINE_LOCALVAR_COLLECTOR_API)
+	NODE_LIST_OP(DEFINE_LOCALVAR_COLLECTOR_API)
 };
 
 /* end of Local Variable Analysis Visitor */
@@ -1422,7 +1422,7 @@ static const struct KBuilderAPI MiniVM_BuilderAPI = {
 	"MiniVM",
 	&MiniVM_Module,
 #define DEFINE_BUILDER_API(NAME) MiniVM_Visit##NAME##Node,
-	KNodeList(DEFINE_BUILDER_API)
+	NODE_LIST_OP(DEFINE_BUILDER_API)
 #undef DEFINE_BUILDER_API
 };
 

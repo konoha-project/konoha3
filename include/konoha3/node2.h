@@ -49,12 +49,12 @@ struct kUntypedNode {
 	};
 };
 
-typedef struct kUntypedNodeBase {
+typedef struct kNodeBase {
 #define KNODE_BASE_STRUCT \
 	kObjectHeader h;\
 	khalfword_t nodeType; ktypeattr_t typeAttr
 	KNODE_BASE_STRUCT;
-} kUntypedNodeBase;
+} kNodeBase;
 
 #define NODE_LIST_OP(OP)\
 	OP(Done)\
@@ -120,7 +120,7 @@ typedef struct kFieldNode {
 typedef struct kBoxNode {
 	KNODE_BASE_STRUCT;
 	/* Object(Expr) */
-	kUntypedNodeBase *Expr;
+	kNodeBase *Expr;
 } kBoxNode;
 
 typedef struct kMethodCallNode {
@@ -133,15 +133,15 @@ typedef struct kMethodCallNode {
 typedef struct kAndNode {
 	KNODE_BASE_STRUCT;
 	/* (Left && Right) */
-	kUntypedNodeBase *Left;
-	kUntypedNodeBase *Right;
+	kNodeBase *Left;
+	kNodeBase *Right;
 } kAndNode;
 
 typedef struct kOrNode {
 	KNODE_BASE_STRUCT;
 	/* (Left || Right) */
-	kUntypedNodeBase *Left;
-	kUntypedNodeBase *Right;
+	kNodeBase *Left;
+	kNodeBase *Right;
 } kOrNode;
 
 typedef struct kAssignNode {
@@ -149,7 +149,8 @@ typedef struct kAssignNode {
 	/* frame[Index] = Right */
 	kToken    *TermToken;
 	uintptr_t Index;
-	kUntypedNodeBase *Right;
+	kNodeBase *Left;
+	kNodeBase *Right;
 } kAssignNode;
 
 typedef struct kLetNode {
@@ -157,8 +158,8 @@ typedef struct kLetNode {
 	/* let frame[Index] = Right in Block end*/
 	kToken    *TermToken;
 	uintptr_t Index;
-	kUntypedNodeBase *Right;
-	kUntypedNodeBase *Block;
+	kNodeBase *Right;
+	kNodeBase *Block;
 } kLetNode;
 
 typedef struct kBlockNode {
@@ -170,9 +171,9 @@ typedef struct kBlockNode {
 typedef struct kIfNode {
 	KNODE_BASE_STRUCT;
 	/* If CondExpr then ThenBlock else ElseBlock */
-	kUntypedNodeBase *CondExpr;
-	kUntypedNodeBase *ThenBlock;
-	kUntypedNodeBase *ElseBlock;
+	kNodeBase *CondExpr;
+	kNodeBase *ThenBlock;
+	kNodeBase *ElseBlock;
 } kIfNode;
 
 typedef struct kSwitchNode {
@@ -185,7 +186,7 @@ typedef struct kSwitchNode {
 	 *  ...
 	 * }
 	 */
-	kUntypedNodeBase *CondExpr;
+	kNodeBase *CondExpr;
 	kArray *Labels;
 	kArray *Blocks;
 } kSwitchNode;
@@ -193,15 +194,15 @@ typedef struct kSwitchNode {
 typedef struct kLoopNode {
 	KNODE_BASE_STRUCT;
 	/* while CondExpr then { LoopBlock; IterationExpr } */
-	kUntypedNodeBase *CondExpr;
-	kUntypedNodeBase *LoopBody;
-	kUntypedNodeBase *IterationExpr;
+	kNodeBase *CondExpr;
+	kNodeBase *LoopBody;
+	kNodeBase *IterationExpr;
 } kLoopNode;
 
 typedef struct kReturnNode {
 	KNODE_BASE_STRUCT;
 	/* return Expr */
-	kUntypedNodeBase *Expr;
+	kNodeBase *Expr;
 } kReturnNode;
 
 typedef struct kLabelNode {
@@ -227,20 +228,20 @@ typedef struct kTryNode {
 	 *   FinallyBlock
 	 * end
 	 * */
-	kUntypedNodeBase *TryBlock;
+	kNodeBase *TryBlock;
 	kArray *CatchedExceptionPairs; /* (ExceptionType, CatchBlock) */
-	kUntypedNodeBase *FinallyBlock;
+	kNodeBase *FinallyBlock;
 } kTryNode;
 
 typedef struct kThrowNode {
 	KNODE_BASE_STRUCT;
 	/* THROW ExceptionExpr */
-	kUntypedNodeBase *ExceptionExpr;
+	kNodeBase *ExceptionExpr;
 } kThrowNode;
 
 typedef struct kFunctionNode {
 	KNODE_BASE_STRUCT;
-	/* [Method, DefaultObject, [Env1, Env2, ...., EnvN], [Param1, Param2, ..., ParamN]] */
+	/* [Method, DefaultObject, [Env1, Env2, ...., EnvN]] */
 	/*
 	 * void f() {
 	 *   int Env1, Env2;
@@ -249,8 +250,9 @@ typedef struct kFunctionNode {
 	 *   }
 	 * }
 	 */
-	kArray *EnvExprList;
-	kArray *ParamList;
+	kMethod *Method;
+	kNameSpace *NS;
+	kArray  *EnvList;
 	} kFunctionNode;
 
 typedef struct kErrorNode {
@@ -258,12 +260,13 @@ typedef struct kErrorNode {
 	kString *ErrorMessage;
 } kErrorNode;
 
-typedef union kUntypedNode2 {
+typedef union kNodeImpl {
 	kUntypedNode asUntypedNode;
+	kNodeBase    asBaseNode;
 #define DEFINE_UNION_FIELD(T) struct k##T##Node as##T;
-	NODE_LIST_OP(DEFINE_UNION_FIELD);
+	NODE_LIST_OP(DEFINE_UNION_FIELD)
 #undef DEFINE_UNION_FIELD
-} kUntypedNode2;
+} kNodeImpl;
 
 typedef enum KNodeType {
 	KNode_UntypedNode,
@@ -322,5 +325,31 @@ typedef enum KNodeType {
 #define KType_FunctionNode   KClass_FunctionNode  ->typeId
 #define KType_ErrorNode      KClass_ErrorNode     ->typeId
 #define KType_UntypedNode    KClass_UntypedNode   ->typeId
+
+typedef struct KNodeFactory {
+	kNodeBase *(*CreateDoneNode)(KonohaContext *kctx, ktypeattr_t Type);
+	kNodeBase *(*CreateConstNode)(KonohaContext *kctx, ktypeattr_t Type, KonohaValue *Value);
+	kNodeBase *(*CreateNewNode)(KonohaContext *kctx, ktypeattr_t Type);
+	kNodeBase *(*CreateNullNode)(KonohaContext *kctx, ktypeattr_t Type);
+	kNodeBase *(*CreateLocalNode)(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, uintptr_t Index);
+	kNodeBase *(*CreateFieldNode)(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, kuhalfword_t Index, kuhalfword_t Xindex);
+	kNodeBase *(*CreateBoxNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Expr);
+	kNodeBase *(*CreateMethodCallNode)(KonohaContext *kctx, ktypeattr_t Type, kMethod *Method, kArray *Param);
+	kNodeBase *(*CreateAndNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Left, kNodeBase *Right);
+	kNodeBase *(*CreateOrNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Left, kNodeBase *Right);
+	kNodeBase *(*CreateAssignNode)(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, uintptr_t Index, kNodeBase *Left, kNodeBase *Right);
+	kNodeBase *(*CreateLetNode)(KonohaContext *kctx, ktypeattr_t Type, kToken *Term, uintptr_t Index, kNodeBase *Right, kNodeBase *Block);
+	kNodeBase *(*CreateBlockNode)(KonohaContext *kctx, ktypeattr_t Type, kArray *ExprList);
+	kNodeBase *(*CreateIfNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Cond, kNodeBase *Then, kNodeBase *Else);
+	kNodeBase *(*CreateSwitchNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Cond);
+	kNodeBase *(*CreateLoopNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Init, kNodeBase *Cond, kNodeBase *Loop, kNodeBase *Iter);
+	kNodeBase *(*CreateReturnNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Expr);
+	kNodeBase *(*CreateLabelNode)(KonohaContext *kctx, ktypeattr_t Type, ksymbol_t Label);
+	kNodeBase *(*CreateJumpNode)(KonohaContext *kctx, ktypeattr_t Type, ksymbol_t Label);
+	kNodeBase *(*CreateTryNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *TryBlock, kNodeBase *FinallyBlock);
+	kNodeBase *(*CreateThrowNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *ExceptionExpr);
+	kNodeBase *(*CreateFunctionNode)(KonohaContext *kctx, ktypeattr_t Type, kMethod *Method, kNameSpace *NS);
+	kNodeBase *(*CreateErrorNode)(KonohaContext *kctx, ktypeattr_t Type, kString *ErrorMessage);
+} KNodeFactory;
 
 #endif /* NODE2_H_ */
