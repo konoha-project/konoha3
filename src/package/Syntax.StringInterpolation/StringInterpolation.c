@@ -143,7 +143,7 @@ static KMETHOD Expression_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *
 	/* [before] "aaa${bbb}ccc"
 	 * [after]  "" + "aaa" + bbb + "ccc"
 	 */
-	KLIB kUntypedNode_AddNode(kctx, expr, new_ConstNode(kctx, ns, NULL, UPCAST(TS_EMPTY)));
+	KLIB kUntypedNode_AddNode(kctx, expr, (kUntypedNode *) new_ConstNode(kctx, ns, NULL, UPCAST(TS_EMPTY))); /*FIXME*/
 	while(true) {
 		start = strstr(str, "${");
 		if(start == NULL)
@@ -157,18 +157,18 @@ static KMETHOD Expression_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *
 			break;
 		kUntypedNode *newexpr = ParseSource(kctx, ns, start+2, end-(start+2));
 		if(start - str > 0) {
-			kUntypedNode *first = new_ConstNode(kctx, ns, NULL,
+			kNodeBase *first = new_ConstNode(kctx, ns, NULL,
 					UPCAST(KLIB new_kString(kctx, OnGcStack, str, (start - str), 0)));
-			KLIB kUntypedNode_AddNode(kctx, expr, first);
+			KLIB kUntypedNode_AddNode(kctx, expr, (kUntypedNode *) first); /*FIXME*/
 		}
 		KLIB kUntypedNode_AddNode(kctx, expr, newexpr);
 		str = end + 1;
 	}
 
 	if((start == NULL) || (start != NULL && end == NULL)) {
-		kUntypedNode *rest = new_ConstNode(kctx, ns, KClass_String,
+		kNodeBase *rest = new_ConstNode(kctx, ns, KClass_String,
 				UPCAST(KLIB new_kString(kctx, OnGcStack, str, strlen(str), 0)));
-		KLIB kUntypedNode_AddNode(kctx, expr, rest);
+		KLIB kUntypedNode_AddNode(kctx, expr, (kUntypedNode *) rest); /*FIXME*/
 	}
 
 	/* (+ 1 2 3 4) => (+ (+ (+ 1 2) 3 ) 4) */

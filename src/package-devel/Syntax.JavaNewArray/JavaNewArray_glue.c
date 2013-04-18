@@ -46,7 +46,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 				/* new Type1[] => Array<Type1>.newList */
 				KClass *arrayClass = KClass_p0(kctx, KClass_Array, foundClass->typeId);
 				newToken->symbol = KSymbol_("newArray");
-				kUntypedNode *arg0 = new_ConstNode(kctx, ns, NULL, KLIB Knull(kctx, arrayClass));
+				kNodeBase *arg0 = new_ConstNode(kctx, ns, NULL, KLIB Knull(kctx, arrayClass));
 				KLIB kUntypedNode_Op(kctx, stmt, newToken, 1, arg0);
 				KLIB AppendParsedNode(kctx, stmt, RangeGroup(GroupTokenList), NULL, ParseExpressionOption, NULL);
 				KReturnUnboxValue(nextIdx+1);

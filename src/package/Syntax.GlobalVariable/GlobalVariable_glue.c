@@ -77,7 +77,7 @@ static kNodeBase *TypeDeclAndMakeSetter(KonohaContext *kctx, kUntypedNode *stmt,
 {
 	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termNode->TermToken->symbol);
 	if(mtd != NULL) {
-		kUntypedNode *recvNode =  new_ConstNode(kctx, ns, NULL, scr);
+		kNodeBase *recvNode =  new_ConstNode(kctx, ns, NULL, scr);
 		return KLIB new_MethodNode(kctx, ns, KClass_void, mtd, 2, recvNode, valueNode);
 	}
 	return NULL;

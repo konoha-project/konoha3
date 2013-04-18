@@ -191,7 +191,7 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *fieldToken = expr->NodeList->TokenItems[0];
 	ksymbol_t fn = fieldToken->symbol;
 	kNodeBase *self = KLIB TypeCheckNodeAt(kctx, expr, 1, ns, KClass_INFER, 0);
-	if(self != K_NULLNODE) {
+	if(self != (kNodeBase *) K_NULLNODE) {
 		kMethod *mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, KClass_(self->typeAttr), fn);
 		if(mtd != NULL) {
 			KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], mtd);
