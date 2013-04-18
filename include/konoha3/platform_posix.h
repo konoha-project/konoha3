@@ -172,14 +172,18 @@ static KPackageHandler *LoadPackageHandler(KonohaContext *kctx, const char *pack
 	return NULL;
 }
 
-static void BEFORE_LoadScript(KonohaContext *kctx, const char *filename) { }
-static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)  { }
+static void BEFORE_LoadScript(KonohaContext *kctx, const char *filename) { (void)kctx; (void) filename; }
+static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)  { (void)kctx; (void) filename; }
 
 // -------------------------------------------------------------------------
 /* I18N */
 
 static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset, const char *sourceCharset, KTraceInfo *trace)
 {
+	(void) kctx;
+	(void) targetCharset;
+	(void) sourceCharset;
+	(void) trace;
 	return ICONV_NULL;
 }
 
@@ -582,6 +586,7 @@ static void PlatformApi_loadReadline(KonohaFactory *plat)
 
 static kunused int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 {
+	(void)kctx;
 	switch(errno) {  // C Standard Library
 	case EILSEQ: /* Results from an illegal byte sequence */
 		return userFault | SoftwareFault;

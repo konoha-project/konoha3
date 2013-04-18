@@ -103,17 +103,18 @@ static void KBuffer_WriteTokenSymbol(KonohaContext *kctx, KBuffer *wb, kToken *t
 	KLIB KBuffer_printf(kctx, wb, "%s%s %s%s ", KSymbol_Fmt2(tk->tokenType), KSymbol_Fmt2(tk->symbol));
 }
 
-static void KBuffer_WriteTokenText(KonohaContext *kctx, KBuffer *wb, kToken *tk)
-{
-	const char *text = IS_String(tk->text) ? kString_text(tk->text) : "...";
-	char c = kToken_GetOpenChar(tk);
-	if(c != 0) {
-		KLIB KBuffer_printf(kctx, wb, "%c%s%c", c, text, kToken_GetCloseChar(tk));
-	}
-	else {
-		KLIB KBuffer_printf(kctx, wb, "%s", text);
-	}
-}
+//static void KBuffer_WriteTokenText(KonohaContext *kctx, KBuffer *wb, kToken *tk)
+//{
+//	const char *text = IS_String(tk->text) ? kString_text(tk->text) : "...";
+//	char c = kToken_GetOpenChar(tk);
+//	if(c != 0) {
+//		KLIB KBuffer_printf(kctx, wb, "%c%s%c", c, text, kToken_GetCloseChar(tk));
+//	}
+//	else {
+//		KLIB KBuffer_printf(kctx, wb, "%s", text);
+//	}
+//}
+
 #endif/*USE_SMALLBUILD*/
 
 static void kToken_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
@@ -168,36 +169,36 @@ static void kUntypedNode_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisito
 }
 
 #ifndef USE_SMALLBUILD
-static void kUntypedNodeTerm_format(KonohaContext *kctx, kObject *o, KonohaValue *v, int pos, KBuffer *wb)
-{
-	if(IS_Token(o)) {
-		KBuffer_WriteTokenText(kctx, wb, (kToken *)o);
-	}
-	else {
-		KStackSetObjectValue(v[pos].asObject, o);
-		kObject_class(o)->format(kctx, v, pos, wb);
-	}
-}
+//static void kUntypedNodeTerm_format(KonohaContext *kctx, kObject *o, KonohaValue *v, int pos, KBuffer *wb)
+//{
+//	if(IS_Token(o)) {
+//		KBuffer_WriteTokenText(kctx, wb, (kToken *)o);
+//	}
+//	else {
+//		KStackSetObjectValue(v[pos].asObject, o);
+//		kObject_class(o)->format(kctx, v, pos, wb);
+//	}
+//}
 
 #define DefineCase(NAME)  case KNode_##NAME:   return #NAME;
 
-static const char *KNode_text(knode_t node)
-{
-	switch(node) {
-	NODE_LIST_OP(DefineCase)
-	}
-	return "unknown";
-}
+//static const char *KNode_text(knode_t node)
+//{
+//	switch(node) {
+//	NODE_LIST_OP(DefineCase)
+//	}
+//	return "unknown";
+//}
+//
+//static void KBuffer_WriteIndent(KonohaContext *kctx, KBuffer *wb, int pos)
+//{
+//	int i;
+//	for(i = 0; i < pos; i++) {
+//		KLIB KBuffer_Write(kctx, wb, " ", 1);
+//	}
+//}
 
-static void KBuffer_WriteIndent(KonohaContext *kctx, KBuffer *wb, int pos)
-{
-	int i;
-	for(i = 0; i < pos; i++) {
-		KLIB KBuffer_Write(kctx, wb, " ", 1);
-	}
-}
 #endif
-
 
 static void kUntypedNode_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuffer *wb)
 {
@@ -312,14 +313,14 @@ static kUntypedNode *kUntypedNode_AddNode(KonohaContext *kctx, kUntypedNode *sel
 	return node;
 }
 
-static kUntypedNode *kUntypedNode_SetNodeAt(KonohaContext *kctx, kUntypedNode *self, size_t n, kUntypedNode *node)
-{
-	DBG_ASSERT(IS_Array(self->NodeList));
-	DBG_ASSERT(n < kArray_size(self->NodeList));
-	KFieldSet(self->NodeList, self->NodeList->NodeItems[n], node);
-	KFieldSet(node, node->Parent, self);
-	return self;
-}
+//static kUntypedNode *kUntypedNode_SetNodeAt(KonohaContext *kctx, kUntypedNode *self, size_t n, kUntypedNode *node)
+//{
+//	DBG_ASSERT(IS_Array(self->NodeList));
+//	DBG_ASSERT(n < kArray_size(self->NodeList));
+//	KFieldSet(self->NodeList, self->NodeList->NodeItems[n], node);
+//	KFieldSet(node, node->Parent, self);
+//	return self;
+//}
 
 static void kUntypedNode_InsertAfter(KonohaContext *kctx, kUntypedNode *self, kUntypedNode *target, kUntypedNode *node)
 {

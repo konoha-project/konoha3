@@ -37,7 +37,7 @@ static kNodeBase *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kUntypedNode *exp
 	if(lsfp[K_RTNIDX].asNode == K_NULLNODE) {
 		DBG_ASSERT(expr->typeAttr == KType_var); // untyped
 	}
-	DBG_ASSERT(IS_UntypedNode(lsfp[K_RTNIDX].asObject));/*FIXME: IS_TypedNode(Node) */
+	DBG_ASSERT(IS_TypedNode(lsfp[K_RTNIDX].asObject));
 	return (kNodeBase *)lsfp[K_RTNIDX].asObject;
 }
 

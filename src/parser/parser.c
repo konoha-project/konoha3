@@ -33,10 +33,6 @@ extern "C" {
 #include "konoha3.h"
 #include "konoha3/import/methoddecl.h"
 
-// global variable
-KONOHA_EXPORT(int) verbose_sugar;
-int verbose_sugar = 0;
-
 #include "import/perror.h"
 #include "import/parser_class.h"
 #include "import/namespace.h"
@@ -199,7 +195,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	l->TypeCheckMethodParam  = TypeCheckMethodParam;
 	l->new_MethodNode        = new_MethodNode;
 	l->AddLocalVariable      = AddLocalVariable;
-	l->kUntypedNode_DeclType        = kUntypedNode_DeclType;
+	l->kUntypedNode_DeclType = kUntypedNode_DeclType;
 	l->TypeVariableNULL      = TypeVariableNULL;
 
 	l->kNameSpace_DefineSyntax = kNameSpace_DefineSyntax;
@@ -365,7 +361,7 @@ KONOHA_EXPORT(kbool_t) Konoha_LoadScript(KonohaContext* kctx, const char *script
 KONOHA_EXPORT(kbool_t) Konoha_Eval(KonohaContext* kctx, const char *script, kfileline_t uline)
 {
 	KBeginKonohaContext();
-	if(verbose_sugar) {
+	if(PLATAPI verbose_sugar) {
 		DUMP_P("\n>>>----\n'%s'\n------\n", script);
 	}
 	KPARSERM->h.setupModelContext(kctx, (KRuntimeModel *)KPARSERM, 0/*lazy*/);

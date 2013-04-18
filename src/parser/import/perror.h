@@ -34,7 +34,7 @@ extern "C" {
 static kbool_t IsPrintableMessage(KonohaContext *kctx, KParserContext *sugarContext, kinfotag_t taglevel)
 {
 	if(sugarContext->isBlockedErrorMessage) return false;
-	if(verbose_sugar) return true;
+	if(PLATAPI verbose_sugar) return true;
 	if(taglevel == InfoTag) {
 		if(KonohaContext_Is(Interactive, kctx) || KonohaContext_Is(CompileOnly, kctx) || KonohaContext_Is(Debug, kctx)) {
 			return true;

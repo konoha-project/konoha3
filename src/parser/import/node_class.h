@@ -449,155 +449,165 @@ static void kErrorNode_format(KonohaContext *kctx, KonohaValue *v, int pos, KBuf
 	KLIB KBuffer_printf(kctx, wb, "(Error %s '%s')", KType_text(Node->typeAttr), kString_text(ErrMsg));
 }
 
+#define SET_STRUCTNAME_WITH_SUPERCLASS(VAR, C) do {\
+	SETSTRUCTNAME(VAR, C);\
+	VAR.superTypeId = mod->cNodeBase->typeId;\
+} while(0)
 
 static void InitNodeClass(KonohaContext *kctx, KParserModel *mod)
 {
+	KDEFINE_CLASS defNodeBase = {0};
+	defNodeBase.structname = "NodeBase";
+	defNodeBase.typeId = KTypeAttr_NewId;
+	defNodeBase.cstruct_size = sizeof(kNodeImpl);
+	mod->cNodeBase = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defNodeBase, 0);
+
 	KDEFINE_CLASS defDone = {0};
-	SETSTRUCTNAME(defDone, DoneNode);
-	defDone.format   = kDoneNode_format;
+	SET_STRUCTNAME_WITH_SUPERCLASS(defDone, DoneNode);
+	defDone.format = kDoneNode_format;
 	mod->cDoneNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defDone, 0);
 
 	KDEFINE_CLASS defConst = {0};
-	SETSTRUCTNAME(defConst, ConstNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defConst, ConstNode);
 	defConst.init     = kConstNode_init;
 	defConst.reftrace = kConstNode_reftrace;
 	defConst.format   = kConstNode_format;
 	mod->cConstNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defConst, 0);
 
 	KDEFINE_CLASS defNew = {0};
-	SETSTRUCTNAME(defNew, NewNode);
-	defNew.format   = kNewNode_format;
+	SET_STRUCTNAME_WITH_SUPERCLASS(defNew, NewNode);
+	defNew.format = kNewNode_format;
 	mod->cNewNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defNew, 0);
 
 	KDEFINE_CLASS defNull = {0};
-	SETSTRUCTNAME(defNull, NullNode);
-	defNull.format   = kNullNode_format;
+	SET_STRUCTNAME_WITH_SUPERCLASS(defNull, NullNode);
+	defNull.format = kNullNode_format;
 	mod->cNullNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defNull, 0);
 
 	KDEFINE_CLASS defLocal = {0};
-	SETSTRUCTNAME(defLocal, LocalNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defLocal, LocalNode);
 	defLocal.init     = kLocalNode_init;
 	defLocal.reftrace = kLocalNode_reftrace;
 	defLocal.format   = kLocalNode_format;
 	mod->cLocalNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defLocal, 0);
 
 	KDEFINE_CLASS defField = {0};
-	SETSTRUCTNAME(defField, FieldNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defField, FieldNode);
 	defField.init     = kFieldNode_init;
 	defField.reftrace = kFieldNode_reftrace;
 	defField.format   = kFieldNode_format;
 	mod->cFieldNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defField, 0);
 
 	KDEFINE_CLASS defBox = {0};
-	SETSTRUCTNAME(defBox, BoxNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defBox, BoxNode);
 	defBox.init     = kBoxNode_init;
 	defBox.reftrace = kBoxNode_reftrace;
 	defBox.format   = kBoxNode_format;
 	mod->cBoxNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defBox, 0);
 
 	KDEFINE_CLASS defMethodCall = {0};
-	SETSTRUCTNAME(defMethodCall, MethodCallNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defMethodCall, MethodCallNode);
 	defMethodCall.init     = kMethodCallNode_init;
 	defMethodCall.reftrace = kMethodCallNode_reftrace;
 	defMethodCall.format   = kMethodCallNode_format;
 	mod->cMethodCallNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defMethodCall, 0);
 
 	KDEFINE_CLASS defAnd = {0};
-	SETSTRUCTNAME(defAnd, AndNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defAnd, AndNode);
 	defAnd.init     = kAndNode_init;
 	defAnd.reftrace = kAndNode_reftrace;
 	defAnd.format   = kAndNode_format;
 	mod->cAndNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defAnd, 0);
 
 	KDEFINE_CLASS defOr = {0};
-	SETSTRUCTNAME(defOr, OrNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defOr, OrNode);
 	defOr.init     = kOrNode_init;
 	defOr.reftrace = kOrNode_reftrace;
 	defOr.format   = kOrNode_format;
 	mod->cOrNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defOr, 0);
 
 	KDEFINE_CLASS defAssign = {0};
-	SETSTRUCTNAME(defAssign, AssignNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defAssign, AssignNode);
 	defAssign.init     = kAssignNode_init;
 	defAssign.reftrace = kAssignNode_reftrace;
 	defAssign.format   = kAssignNode_format;
 	mod->cAssignNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defAssign, 0);
 
 	KDEFINE_CLASS defLet = {0};
-	SETSTRUCTNAME(defLet, LetNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defLet, LetNode);
 	defLet.init     = kLetNode_init;
 	defLet.reftrace = kLetNode_reftrace;
 	defLet.format   = kLetNode_format;
 	mod->cLetNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defLet, 0);
 
 	KDEFINE_CLASS defBlock = {0};
-	SETSTRUCTNAME(defBlock, BlockNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defBlock, BlockNode);
 	defBlock.init     = kBlockNode_init;
 	defBlock.reftrace = kBlockNode_reftrace;
 	defBlock.format   = kBlockNode_format;
 	mod->cBlockNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defBlock, 0);
 
 	KDEFINE_CLASS defIf = {0};
-	SETSTRUCTNAME(defIf, IfNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defIf, IfNode);
 	defIf.init     = kIfNode_init;
 	defIf.reftrace = kIfNode_reftrace;
 	defIf.format   = kIfNode_format;
 	mod->cIfNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defIf, 0);
 
 	KDEFINE_CLASS defSwitch = {0};
-	SETSTRUCTNAME(defSwitch, SwitchNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defSwitch, SwitchNode);
 	defSwitch.init     = kSwitchNode_init;
 	defSwitch.reftrace = kSwitchNode_reftrace;
 	defSwitch.format   = kSwitchNode_format;
 	mod->cSwitchNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defSwitch, 0);
 
 	KDEFINE_CLASS defLoop = {0};
-	SETSTRUCTNAME(defLoop, LoopNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defLoop, LoopNode);
 	defLoop.init     = kLoopNode_init;
 	defLoop.reftrace = kLoopNode_reftrace;
 	defLoop.format   = kLoopNode_format;
 	mod->cLoopNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defLoop, 0);
 
 	KDEFINE_CLASS defReturn = {0};
-	SETSTRUCTNAME(defReturn, ReturnNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defReturn, ReturnNode);
 	defReturn.init     = kReturnNode_init;
 	defReturn.reftrace = kReturnNode_reftrace;
 	defReturn.format   = kReturnNode_format;
 	mod->cReturnNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defReturn, 0);
 
 	KDEFINE_CLASS defLabel = {0};
-	SETSTRUCTNAME(defLabel, LabelNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defLabel, LabelNode);
 	defLabel.format   = kLabelNode_format;
 	mod->cLabelNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defLabel, 0);
 
 	KDEFINE_CLASS defJump = {0};
-	SETSTRUCTNAME(defJump, JumpNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defJump, JumpNode);
 	defJump.format   = kJumpNode_format;
 	mod->cJumpNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defJump, 0);
 
 	KDEFINE_CLASS defTry = {0};
-	SETSTRUCTNAME(defTry, TryNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defTry, TryNode);
 	defTry.init     = kTryNode_init;
 	defTry.reftrace = kTryNode_reftrace;
 	defTry.format   = kTryNode_format;
 	mod->cTryNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defTry, 0);
 
 	KDEFINE_CLASS defThrow = {0};
-	SETSTRUCTNAME(defThrow, ThrowNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defThrow, ThrowNode);
 	defThrow.init     = kThrowNode_init;
 	defThrow.reftrace = kThrowNode_reftrace;
 	defThrow.format   = kThrowNode_format;
 	mod->cThrowNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defThrow, 0);
 
 	KDEFINE_CLASS defFunction = {0};
-	SETSTRUCTNAME(defFunction, FunctionNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defFunction, FunctionNode);
 	defFunction.init     = kFunctionNode_init;
 	defFunction.reftrace = kFunctionNode_reftrace;
 	defFunction.format   = kFunctionNode_format;
 	mod->cFunctionNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defFunction, 0);
 
 	KDEFINE_CLASS defError = {0};
-	SETSTRUCTNAME(defError, ErrorNode);
+	SET_STRUCTNAME_WITH_SUPERCLASS(defError, ErrorNode);
 	defError.init     = kErrorNode_init;
 	defError.reftrace = kErrorNode_reftrace;
 	defError.format   = kErrorNode_format;

@@ -55,7 +55,7 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck2(stmt, expr, ns, reqc);
 	kUntypedNode *leftHandNode = (kUntypedNode *)kUntypedNode_At(expr, 1);
 	if(kUntypedNode_isSymbolTerm(leftHandNode)) {
-		kUntypedNode *texpr = KLIB TypeVariableNULL(kctx, leftHandNode, ns, KClass_INFER);
+		kNodeBase *texpr = KLIB TypeVariableNULL(kctx, leftHandNode, ns, KClass_INFER);
 		if(texpr == NULL) {
 			kNodeBase *rightHandNode = KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_INFER, 0);
 			if(rightHandNode != (kNodeBase *) K_NULLNODE) {
@@ -63,7 +63,7 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 		else {
-			KFieldSet(expr->NodeList, expr->NodeList->NodeItems[1], texpr);
+			KFieldSet(expr->NodeList, expr->NodeList->NodeItems[1], (kUntypedNode *) texpr); /*FIXME */
 		}
 	}
 }

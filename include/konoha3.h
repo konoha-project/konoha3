@@ -1181,6 +1181,7 @@ struct kObjectVar {
 #define kObject_class(o)             ((o)->h.ct)
 #define kObject_typeId(o)            (kObject_class(o)->typeId)
 #define kObject_baseTypeId(o)        (kObject_class(o)->baseTypeId)
+#define kObject_superTypeId(o)       (kObject_class(o)->superTypeId)
 #define kObject_Unbox(o)             (kObject_class(o)->unbox(kctx, o))
 #define kObject_p0(o)                (kObject_class(o)->p0)
 
@@ -2048,6 +2049,7 @@ typedef struct KParserModel {
 	KClass *cSyntax;
 	KClass *cToken;
 	KClass *cTokenArray;
+	KClass *cNodeBase;
 	KClass *cUntypedNode;
 #define DEFINE_NODE_CLASS(T)  KClass *c##T##Node;
 	NODE_LIST_OP(DEFINE_NODE_CLASS)
@@ -2422,7 +2424,7 @@ struct KonohaLibVar {
 	kNodeBase*      (*TypeCheckMethodParam)(KonohaContext *, kMethod *mtd, kUntypedNode *, kNameSpace *, KClass *);
 	int         (*AddLocalVariable)(KonohaContext *, kNameSpace *, ktypeattr_t, ksymbol_t);
 	void        (*kUntypedNode_DeclType)(KonohaContext *, kUntypedNode *, kNameSpace *, ktypeattr_t, kUntypedNode *, kObject *, KTypeDeclFunc);
-	kUntypedNode*      (*TypeVariableNULL)(KonohaContext *, kUntypedNode *, kNameSpace *, KClass *);
+	kNodeBase*      (*TypeVariableNULL)(KonohaContext *, kUntypedNode *, kNameSpace *, KClass *);
 
 	void       (*kToken_ToError)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
 	kNodeBase *(*MessageNode)(KonohaContext *, kUntypedNode *, kToken *, kNameSpace *, kinfotag_t, const char *fmt, ...);

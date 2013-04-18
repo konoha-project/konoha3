@@ -29,7 +29,7 @@
 
 static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 {
-	if(verbose_sugar) {
+	if(PLATAPI verbose_sugar) {
 		if(n < 0) n = (short) tk->uline;
 		DUMP_P("Token[%d] '%s' TokenType=%s%s", n, KToken_t(tk), KSymbol_Fmt2(tk->tokenType));
 		if(kToken_IsIndent(tk)) {
@@ -64,7 +64,7 @@ static void dumpIndent(KonohaContext *kctx, int nest)
 
 static void dumpTokenArray(KonohaContext *kctx, int nest, kArray *a, int s, int e)
 {
-	if(verbose_sugar) {
+	if(PLATAPI verbose_sugar) {
 		if(nest == 0) DUMP_P(">>>\n");
 		while(s < e) {
 			kToken *tk = a->TokenItems[s];

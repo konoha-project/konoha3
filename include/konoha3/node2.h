@@ -276,6 +276,7 @@ typedef enum KNodeType {
 	KNode_MAX
 } KNodeType;
 
+#define KClass_NodeBase       SUGAR cNodeBase
 #define KClass_DoneNode       SUGAR cDoneNode
 #define KClass_ConstNode      SUGAR cConstNode
 #define KClass_NewNode        SUGAR cNewNode
@@ -301,6 +302,7 @@ typedef enum KNodeType {
 #define KClass_ErrorNode      SUGAR cErrorNode
 #define KClass_UntypedNode    SUGAR cUntypedNode
 
+#define KType_NodeBase       KClass_NodeBase      ->typeId
 #define KType_DoneNode       KClass_DoneNode      ->typeId
 #define KType_ConstNode      KClass_ConstNode     ->typeId
 #define KType_NewNode        KClass_NewNode       ->typeId
@@ -325,6 +327,32 @@ typedef enum KNodeType {
 #define KType_FunctionNode   KClass_FunctionNode  ->typeId
 #define KType_ErrorNode      KClass_ErrorNode     ->typeId
 #define KType_UntypedNode    KClass_UntypedNode   ->typeId
+
+#define IS_DoneNode(O)       (kObject_class(O) == KClass_DoneNode)
+#define IS_ConstNode(O)      (kObject_class(O) == KClass_ConstNode)
+#define IS_NewNode(O)        (kObject_class(O) == KClass_NewNode)
+#define IS_NullNode(O)       (kObject_class(O) == KClass_NullNode)
+#define IS_LocalNode(O)      (kObject_class(O) == KClass_LocalNode)
+#define IS_FieldNode(O)      (kObject_class(O) == KClass_FieldNode)
+#define IS_BoxNode(O)        (kObject_class(O) == KClass_BoxNode)
+#define IS_MethodCallNode(O) (kObject_class(O) == KClass_MethodCallNode)
+#define IS_AndNode(O)        (kObject_class(O) == KClass_AndNode)
+#define IS_OrNode(O)         (kObject_class(O) == KClass_OrNode)
+#define IS_AssignNode(O)     (kObject_class(O) == KClass_AssignNode)
+#define IS_LetNode(O)        (kObject_class(O) == KClass_LetNode)
+#define IS_BlockNode(O)      (kObject_class(O) == KClass_BlockNode)
+#define IS_IfNode(O)         (kObject_class(O) == KClass_IfNode)
+#define IS_SwitchNode(O)     (kObject_class(O) == KClass_SwitchNode)
+#define IS_LoopNode(O)       (kObject_class(O) == KClass_LoopNode)
+#define IS_ReturnNode(O)     (kObject_class(O) == KClass_ReturnNode)
+#define IS_LabelNode(O)      (kObject_class(O) == KClass_LabelNode)
+#define IS_JumpNode(O)       (kObject_class(O) == KClass_JumpNode)
+#define IS_TryNode(O)        (kObject_class(O) == KClass_TryNode)
+#define IS_ThrowNode(O)      (kObject_class(O) == KClass_ThrowNode)
+#define IS_FunctionNode(O)   (kObject_class(O) == KClass_FunctionNode)
+#define IS_ErrorNode(O)      (kObject_class(O) == KClass_ErrorNode)
+
+#define IS_TypedNode(O)      (kObject_superTypeId(O) == KType_NodeBase && kObject_class(O) != KClass_UntypedNode)
 
 typedef struct KNodeFactory {
 	kNodeBase *(*CreateDoneNode)(KonohaContext *kctx, ktypeattr_t Type);
