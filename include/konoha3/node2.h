@@ -342,7 +342,7 @@ typedef struct KNodeFactory {
 	kNodeBase *(*CreateBlockNode)(KonohaContext *kctx, ktypeattr_t Type, kArray *ExprList, unsigned begin, unsigned end);
 	kNodeBase *(*CreateIfNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Cond, kNodeBase *Then, kNodeBase *Else);
 	kNodeBase *(*CreateSwitchNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Cond);
-	kNodeBase *(*CreateLoopNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Init, kNodeBase *Cond, kNodeBase *Loop, kNodeBase *Iter);
+	kNodeBase *(*CreateLoopNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Cond, kNodeBase *Loop, kNodeBase *Iter);
 	kNodeBase *(*CreateReturnNode)(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Expr);
 	kNodeBase *(*CreateLabelNode)(KonohaContext *kctx, ktypeattr_t Type, ksymbol_t Label);
 	kNodeBase *(*CreateJumpNode)(KonohaContext *kctx, ktypeattr_t Type, ksymbol_t Label);

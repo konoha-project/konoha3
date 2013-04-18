@@ -132,11 +132,11 @@ static void Syntax_defineSyntaxMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 	kparamtype_t P_FuncToken[] = {{KType_Token}, {KType_String}};
 	int KType_FuncToken = (KLIB KClass_Generics(kctx, KClass_Func, KType_Int, 2, P_FuncToken))->typeId;
 	/* Func[Int, Node, Symbol, Token[], Int, Int, Int] */
-	kparamtype_t P_FuncParse[] = {{KType_Node}, {KType_Symbol}, {KType_TokenArray}, {KType_Int}, {KType_Int}, {KType_Int}};
+	kparamtype_t P_FuncParse[] = {{KType_UntypedNode}, {KType_Symbol}, {KType_TokenArray}, {KType_Int}, {KType_Int}, {KType_Int}};
 	int KType_FuncParse = (KLIB KClass_Generics(kctx, KClass_Func, KType_Int, 6, P_FuncParse))->typeId;
 	/* Func[Node, NameSpace, Object] */
-	kparamtype_t P_FuncType[] = {{KType_Node}, {KType_NameSpace}, {KType_Object}};
-	int KType_FuncType = (KLIB KClass_Generics(kctx, KClass_Func, KType_Node, 3, P_FuncType))->typeId;
+	kparamtype_t P_FuncType[] = {{KType_UntypedNode}, {KType_NameSpace}, {KType_Object}};
+	int KType_FuncType = (KLIB KClass_Generics(kctx, KClass_Func, KType_UntypedNode, 3, P_FuncType))->typeId;
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im, _F(Syntax_new), KType_Syntax, KType_Syntax, KMethodName_("new"), 1, TP_kw,
 		_Public|_Im, _F(Syntax_newParent), KType_Syntax, KType_Syntax, KMethodName_("new"), 1, KType_Syntax, KMethodName_("parent"),

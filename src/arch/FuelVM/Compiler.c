@@ -392,8 +392,9 @@ static kbool_t FuelVM_VisitLabelNode(KonohaContext *kctx, KBuilder *builder, kNo
 }
 
 
-static kbool_t FuelVM_VisitJumpNode(KonohaContext *kctx, KBuilder *builder, kNodeBase *stmt, void *thunk, ksymbol_t label)
+static kbool_t FuelVM_VisitJumpNode(KonohaContext *kctx, KBuilder *builder, kNodeBase *stmt, void *thunk)
 {
+	//ksymbol_t label;
 	assert(0 && "Not Implemented");
 	//kNodeBase *jump = kUntypedNode_GetNode(kctx, stmt, label);
 	//DBG_ASSERT(jump != NULL && IS_UntypedNode(jump));
@@ -522,7 +523,7 @@ static kbool_t FuelVM_VisitMethodCallNode(KonohaContext *kctx, KBuilder *builder
 		Params[i] = Node;
 	}
 
-	INode *MtdObj = CreateObject(BLD(builder), KType_Method, (void *) mtd);
+	INode *MtdObj = CreateObject(BLD(builder), TYPE_Method, (void *) mtd);
 	enum CallOp Op = (kMethod_Is(Virtual, mtd)) ? VirtualCall : DefaultCall;
 	Params[0] = MtdObj;
 	Inst = CreateICall(BLD(builder), Type, Op, 0/*kUntypedNode_uline(Expr)*/, Params, argc + 2);
@@ -666,7 +667,7 @@ static kbool_t FuelVM_VisitFunctionNode(KonohaContext *kctx, KBuilder *builder, 
 	kFunctionNode *Expr = (kFunctionNode *) expr;
 	kMethod *mtd = Expr->Method;
 	kObject *obj = Expr->EnvList->ObjectItems[1];
-	INode *MtdObj = CreateObject(BLD(builder), KType_Method, (void *) mtd);
+	INode *MtdObj = CreateObject(BLD(builder), TYPE_Method, (void *) mtd);
 
 	Type = ConvertToTypeId(kctx, kObject_class(obj)->typeId);
 	INode *NewEnv  = CreateNew(BLD(builder), 0, Type);
@@ -686,7 +687,7 @@ static kbool_t FuelVM_VisitFunctionNode(KonohaContext *kctx, KBuilder *builder, 
 	kNameSpace *ns = Expr->NS;
 	mtd =  KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Func, KMethodName_("_Create"), 2, KMethodMatch_NoOption);
 
-	INode *CallMtd = CreateObject(BLD(builder), KType_Method, (void *) mtd);
+	INode *CallMtd = CreateObject(BLD(builder), TYPE_Method, (void *) mtd);
 	INode *Params[4];
 	Params[0] = CallMtd;
 	Params[1] = NewFunc;

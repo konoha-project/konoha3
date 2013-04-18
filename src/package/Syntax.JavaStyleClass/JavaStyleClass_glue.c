@@ -57,7 +57,8 @@ static kNodeBase *CallTypeFunc(KonohaContext *kctx, kFunc *fo, kUntypedNode *exp
 	CallSugarMethod(kctx, lsfp, fo, 4, UPCAST(K_NULLNODE));
 	END_UnusedStack();
 	RESET_GCSTACK();
-	if(kUntypedNode_IsError(expr)) return expr;
+	if(kUntypedNode_IsError(expr))
+		return (kNodeBase *) expr;
 	if(lsfp[K_RTNIDX].asNode == K_NULLNODE) {
 		DBG_ASSERT(expr->typeAttr == KType_var); // untyped
 	}
@@ -80,7 +81,7 @@ static void class_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Ignored, _F(NameSpace_AllowImplicitField), KType_void, KType_NameSpace, KMethodName_("AllowImplicitField"), 1, KType_Boolean, KFieldName_("allow"),
-		_Public|_Const, _F(NameSpace_AddMethodDecl), KType_void, KType_NameSpace, KMethodName_("AddMethodDecl"), 1, KType_Node, KFieldName_("node"),
+		_Public|_Const, _F(NameSpace_AddMethodDecl), KType_void, KType_NameSpace, KMethodName_("AddMethodDecl"), 1, KType_UntypedNode, KFieldName_("node"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -218,7 +219,7 @@ static kUntypedNode* kUntypedNode_ParseClassNodeNULL(KonohaContext *kctx, kUntyp
 		KLIB kToken_ToBraceGroup(kctx, blockToken, ns, NULL);
 		KTokenSeq source = {ns, RangeGroup(blockToken->GroupTokenList)};
 		block = KLIB ParseNewNode(kctx, ns, source.tokenList, &source.beginIdx, source.endIdx, ParseMetaPatternOption, NULL);
-		KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_BlockPattern, KType_Node, block);
+		KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_BlockPattern, KType_UntypedNode, block);
 	}
 	return block;
 }
@@ -252,14 +253,15 @@ static kbool_t kUntypedNode_AddClassField(KonohaContext *kctx, kUntypedNode *stm
 			kString *name = lexpr->TermToken->text;
 			ksymbol_t symbol = KAsciiSymbol(kString_text(name), kString_size(name), KSymbol_NewId);
 			kNodeBase *vexpr =  KLIB TypeCheckNodeAt(kctx, expr, 2, ns, KClass_(ty), 0);
-			if(vexpr == K_NULLNODE) return false;
+			if(vexpr == (kNodeBase *) K_NULLNODE) return false;
 			if(kUntypedNode_node(vexpr) == KNode_Const) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
-				KClass_SetClassFieldObjectValue(kctx, definedClass, symbol, vexpr->ObjectConstValue);
-			}
-			else if(kUntypedNode_node(vexpr) == KNode_UnboxConst) {
-				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
-				KClass_SetClassFieldUnboxValue(kctx, definedClass, symbol, vexpr->unboxConstValue);
+				kConstNode *Node = (kConstNode *) vexpr;
+				if(KType_Is(UnboxType, Node->typeAttr)) {
+					KClass_SetClassFieldUnboxValue(kctx, definedClass, symbol, Node->ConstValue);
+				} else {
+					KClass_SetClassFieldObjectValue(kctx, definedClass, symbol, Node->ConstObject);
+				}
 			}
 			else if(kUntypedNode_node(vexpr) == KNode_Null) {
 				KLIB KClass_AddField(kctx, definedClass, ty, symbol);
@@ -320,19 +322,19 @@ static void kUntypedNode_AddMethodDeclNode(KonohaContext *kctx, kUntypedNode *bk
 			continue;
 		if(stmt->syn->keyword == KSymbol_MethodDeclPattern) {
 			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_("ClassName"), KType_Token, tokenClassName);
-			kUntypedNode *classParentBlock = kUntypedNode_GetParentNULL(classNode);
+			kNodeBase *classParentBlock = (kNodeBase *) kUntypedNode_GetParentNULL(classNode);
 			if(classParentBlock == NULL) {
-				classParentBlock = KNewNode(ns);
-				KLIB kUntypedNode_AddNode(kctx, classParentBlock, classNode);
-				kUntypedNode_Type(classParentBlock, KNode_Block, KType_void);
+				classParentBlock = SUGAR Factory.CreateBlockNode(kctx, KType_void, NULL, 0, 0);
+				KFieldSet(classParentBlock, ((kBlockNode *) classParentBlock)->ExprList, new_(Array, 0, OnField));
+				KLIB kArray_Add(kctx, ((kBlockNode *) classParentBlock)->ExprList, classNode);
 			}
 
 			/* Create 'NameSpace.AddMethodDecl(stmt)' */
-			kUntypedNode *arg0 = new_ConstNode(kctx, ns, NULL, UPCAST(ns));
-			kUntypedNode *arg1 = new_ConstNode(kctx, ns, NULL, UPCAST(stmt));
+			kNodeBase *arg0 = new_ConstNode(kctx, ns, NULL, UPCAST(ns));
+			kNodeBase *arg1 = new_ConstNode(kctx, ns, NULL, UPCAST(stmt));
 
 			kNodeBase *callNode = KLIB new_MethodNode(kctx, ns, KClass_NameSpace, AddMethod, 2, arg0, arg1);
-			KLIB kUntypedNode_AddNode(kctx, classParentBlock, callNode);
+			KLIB kArray_Add(kctx, ((kBlockNode *) classParentBlock)->ExprList, callNode);
 		}
 		else {
 			KLIB MessageNode(kctx, stmt, NULL, NULL, WarnTag, "%s is not available within the class clause", KSymbol_Fmt2(stmt->syn->keyword));
@@ -387,7 +389,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	kToken_SetTypeId(kctx, tokenClassName, ns, definedClass->typeId);
 	kUntypedNode_AddMethodDeclNode(kctx, block, tokenClassName, stmt);
-	KReturn(kUntypedNode_Type(stmt, KNode_Done, KType_void));
+	KReturn(SUGAR Factory.CreateDoneNode(kctx, KType_void));
 }
 
 static KMETHOD PatternMatch_ClassName(KonohaContext *kctx, KonohaStack *sfp)

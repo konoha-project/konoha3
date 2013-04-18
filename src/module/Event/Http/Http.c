@@ -28,8 +28,9 @@ extern "C" {
 
 #include <stdio.h>
 #include <pthread.h>
-#include <event.h>
-#include <evhttp.h>
+#include <event2/event.h>
+#include <event2/http.h>
+#include <event2/buffer.h>
 #include "konoha3.h"
 
 #define EVENTAPI PLATAPI EventModule.
@@ -159,7 +160,7 @@ static void http_handler(struct evhttp_request *req, void *args)
 	unsigned char *requestLine;
 	struct evbuffer *buf = evbuffer_new();
 
-	switch(req->type) {
+	switch(evhttp_request_get_command(req)) {
 		case EVHTTP_REQ_POST:
 			requestLine = evbuffer_pullup(body, -1);
 			requestLine[len] = '\0';

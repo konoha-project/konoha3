@@ -475,7 +475,7 @@ static kNodeBase *MakeNodeSetter(KonohaContext *kctx, kNodeBase *expr, kNameSpac
 	if(foundMethod != NULL) {
 		KFieldSet(callExpr, callExpr->Method, foundMethod);
 		KLIB kArray_Add(kctx, callExpr->Params, rightHandNode);
-		return KLIB TypeCheckMethodParam(kctx, foundMethod, expr, ns, reqc);
+		return KLIB TypeCheckMethodParam(kctx, foundMethod, (kUntypedNode *) expr, ns, reqc);
 	}
 	return KLIB MessageNode(kctx, /*FIXME*/(kUntypedNode *) callExpr, NULL, ns, ErrTag, "undefined setter");
 }
@@ -667,7 +667,7 @@ static kUntypedNode *BoxThisNode(KonohaContext *kctx, kUntypedNode *expr, kNameS
 	return thisNode;
 }
 
-static kUntypedNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kUntypedNode *expr, kNameSpace *ns, KClass* reqc)
+static kNodeBase *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kUntypedNode *expr, kNameSpace *ns, KClass* reqc)
 {
 	DBG_ASSERT(IS_Method(mtd));
 	KFieldSet(expr->NodeList, expr->NodeList->MethodItems[0], mtd);
@@ -677,23 +677,24 @@ static kUntypedNode *TypeCheckMethodParam(KonohaContext *kctx, kMethod *mtd, kUn
 	kParam *pa = kMethod_GetParam(mtd);
 	DBG_ASSERT(pa->psize + 2U <= kArray_size(expr->NodeList));
 	size_t i;
+	kNodeBase *texpr;
 	for(i = 0; i < pa->psize; i++) {
 		size_t n = i + 2;
 		KClass* paramType = ResolveTypeVariable(kctx, KClass_(pa->paramtypeItems[i].typeAttr), thisClass);
 		int tycheckPolicy = TypeCheckPolicy_(pa->paramtypeItems[i].typeAttr);
-		kNodeBase *texpr = KLIB TypeCheckNodeAt(kctx, expr, n, ns, paramType, tycheckPolicy);
+		texpr = KLIB TypeCheckNodeAt(kctx, expr, n, ns, paramType, tycheckPolicy);
 		if(kUntypedNode_IsError(texpr)) {
 			KLIB MessageNode(kctx, expr, NULL, ns, InfoTag, "%s.%s%s accepts %s at the parameter %d", kMethod_Fmt3(mtd), KClass_text(paramType), (int)i+1);
 			return texpr;
 		}
 		if(!kUntypedNode_IsConstValue(texpr)) isConst = 0;
 	}
-	expr = TypeMethodCallNode(kctx, expr, mtd, reqc);
+	texpr = TypeMethodCallNode(kctx, expr, mtd, reqc);
 	if(isConst && kMethod_Is(Const, mtd)) {
 		KClass *rtype = ResolveTypeVariable(kctx, KClass_(pa->rtype), thisClass);
-		return MakeNodeConst(kctx, expr, rtype);
+		return MakeNodeConst(kctx, ns, (kMethodCallNode *) texpr, rtype);
 	}
-	return expr;
+	return texpr;
 }
 
 //static kUntypedNode *TypeCheckDynamicCallParams(KonohaContext *kctx, kUntypedNode *stmt, kUntypedNode *expr, kMethod *mtd, kNameSpace *ns, kString *name, kmethodn_t mn, KClass *reqClass)
@@ -771,7 +772,7 @@ static kMethod *LookupMethod(KonohaContext *kctx, kUntypedNode *expr, kNameSpace
 static KMETHOD TypeCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(expr, ns, reqc);
-	kNodeBase *texpr = K_NULLNODE;
+	kNodeBase *texpr = (kNodeBase *) K_NULLNODE;
 	KDump(expr);
 	DBG_ASSERT(IS_Array(expr->NodeList));
 	kMethod *mtd = expr->NodeList->MethodItems[0];
@@ -839,7 +840,7 @@ static kMethod *TypeFirstNodeAndLookupMethod(KonohaContext *kctx, kUntypedNode *
 		KClass *ct = genv->thisClass;
 		kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, genv->thisClass, funcName, paramsize, KMethodMatch_CamelStyle);
 		if(mtd != NULL) {
-			KFieldSet(exprN->NodeList, exprN->NodeList->NodeItems[1], new_VariableNode(kctx, ns, KNode_Local, ct->typeId, 0));
+			KFieldSet(exprN->NodeList, exprN->NodeList->NodeItems[1], (kUntypedNode *) new_VariableNode(kctx, ns, KNode_Local, ct->typeId, 0));
 			return mtd;
 		}
 		if(ct->fieldsize) {
@@ -854,7 +855,7 @@ static kMethod *TypeFirstNodeAndLookupMethod(KonohaContext *kctx, kUntypedNode *
 		}
 		mtd = kNameSpace_GetGetterMethodNULL(kctx, ns, genv->thisClass, funcName);
 		if(mtd != NULL && kMethod_IsReturnFunc(mtd)) {
-			KFieldSet(exprN->NodeList, exprN->NodeList->NodeItems[0], new_GetterNode(kctx, termToken, mtd, new_VariableNode(kctx, ns, KNode_Local, genv->thisClass->typeId, 0)));
+			KFieldSet(exprN->NodeList, exprN->NodeList->NodeItems[0], (kUntypedNode *) new_GetterNode(kctx, termToken, mtd, new_VariableNode(kctx, ns, KNode_Local, genv->thisClass->typeId, 0)));
 			return NULL;
 		}
 	}
@@ -865,7 +866,7 @@ static kMethod *TypeFirstNodeAndLookupMethod(KonohaContext *kctx, kUntypedNode *
 			ksymbol_t alias = (ksymbol_t)(kvs->unboxValue >> (sizeof(ktypeattr_t) * 8));
 			kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, c, alias, paramsize, KMethodMatch_NoOption);
 			if(mtd != NULL && kMethod_Is(Static, mtd)) {
-				KFieldSet(exprN->NodeList, exprN->NodeList->NodeItems[1], new_ConstNode(kctx, ns, c, KLIB Knull(kctx, c)));
+				KFieldSet(exprN->NodeList, exprN->NodeList->NodeItems[1], (kUntypedNode *) new_ConstNode(kctx, ns, c, KLIB Knull(kctx, c)));
 				return mtd;
 			}
 		}
@@ -873,7 +874,7 @@ static kMethod *TypeFirstNodeAndLookupMethod(KonohaContext *kctx, kUntypedNode *
 	{
 		kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, kObject_class(ns), funcName, paramsize, KMethodMatch_CamelStyle);
 		if(mtd != NULL) {
-			KFieldSet(exprN->NodeList, exprN->NodeList->NodeItems[1], new_ConstNode(kctx, ns, kObject_class(ns), UPCAST(ns)));
+			KFieldSet(exprN->NodeList, exprN->NodeList->NodeItems[1], (kUntypedNode *) new_ConstNode(kctx, ns, kObject_class(ns), UPCAST(ns)));
 			return mtd;
 		}
 	}
@@ -881,7 +882,7 @@ static kMethod *TypeFirstNodeAndLookupMethod(KonohaContext *kctx, kUntypedNode *
 		KClass *globalClass = kObject_class(ns->globalObjectNULL);
 		kMethod *mtd = kNameSpace_GetGetterMethodNULL(kctx, ns, globalClass, funcName);
 		if(mtd != NULL && kMethod_IsReturnFunc(mtd)) {
-			KFieldSet(exprN->NodeList, exprN->NodeList->NodeItems[0], new_GetterNode(kctx, termToken, mtd, new_ConstNode(kctx, ns, globalClass, ns->globalObjectNULL)));
+			KFieldSet(exprN->NodeList, exprN->NodeList->NodeItems[0], (kUntypedNode *) new_GetterNode(kctx, termToken, mtd, new_ConstNode(kctx, ns, globalClass, ns->globalObjectNULL)));
 			return NULL;
 		}
 		return mtd;
@@ -1075,9 +1076,14 @@ static void kUntypedNode_DeclType(KonohaContext *kctx, kUntypedNode *stmt, kName
 		return;
 	}
 	if(newstmt != NULL && !kUntypedNode_IsError(stmt)) {
+		abort();
 		kUntypedNode_Set(OpenBlock, stmt, true);
-		kUntypedNode_AddNode(kctx, stmt, newstmt);
-		kUntypedNode_Type(stmt, KNode_Block, KType_void);
+		kBlockNode *newblock = (kBlockNode *) SUGAR Factory.CreateBlockNode(kctx, KType_void, NULL, 0, 0);
+		if(newblock->ExprList == K_EMPTYARRAY) {
+			KFieldSet(newblock, newblock->ExprList, new_(Array, 1, OnField));
+			KLIB kArray_Add(kctx, newblock->ExprList, newstmt);
+			abort();
+		}
 	}
 }
 

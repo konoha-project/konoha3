@@ -165,7 +165,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->cUntypedNode = KLIB KClass_define(kctx, PackageId_sugar, NULL, &defUntypedNode, 0);
 
 	KLIB Knull(kctx, mod->cToken);
-	KLIB Knull(kctx, mod->cNode);
+	KLIB Knull(kctx, mod->cUntypedNode);
 	SugarModule_Setup(kctx, &mod->h, 0);
 
 	KDEFINE_INT_CONST ClassData[] = {   // konoha defined class

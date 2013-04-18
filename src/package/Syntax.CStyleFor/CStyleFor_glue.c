@@ -84,17 +84,24 @@ static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, ns, reqc);
 	int KSymbol_InitNode = KSymbol_("init"), KSymbol_IteratorNode = KSymbol_("Iterator");
 	KDump(stmt);
-	kUntypedNode *initNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_InitNode, ns, KClass_void, TypeCheckPolicy_AllowEmpty);
+	kNodeBase *initNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_InitNode, ns, KClass_void, TypeCheckPolicy_AllowEmpty);
 	if(initNode != NULL) {
 		kUntypedNode_Set(OpenBlock, initNode, true);
 	}
-	KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_IteratorNode, ns, KClass_void, TypeCheckPolicy_AllowEmpty);
-	KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
+	kNodeBase *IterNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_IteratorNode, ns, KClass_void, TypeCheckPolicy_AllowEmpty);
+	kNodeBase *CondNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_Boolean, 0);
 	kUntypedNode_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 	kUntypedNode_Set(CatchBreak, stmt, true);
-	//kUntypedNode_Set(RedoLoop, stmt, true);
-	KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
-	KReturn(kUntypedNode_Type(stmt, KNode_For, KType_void));
+	kNodeBase *LoopNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_BlockPattern, ns, KClass_void, 0);
+
+	kNodeBase *Expr = initNode;
+	kNodeBase *Loop = SUGAR Factory.CreateLoopNode(kctx, KType_void, CondNode, LoopNode, IterNode);
+	if(kUntypedNode_node(Expr) == KNode_Let) {
+		KFieldSet(initNode, ((kLetNode *) Expr)->Block, Loop);
+	} else {
+		Expr = Loop;
+	}
+	KReturn(Expr);
 }
 
 /* copied from Syntax.CStyleWhile */
@@ -104,8 +111,10 @@ static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 	kUntypedNode *p = stmt;
 	while(p != NULL) {
 		if(kUntypedNode_Is(CatchBreak, p)) {
-			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_("break"), KType_Node, p);
-			KReturn(kUntypedNode_Type(stmt, KNode_Break, KType_void));
+			ksymbol_t Label = KSymbol_("break");
+			kNodeBase *JumpNode = SUGAR Factory.CreateJumpNode(kctx, KType_void, Label);
+			KLIB kObjectProto_SetObject(kctx, JumpNode, Label, KType_UntypedNode, p);
+			KReturn(JumpNode);
 		}
 		p = kUntypedNode_GetParentNULL(p);
 	}
@@ -118,8 +127,10 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 	kUntypedNode *p = stmt;
 	while(p != NULL) {
 		if(kUntypedNode_Is(CatchContinue, p)) {
-			KLIB kObjectProto_SetObject(kctx, stmt, KSymbol_("continue"), KType_Node, p);
-			KReturn(kUntypedNode_Type(stmt, KNode_Continue, KType_void));
+			ksymbol_t Label = KSymbol_("continue");
+			kNodeBase *JumpNode = SUGAR Factory.CreateJumpNode(kctx, KType_void, Label);
+			KLIB kObjectProto_SetObject(kctx, JumpNode, Label, KType_UntypedNode, p);
+			KReturn(JumpNode);
 		}
 		p = kUntypedNode_GetParentNULL(p);
 	}

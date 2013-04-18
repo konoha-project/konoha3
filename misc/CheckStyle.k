@@ -67,6 +67,7 @@ void main() {
         data = replace(args[i], data, "#include \"konoha3/sugar.h\"", "#include \"konoha3/sugar.h\"", "");
         data = replace(args[i], data, "while \\(", "while (", "while(");
         //data = replace(args[i], data, "[^a-zA-Z]kNode", "kNode", "kUntypedNode");
+        data = replace(args[i], data, "KType_Node", "KType_Node", "KType_UntypedNode");
         data = replace(args[i], data, "\n\t\n", "\n\t\n", "\n\n");
         data = replace(args[i], data, ";\t\n", ";\t\n", ";\n");
         data = replace(args[i], data, "; \n", "; \n", ";\n");

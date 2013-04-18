@@ -99,8 +99,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 		result = KLIB EvalTokenList(kctx, &range, NULL/*trace*/);
 		KTokenSeq_Pop(kctx, range);
 		RESET_GCSTACK();
-		//kUntypedNode_Type(stmt, KNode_Done, KType_void);
-		KTODO("");KReturn(kUntypedNode_Type(stmt, KNode_Done, KType_void));
+		KReturn(SUGAR Factory.CreateDoneNode(kctx, KType_void));
 	}
 	KReturnUnboxValue(result == K_CONTINUE);
 }
@@ -112,7 +111,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, ns, reqc);
 	kToken *symbolToken = KLIB kUntypedNode_GetToken(kctx, stmt, KSymbol_SymbolPattern, NULL);
 	ksymbol_t unboxKey = symbolToken->symbol;
-	kUntypedNode *constNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_INFER, TypeCheckPolicy_CONST);
+	kNodeBase *constNode = KLIB TypeCheckNodeByName(kctx, stmt, KSymbol_ExprPattern, ns, KClass_INFER, TypeCheckPolicy_CONST);
 	if(!kUntypedNode_IsError(constNode)) {
 		KClass *constClass = KClass_(constNode->typeAttr);
 		ktypeattr_t type = constClass->typeId;
@@ -124,10 +123,11 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 			result = true;
 		}
 		else if(kUntypedNode_node(constNode) == KNode_Const) {   // const C = "1"
+			kConstNode *Node = (kConstNode *) constNode;
 			if(KType_Is(UnboxType, type)) {
-				unboxValue = (uintptr_t)constNode->ObjectConstValue;
+				unboxValue = (uintptr_t)Node->ConstObject;
 			} else {
-			unboxValue = constNode->unboxConstValue;
+			unboxValue = Node->ConstValue;
 			}
 			result = true;
 		}
@@ -135,13 +135,15 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 			KMakeTraceUL(trace, sfp, kUntypedNode_uline(stmt));
 			result = KLIB kNameSpace_SetConstData(kctx, ns, unboxKey, type, unboxValue, trace);
 			if(!result) {
-				kUntypedNode_Message(kctx, stmt, ErrTag, "constant value is already defined: %s%s", KSymbol_Fmt2(unboxKey));
+				constNode = kUntypedNode_Message(kctx, stmt, ErrTag, "constant value is already defined: %s%s", KSymbol_Fmt2(unboxKey));
 			}
 		}
 		else {
-			kUntypedNode_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", KSymbol_Fmt2(unboxKey));
+			constNode = kUntypedNode_Message(kctx, stmt, ErrTag, "constant value is expected: %s%s", KSymbol_Fmt2(unboxKey));
 		}
-		constNode = kUntypedNode_Type(stmt, KNode_Done, KType_void);
+		if(!kUntypedNode_IsError(constNode)) {
+			constNode = SUGAR Factory.CreateDoneNode(kctx, KType_void);
+		}
 	}
 	KReturn(constNode);
 }

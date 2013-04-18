@@ -718,11 +718,11 @@ static kNodeBase *CreateBlockNode(KonohaContext *kctx, ktypeattr_t Type, kArray 
 {
 	unsigned i;
 	kBlockNode *Node = new_(BlockNode, 0, OnGcStack);
-	assert(end > begin);
-	KFieldSet(Node, Node->ExprList, new_(Array, end - begin, OnField));
-
-	for (i = begin; i < end; i++) {
-		KLIB kArray_Add(kctx, Node->ExprList, UPCAST(ExprList->NodeItems[i]));
+	if(end >= begin) {
+		KFieldSet(Node, Node->ExprList, new_(Array, end - begin, OnField));
+		for (i = begin; i < end; i++) {
+			KLIB kArray_Add(kctx, Node->ExprList, UPCAST(ExprList->NodeItems[i]));
+		}
 	}
 	return TypedNode(Node, Type);
 }
@@ -745,7 +745,7 @@ static kNodeBase *CreateSwitchNode(KonohaContext *kctx, ktypeattr_t Type, kNodeB
 	return TypedNode(Node, Type);
 }
 
-static kNodeBase *CreateLoopNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Init, kNodeBase *Cond, kNodeBase *Loop, kNodeBase *Iter)
+static kNodeBase *CreateLoopNode(KonohaContext *kctx, ktypeattr_t Type, kNodeBase *Cond, kNodeBase *Loop, kNodeBase *Iter)
 {
 	kLoopNode *Node = new_(LoopNode, 0, OnGcStack);
 	KFieldSet(Node, Node->CondExpr, Cond);

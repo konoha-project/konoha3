@@ -2047,7 +2047,6 @@ typedef struct KParserModel {
 	KClass *cSymbol;
 	KClass *cSyntax;
 	KClass *cToken;
-	KClass *cNode;
 	KClass *cTokenArray;
 	KClass *cUntypedNode;
 #define DEFINE_NODE_CLASS(T)  KClass *c##T##Node;
@@ -2094,7 +2093,6 @@ typedef enum {
 #define KType_Syntax                            SUGAR cSyntax->typeId
 #define KType_Symbol                            SUGAR cSymbol->typeId
 #define KType_Token                             SUGAR cToken->typeId
-#define KType_Node                              SUGAR cNode->typeId
 #define KType_TokenArray                        SUGAR cTokenArray->typeId
 
 //#define KSymbol_(T)                               _e->keyword(kctx, T, sizeof(T)-1, KSymbol_Noname)

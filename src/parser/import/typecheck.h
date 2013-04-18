@@ -99,16 +99,16 @@ static void PutConstNode(KonohaContext *kctx, kUntypedNode *expr, KonohaStack *s
 	}
 }
 
-static kNodeBase *MakeNodeConst(KonohaContext *kctx, kUntypedNode *expr, KClass *rtype)
+static kNodeBase *MakeNodeConst(KonohaContext *kctx, kNameSpace *ns, kMethodCallNode *expr, KClass *rtype)
 {
-	size_t i, size = kArray_size(expr->NodeList), psize = size - 2;
-	kMethod *mtd = expr->NodeList->MethodItems[0];
+	size_t i, size = kArray_size(expr->Params), psize = size - 2;
+	kMethod *mtd = expr->Method;
 	BEGIN_UnusedStack(lsfp);
-	KStackSetObjectValue(lsfp[K_NSIDX].asNameSpace, kUntypedNode_ns(expr));
+	KStackSetObjectValue(lsfp[K_NSIDX].asNameSpace, ns);
 	for(i = 1; i < size; i++) {
-		PutConstNode(kctx, expr->NodeList->NodeItems[i], lsfp + i - 1);
+		PutConstNode(kctx, expr->Params->NodeItems[i], lsfp + i - 1);
 	}
-	KStackSetMethodAll(lsfp, KLIB Knull(kctx, KClass_(expr->typeAttr)), kUntypedNode_uline(expr), mtd, psize);
+	KStackSetMethodAll(lsfp, KLIB Knull(kctx, KClass_(expr->typeAttr)), 0/*kUntypedNode_uline(expr)*/, mtd, psize);
 	KStackCall(lsfp);
 	END_UnusedStack();
 	if(KClass_Is(UnboxType, rtype) /* || rtype->typeId == KType_void*/) {
@@ -191,7 +191,6 @@ static kNodeBase *TypeCheckNodeByName(KonohaContext *kctx, kUntypedNode *stmt, k
 	if(expr != NULL) {
 		if(IS_Token(expr)) {
 			kTokenVar *tk = (kTokenVar *)expr;
-			kNameSpace *ns = kUntypedNode_ns(stmt);
 			if(tk->tokenType == TokenType_LazyBlock) {
 				kToken_ToBraceGroup(kctx, (kTokenVar *)tk, ns, NULL);
 			}
@@ -211,7 +210,7 @@ static kNodeBase *TypeCheckNodeByName(KonohaContext *kctx, kUntypedNode *stmt, k
 				return texpr;
 			}
 			if(/*FIXME*/ texpr != (kNodeBase *) expr) {
-				KLIB kObjectProto_SetObject(kctx, stmt, symbol, KType_Node, texpr);
+				KLIB kObjectProto_SetObject(kctx, stmt, symbol, KType_UntypedNode, texpr);
 				//kUntypedNode_SetParent(kctx, texpr, stmt);
 			}
 			return texpr;

@@ -1,5 +1,6 @@
 find_library(HAVE_LIBEVENT NAMES event)
 if(HAVE_LIBEVENT)
+	set(MODULE_INCLUDE_DIR ${EVENT_INCLUDE_DIR})
 	set(MODULE_EXTRA_LIBRARY ${HAVE_LIBEVENT})
 	set(MODULE_SOURCE_CODE Http.c)
 	add_konoha_module(Http)

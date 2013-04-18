@@ -222,7 +222,7 @@ static void kNameSpace_InitParam(KonohaContext *kctx, kNameSpace *ns, struct KGa
 	env->localScope.varsize += pa->psize + 1;
 }
 
-static kMethod *CompileClosure(KonohaContext *kctx, kNameSpace *ns, kUntypedNode *expr, KClass *envCt, kToken *typeTk, kUntypedNode **texprRef)
+static kMethod *CompileClosure(KonohaContext *kctx, kNameSpace *ns, kUntypedNode *expr, KClass *envCt, kToken *typeTk, kNodeBase **texprRef)
 {
 	INIT_GCSTACK();
 	kParam *pa = kUntypedNode_GetParamNULL(kctx, expr, typeTk, ns);
@@ -244,7 +244,7 @@ static kMethod *CompileClosure(KonohaContext *kctx, kNameSpace *ns, kUntypedNode
 	KPushGammaStack(ns, &newgma);
 	*texprRef = KLIB TypeCheckNodeByName(kctx, expr, KSymbol_BlockPattern, ns, KClass_var, TypeCheckPolicy_AllowVoid);
 
-	kUntypedNode *block = KLIB kUntypedNode_GetNode(kctx, expr, KSymbol_BlockPattern, NULL);
+	kNodeBase *block = (kNodeBase *) KLIB kUntypedNode_GetNode(kctx, expr, KSymbol_BlockPattern, NULL);
 	KLIB kMethod_GenCode(kctx, mtd, block, HatedLazyCompile);
 
 	KPopGammaStack(ns, &newgma);
@@ -257,7 +257,7 @@ static kMethod *CompileClosure(KonohaContext *kctx, kNameSpace *ns, kUntypedNode
 static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(expr, ns, reqc);
-	kUntypedNode *texpr = K_NULLNODE;
+	kNodeBase *texpr = (kNodeBase *) K_NULLNODE;
 	INIT_GCSTACK();
 	kToken *typeTk   = KLIB kUntypedNode_GetToken(kctx, expr, KSymbol_TypePattern, NULL);
 	KClass *EnvObjectClass = NULL;
@@ -265,7 +265,7 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 
 	kMethod *mtd = CompileClosure(kctx, ns, expr, envCt, typeTk, &texpr);
 	/* type check is OK */
-	if(texpr != K_NULLNODE) {
+	if(texpr != (kNodeBase *) K_NULLNODE) {
 		/*
 		 * FunctionExpression
 		 * 0: Method
@@ -276,19 +276,18 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 		 */
 		kParam *pa = kMethod_GetParam(mtd);
 		KClass *ct = KLIB KClass_Generics(kctx, KClass_Func, pa->rtype, pa->psize, (kparamtype_t *) pa->paramtypeItems);
-		kUntypedNode_Type(texpr, KNode_Function, ct->typeId);
-		KFieldSet(expr, texpr->NodeList, new_(Array, 0, OnField));
+		kFunctionNode *Node = (kFunctionNode *) SUGAR Factory.CreateFunctionNode(kctx, ct->typeId, mtd, ns);
+		KFieldSet(expr, Node->EnvList, new_(Array, 0, OnField));
 
-		KLIB kArray_Add(kctx, texpr->NodeList, mtd);
-		KLIB kArray_Add(kctx, texpr->NodeList, KLIB Knull(kctx, EnvObjectClass));
+		KLIB kArray_Add(kctx, Node->EnvList, KLIB Knull(kctx, EnvObjectClass));
 		size_t i = 0;
 		struct KGammaLocalData *genv = ns->genv;
 		if(genv->thisClass == KClass_NameSpace) {
 			i = 1;
 		}
 		for(; i < genv->localScope.varsize; i++) {
-			kUntypedNode *node = new_VariableNode(kctx, ns, KNode_Local, genv->localScope.varItems[i].typeAttr, i);
-			KLIB kArray_Add(kctx, texpr->NodeList, node);
+			kNodeBase *node = new_VariableNode(kctx, ns, KNode_Local, genv->localScope.varItems[i].typeAttr, i);
+			KLIB kArray_Add(kctx, Node->EnvList, node);
 		}
 	}
 	RESET_GCSTACK();

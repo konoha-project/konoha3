@@ -711,12 +711,12 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, KClass_Array, KMethodName_("[]"), -1, KMethodMatch_NoOption);
 	DBG_ASSERT(mtd != NULL);
-	KFieldSet(expr, expr->NodeList->MethodItems[0], mtd);
-	KFieldSet(expr, expr->NodeList->NodeItems[1],
-			SUGAR Factory.CreateNewNode(kctx, reqc->typeId));
-	//FIXME We Need to add parameter to NewNode
-	//:: new Array[kArray_size(expr->NodeList) - 2)]
-	KReturn(kUntypedNode_Type(expr, KNode_MethodCall, reqc->typeId));
+	kMethodCallNode *Node = (kMethodCallNode *) SUGAR Factory.CreateMethodCallNode(kctx, reqc->typeId, mtd);
+	KFieldSet(Node, Node->Params, new_(Array, 1, OnField));
+	KLIB kArray_Add(kctx, Node->Params, SUGAR Factory.CreateNewNode(kctx, reqc->typeId));
+	//FIXME do we need to add parameter to NewNode??
+	//i.e. new Array[kArray_size(expr->NodeList) - 2)]
+	KReturn(Node);
 }
 
 static KMETHOD Expression_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
