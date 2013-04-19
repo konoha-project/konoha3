@@ -318,6 +318,20 @@ static kbool_t JSBuilder_VisitStmtNode(KonohaContext *kctx, KBuilder *builder, k
 	return KLIB VisitNode(kctx, builder, node, thunk);
 }
 
+// FIXME: very adhoc impl. must refactor it later.
+static kbool_t JSBuilder_VisitStmtNodeWithExpandBlock(KonohaContext *kctx, KBuilder *builder, kNode *node, void *thunk)
+{
+	((JSBuilder *)builder)->isExprNode = false;
+	if(kNode_node(node) == KNode_Assign) {
+		JSBuilder_EmitAssignStmtPrefix(kctx, builder, node);
+	}
+	if(kNode_node(node) == KNode_Block) {
+		return JSBuilder_VisitStmtNode(kctx, builder, node->NodeList->NodeItems[0], thunk);
+	}
+
+	return KLIB VisitNode(kctx, builder, node, thunk);
+}
+
 static kbool_t JSBuilder_VisitNode(KonohaContext *kctx, KBuilder *builder, kNode *expr, void *thunk, const char *prefix, const char *suffix)
 {
 	JSBuilder_EmitString(kctx, builder, prefix, "", "");
@@ -401,13 +415,13 @@ static kbool_t JSBuilder_VisitForNode(KonohaContext *kctx, KBuilder *builder, kN
 	kNode *iterNode = KLIB kNode_GetNode(kctx, stmt, KSymbol_("Iterator"), NULL) ;
 	JSBuilder_EmitString(kctx, builder, "for(", "", "");
 	if(initNode != NULL) {
-		JSBuilder_VisitStmtNode(kctx, builder, initNode, thunk);
+		JSBuilder_VisitStmtNodeWithExpandBlock(kctx, builder, initNode, thunk);
 	}
 	JSBuilder_EmitString(kctx, builder, ";", "", "");
 	JSBuilder_VisitExprNode(kctx, builder, kNode_getFirstNode(kctx, stmt), thunk);
 	JSBuilder_EmitString(kctx, builder, ";", "", "");
 	if(iterNode != NULL) {
-		JSBuilder_VisitStmtNode(kctx, builder, iterNode, thunk);
+		JSBuilder_VisitNode(kctx, builder, iterNode, thunk, "", "");
 	}
 	JSBuilder_EmitString(kctx, builder, ") ", "", "");
 	JSBuilder_VisitStmtNode(kctx, builder, kNode_getFirstBlock(kctx, stmt), thunk);
