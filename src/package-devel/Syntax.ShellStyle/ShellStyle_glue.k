@@ -286,6 +286,28 @@ int ParseShell(Node node, Symbol sym, Token[] tokenList, int beginIdx, int opera
 		}
 		isSymbol = true;
 	}
+	if(firstToken.Is("$Symbol") && !SubProc.isCommand(firstToken.getParsedText())){
+		String cmd = firstToken.getParsedText();
+		int i = beginIdx + 1;
+		while(i < endIdx) {
+			Token currentToken = tokenList[i];
+			if(defined(DEBUG)) {
+				System.p(currentToken);
+			}
+
+			cmd = cmd + currentToken.getParsedText();
+			if(currentToken.isBeforeWhiteSpace() || i + 1 == endIdx) {
+				if(SubProc.isCommand(cmd)){
+			  		beginIdx = i;
+					currentToken.setParsedText("$Symbol", cmd, 0, cmd.getlength());
+					firstToken = currentToken;
+					isSymbol = true;
+					break;
+				}
+			}
+			i = i + 1;
+		}
+	}
 	if(defined(DEBUG)) {
 		System.p(firstToken);
 	}
