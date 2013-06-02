@@ -268,7 +268,7 @@ struct KBuilder { /* MiniVM Builder */
 	intptr_t   InstructionSize;
 };
 
-typedef struct tagBasicBlock {
+typedef struct _BasicBlock {
 	long     incoming;
 	bblock_t newid;
 	bblock_t nextid;
