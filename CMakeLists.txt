@@ -49,6 +49,10 @@ set(INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
 if(${CMAKE_SYSTEM_NAME} MATCHES "NetBSD")
 	set(INCLUDE_DIRS ${INCLUDE_DIRS} /usr/pkg/include)
 endif(${CMAKE_SYSTEM_NAME} MATCHES "NetBSD")
+#Added Kouhei-Moriya
+find_package(JNI)
+set(INCLUDE_DIRS ${INCLUDE_DIRS} ${JNI_INCLUDE_DIRS})
+#end Addition
 include_directories(${INCLUDE_DIRS})
 
 if(NOT CMAKE_BUILD_TYPE)
