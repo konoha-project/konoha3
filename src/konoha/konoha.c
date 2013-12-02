@@ -37,23 +37,7 @@ extern "C" {
 #include "import/datatype.h"
 #include "import/methods.h"
 
-#include "konoha3/org_GreenTeaScript_MiniKonohaExecutor.h"
-#include "../exec/command/command.c"
-JNIEXPORT jstring JNICALL Java_org_GreenTeaScript_MiniKonohaExecutor_MiniKonohaExecute (JNIEnv *env, jobject me, jstring srcj)
-{
-	//set input string
-	const char *src = (*env)->GetStringUTFChars(env, srcj, NULL);
-
-	//eval script
-	char output[256];
-	CallKonoha_Through(src, output);
-
-	//release input string
-	(*env)->ReleaseStringUTFChars(env, srcj, src);
-
-	//create return_value
-	return (*env)->NewStringUTF(env, output);
-}
+#include "../exec/JNI/JNIEntryPoint.c"
 // -------------------------------------------------------------------------
 
 static void InitKonoha(void)
