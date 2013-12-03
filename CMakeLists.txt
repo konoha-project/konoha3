@@ -51,7 +51,10 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "NetBSD")
 endif(${CMAKE_SYSTEM_NAME} MATCHES "NetBSD")
 #Added Kouhei-Moriya
 find_package(JNI)
-set(INCLUDE_DIRS ${INCLUDE_DIRS} ${JNI_INCLUDE_DIRS})
+if(JNI_FOUND)
+	set(KONOHA_SOURCE ${KONOHA_SOURCE} src/exec/JNI/JNIEntryPoint.c)
+	set(INCLUDE_DIRS ${INCLUDE_DIRS} ${JNI_INCLUDE_DIRS})
+endif()
 #end Addition
 include_directories(${INCLUDE_DIRS})
 

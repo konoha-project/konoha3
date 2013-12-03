@@ -37,7 +37,6 @@ extern "C" {
 #include "import/datatype.h"
 #include "import/methods.h"
 
-#include "../exec/JNI/JNIEntryPoint.c"
 // -------------------------------------------------------------------------
 
 static void InitKonoha(void)
